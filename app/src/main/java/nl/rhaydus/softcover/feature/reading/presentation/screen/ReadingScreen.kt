@@ -34,9 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
@@ -120,16 +121,16 @@ object ReadingScreen : Screen {
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            // TODO: Ideally i'd like some sort of placeholder here
-                            AsyncImage(
+                            SubcomposeAsyncImage(
                                 model = it.book.url,
-                                contentDescription = "Book image",
                                 modifier = Modifier
                                     .size(
                                         width = 100.dp,
                                         height = 150.dp
                                     )
-                                    .clip(shape = RoundedCornerShape(4.dp))
+                                    .clip(shape = RoundedCornerShape(4.dp)),
+                                contentDescription = "Book image",
+                                loading = { Box(modifier = Modifier.shimmer()) }
                             )
 
                             Spacer(modifier = Modifier.width(16.dp))
