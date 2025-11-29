@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
+import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
 
@@ -49,11 +51,17 @@ object ReadingScreen : Screen {
 
         val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-        Screen(state = state)
+        Screen(
+            state = state,
+            onEvent = viewModel::onEvent,
+        )
     }
 
     @Composable
-    fun Screen(state: ReadingScreenUiState) {
+    fun Screen(
+        state: ReadingScreenUiState,
+        onEvent: (ReadingScreenUiEvent) -> Unit,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -73,9 +81,18 @@ object ReadingScreen : Screen {
                 )
             }
 
-            when {
-                state.books.isNotEmpty() -> BooksDisplay(books = state.books)
-                else -> EmptyCurrentlyReadingScreen()
+            PullToRefreshBox(
+                isRefreshing = state.isLoading,
+                onRefresh = { onEvent(ReadingScreenUiEvent.Refresh) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                when {
+                    state.books.isNotEmpty() -> BooksDisplay(books = state.books)
+                    state.isLoading -> Unit // Show nothing if the books are still loading
+                    else -> EmptyCurrentlyReadingScreen()
+                }
             }
         }
     }
@@ -229,7 +246,10 @@ object ReadingScreen : Screen {
 @Composable
 private fun ReadingScreenEmptyPreview() {
     SoftcoverTheme {
-        ReadingScreen.Screen(state = ReadingScreenUiState())
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(),
+            onEvent = {},
+        )
     }
 }
 
@@ -308,7 +328,8 @@ private fun ReadingScreenPreview() {
 
     SoftcoverTheme {
         ReadingScreen.Screen(
-            state = ReadingScreenUiState(books = books)
+            state = ReadingScreenUiState(books = books),
+            onEvent = {},
         )
     }
 }
