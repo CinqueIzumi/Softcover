@@ -2,8 +2,8 @@ package nl.rhaydus.softcover.feature.reading.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import nl.rhaydus.softcover.GetCurrentlyReadingBooksQuery
-import nl.rhaydus.softcover.core.domain.Author
-import nl.rhaydus.softcover.core.domain.Book
+import nl.rhaydus.softcover.core.domain.model.Author
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import javax.inject.Inject
 

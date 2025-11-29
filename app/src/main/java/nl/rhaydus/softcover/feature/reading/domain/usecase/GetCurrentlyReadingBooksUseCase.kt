@@ -4,6 +4,8 @@ import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.domain.repository.BooksRepository
 import javax.inject.Inject
 
+class NoUserIdFoundException() : Exception()
+
 class GetCurrentlyReadingBooksUseCase @Inject constructor(
     private val booksRepository: BooksRepository,
     private val getUserIdUseCase: GetUserIdUseCase,
@@ -12,10 +14,7 @@ class GetCurrentlyReadingBooksUseCase @Inject constructor(
         return runCatching {
             val userId = getUserIdUseCase().getOrDefault(-1)
 
-            if (userId == -1) {
-                // TODO: Return a failure here?
-                return@runCatching emptyList()
-            }
+            if (userId == -1) throw NoUserIdFoundException()
 
             booksRepository.getCurrentlyReadingBooks(userId = userId)
         }

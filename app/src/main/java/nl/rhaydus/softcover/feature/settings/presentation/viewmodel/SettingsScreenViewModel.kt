@@ -13,8 +13,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUSeCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenUiEvent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -26,6 +28,7 @@ class SettingsScreenViewModel @Inject constructor(
     private val updateApiKeyUseCase: UpdateApiKeyUseCase,
     private val getApiKeyUseCase: GetApiKeyUseCase,
     private val initializeUserIdUseCase: InitializeUserIdUseCase,
+    private val resetUserDataUseCase: ResetUserDataUSeCase,
 ) : ViewModel() {
     private val _apiKeyFlow = MutableStateFlow("")
 
@@ -57,7 +60,8 @@ class SettingsScreenViewModel @Inject constructor(
             .trim()
 
         viewModelScope.launch {
-            // TODO: Add feedback for success / failure here?
+            resetUserDataUseCase().onFailure { return@launch }
+
             updateApiKeyUseCase(key = updatedKey).onSuccess {
                 attemptToInitializeUserId()
             }
@@ -65,8 +69,12 @@ class SettingsScreenViewModel @Inject constructor(
     }
 
     private suspend fun attemptToInitializeUserId() {
-        // TODO: Add feedback for success / failure here?
-        initializeUserIdUseCase()
+        val message: String = initializeUserIdUseCase().fold(
+            onSuccess = { "Successfully initialized the user's profile." },
+            onFailure = { "Something went wrong while trying to initialize the user's profile." }
+        )
+
+        SnackBarManager.showSnackbar(title = message)
     }
 
     private fun setApiKeyValue(newValue: String) {

@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBooksUseCase
+import nl.rhaydus.softcover.feature.reading.domain.usecase.NoUserIdFoundException
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -36,7 +38,21 @@ class ReadingScreenViewModel @Inject constructor(
 
     private fun initializeCurrentlyReadingBooks() {
         viewModelScope.launch {
-            val books = getCurrentlyReadingBooksUseCase().getOrDefault(emptyList())
+            val books: List<BookWithProgress> = getCurrentlyReadingBooksUseCase().fold(
+                onSuccess = { it },
+
+                onFailure = { failure ->
+                    val message = if (failure is NoUserIdFoundException) {
+                        "Without a valid API key the user's data can not be initialized"
+                    } else {
+                        "Something went wrong while trying to fetch the currently reading books."
+                    }
+
+                    SnackBarManager.showSnackbar(title = message)
+
+                    emptyList()
+                }
+            )
 
             _booksFlow.update { books }
         }
