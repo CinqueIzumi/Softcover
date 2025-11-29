@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.reading.domain.usecase
 
+import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.domain.repository.BooksRepository
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
 import javax.inject.Inject
-
-class NoUserIdFoundException() : Exception()
 
 class GetCurrentlyReadingBooksUseCase @Inject constructor(
     private val booksRepository: BooksRepository,

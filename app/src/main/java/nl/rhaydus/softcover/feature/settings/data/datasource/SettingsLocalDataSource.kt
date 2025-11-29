@@ -1,11 +1,13 @@
 package nl.rhaydus.softcover.feature.settings.data.datasource
 
+import kotlinx.coroutines.flow.Flow
+
 interface SettingsLocalDataSource {
     suspend fun updateApiKey(key: String)
 
     suspend fun getApiKey(): String
 
-    suspend fun getUserId(): Int
+    fun getUserId(): Flow<Int>
 
     suspend fun updateUserId(id: Int)
 }

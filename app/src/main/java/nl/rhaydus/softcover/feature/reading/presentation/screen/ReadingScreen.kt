@@ -42,7 +42,6 @@ import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
 
-// TODO: When user id changes, refresh books by default
 object ReadingScreen : Screen {
     @Composable
     override fun Content() {

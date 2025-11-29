@@ -1,6 +1,9 @@
 package nl.rhaydus.softcover.feature.settings.data.datasource
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.feature.settings.data.datastore.AppSettingsDataStore
 import javax.inject.Inject
 
@@ -17,8 +20,8 @@ class SettingsLocalDataSourceImpl @Inject constructor(
         return appSettingsDataStore.data.first().apiKey
     }
 
-    override suspend fun getUserId(): Int {
-        return appSettingsDataStore.data.first().userId
+    override fun getUserId(): Flow<Int> {
+        return appSettingsDataStore.data.map { it.userId }.distinctUntilChanged()
     }
 
     override suspend fun updateUserId(id: Int) {
