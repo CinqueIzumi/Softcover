@@ -1,0 +1,11 @@
+query UserBooks($userId: Int!) {
+    user_books(
+        where: {user_id: {_eq: $userId}},
+        limit: 10,
+    ) {
+        book {
+            id
+            title
+        }
+    }
+}
