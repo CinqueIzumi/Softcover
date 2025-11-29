@@ -24,8 +24,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val transparent = Color.Companion.Transparent.toArgb()
-        val transparentAutoStyle = SystemBarStyle.Companion.auto(
+        val transparent = Color.Transparent.toArgb()
+        val transparentAutoStyle = SystemBarStyle.auto(
             lightScrim = transparent,
             darkScrim = transparent,
         )

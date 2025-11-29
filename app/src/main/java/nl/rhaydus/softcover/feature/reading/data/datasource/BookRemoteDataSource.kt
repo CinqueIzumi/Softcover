@@ -1,0 +1,7 @@
+package nl.rhaydus.softcover.feature.reading.data.datasource
+
+import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
+
+interface BookRemoteDataSource {
+    suspend fun getCurrentlyReadingBooks(userId: Int): List<BookWithProgress>
+}

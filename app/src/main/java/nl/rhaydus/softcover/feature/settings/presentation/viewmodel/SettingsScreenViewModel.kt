@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenUiEvent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -24,6 +25,7 @@ import kotlin.time.Duration.Companion.seconds
 class SettingsScreenViewModel @Inject constructor(
     private val updateApiKeyUseCase: UpdateApiKeyUseCase,
     private val getApiKeyUseCase: GetApiKeyUseCase,
+    private val initializeUserIdUseCase: InitializeUserIdUseCase,
 ) : ViewModel() {
     private val _apiKeyFlow = MutableStateFlow("")
 
@@ -47,7 +49,7 @@ class SettingsScreenViewModel @Inject constructor(
         }
     }
 
-    fun handleOnApiKeyValueChanged(newValue: String) = setApiKeyValue(newValue = newValue)
+    private fun handleOnApiKeyValueChanged(newValue: String) = setApiKeyValue(newValue = newValue)
 
     private fun handleOnSaveApiKeyClick() {
         val updatedKey = uiState.value.apiKey
@@ -56,11 +58,18 @@ class SettingsScreenViewModel @Inject constructor(
 
         viewModelScope.launch {
             // TODO: Add feedback for success / failure here?
-            updateApiKeyUseCase(key = updatedKey)
+            updateApiKeyUseCase(key = updatedKey).onSuccess {
+                attemptToInitializeUserId()
+            }
         }
     }
 
-    fun setApiKeyValue(newValue: String) {
+    private suspend fun attemptToInitializeUserId() {
+        // TODO: Add feedback for success / failure here?
+        initializeUserIdUseCase()
+    }
+
+    private fun setApiKeyValue(newValue: String) {
         _apiKeyFlow.update { newValue }
     }
 }

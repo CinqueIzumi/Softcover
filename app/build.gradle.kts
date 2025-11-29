@@ -68,7 +68,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Apollo
+    // Apollo (graph ql communication)
     implementation(libs.apollo)
 
     // Datastore
@@ -86,10 +86,15 @@ dependencies {
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.hilt)
     implementation(libs.voyager.tabNavigator)
+
+    // Image loading
+    implementation(libs.coil)
 }
 
 apollo {
     service("service") {
         packageName.set("nl.rhaydus.softcover")
+        mapScalar("numeric", "kotlin.Double")
+        mapScalar("float8", "kotlin.Double")
     }
 }

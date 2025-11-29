@@ -5,4 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AppSettingsEntity(
     val apiKey: String = "",
+    val userId: Int = -1,
 )
