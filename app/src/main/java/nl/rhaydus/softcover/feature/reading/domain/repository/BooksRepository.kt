@@ -9,4 +9,6 @@ interface BooksRepository {
         book: BookWithProgress,
         newPage: Int,
     ): BookWithProgress
+
+    suspend fun markBookAsRead(book: BookWithProgress)
 }

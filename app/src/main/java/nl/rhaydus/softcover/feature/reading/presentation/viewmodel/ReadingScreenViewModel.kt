@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
 import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBooksUseCase
+import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
@@ -27,6 +28,7 @@ import javax.inject.Inject
 class ReadingScreenViewModel @Inject constructor(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingBooksUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
+    private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val getUserIdUseCaseAsFlow: GetUserIdUseCaseAsFlow,
 ) : ViewModel() {
     private val _loadingFlow = MutableStateFlow(true)
@@ -73,25 +75,47 @@ class ReadingScreenViewModel @Inject constructor(
         val newPageValue = newPage.toIntOrNull() ?: 0
 
         viewModelScope.launch {
-            val updatedBook = updateBookProgressUseCase(
-                book = bookToUpdate,
-                newPage = newPageValue,
-            ).getOrDefault(bookToUpdate)
-
-            setBookForProgressSheet(book = null)
-
-            val currentBooks = _booksFlow.firstOrNull() ?: return@launch
-
-            val updatedBooks = currentBooks.map { book ->
-                if (book.userProgressId == updatedBook.userProgressId) {
-                    updatedBook
-                } else {
-                    book
-                }
+            if (newPageValue == bookToUpdate.book.totalPages) {
+                markBookAsRead(bookWithProgress = bookToUpdate)
+            } else {
+                updateBookWithPage(
+                    bookWithProgress = bookToUpdate,
+                    page = newPageValue,
+                )
             }
-
-            setBooksWithProgress(books = updatedBooks)
         }
+    }
+
+    private suspend fun markBookAsRead(bookWithProgress: BookWithProgress) {
+        markBookAsReadUseCase(book = bookWithProgress)
+
+        setBookForProgressSheet(book = null)
+
+        fetchCurrentlyReadingBooks()
+    }
+
+    private suspend fun updateBookWithPage(
+        bookWithProgress: BookWithProgress,
+        page: Int,
+    ) {
+        val updatedBook = updateBookProgressUseCase(
+            book = bookWithProgress,
+            newPage = page,
+        ).getOrDefault(bookWithProgress)
+
+        setBookForProgressSheet(book = null)
+
+        val currentBooks = _booksFlow.firstOrNull() ?: return
+
+        val updatedBooks = currentBooks.map { book ->
+            if (book.userProgressId == updatedBook.userProgressId) {
+                updatedBook
+            } else {
+                book
+            }
+        }
+
+        setBooksWithProgress(books = updatedBooks)
     }
 
     private fun handleDismissProgressSheet() = setBookForProgressSheet(book = null)

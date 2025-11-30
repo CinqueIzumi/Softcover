@@ -21,4 +21,8 @@ class BooksRepositoryImpl @Inject constructor(
             newPage = newPage,
         )
     }
+
+    override suspend fun markBookAsRead(book: BookWithProgress) {
+        bookRemoteDataSource.markBookAsRead(book = book)
+    }
 }

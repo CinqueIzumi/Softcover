@@ -3,11 +3,15 @@ package nl.rhaydus.softcover.feature.reading.data.datasource
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import nl.rhaydus.softcover.GetCurrentlyReadingBooksQuery
+import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.type.DatesReadInput
+import nl.rhaydus.softcover.type.UserBookCreateInput
+import java.time.LocalDate
 import javax.inject.Inject
 
 class BookRemoteDataSourceImpl @Inject constructor(
@@ -50,7 +54,6 @@ class BookRemoteDataSourceImpl @Inject constructor(
     }
 
     // TODO: Add support for updating with progress %
-    // TODO: When new page (or percentage) is 100% of the book, mark it as read
     override suspend fun updateBookProgress(
         book: BookWithProgress,
         newPage: Int,
@@ -80,5 +83,27 @@ class BookRemoteDataSourceImpl @Inject constructor(
         )
 
         return updatedBook
+    }
+
+    override suspend fun markBookAsRead(book: BookWithProgress) {
+        val currentDate = LocalDate.now().toString()
+
+        val dataObject = UserBookCreateInput(
+            book_id = book.book.id,
+            status_id = Optional.present(UserBookStatus.READ.code),
+            user_date = Optional.present(currentDate)
+        )
+
+        val mutation = MarkBookAsReadMutation(userBookCreateInput = dataObject)
+
+        val result = apolloClient
+            .mutation(mutation = mutation)
+            .execute()
+
+        val data = result.dataOrThrow()
+
+        if (data.insert_user_book?.error != null) {
+            throw Exception("Error while marking book as read")
+        }
     }
 }
