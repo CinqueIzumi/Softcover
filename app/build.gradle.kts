@@ -94,7 +94,9 @@ dependencies {
 apollo {
     service("service") {
         packageName.set("nl.rhaydus.softcover")
+
         mapScalar("numeric", "kotlin.Double")
         mapScalar("float8", "kotlin.Double")
+        mapScalar("date", "kotlin.String")
     }
 }

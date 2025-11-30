@@ -4,18 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
 import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBooksUseCase
+import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCaseAsFlow
@@ -25,27 +26,25 @@ import javax.inject.Inject
 @HiltViewModel
 class ReadingScreenViewModel @Inject constructor(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingBooksUseCase,
-    getUserIdUseCaseAsFlow: GetUserIdUseCaseAsFlow,
+    private val updateBookProgressUseCase: UpdateBookProgressUseCase,
+    private val getUserIdUseCaseAsFlow: GetUserIdUseCaseAsFlow,
 ) : ViewModel() {
     private val _loadingFlow = MutableStateFlow(true)
-    private val _refreshTrigger = MutableSharedFlow<Unit>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    ).apply { tryEmit(Unit) }
-
-    private val _booksFlow = combine(
-        getUserIdUseCaseAsFlow(),
-        _refreshTrigger
-    ) { _, _ -> }.mapLatest { fetchCurrentlyReadingBooks() }
+    private val _bookToUpdateFlow = MutableStateFlow<BookWithProgress?>(null)
+    private val _booksFlow = MutableStateFlow<List<BookWithProgress>>(emptyList())
 
     val uiState = combine(
         _booksFlow,
-        _loadingFlow
-    ) { books: List<BookWithProgress>, isLoading: Boolean ->
+        _loadingFlow,
+        _bookToUpdateFlow
+    ) { books: List<BookWithProgress>, isLoading: Boolean, bookToUpdate: BookWithProgress? ->
         ReadingScreenUiState(
             books = books,
-            isLoading = isLoading
+            isLoading = isLoading,
+            bookToUpdate = bookToUpdate,
         )
+    }.onStart {
+        initializeCollectors()
     }.stateIn(
         scope = viewModelScope,
         initialValue = ReadingScreenUiState(),
@@ -55,37 +54,88 @@ class ReadingScreenViewModel @Inject constructor(
     fun onEvent(event: ReadingScreenUiEvent) {
         when (event) {
             ReadingScreenUiEvent.Refresh -> handleRefresh()
+            ReadingScreenUiEvent.DismissProgressSheet -> handleDismissProgressSheet()
+
+            is ReadingScreenUiEvent.OnSetProgressClick -> handleOnUpgradeProgressClick(book = event.book)
+            is ReadingScreenUiEvent.OnUpdateProgressClick -> handleOnUpdateProgressClick(newPage = event.newPage)
         }
     }
 
-    private fun handleRefresh() {
-        _refreshTrigger.tryEmit(Unit)
+    private fun initializeCollectors() {
+        viewModelScope.launch {
+            getUserIdUseCaseAsFlow().collect { handleRefresh() }
+        }
     }
 
-    private suspend fun fetchCurrentlyReadingBooks(): List<BookWithProgress> {
-        setLoadingState(isLoading = true)
+    private fun handleOnUpdateProgressClick(newPage: String) {
+        val bookToUpdate = _bookToUpdateFlow.value ?: return
 
-        val books = getCurrentlyReadingBooksUseCase().fold(
-            onSuccess = { it },
-            onFailure = { failure ->
-                val message = if (failure is NoUserIdFoundException) {
-                    "Without a valid API key the user's data can not be initialized"
+        val newPageValue = newPage.toIntOrNull() ?: 0
+
+        viewModelScope.launch {
+            val updatedBook = updateBookProgressUseCase(
+                book = bookToUpdate,
+                newPage = newPageValue,
+            ).getOrDefault(bookToUpdate)
+
+            setBookForProgressSheet(book = null)
+
+            val currentBooks = _booksFlow.firstOrNull() ?: return@launch
+
+            val updatedBooks = currentBooks.map { book ->
+                if (book.userProgressId == updatedBook.userProgressId) {
+                    updatedBook
                 } else {
-                    "Something went wrong while trying to fetch the currently reading books."
+                    book
                 }
-
-                SnackBarManager.showSnackbar(title = message)
-
-                emptyList()
             }
-        )
 
-        setLoadingState(isLoading = false)
+            setBooksWithProgress(books = updatedBooks)
+        }
+    }
 
-        return books
+    private fun handleDismissProgressSheet() = setBookForProgressSheet(book = null)
+
+    private fun handleRefresh() = fetchCurrentlyReadingBooks()
+
+    private fun handleOnUpgradeProgressClick(book: BookWithProgress) {
+        setBookForProgressSheet(book = book)
+    }
+
+    private fun fetchCurrentlyReadingBooks() {
+        viewModelScope.launch {
+            setLoadingState(isLoading = true)
+
+            val books = getCurrentlyReadingBooksUseCase().fold(
+                onSuccess = { it },
+                onFailure = { failure ->
+                    val message = if (failure is NoUserIdFoundException) {
+                        "Without a valid API key the user's data can not be initialized"
+                    } else {
+                        "Something went wrong while trying to fetch the currently reading books."
+                    }
+
+                    SnackBarManager.showSnackbar(title = message)
+
+                    emptyList()
+                }
+            )
+
+            setBooksWithProgress(books = books)
+
+            setLoadingState(isLoading = false)
+        }
+    }
+
+    private fun setBookForProgressSheet(book: BookWithProgress?) {
+        _bookToUpdateFlow.update { book }
     }
 
     private fun setLoadingState(isLoading: Boolean) {
         _loadingFlow.update { isLoading }
+    }
+
+    private fun setBooksWithProgress(books: List<BookWithProgress>) {
+        _booksFlow.update { books }
     }
 }

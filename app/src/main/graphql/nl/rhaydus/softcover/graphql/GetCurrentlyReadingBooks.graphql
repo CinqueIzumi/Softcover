@@ -13,9 +13,6 @@ query GetCurrentlyReadingBooks(
             id
             title
             pages
-            image {
-                url
-            }
             contributions {
                 author {
                     name
@@ -27,10 +24,14 @@ query GetCurrentlyReadingBooks(
             limit: 1,
             order_by: {started_at: desc},
         ) {
+            id
             progress
             progress_pages
+            started_at
+            finished_at
 
             edition {
+                id
                 image {
                     url
                 }

@@ -11,4 +11,14 @@ class BooksRepositoryImpl @Inject constructor(
     override suspend fun getCurrentlyReadingBooks(userId: Int): List<BookWithProgress> {
         return bookRemoteDataSource.getCurrentlyReadingBooks(userId = userId)
     }
+
+    override suspend fun updateBookProgress(
+        book: BookWithProgress,
+        newPage: Int,
+    ): BookWithProgress {
+        return bookRemoteDataSource.updateBookProgress(
+            book = book,
+            newPage = newPage,
+        )
+    }
 }
