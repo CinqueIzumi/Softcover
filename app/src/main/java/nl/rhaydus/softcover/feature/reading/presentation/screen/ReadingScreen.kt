@@ -568,6 +568,7 @@ object ReadingScreen : Screen {
                                 updateProgressSplitButtonActive = it
                             },
                             leadingButtonStyle = SplitButtonStyle.OUTLINED,
+                            size = ButtonSize.XS,
                         )
 
                         Row(
