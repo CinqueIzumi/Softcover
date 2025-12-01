@@ -58,14 +58,21 @@ class ReadingScreenViewModel @Inject constructor(
             ReadingScreenUiEvent.Refresh -> handleRefresh()
             ReadingScreenUiEvent.DismissProgressSheet -> handleDismissProgressSheet()
 
-            is ReadingScreenUiEvent.OnSetProgressClick -> handleOnUpgradeProgressClick(book = event.book)
+            is ReadingScreenUiEvent.OnShowProgressSheetClick -> handleOnUpgradeProgressClick(book = event.book)
             is ReadingScreenUiEvent.OnUpdateProgressClick -> handleOnUpdateProgressClick(newPage = event.newPage)
+            is ReadingScreenUiEvent.OnMarkBookAsReadClick -> handleOnMarkBookAsReadClick(book = event.book)
         }
     }
 
     private fun initializeCollectors() {
         viewModelScope.launch {
             getUserIdUseCaseAsFlow().collect { handleRefresh() }
+        }
+    }
+
+    private fun handleOnMarkBookAsReadClick(book: BookWithProgress) {
+        viewModelScope.launch {
+            markBookAsRead(bookWithProgress = book)
         }
     }
 

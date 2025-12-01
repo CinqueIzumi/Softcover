@@ -19,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +42,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
 import nl.rhaydus.softcover.core.presentation.component.ClickableText
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenUiEvent
@@ -244,12 +245,12 @@ object SettingsScreen : Screen {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Button(
-                    onClick = { onEvent(SettingsScreenUiEvent.OnSaveApiKeyClick) },
+                SoftcoverButton(
+                    label = "Save API key",
+                    onClick = {},
                     modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(text = "Save API Key")
-                }
+                    style = ButtonStyle.FILLED,
+                )
             }
         }
     }

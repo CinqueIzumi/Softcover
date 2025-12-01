@@ -21,14 +21,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -50,6 +52,12 @@ import cafe.adriel.voyager.hilt.getViewModel
 import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
+import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
+import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -72,7 +80,7 @@ object ReadingScreen : Screen {
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     fun Screen(
         state: ReadingScreenUiState,
@@ -102,7 +110,7 @@ object ReadingScreen : Screen {
                 onRefresh = { onEvent(ReadingScreenUiEvent.Refresh) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .weight(1f),
             ) {
                 when {
                     state.books.isNotEmpty() -> {
@@ -192,15 +200,14 @@ object ReadingScreen : Screen {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
+            SoftcoverButton(
+                label = "Update progress",
                 onClick = {
                     onEvent(ReadingScreenUiEvent.OnUpdateProgressClick(newPage = number))
                 },
+                style = ButtonStyle.FILLED,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(4.dp)
-            ) {
-                Text(text = "Update progress")
-            }
+            )
 
             Spacer(modifier = Modifier.height(4.dp))
         }
@@ -272,11 +279,14 @@ object ReadingScreen : Screen {
         }
     }
 
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     private fun BookEntry(
         bookWithProgress: BookWithProgress,
         onEvent: (ReadingScreenUiEvent) -> Unit,
     ) {
+        var updateProgressSplitButtonActive by remember { mutableStateOf(false) }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -308,7 +318,7 @@ object ReadingScreen : Screen {
                     Column {
                         Text(
                             text = bookWithProgress.book.title,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleMediumEmphasized,
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
@@ -338,42 +348,72 @@ object ReadingScreen : Screen {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        OutlinedButton(
-                            onClick = {
-                                onEvent(ReadingScreenUiEvent.OnSetProgressClick(book = bookWithProgress))
+                        SoftcoverSplitButton(
+                            checked = updateProgressSplitButtonActive,
+                            dropDownItems = listOf(
+                                SoftcoverMenuItem(
+                                    label = "Mark as Read",
+                                    onClick = {
+                                        onEvent(ReadingScreenUiEvent.OnMarkBookAsReadClick(book = bookWithProgress))
+                                    },
+                                    icon = SoftcoverIconResource.Vector(
+                                        vector = Icons.Default.CheckCircle,
+                                        contentDescription = "Mark as Read icon"
+                                    )
+                                ),
+                                SoftcoverMenuItem(
+                                    label = "Switch Edition",
+                                    onClick = {
+                                        // TODO: Show edition sheet
+                                    },
+                                    icon = SoftcoverIconResource.Vector(
+                                        vector = Icons.AutoMirrored.Default.LibraryBooks,
+                                        contentDescription = "Mark as Read icon"
+                                    )
+                                ),
+                            ),
+                            label = "Update Progress",
+                            trailingIcon = SoftcoverIconResource.Vector(
+                                vector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Drop down icon",
+                            ),
+                            onDismissMenuRequest = {
+                                updateProgressSplitButtonActive = false
                             },
-                            shape = RoundedCornerShape(4.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            onLeadingButtonClick = {
+                                onEvent(ReadingScreenUiEvent.OnShowProgressSheetClick(book = bookWithProgress))
+                            },
+                            onTrailingButtonClick = {
+                                updateProgressSplitButtonActive = it
+                            },
+                            leadingButtonStyle = SplitButtonStyle.OUTLINED,
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(text = "Update progress")
+                            val progress = bookWithProgress.progress / 100f
+
+                            LinearProgressIndicator(
+                                progress = { progress },
+                                modifier = Modifier.weight(1f),
+                                drawStopIndicator = {},
+                                gapSize = (-2).dp,
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Text(
+                                text = "${(bookWithProgress.progress).toInt()}%",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val progress = bookWithProgress.progress / 100f
-
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier.weight(1f),
-                        drawStopIndicator = {},
-                        gapSize = (-2).dp,
-                    )
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Text(
-                        text = "${(bookWithProgress.progress).toInt()}%",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
                 }
             }
         }

@@ -34,16 +34,10 @@ fun BottomNavigationBar() {
 
             NavigationBarItem(
                 icon = {
-                    val itemContentColor = when (isSelected) {
-                        true -> MaterialTheme.colorScheme.onPrimary
-                        false -> Color.Gray
-                    }
-
                     tab.options.icon?.let { icon ->
                         Icon(
                             painter = icon,
                             contentDescription = tab.options.title,
-                            tint = itemContentColor,
                             modifier = Modifier.size(32.dp),
                         )
                     }
