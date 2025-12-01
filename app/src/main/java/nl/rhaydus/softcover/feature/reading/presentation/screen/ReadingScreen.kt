@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,18 +57,22 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
+import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
+import nl.rhaydus.softcover.core.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
+import nl.rhaydus.softcover.feature.reading.presentation.state.ProgressTab
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
     @Composable
@@ -132,6 +139,7 @@ object ReadingScreen : Screen {
                 ) {
                     ProgressBottomSheetContent(
                         bookWithProgress = state.bookToUpdate,
+                        progressTab = state.progressTab,
                         onEvent = onEvent
                     )
                 }
@@ -141,11 +149,10 @@ object ReadingScreen : Screen {
 
     @Composable
     fun ProgressBottomSheetContent(
+        progressTab: ProgressTab,
         bookWithProgress: BookWithProgress,
         onEvent: (ReadingScreenUiEvent) -> Unit,
     ) {
-        var number by remember { mutableStateOf("${bookWithProgress.currentPage}") }
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -158,21 +165,185 @@ object ReadingScreen : Screen {
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = bookWithProgress.book.title,
+                    text = "Update progress",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleLarge
                 )
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = bookWithProgress.book.title,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "What page are you on?",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .padding(all = 4.dp)
+            ) {
+                ProgressTab.entries.forEach { tab ->
+                    val isSelected = tab == progressTab
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                onEvent(ReadingScreenUiEvent.OnProgressTabClick(newProgressTab = tab))
+                            }
+                            .conditional(
+                                condition = isSelected,
+                                ifTrue = {
+                                    Modifier.background(
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        shape = RoundedCornerShape(4.dp),
+                                    )
+                                }
+                            )
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = tab.tabName,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (progressTab) {
+                ProgressTab.PAGE -> {
+                    ProgressBottomSheetPageContent(
+                        bookWithProgress = bookWithProgress,
+                        onEvent = onEvent,
+                    )
+                }
+
+                ProgressTab.PERCENTAGE -> {
+                    ProgressBottomSheetPercentageContent(
+                        bookWithProgress = bookWithProgress,
+                        onEvent = onEvent,
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun ColumnScope.ProgressBottomSheetPageContent(
+        bookWithProgress: BookWithProgress,
+        onEvent: (ReadingScreenUiEvent) -> Unit,
+    ) {
+        var number by remember { mutableStateOf("${bookWithProgress.currentPage}") }
+        val density = LocalDensity.current
+
+        val textFieldTextStyle = MaterialTheme.typography.bodyLarge
+
+        val textFieldWidth = remember(density) {
+            with(density) {
+                val fontSizeInPx = textFieldTextStyle.fontSize.toPx()
+                val charCount = 4
+                val padding = 32.dp.toPx()
+
+                ((charCount * fontSizeInPx * 0.6f) + padding).toDp()
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+
+            OutlinedTextField(
+                value = number,
+                onValueChange = {
+                    val newNumber = it.toIntOrNull() ?: run {
+                        number = ""
+                        return@OutlinedTextField
+                    }
+                    val updatedNumber = min(newNumber, bookWithProgress.book.totalPages)
+
+                    number = updatedNumber.toString()
+                },
+                singleLine = true,
+                textStyle = textFieldTextStyle.copy(textAlign = TextAlign.Center),
+                modifier = Modifier.width(textFieldWidth),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             )
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Text(
+                    text = "/ ${bookWithProgress.book.totalPages}",
+                    modifier = Modifier.padding(start = 8.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        SoftcoverButton(
+            label = "Update Progress",
+            onClick = { onEvent(ReadingScreenUiEvent.OnUpdatePageProgressClick(newPage = number)) },
+            modifier = Modifier.fillMaxWidth(),
+            style = ButtonStyle.FILLED,
+            size = ButtonSize.M,
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+    }
+
+    @Composable
+    fun ColumnScope.ProgressBottomSheetPercentageContent(
+        bookWithProgress: BookWithProgress,
+        onEvent: (ReadingScreenUiEvent) -> Unit,
+    ) {
+        var number by remember { mutableStateOf("${bookWithProgress.progress.roundToInt()}") }
+
+        val density = LocalDensity.current
+
+        val textFieldTextStyle = MaterialTheme.typography.bodyLarge
+
+        val textFieldWidth = remember(density) {
+            with(density) {
+                val fontSizeInPx = textFieldTextStyle.fontSize.toPx()
+                val charCount = 4
+                val padding = 32.dp.toPx()
+
+                ((charCount * fontSizeInPx * 0.6f) + padding).toDp()
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
 
             OutlinedTextField(
                 value = number,
@@ -183,34 +354,42 @@ object ReadingScreen : Screen {
                         return@OutlinedTextField
                     }
 
-                    val updatedNumber = min(newNumber, bookWithProgress.book.totalPages)
+                    val updatedNumber = min(newNumber, 100)
 
                     number = updatedNumber.toString()
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    Text(
-                        text = "/ ${bookWithProgress.book.totalPages}",
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
-                }
+                modifier = Modifier.width(textFieldWidth),
+                textStyle = textFieldTextStyle.copy(textAlign = TextAlign.Center),
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SoftcoverButton(
-                label = "Update progress",
-                onClick = {
-                    onEvent(ReadingScreenUiEvent.OnUpdateProgressClick(newPage = number))
-                },
-                style = ButtonStyle.FILLED,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Text(
+                    text = "%",
+                    modifier = Modifier.padding(start = 8.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        SoftcoverButton(
+            label = "Update Progress",
+            modifier = Modifier.fillMaxWidth(),
+            style = ButtonStyle.FILLED,
+            size = ButtonSize.M,
+            onClick = {
+                onEvent(ReadingScreenUiEvent.OnUpdatePercentageProgressClick(newProgress = number))
+            }
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
     }
 
     @Composable
@@ -407,13 +586,12 @@ object ReadingScreen : Screen {
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = "${(bookWithProgress.progress).toInt()}%",
+                                text = "${(bookWithProgress.progress).roundToInt()}%",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
-
                 }
             }
         }
@@ -534,10 +712,39 @@ private fun ReadingScreenPreview() {
 
 @StandardPreview
 @Composable
-private fun ProgressSheetContentPreview() {
+private fun ProgressSheetContentPagePreview() {
     SoftcoverTheme {
         ReadingScreen.ProgressBottomSheetContent(
             onEvent = {},
+            progressTab = ProgressTab.PAGE,
+            bookWithProgress = BookWithProgress(
+                book = Book(
+                    id = 1,
+                    title = "The Dungeon Anarchist's Cookbook",
+                    authors = listOf(
+                        Author(name = "Matt Dinniman"),
+                    ),
+                    totalPages = 534,
+                    url = "",
+                ),
+                currentPage = 470,
+                progress = 88.014984f,
+                editionId = -1,
+                userProgressId = -1,
+                startedAt = null,
+                finishedAt = null,
+            ),
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ProgressSheetContentPercentagePreview() {
+    SoftcoverTheme {
+        ReadingScreen.ProgressBottomSheetContent(
+            onEvent = {},
+            progressTab = ProgressTab.PERCENTAGE,
             bookWithProgress = BookWithProgress(
                 book = Book(
                     id = 1,

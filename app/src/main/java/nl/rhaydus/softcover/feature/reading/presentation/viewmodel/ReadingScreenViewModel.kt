@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBo
 import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
+import nl.rhaydus.softcover.feature.reading.presentation.state.ProgressTab
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCaseAsFlow
 import javax.inject.Inject
@@ -31,6 +32,7 @@ class ReadingScreenViewModel @Inject constructor(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val getUserIdUseCaseAsFlow: GetUserIdUseCaseAsFlow,
 ) : ViewModel() {
+    private val _progressTabFlow = MutableStateFlow(ProgressTab.PAGE)
     private val _loadingFlow = MutableStateFlow(true)
     private val _bookToUpdateFlow = MutableStateFlow<BookWithProgress?>(null)
     private val _booksFlow = MutableStateFlow<List<BookWithProgress>>(emptyList())
@@ -38,12 +40,14 @@ class ReadingScreenViewModel @Inject constructor(
     val uiState = combine(
         _booksFlow,
         _loadingFlow,
-        _bookToUpdateFlow
-    ) { books: List<BookWithProgress>, isLoading: Boolean, bookToUpdate: BookWithProgress? ->
+        _bookToUpdateFlow,
+        _progressTabFlow,
+    ) { books: List<BookWithProgress>, isLoading: Boolean, bookToUpdate: BookWithProgress?, tab: ProgressTab ->
         ReadingScreenUiState(
             books = books,
             isLoading = isLoading,
             bookToUpdate = bookToUpdate,
+            progressTab = tab
         )
     }.onStart {
         initializeCollectors()
@@ -59,7 +63,11 @@ class ReadingScreenViewModel @Inject constructor(
             ReadingScreenUiEvent.DismissProgressSheet -> handleDismissProgressSheet()
 
             is ReadingScreenUiEvent.OnShowProgressSheetClick -> handleOnUpgradeProgressClick(book = event.book)
-            is ReadingScreenUiEvent.OnUpdateProgressClick -> handleOnUpdateProgressClick(newPage = event.newPage)
+            is ReadingScreenUiEvent.OnProgressTabClick -> handleOnProgressTabClick(newTab = event.newProgressTab)
+
+            is ReadingScreenUiEvent.OnUpdatePageProgressClick -> handleOnUpdatePageProgressClick(newPage = event.newPage)
+            is ReadingScreenUiEvent.OnUpdatePercentageProgressClick -> handleOnUpdatePercentageProgressClick(newPercentage = event.newProgress)
+
             is ReadingScreenUiEvent.OnMarkBookAsReadClick -> handleOnMarkBookAsReadClick(book = event.book)
         }
     }
@@ -76,7 +84,7 @@ class ReadingScreenViewModel @Inject constructor(
         }
     }
 
-    private fun handleOnUpdateProgressClick(newPage: String) {
+    private fun handleOnUpdatePageProgressClick(newPage: String) {
         val bookToUpdate = _bookToUpdateFlow.value ?: return
 
         val newPageValue = newPage.toIntOrNull() ?: 0
@@ -91,6 +99,20 @@ class ReadingScreenViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun handleOnUpdatePercentageProgressClick(newPercentage: String) {
+        val bookToUpdate = _bookToUpdateFlow.value ?: return
+
+        val newPercentageValue = newPercentage.toDoubleOrNull() ?: 0.0
+
+        val newPageValue: Int = ((newPercentageValue / 100) * bookToUpdate.book.totalPages).toInt()
+
+        handleOnUpdatePageProgressClick(newPage = newPageValue.toString())
+    }
+
+    private fun handleOnProgressTabClick(newTab: ProgressTab) {
+        setProgressTab(tab = newTab)
     }
 
     private suspend fun markBookAsRead(bookWithProgress: BookWithProgress) {
@@ -164,6 +186,10 @@ class ReadingScreenViewModel @Inject constructor(
 
     private fun setLoadingState(isLoading: Boolean) {
         _loadingFlow.update { isLoading }
+    }
+
+    private fun setProgressTab(tab: ProgressTab) {
+        _progressTabFlow.update { tab }
     }
 
     private fun setBooksWithProgress(books: List<BookWithProgress>) {

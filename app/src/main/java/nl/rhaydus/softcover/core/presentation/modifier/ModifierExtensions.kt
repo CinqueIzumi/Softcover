@@ -58,3 +58,16 @@ fun Modifier.shimmer(
 
     this.background(brush)
 }
+
+@Composable
+fun Modifier.conditional(
+    condition: Boolean,
+    ifTrue: @Composable () -> Modifier,
+    ifFalse: @Composable () -> Modifier = { Modifier },
+): Modifier {
+    return if (condition) {
+        then(ifTrue())
+    } else {
+        then(ifFalse())
+    }
+}

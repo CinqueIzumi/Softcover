@@ -24,29 +24,31 @@ class BookRemoteDataSourceImpl @Inject constructor(
 
         val books = result.data?.user_books ?: emptyList()
 
-        val mappedBooks = books.map {
-            val authors = it.book.contributions.map { contribution ->
+        val mappedBooks = books.mapNotNull {
+            val userBooksReads = it.user_book_reads.firstOrNull()
+
+            val edition = userBooksReads?.edition ?: return@mapNotNull null
+
+            val authors = edition.contributions.map { contribution ->
                 Author(name = contribution.author?.name ?: "")
             }
 
-            val userBooksReads = it.user_book_reads.firstOrNull()
-
             val book = Book(
                 id = it.book.id,
-                title = it.book.title ?: "",
-                url = userBooksReads?.edition?.image?.url ?: "",
+                title = edition.title ?: "",
+                url = edition.image?.url ?: "",
                 authors = authors,
-                totalPages = it.book.pages ?: -1
+                totalPages = edition.pages ?: -1
             )
 
             BookWithProgress(
                 book = book,
-                currentPage = userBooksReads?.progress_pages ?: 0,
-                progress = userBooksReads?.progress?.toFloat() ?: 0f,
-                editionId = userBooksReads?.edition?.id ?: -1,
-                userProgressId = userBooksReads?.id ?: -1,
-                startedAt = userBooksReads?.started_at,
-                finishedAt = userBooksReads?.finished_at,
+                currentPage = userBooksReads.progress_pages ?: 0,
+                progress = userBooksReads.progress?.toFloat() ?: 0f,
+                editionId = userBooksReads.edition.id,
+                userProgressId = userBooksReads.id,
+                startedAt = userBooksReads.started_at,
+                finishedAt = userBooksReads.finished_at,
             )
         }
 

@@ -11,13 +11,6 @@ query GetCurrentlyReadingBooks(
     ) {
         book {
             id
-            title
-            pages
-            contributions {
-                author {
-                    name
-                }
-            }
         }
 
         user_book_reads(
@@ -32,9 +25,16 @@ query GetCurrentlyReadingBooks(
 
             edition {
                 id
+                title
+                contributions {
+                    author {
+                        name
+                    }
+                }
                 image {
                     url
                 }
+                pages
             }
         }
     }
