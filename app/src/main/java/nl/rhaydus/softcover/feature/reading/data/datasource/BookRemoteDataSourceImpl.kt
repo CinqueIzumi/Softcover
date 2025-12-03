@@ -55,7 +55,6 @@ class BookRemoteDataSourceImpl @Inject constructor(
         return mappedBooks
     }
 
-    // TODO: Add support for updating with progress %
     override suspend fun updateBookProgress(
         book: BookWithProgress,
         newPage: Int,

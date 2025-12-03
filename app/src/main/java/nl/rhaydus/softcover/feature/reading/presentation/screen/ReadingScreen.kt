@@ -45,8 +45,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,7 +90,7 @@ object ReadingScreen : Screen {
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Screen(
         state: ReadingScreenUiState,
@@ -135,18 +138,20 @@ object ReadingScreen : Screen {
             if (state.bookToUpdate != null) {
                 ModalBottomSheet(
                     onDismissRequest = { onEvent(ReadingScreenUiEvent.DismissProgressSheet) },
-                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
                 ) {
                     ProgressBottomSheetContent(
                         bookWithProgress = state.bookToUpdate,
                         progressTab = state.progressTab,
-                        onEvent = onEvent
+                        onEvent = onEvent,
                     )
                 }
             }
         }
     }
 
+    // TODO: When requesting focus, highlight current text automatically?
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ProgressBottomSheetContent(
         progressTab: ProgressTab,
@@ -254,7 +259,14 @@ object ReadingScreen : Screen {
         bookWithProgress: BookWithProgress,
         onEvent: (ReadingScreenUiEvent) -> Unit,
     ) {
-        var number by remember { mutableStateOf("${bookWithProgress.currentPage}") }
+        var number by remember {
+            val currentPageString = bookWithProgress.currentPage.toString()
+
+            mutableStateOf(TextFieldValue(text = currentPageString))
+        }
+
+        var firstTimeFocusedGained by remember { mutableStateOf(true) }
+
         val density = LocalDensity.current
 
         val textFieldTextStyle = MaterialTheme.typography.bodyLarge
@@ -277,18 +289,47 @@ object ReadingScreen : Screen {
 
             OutlinedTextField(
                 value = number,
-                onValueChange = {
-                    val newNumber = it.toIntOrNull() ?: run {
-                        number = ""
+                onValueChange = { newValue ->
+                    if (firstTimeFocusedGained.not()) {
+                        number = number.copy(selection = newValue.selection)
+                    } else {
+                        firstTimeFocusedGained = false
+                    }
+
+                    if (newValue.text == number.text) return@OutlinedTextField
+
+                    if (newValue.text.isEmpty()) {
+                        number = newValue
                         return@OutlinedTextField
                     }
+
+
+                    val newNumber = newValue.text.toIntOrNull() ?: run {
+                        number = number.copy(text = "", selection = newValue.selection)
+                        return@OutlinedTextField
+                    }
+
                     val updatedNumber = min(newNumber, bookWithProgress.book.totalPages)
 
-                    number = updatedNumber.toString()
+                    number = newValue.copy(text = updatedNumber.toString())
                 },
                 singleLine = true,
                 textStyle = textFieldTextStyle.copy(textAlign = TextAlign.Center),
-                modifier = Modifier.width(textFieldWidth),
+                modifier = Modifier
+                    .width(textFieldWidth)
+                    .onFocusChanged {
+                        if (it.hasFocus.not()) {
+                            firstTimeFocusedGained = true
+
+                            number = number.copy(selection = TextRange.Zero)
+
+                            return@onFocusChanged
+                        }
+
+                        number = number.copy(
+                            selection = TextRange(start = 0, end = number.text.length),
+                        )
+                    },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             )
 
@@ -309,7 +350,7 @@ object ReadingScreen : Screen {
 
         SoftcoverButton(
             label = "Update Progress",
-            onClick = { onEvent(ReadingScreenUiEvent.OnUpdatePageProgressClick(newPage = number)) },
+            onClick = { onEvent(ReadingScreenUiEvent.OnUpdatePageProgressClick(newPage = number.text)) },
             modifier = Modifier.fillMaxWidth(),
             style = ButtonStyle.FILLED,
             size = ButtonSize.M,
@@ -323,7 +364,13 @@ object ReadingScreen : Screen {
         bookWithProgress: BookWithProgress,
         onEvent: (ReadingScreenUiEvent) -> Unit,
     ) {
-        var number by remember { mutableStateOf("${bookWithProgress.progress.roundToInt()}") }
+        var number by remember {
+            val currentPageString = bookWithProgress.progress.roundToInt()
+
+            mutableStateOf(TextFieldValue(text = currentPageString.toString()))
+        }
+
+        var firstTimeFocusedGained by remember { mutableStateOf(true) }
 
         val density = LocalDensity.current
 
@@ -347,21 +394,47 @@ object ReadingScreen : Screen {
 
             OutlinedTextField(
                 value = number,
-                onValueChange = {
-                    val newNumber = it.toIntOrNull() ?: run {
-                        number = ""
+                onValueChange = { newValue ->
+                    if (firstTimeFocusedGained.not()) {
+                        number = number.copy(selection = newValue.selection)
+                    } else {
+                        firstTimeFocusedGained = false
+                    }
 
+                    if (newValue.text == number.text) return@OutlinedTextField
+
+                    if (newValue.text.isEmpty()) {
+                        number = newValue
+                        return@OutlinedTextField
+                    }
+
+                    val newNumber = newValue.text.toIntOrNull() ?: run {
+                        number = number.copy(text = "", selection = newValue.selection)
                         return@OutlinedTextField
                     }
 
                     val updatedNumber = min(newNumber, 100)
 
-                    number = updatedNumber.toString()
+                    number = newValue.copy(text = updatedNumber.toString())
                 },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.width(textFieldWidth),
                 textStyle = textFieldTextStyle.copy(textAlign = TextAlign.Center),
+                modifier = Modifier
+                    .width(textFieldWidth)
+                    .onFocusChanged {
+                        if (it.hasFocus.not()) {
+                            firstTimeFocusedGained = true
+
+                            number = number.copy(selection = TextRange.Zero)
+
+                            return@onFocusChanged
+                        }
+
+                        number = number.copy(
+                            selection = TextRange(start = 0, end = number.text.length),
+                        )
+                    },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             )
 
             Box(
@@ -385,7 +458,7 @@ object ReadingScreen : Screen {
             style = ButtonStyle.FILLED,
             size = ButtonSize.M,
             onClick = {
-                onEvent(ReadingScreenUiEvent.OnUpdatePercentageProgressClick(newProgress = number))
+                onEvent(ReadingScreenUiEvent.OnUpdatePercentageProgressClick(newProgress = number.text))
             }
         )
 
