@@ -73,8 +73,8 @@ import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
+import nl.rhaydus.softcover.feature.reading.presentation.ProgressSheetTab
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
-import nl.rhaydus.softcover.feature.reading.presentation.state.ProgressTab
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
 import kotlin.math.min
@@ -147,7 +147,7 @@ object ReadingScreen : Screen {
                 ) {
                     ProgressBottomSheetContent(
                         bookWithProgress = state.bookToUpdate,
-                        progressTab = state.progressTab,
+                        progressSheetTab = state.progressSheetTab,
                         onEvent = onEvent,
                     )
                 }
@@ -325,7 +325,7 @@ object ReadingScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ProgressBottomSheetContent(
-        progressTab: ProgressTab,
+        progressSheetTab: ProgressSheetTab,
         bookWithProgress: BookWithProgress,
         onEvent: (ReadingScreenUiEvent) -> Unit,
     ) {
@@ -371,14 +371,14 @@ object ReadingScreen : Screen {
                     )
                     .padding(all = 4.dp)
             ) {
-                ProgressTab.entries.forEach { tab ->
-                    val isSelected = tab == progressTab
+                ProgressSheetTab.entries.forEach { tab ->
+                    val isSelected = tab == progressSheetTab
 
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .clickable {
-                                onEvent(ReadingScreenUiEvent.OnProgressTabClick(newProgressTab = tab))
+                                onEvent(ReadingScreenUiEvent.OnProgressTabClick(newProgressSheetTab = tab))
                             }
                             .conditional(
                                 condition = isSelected,
@@ -407,15 +407,15 @@ object ReadingScreen : Screen {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            when (progressTab) {
-                ProgressTab.PAGE -> {
+            when (progressSheetTab) {
+                ProgressSheetTab.PAGE -> {
                     ProgressBottomSheetPageContent(
                         bookWithProgress = bookWithProgress,
                         onEvent = onEvent,
                     )
                 }
 
-                ProgressTab.PERCENTAGE -> {
+                ProgressSheetTab.PERCENTAGE -> {
                     ProgressBottomSheetPercentageContent(
                         bookWithProgress = bookWithProgress,
                         onEvent = onEvent,
@@ -1005,7 +1005,7 @@ private fun ProgressSheetContentPagePreview() {
     SoftcoverTheme {
         ReadingScreen.ProgressBottomSheetContent(
             onEvent = {},
-            progressTab = ProgressTab.PAGE,
+            progressSheetTab = ProgressSheetTab.PAGE,
             bookWithProgress = BookWithProgress(
                 book = Book(
                     id = 1,
@@ -1097,7 +1097,7 @@ private fun ProgressSheetContentPercentagePreview() {
     SoftcoverTheme {
         ReadingScreen.ProgressBottomSheetContent(
             onEvent = {},
-            progressTab = ProgressTab.PERCENTAGE,
+            progressSheetTab = ProgressSheetTab.PERCENTAGE,
             bookWithProgress = BookWithProgress(
                 book = Book(
                     id = 1,

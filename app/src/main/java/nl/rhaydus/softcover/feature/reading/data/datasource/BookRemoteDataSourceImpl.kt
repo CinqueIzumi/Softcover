@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.type.UserBookUpdateInput
 import java.time.LocalDate
 import javax.inject.Inject
 
+// TODO: Add error logging when calls fail for user, incl. modal messages etc etc
 class BookRemoteDataSourceImpl @Inject constructor(
     private val apolloClient: ApolloClient,
 ) : BookRemoteDataSource {
@@ -81,16 +82,10 @@ class BookRemoteDataSourceImpl @Inject constructor(
 
         val mutation = MarkBookAsReadMutation(userBookCreateInput = dataObject)
 
-        val result = apolloClient
+        apolloClient
             .mutation(mutation = mutation)
             .execute()
-
-        val data = result.dataOrThrow()
-
-        // TODO: Maybe do some better error logging here down the line
-        if (data.insert_user_book?.error != null) {
-            throw Exception("Error while marking book as read")
-        }
+            .dataOrThrow()
     }
 
     override suspend fun updateBookEdition(

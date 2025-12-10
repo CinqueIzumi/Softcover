@@ -19,15 +19,13 @@ import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.RefreshCurrentlyReadingBooksUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
+import nl.rhaydus.softcover.feature.reading.presentation.ProgressSheetTab
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
-import nl.rhaydus.softcover.feature.reading.presentation.state.ProgressTab
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import timber.log.Timber
 import javax.inject.Inject
 
 // TODO: When opening the edition sheet, can the active button be disabled already?
-// TODO: Rather than refresh data after a query, maybe the data can be returned immediately from the queries?
-// TODO: Ideally I'd want to update all error logging, preventing the app from crashing in case something unexpected goes wrong...
 // TODO: Clean-up all files, code style guide, feels messy
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -38,7 +36,7 @@ class ReadingScreenViewModel @Inject constructor(
     private val refreshCurrentlyReadingBooksUseCase: RefreshCurrentlyReadingBooksUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
 ) : ViewModel() {
-    private val _progressTabFlow = MutableStateFlow(ProgressTab.PAGE)
+    private val _progressSheetTabFlow = MutableStateFlow(ProgressSheetTab.PAGE)
     private val _loadingFlow = MutableStateFlow(true)
     private val _bookToUpdateFlow = MutableStateFlow<BookWithProgress?>(null)
     private val _booksFlow = MutableStateFlow<List<BookWithProgress>>(emptyList())
@@ -50,14 +48,14 @@ class ReadingScreenViewModel @Inject constructor(
         _booksFlow,
         _loadingFlow,
         _bookToUpdateFlow,
-        _progressTabFlow,
+        _progressSheetTabFlow,
         _showProgressSheet,
         _showEditionSheet,
     ) { args ->
         val books = args[0] as List<BookWithProgress>
         val isLoading = args[1] as Boolean
         val bookToUpdate = args[2] as BookWithProgress?
-        val tab = args[3] as ProgressTab
+        val tab = args[3] as ProgressSheetTab
         val showProgressSheet = args[4] as Boolean
         val showEditionSheet = args[5] as Boolean
 
@@ -65,7 +63,7 @@ class ReadingScreenViewModel @Inject constructor(
             books = books,
             isLoading = isLoading,
             bookToUpdate = bookToUpdate,
-            progressTab = tab,
+            progressSheetTab = tab,
             showProgressSheet = showProgressSheet,
             showEditionSheet = showEditionSheet,
         )
@@ -94,7 +92,7 @@ class ReadingScreenViewModel @Inject constructor(
             }
 
             is ReadingScreenUiEvent.OnProgressTabClick -> {
-                handleOnProgressTabClick(newTab = event.newProgressTab)
+                handleOnProgressTabClick(newTab = event.newProgressSheetTab)
             }
 
             is ReadingScreenUiEvent.OnUpdatePageProgressClick -> {
@@ -119,7 +117,6 @@ class ReadingScreenViewModel @Inject constructor(
         val bookToUpdate = _bookToUpdateFlow.value ?: return
 
         viewModelScope.launch {
-            // TODO: Error handling should be done throughout the app, see docs with different error codes
             updateBookEditionUseCase(
                 userBookId = bookToUpdate.userBookId,
                 newEditionId = edition.id,
@@ -179,7 +176,7 @@ class ReadingScreenViewModel @Inject constructor(
         handleOnUpdatePageProgressClick(newPage = newPageValue.toString())
     }
 
-    private fun handleOnProgressTabClick(newTab: ProgressTab) {
+    private fun handleOnProgressTabClick(newTab: ProgressSheetTab) {
         setProgressTab(tab = newTab)
     }
 
@@ -256,8 +253,8 @@ class ReadingScreenViewModel @Inject constructor(
         _loadingFlow.update { isLoading }
     }
 
-    private fun setProgressTab(tab: ProgressTab) {
-        _progressTabFlow.update { tab }
+    private fun setProgressTab(tab: ProgressSheetTab) {
+        _progressSheetTabFlow.update { tab }
     }
 
     private fun setBooksWithProgress(books: List<BookWithProgress>) {
