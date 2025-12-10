@@ -474,7 +474,6 @@ object ReadingScreen : Screen {
                         return@OutlinedTextField
                     }
 
-
                     val newNumber = newValue.text.toIntOrNull() ?: run {
                         number = number.copy(text = "", selection = newValue.selection)
                         return@OutlinedTextField

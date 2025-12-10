@@ -4,20 +4,14 @@ fragment EditionFragment on editions {
     contributions {
         author {
             name
-            __typename
         }
-        __typename
     }
     isbn_10
     pages
     publisher {
         name
-        __typename
     }
     image {
         url
-        __typename
     }
-
-    __typename
 }

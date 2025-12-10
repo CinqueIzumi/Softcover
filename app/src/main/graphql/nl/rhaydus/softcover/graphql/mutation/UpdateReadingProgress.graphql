@@ -7,10 +7,7 @@ mutation UpdateReadingProgress(
         object: $datesReadInput
     ) {
         user_book_read {
-            id
             ...UserBookReadFragment
-            __typename
         }
-        __typename
     }
 }

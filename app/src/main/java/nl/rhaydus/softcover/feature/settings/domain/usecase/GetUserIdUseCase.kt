@@ -1,12 +1,19 @@
 package nl.rhaydus.softcover.feature.settings.domain.usecase
 
 import kotlinx.coroutines.flow.first
+import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
 import javax.inject.Inject
 
 class GetUserIdUseCase @Inject constructor(
     private val getUserIdUseCaseAsFlow: GetUserIdUseCaseAsFlow,
 ) {
     suspend operator fun invoke(): Result<Int> {
-        return runCatching { getUserIdUseCaseAsFlow().first() }
+        return runCatching {
+            val userId = getUserIdUseCaseAsFlow().first()
+
+            if (userId == -1) throw NoUserIdFoundException()
+
+            userId
+        }
     }
 }

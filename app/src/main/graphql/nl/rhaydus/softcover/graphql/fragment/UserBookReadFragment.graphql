@@ -7,15 +7,9 @@ fragment UserBookReadFragment on user_book_reads{
 
     user_book {
         ...UserBookFragment
-
-        __typename
     }
 
     edition {
         ...EditionFragment
-
-        __typename
     }
-
-    __typename
 }

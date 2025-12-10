@@ -4,8 +4,12 @@ query GetCurrentlyReadingBooks(
     user_books(
         limit: 10
         where: {
-            user_id: {_eq: $userId},
-            status_id: {_eq: 2},
+            user_id: {
+                _eq: $userId
+            },
+            status_id: {
+                _eq: 2
+            },
         }
         order_by: {updated_at: desc}
     ) {
@@ -13,11 +17,7 @@ query GetCurrentlyReadingBooks(
             limit: 1,
             order_by: {started_at: desc},
         ) {
-            id
             ...UserBookReadFragment
-            __typename
         }
-
-        __typename
     }
 }

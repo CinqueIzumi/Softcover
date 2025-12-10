@@ -1,9 +1,7 @@
 package nl.rhaydus.softcover.di
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.cache.normalized.FetchPolicy
 import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
-import com.apollographql.apollo.cache.normalized.fetchPolicy
 import com.apollographql.apollo.cache.normalized.normalizedCache
 import com.apollographql.apollo.network.okHttpClient
 import dagger.Module
@@ -40,7 +38,6 @@ object ApolloModule {
         return ApolloClient.Builder()
             .serverUrl("https://api.hardcover.app/v1/graphql")
             .okHttpClient(client)
-            .fetchPolicy(FetchPolicy.NetworkOnly)
             .normalizedCache(normalizedCacheFactory = MemoryCacheFactory())
             .build()
     }

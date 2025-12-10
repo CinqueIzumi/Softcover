@@ -10,17 +10,14 @@ mutation UpdateBookEdition(
 
         user_book {
             id
+
             user_book_reads(
                 limit: 1,
                 order_by: {started_at: desc},
             ) {
                 id
                 ...UserBookReadFragment
-                __typename
             }
-            __typename
         }
-
-        __typename
     }
 }

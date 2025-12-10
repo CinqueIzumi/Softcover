@@ -12,15 +12,12 @@ class UpdateBookEditionUseCase @Inject constructor(
         userBookId: Int,
         newEditionId: Int,
     ) {
-        // TODO: Logic for this here is duplicated, maybe add a onSuccess to the use case, which only triggers if user id != -1?
-        val userId = getUserIdUseCase().getOrDefault(-1)
-
-        if (userId == -1) return
-
-        repository.updateBookEdition(
-            userBookId = userBookId,
-            newEditionId = newEditionId,
-            userId = userId,
-        )
+        getUserIdUseCase().onSuccess { userId ->
+            repository.updateBookEdition(
+                userBookId = userBookId,
+                newEditionId = newEditionId,
+                userId = userId,
+            )
+        }
     }
 }

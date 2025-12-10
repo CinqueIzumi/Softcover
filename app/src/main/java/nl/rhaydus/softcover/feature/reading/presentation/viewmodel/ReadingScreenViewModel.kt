@@ -117,9 +117,7 @@ class ReadingScreenViewModel @Inject constructor(
         val bookToUpdate = _bookToUpdateFlow.value ?: return
 
         viewModelScope.launch {
-            // TODO: Error handling?
             // TODO: Error handling should be done throughout the app, see docs with different error codes
-            // TODO: Check to see if this actually updates the edition, maybe this can be done using the watch observer? ...
             updateBookEditionUseCase(
                 userBookId = bookToUpdate.userBookId,
                 newEditionId = edition.id,
@@ -130,13 +128,15 @@ class ReadingScreenViewModel @Inject constructor(
     }
 
     private fun initializeCollectors() {
+        setLoadingState(isLoading = true)
+
         viewModelScope.launch {
-            setLoadingState(isLoading = true)
+            launch {
+                getCurrentlyReadingBooksUseCase().collectLatest { books ->
+                    setBooksWithProgress(books = books)
 
-            getCurrentlyReadingBooksUseCase().collectLatest { books ->
-                setBooksWithProgress(books = books)
-
-                setLoadingState(isLoading = false)
+                    setLoadingState(isLoading = false)
+                }
             }
         }
     }

@@ -11,64 +11,14 @@ import nl.rhaydus.softcover.GetCurrentlyReadingBooksQuery
 import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
-import nl.rhaydus.softcover.core.domain.model.Author
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.feature.reading.data.mapper.toBookWithProgress
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
-import nl.rhaydus.softcover.fragment.EditionFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment
-import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
 import java.time.LocalDate
 import javax.inject.Inject
-
-// TODO: Maybe move these to mappers or something of the sort
-// TODO: Maybe look into the correct default values to prevent weird app ui?
-fun EditionFragment.toBookEdition(): BookEdition {
-    return BookEdition(
-        id = id,
-        title = title,
-        url = image?.url,
-        publisher = publisher?.name,
-        pages = pages,
-        authors = contributions.map { contribution ->
-            Author(name = contribution.author?.name ?: "")
-        },
-        isbn10 = isbn_10,
-    )
-}
-
-fun UserBookFragment.toBook(): Book {
-    val book = book
-
-    return Book(
-        id = book.id,
-        title = book.title ?: "",
-        editions = book.editions.map { userBookEdition ->
-            userBookEdition.editionFragment.toBookEdition()
-        }
-    )
-}
-
-fun UserBookReadFragment.toBookWithProgress(): BookWithProgress? {
-    val userBookFragment = user_book?.userBookFragment ?: return null
-    val editionId = edition?.editionFragment?.id ?: return null
-    val book = userBookFragment.toBook()
-
-    return BookWithProgress(
-        book = book,
-        currentPage = progress_pages ?: 0,
-        progress = progress?.toFloat() ?: 0f,
-        editionId = editionId,
-        userBookReadId = id,
-        startedAt = started_at,
-        finishedAt = finished_at,
-        userBookId = userBookFragment.id
-    )
-}
 
 class BookRemoteDataSourceImpl @Inject constructor(
     private val apolloClient: ApolloClient,
@@ -79,7 +29,6 @@ class BookRemoteDataSourceImpl @Inject constructor(
             .fetchPolicy(FetchPolicy.CacheAndNetwork)
             .watch()
             .mapNotNull { result ->
-                println("-=- watcher was called")
                 val userBooks = result.data?.user_books ?: return@mapNotNull null
 
                 userBooks.mapNotNull { userBook ->
@@ -96,6 +45,7 @@ class BookRemoteDataSourceImpl @Inject constructor(
             .query(query = GetCurrentlyReadingBooksQuery(userId = userId))
             .fetchPolicy(FetchPolicy.NetworkOnly)
             .execute()
+            .dataOrThrow()
     }
 
     override suspend fun updateBookProgress(
@@ -117,8 +67,7 @@ class BookRemoteDataSourceImpl @Inject constructor(
         val result = apolloClient
             .mutation(mutation = mutation)
             .execute()
-
-        result.dataOrThrow()
+            .dataOrThrow()
     }
 
     override suspend fun markBookAsRead(book: BookWithProgress) {
@@ -138,6 +87,7 @@ class BookRemoteDataSourceImpl @Inject constructor(
 
         val data = result.dataOrThrow()
 
+        // TODO: Maybe do some better error logging here down the line
         if (data.insert_user_book?.error != null) {
             throw Exception("Error while marking book as read")
         }
@@ -155,12 +105,9 @@ class BookRemoteDataSourceImpl @Inject constructor(
             )
         )
 
-        val result = apolloClient
+        apolloClient
             .mutation(mutation = mutation)
             .execute()
-
-        result.dataOrThrow()
-
-        refreshCurrentlyReadingBooks(userId = userId)
+            .dataOrThrow()
     }
 }
