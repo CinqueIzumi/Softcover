@@ -91,6 +91,9 @@ dependencies {
 
     // Image loading
     implementation(libs.coil)
+
+    // Timber
+    implementation(libs.timber)
 }
 
 apollo {
