@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUse
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ProgressTab
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import timber.log.Timber
 import javax.inject.Inject
 
 // TODO: When opening the edition sheet, can the active button be disabled already?
@@ -69,6 +70,7 @@ class ReadingScreenViewModel @Inject constructor(
             showEditionSheet = showEditionSheet,
         )
     }.onStart {
+        Timber.d("-=- initializing collectors!")
         initializeCollectors()
     }.stateIn(
         scope = viewModelScope,
@@ -121,7 +123,9 @@ class ReadingScreenViewModel @Inject constructor(
             updateBookEditionUseCase(
                 userBookId = bookToUpdate.userBookId,
                 newEditionId = edition.id,
-            )
+            ).onFailure {
+                Timber.e("Something went wrong updating book edition! $it")
+            }
 
             dismissAllSheets()
         }
@@ -180,7 +184,9 @@ class ReadingScreenViewModel @Inject constructor(
     }
 
     private suspend fun markBookAsRead(bookWithProgress: BookWithProgress) {
-        markBookAsReadUseCase(book = bookWithProgress)
+        markBookAsReadUseCase(book = bookWithProgress).onFailure {
+            Timber.e("Error while marking book as read! $it")
+        }
 
         dismissAllSheets()
     }
@@ -189,11 +195,12 @@ class ReadingScreenViewModel @Inject constructor(
         bookWithProgress: BookWithProgress,
         page: Int,
     ) {
-        // TODO: Maybe some sort of error logging or something like that?
         updateBookProgressUseCase(
             book = bookWithProgress,
             newPage = page,
-        )
+        ).onFailure {
+            Timber.e("Something went wrong updating book progress! $it")
+        }
 
         dismissAllSheets()
     }
@@ -206,7 +213,9 @@ class ReadingScreenViewModel @Inject constructor(
         viewModelScope.launch {
             setLoadingState(isLoading = true)
 
-            refreshCurrentlyReadingBooksUseCase()
+            refreshCurrentlyReadingBooksUseCase().onFailure {
+                Timber.e("Something went wrong refreshing currently reading books! $it")
+            }
 
             setLoadingState(isLoading = false)
         }

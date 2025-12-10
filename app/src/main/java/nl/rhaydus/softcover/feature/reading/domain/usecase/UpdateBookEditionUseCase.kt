@@ -11,13 +11,13 @@ class UpdateBookEditionUseCase @Inject constructor(
     suspend operator fun invoke(
         userBookId: Int,
         newEditionId: Int,
-    ) {
-        getUserIdUseCase().onSuccess { userId ->
-            repository.updateBookEdition(
-                userBookId = userBookId,
-                newEditionId = newEditionId,
-                userId = userId,
-            )
-        }
+    ): Result<Unit> = runCatching {
+        val userId = getUserIdUseCase().getOrThrow()
+
+        repository.updateBookEdition(
+            userBookId = userBookId,
+            newEditionId = newEditionId,
+            userId = userId,
+        )
     }
 }
