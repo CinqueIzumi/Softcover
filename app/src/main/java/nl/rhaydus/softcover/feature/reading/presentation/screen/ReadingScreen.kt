@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,6 +59,7 @@ import cafe.adriel.voyager.hilt.getViewModel
 import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
@@ -66,6 +68,7 @@ import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
+import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -77,6 +80,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreen
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+// TODO: Add optimistic graphql updates to make the app seem more responsive?
+// TODO: Dismiss bottom sheet smoothly when clicking on confirm, don't wait for the api call to finish...
 object ReadingScreen : Screen {
     @Composable
     override fun Content() {
@@ -135,7 +140,7 @@ object ReadingScreen : Screen {
                 }
             }
 
-            if (state.bookToUpdate != null) {
+            if (state.bookToUpdate != null && state.showProgressSheet) {
                 ModalBottomSheet(
                     onDismissRequest = { onEvent(ReadingScreenUiEvent.DismissProgressSheet) },
                     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -147,10 +152,176 @@ object ReadingScreen : Screen {
                     )
                 }
             }
+
+            if (state.bookToUpdate != null && state.showEditionSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { onEvent(ReadingScreenUiEvent.DismissEditionSheet) },
+                    sheetState = rememberModalBottomSheetState(),
+                ) {
+                    EditionBottomSheetContent(
+                        book = state.bookToUpdate,
+                        onEvent = onEvent,
+                    )
+                }
+            }
         }
     }
 
-    // TODO: When requesting focus, highlight current text automatically?
+    @Composable
+    fun EditionBottomSheetContent(
+        book: BookWithProgress,
+        onEvent: (ReadingScreenUiEvent) -> Unit,
+    ) {
+        var selectedEdition by remember {
+            mutableStateOf(book.currentEdition)
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SoftcoverButton(
+                    label = "Cancel",
+                    onClick = { onEvent(ReadingScreenUiEvent.DismissEditionSheet) },
+                    style = ButtonStyle.TEXT
+                )
+
+                Text(
+                    text = "Change edition",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                SoftcoverButton(
+                    label = "Confirm",
+                    enabled = selectedEdition != book.currentEdition,
+                    onClick = {
+                        onEvent(ReadingScreenUiEvent.OnNewEditionSaveClick(edition = selectedEdition))
+                    },
+                    style = ButtonStyle.TEXT
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = book.book.title,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(book.book.editions) { edition ->
+                    EditionItem(
+                        edition = edition,
+                        selected = edition == selectedEdition,
+                        onEditionClick = { selectedEdition = edition }
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun EditionItem(
+        edition: BookEdition,
+        selected: Boolean,
+        onEditionClick: () -> Unit,
+    ) {
+        val cardShape = RoundedCornerShape(8.dp)
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape = cardShape)
+                .conditional(
+                    condition = selected,
+                    ifTrue = {
+                        Modifier.border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = cardShape
+                        )
+                    }
+                )
+                .background(color = MaterialTheme.colorScheme.surface)
+                .noRippleClickable(onEditionClick)
+                .padding(all = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SubcomposeAsyncImage(
+                    model = edition.url,
+                    modifier = Modifier
+                        .size(
+                            width = 60.dp,
+                            height = 90.dp
+                        )
+                        .clip(shape = RoundedCornerShape(4.dp)),
+                    contentDescription = "Book image",
+                    loading = { Box(modifier = Modifier.shimmer()) }
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    edition.title?.let {
+                        Text(
+                            text = edition.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    edition.publisher?.let {
+                        Text(
+                            text = edition.publisher,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    edition.pages?.let {
+                        Text(
+                            text = "${edition.pages} pages",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    edition.isbn10?.let { isbn ->
+                        Text(
+                            text = "ISBN: $isbn",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ProgressBottomSheetContent(
@@ -309,7 +480,7 @@ object ReadingScreen : Screen {
                         return@OutlinedTextField
                     }
 
-                    val updatedNumber = min(newNumber, bookWithProgress.book.totalPages)
+                    val updatedNumber = min(newNumber, bookWithProgress.currentEdition.pages ?: 0)
 
                     number = newValue.copy(text = updatedNumber.toString())
                 },
@@ -338,7 +509,7 @@ object ReadingScreen : Screen {
                 contentAlignment = Alignment.CenterStart,
             ) {
                 Text(
-                    text = "/ ${bookWithProgress.book.totalPages}",
+                    text = "/ ${bookWithProgress.currentEdition.pages}",
                     modifier = Modifier.padding(start = 8.dp),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -554,7 +725,7 @@ object ReadingScreen : Screen {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     SubcomposeAsyncImage(
-                        model = bookWithProgress.book.url,
+                        model = bookWithProgress.currentEdition.url,
                         modifier = Modifier
                             .size(
                                 width = 100.dp,
@@ -578,7 +749,7 @@ object ReadingScreen : Screen {
 
                         var authorString = ""
 
-                        bookWithProgress.book.authors.forEachIndexed { index, author ->
+                        bookWithProgress.currentEdition.authors.forEachIndexed { index, author ->
                             if (index != 0) {
                                 authorString += ", "
                             }
@@ -595,7 +766,7 @@ object ReadingScreen : Screen {
                         Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
-                            text = "Page ${bookWithProgress.currentPage} of ${bookWithProgress.book.totalPages}",
+                            text = "Page ${bookWithProgress.currentPage} of ${bookWithProgress.currentEdition.pages}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -618,7 +789,7 @@ object ReadingScreen : Screen {
                                 SoftcoverMenuItem(
                                     label = "Switch Edition",
                                     onClick = {
-                                        // TODO: Show edition sheet
+                                        onEvent(ReadingScreenUiEvent.OnShowEditionSheetClick(book = bookWithProgress))
                                     },
                                     icon = SoftcoverIconResource.Vector(
                                         vector = Icons.AutoMirrored.Default.LibraryBooks,
@@ -691,33 +862,51 @@ private fun ReadingScreenPreview() {
             book = Book(
                 id = 1,
                 title = "The Dungeon Anarchist's Cookbook",
-                authors = listOf(
-                    Author(name = "Matt Dinniman"),
+                editions = listOf(
+                    BookEdition(
+                        id = 20,
+                        title = "Ed. The Dungeon Anarchist's Cookbook",
+                        url = "",
+                        publisher = "",
+                        isbn10 = "",
+                        pages = 534,
+                        authors = listOf(
+                            Author(name = "Matt Dinniman"),
+                        )
+                    )
                 ),
-                totalPages = 534,
-                url = "",
             ),
             currentPage = 470,
             progress = 88.014984f,
-            editionId = -1,
-            userProgressId = -1,
+            editionId = 20,
             startedAt = null,
             finishedAt = null,
+            userBookId = -1,
+            userBookReadId = -1
         ),
         BookWithProgress(
             book = Book(
                 id = 1,
                 title = "Last to Leave the Room",
-                authors = listOf(
-                    Author(name = "Caitlin Starling"),
+                editions = listOf(
+                    BookEdition(
+                        id = 20,
+                        title = "Ed. Last to Leave the Room",
+                        url = "",
+                        publisher = "",
+                        isbn10 = "",
+                        pages = 320,
+                        authors = listOf(
+                            Author(name = "Caitlin Starling"),
+                        )
+                    )
                 ),
-                totalPages = 320,
-                url = "",
             ),
             currentPage = 262,
             progress = 81.875f,
-            editionId = -1,
-            userProgressId = -1,
+            editionId = 20,
+            userBookReadId = -1,
+            userBookId = -1,
             startedAt = null,
             finishedAt = null,
         ),
@@ -725,54 +914,81 @@ private fun ReadingScreenPreview() {
             book = Book(
                 id = 1,
                 title = "Cursed Bunny",
-                authors = listOf(
-                    Author(name = "Bora Chung"),
-                    Author(name = "Anton Hur"),
+                editions = listOf(
+                    BookEdition(
+                        id = 20,
+                        title = "Ed. Cursed Bunny",
+                        url = "",
+                        publisher = "",
+                        isbn10 = "",
+                        pages = 256,
+                        authors = listOf(
+                            Author(name = "Bora Chung"),
+                            Author(name = "Anton Hur"),
+                        )
+                    )
                 ),
-                totalPages = 256,
-                url = "",
             ),
             currentPage = 49,
             progress = 19.140625f,
-            editionId = -1,
-            userProgressId = -1,
+            editionId = 20,
             startedAt = null,
             finishedAt = null,
+            userBookId = -1,
+            userBookReadId = -1
         ),
         BookWithProgress(
             book = Book(
                 id = 1,
                 title = "Sherlock Holmes: The complete illustrated novels",
-                authors = listOf(
-                    Author(name = "Arthur Conan Doyle")
+                editions = listOf(
+                    BookEdition(
+                        id = 20,
+                        title = "Ed. Sherlock Holmes: The complete illustrated novels",
+                        url = "",
+                        publisher = "",
+                        isbn10 = "",
+                        pages = 496,
+                        authors = listOf(
+                            Author(name = "Arthur Conan Doyle"),
+                        )
+                    )
                 ),
-                totalPages = 496,
-                url = "",
             ),
             currentPage = 200,
             progress = 40.322582f,
-            editionId = -1,
-            userProgressId = -1,
+            editionId = 20,
             startedAt = null,
             finishedAt = null,
+            userBookId = -1,
+            userBookReadId = -1
         ),
         BookWithProgress(
             book = Book(
                 id = 1,
                 title = "The Complete Fiction",
-                authors = listOf(
-                    Author(name = "H. P. Lovecraft"),
-                    Author(name = "S.T. Joshi"),
+                editions = listOf(
+                    BookEdition(
+                        id = 20,
+                        title = "Ed. The Complete Fiction",
+                        url = "",
+                        publisher = "",
+                        isbn10 = "",
+                        pages = 1098,
+                        authors = listOf(
+                            Author(name = "H. P. Lovecraft"),
+                            Author(name = "S.T. Joshi"),
+                        )
+                    )
                 ),
-                totalPages = 1098,
-                url = "",
             ),
             currentPage = 110,
             progress = 10.018215f,
             editionId = -1,
-            userProgressId = -1,
             startedAt = null,
             finishedAt = null,
+            userBookId = -1,
+            userBookReadId = -1
         ),
     )
 
@@ -795,18 +1011,82 @@ private fun ProgressSheetContentPagePreview() {
                 book = Book(
                     id = 1,
                     title = "The Dungeon Anarchist's Cookbook",
-                    authors = listOf(
-                        Author(name = "Matt Dinniman"),
+                    editions = listOf(
+                        BookEdition(
+                            id = 20,
+                            title = "Ed. The Dungeon Anarchist's Cookbook",
+                            url = "",
+                            publisher = "",
+                            isbn10 = "",
+                            pages = 534,
+                            authors = listOf(
+                                Author(name = "Matt Dinniman"),
+                            )
+                        )
                     ),
-                    totalPages = 534,
-                    url = "",
                 ),
                 currentPage = 470,
                 progress = 88.014984f,
-                editionId = -1,
-                userProgressId = -1,
+                editionId = 20,
                 startedAt = null,
                 finishedAt = null,
+                userBookId = -1,
+                userBookReadId = -1
+            )
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun EditionBottomSheetContentPreview() {
+    val baseEdition = BookEdition(
+        id = 20,
+        publisher = "Publisher",
+        title = "Snake-Eater",
+        url = "url",
+        isbn10 = "isbn",
+        pages = 20,
+        authors = listOf(
+            Author(name = "T. Kingfisher")
+        )
+    )
+
+    SoftcoverTheme {
+        ReadingScreen.EditionBottomSheetContent(
+            onEvent = {},
+            book = BookWithProgress(
+                book = Book(
+                    id = 1,
+                    title = "Snake-Eater",
+                    editions = listOf(
+                        baseEdition.copy(
+                            pages = 271,
+                            isbn10 = "123",
+                            publisher = "47 north",
+                            id = 40
+                        ),
+                        baseEdition.copy(
+                            pages = 352,
+                            isbn10 = "234",
+                            publisher = "Titan Books",
+                            id = 20
+                        ),
+                        baseEdition.copy(
+                            pages = 267,
+                            isbn10 = null,
+                            publisher = "47 north",
+                            id = 80
+                        ),
+                    )
+                ),
+                currentPage = 470,
+                progress = 88.014984f,
+                editionId = 20,
+                startedAt = null,
+                finishedAt = null,
+                userBookId = -1,
+                userBookReadId = -1
             ),
         )
     }
@@ -823,19 +1103,28 @@ private fun ProgressSheetContentPercentagePreview() {
                 book = Book(
                     id = 1,
                     title = "The Dungeon Anarchist's Cookbook",
-                    authors = listOf(
-                        Author(name = "Matt Dinniman"),
+                    editions = listOf(
+                        BookEdition(
+                            id = 20,
+                            title = "Ed. The Dungeon Anarchist's Cookbook",
+                            url = "",
+                            publisher = "",
+                            isbn10 = "",
+                            pages = 534,
+                            authors = listOf(
+                                Author(name = "Matt Dinniman"),
+                            )
+                        )
                     ),
-                    totalPages = 534,
-                    url = "",
                 ),
                 currentPage = 470,
                 progress = 88.014984f,
-                editionId = -1,
-                userProgressId = -1,
+                editionId = 20,
                 startedAt = null,
                 finishedAt = null,
-            ),
+                userBookId = -1,
+                userBookReadId = -1
+            )
         )
     }
 }

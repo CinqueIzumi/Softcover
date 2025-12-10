@@ -1,0 +1,19 @@
+fragment UserBookFragment on user_books {
+    id
+
+    book {
+        id
+        title
+        editions(
+            order_by: {
+                users_count: desc
+            }
+        ) {
+            ...EditionFragment
+            __typename
+        }
+        __typename
+    }
+
+    __typename
+}

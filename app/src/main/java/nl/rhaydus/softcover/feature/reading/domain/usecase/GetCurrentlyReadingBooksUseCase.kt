@@ -1,21 +1,20 @@
 package nl.rhaydus.softcover.feature.reading.domain.usecase
 
-import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.domain.repository.BooksRepository
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCaseAsFlow
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GetCurrentlyReadingBooksUseCase @Inject constructor(
     private val booksRepository: BooksRepository,
-    private val getUserIdUseCase: GetUserIdUseCase,
+    private val getUserIdUseCaseAsFlow: GetUserIdUseCaseAsFlow,
 ) {
-    suspend operator fun invoke(): Result<List<BookWithProgress>> {
-        return runCatching {
-            val userId = getUserIdUseCase().getOrDefault(-1)
-
-            if (userId == -1) throw NoUserIdFoundException()
-
+    operator fun invoke(): Flow<List<BookWithProgress>> {
+        return getUserIdUseCaseAsFlow().flatMapLatest { userId ->
             booksRepository.getCurrentlyReadingBooks(userId = userId)
         }
     }

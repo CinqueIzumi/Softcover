@@ -71,6 +71,7 @@ dependencies {
 
     // Apollo (graph ql communication)
     implementation(libs.apollo)
+    implementation(libs.apollo.cache)
 
     // Datastore
     implementation(libs.dataStore)
@@ -95,6 +96,9 @@ dependencies {
 apollo {
     service("service") {
         packageName.set("nl.rhaydus.softcover")
+        addTypename.set("always")
+
+        schemaFiles.from("src/main/graphql/schema.graphqls", "src/main/graphql/extra.graphqls")
 
         mapScalar("numeric", "kotlin.Double")
         mapScalar("float8", "kotlin.Double")

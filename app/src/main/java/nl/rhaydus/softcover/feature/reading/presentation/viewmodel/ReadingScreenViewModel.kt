@@ -6,48 +6,67 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBooksUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.reading.domain.usecase.RefreshCurrentlyReadingBooksUseCase
+import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ProgressTab
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCaseAsFlow
 import javax.inject.Inject
 
+// TODO: When opening the edition sheet, can the active button be disabled already?
+// TODO: Rather than refresh data after a query, maybe the data can be returned immediately from the queries?
+// TODO: Ideally I'd want to update all error logging, preventing the app from crashing in case something unexpected goes wrong...
+// TODO: Clean-up all files, code style guide, feels messy
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ReadingScreenViewModel @Inject constructor(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingBooksUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
-    private val getUserIdUseCaseAsFlow: GetUserIdUseCaseAsFlow,
+    private val refreshCurrentlyReadingBooksUseCase: RefreshCurrentlyReadingBooksUseCase,
+    private val updateBookEditionUseCase: UpdateBookEditionUseCase,
 ) : ViewModel() {
     private val _progressTabFlow = MutableStateFlow(ProgressTab.PAGE)
     private val _loadingFlow = MutableStateFlow(true)
     private val _bookToUpdateFlow = MutableStateFlow<BookWithProgress?>(null)
     private val _booksFlow = MutableStateFlow<List<BookWithProgress>>(emptyList())
+    private val _showProgressSheet = MutableStateFlow(false)
+    private val _showEditionSheet = MutableStateFlow(false)
 
+    // TODO: Implement custom combine functions, as casting args feels error-prone...
     val uiState = combine(
         _booksFlow,
         _loadingFlow,
         _bookToUpdateFlow,
         _progressTabFlow,
-    ) { books: List<BookWithProgress>, isLoading: Boolean, bookToUpdate: BookWithProgress?, tab: ProgressTab ->
+        _showProgressSheet,
+        _showEditionSheet,
+    ) { args ->
+        val books = args[0] as List<BookWithProgress>
+        val isLoading = args[1] as Boolean
+        val bookToUpdate = args[2] as BookWithProgress?
+        val tab = args[3] as ProgressTab
+        val showProgressSheet = args[4] as Boolean
+        val showEditionSheet = args[5] as Boolean
+
         ReadingScreenUiState(
             books = books,
             isLoading = isLoading,
             bookToUpdate = bookToUpdate,
-            progressTab = tab
+            progressTab = tab,
+            showProgressSheet = showProgressSheet,
+            showEditionSheet = showEditionSheet,
         )
     }.onStart {
         initializeCollectors()
@@ -60,21 +79,65 @@ class ReadingScreenViewModel @Inject constructor(
     fun onEvent(event: ReadingScreenUiEvent) {
         when (event) {
             ReadingScreenUiEvent.Refresh -> handleRefresh()
+
             ReadingScreenUiEvent.DismissProgressSheet -> handleDismissProgressSheet()
+            ReadingScreenUiEvent.DismissEditionSheet -> handleDismissEditionBottomSheet()
 
-            is ReadingScreenUiEvent.OnShowProgressSheetClick -> handleOnUpgradeProgressClick(book = event.book)
-            is ReadingScreenUiEvent.OnProgressTabClick -> handleOnProgressTabClick(newTab = event.newProgressTab)
+            is ReadingScreenUiEvent.OnShowProgressSheetClick -> {
+                handleOnUpgradeProgressClick(book = event.book)
+            }
 
-            is ReadingScreenUiEvent.OnUpdatePageProgressClick -> handleOnUpdatePageProgressClick(newPage = event.newPage)
-            is ReadingScreenUiEvent.OnUpdatePercentageProgressClick -> handleOnUpdatePercentageProgressClick(newPercentage = event.newProgress)
+            is ReadingScreenUiEvent.OnShowEditionSheetClick -> {
+                handleOnShowEditionSheetClick(book = event.book)
+            }
 
-            is ReadingScreenUiEvent.OnMarkBookAsReadClick -> handleOnMarkBookAsReadClick(book = event.book)
+            is ReadingScreenUiEvent.OnProgressTabClick -> {
+                handleOnProgressTabClick(newTab = event.newProgressTab)
+            }
+
+            is ReadingScreenUiEvent.OnUpdatePageProgressClick -> {
+                handleOnUpdatePageProgressClick(newPage = event.newPage)
+            }
+
+            is ReadingScreenUiEvent.OnUpdatePercentageProgressClick -> {
+                handleOnUpdatePercentageProgressClick(newPercentage = event.newProgress)
+            }
+
+            is ReadingScreenUiEvent.OnMarkBookAsReadClick -> {
+                handleOnMarkBookAsReadClick(book = event.book)
+            }
+
+            is ReadingScreenUiEvent.OnNewEditionSaveClick -> {
+                handleOnNewEditionSaveClick(edition = event.edition)
+            }
+        }
+    }
+
+    private fun handleOnNewEditionSaveClick(edition: BookEdition) {
+        val bookToUpdate = _bookToUpdateFlow.value ?: return
+
+        viewModelScope.launch {
+            // TODO: Error handling?
+            // TODO: Error handling should be done throughout the app, see docs with different error codes
+            // TODO: Check to see if this actually updates the edition, maybe this can be done using the watch observer? ...
+            updateBookEditionUseCase(
+                userBookId = bookToUpdate.userBookId,
+                newEditionId = edition.id,
+            )
+
+            dismissAllSheets()
         }
     }
 
     private fun initializeCollectors() {
         viewModelScope.launch {
-            getUserIdUseCaseAsFlow().collect { handleRefresh() }
+            setLoadingState(isLoading = true)
+
+            getCurrentlyReadingBooksUseCase().collectLatest { books ->
+                setBooksWithProgress(books = books)
+
+                setLoadingState(isLoading = false)
+            }
         }
     }
 
@@ -90,7 +153,7 @@ class ReadingScreenViewModel @Inject constructor(
         val newPageValue = newPage.toIntOrNull() ?: 0
 
         viewModelScope.launch {
-            if (newPageValue == bookToUpdate.book.totalPages) {
+            if (newPageValue == bookToUpdate.currentEdition.pages) {
                 markBookAsRead(bookWithProgress = bookToUpdate)
             } else {
                 updateBookWithPage(
@@ -106,7 +169,8 @@ class ReadingScreenViewModel @Inject constructor(
 
         val newPercentageValue = newPercentage.toDoubleOrNull() ?: 0.0
 
-        val newPageValue: Int = ((newPercentageValue / 100) * bookToUpdate.book.totalPages).toInt()
+        val newPageValue: Int =
+            ((newPercentageValue / 100) * (bookToUpdate.currentEdition.pages ?: 0)).toInt()
 
         handleOnUpdatePageProgressClick(newPage = newPageValue.toString())
     }
@@ -118,69 +182,64 @@ class ReadingScreenViewModel @Inject constructor(
     private suspend fun markBookAsRead(bookWithProgress: BookWithProgress) {
         markBookAsReadUseCase(book = bookWithProgress)
 
-        setBookForProgressSheet(book = null)
-
-        fetchCurrentlyReadingBooks()
+        dismissAllSheets()
     }
 
     private suspend fun updateBookWithPage(
         bookWithProgress: BookWithProgress,
         page: Int,
     ) {
-        val updatedBook = updateBookProgressUseCase(
+        // TODO: Maybe some sort of error logging or something like that?
+        updateBookProgressUseCase(
             book = bookWithProgress,
             newPage = page,
-        ).getOrDefault(bookWithProgress)
+        )
 
-        setBookForProgressSheet(book = null)
-
-        val currentBooks = _booksFlow.firstOrNull() ?: return
-
-        val updatedBooks = currentBooks.map { book ->
-            if (book.userProgressId == updatedBook.userProgressId) {
-                updatedBook
-            } else {
-                book
-            }
-        }
-
-        setBooksWithProgress(books = updatedBooks)
+        dismissAllSheets()
     }
 
-    private fun handleDismissProgressSheet() = setBookForProgressSheet(book = null)
+    private fun handleDismissProgressSheet() = dismissAllSheets()
 
-    private fun handleRefresh() = fetchCurrentlyReadingBooks()
+    private fun handleDismissEditionBottomSheet() = dismissAllSheets()
 
-    private fun handleOnUpgradeProgressClick(book: BookWithProgress) {
-        setBookForProgressSheet(book = book)
-    }
-
-    private fun fetchCurrentlyReadingBooks() {
+    private fun handleRefresh() {
         viewModelScope.launch {
             setLoadingState(isLoading = true)
 
-            val books = getCurrentlyReadingBooksUseCase().fold(
-                onSuccess = { it },
-                onFailure = { failure ->
-                    val message = if (failure is NoUserIdFoundException) {
-                        "Without a valid API key the user's data can not be initialized"
-                    } else {
-                        "Something went wrong while trying to fetch the currently reading books."
-                    }
-
-                    SnackBarManager.showSnackbar(title = message)
-
-                    emptyList()
-                }
-            )
-
-            setBooksWithProgress(books = books)
+            refreshCurrentlyReadingBooksUseCase()
 
             setLoadingState(isLoading = false)
         }
     }
 
-    private fun setBookForProgressSheet(book: BookWithProgress?) {
+    private fun handleOnUpgradeProgressClick(book: BookWithProgress) {
+        setBookForSheet(book = book)
+
+        setShowProgressSheet(show = true)
+    }
+
+    private fun handleOnShowEditionSheetClick(book: BookWithProgress) {
+        setBookForSheet(book = book)
+
+        setShowEditionSheet(show = true)
+    }
+
+    private fun dismissAllSheets() {
+        setShowEditionSheet(show = false)
+        setShowProgressSheet(show = false)
+
+        setBookForSheet(book = null)
+    }
+
+    private fun setShowEditionSheet(show: Boolean) {
+        _showEditionSheet.update { show }
+    }
+
+    private fun setShowProgressSheet(show: Boolean) {
+        _showProgressSheet.update { show }
+    }
+
+    private fun setBookForSheet(book: BookWithProgress?) {
         _bookToUpdateFlow.update { book }
     }
 

@@ -10,7 +10,7 @@ class UpdateBookProgressUseCase @Inject constructor(
     suspend operator fun invoke(
         book: BookWithProgress,
         newPage: Int,
-    ): Result<BookWithProgress> = runCatching {
+    ): Result<Unit> = runCatching {
         repository.updateBookProgress(
             book = book,
             newPage = newPage,
