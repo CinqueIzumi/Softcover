@@ -60,6 +60,8 @@ class SettingsScreenViewModel @Inject constructor(
             .trim()
 
         viewModelScope.launch {
+            resetUserDataUseCase()
+
             updateApiKeyUseCase(key = updatedKey).onSuccess {
                 attemptToInitializeUserId()
             }
@@ -67,16 +69,9 @@ class SettingsScreenViewModel @Inject constructor(
     }
 
     private suspend fun attemptToInitializeUserId() {
-        val message: String = initializeUserIdUseCase().fold(
-            onSuccess = { "Successfully initialized the user's profile." },
-            onFailure = {
-                resetUserDataUseCase()
-
-                "Something went wrong while trying to initialize the user's profile."
-            }
-        )
-
-        SnackBarManager.showSnackbar(title = message)
+        initializeUserIdUseCase().onFailure {
+            SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
+        }
     }
 
     private fun setApiKeyValue(newValue: String) {

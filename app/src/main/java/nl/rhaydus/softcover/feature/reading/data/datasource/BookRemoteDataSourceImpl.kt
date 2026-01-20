@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.cache.normalized.FetchPolicy
 import com.apollographql.apollo.cache.normalized.fetchPolicy
 import com.apollographql.apollo.cache.normalized.watch
+import com.apollographql.apollo.exception.ApolloHttpException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import nl.rhaydus.softcover.GetCurrentlyReadingBooksQuery
@@ -17,10 +18,10 @@ import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
+import timber.log.Timber
 import java.time.LocalDate
 import javax.inject.Inject
 
-// TODO: Add error logging when calls fail for user, incl. modal messages etc etc
 class BookRemoteDataSourceImpl @Inject constructor(
     private val apolloClient: ApolloClient,
 ) : BookRemoteDataSource {
@@ -30,6 +31,16 @@ class BookRemoteDataSourceImpl @Inject constructor(
             .fetchPolicy(FetchPolicy.CacheAndNetwork)
             .watch()
             .mapNotNull { result ->
+                if (userId == -1) return@mapNotNull emptyList()
+
+                result.exception?.let { exception ->
+                    Timber.e("-=- Something went wrong fetching currently reading! ${exception.message}")
+
+                    if (exception is ApolloHttpException && exception.statusCode == 401) {
+                        return@mapNotNull emptyList()
+                    }
+                }
+
                 val userBooks = result.data?.user_books ?: return@mapNotNull null
 
                 userBooks.mapNotNull { userBook ->
@@ -65,7 +76,7 @@ class BookRemoteDataSourceImpl @Inject constructor(
             datesReadInput = dataObject
         )
 
-        val result = apolloClient
+        apolloClient
             .mutation(mutation = mutation)
             .execute()
             .dataOrThrow()

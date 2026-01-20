@@ -12,7 +12,11 @@ class SettingsRemoteDataSourceImpl @Inject constructor(
             .query(query = UserIdQuery())
             .execute()
 
-        val id = result.data?.me?.firstOrNull()?.id ?: throw Exception("User could not be initialized.")
+        val id = result
+            .data
+            ?.me
+            ?.firstOrNull()
+            ?.id ?: throw Exception("User could not be initialized.")
 
         return id
     }

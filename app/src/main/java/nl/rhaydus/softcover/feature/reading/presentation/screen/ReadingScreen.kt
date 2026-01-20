@@ -80,8 +80,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreen
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-// TODO: Add optimistic graphql updates to make the app seem more responsive?
-// TODO: Dismiss bottom sheet smoothly when clicking on confirm, don't wait for the api call to finish...
 object ReadingScreen : Screen {
     @Composable
     override fun Content() {
@@ -778,6 +776,8 @@ object ReadingScreen : Screen {
                                 SoftcoverMenuItem(
                                     label = "Mark as Read",
                                     onClick = {
+                                        updateProgressSplitButtonActive = false
+
                                         onEvent(ReadingScreenUiEvent.OnMarkBookAsReadClick(book = bookWithProgress))
                                     },
                                     icon = SoftcoverIconResource.Vector(
@@ -788,6 +788,8 @@ object ReadingScreen : Screen {
                                 SoftcoverMenuItem(
                                     label = "Switch Edition",
                                     onClick = {
+                                        updateProgressSplitButtonActive = false
+
                                         onEvent(ReadingScreenUiEvent.OnShowEditionSheetClick(book = bookWithProgress))
                                     },
                                     icon = SoftcoverIconResource.Vector(
