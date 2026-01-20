@@ -19,7 +19,9 @@ class UpdateBookProgressUtil @Inject constructor() {
             scope.setState { copy(isLoading = true) }
 
             if (newPage == book.currentEdition.pages) {
-                dependencies.markBookAsReadUseCase(book = book)
+                dependencies.markBookAsReadUseCase(book = book).onFailure {
+                    Timber.e("Something went wrong marking book as read! $it")
+                }
             } else {
                 dependencies.updateBookProgressUseCase(
                     book = book,

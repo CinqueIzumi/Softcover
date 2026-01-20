@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenDependencies
+import timber.log.Timber
 
 data class OnNewEditionSaveClickAction(val edition: BookEdition) : ReadingAction {
     override suspend fun execute(
@@ -19,7 +20,9 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : ReadingAction
             dependencies.updateBookEditionUseCase(
                 userBookId = bookToUpdate.userBookId,
                 newEditionId = edition.id
-            )
+            ).onFailure {
+                Timber.e("-=- Something went wrong updating book edition! $it")
+            }
 
             scope.setState { copy(isLoading = false) }
         }

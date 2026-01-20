@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsScreenDependencies
+import timber.log.Timber
 
 data object SaveApiKeyClickAction : SettingsAction {
     override suspend fun execute(
@@ -16,7 +17,9 @@ data object SaveApiKeyClickAction : SettingsAction {
             .trim()
 
         dependencies.launch {
-            dependencies.resetUserDataUseCase()
+            dependencies.resetUserDataUseCase().onFailure {
+                Timber.e("-=- Something went wrong while resetting user's data! $it")
+            }
 
             dependencies.updateApiKeyUseCase(key = updatedKey).onSuccess {
                 dependencies.initializeUserIdUseCase().onFailure {
