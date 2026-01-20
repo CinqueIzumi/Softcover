@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseC
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUSeCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 
-data class SettingsDependencies(
+data class SettingsScreenDependencies(
     val updateApiKeyUseCase: UpdateApiKeyUseCase,
     val getApiKeyUseCase: GetApiKeyUseCase,
     val initializeUserIdUseCase: InitializeUserIdUseCase,

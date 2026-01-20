@@ -73,8 +73,18 @@ import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
-import nl.rhaydus.softcover.feature.reading.presentation.ProgressSheetTab
-import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenUiEvent
+import nl.rhaydus.softcover.feature.reading.presentation.enum.ProgressSheetTab
+import nl.rhaydus.softcover.feature.reading.presentation.action.DismissEditionSheetAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnNewEditionSaveClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowEditionSheetClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProgressClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
 import kotlin.math.min
@@ -85,11 +95,11 @@ object ReadingScreen : Screen {
     override fun Content() {
         val viewModel = getViewModel<ReadingScreenViewModel>()
 
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
+        val state by viewModel.state.collectAsStateWithLifecycle()
 
         Screen(
             state = state,
-            onEvent = viewModel::onEvent,
+            runAction = viewModel::runAction,
         )
     }
 
@@ -97,7 +107,7 @@ object ReadingScreen : Screen {
     @Composable
     fun Screen(
         state: ReadingScreenUiState,
-        onEvent: (ReadingScreenUiEvent) -> Unit,
+        runAction: (ReadingAction) -> Unit,
     ) {
         Column(
             modifier = Modifier
@@ -120,7 +130,7 @@ object ReadingScreen : Screen {
 
             PullToRefreshBox(
                 isRefreshing = state.isLoading,
-                onRefresh = { onEvent(ReadingScreenUiEvent.Refresh) },
+                onRefresh = { runAction(RefreshAction) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -129,7 +139,7 @@ object ReadingScreen : Screen {
                     state.books.isNotEmpty() -> {
                         BooksDisplay(
                             books = state.books,
-                            onEvent = onEvent
+                            runAction = runAction
                         )
                     }
 
@@ -140,25 +150,25 @@ object ReadingScreen : Screen {
 
             if (state.bookToUpdate != null && state.showProgressSheet) {
                 ModalBottomSheet(
-                    onDismissRequest = { onEvent(ReadingScreenUiEvent.DismissProgressSheet) },
+                    onDismissRequest = { runAction(DismissProgressSheetAction) },
                     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
                 ) {
                     ProgressBottomSheetContent(
                         bookWithProgress = state.bookToUpdate,
                         progressSheetTab = state.progressSheetTab,
-                        onEvent = onEvent,
+                        runAction = runAction,
                     )
                 }
             }
 
             if (state.bookToUpdate != null && state.showEditionSheet) {
                 ModalBottomSheet(
-                    onDismissRequest = { onEvent(ReadingScreenUiEvent.DismissEditionSheet) },
+                    onDismissRequest = { runAction(DismissEditionSheetAction) },
                     sheetState = rememberModalBottomSheetState(),
                 ) {
                     EditionBottomSheetContent(
                         book = state.bookToUpdate,
-                        onEvent = onEvent,
+                        runAction = runAction,
                     )
                 }
             }
@@ -168,7 +178,7 @@ object ReadingScreen : Screen {
     @Composable
     fun EditionBottomSheetContent(
         book: BookWithProgress,
-        onEvent: (ReadingScreenUiEvent) -> Unit,
+        runAction: (ReadingAction) -> Unit,
     ) {
         var selectedEdition by remember {
             mutableStateOf(book.currentEdition)
@@ -188,7 +198,7 @@ object ReadingScreen : Screen {
             ) {
                 SoftcoverButton(
                     label = "Cancel",
-                    onClick = { onEvent(ReadingScreenUiEvent.DismissEditionSheet) },
+                    onClick = { runAction(DismissEditionSheetAction) },
                     style = ButtonStyle.TEXT
                 )
 
@@ -202,7 +212,7 @@ object ReadingScreen : Screen {
                     label = "Confirm",
                     enabled = selectedEdition != book.currentEdition,
                     onClick = {
-                        onEvent(ReadingScreenUiEvent.OnNewEditionSaveClick(edition = selectedEdition))
+                        runAction(OnNewEditionSaveClickAction(edition = selectedEdition))
                     },
                     style = ButtonStyle.TEXT
                 )
@@ -325,7 +335,7 @@ object ReadingScreen : Screen {
     fun ProgressBottomSheetContent(
         progressSheetTab: ProgressSheetTab,
         bookWithProgress: BookWithProgress,
-        onEvent: (ReadingScreenUiEvent) -> Unit,
+        runAction: (ReadingAction) -> Unit,
     ) {
         Column(
             modifier = Modifier
@@ -376,7 +386,7 @@ object ReadingScreen : Screen {
                         modifier = Modifier
                             .weight(1f)
                             .clickable {
-                                onEvent(ReadingScreenUiEvent.OnProgressTabClick(newProgressSheetTab = tab))
+                                runAction(OnProgressTabClickAction(newTab = tab))
                             }
                             .conditional(
                                 condition = isSelected,
@@ -409,14 +419,14 @@ object ReadingScreen : Screen {
                 ProgressSheetTab.PAGE -> {
                     ProgressBottomSheetPageContent(
                         bookWithProgress = bookWithProgress,
-                        onEvent = onEvent,
+                        runAction = runAction,
                     )
                 }
 
                 ProgressSheetTab.PERCENTAGE -> {
                     ProgressBottomSheetPercentageContent(
                         bookWithProgress = bookWithProgress,
-                        onEvent = onEvent,
+                        runAction = runAction,
                     )
                 }
             }
@@ -426,7 +436,7 @@ object ReadingScreen : Screen {
     @Composable
     fun ColumnScope.ProgressBottomSheetPageContent(
         bookWithProgress: BookWithProgress,
-        onEvent: (ReadingScreenUiEvent) -> Unit,
+        runAction: (ReadingAction) -> Unit,
     ) {
         var number by remember {
             val currentPageString = bookWithProgress.currentPage.toString()
@@ -518,7 +528,9 @@ object ReadingScreen : Screen {
 
         SoftcoverButton(
             label = "Update Progress",
-            onClick = { onEvent(ReadingScreenUiEvent.OnUpdatePageProgressClick(newPage = number.text)) },
+            onClick = {
+                runAction(OnUpdatePageProgressClickAction(newPage = number.text))
+            },
             modifier = Modifier.fillMaxWidth(),
             style = ButtonStyle.FILLED,
             size = ButtonSize.M,
@@ -530,7 +542,7 @@ object ReadingScreen : Screen {
     @Composable
     fun ColumnScope.ProgressBottomSheetPercentageContent(
         bookWithProgress: BookWithProgress,
-        onEvent: (ReadingScreenUiEvent) -> Unit,
+        runAction: (ReadingAction) -> Unit,
     ) {
         var number by remember {
             val currentPageString = bookWithProgress.progress.roundToInt()
@@ -626,7 +638,7 @@ object ReadingScreen : Screen {
             style = ButtonStyle.FILLED,
             size = ButtonSize.M,
             onClick = {
-                onEvent(ReadingScreenUiEvent.OnUpdatePercentageProgressClick(newProgress = number.text))
+                runAction(OnUpdatePercentageProgressClickAction(newPercentage = number.text))
             }
         )
 
@@ -636,7 +648,7 @@ object ReadingScreen : Screen {
     @Composable
     private fun BooksDisplay(
         books: List<BookWithProgress>,
-        onEvent: (ReadingScreenUiEvent) -> Unit,
+        runAction: (ReadingAction) -> Unit,
     ) {
         LazyColumn(
             modifier = Modifier
@@ -647,7 +659,7 @@ object ReadingScreen : Screen {
             items(books) {
                 BookEntry(
                     bookWithProgress = it,
-                    onEvent = onEvent
+                    runAction = runAction
                 )
             }
         }
@@ -703,7 +715,7 @@ object ReadingScreen : Screen {
     @Composable
     private fun BookEntry(
         bookWithProgress: BookWithProgress,
-        onEvent: (ReadingScreenUiEvent) -> Unit,
+        runAction: (ReadingAction) -> Unit,
     ) {
         var updateProgressSplitButtonActive by remember { mutableStateOf(false) }
 
@@ -778,7 +790,7 @@ object ReadingScreen : Screen {
                                     onClick = {
                                         updateProgressSplitButtonActive = false
 
-                                        onEvent(ReadingScreenUiEvent.OnMarkBookAsReadClick(book = bookWithProgress))
+                                        runAction(OnMarkBookAsReadClickAction(book = bookWithProgress))
                                     },
                                     icon = SoftcoverIconResource.Vector(
                                         vector = Icons.Default.CheckCircle,
@@ -790,7 +802,7 @@ object ReadingScreen : Screen {
                                     onClick = {
                                         updateProgressSplitButtonActive = false
 
-                                        onEvent(ReadingScreenUiEvent.OnShowEditionSheetClick(book = bookWithProgress))
+                                        runAction(OnShowEditionSheetClickAction(book = bookWithProgress))
                                     },
                                     icon = SoftcoverIconResource.Vector(
                                         vector = Icons.AutoMirrored.Default.LibraryBooks,
@@ -807,7 +819,7 @@ object ReadingScreen : Screen {
                                 updateProgressSplitButtonActive = false
                             },
                             onLeadingButtonClick = {
-                                onEvent(ReadingScreenUiEvent.OnShowProgressSheetClick(book = bookWithProgress))
+                                runAction(OnShowProgressSheetClickAction(book = bookWithProgress))
                             },
                             onTrailingButtonClick = {
                                 updateProgressSplitButtonActive = it
@@ -850,7 +862,7 @@ private fun ReadingScreenEmptyPreview() {
     SoftcoverTheme {
         ReadingScreen.Screen(
             state = ReadingScreenUiState(isLoading = false),
-            onEvent = {},
+            runAction = {},
         )
     }
 }
@@ -996,7 +1008,7 @@ private fun ReadingScreenPreview() {
     SoftcoverTheme {
         ReadingScreen.Screen(
             state = ReadingScreenUiState(books = books),
-            onEvent = {},
+            runAction = {},
         )
     }
 }
@@ -1006,7 +1018,7 @@ private fun ReadingScreenPreview() {
 private fun ProgressSheetContentPagePreview() {
     SoftcoverTheme {
         ReadingScreen.ProgressBottomSheetContent(
-            onEvent = {},
+            runAction = {},
             progressSheetTab = ProgressSheetTab.PAGE,
             bookWithProgress = BookWithProgress(
                 book = Book(
@@ -1055,7 +1067,7 @@ private fun EditionBottomSheetContentPreview() {
 
     SoftcoverTheme {
         ReadingScreen.EditionBottomSheetContent(
-            onEvent = {},
+            runAction = {},
             book = BookWithProgress(
                 book = Book(
                     id = 1,
@@ -1098,7 +1110,7 @@ private fun EditionBottomSheetContentPreview() {
 private fun ProgressSheetContentPercentagePreview() {
     SoftcoverTheme {
         ReadingScreen.ProgressBottomSheetContent(
-            onEvent = {},
+            runAction = {},
             progressSheetTab = ProgressSheetTab.PERCENTAGE,
             bookWithProgress = BookWithProgress(
                 book = Book(

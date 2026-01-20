@@ -1,14 +1,14 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsEvent
+import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
-import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsDependencies
+import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsScreenDependencies
 
 data class ApiKeyValueChangeAction(val newValue: String) : SettingsAction {
     override suspend fun execute(
-        dependencies: SettingsDependencies,
-        scope: ActionScope<SettingsScreenUiState, SettingsEvent>,
+        dependencies: SettingsScreenDependencies,
+        scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent>,
     ) {
         scope.setState { copy(apiKey = newValue) }
     }
