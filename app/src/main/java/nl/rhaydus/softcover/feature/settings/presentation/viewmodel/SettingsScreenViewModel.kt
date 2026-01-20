@@ -1,27 +1,19 @@
 package nl.rhaydus.softcover.feature.settings.presentation.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUSeCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
-import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenUiEvent
+import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
+import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
+import javax.inject.Named
 
 @HiltViewModel
 class SettingsScreenViewModel @Inject constructor(
@@ -29,52 +21,27 @@ class SettingsScreenViewModel @Inject constructor(
     private val getApiKeyUseCase: GetApiKeyUseCase,
     private val initializeUserIdUseCase: InitializeUserIdUseCase,
     private val resetUserDataUseCase: ResetUserDataUSeCase,
-) : ViewModel() {
-    private val _apiKeyFlow = MutableStateFlow("")
+    @param:Named("mainDispatcher") private val mainDispatcher: CoroutineDispatcher,
+) : ToadViewModel<SettingsScreenUiState, SettingsEvent>(
+    initialState = SettingsScreenUiState()
+) {
+    // TODO: Ideally I'd want to be able to remove/add these observers in the same way actions are added...
+    init {
+        viewModelScope.launch(mainDispatcher) {
+            val apiKey = getApiKeyUseCase().getOrDefault(defaultValue = "")
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<SettingsScreenUiState> = _apiKeyFlow.mapLatest { key: String ->
-        SettingsScreenUiState(apiKey = key)
-    }.onStart {
-        val apiKey = getApiKeyUseCase().getOrDefault(defaultValue = "")
+            scope.setState { copy(apiKey = apiKey) }
+        }
+    }
 
-        setApiKeyValue(newValue = apiKey)
-    }.stateIn(
-        scope = viewModelScope,
-        initialValue = SettingsScreenUiState(),
-        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+    override val dependencies = SettingsDependencies(
+        coroutineScope = viewModelScope,
+        mainDispatcher = mainDispatcher,
+        updateApiKeyUseCase = updateApiKeyUseCase,
+        getApiKeyUseCase = getApiKeyUseCase,
+        initializeUserIdUseCase = initializeUserIdUseCase,
+        resetUserDataUseCase = resetUserDataUseCase,
     )
 
-    fun onEvent(event: SettingsScreenUiEvent) {
-        when (event) {
-            SettingsScreenUiEvent.OnSaveApiKeyClick -> handleOnSaveApiKeyClick()
-            is SettingsScreenUiEvent.OnApiKeyValueChanged -> handleOnApiKeyValueChanged(newValue = event.newValue)
-        }
-    }
-
-    private fun handleOnApiKeyValueChanged(newValue: String) = setApiKeyValue(newValue = newValue)
-
-    private fun handleOnSaveApiKeyClick() {
-        val updatedKey = uiState.value.apiKey
-            .removePrefix("Bearer")
-            .trim()
-
-        viewModelScope.launch {
-            resetUserDataUseCase()
-
-            updateApiKeyUseCase(key = updatedKey).onSuccess {
-                attemptToInitializeUserId()
-            }
-        }
-    }
-
-    private suspend fun attemptToInitializeUserId() {
-        initializeUserIdUseCase().onFailure {
-            SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
-        }
-    }
-
-    private fun setApiKeyValue(newValue: String) {
-        _apiKeyFlow.update { newValue }
-    }
+    fun runAction(action: SettingsAction) = dispatch(action)
 }

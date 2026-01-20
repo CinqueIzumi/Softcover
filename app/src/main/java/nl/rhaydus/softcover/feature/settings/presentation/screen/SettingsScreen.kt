@@ -46,7 +46,9 @@ import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenUiEvent
+import nl.rhaydus.softcover.feature.settings.presentation.action.ApiKeyValueChangeAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.SaveApiKeyClickAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsScreenViewModel
 
@@ -55,7 +57,7 @@ object SettingsScreen : Screen {
     override fun Content() {
         val viewModel = getViewModel<SettingsScreenViewModel>()
 
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
+        val state by viewModel.state.collectAsStateWithLifecycle()
 
         val uriHandler = LocalUriHandler.current
 
@@ -63,7 +65,7 @@ object SettingsScreen : Screen {
 
         Screen(
             state = state,
-            onEvent = viewModel::onEvent,
+            runAction = viewModel::runAction,
             openUrl = uriHandler::openUri,
             getCopiedText = {
                 val text: String = try {
@@ -85,7 +87,7 @@ object SettingsScreen : Screen {
     @Composable
     fun Screen(
         state: SettingsScreenUiState,
-        onEvent: (SettingsScreenUiEvent) -> Unit,
+        runAction: (SettingsAction) -> Unit,
         openUrl: (String) -> Unit,
         getCopiedText: () -> String,
     ) {
@@ -140,7 +142,9 @@ object SettingsScreen : Screen {
                             OutlinedTextField(
                                 value = state.apiKey,
                                 onValueChange = {
-                                    onEvent(SettingsScreenUiEvent.OnApiKeyValueChanged(it))
+                                    val action = ApiKeyValueChangeAction(newValue = it)
+
+                                    runAction(action)
                                 },
                                 shape = RoundedCornerShape(8.dp),
                                 placeholder = { Text(text = "Enter your key") },
@@ -189,9 +193,10 @@ object SettingsScreen : Screen {
                                 .clickable {
                                     val newValue = getCopiedText()
 
-                                    onEvent(SettingsScreenUiEvent.OnApiKeyValueChanged(newValue = newValue))
+                                    runAction(ApiKeyValueChangeAction(newValue = newValue))
 
-                                    onEvent(SettingsScreenUiEvent.OnSaveApiKeyClick)
+                                    runAction(SaveApiKeyClickAction)
+
                                 }
                                 .padding(all = 16.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -218,9 +223,9 @@ object SettingsScreen : Screen {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    onEvent(SettingsScreenUiEvent.OnApiKeyValueChanged(newValue = ""))
+                                    runAction(ApiKeyValueChangeAction(newValue = ""))
 
-                                    onEvent(SettingsScreenUiEvent.OnSaveApiKeyClick)
+                                    runAction(SaveApiKeyClickAction)
                                 }
                                 .padding(all = 16.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -261,7 +266,7 @@ object SettingsScreen : Screen {
 private fun SettingsScreenPreview() {
     SoftcoverTheme {
         SettingsScreen.Screen(
-            onEvent = {},
+            runAction = {},
             getCopiedText = { "" },
             openUrl = {},
             state = SettingsScreenUiState()
