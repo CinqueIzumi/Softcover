@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenDependencies
@@ -11,15 +11,27 @@ data class OnUpdatePageProgressClickAction(val newPage: String) : ReadingAction 
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent>,
     ) {
-        val bookToUpdate: BookWithProgress = scope.currentState.bookToUpdate ?: return
+        val bookToUpdate: Book = scope.currentState.bookToUpdate ?: return
 
         val newPageValue = newPage.toIntOrNull() ?: 0
 
-        dependencies.updateBookProgressUtil(
-            book = bookToUpdate,
-            newPage = newPageValue,
-            scope = scope,
-            dependencies = dependencies
-        )
+        dependencies.launch {
+            dependencies.updateBookProgress(
+                book = bookToUpdate,
+                newPage = newPageValue,
+                setLoading = { newValue ->
+                    scope.setState {
+                        copy(isLoading = newValue)
+                    }
+                }
+            )
+        }
+
+        scope.setState {
+            copy(
+                showProgressSheet = false,
+                bookToUpdate = null,
+            )
+        }
     }
 }

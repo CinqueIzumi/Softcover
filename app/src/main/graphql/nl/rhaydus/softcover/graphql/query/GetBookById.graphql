@@ -1,0 +1,28 @@
+query GetBookById(
+    $id: Int!,
+    $userId: Int!
+) {
+    books(
+        where: {
+            id: {
+                _eq: $id
+            }
+        }
+    ) {
+        ...BookFragment
+
+        user_books(
+            where: {
+                user_id: {_eq: $userId}
+            },
+            distinct_on: book_id
+        ) {
+            user_book_reads(
+                limit: 1,
+                order_by: {started_at: desc},
+            ) {
+                ...UserBookReadFragment
+            }
+        }
+    }
+}

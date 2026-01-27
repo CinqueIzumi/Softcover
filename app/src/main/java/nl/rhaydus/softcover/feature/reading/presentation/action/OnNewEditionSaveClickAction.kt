@@ -12,13 +12,13 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : ReadingAction
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent>,
     ) {
-        val bookToUpdate = scope.currentState.bookToUpdate ?: return
+        val userBookId = scope.currentState.bookToUpdate?.userBookId ?: return
 
         dependencies.launch {
             scope.setState { copy(isLoading = true) }
 
             dependencies.updateBookEditionUseCase(
-                userBookId = bookToUpdate.userBookId,
+                userBookId = userBookId,
                 newEditionId = edition.id
             ).onFailure {
                 Timber.e("-=- Something went wrong updating book edition! $it")

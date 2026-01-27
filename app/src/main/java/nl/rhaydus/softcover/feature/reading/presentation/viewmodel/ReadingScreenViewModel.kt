@@ -4,8 +4,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
-import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
 import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBooksUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.RefreshCurrentlyReadingBooksUseCase
@@ -14,7 +14,8 @@ import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUse
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgressUtil
+import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -25,7 +26,7 @@ class ReadingScreenViewModel @Inject constructor(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val refreshCurrentlyReadingBooksUseCase: RefreshCurrentlyReadingBooksUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
-    private val updateBookProgressUtil: UpdateBookProgressUtil,
+    private val updateBookProgress: UpdateBookProgress,
     @param:Named("mainDispatcher") private val mainDispatcher: CoroutineDispatcher,
 ) : ToadViewModel<ReadingScreenUiState, ReadingScreenEvent>(
     initialState = ReadingScreenUiState()
@@ -38,7 +39,7 @@ class ReadingScreenViewModel @Inject constructor(
         markBookAsReadUseCase = markBookAsReadUseCase,
         refreshCurrentlyReadingBooksUseCase = refreshCurrentlyReadingBooksUseCase,
         updateBookEditionUseCase = updateBookEditionUseCase,
-        updateBookProgressUtil = updateBookProgressUtil,
+        updateBookProgress = updateBookProgress,
     )
 
     // TODO: Ideally I'd want to have this in the same manner as the actions, to prevent modifying
@@ -49,7 +50,8 @@ class ReadingScreenViewModel @Inject constructor(
         dependencies.launch {
             dependencies
                 .getCurrentlyReadingBooksUseCase()
-                .collectLatest { books: List<BookWithProgress> ->
+                .collectLatest { books: List<Book> ->
+                    Timber.d("-=- collected new book editions: ${books.map { it.editionId }}")
                     scope.setState {
                         copy(
                             books = books,
@@ -59,7 +61,6 @@ class ReadingScreenViewModel @Inject constructor(
                 }
         }
     }
-
 
     fun runAction(action: ReadingAction) = dispatch(action)
 }

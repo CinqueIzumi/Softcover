@@ -106,5 +106,6 @@ apollo {
         mapScalar("numeric", "kotlin.Double")
         mapScalar("float8", "kotlin.Double")
         mapScalar("date", "kotlin.String")
+        mapScalar("smallint", "kotlin.Int")
     }
 }

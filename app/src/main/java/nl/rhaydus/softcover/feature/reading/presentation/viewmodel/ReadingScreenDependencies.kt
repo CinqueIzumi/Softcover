@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.RefreshCurrentlyReadingBooksUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
-import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgressUtil
+import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
 
 data class ReadingScreenDependencies(
     val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingBooksUseCase,
@@ -16,7 +16,7 @@ data class ReadingScreenDependencies(
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val refreshCurrentlyReadingBooksUseCase: RefreshCurrentlyReadingBooksUseCase,
     val updateBookEditionUseCase: UpdateBookEditionUseCase,
-    val updateBookProgressUtil: UpdateBookProgressUtil,
+    val updateBookProgress: UpdateBookProgress,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

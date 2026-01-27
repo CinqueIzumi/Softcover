@@ -12,9 +12,9 @@ import nl.rhaydus.softcover.GetCurrentlyReadingBooksQuery
 import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.feature.reading.data.mapper.toBookWithProgress
-import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
+import nl.rhaydus.softcover.feature.reading.data.mapper.toBook
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
@@ -25,7 +25,7 @@ import javax.inject.Inject
 class BookRemoteDataSourceImpl @Inject constructor(
     private val apolloClient: ApolloClient,
 ) : BookRemoteDataSource {
-    override fun getCurrentlyReadingBooks(userId: Int): Flow<List<BookWithProgress>> {
+    override fun getCurrentlyReadingBooks(userId: Int): Flow<List<Book>> {
         return apolloClient
             .query(query = GetCurrentlyReadingBooksQuery(userId = userId))
             .fetchPolicy(FetchPolicy.CacheAndNetwork)
@@ -47,7 +47,7 @@ class BookRemoteDataSourceImpl @Inject constructor(
                     val userBookRead =
                         userBook.user_book_reads.firstOrNull() ?: return@mapNotNull null
 
-                    userBookRead.userBookReadFragment.toBookWithProgress()
+                    userBookRead.userBookReadFragment.toBook()
                 }
             }
     }
@@ -61,9 +61,12 @@ class BookRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun updateBookProgress(
-        book: BookWithProgress,
+        book: Book,
         newPage: Int,
     ) {
+        val userBookReadId = book.userBookReadId
+            ?: throw Exception("Book did not have a user book read id")
+
         val dataObject = DatesReadInput(
             progress_pages = Optional.present(newPage),
             started_at = Optional.present(book.startedAt),
@@ -72,7 +75,7 @@ class BookRemoteDataSourceImpl @Inject constructor(
         )
 
         val mutation = UpdateReadingProgressMutation(
-            id = book.userBookReadId,
+            id = userBookReadId,
             datesReadInput = dataObject
         )
 
@@ -82,11 +85,11 @@ class BookRemoteDataSourceImpl @Inject constructor(
             .dataOrThrow()
     }
 
-    override suspend fun markBookAsRead(book: BookWithProgress) {
+    override suspend fun markBookAsRead(book: Book) {
         val currentDate = LocalDate.now().toString()
 
         val dataObject = UserBookCreateInput(
-            book_id = book.book.id,
+            book_id = book.id,
             status_id = Optional.present(UserBookStatus.READ.code),
             user_date = Optional.present(currentDate)
         )
@@ -111,9 +114,13 @@ class BookRemoteDataSourceImpl @Inject constructor(
             )
         )
 
-        apolloClient
+        val result = apolloClient
             .mutation(mutation = mutation)
             .execute()
             .dataOrThrow()
+
+        val book =
+            result.update_user_book?.user_book?.user_book_reads?.firstOrNull()?.userBookReadFragment?.toBook()
+        Timber.d("-=- found book = ${book?.editionId}")
     }
 }

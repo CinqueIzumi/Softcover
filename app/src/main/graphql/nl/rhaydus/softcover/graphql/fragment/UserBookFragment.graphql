@@ -1,15 +1,8 @@
 fragment UserBookFragment on user_books {
     id
+    status_id
 
     book {
-        id
-        title
-        editions(
-            order_by: {
-                users_count: desc
-            }
-        ) {
-            ...EditionFragment
-        }
+        ...BookFragment
     }
 }

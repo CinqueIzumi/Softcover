@@ -1,19 +1,19 @@
 package nl.rhaydus.softcover.feature.reading.data.datasource
 
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.feature.reading.domain.model.BookWithProgress
+import nl.rhaydus.softcover.core.domain.model.Book
 
 interface BookRemoteDataSource {
-    fun getCurrentlyReadingBooks(userId: Int): Flow<List<BookWithProgress>>
+    fun getCurrentlyReadingBooks(userId: Int): Flow<List<Book>>
 
     suspend fun refreshCurrentlyReadingBooks(userId: Int)
 
     suspend fun updateBookProgress(
-        book: BookWithProgress,
+        book: Book,
         newPage: Int,
     )
 
-    suspend fun markBookAsRead(book: BookWithProgress)
+    suspend fun markBookAsRead(book: Book)
 
     suspend fun updateBookEdition(
         userBookId: Int,

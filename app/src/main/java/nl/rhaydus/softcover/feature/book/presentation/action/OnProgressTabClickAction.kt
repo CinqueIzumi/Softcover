@@ -1,0 +1,21 @@
+package nl.rhaydus.softcover.feature.book.presentation.action
+
+import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.feature.book.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailDependencies
+import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
+import javax.inject.Inject
+
+class OnProgressTabClickAction @Inject constructor(
+    private val tab: ProgressSheetTab,
+) : BookDetailAction {
+    override suspend fun execute(
+        dependencies: BookDetailDependencies,
+        scope: ActionScope<BookDetailUiState, BookDetailEvent>,
+    ) {
+        scope.setState {
+            copy(selectedProgressSheetTab = tab)
+        }
+    }
+}

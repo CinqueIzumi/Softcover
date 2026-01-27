@@ -1,22 +1,23 @@
 package nl.rhaydus.softcover.core.presentation.modifier
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
 
 @Composable
 fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier {
@@ -27,36 +28,50 @@ fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier {
     )
 }
 
-fun Modifier.shimmer(
-    shimmerColor: Color = Color.LightGray.copy(alpha = 0.6f),
-    durationMillis: Int = 1000,
-): Modifier = composed {
-    val transition = rememberInfiniteTransition(label = "shimmer")
+@Composable
+fun Modifier.shimmer(shape: Shape = RectangleShape, isLoading: Boolean): Modifier {
+    return if (isLoading) this.shimmer(shape = shape) else this
+}
 
-    val translateAnimation by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
+@Composable
+fun Modifier.shimmer(shape: Shape = RectangleShape): Modifier {
+    val shimmerColors = listOf(
+        Color.LightGray.copy(alpha = 0.3f),
+        Color.White.copy(alpha = 0.6f),
+        Color.LightGray.copy(alpha = 0.3f)
+    )
+
+    val transition = rememberInfiniteTransition(label = "Shimmer")
+    val translateAnim by transition.animateFloat(
+        initialValue = -400f,
+        targetValue = 1200f,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = durationMillis,
-                easing = LinearEasing
-            ),
-            repeatMode = RepeatMode.Restart
+                durationMillis = 1600,
+                easing = FastOutSlowInEasing,
+            )
         ),
-        label = "shimmerOffset"
+        label = "Translate"
     )
 
-    val brush = Brush.linearGradient(
-        colors = listOf(
-            shimmerColor.copy(alpha = 0.6f),
-            shimmerColor.copy(alpha = 0.2f),
-            shimmerColor.copy(alpha = 0.6f),
-        ),
-        start = Offset.Zero,
-        end = Offset(x = translateAnimation, y = translateAnimation)
-    )
+    return this.drawWithCache {
+        val brush = Brush.linearGradient(
+            colors = shimmerColors,
+            start = Offset(translateAnim, 0f),
+            // wider gradient
+            end = Offset(translateAnim + size.width / 1.5f, size.height)
+        )
 
-    this.background(brush)
+        val outline = shape.createOutline(
+            size = size,
+            layoutDirection = layoutDirection,
+            density = this
+        )
+
+        onDrawWithContent {
+            drawOutline(outline, brush = brush)
+        }
+    }
 }
 
 @Composable

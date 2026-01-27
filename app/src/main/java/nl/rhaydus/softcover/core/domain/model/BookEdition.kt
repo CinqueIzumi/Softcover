@@ -8,4 +8,5 @@ data class BookEdition(
     val isbn10: String?,
     val pages: Int?,
     val authors: List<Author>,
+    val releaseYear: Int,
 )

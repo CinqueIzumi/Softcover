@@ -4,6 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import nl.rhaydus.softcover.feature.book.data.datasource.BookDetailRemoteDataSource
+import nl.rhaydus.softcover.feature.book.data.datasource.BookDetailRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.reading.data.datasource.BookRemoteDataSource
 import nl.rhaydus.softcover.feature.reading.data.datasource.BookRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
@@ -28,4 +30,9 @@ abstract class DataSourceModule {
     abstract fun bindBookRemoteDataSource(
         bookRemoteDataSourceImpl: BookRemoteDataSourceImpl,
     ): BookRemoteDataSource
+
+    @Binds
+    abstract fun bindBookDetailRemoteDataSource(
+        bookDetailRemoteDataSourceImpl: BookDetailRemoteDataSourceImpl,
+    ): BookDetailRemoteDataSource
 }

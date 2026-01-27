@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +42,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
 import nl.rhaydus.softcover.core.presentation.component.ClickableText
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -91,171 +91,164 @@ object SettingsScreen : Screen {
         openUrl: (String) -> Unit,
         getCopiedText: () -> String,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.surface)
-                .verticalScroll(rememberScrollState())
-                .imePadding()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(all = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = "Settings",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+        Scaffold(
+            topBar = {
+                SoftcoverTopBar(title = "Settings")
             }
-
+        ) {
             Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .imePadding()
             ) {
-                Text(
-                    text = "API CONFIGURATION",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainer,
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp),
                 ) {
-                    Column {
-                        Column(
-                            modifier = Modifier.padding(all = 16.dp),
-                        ) {
-                            Text(
-                                text = "API Key",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
+                    Text(
+                        text = "API CONFIGURATION",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                            OutlinedTextField(
-                                value = state.apiKey,
-                                onValueChange = {
-                                    val action = ApiKeyValueChangeAction(newValue = it)
-
-                                    runAction(action)
-                                },
-                                shape = RoundedCornerShape(8.dp),
-                                placeholder = { Text(text = "Enter your key") },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors().copy(
-                                    focusedContainerColor = Color.Black,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                                ),
-                                singleLine = true,
-                            )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            val annotatedString = buildAnnotatedString {
-                                append("For syncing your reading progress. This key can be found ")
-
-                                pushStringAnnotation(
-                                    tag = "url",
-                                    annotation = "https://hardcover.app/account/api"
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                    ) {
+                        Column {
+                            Column(
+                                modifier = Modifier.padding(all = 16.dp),
+                            ) {
+                                Text(
+                                    text = "API Key",
+                                    style = MaterialTheme.typography.titleMedium,
                                 )
 
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        textDecoration = TextDecoration.Underline
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                OutlinedTextField(
+                                    value = state.apiKey,
+                                    onValueChange = {
+                                        val action = ApiKeyValueChangeAction(newValue = it)
+
+                                        runAction(action)
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    placeholder = { Text(text = "Enter your key") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = OutlinedTextFieldDefaults.colors().copy(
+                                        focusedContainerColor = Color.Black,
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                    ),
+                                    singleLine = true,
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                val annotatedString = buildAnnotatedString {
+                                    append("For syncing your reading progress. This key can be found ")
+
+                                    pushStringAnnotation(
+                                        tag = "url",
+                                        annotation = "https://hardcover.app/account/api"
                                     )
-                                ) {
-                                    append("here")
+
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = MaterialTheme.colorScheme.primary,
+                                            textDecoration = TextDecoration.Underline
+                                        )
+                                    ) {
+                                        append("here")
+                                    }
+
+                                    pop()
                                 }
 
-                                pop()
+                                ClickableText(
+                                    annotatedText = annotatedString,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    handleUrlClick = openUrl,
+                                )
                             }
 
-                            ClickableText(
-                                annotatedText = annotatedString,
-                                style = MaterialTheme.typography.labelSmall,
-                                handleUrlClick = openUrl,
-                            )
-                        }
+                            HorizontalDivider()
 
-                        HorizontalDivider()
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        val newValue = getCopiedText()
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    val newValue = getCopiedText()
+                                        runAction(ApiKeyValueChangeAction(newValue = newValue))
 
-                                    runAction(ApiKeyValueChangeAction(newValue = newValue))
+                                        runAction(SaveApiKeyClickAction)
 
-                                    runAction(SaveApiKeyClickAction)
+                                    }
+                                    .padding(all = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ContentPaste,
+                                    contentDescription = "Paste icon",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                )
 
-                                }
-                                .padding(all = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ContentPaste,
-                                contentDescription = "Paste icon",
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
+                                Spacer(modifier = Modifier.width(8.dp))
 
-                            Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Paste from clipboard",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                )
+                            }
 
-                            Text(
-                                text = "Paste from clipboard",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
-                        }
+                            HorizontalDivider()
 
-                        HorizontalDivider()
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        runAction(ApiKeyValueChangeAction(newValue = ""))
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    runAction(ApiKeyValueChangeAction(newValue = ""))
+                                        runAction(SaveApiKeyClickAction)
+                                    }
+                                    .padding(all = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete icon",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                )
 
-                                    runAction(SaveApiKeyClickAction)
-                                }
-                                .padding(all = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete icon",
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
+                                Spacer(modifier = Modifier.width(8.dp))
 
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            Text(
-                                text = "Clear API key",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
+                                Text(
+                                    text = "Clear API key",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                )
+                            }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    SoftcoverButton(
+                        label = "Save API key",
+                        onClick = {},
+                        modifier = Modifier.fillMaxWidth(),
+                        style = ButtonStyle.FILLED,
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                SoftcoverButton(
-                    label = "Save API key",
-                    onClick = {},
-                    modifier = Modifier.fillMaxWidth(),
-                    style = ButtonStyle.FILLED,
-                )
             }
         }
     }

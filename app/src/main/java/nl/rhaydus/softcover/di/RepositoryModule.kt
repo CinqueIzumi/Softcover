@@ -4,6 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import nl.rhaydus.softcover.feature.book.data.repository.BookDetailRepositoryImpl
+import nl.rhaydus.softcover.feature.book.domain.repository.BookDetailRepository
 import nl.rhaydus.softcover.feature.reading.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.feature.reading.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.settings.data.repository.SettingsRepositoryImpl
@@ -21,4 +23,9 @@ abstract class RepositoryModule {
     abstract fun bindBooksRepository(
         booksRepositoryImpl: BooksRepositoryImpl,
     ): BooksRepository
+
+    @Binds
+    abstract fun bindBookDetailRepository(
+        bookDetailRepositoryImpl: BookDetailRepositoryImpl,
+    ): BookDetailRepository
 }
