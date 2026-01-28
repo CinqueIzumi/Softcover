@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.apollo)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
 
@@ -50,6 +49,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
 
     // Testing
     testImplementation(libs.junit)
@@ -68,8 +68,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Apollo
+    // Apollo (graph ql communication)
     implementation(libs.apollo)
+    implementation(libs.apollo.cache)
 
     // Datastore
     implementation(libs.dataStore)
@@ -77,19 +78,32 @@ dependencies {
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    implementation(libs.hilt.navigation.compose)
+    // DI
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
 
     // Navigation
+    implementation(libs.voyager.koin)
     implementation(libs.voyager.navigator)
-    implementation(libs.voyager.hilt)
     implementation(libs.voyager.tabNavigator)
+
+    // Image loading
+    implementation(libs.coil)
+
+    // Timber
+    implementation(libs.timber)
 }
 
 apollo {
     service("service") {
         packageName.set("nl.rhaydus.softcover")
+        addTypename.set("always")
+
+        schemaFiles.from("src/main/graphql/schema.graphqls", "src/main/graphql/extra.graphqls")
+
+        mapScalar("numeric", "kotlin.Double")
+        mapScalar("float8", "kotlin.Double")
+        mapScalar("date", "kotlin.String")
+        mapScalar("smallint", "kotlin.Int")
     }
 }

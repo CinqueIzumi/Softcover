@@ -1,0 +1,4 @@
+fragment UserBookFragment on user_books {
+    id
+    status_id
+}

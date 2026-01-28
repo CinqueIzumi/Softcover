@@ -1,0 +1,27 @@
+query GetCurrentlyReadingBooks(
+    $userId: Int!
+) {
+    user_books(
+        limit: 10
+        where: {
+            user_id: {
+                _eq: $userId
+            },
+            status_id: {
+                _eq: 2
+            },
+        }
+        order_by: {updated_at: desc}
+    ) {
+        user_book_reads(
+            limit: 1,
+            order_by: {started_at: desc},
+        ) {
+            user_book {
+                book {
+                    ...BookFragment
+                }
+            }
+        }
+    }
+}

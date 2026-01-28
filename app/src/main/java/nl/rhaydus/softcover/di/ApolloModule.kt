@@ -1,39 +1,29 @@
 package nl.rhaydus.softcover.di
 
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
+import com.apollographql.apollo.cache.normalized.normalizedCache
 import com.apollographql.apollo.network.okHttpClient
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import nl.rhaydus.softcover.core.data.network.interceptor.AuthInterceptor
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import okhttp3.OkHttpClient
-import javax.inject.Singleton
+import org.koin.dsl.module
 
-@Module
-@InstallIn(SingletonComponent::class)
-object ApolloModule {
-    @Singleton
-    @Provides
-    fun getAuthInterceptor(
-        getApiKeyUseCase: GetApiKeyUseCase,
-    ): AuthInterceptor = AuthInterceptor(getApiKeyUseCase = getApiKeyUseCase)
+val apolloModule = module {
+    single {
+        AuthInterceptor()
+    }
 
-    @Singleton
-    @Provides
-    fun getOkHttpClient(
-        authInterceptor: AuthInterceptor,
-    ): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(interceptor = authInterceptor)
-        .build()
+    single {
+        OkHttpClient.Builder()
+            .addInterceptor(get<AuthInterceptor>())
+            .build()
+    }
 
-    @Singleton
-    @Provides
-    fun getApolloClient(
-        client: OkHttpClient
-    ): ApolloClient = ApolloClient.Builder()
-        .serverUrl("https://api.hardcover.app/v1/graphql")
-        .okHttpClient(client)
-        .build()
+    single {
+        ApolloClient.Builder()
+            .serverUrl("https://api.hardcover.app/v1/graphql")
+            .okHttpClient(get())
+            .normalizedCache(MemoryCacheFactory())
+            .build()
+    }
 }

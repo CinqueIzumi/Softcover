@@ -1,0 +1,92 @@
+package nl.rhaydus.softcover.di
+
+import nl.rhaydus.softcover.feature.book.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.feature.book.domain.usecase.UpdateBookStatusUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.GetUserBooksAsFlowUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBooksUseCase
+import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
+import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCaseAsFlow
+import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
+import org.koin.dsl.module
+
+val useCaseModule = module {
+    factory {
+        FetchBookByIdUseCase(
+            bookDetailRepository = get(),
+            getUserIdUseCase = get()
+        )
+    }
+
+    factory {
+        UpdateBookStatusUseCase(
+            bookDetailRepository = get(),
+            getUserIdUseCase = get()
+        )
+    }
+
+    factory {
+        GetCurrentlyReadingBooksUseCase(
+            getUserBooksAsFlowUseCase = get()
+        )
+    }
+
+    factory {
+        MarkBookAsReadUseCase(repository = get())
+    }
+
+    factory {
+        RefreshUserBooksUseCase(
+            libraryRepository = get(),
+            getUserIdUseCase = get(),
+        )
+    }
+
+    factory {
+        UpdateBookEditionUseCase(
+            repository = get(),
+            getUserIdUseCase = get()
+        )
+    }
+
+    factory {
+        UpdateBookProgressUseCase(repository = get())
+    }
+
+    factory {
+        GetApiKeyUseCase(settingsRepository = get())
+    }
+
+    factory {
+        GetUserIdUseCase(getUserIdUseCaseAsFlow = get())
+    }
+
+    factory {
+        GetUserIdUseCaseAsFlow(settingsRepository = get())
+    }
+
+    factory {
+        InitializeUserIdUseCase(settingsRepository = get())
+    }
+
+    factory {
+        ResetUserDataUseCase(settingsRepository = get())
+    }
+
+    factory {
+        UpdateApiKeyUseCase(settingsRepository = get())
+    }
+
+    factory {
+        GetUserBooksAsFlowUseCase(
+            libraryRepository = get(),
+            getUserIdUseCaseAsFlow = get()
+        )
+    }
+}
