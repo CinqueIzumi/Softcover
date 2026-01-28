@@ -5,9 +5,8 @@ import nl.rhaydus.softcover.feature.book.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
-import javax.inject.Inject
 
-class OnProgressTabClickAction @Inject constructor(
+class OnProgressTabClickAction(
     private val tab: ProgressSheetTab,
 ) : BookDetailAction {
     override suspend fun execute(

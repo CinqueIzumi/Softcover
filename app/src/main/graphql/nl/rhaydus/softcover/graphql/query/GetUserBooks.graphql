@@ -1,0 +1,16 @@
+query GetUserBooks(
+    $userId: Int!
+) {
+    user_books(
+        where: {
+            user_id: {
+                _eq: $userId
+            },
+        }
+        order_by: {updated_at: desc}
+    ) {
+        book {
+            ...BookFragment
+        }
+    }
+}

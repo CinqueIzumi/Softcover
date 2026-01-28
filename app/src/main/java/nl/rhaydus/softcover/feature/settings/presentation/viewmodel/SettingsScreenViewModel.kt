@@ -1,33 +1,29 @@
 package nl.rhaydus.softcover.feature.settings.presentation.viewmodel
 
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
+import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUSeCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
-import javax.inject.Inject
-import javax.inject.Named
 
-@HiltViewModel
-class SettingsScreenViewModel @Inject constructor(
+class SettingsScreenViewModel(
     private val updateApiKeyUseCase: UpdateApiKeyUseCase,
     private val getApiKeyUseCase: GetApiKeyUseCase,
     private val initializeUserIdUseCase: InitializeUserIdUseCase,
-    private val resetUserDataUseCase: ResetUserDataUSeCase,
-    @param:Named("mainDispatcher") private val mainDispatcher: CoroutineDispatcher,
+    private val resetUserDataUseCase: ResetUserDataUseCase,
+    private val appDispatchers: AppDispatchers,
 ) : ToadViewModel<SettingsScreenUiState, SettingsScreenEvent>(
     initialState = SettingsScreenUiState()
 ) {
     // TODO: Ideally I'd want to be able to remove/add these observers in the same way actions are added...
     init {
-        viewModelScope.launch(mainDispatcher) {
+        screenModelScope.launch(appDispatchers.main) {
             val apiKey = getApiKeyUseCase().getOrDefault(defaultValue = "")
 
             scope.setState { copy(apiKey = apiKey) }
@@ -35,8 +31,8 @@ class SettingsScreenViewModel @Inject constructor(
     }
 
     override val dependencies = SettingsScreenDependencies(
-        coroutineScope = viewModelScope,
-        mainDispatcher = mainDispatcher,
+        coroutineScope = screenModelScope,
+        mainDispatcher = appDispatchers.main,
         updateApiKeyUseCase = updateApiKeyUseCase,
         getApiKeyUseCase = getApiKeyUseCase,
         initializeUserIdUseCase = initializeUserIdUseCase,

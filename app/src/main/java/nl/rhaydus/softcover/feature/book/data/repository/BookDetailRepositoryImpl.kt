@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.book.data.repository
 
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.feature.book.data.datasource.BookDetailRemoteDataSource
 import nl.rhaydus.softcover.feature.book.domain.repository.BookDetailRepository
-import javax.inject.Inject
 
-class BookDetailRepositoryImpl @Inject constructor(
+class BookDetailRepositoryImpl(
     private val bookDetailRemoteDataSource: BookDetailRemoteDataSource,
 ) : BookDetailRepository {
     override suspend fun fetchBookById(
@@ -14,6 +14,18 @@ class BookDetailRepositoryImpl @Inject constructor(
     ): Book {
         return bookDetailRemoteDataSource.fetchBookById(
             id = id,
+            userId = userId,
+        )
+    }
+
+    override suspend fun updateBookStatus(
+        book: Book,
+        newStatus: BookStatus,
+        userId: Int,
+    ) {
+        bookDetailRemoteDataSource.updateBookStatus(
+            book = book,
+            newStatus = newStatus,
             userId = userId,
         )
     }

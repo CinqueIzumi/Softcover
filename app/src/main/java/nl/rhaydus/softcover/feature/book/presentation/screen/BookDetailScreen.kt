@@ -47,11 +47,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.PreviewData
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
@@ -68,6 +69,7 @@ import nl.rhaydus.softcover.feature.book.presentation.action.InitializeBookWithI
 import nl.rhaydus.softcover.feature.book.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnFabClickAction
+import nl.rhaydus.softcover.feature.book.presentation.action.OnMarkBookAsReadingClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnShowEditEditionSheetClickAction
@@ -75,7 +77,7 @@ import nl.rhaydus.softcover.feature.book.presentation.action.OnShowUpdateProgres
 import nl.rhaydus.softcover.feature.book.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
-import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailViewModel
+import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailScreenViewModel
 import kotlin.math.roundToInt
 
 // TODO: Maybe add some sort of caching? Apollo normalized cache maybe? Initial load is slow...
@@ -86,7 +88,7 @@ class BookDetailScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val viewModel: BookDetailViewModel = getViewModel<BookDetailViewModel>()
+        val viewModel: BookDetailScreenViewModel = koinScreenModel<BookDetailScreenViewModel>()
 
         val state: BookDetailUiState by viewModel.state.collectAsStateWithLifecycle()
 
@@ -239,7 +241,10 @@ class BookDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                BookStatusWidget(state = state)
+                BookStatusWidget(
+                    state = state,
+                    runAction = runAction,
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -320,7 +325,10 @@ class BookDetailScreen(
     }
 
     @Composable
-    fun ColumnScope.BookStatusWidget(state: BookDetailUiState) {
+    fun ColumnScope.BookStatusWidget(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
         if (state.loading) return
 
         val book = state.book ?: return
@@ -328,7 +336,12 @@ class BookDetailScreen(
         when (book.status) {
             BookStatus.Reading -> ReadingContainer(state = state)
             BookStatus.None -> WantToReadButton()
-            else -> Unit
+            else -> MarkAsReadingButton(
+                book = book,
+                markBookAsReading = {
+                    runAction(OnMarkBookAsReadingClickAction(book = book))
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -383,7 +396,8 @@ class BookDetailScreen(
                     gapSize = (-2).dp,
                 )
 
-                val amountOfPagesLeft = state.book.currentEdition.pages?.minus(state.book.currentPage ?: 0)
+                val amountOfPagesLeft =
+                    state.book.currentEdition.pages?.minus(state.book.currentPage ?: 0)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -393,6 +407,26 @@ class BookDetailScreen(
                 )
             }
         }
+    }
+
+    @Composable
+    fun MarkAsReadingButton(
+        book: Book,
+        markBookAsReading: (Book) -> Unit,
+    ) {
+        SoftcoverButton(
+            label = "Start Reading",
+            onClick = {
+                markBookAsReading(book)
+            },
+            style = ButtonStyle.FILLED,
+            modifier = Modifier.fillMaxWidth(),
+            size = ButtonSize.M,
+            icon = SoftcoverIconResource.Vector(
+                vector = Icons.AutoMirrored.Default.MenuBook,
+                contentDescription = "Add to want to read icon"
+            )
+        )
     }
 
     @Composable

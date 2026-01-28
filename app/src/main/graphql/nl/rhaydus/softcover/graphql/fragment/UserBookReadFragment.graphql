@@ -5,10 +5,6 @@ fragment UserBookReadFragment on user_book_reads{
     started_at
     finished_at
 
-    user_book {
-        ...UserBookFragment
-    }
-
     edition {
         ...EditionFragment
     }

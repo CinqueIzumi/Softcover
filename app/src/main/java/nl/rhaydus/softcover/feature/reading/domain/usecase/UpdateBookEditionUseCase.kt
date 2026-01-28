@@ -2,9 +2,8 @@ package nl.rhaydus.softcover.feature.reading.domain.usecase
 
 import nl.rhaydus.softcover.feature.reading.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
-import javax.inject.Inject
 
-class UpdateBookEditionUseCase @Inject constructor(
+class UpdateBookEditionUseCase(
     private val repository: BooksRepository,
     private val getUserIdUseCase: GetUserIdUseCase,
 ) {

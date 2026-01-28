@@ -1,5 +1,6 @@
 mutation UpdateBookEdition(
     $id: Int!,
+    $userId: Int!,
     $object: UserBookUpdateInput!,
 ) {
     update_user_book(
@@ -11,12 +12,8 @@ mutation UpdateBookEdition(
         user_book {
             id
 
-            user_book_reads(
-                limit: 1,
-                order_by: {started_at: desc},
-            ) {
-                id
-                ...UserBookReadFragment
+            book {
+                ...BookFragment
             }
         }
     }

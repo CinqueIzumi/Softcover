@@ -10,7 +10,6 @@ data class Book(
     val rating: Double,
     val description: String,
     val releaseYear: Int,
-    val pages: Int,
     val coverUrl: String,
     val authors: List<Author>,
     val currentPage: Int?,

@@ -5,9 +5,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.feature.settings.data.datastore.AppSettingsDataStore
-import javax.inject.Inject
 
-class SettingsLocalDataSourceImpl @Inject constructor(
+class SettingsLocalDataSourceImpl(
     private val appSettingsDataStore: AppSettingsDataStore,
 ) : SettingsLocalDataSource {
     override suspend fun updateApiKey(key: String) {

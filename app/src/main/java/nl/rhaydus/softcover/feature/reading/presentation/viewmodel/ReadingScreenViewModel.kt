@@ -1,43 +1,38 @@
 package nl.rhaydus.softcover.feature.reading.presentation.viewmodel
 
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
+import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBooksUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
-import nl.rhaydus.softcover.feature.reading.domain.usecase.RefreshCurrentlyReadingBooksUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
-import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Named
 
-@HiltViewModel
-class ReadingScreenViewModel @Inject constructor(
+class ReadingScreenViewModel(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingBooksUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
-    private val refreshCurrentlyReadingBooksUseCase: RefreshCurrentlyReadingBooksUseCase,
+    private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
     private val updateBookProgress: UpdateBookProgress,
-    @param:Named("mainDispatcher") private val mainDispatcher: CoroutineDispatcher,
+    private val appDispatchers: AppDispatchers,
 ) : ToadViewModel<ReadingScreenUiState, ReadingScreenEvent>(
     initialState = ReadingScreenUiState()
 ) {
     override val dependencies = ReadingScreenDependencies(
-        coroutineScope = viewModelScope,
-        mainDispatcher = mainDispatcher,
+        coroutineScope = screenModelScope,
+        mainDispatcher = appDispatchers.main,
         getCurrentlyReadingBooksUseCase = getCurrentlyReadingBooksUseCase,
         updateBookProgressUseCase = updateBookProgressUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
-        refreshCurrentlyReadingBooksUseCase = refreshCurrentlyReadingBooksUseCase,
+        refreshUserBooksUseCase = refreshUserBooksUseCase,
         updateBookEditionUseCase = updateBookEditionUseCase,
         updateBookProgress = updateBookProgress,
     )
@@ -51,7 +46,6 @@ class ReadingScreenViewModel @Inject constructor(
             dependencies
                 .getCurrentlyReadingBooksUseCase()
                 .collectLatest { books: List<Book> ->
-                    Timber.d("-=- collected new book editions: ${books.map { it.editionId }}")
                     scope.setState {
                         copy(
                             books = books,

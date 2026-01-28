@@ -4,12 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
-import javax.inject.Inject
-import javax.inject.Provider
 
-class SettingsRepositoryImpl @Inject constructor(
+class SettingsRepositoryImpl(
     private val settingsLocalDataSource: SettingsLocalDataSource,
-    private val settingsRemoteDataSource: Provider<SettingsRemoteDataSource>,
+    private val settingsRemoteDataSource: SettingsRemoteDataSource,
 ) : SettingsRepository {
     override suspend fun updateApiKey(key: String) {
         settingsLocalDataSource.updateApiKey(key = key)
@@ -28,6 +26,6 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUserIdFromBackend(): Int {
-        return settingsRemoteDataSource.get().getUserId()
+        return settingsRemoteDataSource.getUserId()
     }
 }

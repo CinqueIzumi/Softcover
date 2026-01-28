@@ -20,11 +20,17 @@ sealed class SoftcoverIconResource(
         override val contentDescription: String,
     ) : SoftcoverIconResource(contentDescription = contentDescription)
 
+    data class SoftcoverPainter(
+        val painter: Painter,
+        override val contentDescription: String,
+    ) : SoftcoverIconResource(contentDescription = contentDescription)
+
     @Composable
     fun getIconPainter(): Painter {
         return when (this) {
             is Drawable -> painterResource(id = id)
             is Vector -> rememberVectorPainter(image = vector)
+            is SoftcoverPainter -> painter
         }
     }
 }

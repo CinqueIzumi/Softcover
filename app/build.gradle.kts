@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.apollo)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
 
@@ -79,14 +78,13 @@ dependencies {
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    implementation(libs.hilt.navigation.compose)
+    // DI
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
 
     // Navigation
+    implementation(libs.voyager.koin)
     implementation(libs.voyager.navigator)
-    implementation(libs.voyager.hilt)
     implementation(libs.voyager.tabNavigator)
 
     // Image loading

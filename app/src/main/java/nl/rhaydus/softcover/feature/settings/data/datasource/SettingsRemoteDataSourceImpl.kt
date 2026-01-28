@@ -2,9 +2,8 @@ package nl.rhaydus.softcover.feature.settings.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import nl.rhaydus.softcover.UserIdQuery
-import javax.inject.Inject
 
-class SettingsRemoteDataSourceImpl @Inject constructor(
+class SettingsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : SettingsRemoteDataSource {
     override suspend fun getUserId(): Int {

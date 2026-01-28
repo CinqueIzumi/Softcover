@@ -39,7 +39,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import nl.rhaydus.softcover.core.presentation.component.ClickableText
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
@@ -55,7 +55,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsScre
 object SettingsScreen : Screen {
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<SettingsScreenViewModel>()
+        val viewModel = koinScreenModel<SettingsScreenViewModel>()
 
         val state by viewModel.state.collectAsStateWithLifecycle()
 

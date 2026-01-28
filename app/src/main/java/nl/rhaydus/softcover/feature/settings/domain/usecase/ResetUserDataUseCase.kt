@@ -1,9 +1,8 @@
 package nl.rhaydus.softcover.feature.settings.domain.usecase
 
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
-import javax.inject.Inject
 
-class ResetUserDataUSeCase @Inject constructor(
+class ResetUserDataUseCase(
     private val settingsRepository: SettingsRepository,
 ) {
     suspend operator fun invoke(): Result<Unit> {

@@ -4,10 +4,9 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
 import timber.log.Timber
-import javax.inject.Inject
 
 // TODO: This does not actually seem to automatically update within the details screen
-class UpdateBookProgress @Inject constructor(
+class UpdateBookProgress(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
 ) {

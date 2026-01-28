@@ -11,7 +11,7 @@ import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import kotlin.math.roundToInt
 
 // TODO: Does this not really belong in the book feature, rather than currently reading?
-fun EditionFragment.toBookEdition(): BookEdition {
+private fun EditionFragment.toBookEdition(): BookEdition {
     return BookEdition(
         id = id,
         title = title,
@@ -26,7 +26,39 @@ fun EditionFragment.toBookEdition(): BookEdition {
     )
 }
 
-fun BookFragment.toBook(): Book {
+fun BookFragment.toBookWithOptionals(): Book {
+    val baseBook = this.toBook()
+
+    val userBooks = user_books.firstOrNull() ?: return baseBook
+    val userBooksFragment = userBooks.userBookFragment
+
+    val userBook = userBooksFragment.appendBookWithStatus(book = baseBook)
+
+    val userBookReadFragment =
+        userBooks.user_book_reads.firstOrNull()?.userBookReadFragment ?: return userBook
+
+    return userBookReadFragment.appendBookWithOptionals(book = userBook)
+}
+
+private fun UserBookFragment.appendBookWithStatus(book: Book): Book {
+    return book.copy(
+        status = BookStatus.getFromCode(code = status_id),
+        userBookId = id,
+    )
+}
+
+private fun UserBookReadFragment.appendBookWithOptionals(book: Book): Book {
+    return book.copy(
+        currentPage = progress_pages ?: 0,
+        progress = progress?.toFloat() ?: 0f,
+        editionId = edition?.editionFragment?.id,
+        userBookReadId = id,
+        startedAt = started_at,
+        finishedAt = finished_at,
+    )
+}
+
+private fun BookFragment.toBook(): Book {
     val rating = ((rating ?: 0.0) * 10).roundToInt() / 10.0
 
     return Book(
@@ -38,7 +70,6 @@ fun BookFragment.toBook(): Book {
         description = description ?: "",
         rating = rating,
         releaseYear = release_year ?: -1,
-        pages = pages ?: -1,
         coverUrl = image?.url ?: "",
         status = BookStatus.None,
         authors = contributions.map { contribution ->
@@ -51,30 +82,5 @@ fun BookFragment.toBook(): Book {
         startedAt = null,
         finishedAt = null,
         userBookReadId = null,
-    )
-}
-
-fun UserBookFragment.toBook(): Book {
-    return this.book
-        .bookFragment
-        .toBook()
-        .copy(status = BookStatus.getFromCode(code = this.status_id))
-}
-
-fun UserBookReadFragment.toBook(): Book {
-    val userBookFragment = user_book
-        ?.userBookFragment
-        ?: throw Exception("user book fragment not found")
-
-    val book = userBookFragment.toBook()
-
-    return book.copy(
-        currentPage = progress_pages,
-        progress = progress?.toFloat(),
-        editionId = edition?.editionFragment?.id,
-        userBookId = userBookFragment.id,
-        userBookReadId = id,
-        startedAt = started_at,
-        finishedAt = finished_at,
     )
 }

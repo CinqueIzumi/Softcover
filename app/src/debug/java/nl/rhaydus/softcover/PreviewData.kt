@@ -28,7 +28,6 @@ object PreviewData {
         editions = listOf(
             baseEdition,
         ),
-        pages = 100,
         coverUrl = "",
         status = BookStatus.None,
         authors = listOf(

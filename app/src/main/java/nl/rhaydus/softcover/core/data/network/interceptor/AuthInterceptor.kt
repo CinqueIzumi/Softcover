@@ -4,10 +4,13 @@ import kotlinx.coroutines.runBlocking
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import okhttp3.Interceptor
 import okhttp3.Response
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class AuthInterceptor(
-    private val getApiKeyUseCase: GetApiKeyUseCase,
-) : Interceptor {
+class AuthInterceptor : Interceptor, KoinComponent {
+
+    private val getApiKeyUseCase: GetApiKeyUseCase by inject()
+
     override fun intercept(chain: Interceptor.Chain): Response {
         val token = runBlocking { getApiKeyUseCase() }.getOrNull()
 

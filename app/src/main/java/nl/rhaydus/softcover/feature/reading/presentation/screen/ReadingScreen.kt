@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil.compose.SubcomposeAsyncImage
@@ -82,7 +82,7 @@ import kotlin.math.roundToInt
 object ReadingScreen : Screen {
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<ReadingScreenViewModel>()
+        val viewModel = koinScreenModel<ReadingScreenViewModel>()
 
         val state by viewModel.state.collectAsStateWithLifecycle()
 

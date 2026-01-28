@@ -5,18 +5,18 @@ import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEven
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenDependencies
 import timber.log.Timber
- 
- data object RefreshAction : ReadingAction {
-     override suspend fun execute(
-         dependencies: ReadingScreenDependencies,
-         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent>,
-     ) {
-         scope.setState { copy(isLoading = true) }
 
-         dependencies.refreshCurrentlyReadingBooksUseCase().onFailure {
-             Timber.e("-=- Something went wrong refreshing currently reading books! $it")
-         }
+data object RefreshAction : ReadingAction {
+    override suspend fun execute(
+        dependencies: ReadingScreenDependencies,
+        scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent>,
+    ) {
+        scope.setState { copy(isLoading = true) }
 
-         scope.setState { copy(isLoading = false) }
-     }
- }
+        dependencies.refreshUserBooksUseCase().onFailure {
+            Timber.e("-=- Something went wrong refreshing currently reading books! $it")
+        }
+
+        scope.setState { copy(isLoading = false) }
+    }
+}

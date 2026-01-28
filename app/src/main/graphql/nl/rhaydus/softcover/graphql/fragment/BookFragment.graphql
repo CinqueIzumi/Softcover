@@ -3,7 +3,6 @@ fragment BookFragment on books {
     title
     description
     rating
-    pages
     image {
         url
     }
@@ -19,5 +18,21 @@ fragment BookFragment on books {
         }
     ) {
         ...EditionFragment
+    }
+
+    user_books(
+        where: {
+            user_id: {_eq: $userId}
+        },
+        distinct_on: book_id
+    ) {
+        ...UserBookFragment
+
+        user_book_reads(
+            limit: 1,
+            order_by: {started_at: desc},
+        ) {
+            ...UserBookReadFragment
+        }
     }
 }
