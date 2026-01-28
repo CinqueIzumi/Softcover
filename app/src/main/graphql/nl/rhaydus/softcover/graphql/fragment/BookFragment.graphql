@@ -29,7 +29,6 @@ fragment BookFragment on books {
             user_id: {_eq: $userId}
         },
         distinct_on: book_id
-        order_by: {updated_at: desc}
     ) {
         ...UserBookFragment
 
