@@ -6,7 +6,6 @@ import nl.rhaydus.softcover.feature.book.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailDependencies
 
-// TODO: This has quite a bit of duplicate code...
 data class OnUpdatePageProgressClickAction(
     val newPage: String,
 ) : BookDetailAction {
