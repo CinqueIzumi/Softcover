@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
+import nl.rhaydus.softcover.feature.settings.presentation.SettingsFlowCollector
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -17,11 +18,12 @@ class SettingsScreenViewModel(
     private val getApiKeyUseCase: GetApiKeyUseCase,
     private val initializeUserIdUseCase: InitializeUserIdUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
-    private val appDispatchers: AppDispatchers,
-) : ToadViewModel<SettingsScreenUiState, SettingsScreenEvent>(
-    initialState = SettingsScreenUiState()
+    appDispatchers: AppDispatchers,
+    flows: List<SettingsFlowCollector>,
+) : ToadViewModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsFlowCollector>(
+    initialState = SettingsScreenUiState(),
+    initialFlowCollectors = flows,
 ) {
-    // TODO: Ideally I'd want to be able to remove/add these observers in the same way actions are added...
     init {
         screenModelScope.launch(appDispatchers.main) {
             val apiKey = getApiKeyUseCase().getOrDefault(defaultValue = "")

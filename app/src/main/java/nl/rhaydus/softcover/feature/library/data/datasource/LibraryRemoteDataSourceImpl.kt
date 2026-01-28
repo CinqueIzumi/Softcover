@@ -15,7 +15,6 @@ import timber.log.Timber
 class LibraryRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : LibraryRemoteDataSource {
-    // TODO: Actually implement this here...
     override suspend fun getUserBooks(userId: Int): Flow<List<Book>> {
         return apolloClient
             .query(query = GetUserBooksQuery(userId = userId))

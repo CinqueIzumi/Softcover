@@ -10,10 +10,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-abstract class ToadViewModel<S : UiState, E : UiEvent>(
+abstract class ToadViewModel<S : UiState, E : UiEvent, D : ActionDependencies, F : FlowCollector<S, E, D>>(
     initialState: S,
+    private val initialFlowCollectors: List<F>,
 ) : ScreenModel {
-    protected abstract val dependencies: ActionDependencies
+    protected abstract val dependencies: D
 
     private val _state = MutableStateFlow(initialState)
     val state: StateFlow<S> = _state.asStateFlow()
@@ -27,12 +28,23 @@ abstract class ToadViewModel<S : UiState, E : UiEvent>(
             eventChannel = _events,
         )
 
-    protected fun <D : ActionDependencies> dispatch(action: UiAction<D, S, E>) {
+    protected fun dispatch(action: UiAction<D, S, E>) {
         screenModelScope.launch {
             action.execute(
-                dependencies as D,
+                dependencies,
                 scope = scope
             )
+        }
+    }
+
+    protected fun startFlowCollectors() {
+        initialFlowCollectors.forEach { collector ->
+            dependencies.launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
         }
     }
 }

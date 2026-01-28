@@ -13,7 +13,8 @@ val screenModelModule = module {
             getApiKeyUseCase = get(),
             initializeUserIdUseCase = get(),
             resetUserDataUseCase = get(),
-            appDispatchers = get()
+            appDispatchers = get(),
+            flows = getAll()
         )
     }
 
@@ -21,6 +22,7 @@ val screenModelModule = module {
         LibraryScreenViewModel(
             getUserBooksAsFlowUseCase = get(),
             appDispatchers = get(),
+            flows = getAll(),
         )
     }
 
@@ -31,7 +33,8 @@ val screenModelModule = module {
             updateBookProgress = get(),
             getUserBooksAsFlowUseCase = get(),
             updateBookStatusUseCase = get(),
-            appDispatchers = get()
+            appDispatchers = get(),
+            flows = getAll(),
         )
     }
 
@@ -43,7 +46,8 @@ val screenModelModule = module {
             updateBookEditionUseCase = get(),
             refreshUserBooksUseCase = get(),
             updateBookProgress = get(),
-            appDispatchers = get()
+            appDispatchers = get(),
+            flows = getAll(),
         )
     }
 }

@@ -30,6 +30,13 @@ interface UiAction<D : ActionDependencies, S : UiState, E : UiEvent> {
     )
 }
 
+interface FlowCollector<S : UiState, E : UiEvent, D : ActionDependencies> {
+    suspend fun onLaunch(
+        scope: ActionScope<S, E>,
+        dependencies: D,
+    )
+}
+
 class ActionScope<S : UiState, E : UiEvent>(
     private val stateFlow: MutableStateFlow<S>,
     private val eventChannel: Channel<E>,

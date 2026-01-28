@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.di.apolloModule
 import nl.rhaydus.softcover.di.dataSourceModule
 import nl.rhaydus.softcover.di.dataStoreModule
 import nl.rhaydus.softcover.di.dispatcherModule
+import nl.rhaydus.softcover.di.flowCollectorModule
 import nl.rhaydus.softcover.di.repositoryModule
 import nl.rhaydus.softcover.di.screenModelModule
 import nl.rhaydus.softcover.di.useCaseModule
@@ -33,6 +34,7 @@ class SoftCoverApp : Application() {
                 screenModelModule,
                 useCaseModule,
                 utilModule,
+                flowCollectorModule,
             )
         }
     }

@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
 import timber.log.Timber
 
-// TODO: This does not actually seem to automatically update within the details screen
 class UpdateBookProgress(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
