@@ -40,5 +40,6 @@ object PreviewData {
         userBookReadId = null,
         startedAt = null,
         finishedAt = null,
+        defaultEdition = baseEdition,
     )
 }

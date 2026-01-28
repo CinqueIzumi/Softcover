@@ -7,13 +7,14 @@ data class Book(
     val status: BookStatus,
     val title: String,
     val editions: List<BookEdition>,
+    val defaultEdition: BookEdition?,
     val rating: Double,
     val description: String,
     val releaseYear: Int,
     val coverUrl: String,
     val authors: List<Author>,
     val currentPage: Int?,
-    val progress: Float? ,
+    val progress: Float?,
     val editionId: Int?,
     val userBookId: Int?,
     val userBookReadId: Int?,
@@ -22,6 +23,6 @@ data class Book(
 ) {
     val currentEdition: BookEdition
         get() {
-            return editions.firstOrNull { it.id == editionId } ?: editions.first()
+            return editions.firstOrNull { it.id == editionId } ?: defaultEdition ?: editions.first()
         }
 }

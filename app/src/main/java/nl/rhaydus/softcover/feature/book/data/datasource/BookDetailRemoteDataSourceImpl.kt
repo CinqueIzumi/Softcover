@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.UpdateBookStatusMutation
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
-import nl.rhaydus.softcover.feature.reading.data.mapper.toBookWithOptionals
+import nl.rhaydus.softcover.feature.book.data.mapper.toBookWithOptionals
 import nl.rhaydus.softcover.type.UserBookUpdateInput
 
 class BookDetailRemoteDataSourceImpl(

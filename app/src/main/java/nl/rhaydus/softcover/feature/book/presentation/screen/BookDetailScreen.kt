@@ -120,6 +120,8 @@ class BookDetailScreen(
                 )
             },
             floatingActionButton = {
+                if (state.book?.status != BookStatus.Reading) return@Scaffold
+
                 FloatingActionButtonMenu(
                     expanded = state.fabMenuExpanded,
                     button = {
@@ -204,9 +206,8 @@ class BookDetailScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // TODO: What if multiple authors?
                     Text(
-                        text = state.book?.authors?.firstOrNull()?.name ?: "",
+                        text = state.book?.currentEdition?.authorString ?: "",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier
                             .shimmer(isLoading = state.loading)

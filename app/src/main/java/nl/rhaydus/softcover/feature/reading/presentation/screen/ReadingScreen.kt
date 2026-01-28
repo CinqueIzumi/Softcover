@@ -91,7 +91,6 @@ object ReadingScreen : Screen {
         Screen(
             state = state,
             runAction = viewModel::runAction,
-            // TODO: Ideally I'd want to do this using view model?
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
             }
@@ -287,18 +286,8 @@ object ReadingScreen : Screen {
 
                         Spacer(modifier = Modifier.height(4.dp))
 
-                        var authorString = ""
-
-                        book.currentEdition.authors.forEachIndexed { index, author ->
-                            if (index != 0) {
-                                authorString += ", "
-                            }
-
-                            authorString += author.name
-                        }
-
                         Text(
-                            text = authorString,
+                            text = book.currentEdition.authorString,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

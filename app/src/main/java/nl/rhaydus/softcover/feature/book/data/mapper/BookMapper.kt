@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.reading.data.mapper
+package nl.rhaydus.softcover.feature.book.data.mapper
 
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -10,7 +10,6 @@ import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import kotlin.math.roundToInt
 
-// TODO: Does this not really belong in the book feature, rather than currently reading?
 private fun EditionFragment.toBookEdition(): BookEdition {
     return BookEdition(
         id = id,
@@ -82,5 +81,6 @@ private fun BookFragment.toBook(): Book {
         startedAt = null,
         finishedAt = null,
         userBookReadId = null,
+        defaultEdition = default_physical_edition?.editionFragment?.toBookEdition()
     )
 }

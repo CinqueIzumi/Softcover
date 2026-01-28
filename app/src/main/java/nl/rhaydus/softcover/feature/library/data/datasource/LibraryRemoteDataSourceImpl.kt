@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.reading.data.mapper.toBookWithOptionals
+import nl.rhaydus.softcover.feature.book.data.mapper.toBookWithOptionals
 import timber.log.Timber
 
 class LibraryRemoteDataSourceImpl(

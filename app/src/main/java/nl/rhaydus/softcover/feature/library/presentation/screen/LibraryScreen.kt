@@ -43,10 +43,7 @@ import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
 
-// TODO: Book has a property default edition, check this out?
-//  When adding 'we call them witches' using the add button, it add sa different edition which looks funny
 object LibraryScreen : Screen {
-
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -58,7 +55,6 @@ object LibraryScreen : Screen {
         Screen(
             state = state,
             runAction = viewModel::runAction,
-            // TODO: Ideally I'd want to do this using viewmodel events?
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
             }
