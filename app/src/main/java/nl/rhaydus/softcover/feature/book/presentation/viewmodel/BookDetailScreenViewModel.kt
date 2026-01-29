@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.book.domain.usecase.UpdateBookStatusUseCase
 import nl.rhaydus.softcover.feature.book.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book.presentation.flows.BookDetailFlowCollector
+import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.library.domain.usecase.GetUserBooksAsFlowUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
@@ -21,8 +22,9 @@ class BookDetailScreenViewModel(
     private val updateBookStatusUseCase: UpdateBookStatusUseCase,
     flows: List<BookDetailFlowCollector>,
     appDispatchers: AppDispatchers,
-) : ToadViewModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailFlowCollector>(
+) : ToadViewModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailFlowCollector, BookDetailLocalVariables>(
     initialState = BookDetailUiState(),
+    initialLocalVariables = BookDetailLocalVariables(),
     initialFlowCollectors = flows,
 ) {
     override val dependencies: BookDetailDependencies = BookDetailDependencies(

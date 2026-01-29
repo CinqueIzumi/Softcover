@@ -43,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,11 +50,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
+import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
@@ -63,7 +62,6 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
-import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.screen.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -271,16 +269,9 @@ object ReadingScreen : Screen {
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    SubcomposeAsyncImage(
-                        model = book.currentEdition.url,
-                        modifier = Modifier
-                            .size(
-                                width = 100.dp,
-                                height = 150.dp
-                            )
-                            .clip(shape = RoundedCornerShape(4.dp)),
-                        contentDescription = "Book image",
-                        loading = { Box(modifier = Modifier.shimmer()) }
+                    EditionImage(
+                        edition = book.currentEdition,
+                        modifier = Modifier.width(100.dp),
                     )
 
                     Spacer(modifier = Modifier.width(16.dp))

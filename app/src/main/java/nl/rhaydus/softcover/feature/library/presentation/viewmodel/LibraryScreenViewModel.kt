@@ -7,14 +7,16 @@ import nl.rhaydus.softcover.feature.library.domain.usecase.GetUserBooksAsFlowUse
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryFlowCollector
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 class LibraryScreenViewModel(
     private val getUserBooksAsFlowUseCase: GetUserBooksAsFlowUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryFlowCollector>,
-) : ToadViewModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryFlowCollector>(
+) : ToadViewModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryFlowCollector, LibraryLocalVariables>(
     initialState = LibraryUiState(),
+    initialLocalVariables = LibraryLocalVariables(),
     initialFlowCollectors = flows,
 ) {
     override val dependencies = LibraryDependencies(

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,14 +28,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
-import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 
@@ -161,16 +158,9 @@ fun EditionItem(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SubcomposeAsyncImage(
-                model = edition.url,
-                modifier = Modifier
-                    .size(
-                        width = 60.dp,
-                        height = 90.dp
-                    )
-                    .clip(shape = RoundedCornerShape(4.dp)),
-                contentDescription = "Book image",
-                loading = { Box(modifier = Modifier.shimmer()) }
+            EditionImage(
+                edition = edition,
+                modifier = Modifier.width(width = 60.dp),
             )
 
             Spacer(modifier = Modifier.width(16.dp))

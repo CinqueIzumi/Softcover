@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUse
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.flows.ReadingFlowCollector
+import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
 
@@ -23,8 +24,9 @@ class ReadingScreenViewModel(
     private val updateBookProgress: UpdateBookProgress,
     appDispatchers: AppDispatchers,
     flows: List<ReadingFlowCollector>,
-) : ToadViewModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingFlowCollector>(
+) : ToadViewModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingFlowCollector, ReadingLocalVariables>(
     initialState = ReadingScreenUiState(),
+    initialLocalVariables = ReadingLocalVariables(),
     initialFlowCollectors = flows,
 ) {
     override val dependencies = ReadingScreenDependencies(

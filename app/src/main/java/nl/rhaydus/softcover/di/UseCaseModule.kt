@@ -8,6 +8,11 @@ import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBo
 import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
+import nl.rhaydus.softcover.feature.search.domain.usecase.GetPreviousSearchQueriesUseCase
+import nl.rhaydus.softcover.feature.search.domain.usecase.GetQueriedBooksUseCase
+import nl.rhaydus.softcover.feature.search.domain.usecase.RemoveAllSearchQueriesUseCase
+import nl.rhaydus.softcover.feature.search.domain.usecase.RemoveSearchQueryUseCase
+import nl.rhaydus.softcover.feature.search.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCaseAsFlow
@@ -88,5 +93,28 @@ val useCaseModule = module {
             libraryRepository = get(),
             getUserIdUseCaseAsFlow = get()
         )
+    }
+
+    factory {
+        GetPreviousSearchQueriesUseCase(searchRepository = get())
+    }
+
+    factory {
+        GetQueriedBooksUseCase(searchRepository = get())
+    }
+
+    factory {
+        SearchForNameUseCase(
+            searchRepository = get(),
+            getUserIdUseCase = get(),
+        )
+    }
+
+    factory {
+        RemoveSearchQueryUseCase(searchRepository = get())
+    }
+
+    factory {
+        RemoveAllSearchQueriesUseCase(searchRepository = get())
     }
 }

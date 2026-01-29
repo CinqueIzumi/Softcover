@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book.presentation.action
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailDependencies
 
@@ -11,7 +12,7 @@ data class OnUpdatePageProgressClickAction(
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
-        scope: ActionScope<BookDetailUiState, BookDetailEvent>,
+        scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val bookToUpdate: Book = scope.currentState.book ?: return
 
@@ -23,14 +24,14 @@ data class OnUpdatePageProgressClickAction(
                 newPage = newPageValue,
                 setLoading = { newValue ->
                     scope.setState {
-                        copy(loading = newValue)
+                        it.copy(loading = newValue)
                     }
                 }
             )
         }
 
         scope.setState {
-            copy(showUpdateProgressSheet = false)
+            it.copy(showUpdateProgressSheet = false)
         }
     }
 }

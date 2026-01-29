@@ -6,12 +6,20 @@ import nl.rhaydus.softcover.feature.library.presentation.flows.GetUserBooksFlowC
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryFlowCollector
 import nl.rhaydus.softcover.feature.reading.presentation.flows.CurrentlyReadingBooksCollector
 import nl.rhaydus.softcover.feature.reading.presentation.flows.ReadingFlowCollector
+import nl.rhaydus.softcover.feature.search.presentation.flows.PreviousQueriesCollector
+import nl.rhaydus.softcover.feature.search.presentation.flows.QueriedBooksCollector
+import nl.rhaydus.softcover.feature.search.presentation.flows.SearchFlowCollector
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val flowCollectorModule = module {
-    factory<LibraryFlowCollector> { GetUserBooksFlowCollector() }
+    factory { GetUserBooksFlowCollector() } bind LibraryFlowCollector::class
 
-    factory<BookDetailFlowCollector> { UserBooksFlowCollector() }
+    factory { UserBooksFlowCollector() } bind BookDetailFlowCollector::class
 
-    factory<ReadingFlowCollector> { CurrentlyReadingBooksCollector() }
+    factory { CurrentlyReadingBooksCollector() } bind ReadingFlowCollector::class
+
+    factory { QueriedBooksCollector() } bind SearchFlowCollector::class
+
+    factory { PreviousQueriesCollector() } bind SearchFlowCollector::class
 }

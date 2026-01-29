@@ -5,12 +5,13 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryDependencies
 
 class GetUserBooksFlowCollector : LibraryFlowCollector {
     override suspend fun onLaunch(
-        scope: ActionScope<LibraryUiState, LibraryEvent>,
+        scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,
     ) {
         dependencies.getUserBooksAsFlowUseCase().collectLatest { books: List<Book> ->
@@ -20,7 +21,7 @@ class GetUserBooksFlowCollector : LibraryFlowCollector {
             val dnfBooks = books.filter { it.status == BookStatus.DidNotFinish }
 
             scope.setState {
-                copy(
+                it.copy(
                     allBooks = books,
                     wantToReadBooks = wantToReadBooks,
                     currentlyReadingBooks = currentlyReadingBooks,

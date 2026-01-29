@@ -6,6 +6,8 @@ import nl.rhaydus.softcover.feature.library.data.repository.LibraryRepositoryImp
 import nl.rhaydus.softcover.feature.library.domain.repository.LibraryRepository
 import nl.rhaydus.softcover.feature.reading.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.feature.reading.domain.repository.BooksRepository
+import nl.rhaydus.softcover.feature.search.data.repository.SearchRepositoryImpl
+import nl.rhaydus.softcover.feature.search.domain.repository.SearchRepository
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.data.repository.SettingsRepositoryImpl
@@ -35,6 +37,13 @@ val repositoryModule = module {
     single<LibraryRepository> {
         LibraryRepositoryImpl(
             libraryRemoteDataSource = get()
+        )
+    }
+
+    single<SearchRepository> {
+        SearchRepositoryImpl(
+            searchRemoteDataSource = get(),
+            searchLocalDataSource = get(),
         )
     }
 }

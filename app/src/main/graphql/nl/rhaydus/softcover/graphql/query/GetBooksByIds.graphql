@@ -1,0 +1,14 @@
+query GetBooksByIds(
+    $ids: [Int!]!,
+    $userId: Int!,
+) {
+    books(
+        where: {
+            id: {
+                _in: $ids
+            }
+        }
+    ) {
+        ...BookFragment
+    }
+}

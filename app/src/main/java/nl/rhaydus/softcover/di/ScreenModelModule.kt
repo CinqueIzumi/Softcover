@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.di
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailScreenViewModel
 import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
+import nl.rhaydus.softcover.feature.search.presentation.flows.SearchFlowCollector
+import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchScreenViewModel
 import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsScreenViewModel
 import org.koin.dsl.module
 
@@ -48,6 +50,18 @@ val screenModelModule = module {
             updateBookProgress = get(),
             appDispatchers = get(),
             flows = getAll(),
+        )
+    }
+
+    factory {
+        SearchScreenViewModel(
+            flows = getAll<SearchFlowCollector>(),
+            appDispatchers = get(),
+            getPreviousSearchQueriesUseCase = get(),
+            getQueriedBooksUseCase = get(),
+            searchForNameUseCase = get(),
+            removeSearchQueryUseCase = get(),
+            removeAllSearchQueriesUseCase = get(),
         )
     }
 }

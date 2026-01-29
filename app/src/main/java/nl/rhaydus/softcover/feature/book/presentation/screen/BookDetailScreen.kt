@@ -2,13 +2,11 @@ package nl.rhaydus.softcover.feature.book.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,7 +39,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -50,11 +47,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
+import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
@@ -177,20 +174,14 @@ class BookDetailScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    val coverImageShape = RoundedCornerShape(4.dp)
-
-                    SubcomposeAsyncImage(
-                        model = state.book?.currentEdition?.url,
+                    EditionImage(
+                        edition = state.book?.currentEdition,
                         modifier = Modifier
-                            .fillMaxWidth(2f / 4f)
-                            .aspectRatio(2f / 3f)
+                            .fillMaxWidth(0.5f)
                             .shimmer(
-                                shape = coverImageShape,
+                                shape = RoundedCornerShape(4.dp),
                                 isLoading = state.loading,
                             )
-                            .clip(shape = RoundedCornerShape(4.dp)),
-                        contentDescription = "Book image",
-                        loading = { Box(modifier = Modifier.shimmer(shape = coverImageShape)) }
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))

@@ -6,7 +6,8 @@ import androidx.datastore.dataStore
 import nl.rhaydus.softcover.feature.settings.data.datastore.serializer.AppSettingsSerializer
 import nl.rhaydus.softcover.feature.settings.data.model.AppSettingsEntity
 
-typealias AppSettingsDataStore = DataStore<AppSettingsEntity>
+@JvmInline
+value class AppSettingsDataStore(val store: DataStore<AppSettingsEntity>)
 
 val Context.appSettings by dataStore(
     fileName = "app_settings.json",

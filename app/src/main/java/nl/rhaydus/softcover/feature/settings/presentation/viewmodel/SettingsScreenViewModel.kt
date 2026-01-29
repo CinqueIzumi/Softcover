@@ -8,9 +8,10 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
-import nl.rhaydus.softcover.feature.settings.presentation.SettingsFlowCollector
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
+import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsFlowCollector
+import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
 class SettingsScreenViewModel(
@@ -20,15 +21,18 @@ class SettingsScreenViewModel(
     private val resetUserDataUseCase: ResetUserDataUseCase,
     appDispatchers: AppDispatchers,
     flows: List<SettingsFlowCollector>,
-) : ToadViewModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsFlowCollector>(
+) : ToadViewModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsFlowCollector, SettingsLocalVariables>(
     initialState = SettingsScreenUiState(),
+    initialLocalVariables = SettingsLocalVariables(),
     initialFlowCollectors = flows,
 ) {
     init {
         screenModelScope.launch(appDispatchers.main) {
             val apiKey = getApiKeyUseCase().getOrDefault(defaultValue = "")
 
-            scope.setState { copy(apiKey = apiKey) }
+            scope.setState {
+                it.copy(apiKey = apiKey)
+            }
         }
     }
 

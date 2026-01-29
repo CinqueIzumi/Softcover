@@ -6,6 +6,10 @@ import nl.rhaydus.softcover.feature.library.data.datasource.LibraryRemoteDataSou
 import nl.rhaydus.softcover.feature.library.data.datasource.LibraryRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.reading.data.datasource.BookRemoteDataSource
 import nl.rhaydus.softcover.feature.reading.data.datasource.BookRemoteDataSourceImpl
+import nl.rhaydus.softcover.feature.search.data.datasource.SearchLocalDataSource
+import nl.rhaydus.softcover.feature.search.data.datasource.SearchLocalDataSourceImpl
+import nl.rhaydus.softcover.feature.search.data.datasource.SearchRemoteDataSource
+import nl.rhaydus.softcover.feature.search.data.datasource.SearchRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSourceImpl
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
@@ -31,5 +35,13 @@ val dataSourceModule = module {
 
     single<LibraryRemoteDataSource> {
         LibraryRemoteDataSourceImpl(get())
+    }
+
+    single<SearchRemoteDataSource> {
+        SearchRemoteDataSourceImpl(apolloClient = get())
+    }
+
+    single<SearchLocalDataSource> {
+        SearchLocalDataSourceImpl(dataStore = get())
     }
 }
