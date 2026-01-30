@@ -4,6 +4,7 @@ fragment EditionFragment on editions {
     contributions {
         author {
             name
+            id
         }
     }
     isbn_10

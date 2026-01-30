@@ -329,26 +329,25 @@ private fun SearchScreenPreview() {
                     PreviewData.baseBook.copy(
                         title = "Last to Leave the Room",
                         defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2023),
-                        authors = listOf(Author(name = "Caitlin Starling")),
                         rating = 3.7,
                     ),
                     PreviewData.baseBook.copy(
                         title = "The Last to Leave",
                         defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2021),
-                        authors = listOf(Author(name = "Erica Lee")),
+                        authors = listOf(PreviewData.baseAuthor.copy(name = "Erica Lee")),
                         rating = 4.2,
                         userBookId = 20,
                     ),
                     PreviewData.baseBook.copy(
                         title = "Last One to Leave",
                         defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2022),
-                        authors = listOf(Author(name = "Benjamin Stevenson")),
+                        authors = listOf(PreviewData.baseAuthor.copy(name = "Benjamin Stevenson")),
                         rating = 4.0,
                     ),
                     PreviewData.baseBook.copy(
                         title = "Will the Last Person To Leave the Planet Please Shut Off the Sun",
                         defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2021),
-                        authors = listOf(Author(name = "Mike Resnick")),
+                        authors = listOf(PreviewData.baseAuthor.copy(name = "Mike Resnick")),
                         rating = 0.0,
                     ),
                 )

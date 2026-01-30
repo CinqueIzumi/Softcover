@@ -6,4 +6,9 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryDependencies
 
-sealed interface LibraryAction : UiAction<LibraryDependencies, LibraryUiState, LibraryEvent, LibraryLocalVariables>
+sealed interface LibraryAction : UiAction<
+        LibraryDependencies,
+        LibraryUiState,
+        LibraryEvent,
+        LibraryLocalVariables,
+        >

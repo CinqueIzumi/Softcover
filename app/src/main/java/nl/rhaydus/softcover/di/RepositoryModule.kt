@@ -2,8 +2,6 @@ package nl.rhaydus.softcover.di
 
 import nl.rhaydus.softcover.feature.book.data.repository.BookDetailRepositoryImpl
 import nl.rhaydus.softcover.feature.book.domain.repository.BookDetailRepository
-import nl.rhaydus.softcover.feature.library.data.repository.LibraryRepositoryImpl
-import nl.rhaydus.softcover.feature.library.domain.repository.LibraryRepository
 import nl.rhaydus.softcover.feature.reading.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.feature.reading.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.search.data.repository.SearchRepositoryImpl
@@ -31,12 +29,6 @@ val repositoryModule = module {
     single<BookDetailRepository> {
         BookDetailRepositoryImpl(
             bookDetailRemoteDataSource = get()
-        )
-    }
-
-    single<LibraryRepository> {
-        LibraryRepositoryImpl(
-            libraryRemoteDataSource = get()
         )
     }
 

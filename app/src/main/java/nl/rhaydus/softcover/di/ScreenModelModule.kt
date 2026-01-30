@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.di
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailScreenViewModel
 import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
-import nl.rhaydus.softcover.feature.search.presentation.flows.SearchFlowCollector
+import nl.rhaydus.softcover.feature.search.presentation.flows.SearchInitializer
 import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchScreenViewModel
 import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsScreenViewModel
 import org.koin.dsl.module
@@ -22,9 +22,13 @@ val screenModelModule = module {
 
     factory {
         LibraryScreenViewModel(
-            getUserBooksAsFlowUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
+            getAllUserBooksUseCase = get(),
+            getWantToReadUserBooksUseCase = get(),
+            getCurrentlyReadingUserBooksUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
         )
     }
 
@@ -33,7 +37,7 @@ val screenModelModule = module {
             fetchBookByIdUseCase = get(),
             updateBookEditionUseCase = get(),
             updateBookProgress = get(),
-            getUserBooksAsFlowUseCase = get(),
+            getAllUserBooksUseCase = get(),
             updateBookStatusUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
@@ -42,20 +46,21 @@ val screenModelModule = module {
 
     factory {
         ReadingScreenViewModel(
-            getCurrentlyReadingBooksUseCase = get(),
             updateBookProgressUseCase = get(),
             markBookAsReadUseCase = get(),
             updateBookEditionUseCase = get(),
             refreshUserBooksUseCase = get(),
             updateBookProgress = get(),
             appDispatchers = get(),
+            initializeUserBooksUseCase = get(),
+            getCurrentlyReadingBooksUseCase = get(),
             flows = getAll(),
         )
     }
 
     factory {
         SearchScreenViewModel(
-            flows = getAll<SearchFlowCollector>(),
+            flows = getAll<SearchInitializer>(),
             appDispatchers = get(),
             getPreviousSearchQueriesUseCase = get(),
             getQueriedBooksUseCase = get(),

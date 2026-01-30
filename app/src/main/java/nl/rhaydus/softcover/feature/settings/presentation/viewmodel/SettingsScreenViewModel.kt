@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
-import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsFlowCollector
+import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
@@ -20,11 +20,11 @@ class SettingsScreenViewModel(
     private val initializeUserIdUseCase: InitializeUserIdUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
     appDispatchers: AppDispatchers,
-    flows: List<SettingsFlowCollector>,
-) : ToadViewModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsFlowCollector, SettingsLocalVariables>(
+    flows: List<SettingsInitializer>,
+) : ToadViewModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsInitializer, SettingsLocalVariables>(
     initialState = SettingsScreenUiState(),
     initialLocalVariables = SettingsLocalVariables(),
-    initialFlowCollectors = flows,
+    initializers = flows,
 ) {
     init {
         screenModelScope.launch(appDispatchers.main) {

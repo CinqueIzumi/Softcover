@@ -33,7 +33,7 @@ interface UiAction<D : ActionDependencies, S : UiState, E : UiEvent, V : LocalVa
     )
 }
 
-interface FlowCollector<S : UiState, E : UiEvent, D : ActionDependencies, V : LocalVariables> {
+interface Initializer<S : UiState, E : UiEvent, D : ActionDependencies, V : LocalVariables> {
     suspend fun onLaunch(
         scope: ActionScope<S, E, V>,
         dependencies: D,

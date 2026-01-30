@@ -51,7 +51,6 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.softcover.PreviewData
-import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
@@ -400,7 +399,7 @@ private fun ReadingScreenPreview() {
                     pages = 534,
                     id = 20,
                     authors = listOf(
-                        Author(name = "Matt Dinniman"),
+                        PreviewData.baseAuthor.copy(name = "Matt Dinniman")
                     )
                 )
             ),
@@ -414,9 +413,6 @@ private fun ReadingScreenPreview() {
                 PreviewData.baseEdition.copy(
                     pages = 320,
                     id = 20,
-                    authors = listOf(
-                        Author(name = "Caitlin Starling"),
-                    )
                 )
             ),
             currentPage = 262,
@@ -430,8 +426,8 @@ private fun ReadingScreenPreview() {
                     pages = 534,
                     id = 20,
                     authors = listOf(
-                        Author(name = "Bora Chung"),
-                        Author(name = "Anton Hur"),
+                        PreviewData.baseAuthor.copy(name = "Bora Chung"),
+                        PreviewData.baseAuthor.copy(name = "Anton Hur"),
                     )
                 )
             ),
@@ -446,7 +442,7 @@ private fun ReadingScreenPreview() {
                     pages = 534,
                     id = 20,
                     authors = listOf(
-                        Author(name = "Arthur Conan Doyle"),
+                        PreviewData.baseAuthor.copy(name = "Arthur Conan Doyle")
                     )
                 )
             ),
@@ -461,8 +457,8 @@ private fun ReadingScreenPreview() {
                     pages = 1098,
                     id = 20,
                     authors = listOf(
-                        Author(name = "H. P. Lovecraft"),
-                        Author(name = "S.T. Joshi"),
+                        PreviewData.baseAuthor.copy(name = "H.P. Lovecraft"),
+                        PreviewData.baseAuthor.copy(name = "S.T. Joshi"),
                     )
                 )
             ),

@@ -2,8 +2,6 @@ package nl.rhaydus.softcover.di
 
 import nl.rhaydus.softcover.feature.book.data.datasource.BookDetailRemoteDataSource
 import nl.rhaydus.softcover.feature.book.data.datasource.BookDetailRemoteDataSourceImpl
-import nl.rhaydus.softcover.feature.library.data.datasource.LibraryRemoteDataSource
-import nl.rhaydus.softcover.feature.library.data.datasource.LibraryRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.reading.data.datasource.BookRemoteDataSource
 import nl.rhaydus.softcover.feature.reading.data.datasource.BookRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.search.data.datasource.SearchLocalDataSource
@@ -31,10 +29,6 @@ val dataSourceModule = module {
 
     single<BookDetailRemoteDataSource> {
         BookDetailRemoteDataSourceImpl(get())
-    }
-
-    single<LibraryRemoteDataSource> {
-        LibraryRemoteDataSourceImpl(get())
     }
 
     single<SearchRemoteDataSource> {

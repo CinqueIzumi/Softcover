@@ -7,14 +7,14 @@ import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailLocalVaria
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailDependencies
 
-class UserBooksFlowCollector : BookDetailFlowCollector {
+class UserBooksFlowCollector : BookDetailInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
         dependencies: BookDetailDependencies,
     ) {
-        dependencies.getUserBooksAsFlowUseCase().collectLatest { books ->
-            val matchingBook =
-                books.find { it.id == scope.currentState.book?.id } ?: return@collectLatest
+        dependencies.getAllUserBooksUseCase().collectLatest { books ->
+            val matchingBook = books
+                .find { it.id == scope.currentState.book?.id } ?: return@collectLatest
 
             scope.setState {
                 it.copy(book = matchingBook)

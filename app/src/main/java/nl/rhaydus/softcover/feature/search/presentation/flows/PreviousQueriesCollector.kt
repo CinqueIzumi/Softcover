@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.search.presentation.state.SearchLocalVariabl
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchDependencies
 
-class PreviousQueriesCollector() : SearchFlowCollector {
+class PreviousQueriesCollector() : SearchInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<SearchScreenUiState, SearchEvent, SearchLocalVariables>,
         dependencies: SearchDependencies,

@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-abstract class ToadViewModel<S : UiState, E : UiEvent, D : ActionDependencies, F : FlowCollector<S, E, D, V>, V : LocalVariables>(
+abstract class ToadViewModel<S : UiState, E : UiEvent, D : ActionDependencies, F : Initializer<S, E, D, V>, V : LocalVariables>(
     initialState: S,
     initialLocalVariables: V,
-    private val initialFlowCollectors: List<F>,
+    private val initializers: List<F>,
 ) : ScreenModel {
     protected abstract val dependencies: D
 
@@ -42,8 +42,8 @@ abstract class ToadViewModel<S : UiState, E : UiEvent, D : ActionDependencies, F
         }
     }
 
-    protected fun startFlowCollectors() {
-        initialFlowCollectors.forEach { collector ->
+    protected fun startInitializers() {
+        initializers.forEach { collector ->
             dependencies.launch {
                 collector.onLaunch(
                     scope = scope,

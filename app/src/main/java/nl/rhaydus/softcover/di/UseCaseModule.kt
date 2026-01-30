@@ -2,9 +2,7 @@ package nl.rhaydus.softcover.di
 
 import nl.rhaydus.softcover.feature.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.book.domain.usecase.UpdateBookStatusUseCase
-import nl.rhaydus.softcover.feature.library.domain.usecase.GetUserBooksAsFlowUseCase
-import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshUserBooksUseCase
-import nl.rhaydus.softcover.feature.reading.domain.usecase.GetCurrentlyReadingBooksUseCase
+import nl.rhaydus.softcover.feature.caching.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
@@ -37,20 +35,7 @@ val useCaseModule = module {
     }
 
     factory {
-        GetCurrentlyReadingBooksUseCase(
-            getUserBooksAsFlowUseCase = get()
-        )
-    }
-
-    factory {
         MarkBookAsReadUseCase(repository = get())
-    }
-
-    factory {
-        RefreshUserBooksUseCase(
-            libraryRepository = get(),
-            getUserIdUseCase = get(),
-        )
     }
 
     factory {
@@ -86,13 +71,6 @@ val useCaseModule = module {
 
     factory {
         UpdateApiKeyUseCase(settingsRepository = get())
-    }
-
-    factory {
-        GetUserBooksAsFlowUseCase(
-            libraryRepository = get(),
-            getUserIdUseCaseAsFlow = get()
-        )
     }
 
     factory {

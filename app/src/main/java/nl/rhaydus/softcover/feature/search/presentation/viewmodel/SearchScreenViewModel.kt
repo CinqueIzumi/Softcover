@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.feature.search.domain.usecase.RemoveSearchQueryUseCa
 import nl.rhaydus.softcover.feature.search.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.search.presentation.action.SearchAction
 import nl.rhaydus.softcover.feature.search.presentation.event.SearchEvent
-import nl.rhaydus.softcover.feature.search.presentation.flows.SearchFlowCollector
+import nl.rhaydus.softcover.feature.search.presentation.flows.SearchInitializer
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchLocalVariables
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 
@@ -20,12 +20,12 @@ class SearchScreenViewModel(
     private val searchForNameUseCase: SearchForNameUseCase,
     val removeSearchQueryUseCase: RemoveSearchQueryUseCase,
     val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
-    flows: List<SearchFlowCollector>,
+    flows: List<SearchInitializer>,
     appDispatchers: AppDispatchers,
-) : ToadViewModel<SearchScreenUiState, SearchEvent, SearchDependencies, SearchFlowCollector, SearchLocalVariables>(
+) : ToadViewModel<SearchScreenUiState, SearchEvent, SearchDependencies, SearchInitializer, SearchLocalVariables>(
     initialState = SearchScreenUiState(),
     initialLocalVariables = SearchLocalVariables(),
-    initialFlowCollectors = flows,
+    initializers = flows,
 ) {
     override val dependencies: SearchDependencies = SearchDependencies(
         searchForNameUseCase = searchForNameUseCase,
@@ -38,7 +38,7 @@ class SearchScreenViewModel(
     )
 
     init {
-        startFlowCollectors()
+        startInitializers()
     }
 
     fun runAction(action: SearchAction) = dispatch(action = action)

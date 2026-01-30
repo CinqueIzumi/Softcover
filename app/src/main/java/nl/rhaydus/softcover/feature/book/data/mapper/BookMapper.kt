@@ -17,8 +17,14 @@ private fun EditionFragment.toBookEdition(): BookEdition {
         url = image?.url,
         publisher = publisher?.name,
         pages = pages,
-        authors = contributions.map { contribution ->
-            Author(name = contribution.author?.name ?: "")
+        authors = contributions.mapNotNull { contribution ->
+            val author = contribution.author ?: return@mapNotNull null
+            val id = author.id
+
+            Author(
+                name = author.name,
+                id = id,
+            )
         },
         isbn10 = isbn_10,
         releaseYear = release_year ?: -1,
@@ -71,8 +77,14 @@ private fun BookFragment.toBook(): Book {
         releaseYear = release_year ?: -1,
         coverUrl = image?.url ?: "",
         status = BookStatus.None,
-        authors = contributions.map { contribution ->
-            Author(name = contribution.author?.name ?: "")
+        authors = contributions.mapNotNull { contribution ->
+            val author = contribution.author ?: return@mapNotNull null
+            val id = author.id
+
+            Author(
+                name = author.name,
+                id = id,
+            )
         },
         currentPage = null,
         progress = null,
