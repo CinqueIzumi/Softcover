@@ -1,4 +1,12 @@
 fragment UserBookFragment on user_books{
     id
     status_id
+
+    user_book_reads {
+        ...UserBookReadFragment
+    }
+
+    book {
+        ...BookFragment
+    }
 }

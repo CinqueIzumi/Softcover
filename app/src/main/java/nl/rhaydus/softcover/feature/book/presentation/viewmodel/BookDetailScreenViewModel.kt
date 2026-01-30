@@ -4,7 +4,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
 import nl.rhaydus.softcover.feature.book.domain.usecase.FetchBookByIdUseCase
-import nl.rhaydus.softcover.feature.book.domain.usecase.UpdateBookStatusUseCase
+import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.book.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book.presentation.flows.BookDetailInitializer
@@ -19,7 +19,7 @@ class BookDetailScreenViewModel(
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
     private val updateBookProgress: UpdateBookProgress,
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
-    private val updateBookStatusUseCase: UpdateBookStatusUseCase,
+    private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadViewModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
@@ -33,8 +33,8 @@ class BookDetailScreenViewModel(
         fetchBookByIdUseCase = fetchBookByIdUseCase,
         updateBookEditionUseCase = updateBookEditionUseCase,
         updateBookProgress = updateBookProgress,
-        updateBookStatusUseCase = updateBookStatusUseCase,
         getAllUserBooksUseCase = getAllUserBooksUseCase,
+        markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
     )
 
     init {

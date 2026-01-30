@@ -38,8 +38,8 @@ val screenModelModule = module {
             updateBookEditionUseCase = get(),
             updateBookProgress = get(),
             getAllUserBooksUseCase = get(),
-            updateBookStatusUseCase = get(),
             appDispatchers = get(),
+            markBookAsWantToReadUseCase = get(),
             flows = getAll(),
         )
     }

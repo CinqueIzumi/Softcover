@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.fragment.BookFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
-import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import kotlin.math.roundToInt
 
 private fun EditionFragment.toBookEdition(): BookEdition {
@@ -31,11 +30,15 @@ private fun EditionFragment.toBookEdition(): BookEdition {
     )
 }
 
+fun UserBookFragment.toBook(): Book {
+    return book.bookFragment.toBook(userBookFragment = this)
+}
+
 fun BookFragment.toBook(
     userBookFragment: UserBookFragment? = null,
-    userBookReadFragment: UserBookReadFragment? = null,
 ): Book {
     val rating = ((rating ?: 0.0) * 10).roundToInt() / 10.0
+    val userBookReadFragment = userBookFragment?.user_book_reads?.firstOrNull()?.userBookReadFragment
 
     return Book(
         id = id,

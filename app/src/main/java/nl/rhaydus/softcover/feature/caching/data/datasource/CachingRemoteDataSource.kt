@@ -20,10 +20,7 @@ class CachingRemoteDataSourceImpl(
             .dataOrThrow()
 
         return result.user_books.map {
-            it.book.bookFragment.toBook(
-                userBookFragment = it.userBookFragment,
-                userBookReadFragment = it.user_book_reads.firstOrNull()?.userBookReadFragment,
-            )
+            it.userBookFragment.toBook()
         }
     }
 }

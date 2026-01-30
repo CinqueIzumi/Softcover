@@ -3,11 +3,10 @@ package nl.rhaydus.softcover.feature.book.data.datasource
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import nl.rhaydus.softcover.GetBookByIdQuery
-import nl.rhaydus.softcover.UpdateBookStatusMutation
+import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.feature.book.data.mapper.toBook
-import nl.rhaydus.softcover.type.UserBookUpdateInput
+import nl.rhaydus.softcover.type.UserBookCreateInput
 
 class BookDetailRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
@@ -29,22 +28,24 @@ class BookDetailRemoteDataSourceImpl(
         return book
     }
 
-    override suspend fun updateBookStatus(
-        book: Book,
-        newStatus: BookStatus,
-    ) {
-        val userBookId = book.userBookId ?: throw Exception("user did not have an user book id")
-
-        val mutation = UpdateBookStatusMutation(
-            id = userBookId,
-            `object` = UserBookUpdateInput(
-                status_id = Optional.present(newStatus.code)
-            )
+    override suspend fun markBookAsWantToRead(bookId: Int): Book {
+        val userBookCreateInput = UserBookCreateInput(
+            book_id = bookId,
+            status_id = Optional.Present(1),
+            privacy_setting_id = Optional.Present(1),
         )
 
-        apolloClient
-            .mutation(mutation = mutation)
+        val result = apolloClient
+            .mutation(mutation = MarkBookAsWantToReadMutation(`object` = userBookCreateInput))
             .execute()
             .dataOrThrow()
+
+        val book = result
+            .insert_user_book
+            ?.user_book
+            ?.userBookFragment
+            ?.toBook() ?: throw Exception("Book could not be mapped")
+
+        return book
     }
 }

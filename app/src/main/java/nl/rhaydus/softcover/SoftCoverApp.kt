@@ -22,11 +22,13 @@ import timber.log.Timber
 // TODO: Add some placeholder images (figma designs?) for stuff like empty pages, authorization etc etc
 // TODO: The refresh function seems to not actually refresh when updating from outside of the app, why?
 // TODO: Loader / refresh within the library screen?
-// TODO: Library screen should be scrollable
+// TODO: Library screen should be scrollable between tabs
 // TODO: Koin modules should be feature package based
-// TODO: Clean up all api calls (search, detail screen, progress update etc etc) to take result and update cached
+// TODO: Clean up all api calls (detail screen, progress update etc etc) to take result and update cached
 // TODO: Add error logging to every single use case... Investigate to see if it can be re-usable, but still log the class in which it happened
-// TODO: Search -> Detail page -> Add to want to read -> back to search -> make sure book is now marked as added to list
+// TODO: Add support for removing book / marking book as finished from detail screen...
+// TODO: Make sure progress/edition/start reading/want to read updating works
+// TODO: Loading screen, maybe even app icon?
 class SoftCoverApp : Application() {
     override fun onCreate() {
         super.onCreate()

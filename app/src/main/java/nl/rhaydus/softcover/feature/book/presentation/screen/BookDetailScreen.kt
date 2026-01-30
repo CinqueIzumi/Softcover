@@ -67,6 +67,7 @@ import nl.rhaydus.softcover.feature.book.presentation.action.OnDismissEditEditio
 import nl.rhaydus.softcover.feature.book.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnFabClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnMarkBookAsReadingClickAction
+import nl.rhaydus.softcover.feature.book.presentation.action.OnMarkBookAsWantToReadClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnShowEditEditionSheetClickAction
@@ -327,7 +328,14 @@ class BookDetailScreen(
 
         when (book.status) {
             BookStatus.Reading -> ReadingContainer(state = state)
-            BookStatus.None -> WantToReadButton()
+            
+            BookStatus.None -> {
+                WantToReadButton(
+                    runAction = runAction,
+                    book = book
+                )
+            }
+
             else -> MarkAsReadingButton(
                 book = book,
                 markBookAsReading = {
@@ -422,11 +430,14 @@ class BookDetailScreen(
     }
 
     @Composable
-    fun WantToReadButton() {
+    fun WantToReadButton(
+        book: Book,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
         SoftcoverButton(
             label = "Want to Read",
             onClick = {
-                TODO("Implement this")
+                runAction(OnMarkBookAsWantToReadClickAction(book = book))
             },
             style = ButtonStyle.FILLED,
             modifier = Modifier.fillMaxWidth(),
