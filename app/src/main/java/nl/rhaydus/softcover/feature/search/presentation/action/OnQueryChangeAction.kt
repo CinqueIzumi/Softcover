@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.search.presentation.event.SearchEvent
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchLocalVariables
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchDependencies
+import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds
 
 class OnQueryChangeAction(val newQuery: String) : SearchAction {
@@ -35,7 +36,9 @@ class OnQueryChangeAction(val newQuery: String) : SearchAction {
             delay(1.seconds)
 
             // TODO: Maybe some sort of loading indicators?
-            dependencies.searchForNameUseCase(name = scope.currentState.searchText)
+            dependencies.searchForNameUseCase(name = scope.currentState.searchText).onFailure {
+                Timber.e("-=- $it")
+            }
         }
 
         scope.setLocalVariables {

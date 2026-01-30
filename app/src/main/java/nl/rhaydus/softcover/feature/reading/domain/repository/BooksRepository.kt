@@ -13,6 +13,5 @@ interface BooksRepository {
     suspend fun updateBookEdition(
         userBookId: Int,
         newEditionId: Int,
-        userId: Int,
     )
 }

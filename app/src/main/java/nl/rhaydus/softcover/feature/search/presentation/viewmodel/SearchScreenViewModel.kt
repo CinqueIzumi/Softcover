@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.search.presentation.viewmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.feature.caching.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.GetQueriedBooksUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.RemoveAllSearchQueriesUseCase
@@ -18,6 +19,7 @@ class SearchScreenViewModel(
     private val getPreviousSearchQueriesUseCase: GetPreviousSearchQueriesUseCase,
     private val getQueriedBooksUseCase: GetQueriedBooksUseCase,
     private val searchForNameUseCase: SearchForNameUseCase,
+    private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     val removeSearchQueryUseCase: RemoveSearchQueryUseCase,
     val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
     flows: List<SearchInitializer>,
@@ -34,6 +36,7 @@ class SearchScreenViewModel(
         mainDispatcher = appDispatchers.main,
         getPreviousSearchQueriesUseCase = getPreviousSearchQueriesUseCase,
         removeSearchQueryUseCase = removeSearchQueryUseCase,
+        getAllUserBooksUseCase = getAllUserBooksUseCase,
         removeAllSearchQueriesUseCase = removeAllSearchQueriesUseCase,
     )
 

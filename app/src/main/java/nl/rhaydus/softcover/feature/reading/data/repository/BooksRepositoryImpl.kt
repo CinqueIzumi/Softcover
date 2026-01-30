@@ -24,12 +24,10 @@ class BooksRepositoryImpl(
     override suspend fun updateBookEdition(
         userBookId: Int,
         newEditionId: Int,
-        userId: Int,
     ) {
         bookRemoteDataSource.updateBookEdition(
             userBookId = userBookId,
             newEditionId = newEditionId,
-            userId = userId,
         )
     }
 }

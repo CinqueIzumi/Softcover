@@ -9,6 +9,12 @@ query GetUserBooks(
         }
         order_by: {updated_at: desc}
     ) {
+        ...UserBookFragment
+
+        user_book_reads {
+            ...UserBookReadFragment
+        }
+
         book {
             ...BookFragment
         }

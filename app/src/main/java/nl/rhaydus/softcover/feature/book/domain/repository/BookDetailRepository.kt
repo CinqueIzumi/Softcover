@@ -6,12 +6,10 @@ import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 interface BookDetailRepository {
     suspend fun fetchBookById(
         id: Int,
-        userId: Int,
     ): Book
 
     suspend fun updateBookStatus(
         book: Book,
         newStatus: BookStatus,
-        userId: Int,
     )
 }

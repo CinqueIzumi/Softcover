@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.update
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetIdsForQuery
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.book.data.mapper.toBookWithOptionals
+import nl.rhaydus.softcover.feature.book.data.mapper.toBook
 
 class SearchRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
@@ -31,16 +31,14 @@ class SearchRemoteDataSourceImpl(
 
         val matchingBooks = apolloClient
             .query(
-                query = GetBooksByIdsQuery(
-                    userId = userId,
-                    ids = matchingIds
-                )
-            ).execute()
+                query = GetBooksByIdsQuery(ids = matchingIds)
+            )
+            .execute()
             .dataOrThrow()
 
         val books = matchingBooks
             .books
-            .map { it.bookFragment.toBookWithOptionals() }
+            .map { it.bookFragment.toBook() }
             .sortedBy { book -> idOrdered[book.id] }
 
         _queriedBooks.update { books }

@@ -25,6 +25,8 @@ import timber.log.Timber
 // TODO: Library screen should be scrollable
 // TODO: Koin modules should be feature package based
 // TODO: Clean up all api calls (search, detail screen, progress update etc etc) to take result and update cached
+// TODO: Add error logging to every single use case... Investigate to see if it can be re-usable, but still log the class in which it happened
+// TODO: Search -> Detail page -> Add to want to read -> back to search -> make sure book is now marked as added to list
 class SoftCoverApp : Application() {
     override fun onCreate() {
         super.onCreate()

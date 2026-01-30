@@ -1,6 +1,5 @@
 mutation UpdateBookStatus(
     $id: Int!,
-    $userId: Int!,
     $object: UserBookUpdateInput!,
 ) {
     update_user_book(

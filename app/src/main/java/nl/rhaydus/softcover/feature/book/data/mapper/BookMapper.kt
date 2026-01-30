@@ -31,39 +31,10 @@ private fun EditionFragment.toBookEdition(): BookEdition {
     )
 }
 
-fun BookFragment.toBookWithOptionals(): Book {
-    val baseBook = this.toBook()
-
-    val userBooks = user_books.firstOrNull() ?: return baseBook
-    val userBooksFragment = userBooks.userBookFragment
-
-    val userBook = userBooksFragment.appendBookWithStatus(book = baseBook)
-
-    val userBookReadFragment =
-        userBooks.user_book_reads.firstOrNull()?.userBookReadFragment ?: return userBook
-
-    return userBookReadFragment.appendBookWithOptionals(book = userBook)
-}
-
-private fun UserBookFragment.appendBookWithStatus(book: Book): Book {
-    return book.copy(
-        status = BookStatus.getFromCode(code = status_id),
-        userBookId = id,
-    )
-}
-
-private fun UserBookReadFragment.appendBookWithOptionals(book: Book): Book {
-    return book.copy(
-        currentPage = progress_pages ?: 0,
-        progress = progress?.toFloat() ?: 0f,
-        editionId = edition?.editionFragment?.id,
-        userBookReadId = id,
-        startedAt = started_at,
-        finishedAt = finished_at,
-    )
-}
-
-private fun BookFragment.toBook(): Book {
+fun BookFragment.toBook(
+    userBookFragment: UserBookFragment? = null,
+    userBookReadFragment: UserBookReadFragment? = null,
+): Book {
     val rating = ((rating ?: 0.0) * 10).roundToInt() / 10.0
 
     return Book(
@@ -76,7 +47,7 @@ private fun BookFragment.toBook(): Book {
         rating = rating,
         releaseYear = release_year ?: -1,
         coverUrl = image?.url ?: "",
-        status = BookStatus.None,
+        status = userBookFragment?.status_id?.let { BookStatus.getFromCode(it) } ?: BookStatus.None,
         authors = contributions.mapNotNull { contribution ->
             val author = contribution.author ?: return@mapNotNull null
             val id = author.id
@@ -86,13 +57,13 @@ private fun BookFragment.toBook(): Book {
                 id = id,
             )
         },
-        currentPage = null,
-        progress = null,
-        editionId = null,
-        userBookId = null,
-        startedAt = null,
-        finishedAt = null,
-        userBookReadId = null,
+        currentPage = userBookReadFragment?.let { it.progress_pages ?: 0 },
+        progress = userBookReadFragment?.let { it.progress?.toFloat() ?: 0f },
+        editionId = userBookReadFragment?.edition?.editionFragment?.id,
+        startedAt = userBookReadFragment?.started_at,
+        finishedAt = userBookReadFragment?.finished_at,
+        userBookReadId = userBookReadFragment?.id,
+        userBookId = userBookFragment?.id,
         defaultEdition = default_physical_edition?.editionFragment?.toBookEdition()
     )
 }

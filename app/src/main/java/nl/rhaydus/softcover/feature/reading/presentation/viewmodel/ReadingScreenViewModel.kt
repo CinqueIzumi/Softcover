@@ -16,7 +16,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
 
-// TODO: Add some sort of last updated property to user books, for ordering
 class ReadingScreenViewModel(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,

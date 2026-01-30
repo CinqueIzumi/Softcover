@@ -60,11 +60,9 @@ class BookRemoteDataSourceImpl(
     override suspend fun updateBookEdition(
         userBookId: Int,
         newEditionId: Int,
-        userId: Int,
     ) {
         val mutation = UpdateBookEditionMutation(
             id = userBookId,
-            userId = userId,
             `object` = UserBookUpdateInput(
                 edition_id = Optional.present(newEditionId)
             )

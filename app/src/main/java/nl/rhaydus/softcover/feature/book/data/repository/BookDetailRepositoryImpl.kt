@@ -10,23 +10,17 @@ class BookDetailRepositoryImpl(
 ) : BookDetailRepository {
     override suspend fun fetchBookById(
         id: Int,
-        userId: Int,
     ): Book {
-        return bookDetailRemoteDataSource.fetchBookById(
-            id = id,
-            userId = userId,
-        )
+        return bookDetailRemoteDataSource.fetchBookById(id = id)
     }
 
     override suspend fun updateBookStatus(
         book: Book,
         newStatus: BookStatus,
-        userId: Int,
     ) {
         bookDetailRemoteDataSource.updateBookStatus(
             book = book,
             newStatus = newStatus,
-            userId = userId,
         )
     }
 }

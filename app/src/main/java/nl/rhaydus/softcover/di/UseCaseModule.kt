@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.di
 
 import nl.rhaydus.softcover.feature.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.book.domain.usecase.UpdateBookStatusUseCase
-import nl.rhaydus.softcover.feature.caching.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
@@ -21,17 +20,11 @@ import org.koin.dsl.module
 
 val useCaseModule = module {
     factory {
-        FetchBookByIdUseCase(
-            bookDetailRepository = get(),
-            getUserIdUseCase = get()
-        )
+        FetchBookByIdUseCase(bookDetailRepository = get())
     }
 
     factory {
-        UpdateBookStatusUseCase(
-            bookDetailRepository = get(),
-            getUserIdUseCase = get()
-        )
+        UpdateBookStatusUseCase(bookDetailRepository = get())
     }
 
     factory {
@@ -39,10 +32,7 @@ val useCaseModule = module {
     }
 
     factory {
-        UpdateBookEditionUseCase(
-            repository = get(),
-            getUserIdUseCase = get()
-        )
+        UpdateBookEditionUseCase(repository = get())
     }
 
     factory {

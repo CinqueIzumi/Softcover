@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.feature.caching.domain.usecase.GetReadUserBooksUseCa
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.RefreshUserBooksUseCase
-import org.koin.dsl.factory
 import org.koin.dsl.module
 
 val cachingModule = module {

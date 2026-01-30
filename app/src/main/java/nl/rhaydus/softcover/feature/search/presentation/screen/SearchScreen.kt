@@ -273,6 +273,7 @@ class SearchScreen : Screen {
         }
     }
 
+    // TODO: On click -> set query as search text (with instant search)
     @Composable
     private fun QueryItem(
         query: String,
