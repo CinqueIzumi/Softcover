@@ -26,7 +26,7 @@ class BookRemoteDataSourceImpl(
             progress_pages = Optional.present(newPage),
             started_at = Optional.present(book.startedAt),
             finished_at = Optional.present(book.finishedAt),
-            edition_id = Optional.present(book.editionId),
+            edition_id = Optional.present(book.userEditionId),
         )
 
         val mutation = UpdateReadingProgressMutation(

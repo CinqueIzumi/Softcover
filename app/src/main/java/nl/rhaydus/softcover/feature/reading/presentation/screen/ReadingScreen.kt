@@ -405,7 +405,7 @@ private fun ReadingScreenPreview() {
             ),
             currentPage = 470,
             progress = 88.014984f,
-            editionId = 20,
+            userEditionId = 20,
         ),
         PreviewData.baseBook.copy(
             title = "Last to Leave the Room",
@@ -417,7 +417,7 @@ private fun ReadingScreenPreview() {
             ),
             currentPage = 262,
             progress = 81.875f,
-            editionId = 20,
+            userEditionId = 20,
         ),
         PreviewData.baseBook.copy(
             title = "Cursed Bunny",
@@ -433,7 +433,7 @@ private fun ReadingScreenPreview() {
             ),
             currentPage = 49,
             progress = 19.140625f,
-            editionId = 20,
+            userEditionId = 20,
         ),
         PreviewData.baseBook.copy(
             title = "Sherlock Holmes: The complete illustrated novels",
@@ -448,7 +448,7 @@ private fun ReadingScreenPreview() {
             ),
             currentPage = 200,
             progress = 40.322582f,
-            editionId = 20,
+            userEditionId = 20,
         ),
         PreviewData.baseBook.copy(
             title = "The Complete Fiction",
@@ -464,7 +464,7 @@ private fun ReadingScreenPreview() {
             ),
             currentPage = 110,
             progress = 10.018215f,
-            editionId = 20,
+            userEditionId = 20,
         ),
     )
 

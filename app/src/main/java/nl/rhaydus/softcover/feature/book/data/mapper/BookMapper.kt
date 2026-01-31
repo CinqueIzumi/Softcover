@@ -50,7 +50,8 @@ fun BookFragment.toBook(
         rating = rating,
         releaseYear = release_year ?: -1,
         coverUrl = image?.url ?: "",
-        status = userBookFragment?.status_id?.let { BookStatus.getFromCode(it) } ?: BookStatus.None,
+        userStatus = userBookFragment?.status_id?.let { BookStatus.getFromCode(it) }
+            ?: BookStatus.None,
         authors = contributions.mapNotNull { contribution ->
             val author = contribution.author ?: return@mapNotNull null
             val id = author.id
@@ -62,11 +63,19 @@ fun BookFragment.toBook(
         },
         currentPage = userBookReadFragment?.let { it.progress_pages ?: 0 },
         progress = userBookReadFragment?.let { it.progress?.toFloat() ?: 0f },
-        editionId = userBookReadFragment?.edition?.editionFragment?.id,
+        userEditionId = userBookFragment?.edition_id,
         startedAt = userBookReadFragment?.started_at,
         finishedAt = userBookReadFragment?.finished_at,
         userBookReadId = userBookReadFragment?.id,
         userBookId = userBookFragment?.id,
-        defaultEdition = default_physical_edition?.editionFragment?.toBookEdition()
+        defaultEdition = default_physical_edition?.editionFragment?.toBookEdition(),
+        userLastReadDate = userBookFragment?.last_read_date,
+        userDateAdded = userBookFragment?.date_added,
+        userPrivacySettingId = userBookFragment?.privacy_setting_id,
+        userRating = userBookFragment?.rating,
+        userReferrerUserId = userBookFragment?.referrer_user_id,
+        userReviewHasSpoilers = userBookFragment?.review_has_spoilers,
+        userReviewedAt = userBookFragment?.reviewed_at,
+        userUpdatedAt = userBookFragment?.updated_at,
     )
 }

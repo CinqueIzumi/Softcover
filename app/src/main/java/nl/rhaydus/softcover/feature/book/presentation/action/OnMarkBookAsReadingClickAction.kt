@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.feature.book.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailDependencies
+import timber.log.Timber
 
 class OnMarkBookAsReadingClickAction(
     val book: Book,
@@ -14,6 +15,8 @@ class OnMarkBookAsReadingClickAction(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        TODO()
+        dependencies.markBookAsReadingUseCase(book = book).onFailure {
+            Timber.e("-=- $it")
+        }
     }
 }

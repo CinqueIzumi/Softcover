@@ -13,20 +13,28 @@ import nl.rhaydus.softcover.feature.caching.data.model.EditionAuthorCrossRef
 
 fun Book.toEntity(): BookEntity = BookEntity(
     id = id,
-    statusCode = status.code,
+    statusCode = userStatus.code,
     title = title,
     rating = rating,
     description = description,
     releaseYear = releaseYear,
     coverUrl = coverUrl,
     defaultEditionId = defaultEdition?.id,
-    currentEditionId = editionId,
+    currentEditionId = userEditionId,
     currentPage = currentPage,
     progress = progress,
     userBookId = userBookId,
     userBookReadId = userBookReadId,
     startedAt = startedAt,
-    finishedAt = finishedAt
+    finishedAt = finishedAt,
+    userLastReadDate = userLastReadDate,
+    userDateAdded = userDateAdded,
+    userPrivacySettingId = userPrivacySettingId,
+    userRating = userRating,
+    userReferrerUserId = userReferrerUserId,
+    userReviewHasSpoilers = userReviewHasSpoilers,
+    userReviewedAt = userReviewedAt,
+    userUpdatedAt = userUpdatedAt
 )
 
 fun BookEdition.toEntity(bookId: Int): BookEditionEntity = BookEditionEntity(
@@ -84,7 +92,7 @@ fun BookFullEntity.toUi(): Book {
 
     return Book(
         id = book.id,
-        status = BookStatus.getFromCode(book.statusCode),
+        userStatus = BookStatus.getFromCode(book.statusCode),
         title = book.title,
         editions = uiEditions,
         defaultEdition = defaultEdition,
@@ -95,11 +103,19 @@ fun BookFullEntity.toUi(): Book {
         authors = bookAuthors.map { it.toUi() },
         currentPage = book.currentPage,
         progress = book.progress,
-        editionId = book.currentEditionId,
+        userEditionId = book.currentEditionId,
         userBookId = book.userBookId,
         userBookReadId = book.userBookReadId,
         startedAt = book.startedAt,
-        finishedAt = book.finishedAt
+        finishedAt = book.finishedAt,
+        userLastReadDate = book.userLastReadDate,
+        userDateAdded = book.userDateAdded,
+        userPrivacySettingId = book.userPrivacySettingId,
+        userRating = book.userRating,
+        userReferrerUserId = book.userReferrerUserId,
+        userReviewHasSpoilers = book.userReviewHasSpoilers,
+        userReviewedAt = book.userReviewedAt,
+        userUpdatedAt = book.userUpdatedAt
     )
 }
 

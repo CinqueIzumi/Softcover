@@ -1,6 +1,15 @@
 fragment UserBookFragment on user_books{
     id
     status_id
+    edition_id
+    last_read_date
+    date_added
+    privacy_setting_id
+    rating
+    referrer_user_id
+    review_has_spoilers
+    reviewed_at
+    updated_at
 
     user_book_reads {
         ...UserBookReadFragment

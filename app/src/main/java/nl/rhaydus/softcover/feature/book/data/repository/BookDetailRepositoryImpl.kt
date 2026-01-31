@@ -14,4 +14,8 @@ class BookDetailRepositoryImpl(
     override suspend fun markBookAsWantToRead(bookId: Int): Book {
         return bookDetailRemoteDataSource.markBookAsWantToRead(bookId = bookId)
     }
+
+    override suspend fun markBookAsReading(book: Book): Book {
+        return bookDetailRemoteDataSource.markBookAsReading( book)
+    }
 }

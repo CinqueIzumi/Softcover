@@ -78,7 +78,6 @@ import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailScreenViewModel
 import kotlin.math.roundToInt
 
-// TODO: Maybe add some sort of caching? Apollo normalized cache maybe? Initial load is slow...
 class BookDetailScreen(
     val id: Int,
 ) : Screen {
@@ -118,7 +117,7 @@ class BookDetailScreen(
                 )
             },
             floatingActionButton = {
-                if (state.book?.status != BookStatus.Reading) return@Scaffold
+                if (state.book?.userStatus != BookStatus.Reading) return@Scaffold
 
                 FloatingActionButtonMenu(
                     expanded = state.fabMenuExpanded,
@@ -326,7 +325,7 @@ class BookDetailScreen(
 
         val book = state.book ?: return
 
-        when (book.status) {
+        when (book.userStatus) {
             BookStatus.Reading -> ReadingContainer(state = state)
             
             BookStatus.None -> {
@@ -493,7 +492,7 @@ private fun BookDetailScreenReadingPreview() {
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
         ) {
             val book = PreviewData.baseBook.copy(
-                status = BookStatus.Reading,
+                userStatus = BookStatus.Reading,
                 progress = 0.8f,
                 currentPage = 20,
             )
@@ -519,7 +518,7 @@ private fun BookDetailScreenIgnoredPreview() {
         Column(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
         ) {
-            val book = PreviewData.baseBook.copy(status = BookStatus.None)
+            val book = PreviewData.baseBook.copy(userStatus = BookStatus.None)
 
             BookDetailScreen(
                 id = 1,

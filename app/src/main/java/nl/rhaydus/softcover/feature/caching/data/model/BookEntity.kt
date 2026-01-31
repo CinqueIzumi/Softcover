@@ -11,19 +11,35 @@ import androidx.room.PrimaryKey
     ]
 )
 data class BookEntity(
+    // region book
     @PrimaryKey val id: Int,
-    val statusCode: Int,
     val title: String,
+    val defaultEditionId: Int?,
     val rating: Double,
     val description: String,
     val releaseYear: Int,
     val coverUrl: String,
-    val defaultEditionId: Int?,
+    // endregion
+
+    // region user book
+    val userBookId: Int?,
+    val statusCode: Int,
     val currentEditionId: Int?,
+    val userLastReadDate: String?,
+    val userDateAdded: String?,
+    val userPrivacySettingId: Int?,
+    val userRating: Double?,
+    val userReferrerUserId: Int?,
+    val userReviewHasSpoilers: Boolean?,
+    val userReviewedAt: String?,
+    val userUpdatedAt: String?,
+    // endregion
+
+    // region user book read
     val currentPage: Int?,
     val progress: Float?,
-    val userBookId: Int?,
     val userBookReadId: Int?,
     val startedAt: String?,
     val finishedAt: String?,
+    // endregion
 )

@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "nl.rhaydus.softcover"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -109,6 +109,8 @@ apollo {
         mapScalar("numeric", "kotlin.Double")
         mapScalar("float8", "kotlin.Double")
         mapScalar("date", "kotlin.String")
+        mapScalar("timestamp", "kotlin.String")
+        mapScalar("timestamptz", "kotlin.String")
         mapScalar("smallint", "kotlin.Int")
     }
 }

@@ -27,7 +27,7 @@ import timber.log.Timber
 // TODO: Clean up all api calls (detail screen, progress update etc etc) to take result and update cached
 // TODO: Add error logging to every single use case... Investigate to see if it can be re-usable, but still log the class in which it happened
 // TODO: Add support for removing book / marking book as finished from detail screen...
-// TODO: Make sure progress/edition/start reading/want to read updating works
+// TODO: Make sure progress/edition/start reading/want to read updating works (both real-time & update -> restart -> verify)
 // TODO: Loading screen, maybe even app icon?
 class SoftCoverApp : Application() {
     override fun onCreate() {
