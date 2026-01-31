@@ -17,16 +17,15 @@ import nl.rhaydus.softcover.feature.caching.data.model.BookEntity
 import nl.rhaydus.softcover.feature.caching.data.model.BookFullEntity
 import nl.rhaydus.softcover.feature.caching.data.model.EditionAuthorCrossRef
 
-// TODO: Clean-up this file
 @Dao
 interface BookDao {
     // ---------- Observing ----------
     @Transaction
-    @Query("SELECT * FROM books")
+    @Query("SELECT * FROM books ORDER BY userUpdatedAt DESC")
     fun observeBooks(): Flow<List<BookFullEntity>>
 
     @Transaction
-    @Query("SELECT * from books WHERE statusCode = :statusCode")
+    @Query("SELECT * from books WHERE statusCode = :statusCode ORDER BY userUpdatedAt DESC")
     fun getBooksByStatus(statusCode: Int): Flow<List<BookFullEntity>>
 
     // ---------- Inserts ----------
