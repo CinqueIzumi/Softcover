@@ -17,7 +17,6 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 
 // region 0.0.1
-// TODO: Investigate correct color for api key text field in light mode
 // TODO: Query Item On click -> set query as search text (with instant search)
 // TODO: Add support for adding / removing book from user's library within the search screen
 // TODO: Loading indicator on search screen

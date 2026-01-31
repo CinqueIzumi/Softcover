@@ -31,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
@@ -145,8 +144,8 @@ object SettingsScreen : Screen {
                                     placeholder = { Text(text = "Enter your key") },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = OutlinedTextFieldDefaults.colors().copy(
-                                        focusedContainerColor = Color.Black,
                                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                        focusedContainerColor = MaterialTheme.colorScheme.surface,
                                     ),
                                     singleLine = true,
                                 )
