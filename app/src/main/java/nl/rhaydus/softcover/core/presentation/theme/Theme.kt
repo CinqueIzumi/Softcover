@@ -89,7 +89,6 @@ private val darkScheme = darkColorScheme(
 @Composable
 fun SoftcoverTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // TODO: Add support for dynamic colors at some point
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit

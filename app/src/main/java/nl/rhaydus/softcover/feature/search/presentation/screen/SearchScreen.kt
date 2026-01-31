@@ -198,8 +198,6 @@ class SearchScreen : Screen {
                 )
             }
         }
-
-        // TODO: Maybe add some sort of tag/genre searching here if possible?
     }
 
     @Composable
@@ -236,7 +234,6 @@ class SearchScreen : Screen {
                     style = MaterialTheme.typography.bodyMedium
                 )
 
-                // TODO: Fix this label for (readers, but also any missing data...
                 var label = ""
 
                 if (book.releaseYear != -1) {
@@ -260,7 +257,7 @@ class SearchScreen : Screen {
 
             IconToggleButton(
                 checked = addedToLibrary,
-                onCheckedChange = { TODO() },
+                onCheckedChange = {  },
             ) {
                 val iconResource = when {
                     addedToLibrary -> Icons.Default.BookmarkAdded
@@ -272,7 +269,6 @@ class SearchScreen : Screen {
         }
     }
 
-    // TODO: On click -> set query as search text (with instant search)
     @Composable
     private fun QueryItem(
         query: String,

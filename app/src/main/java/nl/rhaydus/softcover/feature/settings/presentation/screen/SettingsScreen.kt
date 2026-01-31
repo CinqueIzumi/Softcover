@@ -145,7 +145,6 @@ object SettingsScreen : Screen {
                                     placeholder = { Text(text = "Enter your key") },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = OutlinedTextFieldDefaults.colors().copy(
-                                        // TODO: Investigate correct color for this
                                         focusedContainerColor = Color.Black,
                                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                                     ),

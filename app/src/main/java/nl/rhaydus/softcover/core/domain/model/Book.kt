@@ -13,7 +13,6 @@ data class Book(
     val coverUrl: String,
     val authors: List<Author>,
 
-    // TODO: Maybe extract this to it's own data class?
     // region UserBook
     val userBookId: Int?,
     val userStatus: BookStatus,

@@ -35,7 +35,6 @@ class OnQueryChangeAction(val newQuery: String) : SearchAction {
         val newTimberJob: Job = dependencies.launch {
             delay(1.seconds)
 
-            // TODO: Maybe some sort of loading indicators?
             dependencies.searchForNameUseCase(name = scope.currentState.searchText).onFailure {
                 Timber.e("-=- $it")
             }

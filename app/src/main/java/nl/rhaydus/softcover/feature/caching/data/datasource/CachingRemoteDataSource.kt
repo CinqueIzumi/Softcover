@@ -14,7 +14,6 @@ class CachingRemoteDataSourceImpl(
 ) : CachingRemoteDataSource {
     override suspend fun initializeBooks(userId: Int): List<Book> {
         val result = apolloClient
-            // TODO: Query could potentially be done using the 'me' query?
             .query(query = GetUserBooksQuery(userId = userId))
             .execute()
             .dataOrThrow()
