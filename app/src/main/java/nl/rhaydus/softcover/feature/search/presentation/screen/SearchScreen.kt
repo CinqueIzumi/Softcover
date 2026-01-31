@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +21,8 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +55,7 @@ import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveSearchQue
 import nl.rhaydus.softcover.feature.search.presentation.action.SearchAction
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchScreenViewModel
+import kotlin.time.Duration.Companion.seconds
 
 class SearchScreen : Screen {
     @Composable
@@ -72,6 +76,7 @@ class SearchScreen : Screen {
         )
     }
 
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     fun Screen(
         state: SearchScreenUiState,
@@ -100,7 +105,14 @@ class SearchScreen : Screen {
                     },
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                        if (state.isLoading) {
+                            CircularWavyProgressIndicator(modifier = Modifier.size(32.dp))
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                            )
+                        }
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp),
@@ -138,8 +150,14 @@ class SearchScreen : Screen {
         state: SearchScreenUiState,
         onBookClick: (Book) -> Unit,
     ) {
+        val text = when {
+            state.isLoading -> "Loading..."
+            state.queriedBooks.isEmpty() -> "No results found"
+            else -> "Showing ${state.queriedBooks.size} results"
+        }
+
         Text(
-            text = "Showing ${state.queriedBooks.size} results",
+            text = text,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -257,7 +275,7 @@ class SearchScreen : Screen {
 
             IconToggleButton(
                 checked = addedToLibrary,
-                onCheckedChange = {  },
+                onCheckedChange = { },
             ) {
                 val iconResource = when {
                     addedToLibrary -> Icons.Default.BookmarkAdded
@@ -274,7 +292,16 @@ class SearchScreen : Screen {
         query: String,
         runAction: (SearchAction) -> Unit,
     ) {
-        Column {
+        Column(
+            modifier = Modifier.noRippleClickable {
+                runAction(
+                    OnQueryChangeAction(
+                        newQuery = query,
+                        searchDelay = 0.seconds,
+                    )
+                )
+            }
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -9,15 +9,23 @@ import nl.rhaydus.softcover.feature.search.presentation.state.SearchLocalVariabl
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchDependencies
 import timber.log.Timber
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-class OnQueryChangeAction(val newQuery: String) : SearchAction {
+class OnQueryChangeAction(
+    val newQuery: String,
+    val searchDelay: Duration = 1.seconds,
+) :
+    SearchAction {
     override suspend fun execute(
         dependencies: SearchDependencies,
         scope: ActionScope<SearchScreenUiState, SearchEvent, SearchLocalVariables>,
     ) {
         scope.setState {
-            it.copy(searchText = newQuery)
+            it.copy(
+                searchText = newQuery,
+                isLoading = true,
+            )
         }
 
         scope.currentLocalVariables.queryJob?.cancelAndJoin()
@@ -27,7 +35,12 @@ class OnQueryChangeAction(val newQuery: String) : SearchAction {
         }
 
         if (newQuery.isEmpty()) {
-            scope.setState { it.copy(queriedBooks = emptyList()) }
+            scope.setState {
+                it.copy(
+                    queriedBooks = emptyList(),
+                    isLoading = false,
+                )
+            }
 
             return
         }
@@ -37,6 +50,10 @@ class OnQueryChangeAction(val newQuery: String) : SearchAction {
 
             dependencies.searchForNameUseCase(name = scope.currentState.searchText).onFailure {
                 Timber.e("-=- $it")
+            }
+
+            scope.setState {
+                it.copy(isLoading = false)
             }
         }
 

@@ -17,9 +17,7 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 
 // region 0.0.1
-// TODO: Query Item On click -> set query as search text (with instant search)
 // TODO: Add support for adding / removing book from user's library within the search screen
-// TODO: Loading indicator on search screen
 // TODO: get user books Query could potentially be done using the 'me' query?
 // TODO: The refresh function seems to not actually refresh when updating from outside of the app, why?
 // TODO: Loader / refresh within the library screen?

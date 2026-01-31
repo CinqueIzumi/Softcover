@@ -7,4 +7,5 @@ data class SearchScreenUiState(
     val previousSearchQueries: List<String> = emptyList(),
     val queriedBooks: List<Book> = emptyList(),
     val searchText: String = "",
+    val isLoading: Boolean = false,
 ) : UiState
