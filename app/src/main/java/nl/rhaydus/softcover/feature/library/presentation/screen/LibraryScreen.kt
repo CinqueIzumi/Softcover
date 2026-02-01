@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
@@ -72,7 +73,6 @@ object LibraryScreen : Screen {
         onBookClick: (Book) -> Unit,
     ) {
         val tabs = LibraryStatusTab.entries
-        val pagerState = rememberPagerState() { tabs.size }
         val scope = rememberCoroutineScope()
 
         Scaffold(
@@ -85,14 +85,14 @@ object LibraryScreen : Screen {
                 modifier = Modifier.padding(it)
             ) {
                 PrimaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
+                    selectedTabIndex = state.pagerState.currentPage,
                     tabs = {
                         tabs.forEachIndexed { index, tab ->
                             Tab(
-                                selected = pagerState.currentPage == index,
+                                selected = state.pagerState.currentPage == index,
                                 onClick = {
                                     scope.launch {
-                                        pagerState.animateScrollToPage(index)
+                                        state.pagerState.animateScrollToPage(index)
                                     }
                                 },
                                 modifier = Modifier.padding(all = 8.dp),
@@ -115,7 +115,7 @@ object LibraryScreen : Screen {
                     }
                 ) {
                     HorizontalPager(
-                        state = pagerState,
+                        state = state.pagerState,
                         modifier = pagerModifier,
                     ) { page ->
                         val books = when (tabs[page]) {
