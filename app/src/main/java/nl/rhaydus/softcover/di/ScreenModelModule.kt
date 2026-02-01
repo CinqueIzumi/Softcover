@@ -43,6 +43,7 @@ val screenModelModule = module {
             appDispatchers = get(),
             markBookAsWantToReadUseCase = get(),
             markBookAsReadingUseCase = get(),
+            removeBookFromLibraryUseCase = get(),
             flows = getAll(),
         )
     }

@@ -16,10 +16,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
 
-// region 0.0.1
-// TODO: Detail screen should add an action to allow for removing user books
-// endregion
-
 // region 0.0.2
 // TODO: Fix search screen label for amount of readers, but also any missing data...
 // TODO: Clean up book dao
@@ -32,6 +28,7 @@ import timber.log.Timber
 // TODO: Koin modules should be feature package based
 // TODO: Maybe add some sort of tag/genre searching if possible?
 // TODO: Add support for dynamic colors at some point
+// TODO: Navigation animations?
 // endregion
 
 class SoftCoverApp : Application() {
