@@ -17,6 +17,8 @@ interface CachingLocalDataSource {
     suspend fun cacheBooks(books: List<Book>)
 
     suspend fun removeUserBooksById(ids: List<Int>)
+
+    suspend fun removeAllBooks()
 }
 
 class CachingLocalDataSourceImpl(
@@ -42,4 +44,6 @@ class CachingLocalDataSourceImpl(
             dao.deleteAllForUserBookId(userBookId = userBookId)
         }
     }
+
+    override suspend fun removeAllBooks() = dao.deleteAllUserBooksAndData()
 }

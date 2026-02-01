@@ -66,7 +66,10 @@ val useCaseModule = module {
     }
 
     factory {
-        ResetUserDataUseCase(settingsRepository = get())
+        ResetUserDataUseCase(
+            settingsRepository = get(),
+            cachingRepository = get(),
+        )
     }
 
     factory {

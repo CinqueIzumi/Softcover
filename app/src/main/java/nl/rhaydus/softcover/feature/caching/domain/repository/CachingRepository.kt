@@ -16,4 +16,6 @@ interface CachingRepository {
     suspend fun cacheBooks(books: List<Book>)
 
     suspend fun removeBook(book: Book)
+
+    suspend fun removeAllBooks()
 }

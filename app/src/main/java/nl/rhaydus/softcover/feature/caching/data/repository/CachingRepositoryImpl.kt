@@ -48,4 +48,6 @@ class CachingRepositoryImpl(
 
         cachingLocalDataSource.removeUserBooksById(ids = listOf(userId))
     }
+
+    override suspend fun removeAllBooks() = cachingLocalDataSource.removeAllBooks()
 }

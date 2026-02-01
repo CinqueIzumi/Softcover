@@ -28,6 +28,9 @@ interface BookDao {
     @Query("SELECT * from books WHERE statusCode = :statusCode ORDER BY userUpdatedAt DESC")
     fun getBooksByStatus(statusCode: Int): Flow<List<BookFullEntity>>
 
+    @Query("SELECT userBookId FROM books")
+    suspend fun getAllUserBookIds(): List<Int>
+
     // ---------- Inserts ----------
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(book: BookEntity)
@@ -106,5 +109,14 @@ interface BookDao {
         clearEditionAuthors(bookId)
         deleteEditions(bookId)
         deleteBook(bookId)
+    }
+
+    @Transaction
+    suspend fun deleteAllUserBooksAndData() {
+        val bookIds = getAllUserBookIds()
+
+        bookIds.forEach {
+            deleteAllForUserBookId(userBookId = it)
+        }
     }
 }
