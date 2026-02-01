@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.Optional
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.MarkBookAsReadingMutation
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
+import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book.data.mapper.toBook
 import nl.rhaydus.softcover.type.UserBookCreateInput
@@ -83,5 +84,16 @@ class BookDetailRemoteDataSourceImpl(
             ?.toBook() ?: throw Exception("Book could not be mapped")
 
         return book
+    }
+
+    override suspend fun removeBookFromLibrary(book: Book) {
+        if (book.userBookId == null) {
+            throw Exception("User was missing a user book id")
+        }
+
+        apolloClient
+            .mutation(mutation = RemoveUserBookMutation(id = book.userBookId))
+            .execute()
+            .dataOrThrow()
     }
 }

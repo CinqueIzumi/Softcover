@@ -18,4 +18,8 @@ class BookDetailRepositoryImpl(
     override suspend fun markBookAsReading(book: Book): Book {
         return bookDetailRemoteDataSource.markBookAsReading( book)
     }
+
+    override suspend fun removeBookFromLibrary(book: Book) {
+        return bookDetailRemoteDataSource.removeBookFromLibrary(book = book)
+    }
 }

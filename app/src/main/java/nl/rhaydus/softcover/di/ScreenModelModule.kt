@@ -70,6 +70,7 @@ val screenModelModule = module {
             removeAllSearchQueriesUseCase = get(),
             getAllUserBooksUseCase = get(),
             markBookAsWantToReadUseCase = get(),
+            removeBookFromLibraryUseCase = get(),
         )
     }
 }

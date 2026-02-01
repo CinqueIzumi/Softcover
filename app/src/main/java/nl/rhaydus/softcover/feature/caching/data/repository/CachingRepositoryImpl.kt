@@ -42,4 +42,10 @@ class CachingRepositoryImpl(
     override suspend fun cacheBooks(books: List<Book>) {
         cachingLocalDataSource.cacheBooks(books = books)
     }
+
+    override suspend fun removeBook(book: Book) {
+        val userId: Int = book.userBookId ?: throw Exception("Book has no user book id")
+
+        cachingLocalDataSource.removeUserBooksById(ids = listOf(userId))
+    }
 }

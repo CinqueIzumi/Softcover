@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.GetQueriedBooksUseCase
@@ -19,6 +20,7 @@ data class SearchDependencies(
     val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
     val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
+    val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

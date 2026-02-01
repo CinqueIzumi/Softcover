@@ -8,4 +8,6 @@ interface BookDetailRemoteDataSource {
     suspend fun markBookAsWantToRead(bookId: Int): Book
 
     suspend fun markBookAsReading(book: Book): Book
+
+    suspend fun removeBookFromLibrary(book: Book)
 }

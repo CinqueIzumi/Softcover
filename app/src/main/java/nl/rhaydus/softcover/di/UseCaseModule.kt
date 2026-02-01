@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.di
 import nl.rhaydus.softcover.feature.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
@@ -97,6 +98,13 @@ val useCaseModule = module {
         MarkBookAsReadingUseCase(
             bookDetailRepository = get(),
             cachingRepository = get(),
+        )
+    }
+
+    factory {
+        RemoveBookFromLibraryUseCase(
+            cachingRepository = get(),
+            bookDetailRepository = get()
         )
     }
 }
