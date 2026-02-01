@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
@@ -20,6 +22,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,6 +30,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
@@ -36,8 +40,6 @@ import nl.rhaydus.softcover.core.presentation.screen.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
-import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnLibraryStatusTabClickAction
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
@@ -53,7 +55,6 @@ object LibraryScreen : Screen {
 
         Screen(
             state = state,
-            runAction = viewModel::runAction,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
             }
@@ -63,9 +64,12 @@ object LibraryScreen : Screen {
     @Composable
     fun Screen(
         state: LibraryUiState,
-        runAction: (LibraryAction) -> Unit,
         onBookClick: (Book) -> Unit,
     ) {
+        val tabs = LibraryStatusTab.entries
+        val pagerState = rememberPagerState() { tabs.size }
+        val scope = rememberCoroutineScope()
+
         Scaffold(
             topBar = {
                 SoftcoverTopBar(title = "Library")
@@ -75,35 +79,55 @@ object LibraryScreen : Screen {
             Column(
                 modifier = Modifier.padding(it)
             ) {
-                TabSelector(
-                    state = state,
-                    runAction = runAction,
+                PrimaryScrollableTabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                    tabs = {
+                        tabs.forEachIndexed { index, tab ->
+                            Tab(
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                                modifier = Modifier.padding(all = 8.dp),
+                            ) {
+                                Text(text = tab.label)
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                val books = when (state.selectedTab) {
-                    LibraryStatusTab.ALL -> state.allBooks
-                    LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooks
-                    LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooks
-                    LibraryStatusTab.READ -> state.readBooks
-                    LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooks
-                }
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    val books = when (tabs[page]) {
+                        LibraryStatusTab.ALL -> state.allBooks
+                        LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooks
+                        LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooks
+                        LibraryStatusTab.READ -> state.readBooks
+                        LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooks
+                    }
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    contentPadding = PaddingValues(bottom = LocalBottomBarPadding.current),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(books) { book ->
-                        BookEntry(
-                            book = book,
-                            onBookClick = onBookClick,
-                        )
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                        contentPadding = PaddingValues(bottom = LocalBottomBarPadding.current),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(books) { book ->
+                            BookEntry(
+                                book = book,
+                                onBookClick = onBookClick,
+                            )
+                        }
                     }
                 }
             }
@@ -138,30 +162,6 @@ object LibraryScreen : Screen {
             )
         }
     }
-
-    @Composable
-    private fun TabSelector(
-        state: LibraryUiState,
-        runAction: (LibraryAction) -> Unit,
-    ) {
-        PrimaryScrollableTabRow(
-            selectedTabIndex = LibraryStatusTab.entries.indexOf(state.selectedTab),
-            tabs = {
-                LibraryStatusTab.entries.forEachIndexed { index, tab ->
-                    Tab(
-                        selected = tab == state.selectedTab,
-                        onClick = {
-                            runAction(OnLibraryStatusTabClickAction(tab = tab))
-                        },
-                        modifier = Modifier.padding(all = 8.dp),
-                    ) {
-                        Text(text = tab.label)
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
 }
 
 @StandardPreview
@@ -170,14 +170,12 @@ private fun LibraryScreenPreview() {
     SoftcoverTheme {
         LibraryScreen.Screen(
             state = LibraryUiState(
-                selectedTab = LibraryStatusTab.WANT_TO_READ,
                 wantToReadBooks = listOf(
                     PreviewData.baseBook.copy(title = "Last to Leave the room"),
                     PreviewData.baseBook.copy(title = "Futility"),
                     PreviewData.baseBook.copy(title = "We call them witches"),
                 )
             ),
-            runAction = {},
             onBookClick = {},
         )
     }
