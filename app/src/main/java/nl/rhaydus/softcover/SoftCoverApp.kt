@@ -29,6 +29,7 @@ import timber.log.Timber
 // TODO: Maybe add some sort of tag/genre searching if possible?
 // TODO: Add support for dynamic colors at some point
 // TODO: Navigation animations?
+// TODO: Auto updater vs google play updater?
 // endregion
 
 class SoftCoverApp : Application() {
