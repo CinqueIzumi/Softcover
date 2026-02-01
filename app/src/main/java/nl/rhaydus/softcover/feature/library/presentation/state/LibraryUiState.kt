@@ -9,4 +9,5 @@ data class LibraryUiState(
     val currentlyReadingBooks: List<Book> = emptyList(),
     val readBooks: List<Book> = emptyList(),
     val dnfBooks: List<Book> = emptyList(),
+    val isLoading: Boolean = true,
 ) : UiState

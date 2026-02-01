@@ -15,7 +15,10 @@ class DidNotFinishBooksCollector : LibraryInitializer {
     ) {
         dependencies.getDidNotFinishUserBooksUseCase().collectLatest { books: List<Book> ->
             scope.setState {
-                it.copy(dnfBooks = books)
+                it.copy(
+                    dnfBooks = books,
+                    isLoading = false,
+                )
             }
         }
     }

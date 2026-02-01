@@ -15,7 +15,10 @@ class ReadBooksCollector : LibraryInitializer {
     ) {
         dependencies.getReadUserBooksUseCase().collectLatest { books: List<Book> ->
             scope.setState {
-                it.copy(readBooks = books)
+                it.copy(
+                    readBooks = books,
+                    isLoading = false,
+                )
             }
         }
     }

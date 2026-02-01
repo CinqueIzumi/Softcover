@@ -15,7 +15,10 @@ class AllBooksCollector : LibraryInitializer {
     ) {
         dependencies.getAllUserBooksUseCase().collectLatest { books: List<Book> ->
             scope.setState {
-                it.copy(allBooks = books)
+                it.copy(
+                    allBooks = books,
+                    isLoading = false,
+                )
             }
         }
     }

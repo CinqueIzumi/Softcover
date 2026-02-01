@@ -29,6 +29,7 @@ val screenModelModule = module {
             getCurrentlyReadingUserBooksUseCase = get(),
             getReadUserBooksUseCase = get(),
             getDidNotFinishUserBooksUseCase = get(),
+            initializeUserBooksUseCase = get(),
         )
     }
 

@@ -20,6 +20,7 @@ import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,6 +41,8 @@ import nl.rhaydus.softcover.core.presentation.screen.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
@@ -55,6 +58,7 @@ object LibraryScreen : Screen {
 
         Screen(
             state = state,
+            runAction = viewModel::runAction,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
             }
@@ -64,6 +68,7 @@ object LibraryScreen : Screen {
     @Composable
     fun Screen(
         state: LibraryUiState,
+        runAction: (LibraryAction) -> Unit,
         onBookClick: (Book) -> Unit,
     ) {
         val tabs = LibraryStatusTab.entries
@@ -101,32 +106,41 @@ object LibraryScreen : Screen {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.weight(1f)
-                ) { page ->
-                    val books = when (tabs[page]) {
-                        LibraryStatusTab.ALL -> state.allBooks
-                        LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooks
-                        LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooks
-                        LibraryStatusTab.READ -> state.readBooks
-                        LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooks
-                    }
+                val pagerModifier = Modifier.weight(1f)
 
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
-                        contentPadding = PaddingValues(bottom = LocalBottomBarPadding.current),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(books) { book ->
-                            BookEntry(
-                                book = book,
-                                onBookClick = onBookClick,
-                            )
+                PullToRefreshBox(
+                    isRefreshing = state.isLoading,
+                    onRefresh = {
+                        runAction(OnRefreshAction())
+                    }
+                ) {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = pagerModifier,
+                    ) { page ->
+                        val books = when (tabs[page]) {
+                            LibraryStatusTab.ALL -> state.allBooks
+                            LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooks
+                            LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooks
+                            LibraryStatusTab.READ -> state.readBooks
+                            LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooks
+                        }
+
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
+                            contentPadding = PaddingValues(bottom = LocalBottomBarPadding.current),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(books) { book ->
+                                BookEntry(
+                                    book = book,
+                                    onBookClick = onBookClick,
+                                )
+                            }
                         }
                     }
                 }
@@ -177,6 +191,7 @@ private fun LibraryScreenPreview() {
                 )
             ),
             onBookClick = {},
+            runAction = {},
         )
     }
 }
