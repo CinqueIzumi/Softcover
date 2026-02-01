@@ -1,0 +1,19 @@
+fragment EditionFragment on editions {
+    id
+    title
+    contributions {
+        author {
+            name
+            id
+        }
+    }
+    isbn_10
+    pages
+    publisher {
+        name
+    }
+    image {
+        url
+    }
+    release_year
+}

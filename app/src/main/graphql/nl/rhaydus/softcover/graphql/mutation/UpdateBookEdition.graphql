@@ -1,0 +1,13 @@
+mutation UpdateBookEdition(
+    $id: Int!,
+    $object: UserBookUpdateInput!,
+) {
+    update_user_book(
+        object: $object,
+        id: $id,
+    ) {
+        user_book {
+            ...UserBookFragment
+        }
+    }
+}

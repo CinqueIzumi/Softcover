@@ -1,0 +1,5 @@
+mutation RemoveUserBook($id: Int!) {
+    delete_user_book(id: $id) {
+        id
+    }
+}

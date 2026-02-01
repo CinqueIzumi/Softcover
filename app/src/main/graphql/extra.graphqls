@@ -1,0 +1,5 @@
+# NOTE: This is required to ensure that each object is only cached once, based on the ID as identifier
+extend type user_books @typePolicy(keyFields: "id")
+extend type user_book_reads @typePolicy(keyFields: "id")
+extend type editions @typePolicy(keyFields: "id")
+extend type books @typePolicy(keyFields: "id")

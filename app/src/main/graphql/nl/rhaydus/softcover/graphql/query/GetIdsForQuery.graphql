@@ -1,0 +1,12 @@
+query GetIdsForQuery(
+    $query: String!,
+) {
+    search(
+        query: $query
+        per_page: 25
+        sort: "_text_match:desc,users_count:desc"
+        weights: "5,5,3,1,1"
+    ) {
+        ids
+    }
+}

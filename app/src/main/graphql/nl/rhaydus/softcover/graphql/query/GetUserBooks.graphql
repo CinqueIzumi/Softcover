@@ -1,0 +1,9 @@
+query GetUserBooks {
+    me {
+        user_books(
+            order_by: { updated_at: desc}
+        ) {
+            ...UserBookFragment
+        }
+    }
+}

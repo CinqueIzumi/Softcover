@@ -1,0 +1,7 @@
+fragment UserBookReadFragment on user_book_reads{
+    id
+    progress
+    progress_pages
+    started_at
+    finished_at
+}

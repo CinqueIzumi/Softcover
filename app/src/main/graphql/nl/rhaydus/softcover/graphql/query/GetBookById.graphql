@@ -1,0 +1,13 @@
+query GetBookById(
+    $id: Int!,
+) {
+    books(
+        where: {
+            id: {
+                _eq: $id
+            }
+        }
+    ) {
+        ...BookFragment
+    }
+}

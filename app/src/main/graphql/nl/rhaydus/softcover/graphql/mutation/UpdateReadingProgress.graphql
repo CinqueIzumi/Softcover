@@ -1,0 +1,13 @@
+mutation UpdateReadingProgress(
+    $id: Int!,
+    $datesReadInput: DatesReadInput!
+) {
+    update_user_book_read(
+        id: $id,
+        object: $datesReadInput
+    ) {
+        user_book_read {
+            ...UserBookReadFragment
+        }
+    }
+}
