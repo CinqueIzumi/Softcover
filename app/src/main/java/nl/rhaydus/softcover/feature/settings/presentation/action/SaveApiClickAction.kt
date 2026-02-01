@@ -25,6 +25,10 @@ data object SaveApiKeyClickAction : SettingsAction {
             dependencies.updateApiKeyUseCase(key = updatedKey).onSuccess {
                 dependencies.initializeUserIdUseCase().onFailure {
                     SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
+                }.onSuccess {
+                    dependencies.initializeUserBooksUseCase().onFailure {
+                        Timber.e("-=- $it")
+                    }
                 }
             }
         }

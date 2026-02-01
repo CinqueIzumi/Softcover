@@ -4,6 +4,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.feature.caching.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
@@ -20,6 +21,7 @@ class SettingsScreenViewModel(
     private val getApiKeyUseCase: GetApiKeyUseCase,
     private val initializeUserIdUseCase: InitializeUserIdUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
+    private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
     appDispatchers: AppDispatchers,
     flows: List<SettingsInitializer>,
 ) : ToadViewModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsInitializer, SettingsLocalVariables>(
@@ -46,6 +48,7 @@ class SettingsScreenViewModel(
         getApiKeyUseCase = getApiKeyUseCase,
         initializeUserIdUseCase = initializeUserIdUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
+        initializeUserBooksUseCase = initializeUserBooksUseCase,
     )
 
     fun runAction(action: SettingsAction) = dispatch(action)

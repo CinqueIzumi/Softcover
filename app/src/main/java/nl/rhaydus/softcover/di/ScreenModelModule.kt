@@ -16,7 +16,8 @@ val screenModelModule = module {
             initializeUserIdUseCase = get(),
             resetUserDataUseCase = get(),
             appDispatchers = get(),
-            flows = getAll()
+            flows = getAll(),
+            initializeUserBooksUseCase = get(),
         )
     }
 
