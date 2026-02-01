@@ -1,6 +1,5 @@
 query GetBookById(
     $id: Int!,
-    $userId: Int!
 ) {
     books(
         where: {

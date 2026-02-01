@@ -6,6 +6,11 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 
 object PreviewData {
+    val baseAuthor = Author(
+        name = "Caitlin Starling",
+        id = 1,
+    )
+
     val baseEdition = BookEdition(
         id = 1,
         title = "Last to leave the Room",
@@ -14,9 +19,7 @@ object PreviewData {
         pages = 100,
         url = "",
         releaseYear = 2023,
-        authors = listOf(
-            Author(name = "Caitlin Starling")
-        )
+        authors = listOf(baseAuthor)
     )
 
     val baseBook = Book(
@@ -29,17 +32,23 @@ object PreviewData {
             baseEdition,
         ),
         coverUrl = "",
-        status = BookStatus.None,
-        authors = listOf(
-            Author(name = "Caitlin Starling")
-        ),
+        userStatus = BookStatus.None,
+        authors = listOf(baseAuthor),
         currentPage = 20,
         progress = null,
-        editionId = null,
+        userEditionId = null,
         userBookId = null,
         userBookReadId = null,
         startedAt = null,
         finishedAt = null,
         defaultEdition = baseEdition,
+        userDateAdded = null,
+        userLastReadDate = null,
+        userPrivacySettingId = null,
+        userRating = null,
+        userReferrerUserId = null,
+        userReviewHasSpoilers = null,
+        userReviewedAt = null,
+        userUpdatedAt = null,
     )
 }

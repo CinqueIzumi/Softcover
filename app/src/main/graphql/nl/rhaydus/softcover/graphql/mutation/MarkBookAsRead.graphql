@@ -2,6 +2,8 @@ mutation MarkBookAsRead($userBookCreateInput: UserBookCreateInput!) {
     insert_user_book(
         object: $userBookCreateInput
     ) {
-        error
+        user_book {
+            ...UserBookFragment
+        }
     }
 }

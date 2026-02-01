@@ -2,16 +2,17 @@ package nl.rhaydus.softcover.feature.reading.presentation.action
 
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenDependencies
 
 data object DismissEditionSheetAction : ReadingAction {
     override suspend fun execute(
         dependencies: ReadingScreenDependencies,
-        scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent>,
+        scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
         scope.setState {
-            copy(
+            it.copy(
                 bookToUpdate = null,
                 showEditionSheet = false,
             )

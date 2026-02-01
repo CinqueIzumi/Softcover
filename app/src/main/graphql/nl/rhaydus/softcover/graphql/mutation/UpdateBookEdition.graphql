@@ -1,20 +1,13 @@
 mutation UpdateBookEdition(
     $id: Int!,
-    $userId: Int!,
     $object: UserBookUpdateInput!,
 ) {
     update_user_book(
         object: $object,
         id: $id,
     ) {
-        error
-
         user_book {
-            id
-
-            book {
-                ...BookFragment
-            }
+            ...UserBookFragment
         }
     }
 }

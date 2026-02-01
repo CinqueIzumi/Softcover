@@ -6,6 +6,7 @@ fragment BookFragment on books {
     image {
         url
     }
+
     default_physical_edition {
         ...EditionFragment
     }
@@ -13,30 +14,16 @@ fragment BookFragment on books {
     contributions {
         author {
             name
+            id
         }
     }
     release_year
+
     editions(
         order_by: {
             users_count: desc
         }
     ) {
         ...EditionFragment
-    }
-
-    user_books(
-        where: {
-            user_id: {_eq: $userId}
-        },
-        distinct_on: book_id
-    ) {
-        ...UserBookFragment
-
-        user_book_reads(
-            limit: 1,
-            order_by: {started_at: desc},
-        ) {
-            ...UserBookReadFragment
-        }
     }
 }

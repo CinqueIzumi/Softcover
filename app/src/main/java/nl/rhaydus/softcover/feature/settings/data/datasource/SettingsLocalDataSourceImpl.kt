@@ -10,21 +10,21 @@ class SettingsLocalDataSourceImpl(
     private val appSettingsDataStore: AppSettingsDataStore,
 ) : SettingsLocalDataSource {
     override suspend fun updateApiKey(key: String) {
-        appSettingsDataStore.updateData {
+        appSettingsDataStore.store.updateData {
             it.copy(apiKey = key)
         }
     }
 
     override suspend fun getApiKey(): String {
-        return appSettingsDataStore.data.first().apiKey
+        return appSettingsDataStore.store.data.first().apiKey
     }
 
     override fun getUserId(): Flow<Int> {
-        return appSettingsDataStore.data.map { it.userId }.distinctUntilChanged()
+        return appSettingsDataStore.store.data.map { it.userId }.distinctUntilChanged()
     }
 
     override suspend fun updateUserId(id: Int) {
-        appSettingsDataStore.updateData {
+        appSettingsDataStore.store.updateData {
             it.copy(userId = id)
         }
     }

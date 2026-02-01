@@ -10,26 +10,24 @@ class BooksRepositoryImpl(
     override suspend fun updateBookProgress(
         book: Book,
         newPage: Int,
-    ) {
-        bookRemoteDataSource.updateBookProgress(
+    ): Book {
+        return bookRemoteDataSource.updateBookProgress(
             book = book,
             newPage = newPage,
         )
     }
 
-    override suspend fun markBookAsRead(book: Book) {
-        bookRemoteDataSource.markBookAsRead(book = book)
+    override suspend fun markBookAsRead(book: Book): Book {
+        return bookRemoteDataSource.markBookAsRead(book = book)
     }
 
     override suspend fun updateBookEdition(
         userBookId: Int,
         newEditionId: Int,
-        userId: Int,
-    ) {
-        bookRemoteDataSource.updateBookEdition(
+    ): Book {
+        return bookRemoteDataSource.updateBookEdition(
             userBookId = userBookId,
             newEditionId = newEditionId,
-            userId = userId,
         )
     }
 }

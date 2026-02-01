@@ -1,0 +1,9 @@
+mutation MarkBookAsWantToRead(
+    $object: UserBookCreateInput!
+) {
+    insert_user_book(object: $object) {
+        user_book {
+            ...UserBookFragment
+        }
+    }
+}

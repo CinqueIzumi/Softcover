@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.action
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenDependencies
 import timber.log.Timber
@@ -10,12 +11,12 @@ import timber.log.Timber
 data class OnNewEditionSaveClickAction(val edition: BookEdition) : ReadingAction {
     override suspend fun execute(
         dependencies: ReadingScreenDependencies,
-        scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent>,
+        scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
         val userBookId = scope.currentState.bookToUpdate?.userBookId ?: return
 
         dependencies.launch {
-            scope.setState { copy(isLoading = true) }
+            scope.setState { it.copy(isLoading = true) }
 
             dependencies.updateBookEditionUseCase(
                 userBookId = userBookId,
@@ -24,9 +25,9 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : ReadingAction
                 Timber.e("-=- Something went wrong updating book edition! $it")
             }
 
-            scope.setState { copy(isLoading = false) }
+            scope.setState { it.copy(isLoading = false) }
         }
 
-        scope.setState { copy(showEditionSheet = false) }
+        scope.setState { it.copy(showEditionSheet = false) }
     }
 }

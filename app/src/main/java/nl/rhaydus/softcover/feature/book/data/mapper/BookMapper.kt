@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.fragment.BookFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
-import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import kotlin.math.roundToInt
 
 private fun EditionFragment.toBookEdition(): BookEdition {
@@ -17,48 +16,29 @@ private fun EditionFragment.toBookEdition(): BookEdition {
         url = image?.url,
         publisher = publisher?.name,
         pages = pages,
-        authors = contributions.map { contribution ->
-            Author(name = contribution.author?.name ?: "")
+        authors = contributions.mapNotNull { contribution ->
+            val author = contribution.author ?: return@mapNotNull null
+            val id = author.id
+
+            Author(
+                name = author.name,
+                id = id,
+            )
         },
         isbn10 = isbn_10,
         releaseYear = release_year ?: -1,
     )
 }
 
-fun BookFragment.toBookWithOptionals(): Book {
-    val baseBook = this.toBook()
-
-    val userBooks = user_books.firstOrNull() ?: return baseBook
-    val userBooksFragment = userBooks.userBookFragment
-
-    val userBook = userBooksFragment.appendBookWithStatus(book = baseBook)
-
-    val userBookReadFragment =
-        userBooks.user_book_reads.firstOrNull()?.userBookReadFragment ?: return userBook
-
-    return userBookReadFragment.appendBookWithOptionals(book = userBook)
+fun UserBookFragment.toBook(): Book {
+    return book.bookFragment.toBook(userBookFragment = this)
 }
 
-private fun UserBookFragment.appendBookWithStatus(book: Book): Book {
-    return book.copy(
-        status = BookStatus.getFromCode(code = status_id),
-        userBookId = id,
-    )
-}
-
-private fun UserBookReadFragment.appendBookWithOptionals(book: Book): Book {
-    return book.copy(
-        currentPage = progress_pages ?: 0,
-        progress = progress?.toFloat() ?: 0f,
-        editionId = edition?.editionFragment?.id,
-        userBookReadId = id,
-        startedAt = started_at,
-        finishedAt = finished_at,
-    )
-}
-
-private fun BookFragment.toBook(): Book {
+fun BookFragment.toBook(
+    userBookFragment: UserBookFragment? = null,
+): Book {
     val rating = ((rating ?: 0.0) * 10).roundToInt() / 10.0
+    val userBookReadFragment = userBookFragment?.user_book_reads?.firstOrNull()?.userBookReadFragment
 
     return Book(
         id = id,
@@ -70,17 +50,32 @@ private fun BookFragment.toBook(): Book {
         rating = rating,
         releaseYear = release_year ?: -1,
         coverUrl = image?.url ?: "",
-        status = BookStatus.None,
-        authors = contributions.map { contribution ->
-            Author(name = contribution.author?.name ?: "")
+        userStatus = userBookFragment?.status_id?.let { BookStatus.getFromCode(it) }
+            ?: BookStatus.None,
+        authors = contributions.mapNotNull { contribution ->
+            val author = contribution.author ?: return@mapNotNull null
+            val id = author.id
+
+            Author(
+                name = author.name,
+                id = id,
+            )
         },
-        currentPage = null,
-        progress = null,
-        editionId = null,
-        userBookId = null,
-        startedAt = null,
-        finishedAt = null,
-        userBookReadId = null,
-        defaultEdition = default_physical_edition?.editionFragment?.toBookEdition()
+        currentPage = userBookReadFragment?.let { it.progress_pages ?: 0 },
+        progress = userBookReadFragment?.let { it.progress?.toFloat() ?: 0f },
+        userEditionId = userBookFragment?.edition_id,
+        startedAt = userBookReadFragment?.started_at,
+        finishedAt = userBookReadFragment?.finished_at,
+        userBookReadId = userBookReadFragment?.id,
+        userBookId = userBookFragment?.id,
+        defaultEdition = default_physical_edition?.editionFragment?.toBookEdition(),
+        userLastReadDate = userBookFragment?.last_read_date,
+        userDateAdded = userBookFragment?.date_added,
+        userPrivacySettingId = userBookFragment?.privacy_setting_id,
+        userRating = userBookFragment?.rating,
+        userReferrerUserId = userBookFragment?.referrer_user_id,
+        userReviewHasSpoilers = userBookFragment?.review_has_spoilers,
+        userReviewedAt = userBookFragment?.reviewed_at,
+        userUpdatedAt = userBookFragment?.updated_at,
     )
 }

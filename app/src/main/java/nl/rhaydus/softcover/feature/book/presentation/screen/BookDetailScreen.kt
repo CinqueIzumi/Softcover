@@ -2,13 +2,11 @@ package nl.rhaydus.softcover.feature.book.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +40,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -50,11 +48,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
+import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
@@ -64,23 +62,26 @@ import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.feature.book.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnFabClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnMarkBookAsReadingClickAction
+import nl.rhaydus.softcover.feature.book.presentation.action.OnMarkBookAsWantToReadClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnProgressTabClickAction
+import nl.rhaydus.softcover.feature.book.presentation.action.OnRemoveBookClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnShowUpdateProgressSheetClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnUpdatePercentageProgressClickAction
+import nl.rhaydus.softcover.feature.book.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailScreenViewModel
 import kotlin.math.roundToInt
 
-// TODO: Maybe add some sort of caching? Apollo normalized cache maybe? Initial load is slow...
 class BookDetailScreen(
     val id: Int,
 ) : Screen {
@@ -91,6 +92,14 @@ class BookDetailScreen(
         val viewModel: BookDetailScreenViewModel = koinScreenModel<BookDetailScreenViewModel>()
 
         val state: BookDetailUiState by viewModel.state.collectAsStateWithLifecycle()
+
+        ObserveAsEvents(flow = viewModel.events) {
+            when (it) {
+                is RefreshDetailBookEvent -> {
+                    viewModel.runAction(action = InitializeBookWithIdAction(id = id))
+                }
+            }
+        }
 
         LaunchedEffect(Unit) {
             val action = InitializeBookWithIdAction(id = id)
@@ -120,7 +129,7 @@ class BookDetailScreen(
                 )
             },
             floatingActionButton = {
-                if (state.book?.status != BookStatus.Reading) return@Scaffold
+                val userStatus = state.book?.userStatus ?: return@Scaffold
 
                 FloatingActionButtonMenu(
                     expanded = state.fabMenuExpanded,
@@ -137,28 +146,43 @@ class BookDetailScreen(
                         }
                     }
                 ) {
-                    FloatingActionButtonMenuItem(
-                        onClick = {
-                            runAction(OnShowEditEditionSheetClickAction())
-                        },
-                        text = { Text(text = "Change edition") },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Default.LibraryBooks,
-                                contentDescription = "Edition icon"
-                            )
-                        }
-                    )
+                    if (userStatus == BookStatus.Reading) {
+                        FloatingActionButtonMenuItem(
+                            onClick = {
+                                runAction(OnShowEditEditionSheetClickAction())
+                            },
+                            text = { Text(text = "Change edition") },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.LibraryBooks,
+                                    contentDescription = "Edition icon"
+                                )
+                            }
+                        )
+
+                        FloatingActionButtonMenuItem(
+                            onClick = {
+                                runAction(OnShowUpdateProgressSheetClickAction())
+                            },
+                            text = { Text(text = "Update progress") },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.MenuBook,
+                                    contentDescription = "Progress icon"
+                                )
+                            }
+                        )
+                    }
 
                     FloatingActionButtonMenuItem(
                         onClick = {
-                            runAction(OnShowUpdateProgressSheetClickAction())
+                            runAction(OnRemoveBookClickAction(book = state.book))
                         },
-                        text = { Text(text = "Update progress") },
+                        text = { Text(text = "Remove") },
                         icon = {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Default.MenuBook,
-                                contentDescription = "Progress icon"
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete icon"
                             )
                         }
                     )
@@ -177,20 +201,14 @@ class BookDetailScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    val coverImageShape = RoundedCornerShape(4.dp)
-
-                    SubcomposeAsyncImage(
-                        model = state.book?.currentEdition?.url,
+                    EditionImage(
+                        edition = state.book?.currentEdition,
                         modifier = Modifier
-                            .fillMaxWidth(2f / 4f)
-                            .aspectRatio(2f / 3f)
+                            .fillMaxWidth(0.5f)
                             .shimmer(
-                                shape = coverImageShape,
+                                shape = RoundedCornerShape(4.dp),
                                 isLoading = state.loading,
                             )
-                            .clip(shape = RoundedCornerShape(4.dp)),
-                        contentDescription = "Book image",
-                        loading = { Box(modifier = Modifier.shimmer(shape = coverImageShape)) }
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -334,9 +352,16 @@ class BookDetailScreen(
 
         val book = state.book ?: return
 
-        when (book.status) {
+        when (book.userStatus) {
             BookStatus.Reading -> ReadingContainer(state = state)
-            BookStatus.None -> WantToReadButton()
+
+            BookStatus.None -> {
+                WantToReadButton(
+                    runAction = runAction,
+                    book = book
+                )
+            }
+
             else -> MarkAsReadingButton(
                 book = book,
                 markBookAsReading = {
@@ -431,11 +456,14 @@ class BookDetailScreen(
     }
 
     @Composable
-    fun WantToReadButton() {
+    fun WantToReadButton(
+        book: Book,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
         SoftcoverButton(
             label = "Want to Read",
             onClick = {
-                TODO("Implement this")
+                runAction(OnMarkBookAsWantToReadClickAction(book = book))
             },
             style = ButtonStyle.FILLED,
             modifier = Modifier.fillMaxWidth(),
@@ -491,7 +519,7 @@ private fun BookDetailScreenReadingPreview() {
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
         ) {
             val book = PreviewData.baseBook.copy(
-                status = BookStatus.Reading,
+                userStatus = BookStatus.Reading,
                 progress = 0.8f,
                 currentPage = 20,
             )
@@ -517,7 +545,7 @@ private fun BookDetailScreenIgnoredPreview() {
         Column(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
         ) {
-            val book = PreviewData.baseBook.copy(status = BookStatus.None)
+            val book = PreviewData.baseBook.copy(userStatus = BookStatus.None)
 
             BookDetailScreen(
                 id = 1,

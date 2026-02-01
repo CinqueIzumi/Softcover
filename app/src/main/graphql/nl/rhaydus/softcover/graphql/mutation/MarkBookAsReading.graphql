@@ -1,0 +1,13 @@
+mutation MarkBookAsReading(
+    $id: Int!,
+    $object: UserBookUpdateInput!,
+) {
+    update_user_book(
+        id: $id,
+        object: $object,
+    ) {
+        user_book {
+            ...UserBookFragment
+        }
+    }
+}

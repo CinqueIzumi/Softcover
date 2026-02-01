@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.action
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
+import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsScreenDependencies
 import timber.log.Timber
@@ -10,7 +11,7 @@ import timber.log.Timber
 data object SaveApiKeyClickAction : SettingsAction {
     override suspend fun execute(
         dependencies: SettingsScreenDependencies,
-        scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent>,
+        scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent, SettingsLocalVariables>,
     ) {
         val updatedKey = scope.currentState.apiKey
             .removePrefix("Bearer")
@@ -24,6 +25,10 @@ data object SaveApiKeyClickAction : SettingsAction {
             dependencies.updateApiKeyUseCase(key = updatedKey).onSuccess {
                 dependencies.initializeUserIdUseCase().onFailure {
                     SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
+                }.onSuccess {
+                    dependencies.initializeUserBooksUseCase().onFailure {
+                        Timber.e("-=- $it")
+                    }
                 }
             }
         }

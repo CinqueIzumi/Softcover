@@ -3,13 +3,14 @@ package nl.rhaydus.softcover.feature.reading.presentation.action
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenDependencies
 
 data class OnUpdatePageProgressClickAction(val newPage: String) : ReadingAction {
     override suspend fun execute(
         dependencies: ReadingScreenDependencies,
-        scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent>,
+        scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
         val bookToUpdate: Book = scope.currentState.bookToUpdate ?: return
 
@@ -21,14 +22,14 @@ data class OnUpdatePageProgressClickAction(val newPage: String) : ReadingAction 
                 newPage = newPageValue,
                 setLoading = { newValue ->
                     scope.setState {
-                        copy(isLoading = newValue)
+                        it.copy(isLoading = newValue)
                     }
                 }
             )
         }
 
         scope.setState {
-            copy(
+            it.copy(
                 showProgressSheet = false,
                 bookToUpdate = null,
             )

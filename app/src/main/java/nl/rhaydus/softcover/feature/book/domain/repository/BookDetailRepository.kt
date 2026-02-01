@@ -1,17 +1,13 @@
 package nl.rhaydus.softcover.feature.book.domain.repository
 
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 
 interface BookDetailRepository {
-    suspend fun fetchBookById(
-        id: Int,
-        userId: Int,
-    ): Book
+    suspend fun fetchBookById(id: Int): Book
 
-    suspend fun updateBookStatus(
-        book: Book,
-        newStatus: BookStatus,
-        userId: Int,
-    )
+    suspend fun markBookAsWantToRead(bookId: Int): Book
+
+    suspend fun markBookAsReading(book: Book): Book
+
+    suspend fun removeBookFromLibrary(book: Book)
 }

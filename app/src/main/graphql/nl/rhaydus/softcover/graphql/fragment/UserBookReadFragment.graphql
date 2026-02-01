@@ -4,8 +4,4 @@ fragment UserBookReadFragment on user_book_reads{
     progress_pages
     started_at
     finished_at
-
-    edition {
-        ...EditionFragment
-    }
 }

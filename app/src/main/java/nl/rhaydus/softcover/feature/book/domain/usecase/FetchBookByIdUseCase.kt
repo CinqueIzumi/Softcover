@@ -1,21 +1,22 @@
 package nl.rhaydus.softcover.feature.book.domain.usecase
 
+import kotlinx.coroutines.flow.firstOrNull
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book.domain.repository.BookDetailRepository
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.feature.caching.domain.usecase.GetAllUserBooksUseCase
 
 class FetchBookByIdUseCase(
     private val bookDetailRepository: BookDetailRepository,
-    private val getUserIdUseCase: GetUserIdUseCase,
+    private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
 ) {
     suspend operator fun invoke(id: Int): Result<Book> {
         return runCatching {
-            val userId = getUserIdUseCase().getOrThrow()
+            val originalBook: Book = bookDetailRepository.fetchBookById(id = id)
 
-            bookDetailRepository.fetchBookById(
-                id = id,
-                userId = userId,
-            )
+            val userBooks: List<Book> = getAllUserBooksUseCase().firstOrNull()
+                ?: return@runCatching originalBook
+
+            userBooks.find { it.id == originalBook.id } ?: originalBook
         }
     }
 }

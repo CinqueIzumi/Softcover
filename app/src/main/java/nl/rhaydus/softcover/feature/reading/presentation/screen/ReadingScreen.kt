@@ -43,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,11 +50,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.PreviewData
-import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
+import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
@@ -63,7 +61,6 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
-import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.screen.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -271,16 +268,9 @@ object ReadingScreen : Screen {
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    SubcomposeAsyncImage(
-                        model = book.currentEdition.url,
-                        modifier = Modifier
-                            .size(
-                                width = 100.dp,
-                                height = 150.dp
-                            )
-                            .clip(shape = RoundedCornerShape(4.dp)),
-                        contentDescription = "Book image",
-                        loading = { Box(modifier = Modifier.shimmer()) }
+                    EditionImage(
+                        edition = book.currentEdition,
+                        modifier = Modifier.width(100.dp),
                     )
 
                     Spacer(modifier = Modifier.width(16.dp))
@@ -409,13 +399,13 @@ private fun ReadingScreenPreview() {
                     pages = 534,
                     id = 20,
                     authors = listOf(
-                        Author(name = "Matt Dinniman"),
+                        PreviewData.baseAuthor.copy(name = "Matt Dinniman")
                     )
                 )
             ),
             currentPage = 470,
             progress = 88.014984f,
-            editionId = 20,
+            userEditionId = 20,
         ),
         PreviewData.baseBook.copy(
             title = "Last to Leave the Room",
@@ -423,14 +413,11 @@ private fun ReadingScreenPreview() {
                 PreviewData.baseEdition.copy(
                     pages = 320,
                     id = 20,
-                    authors = listOf(
-                        Author(name = "Caitlin Starling"),
-                    )
                 )
             ),
             currentPage = 262,
             progress = 81.875f,
-            editionId = 20,
+            userEditionId = 20,
         ),
         PreviewData.baseBook.copy(
             title = "Cursed Bunny",
@@ -439,14 +426,14 @@ private fun ReadingScreenPreview() {
                     pages = 534,
                     id = 20,
                     authors = listOf(
-                        Author(name = "Bora Chung"),
-                        Author(name = "Anton Hur"),
+                        PreviewData.baseAuthor.copy(name = "Bora Chung"),
+                        PreviewData.baseAuthor.copy(name = "Anton Hur"),
                     )
                 )
             ),
             currentPage = 49,
             progress = 19.140625f,
-            editionId = 20,
+            userEditionId = 20,
         ),
         PreviewData.baseBook.copy(
             title = "Sherlock Holmes: The complete illustrated novels",
@@ -455,13 +442,13 @@ private fun ReadingScreenPreview() {
                     pages = 534,
                     id = 20,
                     authors = listOf(
-                        Author(name = "Arthur Conan Doyle"),
+                        PreviewData.baseAuthor.copy(name = "Arthur Conan Doyle")
                     )
                 )
             ),
             currentPage = 200,
             progress = 40.322582f,
-            editionId = 20,
+            userEditionId = 20,
         ),
         PreviewData.baseBook.copy(
             title = "The Complete Fiction",
@@ -470,14 +457,14 @@ private fun ReadingScreenPreview() {
                     pages = 1098,
                     id = 20,
                     authors = listOf(
-                        Author(name = "H. P. Lovecraft"),
-                        Author(name = "S.T. Joshi"),
+                        PreviewData.baseAuthor.copy(name = "H.P. Lovecraft"),
+                        PreviewData.baseAuthor.copy(name = "S.T. Joshi"),
                     )
                 )
             ),
             currentPage = 110,
             progress = 10.018215f,
-            editionId = 20,
+            userEditionId = 20,
         ),
     )
 

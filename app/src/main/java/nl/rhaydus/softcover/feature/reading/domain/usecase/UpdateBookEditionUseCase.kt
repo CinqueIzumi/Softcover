@@ -1,22 +1,21 @@
 package nl.rhaydus.softcover.feature.reading.domain.usecase
 
+import nl.rhaydus.softcover.feature.caching.domain.repository.CachingRepository
 import nl.rhaydus.softcover.feature.reading.domain.repository.BooksRepository
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
 
 class UpdateBookEditionUseCase(
     private val repository: BooksRepository,
-    private val getUserIdUseCase: GetUserIdUseCase,
+    private val cachingRepository: CachingRepository,
 ) {
     suspend operator fun invoke(
         userBookId: Int,
         newEditionId: Int,
     ): Result<Unit> = runCatching {
-        val userId = getUserIdUseCase().getOrThrow()
-
-        repository.updateBookEdition(
+        val updatedBook = repository.updateBookEdition(
             userBookId = userBookId,
             newEditionId = newEditionId,
-            userId = userId,
         )
+
+        cachingRepository.cacheBook(book = updatedBook)
     }
 }
