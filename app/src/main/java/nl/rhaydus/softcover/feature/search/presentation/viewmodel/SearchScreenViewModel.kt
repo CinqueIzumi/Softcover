@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.search.presentation.viewmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.GetQueriedBooksUseCase
@@ -20,8 +21,9 @@ class SearchScreenViewModel(
     private val getQueriedBooksUseCase: GetQueriedBooksUseCase,
     private val searchForNameUseCase: SearchForNameUseCase,
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
-    val removeSearchQueryUseCase: RemoveSearchQueryUseCase,
-    val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
+    private val removeSearchQueryUseCase: RemoveSearchQueryUseCase,
+    private val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
+    private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     flows: List<SearchInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadViewModel<SearchScreenUiState, SearchEvent, SearchDependencies, SearchInitializer, SearchLocalVariables>(
@@ -38,6 +40,7 @@ class SearchScreenViewModel(
         removeSearchQueryUseCase = removeSearchQueryUseCase,
         getAllUserBooksUseCase = getAllUserBooksUseCase,
         removeAllSearchQueriesUseCase = removeAllSearchQueriesUseCase,
+        markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
     )
 
     init {

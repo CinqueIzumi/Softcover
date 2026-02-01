@@ -49,12 +49,14 @@ import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.search.presentation.action.OnAddBookToLibraryClickAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveAllSearchQueriesClickedAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveSearchQueryClickedAction
 import nl.rhaydus.softcover.feature.search.presentation.action.SearchAction
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchScreenViewModel
+import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds
 
 class SearchScreen : Screen {
@@ -138,6 +140,7 @@ class SearchScreen : Screen {
                         ActiveSearchScreen(
                             state = state,
                             onBookClick = onBookClick,
+                            runAction = runAction,
                         )
                     }
                 }
@@ -149,6 +152,7 @@ class SearchScreen : Screen {
     private fun ColumnScope.ActiveSearchScreen(
         state: SearchScreenUiState,
         onBookClick: (Book) -> Unit,
+        runAction: (SearchAction) -> Unit,
     ) {
         val text = when {
             state.isLoading -> "Loading..."
@@ -174,6 +178,7 @@ class SearchScreen : Screen {
                 BookEntry(
                     book = it,
                     onBookClick = onBookClick,
+                    runAction = runAction,
                 )
             }
         }
@@ -222,6 +227,7 @@ class SearchScreen : Screen {
     private fun BookEntry(
         book: Book,
         onBookClick: (Book) -> Unit,
+        runAction: (SearchAction) -> Unit,
     ) {
         Row(
             modifier = Modifier
@@ -275,14 +281,27 @@ class SearchScreen : Screen {
 
             IconToggleButton(
                 checked = addedToLibrary,
-                onCheckedChange = { },
+                onCheckedChange = { newValue: Boolean ->
+                    when (newValue) {
+                        true -> runAction(OnAddBookToLibraryClickAction(book = book))
+                        false -> Timber.d("-=- Attempt to remove book from library")
+                    }
+                },
             ) {
                 val iconResource = when {
                     addedToLibrary -> Icons.Default.BookmarkAdded
                     else -> Icons.Default.BookmarkBorder
                 }
 
-                Icon(iconResource, contentDescription = "")
+                val contentDescription = when {
+                    addedToLibrary -> "Remove from library icon"
+                    else -> "Add to library icon"
+                }
+
+                Icon(
+                    imageVector = iconResource,
+                    contentDescription = contentDescription,
+                )
             }
         }
     }
