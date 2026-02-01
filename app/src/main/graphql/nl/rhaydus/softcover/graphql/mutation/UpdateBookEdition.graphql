@@ -6,14 +6,8 @@ mutation UpdateBookEdition(
         object: $object,
         id: $id,
     ) {
-        error
-
         user_book {
-            id
-
-            book {
-                ...BookFragment
-            }
+            ...UserBookFragment
         }
     }
 }

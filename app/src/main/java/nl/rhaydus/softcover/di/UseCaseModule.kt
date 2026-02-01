@@ -29,15 +29,24 @@ val useCaseModule = module {
     }
 
     factory {
-        MarkBookAsReadUseCase(repository = get())
+        MarkBookAsReadUseCase(
+            repository = get(),
+            cachingRepository = get(),
+        )
     }
 
     factory {
-        UpdateBookEditionUseCase(repository = get())
+        UpdateBookEditionUseCase(
+            repository = get(),
+            cachingRepository = get()
+        )
     }
 
     factory {
-        UpdateBookProgressUseCase(repository = get())
+        UpdateBookProgressUseCase(
+            repository = get(),
+            cachingRepository = get(),
+        )
     }
 
     factory {

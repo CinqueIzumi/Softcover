@@ -6,12 +6,12 @@ interface BookRemoteDataSource {
     suspend fun updateBookProgress(
         book: Book,
         newPage: Int,
-    )
+    ): Book
 
-    suspend fun markBookAsRead(book: Book)
+    suspend fun markBookAsRead(book: Book): Book
 
     suspend fun updateBookEdition(
         userBookId: Int,
         newEditionId: Int,
-    )
+    ): Book
 }
