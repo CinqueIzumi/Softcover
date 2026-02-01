@@ -17,7 +17,6 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 
 // region 0.0.1
-// TODO: The refresh function seems to not actually refresh when updating from outside of the app, why?
 // TODO: Loader / refresh within the library screen?
 // TODO: Library screen should be scrollable between tabs
 // TODO: Clean up all api calls (detail screen, progress update etc etc) to take result and update cached
