@@ -18,7 +18,6 @@ import timber.log.Timber
 
 // region 0.0.1
 // TODO: Add support for adding / removing book from user's library within the search screen
-// TODO: get user books Query could potentially be done using the 'me' query?
 // TODO: The refresh function seems to not actually refresh when updating from outside of the app, why?
 // TODO: Loader / refresh within the library screen?
 // TODO: Library screen should be scrollable between tabs

@@ -1,14 +1,9 @@
-query GetUserBooks(
-    $userId: Int!
-) {
-    user_books(
-        where: {
-            user_id: {
-                _eq: $userId
-            },
+query GetUserBooks {
+    me {
+        user_books(
+            order_by: { updated_at: desc}
+        ) {
+            ...UserBookFragment
         }
-        order_by: {updated_at: desc}
-    ) {
-        ...UserBookFragment
     }
 }

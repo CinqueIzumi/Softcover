@@ -14,12 +14,13 @@ class CachingRemoteDataSourceImpl(
 ) : CachingRemoteDataSource {
     override suspend fun initializeBooks(userId: Int): List<Book> {
         val result = apolloClient
-            .query(query = GetUserBooksQuery(userId = userId))
+            .query(query = GetUserBooksQuery())
             .execute()
             .dataOrThrow()
 
-        return result.user_books.map {
-            it.userBookFragment.toBook()
-        }
+        val userBooks = result.me.firstOrNull()?.user_books
+            ?: throw Exception("No books were found")
+
+        return userBooks.map { it.userBookFragment.toBook() }
     }
 }
