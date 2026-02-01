@@ -5,12 +5,15 @@ import nl.rhaydus.softcover.feature.search.presentation.event.SearchEvent
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchLocalVariables
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchDependencies
+import timber.log.Timber
 
 class OnRemoveSearchQueryClickedAction(val query: String) : SearchAction {
     override suspend fun execute(
         dependencies: SearchDependencies,
         scope: ActionScope<SearchScreenUiState, SearchEvent, SearchLocalVariables>,
     ) {
-        dependencies.removeSearchQueryUseCase(name = query)
+        dependencies.removeSearchQueryUseCase(name = query).onFailure {
+            Timber.e("-=- $it")
+        }
     }
 }

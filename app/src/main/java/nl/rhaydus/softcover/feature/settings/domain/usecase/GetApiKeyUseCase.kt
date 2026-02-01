@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepositor
 class GetApiKeyUseCase(
     private val settingsRepository: SettingsRepository,
 ) {
-    suspend operator fun invoke(): Result<String> {
-        return runCatching { settingsRepository.getApiKey() }
+    suspend operator fun invoke(): Result<String> = runCatching {
+        settingsRepository.getApiKey()
     }
 }

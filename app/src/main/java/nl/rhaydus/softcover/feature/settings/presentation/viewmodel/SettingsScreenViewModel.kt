@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEv
 import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+import timber.log.Timber
 
 class SettingsScreenViewModel(
     private val updateApiKeyUseCase: UpdateApiKeyUseCase,
@@ -28,7 +29,9 @@ class SettingsScreenViewModel(
 ) {
     init {
         screenModelScope.launch(appDispatchers.main) {
-            val apiKey = getApiKeyUseCase().getOrDefault(defaultValue = "")
+            val apiKey = getApiKeyUseCase()
+                .onFailure { Timber.e("-=- $it") }
+                .getOrDefault(defaultValue = "")
 
             scope.setState {
                 it.copy(apiKey = apiKey)

@@ -17,7 +17,6 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 
 // region 0.0.1
-// TODO: Add error logging to every single use case... Investigate to see if it can be re-usable, but still log the class in which it happened
 // TODO: Detail screen should add an action to allow for removing user books
 // TODO: Detail screen -> Want to read -> mark as reading -> navigate back -> Somehow back to all screen? Move state (selected tab) back to the viewmodel?
 // endregion
