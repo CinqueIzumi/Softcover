@@ -14,10 +14,12 @@ kotlinxSerialization = "1.9.0"
 ksp = "2.2.21-2.0.4"
 voyager = "1.1.0-beta02"
 coilVersion = "2.7.0"
-material3Version = "1.5.0-alpha09"
+material3ComposeVersion = "1.5.0-alpha09"
+material3Version = "1.11.0"
 timberVersion = "5.0.1"
 koinVersion = "3.5.3"
 roomVersion = "2.7.2"
+splashVersion = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,7 +36,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3Version" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3ComposeVersion" }
 androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts" }
 apollo = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
 apollo-cache = { group = "com.apollographql.apollo", name = "apollo-normalized-cache", version.ref = "apollo" }
@@ -50,6 +52,8 @@ koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", versi
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVersion" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
+material3 = {group  = "com.google.android.material", name = "material", version.ref = "material3Version"}
+androidx-splash = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

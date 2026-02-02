@@ -1,7 +1,10 @@
 package nl.rhaydus.softcover.di
 
+import nl.rhaydus.softcover.core.presentation.screen.MainActivityViewModel
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailScreenViewModel
 import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
+import nl.rhaydus.softcover.feature.onboarding.presentation.initializer.OnboardingInitializer
+import nl.rhaydus.softcover.feature.onboarding.presentation.viewmodel.OnboardingScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
 import nl.rhaydus.softcover.feature.search.presentation.flows.SearchInitializer
 import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchScreenViewModel
@@ -13,7 +16,6 @@ val screenModelModule = module {
         SettingsScreenViewModel(
             updateApiKeyUseCase = get(),
             getApiKeyUseCase = get(),
-            initializeUserIdUseCase = get(),
             resetUserDataUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
@@ -74,6 +76,24 @@ val screenModelModule = module {
             getAllUserBooksUseCase = get(),
             markBookAsWantToReadUseCase = get(),
             removeBookFromLibraryUseCase = get(),
+        )
+    }
+
+    factory {
+        OnboardingScreenModel(
+            dispatchers = get(),
+            initializers = getAll<OnboardingInitializer>(),
+            initializeUserBooksUseCase = get(),
+            initializeUserDataUseCase = get(),
+            resetUserDataUseCase = get(),
+            updateApiKeyUseCase = get(),
+        )
+    }
+
+    factory {
+        MainActivityViewModel(
+            getUserIdUseCaseAsFlow = get(),
+            initializeUserBooksUseCase = get()
         )
     }
 }

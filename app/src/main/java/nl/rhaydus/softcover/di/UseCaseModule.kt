@@ -15,7 +15,7 @@ import nl.rhaydus.softcover.feature.search.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCaseAsFlow
-import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import org.koin.dsl.module
@@ -62,7 +62,10 @@ val useCaseModule = module {
     }
 
     factory {
-        InitializeUserIdUseCase(settingsRepository = get())
+        InitializeUserDataUseCase(
+            settingsRepository = get(),
+            cachingRepository = get(),
+        )
     }
 
     factory {
