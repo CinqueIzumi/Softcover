@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.di
 
-import nl.rhaydus.softcover.core.presentation.screen.MainActivityViewModel
+import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailScreenViewModel
 import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.initializer.OnboardingInitializer
