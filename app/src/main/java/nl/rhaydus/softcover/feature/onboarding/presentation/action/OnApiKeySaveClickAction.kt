@@ -20,7 +20,6 @@ class OnApiKeySaveClickAction() : OnboardingAction {
             )
         }
 
-        // TODO: Loader, disable save button
         val updatedKey = scope.currentState.apiKeyValue
             .removePrefix("Bearer")
             .trim()
@@ -30,7 +29,6 @@ class OnApiKeySaveClickAction() : OnboardingAction {
                 Timber.e("-=- Something went wrong while resetting user's data! $it")
             }
 
-            // TODO: Initializing user id & user books is same call, could be merged
             dependencies.updateApiKeyUseCase(key = updatedKey).onSuccess {
                 dependencies.initializeUserDataUseCase().onFailure {
                     Timber.e("-=- $it")
