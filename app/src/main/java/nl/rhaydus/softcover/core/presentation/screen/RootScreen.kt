@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.core.presentation.screen
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -15,7 +14,7 @@ object RootScreen : Screen {
     @Composable
     override fun Content() {
         Scaffold(
-            contentWindowInsets = WindowInsets.statusBars,
+            contentWindowInsets = WindowInsets(0),
         ) { innerPadding ->
             Surface(
                 modifier = Modifier

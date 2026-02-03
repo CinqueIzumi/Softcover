@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover
+package nl.rhaydus.softcover.core
 
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book

@@ -10,23 +10,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkAdded
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,11 +35,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.PreviewData
+import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
@@ -78,7 +74,7 @@ class SearchScreen : Screen {
         )
     }
 
-    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
     @Composable
     fun Screen(
         state: SearchScreenUiState,
@@ -89,9 +85,13 @@ class SearchScreen : Screen {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                SoftcoverTopBar(
-                    title = "Search",
-                    navigateUp = onNavigateUp,
+                SoftcoverSearchTopBar(
+                    onNavigateBack = onNavigateUp,
+                    searchText = state.searchText,
+                    onSearchValueChange = {
+                        runAction(OnQueryChangeAction(newQuery = it))
+                    },
+                    isLoading = state.isLoading,
                 )
             }
         ) {
@@ -100,32 +100,6 @@ class SearchScreen : Screen {
                     .padding(it)
                     .padding(horizontal = 16.dp),
             ) {
-                OutlinedTextField(
-                    value = state.searchText,
-                    onValueChange = {
-                        runAction(OnQueryChangeAction(newQuery = it))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = {
-                        if (state.isLoading) {
-                            CircularWavyProgressIndicator(modifier = Modifier.size(32.dp))
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                            )
-                        }
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
-                    placeholder = {
-                        Text(
-                            text = "Search for titles, authors or ISBNs",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                )
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 when {

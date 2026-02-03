@@ -1,15 +1,17 @@
 package nl.rhaydus.softcover.feature.settings.domain.usecase
 
+import nl.rhaydus.softcover.feature.caching.domain.repository.CachingRepository
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 
-class InitializeUserIdUseCase(
+class InitializeUserDataUseCase(
     private val settingsRepository: SettingsRepository,
+    private val cachingRepository: CachingRepository,
 ) {
-    suspend operator fun invoke(): Result<Unit> {
-        return runCatching {
-            val userId = settingsRepository.getUserIdFromBackend()
+    suspend operator fun invoke(): Result<Unit> = runCatching {
+        val information = settingsRepository.getUserInfoFromBackend()
 
-            settingsRepository.updateUserId(id = userId)
-        }
+        cachingRepository.cacheBooks(books = information.books)
+
+        settingsRepository.updateUserId(id = information.id)
     }
 }

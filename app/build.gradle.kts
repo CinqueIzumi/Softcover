@@ -97,6 +97,12 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+
+    // Material 3 - used for themes
+    implementation(libs.material3)
+
+    // Splash screen
+    implementation(libs.androidx.splash)
 }
 
 apollo {

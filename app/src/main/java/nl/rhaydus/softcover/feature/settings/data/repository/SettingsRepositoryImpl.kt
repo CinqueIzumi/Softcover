@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
+import nl.rhaydus.softcover.feature.settings.domain.model.UserInformation
 
 class SettingsRepositoryImpl(
     private val settingsLocalDataSource: SettingsLocalDataSource,
@@ -25,7 +26,7 @@ class SettingsRepositoryImpl(
         settingsLocalDataSource.updateUserId(id = id)
     }
 
-    override suspend fun getUserIdFromBackend(): Int {
-        return settingsRemoteDataSource.getUserId()
+    override suspend fun getUserInfoFromBackend(): UserInformation {
+        return settingsRemoteDataSource.getUserInformation()
     }
 }

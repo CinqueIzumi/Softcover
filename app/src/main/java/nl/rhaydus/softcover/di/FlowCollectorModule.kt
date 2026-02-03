@@ -8,7 +8,6 @@ import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitialize
 import nl.rhaydus.softcover.feature.library.presentation.flows.ReadBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.WantToReadBooksCollector
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.CurrentlyReadingBooksCollector
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.InitializeUserBooksInitializer
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingInitializer
 import nl.rhaydus.softcover.feature.search.presentation.flows.PreviousQueriesCollector
 import nl.rhaydus.softcover.feature.search.presentation.flows.QueriedBooksCollector
@@ -29,5 +28,4 @@ val initializerModule = module {
     factory { PreviousQueriesCollector() } bind SearchInitializer::class
 
     factory { CurrentlyReadingBooksCollector() } bind ReadingInitializer::class
-    factory { InitializeUserBooksInitializer() } bind ReadingInitializer::class
 }

@@ -1,26 +1,32 @@
 package nl.rhaydus.softcover.feature.book.presentation.screen
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
@@ -30,17 +36,27 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,8 +64,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.PreviewData
+import coil.compose.SubcomposeAsyncImage
+import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
@@ -62,6 +80,7 @@ import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.feature.book.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book.presentation.action.InitializeBookWithIdAction
@@ -107,27 +126,93 @@ class BookDetailScreen(
             viewModel.runAction(action)
         }
 
-        Screen(
-            navigateUp = navigator::pop,
-            runAction = viewModel::runAction,
+        UpdatedScreen(
             state = state,
+            runAction = viewModel::runAction,
+            onNavigateBack = navigator::pop,
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun Screen(
+    fun FadingImageBackground(
+        edition: BookEdition?,
+        isLoading: Boolean,
+    ) {
+        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+        val imageHeight = screenHeight * 0.5f
+
+        val cornerRadius = 32.dp
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(IntrinsicSize.Min)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 0.dp,
+                        topEnd = 0.dp,
+                        bottomStart = cornerRadius,
+                        bottomEnd = cornerRadius,
+                    )
+                )
+        ) {
+            SubcomposeAsyncImage(
+                model = edition?.url,
+                contentDescription = "",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(imageHeight)
+                    .blur(8.dp)
+                    .scale(1.8f)
+                    .shimmer(isLoading = isLoading),
+                loading = { Box(modifier = Modifier.shimmer()) },
+                contentScale = ContentScale.Fit
+            )
+
+            EditionImage(
+                edition = edition,
+                modifier = Modifier
+                    .height(imageHeight * 0.8f)
+                    .aspectRatio(2f / 3f)
+                    .align(Alignment.Center)
+                    .shimmer(isLoading = isLoading)
+            )
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+    @Composable
+    fun UpdatedScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
-        navigateUp: () -> Unit,
+        onNavigateBack: () -> Unit,
     ) {
+        val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+        val lazyListState = rememberLazyListState()
+
+        val shouldBeExpanded by remember {
+            derivedStateOf { lazyListState.firstVisibleItemIndex >= 1 }
+        }
+
+        val title = remember(shouldBeExpanded) {
+            if (shouldBeExpanded.not()) {
+                ""
+            } else {
+                state.book?.title ?: ""
+            }
+        }
+
+        val containerColor by animateColorAsState(
+            if (shouldBeExpanded.not()) {
+                Color.Transparent
+            } else {
+                Color.Unspecified
+            }
+        )
+
         Scaffold(
-            topBar = {
-                SoftcoverTopBar(
-                    title = "Book Details",
-                    navigateUp = navigateUp,
-                )
-            },
+            contentWindowInsets = WindowInsets(),
             floatingActionButton = {
                 val userStatus = state.book?.userStatus ?: return@Scaffold
 
@@ -189,117 +274,164 @@ class BookDetailScreen(
                 }
             }
         ) { innerPadding ->
-            Column(
+            LazyColumn(
                 modifier = Modifier
-                    .padding(innerPadding)
                     .fillMaxSize()
-                    .imePadding()
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .padding(innerPadding),
+                state = lazyListState,
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    EditionImage(
+                item {
+                    FadingImageBackground(
                         edition = state.book?.currentEdition,
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .shimmer(
-                                shape = RoundedCornerShape(4.dp),
-                                isLoading = state.loading,
-                            )
+                        isLoading = state.loading
                     )
+                }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = state.book?.title ?: "",
+                        text = "${state.book?.title}",
                         style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier
+                            .padding(horizontal = 16.dp)
                             .shimmer(isLoading = state.loading)
                             .fillMaxWidth(),
                         textAlign = TextAlign.Center,
                     )
+                }
 
+                item {
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
-                        text = state.book?.currentEdition?.authorString ?: "",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .shimmer(isLoading = state.loading)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .shimmer(isLoading = state.loading),
-                        horizontalArrangement = Arrangement.Center,
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Star,
-                            contentDescription = "",
-                            tint = Color(0xFFFBBF23),
-                            modifier = Modifier.size(16.dp)
+                        Text(
+                            text = state.book?.currentEdition?.authorString ?: "",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier
+                                .shimmer(isLoading = state.loading)
+                                .fillMaxWidth(),
+                            textAlign = TextAlign.Center,
                         )
 
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Min)
+                                .shimmer(isLoading = state.loading),
+                        ) {
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Star,
+                                    contentDescription = "",
+                                    tint = Color(0xFFFBBF23),
+                                    modifier = Modifier.size(16.dp)
+                                )
+
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                Text(
+                                    text = "${state.book?.rating}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                            VerticalDivider()
+
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                    contentDescription = "",
+                                    modifier = Modifier.size(16.dp)
+                                )
+
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                Text(
+                                    text = "${state.book?.currentEdition?.pages}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                            VerticalDivider()
+
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "",
+                                    modifier = Modifier.size(16.dp)
+                                )
+
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                Text(
+                                    text = "${state.book?.releaseYear}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        BookStatusWidget(
+                            state = state,
+                            runAction = runAction,
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "Average rating: ${state.book?.rating}",
-                            style = MaterialTheme.typography.bodyMedium
+                            text = "Description",
+                            style = MaterialTheme.typography.titleLarge
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = state.book?.description ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .shimmer(isLoading = state.loading)
+                        )
+
+                        BottomNavigationSpacer()
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                BookStatusWidget(
-                    state = state,
-                    runAction = runAction,
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    HighlightedInfoWidget(
-                        title = "RELEASE DATE",
-                        subtitle = "${state.book?.releaseYear}",
-                        loading = state.loading,
-                    )
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    HighlightedInfoWidget(
-                        title = "PAGES",
-                        subtitle = "${state.book?.currentEdition?.pages}",
-                        loading = state.loading,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = "Description",
-                    style = MaterialTheme.typography.titleLarge
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = state.book?.description ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .shimmer(isLoading = state.loading)
-                )
             }
+
+            SoftcoverTopBar(
+                title = title,
+                onNavigateBack = onNavigateBack,
+                navigateBackButton = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = "Navigate back icon"
+                        )
+                    }
+                },
+                scrollBehavior = topAppBarScrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors().copy(
+                    containerColor = containerColor,
+                )
+            )
 
             if (state.showEditEditionSheet && state.book != null) {
                 EditionBottomSheetSelector(
@@ -342,6 +474,7 @@ class BookDetailScreen(
             }
         }
     }
+
 
     @Composable
     fun ColumnScope.BookStatusWidget(
@@ -526,13 +659,13 @@ private fun BookDetailScreenReadingPreview() {
 
             BookDetailScreen(
                 id = 1,
-            ).Screen(
+            ).UpdatedScreen(
                 state = BookDetailUiState(
                     book = book,
                     loading = false,
                 ),
-                navigateUp = {},
                 runAction = {},
+                onNavigateBack = {},
             )
         }
     }
@@ -543,19 +676,21 @@ private fun BookDetailScreenReadingPreview() {
 private fun BookDetailScreenIgnoredPreview() {
     SoftcoverTheme {
         Column(
-            modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background),
         ) {
             val book = PreviewData.baseBook.copy(userStatus = BookStatus.None)
 
             BookDetailScreen(
                 id = 1,
-            ).Screen(
+            ).UpdatedScreen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loading = true,
                 ),
-                navigateUp = {},
                 runAction = {},
+                onNavigateBack = {},
             )
         }
     }
