@@ -4,4 +4,6 @@ import nl.rhaydus.softcover.core.presentation.toad.UiState
 
 data class OnboardingUiState(
     val apiKeyValue: String = "",
-    ) : UiState
+    val saveApiKeyButtonEnabled: Boolean = true,
+    val isLoading: Boolean = false,
+) : UiState

@@ -13,6 +13,13 @@ class OnApiKeySaveClickAction() : OnboardingAction {
         dependencies: OnboardingDependencies,
         scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>,
     ) {
+        scope.setState {
+            it.copy(
+                saveApiKeyButtonEnabled = false,
+                isLoading = true,
+            )
+        }
+
         // TODO: Loader, disable save button
         val updatedKey = scope.currentState.apiKeyValue
             .removePrefix("Bearer")
@@ -26,8 +33,16 @@ class OnApiKeySaveClickAction() : OnboardingAction {
             // TODO: Initializing user id & user books is same call, could be merged
             dependencies.updateApiKeyUseCase(key = updatedKey).onSuccess {
                 dependencies.initializeUserDataUseCase().onFailure {
+                    Timber.e("-=- $it")
                     SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
                 }
+            }.onFailure { Timber.e("-=- $it") }
+
+            scope.setState {
+                it.copy(
+                    saveApiKeyButtonEnabled = true,
+                    isLoading = false,
+                )
             }
         }
     }

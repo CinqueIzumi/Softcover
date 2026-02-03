@@ -19,6 +19,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +50,7 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.component.ClickableText
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverLoadingDialog
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
@@ -96,6 +98,7 @@ object OnboardingScreen : Screen {
         )
     }
 
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     fun Screen(
         state: OnboardingUiState,
@@ -164,6 +167,8 @@ object OnboardingScreen : Screen {
                     }
                 }
             }
+
+            SoftcoverLoadingDialog(isLoading = state.isLoading)
         }
     }
 
@@ -339,6 +344,7 @@ object OnboardingScreen : Screen {
                 modifier = Modifier.fillMaxWidth(),
                 style = ButtonStyle.FILLED,
                 size = ButtonSize.M,
+                enabled = state.saveApiKeyButtonEnabled,
             )
         }
     }
