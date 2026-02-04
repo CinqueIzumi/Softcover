@@ -4,11 +4,11 @@ import kotlinx.coroutines.flow.first
 import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
 
 class GetUserIdUseCase(
-    private val getUserIdUseCaseAsFlow: GetUserIdUseCaseAsFlow,
+    private val getUserIdAsFlowUseCase: GetUserIdAsFlowUseCase,
 ) {
     suspend operator fun invoke(): Result<Int> {
         return runCatching {
-            val userId = getUserIdUseCaseAsFlow().first()
+            val userId = getUserIdAsFlowUseCase().first()
 
             if (userId == -1) throw NoUserIdFoundException()
 

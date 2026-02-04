@@ -2,16 +2,16 @@ package nl.rhaydus.softcover
 
 import android.app.Application
 import nl.rhaydus.softcover.di.apolloModule
-import nl.rhaydus.softcover.di.dataSourceModule
-import nl.rhaydus.softcover.di.dataStoreModule
+import nl.rhaydus.softcover.di.coreModule
 import nl.rhaydus.softcover.di.databaseModule
 import nl.rhaydus.softcover.di.dispatcherModule
-import nl.rhaydus.softcover.di.initializerModule
-import nl.rhaydus.softcover.di.repositoryModule
-import nl.rhaydus.softcover.di.screenModelModule
-import nl.rhaydus.softcover.di.useCaseModule
-import nl.rhaydus.softcover.di.utilModule
+import nl.rhaydus.softcover.feature.book.di.bookModule
 import nl.rhaydus.softcover.feature.caching.di.cachingModule
+import nl.rhaydus.softcover.feature.library.di.libraryModule
+import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
+import nl.rhaydus.softcover.feature.reading.di.readingModule
+import nl.rhaydus.softcover.feature.search.di.searchModule
+import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
@@ -22,7 +22,6 @@ import timber.log.Timber
 // TODO: Clean up book dao
 // TODO: Clean up book model
 // TODO: Look at error/warnings on project startup when going through onboarding (illustration related?)
-// TODO: Koin modules should be feature package based
 // endregion
 
 // region 1.0.2
@@ -55,17 +54,18 @@ class SoftCoverApp : Application() {
             androidContext(this@SoftCoverApp)
 
             modules(
+                coreModule,
                 apolloModule,
-                dataSourceModule,
-                dataStoreModule,
                 dispatcherModule,
-                repositoryModule,
-                screenModelModule,
-                useCaseModule,
-                utilModule,
-                initializerModule,
                 databaseModule,
-                cachingModule
+                cachingModule,
+                bookModule,
+                cachingModule,
+                libraryModule,
+                onboardingModule,
+                readingModule,
+                searchModule,
+                settingsModule,
             )
         }
     }

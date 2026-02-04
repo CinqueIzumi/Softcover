@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.presentation.state.SplashState
 import nl.rhaydus.softcover.feature.caching.domain.usecase.InitializeUserBooksUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCaseAsFlow
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdAsFlowUseCase
 
 class MainActivityViewModel(
-    private val getUserIdUseCaseAsFlow: GetUserIdUseCaseAsFlow,
+    private val getUserIdAsFlowUseCase: GetUserIdAsFlowUseCase,
     private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SplashState())
@@ -20,7 +20,7 @@ class MainActivityViewModel(
 
     init {
         viewModelScope.launch {
-            getUserIdUseCaseAsFlow().collectLatest { userId ->
+            getUserIdAsFlowUseCase().collectLatest { userId ->
                 handleCollectedUserId(userId)
             }
         }
