@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -36,6 +37,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -98,13 +101,15 @@ object ReadingScreen : Screen {
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     fun Screen(
         state: ReadingScreenUiState,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
     ) {
+        val pullToRefreshState = rememberPullToRefreshState()
+
         Scaffold(
             topBar = {
                 SoftcoverTopBar(title = "Currently Reading")
@@ -123,6 +128,16 @@ object ReadingScreen : Screen {
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
+                    state = pullToRefreshState,
+                    indicator = {
+                        IndicatorBox(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            state = pullToRefreshState,
+                            isRefreshing = state.isLoading,
+                        ) {
+                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
+                        }
+                    }
                 ) {
                     when {
                         state.books.isNotEmpty() -> {

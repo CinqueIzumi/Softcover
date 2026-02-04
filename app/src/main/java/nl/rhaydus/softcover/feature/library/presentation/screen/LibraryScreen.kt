@@ -13,18 +13,22 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,7 +70,7 @@ object LibraryScreen : Screen {
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     fun Screen(
         state: LibraryUiState,
@@ -75,6 +79,8 @@ object LibraryScreen : Screen {
     ) {
         val tabs = LibraryStatusTab.entries
         val scope = rememberCoroutineScope()
+
+        val pullToRefreshState = rememberPullToRefreshState()
 
         Scaffold(
             topBar = {
@@ -113,7 +119,17 @@ object LibraryScreen : Screen {
                     isRefreshing = state.isLoading,
                     onRefresh = {
                         runAction(OnRefreshAction())
-                    }
+                    },
+                    indicator = {
+                        IndicatorBox(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            state = pullToRefreshState,
+                            isRefreshing = state.isLoading,
+                        ) {
+                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
+                        }
+                    },
+                    state = pullToRefreshState,
                 ) {
                     HorizontalPager(
                         state = state.pagerState,
