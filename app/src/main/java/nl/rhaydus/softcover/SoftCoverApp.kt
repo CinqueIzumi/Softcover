@@ -19,9 +19,7 @@ import timber.log.Timber
 // region 1.0.1
 // TODO: Ideally I'd want to run the user book initialization async -> should happen 'normally' if the user authenticates for the first time, but should happen as a background call if not logging in for the first time
 // TODO: Fix search screen label for amount of readers, but also any missing data...
-// TODO: Clean up book dao
 // TODO: Clean up book model
-// TODO: Look at error/warnings on project startup when going through onboarding (illustration related?)
 // endregion
 
 // region 1.0.2
