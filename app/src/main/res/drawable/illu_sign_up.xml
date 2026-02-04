@@ -5,10 +5,10 @@
     android:viewportHeight="750">
   <path
       android:pathData="M0,0h750v750h-750z"
-      android:fillColor="?attr/background"/>
+      android:fillColor="@color/m3_background"/>
   <path
       android:pathData="M71.81,333.05C90.17,217.71 431.86,72.53 611.57,163.72C791.28,254.9 558.22,337.43 575.37,527.2C587.26,658.85 385.88,667.68 225.92,597.56C128.99,555.07 58.4,417.27 71.81,333.05Z"
-      android:fillColor="?attr/colorSecondaryContainer"
+      android:fillColor="@color/secondary_container"
       android:fillType="evenOdd"/>
   <group>
     <clip-path
