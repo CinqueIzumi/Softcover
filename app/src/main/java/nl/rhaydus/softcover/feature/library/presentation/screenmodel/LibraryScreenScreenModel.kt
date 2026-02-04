@@ -1,8 +1,8 @@
-package nl.rhaydus.softcover.feature.library.presentation.viewmodel
+package nl.rhaydus.softcover.feature.library.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
-import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetDidNotFinishUserBooksUseCase
@@ -15,7 +15,7 @@ import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitialize
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-class LibraryScreenViewModel(
+class LibraryScreenScreenModel(
     private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
     private val getCurrentlyReadingUserBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
     private val getReadUserBooksUseCase: GetReadUserBooksUseCase,
@@ -24,7 +24,7 @@ class LibraryScreenViewModel(
     private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryInitializer>,
-) : ToadViewModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
+) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
     initialState = LibraryUiState(),
     initialLocalVariables = LibraryLocalVariables(),
     initializers = flows,

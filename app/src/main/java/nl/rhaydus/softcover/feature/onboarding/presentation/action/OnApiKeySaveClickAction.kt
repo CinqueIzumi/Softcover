@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
-import nl.rhaydus.softcover.feature.onboarding.presentation.viewmodel.OnboardingDependencies
+import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import timber.log.Timber
 
 class OnApiKeySaveClickAction() : OnboardingAction {

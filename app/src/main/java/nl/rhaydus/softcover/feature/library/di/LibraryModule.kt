@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.library.presentation.flows.DidNotFinishBooks
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
 import nl.rhaydus.softcover.feature.library.presentation.flows.ReadBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.WantToReadBooksCollector
-import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -22,7 +22,7 @@ val libraryModule = module {
     factory { WantToReadBooksCollector() } bind LibraryInitializer::class
 
     single {
-        LibraryScreenViewModel(
+        LibraryScreenScreenModel(
             getWantToReadUserBooksUseCase = get(),
             getCurrentlyReadingUserBooksUseCase = get(),
             getReadUserBooksUseCase = get(),

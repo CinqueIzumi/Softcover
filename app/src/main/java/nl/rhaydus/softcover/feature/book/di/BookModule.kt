@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsWantToReadUseC
 import nl.rhaydus.softcover.feature.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.book.presentation.flows.BookDetailInitializer
 import nl.rhaydus.softcover.feature.book.presentation.flows.UserBooksFlowCollector
-import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailScreenViewModel
+import nl.rhaydus.softcover.feature.book.presentation.screenmodel.BookDetailScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -56,7 +56,7 @@ val bookModule = module {
     factory { UserBooksFlowCollector() } bind BookDetailInitializer::class
 
     factory {
-        BookDetailScreenViewModel(
+        BookDetailScreenScreenModel(
             fetchBookByIdUseCase = get(),
             updateBookEditionUseCase = get(),
             updateBookProgress = get(),

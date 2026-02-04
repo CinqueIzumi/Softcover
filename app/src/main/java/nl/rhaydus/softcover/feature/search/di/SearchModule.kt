@@ -16,14 +16,14 @@ import nl.rhaydus.softcover.feature.search.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.search.presentation.flows.PreviousQueriesCollector
 import nl.rhaydus.softcover.feature.search.presentation.flows.QueriedBooksCollector
 import nl.rhaydus.softcover.feature.search.presentation.flows.SearchInitializer
-import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchScreenViewModel
+import nl.rhaydus.softcover.feature.search.presentation.screenmodel.SearchScreenScreenModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val searchModule = module {
-    single<SearchScreenViewModel> {
-        SearchScreenViewModel(
+    single<SearchScreenScreenModel> {
+        SearchScreenScreenModel(
             getPreviousSearchQueriesUseCase = get(),
             getQueriedBooksUseCase = get(),
             searchForNameUseCase = get(),

@@ -52,7 +52,7 @@ import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveBookFromL
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveSearchQueryClickedAction
 import nl.rhaydus.softcover.feature.search.presentation.action.SearchAction
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
-import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchScreenViewModel
+import nl.rhaydus.softcover.feature.search.presentation.screenmodel.SearchScreenScreenModel
 import kotlin.time.Duration.Companion.seconds
 
 class SearchScreen : Screen {
@@ -60,14 +60,14 @@ class SearchScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val viewModel = koinScreenModel<SearchScreenViewModel>()
+        val screenModel = koinScreenModel<SearchScreenScreenModel>()
 
-        val state by viewModel.state.collectAsStateWithLifecycle()
+        val state by screenModel.state.collectAsStateWithLifecycle()
 
         Screen(
             onNavigateUp = navigator::pop,
             state = state,
-            runAction = viewModel::runAction,
+            runAction = screenModel::runAction,
             onBookClick = {
                 navigator.push(BookDetailScreen(id = it.id))
             }

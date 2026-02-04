@@ -1,8 +1,8 @@
-package nl.rhaydus.softcover.feature.reading.presentation.viewmodel
+package nl.rhaydus.softcover.feature.reading.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
-import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.RefreshUserBooksUseCase
@@ -16,7 +16,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
 
-class ReadingScreenViewModel(
+class ReadingScreenScreenModel(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
@@ -26,7 +26,7 @@ class ReadingScreenViewModel(
     private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
     appDispatchers: AppDispatchers,
     flows: List<ReadingInitializer>,
-) : ToadViewModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingInitializer, ReadingLocalVariables>(
+) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingInitializer, ReadingLocalVariables>(
     initialState = ReadingScreenUiState(),
     initialLocalVariables = ReadingLocalVariables(),
     initializers = flows,

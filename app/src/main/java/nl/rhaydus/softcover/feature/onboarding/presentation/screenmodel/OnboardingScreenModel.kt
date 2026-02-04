@@ -1,8 +1,8 @@
-package nl.rhaydus.softcover.feature.onboarding.presentation.viewmodel
+package nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
-import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.caching.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
@@ -20,7 +20,7 @@ class OnboardingScreenModel(
     val updateApiKeyUseCase: UpdateApiKeyUseCase,
     dispatchers: AppDispatchers,
     initializers: List<OnboardingInitializer>,
-) : ToadViewModel<OnboardingUiState, OnboardingEvent, OnboardingDependencies, OnboardingInitializer, LocalOnboardingVariables>(
+) : ToadScreenModel<OnboardingUiState, OnboardingEvent, OnboardingDependencies, OnboardingInitializer, LocalOnboardingVariables>(
     initializers = initializers,
     initialState = OnboardingUiState(),
     initialLocalVariables = LocalOnboardingVariables(),

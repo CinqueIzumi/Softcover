@@ -10,13 +10,13 @@ import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUse
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.CurrentlyReadingBooksCollector
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingInitializer
 import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
-import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
+import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val readingModule = module {
     single {
-        ReadingScreenViewModel(
+        ReadingScreenScreenModel(
             getCurrentlyReadingBooksUseCase = get(),
             updateBookProgressUseCase = get(),
             markBookAsReadUseCase = get(),

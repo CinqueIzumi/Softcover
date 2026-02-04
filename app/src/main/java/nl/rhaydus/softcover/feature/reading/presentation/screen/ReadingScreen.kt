@@ -80,21 +80,21 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercenta
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
+import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
     @Composable
     override fun Content() {
-        val viewModel = koinScreenModel<ReadingScreenViewModel>()
+        val screenModel = koinScreenModel<ReadingScreenScreenModel>()
 
-        val state by viewModel.state.collectAsStateWithLifecycle()
+        val state by screenModel.state.collectAsStateWithLifecycle()
 
         val navigator = LocalNavigator.currentOrThrow
 
         Screen(
             state = state,
-            runAction = viewModel::runAction,
+            runAction = screenModel::runAction,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
             }

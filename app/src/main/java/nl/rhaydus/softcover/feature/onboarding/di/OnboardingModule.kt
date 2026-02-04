@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.onboarding.di
 
-import nl.rhaydus.softcover.feature.onboarding.presentation.viewmodel.OnboardingScreenModel
+import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenModel
 import org.koin.dsl.module
 
 val onboardingModule = module {

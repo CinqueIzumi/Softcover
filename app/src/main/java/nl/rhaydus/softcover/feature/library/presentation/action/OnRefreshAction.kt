@@ -4,7 +4,7 @@ import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import timber.log.Timber
 
 class OnRefreshAction : LibraryAction {

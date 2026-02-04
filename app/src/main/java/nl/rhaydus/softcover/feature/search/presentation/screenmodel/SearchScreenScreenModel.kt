@@ -1,8 +1,8 @@
-package nl.rhaydus.softcover.feature.search.presentation.viewmodel
+package nl.rhaydus.softcover.feature.search.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
-import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetAllUserBooksUseCase
@@ -17,7 +17,7 @@ import nl.rhaydus.softcover.feature.search.presentation.flows.SearchInitializer
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchLocalVariables
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 
-class SearchScreenViewModel(
+class SearchScreenScreenModel(
     private val getPreviousSearchQueriesUseCase: GetPreviousSearchQueriesUseCase,
     private val getQueriedBooksUseCase: GetQueriedBooksUseCase,
     private val searchForNameUseCase: SearchForNameUseCase,
@@ -28,7 +28,7 @@ class SearchScreenViewModel(
     private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     flows: List<SearchInitializer>,
     appDispatchers: AppDispatchers,
-) : ToadViewModel<SearchScreenUiState, SearchEvent, SearchDependencies, SearchInitializer, SearchLocalVariables>(
+) : ToadScreenModel<SearchScreenUiState, SearchEvent, SearchDependencies, SearchInitializer, SearchLocalVariables>(
     initialState = SearchScreenUiState(),
     initialLocalVariables = SearchLocalVariables(),
     initializers = flows,

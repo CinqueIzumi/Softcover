@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.library.presentation.viewmodel
+package nl.rhaydus.softcover.feature.library.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

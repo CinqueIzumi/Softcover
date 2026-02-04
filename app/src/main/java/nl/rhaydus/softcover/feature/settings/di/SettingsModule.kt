@@ -14,13 +14,13 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
-import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsScreenViewModel
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val settingsModule = module {
-    single<SettingsScreenViewModel> {
-        SettingsScreenViewModel(
+    single<SettingsScreenScreenModel> {
+        SettingsScreenScreenModel(
             updateApiKeyUseCase = get(),
             getApiKeyUseCase = get(),
             resetUserDataUseCase = get(),

@@ -1,8 +1,8 @@
-package nl.rhaydus.softcover.feature.book.presentation.viewmodel
+package nl.rhaydus.softcover.feature.book.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
-import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsWantToReadUseCase
@@ -16,7 +16,7 @@ import nl.rhaydus.softcover.feature.caching.domain.usecase.GetAllUserBooksUseCas
 import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
 
-class BookDetailScreenViewModel(
+class BookDetailScreenScreenModel(
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
     private val updateBookProgress: UpdateBookProgress,
@@ -26,7 +26,7 @@ class BookDetailScreenViewModel(
     private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
-) : ToadViewModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
+) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
     initialState = BookDetailUiState(),
     initialLocalVariables = BookDetailLocalVariables(),
     initializers = flows,

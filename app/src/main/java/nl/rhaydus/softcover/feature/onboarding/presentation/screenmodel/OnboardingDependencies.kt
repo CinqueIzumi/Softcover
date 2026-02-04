@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.onboarding.presentation.viewmodel
+package nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

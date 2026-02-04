@@ -1,9 +1,9 @@
-package nl.rhaydus.softcover.feature.settings.presentation.viewmodel
+package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
-import nl.rhaydus.softcover.core.presentation.toad.ToadViewModel
+import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.caching.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
@@ -15,14 +15,14 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVar
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import timber.log.Timber
 
-class SettingsScreenViewModel(
+class SettingsScreenScreenModel(
     private val updateApiKeyUseCase: UpdateApiKeyUseCase,
     private val getApiKeyUseCase: GetApiKeyUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
     private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
     appDispatchers: AppDispatchers,
     flows: List<SettingsInitializer>,
-) : ToadViewModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsInitializer, SettingsLocalVariables>(
+) : ToadScreenModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsInitializer, SettingsLocalVariables>(
     initialState = SettingsScreenUiState(),
     initialLocalVariables = SettingsLocalVariables(),
     initializers = flows,

@@ -61,7 +61,7 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValue
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
-import nl.rhaydus.softcover.feature.onboarding.presentation.viewmodel.OnboardingScreenModel
+import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenModel
 
 object OnboardingScreen : Screen {
     @Composable

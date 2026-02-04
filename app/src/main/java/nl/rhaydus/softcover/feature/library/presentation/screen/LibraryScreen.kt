@@ -50,20 +50,20 @@ import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 
 object LibraryScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val viewModel = koinScreenModel<LibraryScreenViewModel>()
+        val screenModel = koinScreenModel<LibraryScreenScreenModel>()
 
-        val state by viewModel.state.collectAsStateWithLifecycle()
+        val state by screenModel.state.collectAsStateWithLifecycle()
 
         Screen(
             state = state,
-            runAction = viewModel::runAction,
+            runAction = screenModel::runAction,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
             }

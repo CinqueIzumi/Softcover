@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenDependencies
+import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 
 data class OnProgressTabClickAction(val newTab: ProgressSheetTab): ReadingAction {
     override suspend fun execute(

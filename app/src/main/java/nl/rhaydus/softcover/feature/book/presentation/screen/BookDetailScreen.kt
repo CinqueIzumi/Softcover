@@ -98,7 +98,7 @@ import nl.rhaydus.softcover.feature.book.presentation.action.OnUpdatePageProgres
 import nl.rhaydus.softcover.feature.book.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
-import nl.rhaydus.softcover.feature.book.presentation.viewmodel.BookDetailScreenViewModel
+import nl.rhaydus.softcover.feature.book.presentation.screenmodel.BookDetailScreenScreenModel
 import kotlin.math.roundToInt
 
 class BookDetailScreen(
@@ -108,14 +108,14 @@ class BookDetailScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val viewModel: BookDetailScreenViewModel = koinScreenModel<BookDetailScreenViewModel>()
+        val screenModel: BookDetailScreenScreenModel = koinScreenModel<BookDetailScreenScreenModel>()
 
-        val state: BookDetailUiState by viewModel.state.collectAsStateWithLifecycle()
+        val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
-        ObserveAsEvents(flow = viewModel.events) {
+        ObserveAsEvents(flow = screenModel.events) {
             when (it) {
                 is RefreshDetailBookEvent -> {
-                    viewModel.runAction(action = InitializeBookWithIdAction(id = id))
+                    screenModel.runAction(action = InitializeBookWithIdAction(id = id))
                 }
             }
         }
@@ -123,12 +123,12 @@ class BookDetailScreen(
         LaunchedEffect(Unit) {
             val action = InitializeBookWithIdAction(id = id)
 
-            viewModel.runAction(action)
+            screenModel.runAction(action)
         }
 
         Screen(
             state = state,
-            runAction = viewModel::runAction,
+            runAction = screenModel::runAction,
             onNavigateBack = navigator::pop,
         )
     }

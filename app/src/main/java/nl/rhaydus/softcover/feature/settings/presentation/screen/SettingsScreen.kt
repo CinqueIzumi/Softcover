@@ -34,20 +34,20 @@ import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
-import nl.rhaydus.softcover.feature.settings.presentation.viewmodel.SettingsScreenViewModel
 
 // TODO: Maybe display some user info here?
 object SettingsScreen : Screen {
     @Composable
     override fun Content() {
-        val viewModel = koinScreenModel<SettingsScreenViewModel>()
+        val screenModel = koinScreenModel<SettingsScreenScreenModel>()
 
-        val state by viewModel.state.collectAsStateWithLifecycle()
+        val state by screenModel.state.collectAsStateWithLifecycle()
 
         Screen(
             state = state,
-            runAction = viewModel::runAction,
+            runAction = screenModel::runAction,
         )
     }
 
