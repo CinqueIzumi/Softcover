@@ -78,7 +78,7 @@ object SettingsScreen : Screen {
                 )
 
                 Text(
-                    text = "This page is still in being set-up...",
+                    text = "This page is still being worked on...",
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
