@@ -5,10 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -56,7 +55,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -126,64 +126,82 @@ class BookDetailScreen(
             viewModel.runAction(action)
         }
 
-        UpdatedScreen(
+        Screen(
             state = state,
             runAction = viewModel::runAction,
             onNavigateBack = navigator::pop,
         )
     }
 
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun FadingImageBackground(
-        edition: BookEdition?,
-        isLoading: Boolean,
+    fun FloatingActionButtonMenu(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
     ) {
-        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+        val userStatus = state.book?.userStatus ?: return
 
-        val imageHeight = screenHeight * 0.5f
-
-        val cornerRadius = 32.dp
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .height(IntrinsicSize.Min)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 0.dp,
-                        topEnd = 0.dp,
-                        bottomStart = cornerRadius,
-                        bottomEnd = cornerRadius,
+        FloatingActionButtonMenu(
+            expanded = state.fabMenuExpanded,
+            button = {
+                FloatingActionButton(
+                    onClick = {
+                        runAction(OnFabClickAction())
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit book data",
                     )
-                )
+                }
+            }
         ) {
-            SubcomposeAsyncImage(
-                model = edition?.url,
-                contentDescription = "",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(imageHeight)
-                    .blur(8.dp)
-                    .scale(1.8f)
-                    .shimmer(isLoading = isLoading),
-                loading = { Box(modifier = Modifier.shimmer()) },
-                contentScale = ContentScale.Fit
-            )
+            if (userStatus == BookStatus.Reading) {
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        runAction(OnShowEditEditionSheetClickAction())
+                    },
+                    text = { Text(text = "Change edition") },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.LibraryBooks,
+                            contentDescription = "Edition icon"
+                        )
+                    }
+                )
 
-            EditionImage(
-                edition = edition,
-                modifier = Modifier
-                    .height(imageHeight * 0.8f)
-                    .aspectRatio(2f / 3f)
-                    .align(Alignment.Center)
-                    .shimmer(isLoading = isLoading)
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        runAction(OnShowUpdateProgressSheetClickAction())
+                    },
+                    text = { Text(text = "Update progress") },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.MenuBook,
+                            contentDescription = "Progress icon"
+                        )
+                    }
+                )
+            }
+
+            FloatingActionButtonMenuItem(
+                onClick = {
+                    runAction(OnRemoveBookClickAction(book = state.book))
+                },
+                text = { Text(text = "Remove") },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete icon"
+                    )
+                }
             )
         }
     }
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
     @Composable
-    fun UpdatedScreen(
+    fun Screen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
         onNavigateBack: () -> Unit,
@@ -214,64 +232,10 @@ class BookDetailScreen(
         Scaffold(
             contentWindowInsets = WindowInsets(),
             floatingActionButton = {
-                val userStatus = state.book?.userStatus ?: return@Scaffold
-
                 FloatingActionButtonMenu(
-                    expanded = state.fabMenuExpanded,
-                    button = {
-                        FloatingActionButton(
-                            onClick = {
-                                runAction(OnFabClickAction())
-                            },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit book data",
-                            )
-                        }
-                    }
-                ) {
-                    if (userStatus == BookStatus.Reading) {
-                        FloatingActionButtonMenuItem(
-                            onClick = {
-                                runAction(OnShowEditEditionSheetClickAction())
-                            },
-                            text = { Text(text = "Change edition") },
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Default.LibraryBooks,
-                                    contentDescription = "Edition icon"
-                                )
-                            }
-                        )
-
-                        FloatingActionButtonMenuItem(
-                            onClick = {
-                                runAction(OnShowUpdateProgressSheetClickAction())
-                            },
-                            text = { Text(text = "Update progress") },
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Default.MenuBook,
-                                    contentDescription = "Progress icon"
-                                )
-                            }
-                        )
-                    }
-
-                    FloatingActionButtonMenuItem(
-                        onClick = {
-                            runAction(OnRemoveBookClickAction(book = state.book))
-                        },
-                        text = { Text(text = "Remove") },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete icon"
-                            )
-                        }
-                    )
-                }
+                    state = state,
+                    runAction = runAction,
+                )
             }
         ) { innerPadding ->
             LazyColumn(
@@ -281,139 +245,32 @@ class BookDetailScreen(
                 state = lazyListState,
             ) {
                 item {
-                    FadingImageBackground(
+                    CoverImageSection(
                         edition = state.book?.currentEdition,
                         isLoading = state.loading
                     )
                 }
 
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
+                generalBookInfoSection(state = state)
 
-                    Text(
-                        text = "${state.book?.title}",
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .shimmer(isLoading = state.loading)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center,
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                item { ReviewsPagesReleaseDateSection(state = state) }
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                item {
+                    BookStatusWidget(
+                        state = state,
+                        runAction = runAction,
                     )
                 }
 
-                item {
-                    Spacer(modifier = Modifier.height(4.dp))
+                item { Spacer(modifier = Modifier.height(32.dp)) }
 
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    ) {
-                        Text(
-                            text = state.book?.currentEdition?.authorString ?: "",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier
-                                .shimmer(isLoading = state.loading)
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        )
+                item { DescriptionSection(state = state) }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(IntrinsicSize.Min)
-                                .shimmer(isLoading = state.loading),
-                        ) {
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Star,
-                                    contentDescription = "",
-                                    tint = Color(0xFFFBBF23),
-                                    modifier = Modifier.size(16.dp)
-                                )
-
-                                Spacer(modifier = Modifier.width(4.dp))
-
-                                Text(
-                                    text = "${state.book?.rating}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-
-                            VerticalDivider()
-
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                                    contentDescription = "",
-                                    modifier = Modifier.size(16.dp)
-                                )
-
-                                Spacer(modifier = Modifier.width(4.dp))
-
-                                Text(
-                                    text = "${state.book?.currentEdition?.pages}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-
-                            VerticalDivider()
-
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.DateRange,
-                                    contentDescription = "",
-                                    modifier = Modifier.size(16.dp)
-                                )
-
-                                Spacer(modifier = Modifier.width(4.dp))
-
-                                Text(
-                                    text = "${state.book?.releaseYear}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        BookStatusWidget(
-                            state = state,
-                            runAction = runAction,
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = "Description",
-                            style = MaterialTheme.typography.titleLarge
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = state.book?.description ?: "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .shimmer(isLoading = state.loading)
-                        )
-
-                        BottomNavigationSpacer()
-                    }
-                }
+                item { BottomNavigationSpacer() }
             }
 
             SoftcoverTopBar(
@@ -475,9 +332,181 @@ class BookDetailScreen(
         }
     }
 
+    @Composable
+    private fun CoverImageSection(
+        edition: BookEdition?,
+        isLoading: Boolean,
+    ) {
+        val imageHeight = with(LocalDensity.current) {
+            (LocalWindowInfo.current.containerSize.height * 0.5f).toDp()
+        }
+
+        val cornerRadius = 32.dp
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(IntrinsicSize.Min)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 0.dp,
+                        topEnd = 0.dp,
+                        bottomStart = cornerRadius,
+                        bottomEnd = cornerRadius,
+                    )
+                )
+        ) {
+            SubcomposeAsyncImage(
+                model = edition?.url,
+                contentDescription = "",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(imageHeight)
+                    .blur(8.dp)
+                    .scale(1.8f)
+                    .shimmer(isLoading = isLoading),
+                loading = { Box(modifier = Modifier.shimmer()) },
+                contentScale = ContentScale.Fit
+            )
+
+            EditionImage(
+                edition = edition,
+                modifier = Modifier
+                    .height(imageHeight * 0.8f)
+                    .aspectRatio(2f / 3f)
+                    .align(Alignment.Center)
+                    .shimmer(isLoading = isLoading)
+            )
+        }
+    }
+
+    private fun LazyListScope.generalBookInfoSection(state: BookDetailUiState) {
+        item {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "${state.book?.title}",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .shimmer(isLoading = state.loading)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = state.book?.currentEdition?.authorString ?: "",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .shimmer(isLoading = state.loading),
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
 
     @Composable
-    fun ColumnScope.BookStatusWidget(
+    private fun ReviewsPagesReleaseDateSection(state: BookDetailUiState) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .padding(horizontal = 16.dp)
+                .shimmer(isLoading = state.loading),
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = "",
+                    tint = Color(0xFFFBBF23),
+                    modifier = Modifier.size(16.dp)
+                )
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(
+                    text = "${state.book?.rating}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            VerticalDivider()
+
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                    contentDescription = "",
+                    modifier = Modifier.size(16.dp)
+                )
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(
+                    text = "${state.book?.currentEdition?.pages}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            VerticalDivider()
+
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "",
+                    modifier = Modifier.size(16.dp)
+                )
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(
+                    text = "${state.book?.releaseYear}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun DescriptionSection(state: BookDetailUiState) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            Text(
+                text = "Description",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = state.book?.description ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .shimmer(isLoading = state.loading)
+            )
+        }
+    }
+
+    @Composable
+    private fun BookStatusWidget(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
@@ -485,29 +514,33 @@ class BookDetailScreen(
 
         val book = state.book ?: return
 
-        when (book.userStatus) {
-            BookStatus.Reading -> ReadingContainer(state = state)
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            when (book.userStatus) {
+                BookStatus.Reading -> ReadingContainer(state = state)
 
-            BookStatus.None -> {
-                WantToReadButton(
-                    runAction = runAction,
-                    book = book
-                )
-            }
-
-            else -> MarkAsReadingButton(
-                book = book,
-                markBookAsReading = {
-                    runAction(OnMarkBookAsReadingClickAction(book = book))
+                BookStatus.None -> {
+                    WantToReadButton(
+                        runAction = runAction,
+                        book = book
+                    )
                 }
-            )
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+                else -> {
+                    MarkAsReadingButton(
+                        book = book,
+                        markBookAsReading = {
+                            runAction(OnMarkBookAsReadingClickAction(book = book))
+                        }
+                    )
+                }
+            }
+        }
     }
 
     @Composable
-    fun ReadingContainer(state: BookDetailUiState) {
+    private fun ReadingContainer(state: BookDetailUiState) {
         if (state.book == null || state.book.progress == null) return
 
         Surface(
@@ -569,7 +602,7 @@ class BookDetailScreen(
     }
 
     @Composable
-    fun MarkAsReadingButton(
+    private fun MarkAsReadingButton(
         book: Book,
         markBookAsReading: (Book) -> Unit,
     ) {
@@ -589,7 +622,7 @@ class BookDetailScreen(
     }
 
     @Composable
-    fun WantToReadButton(
+    private fun WantToReadButton(
         book: Book,
         runAction: (BookDetailAction) -> Unit,
     ) {
@@ -606,41 +639,6 @@ class BookDetailScreen(
                 contentDescription = "Add to want to read icon"
             )
         )
-    }
-
-    @Composable
-    private fun RowScope.HighlightedInfoWidget(
-        title: String,
-        loading: Boolean,
-        subtitle: String,
-    ) {
-        val widgetShape = RoundedCornerShape(16.dp)
-
-        Surface(
-            modifier = Modifier
-                .shimmer(isLoading = loading, shape = widgetShape)
-                .fillMaxWidth()
-                .weight(1f),
-            tonalElevation = 1.dp,
-            shape = widgetShape,
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(all = 16.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelSmall,
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
     }
 }
 
@@ -659,7 +657,7 @@ private fun BookDetailScreenReadingPreview() {
 
             BookDetailScreen(
                 id = 1,
-            ).UpdatedScreen(
+            ).Screen(
                 state = BookDetailUiState(
                     book = book,
                     loading = false,
@@ -684,7 +682,7 @@ private fun BookDetailScreenIgnoredPreview() {
 
             BookDetailScreen(
                 id = 1,
-            ).UpdatedScreen(
+            ).Screen(
                 state = BookDetailUiState(
                     book = book,
                     loading = true,
