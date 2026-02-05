@@ -28,7 +28,7 @@ val libraryModule = module {
             getReadUserBooksUseCase = get(),
             getDidNotFinishUserBooksUseCase = get(),
             getAllUserBooksUseCase = get(),
-            initializeUserBooksUseCase = get(),
+            refreshUserBooksUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
         )

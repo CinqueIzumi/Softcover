@@ -14,14 +14,28 @@ class CachingRepositoryImpl(
 ) : CachingRepository {
     override val books: Flow<List<Book>> = cachingLocalDataSource.allUserBooks
 
+    private var initializedBooksThisSession: Boolean = false
+
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return cachingLocalDataSource.getBooksFlowByStatus(status = status)
     }
 
     override suspend fun initializeBooks(userId: Int) {
+        if (initializedBooksThisSession) return
+
+        fetchAndCacheBooks(userId = userId)
+
+        initializedBooksThisSession = true
+    }
+
+    override suspend fun refreshUserBooks(userId: Int) {
+        fetchAndCacheBooks(userId = userId)
+    }
+
+    private suspend fun fetchAndCacheBooks(userId: Int) {
         val fetchedBooks: List<Book> = cachingRemoteDataSource.initializeBooks(userId = userId)
 
-        cacheBooks(books = fetchedBooks)
+        cachingLocalDataSource.cacheBooks(books = fetchedBooks)
 
         val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }
 
@@ -37,10 +51,6 @@ class CachingRepositoryImpl(
 
     override suspend fun cacheBook(book: Book) {
         cachingLocalDataSource.cacheBook(book = book)
-    }
-
-    override suspend fun cacheBooks(books: List<Book>) {
-        cachingLocalDataSource.cacheBooks(books = books)
     }
 
     override suspend fun removeBook(book: Book) {

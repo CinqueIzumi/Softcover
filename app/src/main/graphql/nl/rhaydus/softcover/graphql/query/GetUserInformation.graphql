@@ -1,9 +1,5 @@
 query UserId {
     me {
         id
-
-        user_books {
-            ...UserBookFragment
-        }
     }
 }

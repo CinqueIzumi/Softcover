@@ -65,6 +65,9 @@ val cachingModule = module {
     }
 
     factory {
-        RefreshUserBooksUseCase(initializeUserBooksUseCase = get())
+        RefreshUserBooksUseCase(
+            getUserIdUseCase = get(),
+            cachingRepository = get(),
+        )
     }
 }

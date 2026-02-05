@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.caching.domain.usecase.GetDidNotFinishUserBo
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.InitializeUserBooksUseCase
+import nl.rhaydus.softcover.feature.caching.domain.usecase.RefreshUserBooksUseCase
 
 class LibraryDependencies(
     val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
@@ -16,7 +17,7 @@ class LibraryDependencies(
     val getReadUserBooksUseCase: GetReadUserBooksUseCase,
     val getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase,
     val getAllUserBooksUseCase: GetAllUserBooksUseCase,
-    val initializeUserBooksUseCase: InitializeUserBooksUseCase,
+    val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

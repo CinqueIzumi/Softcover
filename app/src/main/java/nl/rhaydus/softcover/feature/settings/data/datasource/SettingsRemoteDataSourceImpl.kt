@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.settings.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import nl.rhaydus.softcover.UserIdQuery
-import nl.rhaydus.softcover.feature.book.data.mapper.toBook
 import nl.rhaydus.softcover.feature.settings.domain.model.UserInformation
 
 class SettingsRemoteDataSourceImpl(
@@ -17,9 +16,6 @@ class SettingsRemoteDataSourceImpl(
         val me = result.me.firstOrNull()
             ?: throw Exception("User could not be initialized")
 
-        return UserInformation(
-            id = me.id,
-            books = me.user_books.map { it.userBookFragment.toBook() },
-        )
+        return UserInformation(id = me.id)
     }
 }

@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.caching.domain.usecase.GetDidNotFinishUserBo
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.caching.domain.usecase.InitializeUserBooksUseCase
+import nl.rhaydus.softcover.feature.caching.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
@@ -21,7 +22,7 @@ class LibraryScreenScreenModel(
     private val getReadUserBooksUseCase: GetReadUserBooksUseCase,
     private val getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase,
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
-    private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
+    private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryInitializer>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
@@ -36,7 +37,7 @@ class LibraryScreenScreenModel(
         getReadUserBooksUseCase = getReadUserBooksUseCase,
         getDidNotFinishUserBooksUseCase = getDidNotFinishUserBooksUseCase,
         mainDispatcher = appDispatchers.main,
-        initializeUserBooksUseCase = initializeUserBooksUseCase,
+        refreshUserBooksUseCase = refreshUserBooksUseCase,
         coroutineScope = screenModelScope,
     )
 
