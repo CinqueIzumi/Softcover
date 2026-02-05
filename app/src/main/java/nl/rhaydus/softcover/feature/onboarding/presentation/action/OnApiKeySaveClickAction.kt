@@ -30,7 +30,7 @@ class OnApiKeySaveClickAction() : OnboardingAction {
             }
 
             dependencies.updateApiKeyUseCase(key = updatedKey).onSuccess {
-                dependencies.initializeUserDataUseCase().onFailure {
+                dependencies.initializeUserIdAndBooksUseCase().onFailure {
                     Timber.e("-=- $it")
                     SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
                 }

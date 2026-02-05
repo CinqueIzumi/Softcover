@@ -61,12 +61,12 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValue
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
-import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenModel
+import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel
 
 object OnboardingScreen : Screen {
     @Composable
     override fun Content() {
-        val screenModel = koinScreenModel<OnboardingScreenModel>()
+        val screenModel = koinScreenModel<OnboardingScreenScreenModel>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 

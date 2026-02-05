@@ -176,6 +176,7 @@ object LibraryScreen : Screen {
             EditionImage(
                 edition = book.currentEdition,
                 modifier = Modifier.fillMaxWidth(),
+                isLoading = false,
             )
 
             Text(

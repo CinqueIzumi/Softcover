@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.di
 
+import nl.rhaydus.softcover.feature.profile.presentation.initializer.ProfileInitializer
+import nl.rhaydus.softcover.feature.profile.presentation.initializer.UserInformationInitializer
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSourceImpl
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
@@ -11,24 +13,23 @@ import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepositor
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserDataUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val settingsModule = module {
     single<SettingsScreenScreenModel> {
         SettingsScreenScreenModel(
-            updateApiKeyUseCase = get(),
-            getApiKeyUseCase = get(),
-            resetUserDataUseCase = get(),
-            initializeUserBooksUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
         )
     }
+
+    factory { UserInformationInitializer() } bind ProfileInitializer::class
 
     single<SettingsLocalDataSource> {
         SettingsLocalDataSourceImpl(appSettingsDataStore = get())
@@ -64,9 +65,9 @@ val settingsModule = module {
     }
 
     factory {
-        InitializeUserDataUseCase(
+        InitializeUserIdAndBooksUseCase(
             settingsRepository = get(),
-            cachingRepository = get(),
+            cachingRepository = get()
         )
     }
 
@@ -78,8 +79,6 @@ val settingsModule = module {
     }
 
     factory {
-        UpdateApiKeyUseCase(
-            settingsRepository = get()
-        )
+        UpdateApiKeyUseCase(settingsRepository = get())
     }
 }

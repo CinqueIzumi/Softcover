@@ -286,6 +286,7 @@ object ReadingScreen : Screen {
                     EditionImage(
                         edition = book.currentEdition,
                         modifier = Modifier.width(100.dp),
+                        isLoading = false,
                     )
 
                     Spacer(modifier = Modifier.width(16.dp))

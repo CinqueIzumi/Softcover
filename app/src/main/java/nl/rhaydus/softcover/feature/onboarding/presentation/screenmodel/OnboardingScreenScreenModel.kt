@@ -9,13 +9,13 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEven
 import nl.rhaydus.softcover.feature.onboarding.presentation.initializer.OnboardingInitializer
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
-import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserDataUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 
-class OnboardingScreenModel(
+class OnboardingScreenScreenModel(
     val initializeUserBooksUseCase: InitializeUserBooksUseCase,
-    val initializeUserDataUseCase: InitializeUserDataUseCase,
+    val initializeUserIdAndBooksUseCase: InitializeUserIdAndBooksUseCase,
     val resetUserDataUseCase: ResetUserDataUseCase,
     val updateApiKeyUseCase: UpdateApiKeyUseCase,
     dispatchers: AppDispatchers,
@@ -26,7 +26,7 @@ class OnboardingScreenModel(
     initialLocalVariables = LocalOnboardingVariables(),
 ) {
     override val dependencies: OnboardingDependencies = OnboardingDependencies(
-        initializeUserDataUseCase = initializeUserDataUseCase,
+        initializeUserIdAndBooksUseCase = initializeUserIdAndBooksUseCase,
         initializeUserBooksUseCase = initializeUserBooksUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
         updateApiKeyUseCase = updateApiKeyUseCase,

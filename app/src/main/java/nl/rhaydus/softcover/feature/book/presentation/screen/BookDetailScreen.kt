@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,7 +53,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
@@ -64,7 +62,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coil.compose.SubcomposeAsyncImage
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -72,6 +69,7 @@ import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
@@ -357,26 +355,23 @@ class BookDetailScreen(
                     )
                 )
         ) {
-            SubcomposeAsyncImage(
-                model = edition?.url,
-                contentDescription = "",
+            SoftcoverImage(
+                url = edition?.url,
+                contentDescription = "Blurred cover edition image",
+                isLoading = isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(imageHeight)
                     .blur(8.dp)
                     .scale(1.8f)
-                    .shimmer(isLoading = isLoading),
-                loading = { Box(modifier = Modifier.shimmer()) },
-                contentScale = ContentScale.Fit
             )
 
             EditionImage(
                 edition = edition,
+                isLoading = isLoading,
                 modifier = Modifier
                     .height(imageHeight * 0.8f)
-                    .aspectRatio(2f / 3f)
                     .align(Alignment.Center)
-                    .shimmer(isLoading = isLoading)
             )
         }
     }
