@@ -17,7 +17,7 @@ import nl.rhaydus.softcover.feature.caching.data.model.EditionAuthorCrossRef
         BookAuthorCrossRef::class,
         EditionAuthorCrossRef::class
     ],
-    version = 1,
+    version = 2,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao

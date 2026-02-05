@@ -1,15 +1,18 @@
 package nl.rhaydus.softcover.feature.caching.data.model
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "books",
     indices = [
-        Index(value = ["userBookId"], unique = true),
+        Index(value = ["userBook_id"], unique = true),
     ]
 )
+@Serializable
 data class BookEntity(
     // region book
     @PrimaryKey val id: Int,
@@ -21,25 +24,9 @@ data class BookEntity(
     val coverUrl: String,
     // endregion
 
-    // region user book
-    val userBookId: Int?,
-    val statusCode: Int,
-    val currentEditionId: Int?,
-    val userLastReadDate: String?,
-    val userDateAdded: String?,
-    val userPrivacySettingId: Int?,
-    val userRating: Double?,
-    val userReferrerUserId: Int?,
-    val userReviewHasSpoilers: Boolean?,
-    val userReviewedAt: String?,
-    val userUpdatedAt: String?,
-    // endregion
+    @Embedded(prefix = "userBook_")
+    val userBook: UserBookEntity?,
 
-    // region user book read
-    val currentPage: Int?,
-    val progress: Float?,
-    val userBookReadId: Int?,
-    val startedAt: String?,
-    val finishedAt: String?,
-    // endregion
+    @Embedded(prefix = "userBookRead_")
+    val userBookReadEntity: UserBookReadEntity?,
 )

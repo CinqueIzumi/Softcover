@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.caching.data.mapper
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.feature.caching.data.model.AuthorEntity
 import nl.rhaydus.softcover.feature.caching.data.model.BookAuthorCrossRef
@@ -10,32 +12,47 @@ import nl.rhaydus.softcover.feature.caching.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.caching.data.model.BookEntity
 import nl.rhaydus.softcover.feature.caching.data.model.BookFullEntity
 import nl.rhaydus.softcover.feature.caching.data.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.feature.caching.data.model.UserBookEntity
+import nl.rhaydus.softcover.feature.caching.data.model.UserBookReadEntity
 
+// region UI -> Entity mappers
 fun Book.toEntity(): BookEntity = BookEntity(
     id = id,
-    statusCode = userStatus.code,
     title = title,
     rating = rating,
     description = description,
     releaseYear = releaseYear,
     coverUrl = coverUrl,
     defaultEditionId = defaultEdition?.id,
-    currentEditionId = userEditionId,
-    currentPage = currentPage,
-    progress = progress,
-    userBookId = userBookId,
-    userBookReadId = userBookReadId,
-    startedAt = startedAt,
-    finishedAt = finishedAt,
-    userLastReadDate = userLastReadDate,
-    userDateAdded = userDateAdded,
-    userPrivacySettingId = userPrivacySettingId,
-    userRating = userRating,
-    userReferrerUserId = userReferrerUserId,
-    userReviewHasSpoilers = userReviewHasSpoilers,
-    userReviewedAt = userReviewedAt,
-    userUpdatedAt = userUpdatedAt
+    userBook = userBook?.toEntity(),
+    userBookReadEntity = userBookRead?.toEntity(),
 )
+
+fun UserBookRead.toEntity(): UserBookReadEntity {
+    return UserBookReadEntity(
+        id = id,
+        currentPage = currentPage,
+        progress = progress,
+        startedAt = startedAt,
+        finishedAt = finishedAt
+    )
+}
+
+fun UserBook.toEntity(): UserBookEntity {
+    return UserBookEntity(
+        id = id,
+        statusCode = status.code,
+        dateAdded = dateAdded,
+        privacySettingId = privacySettingId,
+        reviewHasSpoilers = reviewHasSpoilers,
+        editionId = editionId,
+        lastReadDate = lastReadDate,
+        rating = rating,
+        referrerUserId = referrerUserId,
+        reviewedAt = reviewedAt,
+        updatedAt = updatedAt
+    )
+}
 
 fun BookEdition.toEntity(bookId: Int): BookEditionEntity = BookEditionEntity(
     id = id,
@@ -63,25 +80,51 @@ fun Book.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAut
         }
     }
 
+// endregion
 
-// ----------
-fun AuthorEntity.toUi(): Author = Author(name = name, id = id)
+// region Entity -> UI mappers
+fun AuthorEntity.toModel(): Author = Author(name = name, id = id)
 
-fun BookEditionEntity.toUi(authors: List<AuthorEntity>): BookEdition =
-    BookEdition(
+fun BookEditionEntity.toModel(authors: List<AuthorEntity>): BookEdition = BookEdition(
+    id = id,
+    publisher = publisher,
+    title = title,
+    url = url,
+    isbn10 = isbn10,
+    pages = pages,
+    releaseYear = releaseYear,
+    authors = authors.map { it.toModel() }
+)
+
+fun UserBookReadEntity.toModel(): UserBookRead {
+    return UserBookRead(
         id = id,
-        publisher = publisher,
-        title = title,
-        url = url,
-        isbn10 = isbn10,
-        pages = pages,
-        releaseYear = releaseYear,
-        authors = authors.map { it.toUi() }
+        currentPage = currentPage,
+        progress = progress,
+        startedAt = startedAt,
+        finishedAt = finishedAt
     )
+}
 
-fun BookFullEntity.toUi(): Book {
+fun UserBookEntity.toModel(): UserBook {
+    return UserBook(
+        id = id,
+        status = BookStatus.getFromCode(statusCode),
+        dateAdded = dateAdded,
+        privacySettingId = privacySettingId,
+        reviewHasSpoilers = reviewHasSpoilers,
+        editionId = editionId,
+        lastReadDate = lastReadDate,
+        rating = rating,
+        referrerUserId = referrerUserId,
+        reviewedAt = reviewedAt,
+        updatedAt = updatedAt
+    )
+}
+
+fun BookFullEntity.toModel(): Book {
     val uiEditions = editions.map { editionWithAuthors ->
-        editionWithAuthors.edition.toUi(
+        editionWithAuthors.edition.toModel(
             authors = editionWithAuthors.authors
         )
     }
@@ -92,7 +135,6 @@ fun BookFullEntity.toUi(): Book {
 
     return Book(
         id = book.id,
-        userStatus = BookStatus.getFromCode(book.statusCode),
         title = book.title,
         editions = uiEditions,
         defaultEdition = defaultEdition,
@@ -100,22 +142,9 @@ fun BookFullEntity.toUi(): Book {
         description = book.description,
         releaseYear = book.releaseYear,
         coverUrl = book.coverUrl,
-        authors = bookAuthors.map { it.toUi() },
-        currentPage = book.currentPage,
-        progress = book.progress,
-        userEditionId = book.currentEditionId,
-        userBookId = book.userBookId,
-        userBookReadId = book.userBookReadId,
-        startedAt = book.startedAt,
-        finishedAt = book.finishedAt,
-        userLastReadDate = book.userLastReadDate,
-        userDateAdded = book.userDateAdded,
-        userPrivacySettingId = book.userPrivacySettingId,
-        userRating = book.userRating,
-        userReferrerUserId = book.userReferrerUserId,
-        userReviewHasSpoilers = book.userReviewHasSpoilers,
-        userReviewedAt = book.userReviewedAt,
-        userUpdatedAt = book.userUpdatedAt
+        authors = bookAuthors.map { it.toModel() },
+        userBook = book.userBook?.toModel(),
+        userBookRead = book.userBookReadEntity?.toModel()
     )
 }
-
+// endregion

@@ -308,7 +308,7 @@ object ReadingScreen : Screen {
                         Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
-                            text = "Page ${book.currentPage} of ${book.currentEdition.pages}",
+                            text = "Page ${book.userBookRead?.currentPage} of ${book.currentEdition.pages}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -361,7 +361,7 @@ object ReadingScreen : Screen {
                             size = ButtonSize.XS,
                         )
 
-                        book.progress?.let { bookProgress ->
+                        book.userBookRead?.progress?.let { bookProgress ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -418,9 +418,11 @@ private fun ReadingScreenPreview() {
                     )
                 )
             ),
-            currentPage = 470,
-            progress = 88.014984f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 470,
+                progress =  88.014984f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
         PreviewData.baseBook.copy(
             title = "Last to Leave the Room",
@@ -430,9 +432,11 @@ private fun ReadingScreenPreview() {
                     id = 20,
                 )
             ),
-            currentPage = 262,
-            progress = 81.875f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 262,
+                progress =  81.875f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
         PreviewData.baseBook.copy(
             title = "Cursed Bunny",
@@ -446,9 +450,11 @@ private fun ReadingScreenPreview() {
                     )
                 )
             ),
-            currentPage = 49,
-            progress = 19.140625f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 49,
+                progress =  19.140625f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
         PreviewData.baseBook.copy(
             title = "Sherlock Holmes: The complete illustrated novels",
@@ -461,9 +467,11 @@ private fun ReadingScreenPreview() {
                     )
                 )
             ),
-            currentPage = 200,
-            progress = 40.322582f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 200,
+                progress = 40.322582f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
         PreviewData.baseBook.copy(
             title = "The Complete Fiction",
@@ -477,9 +485,11 @@ private fun ReadingScreenPreview() {
                     )
                 )
             ),
-            currentPage = 110,
-            progress = 10.018215f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 110,
+                progress =  10.018215f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
     )
 

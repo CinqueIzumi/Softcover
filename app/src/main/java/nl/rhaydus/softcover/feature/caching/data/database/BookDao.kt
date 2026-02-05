@@ -21,20 +21,20 @@ import nl.rhaydus.softcover.feature.caching.data.model.EditionAuthorCrossRef
 interface BookDao {
     // region Data fetchers
     @Transaction
-    @Query("SELECT * FROM books ORDER BY userUpdatedAt DESC")
+    @Query("SELECT * FROM books ORDER BY userBook_updatedAt DESC")
     fun observeBooks(): Flow<List<BookFullEntity>>
 
     @Transaction
-    @Query("SELECT * from books WHERE statusCode = :statusCode ORDER BY userUpdatedAt DESC")
+    @Query("SELECT * from books WHERE userBook_statusCode = :statusCode ORDER BY userBook_updatedAt DESC")
     fun getBooksByStatus(statusCode: Int): Flow<List<BookFullEntity>>
 
-    @Query("SELECT userBookId FROM books")
+    @Query("SELECT userBook_id FROM books")
     suspend fun getAllUserBookIds(): List<Int>
 
     @Query("SELECT * FROM authors WHERE name IN (:names)")
     suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
 
-    @Query("SELECT id FROM books WHERE userBookId = :userBookId")
+    @Query("SELECT id FROM books WHERE userBook_id = :userBookId")
     suspend fun getBookIdByUserBookId(userBookId: Int): Int?
     // endregion
 

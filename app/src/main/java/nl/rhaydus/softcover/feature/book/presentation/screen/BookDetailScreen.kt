@@ -97,8 +97,8 @@ import nl.rhaydus.softcover.feature.book.presentation.action.OnShowUpdateProgres
 import nl.rhaydus.softcover.feature.book.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book.presentation.event.RefreshDetailBookEvent
-import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book.presentation.screenmodel.BookDetailScreenScreenModel
+import nl.rhaydus.softcover.feature.book.presentation.state.BookDetailUiState
 import kotlin.math.roundToInt
 
 class BookDetailScreen(
@@ -108,7 +108,8 @@ class BookDetailScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val screenModel: BookDetailScreenScreenModel = koinScreenModel<BookDetailScreenScreenModel>()
+        val screenModel: BookDetailScreenScreenModel =
+            koinScreenModel<BookDetailScreenScreenModel>()
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
@@ -139,7 +140,7 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        val userStatus = state.book?.userStatus ?: return
+        val userStatus = state.book?.status ?: return
 
         FloatingActionButtonMenu(
             expanded = state.fabMenuExpanded,
@@ -517,7 +518,7 @@ class BookDetailScreen(
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            when (book.userStatus) {
+            when (book.status) {
                 BookStatus.Reading -> ReadingContainer(state = state)
 
                 BookStatus.None -> {
@@ -541,7 +542,7 @@ class BookDetailScreen(
 
     @Composable
     private fun ReadingContainer(state: BookDetailUiState) {
-        if (state.book == null || state.book.progress == null) return
+        if (state.book == null || state.book.userBookRead?.progress == null) return
 
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -571,7 +572,7 @@ class BookDetailScreen(
                     )
 
                     Text(
-                        text = "${state.book.progress.roundToInt()}%",
+                        text = "${state.book.userBookRead.progress.roundToInt()}%",
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.titleMedium,
                     )
@@ -580,7 +581,7 @@ class BookDetailScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 LinearProgressIndicator(
-                    progress = { state.book.progress / 100f },
+                    progress = { state.book.userBookRead.progress / 100f },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(6.dp),
@@ -589,12 +590,12 @@ class BookDetailScreen(
                 )
 
                 val amountOfPagesLeft =
-                    state.book.currentEdition.pages?.minus(state.book.currentPage ?: 0)
+                    state.book.currentEdition.pages?.minus(state.book.userBookRead.currentPage ?: 0)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "${state.book.currentPage} of ${state.book.currentEdition.pages} pages • $amountOfPagesLeft pages left",
+                    text = "${state.book.userBookRead.currentPage} of ${state.book.currentEdition.pages} pages • $amountOfPagesLeft pages left",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -650,9 +651,11 @@ private fun BookDetailScreenReadingPreview() {
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
         ) {
             val book = PreviewData.baseBook.copy(
-                userStatus = BookStatus.Reading,
-                progress = 0.8f,
-                currentPage = 20,
+                userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.Reading),
+                userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                    currentPage = 20,
+                    progress = 0.8f,
+                ),
             )
 
             BookDetailScreen(
@@ -678,7 +681,9 @@ private fun BookDetailScreenIgnoredPreview() {
                 .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.background),
         ) {
-            val book = PreviewData.baseBook.copy(userStatus = BookStatus.None)
+            val book = PreviewData.baseBook.copy(
+                userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.None),
+            )
 
             BookDetailScreen(
                 id = 1,

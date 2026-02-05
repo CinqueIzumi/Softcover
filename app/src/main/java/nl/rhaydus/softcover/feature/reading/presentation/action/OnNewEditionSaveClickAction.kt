@@ -13,7 +13,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : ReadingAction
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
-        val userBookId = scope.currentState.bookToUpdate?.userBookId ?: return
+        val userBookId = scope.currentState.bookToUpdate?.userBook?.id ?: return
 
         dependencies.launch {
             scope.setState { it.copy(isLoading = true) }

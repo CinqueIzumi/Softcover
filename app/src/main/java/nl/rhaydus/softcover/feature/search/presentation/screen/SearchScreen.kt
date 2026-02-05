@@ -251,7 +251,7 @@ class SearchScreen : Screen {
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            val addedToLibrary = book.userBookId != null
+            val addedToLibrary = book.userBook != null
 
             IconToggleButton(
                 checked = addedToLibrary,
@@ -352,7 +352,7 @@ private fun SearchScreenPreview() {
                         defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2021),
                         authors = listOf(PreviewData.baseAuthor.copy(name = "Erica Lee")),
                         rating = 4.2,
-                        userBookId = 20,
+                        userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
                     ),
                     PreviewData.baseBook.copy(
                         title = "Last One to Leave",

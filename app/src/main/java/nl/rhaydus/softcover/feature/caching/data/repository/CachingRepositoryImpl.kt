@@ -23,11 +23,11 @@ class CachingRepositoryImpl(
 
         cacheBooks(books = fetchedBooks)
 
-        val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBookId }
+        val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }
 
         val locallyStoredUserBookIds = books
             .firstOrNull()
-            ?.mapNotNull { it.userBookId } ?: emptyList()
+            ?.mapNotNull { it.userBook?.id } ?: emptyList()
 
         val userBookIdsToRemove: List<Int> = locallyStoredUserBookIds
             .filterNot { it in fetchedBookUserBookIds }
@@ -44,7 +44,7 @@ class CachingRepositoryImpl(
     }
 
     override suspend fun removeBook(book: Book) {
-        val userId: Int = book.userBookId ?: throw Exception("Book has no user book id")
+        val userId: Int = book.userBook?.id ?: throw Exception("Book has no user book id")
 
         cachingLocalDataSource.removeUserBooksById(ids = listOf(userId))
     }

@@ -14,7 +14,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val book = scope.currentState.book ?: return
-        val userBookId = book.userBookId ?: return
+        val userBookId = book.userBook?.id ?: return
 
         dependencies.launch {
             scope.setState {

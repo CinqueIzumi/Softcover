@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.core
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 
 object PreviewData {
@@ -32,23 +34,27 @@ object PreviewData {
             baseEdition,
         ),
         coverUrl = "",
-        userStatus = BookStatus.None,
         authors = listOf(baseAuthor),
-        currentPage = 20,
-        progress = null,
-        userEditionId = null,
-        userBookId = null,
-        userBookReadId = null,
-        startedAt = null,
-        finishedAt = null,
         defaultEdition = baseEdition,
-        userDateAdded = null,
-        userLastReadDate = null,
-        userPrivacySettingId = null,
-        userRating = null,
-        userReferrerUserId = null,
-        userReviewHasSpoilers = null,
-        userReviewedAt = null,
-        userUpdatedAt = null,
+        userBook = UserBook(
+            id = 1,
+            status = BookStatus.None,
+            dateAdded = "",
+            privacySettingId = 1,
+            reviewHasSpoilers = false,
+            editionId = null,
+            lastReadDate = null,
+            rating = null,
+            referrerUserId = null,
+            reviewedAt = null,
+            updatedAt = null,
+        ),
+        userBookRead = UserBookRead(
+            id = 1,
+            currentPage = null,
+            progress = null,
+            startedAt = null,
+            finishedAt = null,
+        ),
     )
 }

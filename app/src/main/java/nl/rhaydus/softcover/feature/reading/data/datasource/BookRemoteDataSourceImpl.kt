@@ -20,18 +20,21 @@ class BookRemoteDataSourceImpl(
         book: Book,
         newPage: Int,
     ): Book {
-        val userBookReadId = book.userBookReadId
-            ?: throw Exception("Book did not have a user book read id")
+        val userBook = book.userBook
+            ?: throw Exception("Book did not contain a user book")
+
+        val userBookRead =
+            book.userBookRead ?: throw Exception("Book did not contain a user book read")
 
         val dataObject = DatesReadInput(
             progress_pages = Optional.present(newPage),
-            started_at = Optional.present(book.startedAt),
-            finished_at = Optional.present(book.finishedAt),
-            edition_id = Optional.present(book.userEditionId),
+            started_at = Optional.present(userBookRead.startedAt),
+            finished_at = Optional.present(userBookRead.finishedAt),
+            edition_id = Optional.present(userBook.editionId),
         )
 
         val mutation = UpdateReadingProgressMutation(
-            id = userBookReadId,
+            id = userBookRead.id,
             datesReadInput = dataObject
         )
 
@@ -44,10 +47,12 @@ class BookRemoteDataSourceImpl(
             result.update_user_book_read?.user_book_read?.userBookReadFragment
                 ?: throw Exception("Did not receive a new user book read fragment")
 
-        val updatedBook = book.copy(
+        val updatedUserBookRead = userBookRead.copy(
             currentPage = userBookReadFragment.progress_pages,
-            progress = userBookReadFragment.progress?.toFloat(),
+            progress = userBookReadFragment.progress?.toFloat()
         )
+
+        val updatedBook = book.copy(userBookRead = updatedUserBookRead)
 
         return updatedBook
     }
