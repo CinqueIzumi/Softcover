@@ -24,6 +24,7 @@ fun Book.toEntity(): BookEntity = BookEntity(
     releaseYear = releaseYear,
     coverUrl = coverUrl,
     defaultEditionId = defaultEdition?.id,
+    usersCount = usersCount,
     userBook = userBook?.toEntity(),
     userBookReadEntity = userBookRead?.toEntity(),
 )
@@ -143,6 +144,7 @@ fun BookFullEntity.toModel(): Book {
         releaseYear = book.releaseYear,
         coverUrl = book.coverUrl,
         authors = bookAuthors.map { it.toModel() },
+        usersCount = book.usersCount,
         userBook = book.userBook?.toModel(),
         userBookRead = book.userBookReadEntity?.toModel()
     )

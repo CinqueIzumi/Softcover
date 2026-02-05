@@ -95,5 +95,6 @@ fun BookFragment.toBook(
         defaultEdition = default_physical_edition?.editionFragment?.toBookEdition(),
         userBook = userBookFragment.toUserBook(),
         userBookRead = userBookReadFragment.toUserBookRead(),
+        usersCount = users_count,
     )
 }

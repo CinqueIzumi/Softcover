@@ -12,6 +12,7 @@ data class Book(
     val releaseYear: Int,
     val coverUrl: String,
     val authors: List<Author>,
+    val usersCount: Int,
 
     val userBook: UserBook?,
     val userBookRead: UserBookRead?,

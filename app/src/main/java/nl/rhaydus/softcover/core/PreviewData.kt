@@ -36,6 +36,7 @@ object PreviewData {
         coverUrl = "",
         authors = listOf(baseAuthor),
         defaultEdition = baseEdition,
+        usersCount = 20,
         userBook = UserBook(
             id = 1,
             status = BookStatus.None,

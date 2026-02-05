@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.BookmarkAdded
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -29,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -51,8 +54,8 @@ import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveAllSearch
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveSearchQueryClickedAction
 import nl.rhaydus.softcover.feature.search.presentation.action.SearchAction
-import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 import nl.rhaydus.softcover.feature.search.presentation.screenmodel.SearchScreenScreenModel
+import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
 import kotlin.time.Duration.Companion.seconds
 
 class SearchScreen : Screen {
@@ -232,21 +235,35 @@ class SearchScreen : Screen {
                     style = MaterialTheme.typography.bodyMedium
                 )
 
-                var label = ""
+                val strings = listOf(
+                    book.releaseYear.takeIf { it != -1 },
+                    book.usersCount.let { "$it readers" },
+                    book.rating.takeIf { it != 0.0 },
+                ).mapNotNull { it?.toString() }
 
-                if (book.releaseYear != -1) {
-                    label += book.releaseYear.toString()
+                val label = strings.joinToString(separator = " • ") { it }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    if (book.rating != 0.0) {
+                        Spacer(modifier = Modifier.width(4.dp))
+
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "",
+                            tint = Color(0xFFFBBF23),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
-
-                if (book.rating != 0.0) {
-                    label += " • ${book.rating}"
-                }
-
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
 
             Spacer(modifier = Modifier.width(4.dp))

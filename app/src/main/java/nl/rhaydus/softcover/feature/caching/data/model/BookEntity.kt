@@ -22,6 +22,7 @@ data class BookEntity(
     val description: String,
     val releaseYear: Int,
     val coverUrl: String,
+    val usersCount: Int,
     // endregion
 
     @Embedded(prefix = "userBook_")
