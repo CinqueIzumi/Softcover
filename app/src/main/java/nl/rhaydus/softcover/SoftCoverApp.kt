@@ -18,7 +18,7 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 
 // region 1.0.1
-// TODO: Amount of book reads seems to not work for main account, verify this...
+// TODO: Add some more info to the loading indicator, it takes quite a while on bigger accounts...
 // endregion
 
 // region 1.0.2

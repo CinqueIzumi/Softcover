@@ -33,7 +33,7 @@ class SettingsRemoteDataSourceImpl(
             profileImageUrl = me.image?.url ?: "",
             name = me.name ?: "",
             bio = me.bio ?: "",
-            booksRead = me.user_books.firstOrNull()?.read_count ?: -1,
+            booksRead = me.user_books.count(),
         )
     }
 }
