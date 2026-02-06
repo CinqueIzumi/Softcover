@@ -11,9 +11,9 @@ class ResetUserDataUseCase(
         return runCatching {
             settingsRepository.updateApiKey(key = "")
 
-            cachingRepository.removeAllBooks()
-
             settingsRepository.updateUserId(id = -1)
+
+            cachingRepository.removeAllBooks()
         }
     }
 }
