@@ -4,9 +4,8 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.Onboardi
 import org.koin.dsl.module
 
 val onboardingModule = module {
-    single<OnboardingScreenScreenModel> {
+    factory {
         OnboardingScreenScreenModel(
-            initializeUserBooksUseCase = get(),
             initializeUserIdAndBooksUseCase = get(),
             resetUserDataUseCase = get(),
             updateApiKeyUseCase = get(),

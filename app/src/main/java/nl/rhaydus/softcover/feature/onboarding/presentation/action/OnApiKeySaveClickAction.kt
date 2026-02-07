@@ -25,16 +25,20 @@ class OnApiKeySaveClickAction() : OnboardingAction {
             .trim()
 
         dependencies.launch {
-            dependencies.resetUserDataUseCase().onFailure {
-                Timber.e("-=- Something went wrong while resetting user's data! $it")
-            }
-
-            dependencies.updateApiKeyUseCase(key = updatedKey).onSuccess {
-                dependencies.initializeUserIdAndBooksUseCase().onFailure {
-                    Timber.e("-=- $it")
-                    SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
+            dependencies.resetUserDataUseCase()
+                .onFailure {
+                    Timber.e("-=- Something went wrong while resetting user's data! $it")
                 }
-            }.onFailure { Timber.e("-=- $it") }
+
+            dependencies.updateApiKeyUseCase(key = updatedKey)
+                .onFailure { Timber.e("-=- $it") }
+                .onSuccess {
+                    dependencies.initializeUserIdAndBooksUseCase()
+                        .onFailure {
+                            Timber.e("-=- $it")
+                            SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
+                        }
+                }
 
             scope.setState {
                 it.copy(

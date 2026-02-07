@@ -15,7 +15,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val readingModule = module {
-    single {
+    factory {
         ReadingScreenScreenModel(
             getCurrentlyReadingBooksUseCase = get(),
             updateBookProgressUseCase = get(),

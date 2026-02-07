@@ -21,7 +21,9 @@ class CachingRepositoryImpl(
     }
 
     override suspend fun initializeBooks(userId: Int) {
-        if (initializedBooksThisSession) return
+        if (initializedBooksThisSession) {
+            throw Exception("User already initialized books this session")
+        }
 
         fetchAndCacheBooks(userId = userId)
 
@@ -59,5 +61,9 @@ class CachingRepositoryImpl(
         cachingLocalDataSource.removeUserBooksById(ids = listOf(userId))
     }
 
-    override suspend fun removeAllBooks() = cachingLocalDataSource.removeAllBooks()
+    override suspend fun removeAllBooks() {
+        cachingLocalDataSource.removeAllBooks()
+
+        initializedBooksThisSession = false
+    }
 }

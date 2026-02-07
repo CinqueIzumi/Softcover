@@ -21,7 +21,7 @@ val libraryModule = module {
 
     factory { WantToReadBooksCollector() } bind LibraryInitializer::class
 
-    single {
+    factory {
         LibraryScreenScreenModel(
             getWantToReadUserBooksUseCase = get(),
             getCurrentlyReadingUserBooksUseCase = get(),

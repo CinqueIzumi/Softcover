@@ -22,7 +22,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val searchModule = module {
-    single<SearchScreenScreenModel> {
+    factory {
         SearchScreenScreenModel(
             getPreviousSearchQueriesUseCase = get(),
             getQueriedBooksUseCase = get(),

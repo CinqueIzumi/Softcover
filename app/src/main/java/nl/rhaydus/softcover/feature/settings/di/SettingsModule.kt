@@ -22,7 +22,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val settingsModule = module {
-    single<SettingsScreenScreenModel> {
+    factory {
         SettingsScreenScreenModel(
             appDispatchers = get(),
             flows = getAll(),

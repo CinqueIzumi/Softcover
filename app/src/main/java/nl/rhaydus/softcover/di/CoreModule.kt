@@ -4,7 +4,7 @@ import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
 import org.koin.dsl.module
 
 val coreModule = module {
-    factory {
+    single<MainActivityViewModel> {
         MainActivityViewModel(
             getUserIdAsFlowUseCase = get(),
             initializeUserBooksUseCase = get(),

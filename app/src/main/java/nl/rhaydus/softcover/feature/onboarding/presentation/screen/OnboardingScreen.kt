@@ -60,8 +60,8 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveC
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
-import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel
+import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 
 object OnboardingScreen : Screen {
     @Composable
