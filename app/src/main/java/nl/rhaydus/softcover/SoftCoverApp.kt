@@ -18,7 +18,7 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 
 // region 1.0.1
-// TODO: Add some more info to the loading indicator, it takes quite a while on bigger accounts...
+// TODO: Library tab scroll resets when navigating back
 // endregion
 
 // region 1.0.2

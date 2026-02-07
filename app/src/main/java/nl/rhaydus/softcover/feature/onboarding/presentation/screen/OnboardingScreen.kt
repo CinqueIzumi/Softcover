@@ -50,23 +50,26 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.component.ClickableText
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverLoadingDialog
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverLoadingSheet
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
+import org.koin.androidx.compose.koinViewModel
 
 object OnboardingScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<OnboardingScreenScreenModel>()
+        val mainVm = koinViewModel<MainActivityViewModel>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
@@ -81,6 +84,9 @@ object OnboardingScreen : Screen {
             runAction = screenModel::runAction,
             openUrl = uriHandler::openUri,
             snackbarHostState = snackBarState,
+            onInitializingComplete = {
+                mainVm.setUserAuthenticated(authenticated = true)
+            },
             getCopiedText = {
                 val text: String = try {
                     clipboardManager
@@ -106,6 +112,7 @@ object OnboardingScreen : Screen {
         runAction: (action: OnboardingAction) -> Unit,
         openUrl: (String) -> Unit,
         getCopiedText: () -> String,
+        onInitializingComplete: () -> Unit,
     ) {
         val pages = IntroScreen.entries
         val pagerState = rememberPagerState { pages.size }
@@ -168,7 +175,13 @@ object OnboardingScreen : Screen {
                 }
             }
 
-            SoftcoverLoadingDialog(isLoading = state.isLoading)
+            SoftcoverLoadingSheet(
+                isLoading = state.isLoading,
+                progress = state.progress,
+                onLoaderFinished = onInitializingComplete,
+                title = "Fetching user data...",
+                subtitle = "Depending on your library, this might take a bit of time."
+            )
         }
     }
 
@@ -360,6 +373,25 @@ private fun FirstIntroScreenPreview() {
             getCopiedText = { "" },
             openUrl = {},
             snackbarHostState = SnackbarHostState(),
+            onInitializingComplete = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun LoadingDialogIntroScreenPreview() {
+    SoftcoverTheme {
+        OnboardingScreen.Screen(
+            state = OnboardingUiState(
+                isLoading = true,
+                progress = 0.2f,
+            ),
+            runAction = {},
+            getCopiedText = { "" },
+            openUrl = {},
+            snackbarHostState = SnackbarHostState(),
+            onInitializingComplete = {},
         )
     }
 }

@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.caching.data.datasource.CachingLocalDataSource
 import nl.rhaydus.softcover.feature.caching.data.datasource.CachingRemoteDataSource
 import nl.rhaydus.softcover.feature.caching.domain.repository.CachingRepository
+import timber.log.Timber
 
 class CachingRepositoryImpl(
     private val cachingLocalDataSource: CachingLocalDataSource,
@@ -37,7 +38,10 @@ class CachingRepositoryImpl(
     private suspend fun fetchAndCacheBooks(userId: Int) {
         val fetchedBooks: List<Book> = cachingRemoteDataSource.initializeBooks(userId = userId)
 
+        Timber.d("-=- finished fetching books")
+
         cachingLocalDataSource.cacheBooks(books = fetchedBooks)
+        Timber.d("-=- finished caching books")
 
         val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }
 
@@ -49,6 +53,7 @@ class CachingRepositoryImpl(
             .filterNot { it in fetchedBookUserBookIds }
 
         cachingLocalDataSource.removeUserBooksById(ids = userBookIdsToRemove)
+        Timber.d("-=- finished removing user books")
     }
 
     override suspend fun cacheBook(book: Book) {

@@ -6,7 +6,7 @@ import org.koin.dsl.module
 val coreModule = module {
     single<MainActivityViewModel> {
         MainActivityViewModel(
-            getUserIdAsFlowUseCase = get(),
+            getUserIdUseCase = get(),
             initializeUserBooksUseCase = get(),
         )
     }

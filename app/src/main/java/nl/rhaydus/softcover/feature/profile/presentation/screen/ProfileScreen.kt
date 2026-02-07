@@ -36,20 +36,31 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
+import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.softcover.feature.settings.domain.model.UserProfileData
+import org.koin.androidx.compose.koinViewModel
 
 class ProfileScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<ProfileScreenScreenModel>()
+        val mainVm = koinViewModel<MainActivityViewModel>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
         val navigator = LocalNavigator.currentOrThrow
+
+        ObserveAsEvents(flow = screenModel.events) {
+            when (it) {
+                is LogOutUserEvent -> mainVm.setUserAuthenticated(authenticated = false)
+            }
+        }
 
         Screen(
             state = state,
@@ -146,9 +157,7 @@ class ProfileScreen : Screen {
 
                 SoftcoverButton(
                     label = "Log out",
-                    onClick = {
-                        runAction(OnLogOutClickAction())
-                    },
+                    onClick = { runAction(OnLogOutClickAction()) },
                     style = ButtonStyle.TONAL,
                     modifier = Modifier
                         .fillMaxWidth()
