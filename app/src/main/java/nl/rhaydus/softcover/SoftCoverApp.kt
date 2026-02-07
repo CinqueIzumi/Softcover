@@ -17,10 +17,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
 
-// region 1.0.1
-// TODO: Library tab scroll resets when navigating back
-// endregion
-
 // region 1.0.2
 // TODO: Connectivity checker... both for no internet as connected without internet
 // TODO: Add a setting in which the user can switch between bottom nav bar & floating bar

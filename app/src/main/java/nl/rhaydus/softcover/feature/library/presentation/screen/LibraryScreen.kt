@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -143,6 +145,14 @@ object LibraryScreen : Screen {
                             LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooks
                         }
 
+                        val gridState: LazyGridState = when(tabs[page]) {
+                            LibraryStatusTab.ALL -> state.allBooksGridState
+                            LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooksGridState
+                            LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooksGridState
+                            LibraryStatusTab.READ -> state.readBooksGridState
+                            LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooksGridState
+                        }
+
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             modifier = Modifier
@@ -150,7 +160,8 @@ object LibraryScreen : Screen {
                                 .padding(horizontal = 16.dp),
                             contentPadding = PaddingValues(bottom = LocalBottomBarPadding.current),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            state = gridState,
                         ) {
                             items(books) { book ->
                                 BookEntry(
