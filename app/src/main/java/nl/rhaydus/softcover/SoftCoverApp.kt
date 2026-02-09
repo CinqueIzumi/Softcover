@@ -29,6 +29,7 @@ import timber.log.Timber
 
 // region 1.1.0
 // TODO: Maybe some sort of home screen, rather than displaying currently reading? -- show stats, reading streak?
+// TODO: Maybe notifications for newly releasing books? -- bind this to user setting, get a notification if a book you're interesting in is released...
 // TODO: Add support for dynamic colors at some point
 // TODO: Navigation animations?
 // TODO: Maybe add some sort of tag/genre searching if possible?
