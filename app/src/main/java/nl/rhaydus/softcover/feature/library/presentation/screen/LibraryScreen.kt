@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,15 +43,15 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
-import nl.rhaydus.softcover.core.presentation.screen.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 object LibraryScreen : Screen {
     @Composable
@@ -145,7 +144,7 @@ object LibraryScreen : Screen {
                             LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooks
                         }
 
-                        val gridState: LazyGridState = when(tabs[page]) {
+                        val gridState: LazyGridState = when (tabs[page]) {
                             LibraryStatusTab.ALL -> state.allBooksGridState
                             LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooksGridState
                             LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooksGridState
@@ -158,7 +157,7 @@ object LibraryScreen : Screen {
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(horizontal = 16.dp),
-                            contentPadding = PaddingValues(bottom = LocalBottomBarPadding.current),
+                            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             state = gridState,

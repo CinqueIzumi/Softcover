@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -62,6 +63,9 @@ object SettingsScreen : Screen {
             runAction = screenModel::runAction,
             navigateToProfile = {
                 navigator.parent?.push(ProfileScreen())
+            },
+            navigateToAppearanceSettings = {
+                navigator.parent?.push(AppearanceSettingsScreen())
             }
         )
     }
@@ -72,6 +76,7 @@ object SettingsScreen : Screen {
         state: SettingsScreenUiState,
         runAction: (SettingsAction) -> Unit,
         navigateToProfile: () -> Unit,
+        navigateToAppearanceSettings: () -> Unit,
     ) {
         Scaffold(
             topBar = {
@@ -110,6 +115,17 @@ object SettingsScreen : Screen {
                 )
 
                 HorizontalDivider()
+
+                SectionCard(
+                    title = "Appearance",
+                    onClick = navigateToAppearanceSettings,
+                    icon = SoftcoverIconResource.Vector(
+                        vector = Icons.Default.Palette,
+                        contentDescription = "Appearance icon"
+                    )
+                )
+
+                HorizontalDivider()
             }
         }
     }
@@ -133,7 +149,7 @@ object SettingsScreen : Screen {
                 Icon(
                     painter = icon.getIconPainter(),
                     contentDescription = icon.contentDescription,
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(20.dp),
                 )
 
                 Spacer(modifier = Modifier.width(24.dp))
@@ -160,6 +176,7 @@ private fun SettingsScreenPreview() {
             runAction = {},
             state = SettingsScreenUiState(),
             navigateToProfile = {},
+            navigateToAppearanceSettings = {},
         )
     }
 }

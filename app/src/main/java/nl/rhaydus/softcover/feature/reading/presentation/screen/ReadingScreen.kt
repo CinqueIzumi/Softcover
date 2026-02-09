@@ -67,6 +67,7 @@ import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.presentation.screen.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissEditionSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
@@ -192,14 +193,12 @@ object ReadingScreen : Screen {
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
     ) {
-        val bottomPadding = LocalBottomBarPadding.current
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = bottomPadding)
+            contentPadding = PaddingValues(bottom = rememberBottomBarPadding())
         ) {
             items(books) {
                 BookEntry(

@@ -11,11 +11,15 @@ import nl.rhaydus.softcover.feature.settings.data.datastore.appSettings
 import nl.rhaydus.softcover.feature.settings.data.repository.SettingsRepositoryImpl
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
+import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
+import nl.rhaydus.softcover.feature.settings.presentation.flows.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.bind
@@ -26,6 +30,8 @@ val settingsModule = module {
         SettingsScreenScreenModel(
             appDispatchers = get(),
             flows = getAll(),
+            setBottomBarStyleUseCase = get(),
+            getThemeConfigurationUseCase = get(),
         )
     }
 
@@ -49,6 +55,8 @@ val settingsModule = module {
             settingsRemoteDataSource = get(),
         )
     }
+
+    factory { ThemeConfigurationCollector() } bind SettingsInitializer::class
 
     factory {
         GetApiKeyUseCase(
@@ -80,5 +88,13 @@ val settingsModule = module {
 
     factory {
         UpdateApiKeyUseCase(settingsRepository = get())
+    }
+
+    factory {
+        SetBottomBarStyleUseCase(settingsRepository = get())
+    }
+
+    single<GetThemeConfigurationUseCase> {
+        GetThemeConfigurationUseCase(settingsRepository = get())
     }
 }
