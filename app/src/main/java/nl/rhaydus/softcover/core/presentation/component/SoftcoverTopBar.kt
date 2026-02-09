@@ -5,11 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.TextAutoSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,7 +25,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -57,7 +54,7 @@ fun SoftcoverSearchTopBar(
                 onClick = { onSearchValueChange("") }
             ) {
                 Icon(
-                    imageVector = Icons.Default.Clear,
+                    painter = painterResource(R.drawable.ic_close),
                     contentDescription = "Clear search icon"
                 )
             }
@@ -78,7 +75,7 @@ fun SoftcoverSearchTopBar(
                         CircularWavyProgressIndicator(modifier = Modifier.size(32.dp))
                     } else {
                         Icon(
-                            imageVector = Icons.Default.Search,
+                            painter = painterResource(R.drawable.ic_search),
                             contentDescription = "Search",
                         )
                     }
@@ -108,9 +105,10 @@ fun SoftcoverSearchTopBar(
         navigationIcon = {
             onNavigateBack?.let {
                 IconButton(onClick = onNavigateBack) {
-                    val icon = Icons.AutoMirrored.Default.ArrowBack
-
-                    Icon(imageVector = icon, contentDescription = "Navigate back icon")
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_back),
+                        contentDescription = "Navigate back icon"
+                    )
                 }
             }
         }
@@ -130,9 +128,10 @@ fun SoftcoverTopBar(
     navigateBackButton: @Composable () -> Unit = {
         onNavigateBack?.let {
             IconButton(onClick = onNavigateBack) {
-                val icon = Icons.AutoMirrored.Default.ArrowBack
-
-                Icon(imageVector = icon, contentDescription = "Navigate back icon")
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = "Navigate back icon"
+                )
             }
         }
     },
@@ -184,8 +183,8 @@ private fun SoftcoverTopBarPreview() {
                 subTitle = "subtitle",
                 actions = List(2) {
                     SoftcoverTopBarAction(
-                        iconResource = SoftcoverIconResource.Vector(
-                            vector = Icons.Default.Favorite,
+                        iconResource = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_palette,
                             contentDescription = ""
                         ),
                         onClick = {}
@@ -220,8 +219,8 @@ private fun SoftcoverSearchTopBarPreview() {
                 placeHolder = "Search",
                 actions = List(2) {
                     SoftcoverTopBarAction(
-                        iconResource = SoftcoverIconResource.Vector(
-                            vector = Icons.Default.Favorite,
+                        iconResource = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_palette,
                             contentDescription = ""
                         ),
                         onClick = {}

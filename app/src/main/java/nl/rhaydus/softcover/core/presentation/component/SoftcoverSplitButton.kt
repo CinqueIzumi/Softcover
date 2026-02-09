@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -26,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
@@ -213,8 +211,8 @@ private fun SoftcoverSplitButtonPreview() {
                 .background(color = MaterialTheme.colorScheme.background)
                 .padding(all = 8.dp)
         ) {
-            val leadingIcon = SoftcoverIconResource.Vector(
-                vector = Icons.Default.Edit,
+            val leadingIcon = SoftcoverIconResource.Drawable(
+                id = R.drawable.ic_palette,
                 contentDescription = "",
             )
 
@@ -222,8 +220,8 @@ private fun SoftcoverSplitButtonPreview() {
                 SoftcoverSplitButton(
                     size = size,
                     label = "Label $index",
-                    trailingIcon = SoftcoverIconResource.Vector(
-                        vector = Icons.Default.ArrowDropDown,
+                    trailingIcon = SoftcoverIconResource.Drawable(
+                        id = R.drawable.ic_arrow_drop_down,
                         contentDescription = "",
                     ),
                     leadingIcon = if (index % 2 == 0) leadingIcon else null,

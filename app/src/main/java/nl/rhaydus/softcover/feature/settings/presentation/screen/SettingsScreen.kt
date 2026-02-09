@@ -15,10 +15,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -108,8 +103,8 @@ object SettingsScreen : Screen {
                 SectionCard(
                     title = "View user profile",
                     onClick = navigateToProfile,
-                    icon = SoftcoverIconResource.Vector(
-                        vector = Icons.Default.AccountCircle,
+                    icon = SoftcoverIconResource.Drawable(
+                        id = R.drawable.ic_account,
                         contentDescription = "Account icon"
                     )
                 )
@@ -119,8 +114,8 @@ object SettingsScreen : Screen {
                 SectionCard(
                     title = "Appearance",
                     onClick = navigateToAppearanceSettings,
-                    icon = SoftcoverIconResource.Vector(
-                        vector = Icons.Default.Palette,
+                    icon = SoftcoverIconResource.Drawable(
+                        id = R.drawable.ic_palette,
                         contentDescription = "Appearance icon"
                     )
                 )
@@ -161,7 +156,7 @@ object SettingsScreen : Screen {
             }
 
             Icon(
-                painter = rememberVectorPainter(image = Icons.AutoMirrored.Default.KeyboardArrowRight),
+                painter = painterResource(R.drawable.ic_keyboard_arrow_right),
                 contentDescription = null
             )
         }

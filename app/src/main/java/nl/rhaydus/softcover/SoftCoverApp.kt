@@ -26,7 +26,6 @@ import timber.log.Timber
 //  Check imports, actions actually used, dependencies actually used, .onFailure/success style etc etc....
 // TODO: google play updater?
 // TODO: Check all queries to see if they match the HC ones
-// TODO: Remove all Icons.x and replace them with the google material icons as recommended
 // endregion
 
 // region 1.1.0

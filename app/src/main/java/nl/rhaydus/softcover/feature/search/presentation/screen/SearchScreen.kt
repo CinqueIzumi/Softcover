@@ -14,12 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BookmarkAdded
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -32,12 +26,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
@@ -258,7 +254,7 @@ class SearchScreen : Screen {
                         Spacer(modifier = Modifier.width(4.dp))
 
                         Icon(
-                            imageVector = Icons.Filled.Star,
+                            painter = painterResource(R.drawable.ic_star_filled),
                             contentDescription = "",
                             tint = Color(0xFFFBBF23),
                             modifier = Modifier.size(16.dp)
@@ -281,8 +277,8 @@ class SearchScreen : Screen {
                 },
             ) {
                 val iconResource = when {
-                    addedToLibrary -> Icons.Default.BookmarkAdded
-                    else -> Icons.Default.BookmarkBorder
+                    addedToLibrary -> R.drawable.ic_bookmark_added
+                    else -> R.drawable.ic_bookmark_add
                 }
 
                 val contentDescription = when {
@@ -291,7 +287,7 @@ class SearchScreen : Screen {
                 }
 
                 Icon(
-                    imageVector = iconResource,
+                    painter = painterResource(iconResource),
                     contentDescription = contentDescription,
                 )
             }
@@ -320,7 +316,7 @@ class SearchScreen : Screen {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = Icons.Default.History,
+                    painter = painterResource(R.drawable.ic_history),
                     contentDescription = "Previous search icon",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -336,7 +332,7 @@ class SearchScreen : Screen {
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Icon(
-                    imageVector = Icons.Default.Clear,
+                    painter = painterResource(R.drawable.ic_close),
                     contentDescription = "Clear icon",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.noRippleClickable {

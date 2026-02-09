@@ -19,15 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
@@ -55,6 +46,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,6 +54,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -149,7 +142,7 @@ class BookDetailScreen(
                     },
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Edit,
+                        painter = painterResource(R.drawable.ic_edit),
                         contentDescription = "Edit book data",
                     )
                 }
@@ -163,7 +156,7 @@ class BookDetailScreen(
                     text = { Text(text = "Change edition") },
                     icon = {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Default.LibraryBooks,
+                            painter = painterResource(R.drawable.ic_library_books),
                             contentDescription = "Edition icon"
                         )
                     }
@@ -176,7 +169,7 @@ class BookDetailScreen(
                     text = { Text(text = "Update progress") },
                     icon = {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Default.MenuBook,
+                            painter = painterResource(R.drawable.ic_menu_book),
                             contentDescription = "Progress icon"
                         )
                     }
@@ -190,7 +183,7 @@ class BookDetailScreen(
                 text = { Text(text = "Remove") },
                 icon = {
                     Icon(
-                        imageVector = Icons.Default.Delete,
+                        painter = painterResource(R.drawable.ic_delete),
                         contentDescription = "Delete icon"
                     )
                 }
@@ -278,7 +271,7 @@ class BookDetailScreen(
                 navigateBackButton = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = "Navigate back icon"
                         )
                     }
@@ -421,7 +414,7 @@ class BookDetailScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Star,
+                    painter = painterResource(R.drawable.ic_star_filled),
                     contentDescription = "",
                     tint = Color(0xFFFBBF23),
                     modifier = Modifier.size(16.dp)
@@ -443,7 +436,7 @@ class BookDetailScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                    painter = painterResource(R.drawable.ic_menu_book),
                     contentDescription = "",
                     modifier = Modifier.size(16.dp)
                 )
@@ -464,7 +457,7 @@ class BookDetailScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = Icons.Default.DateRange,
+                    painter = painterResource(R.drawable.ic_date_range),
                     contentDescription = "",
                     modifier = Modifier.size(16.dp)
                 )
@@ -553,7 +546,7 @@ class BookDetailScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Default.MenuBook,
+                        painter = painterResource(R.drawable.ic_menu_book),
                         contentDescription = "Book icon",
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -610,8 +603,8 @@ class BookDetailScreen(
             style = ButtonStyle.FILLED,
             modifier = Modifier.fillMaxWidth(),
             size = ButtonSize.M,
-            icon = SoftcoverIconResource.Vector(
-                vector = Icons.AutoMirrored.Default.MenuBook,
+            icon = SoftcoverIconResource.Drawable(
+                id = R.drawable.ic_menu_book,
                 contentDescription = "Add to want to read icon"
             )
         )
@@ -630,8 +623,8 @@ class BookDetailScreen(
             style = ButtonStyle.FILLED,
             modifier = Modifier.fillMaxWidth(),
             size = ButtonSize.M,
-            icon = SoftcoverIconResource.Vector(
-                vector = Icons.Default.BookmarkAdd,
+            icon = SoftcoverIconResource.Drawable(
+                id = R.drawable.ic_bookmark_add,
                 contentDescription = "Add to want to read icon"
             )
         )
