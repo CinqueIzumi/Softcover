@@ -19,7 +19,6 @@ import timber.log.Timber
 
 // region 1.0.2
 // TODO: Connectivity checker... both for no internet as connected without internet
-// TODO: Add some placeholder images (figma designs?) for stuff like empty pages, authorization etc etc
 // TODO: Add support for removing book / marking book as finished from detail screen...
 // TODO: Look at the feature setup, this feels wrong
 // TODO: General code clean-up

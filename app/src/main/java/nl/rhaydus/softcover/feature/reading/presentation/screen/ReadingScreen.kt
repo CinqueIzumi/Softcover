@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -216,21 +217,10 @@ object ReadingScreen : Screen {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
-                    )
-                    .padding(all = 24.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_menu_book),
-                    contentDescription = "Book icon",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(64.dp)
-                )
-            }
+            Image(
+                painter = painterResource(R.drawable.illu_no_results),
+                contentDescription = "No images were found"
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
