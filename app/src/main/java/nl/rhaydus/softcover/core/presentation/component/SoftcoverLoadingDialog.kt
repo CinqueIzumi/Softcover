@@ -56,7 +56,6 @@ fun SoftcoverLoadingSheet(
         Column(
             modifier = Modifier.padding(all = 16.dp),
         ) {
-            // TODO: Extract text from here
             Text(
                 text = title,
                 modifier = Modifier.fillMaxWidth(),
