@@ -1,5 +1,5 @@
-query UserId {
+query GetUserId {
     me {
-        id
+       id
     }
 }

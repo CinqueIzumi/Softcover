@@ -34,7 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.PreviewData
+import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
@@ -180,7 +180,7 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
     onUpdatePageProgressClick: (String) -> Unit,
 ) {
     var number by remember {
-        val currentPageString = book.currentPage.toString()
+        val currentPageString = book.userBookRead.toString()
 
         mutableStateOf(TextFieldValue(text = currentPageString))
     }
@@ -286,7 +286,7 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
     onUpdatePercentageClick: (String) -> Unit,
 ) {
     var number by remember {
-        val currentPageString = book.progress?.roundToInt()
+        val currentPageString = book.userBookRead?.progress?.roundToInt()
 
         mutableStateOf(TextFieldValue(text = currentPageString.toString()))
     }
@@ -402,7 +402,7 @@ private fun ProgressSheetContentPagePreview() {
                         pages = 534,
                     )
                 ),
-                currentPage = 80,
+                userBookRead = PreviewData.baseBook.userBookRead?.copy(currentPage = 80),
             ),
         )
     }
@@ -424,8 +424,10 @@ private fun ProgressSheetContentPercentagePreview() {
                         pages = 534,
                     )
                 ),
-                currentPage = 80,
-                progress = 80f
+                userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                    currentPage = 80,
+                    progress = 80f
+                ),
             ),
         )
     }

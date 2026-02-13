@@ -53,9 +53,8 @@ class BookDetailRemoteDataSourceImpl(
     }
 
     override suspend fun markBookAsReading(book: Book): Book {
-        if (book.userBookId == null) {
-            throw Exception("User was missing a user book id")
-        }
+        val userBook = book.userBook
+            ?: throw Exception("User did not have a user book")
 
         val currentDate = LocalDate
             .now()
@@ -63,19 +62,24 @@ class BookDetailRemoteDataSourceImpl(
 
         val input = UserBookUpdateInput(
             edition_id = Optional.Present(book.currentEdition.id),
-            review_has_spoilers = Optional.Present(book.userReviewHasSpoilers),
+            review_has_spoilers = Optional.Present(userBook.reviewHasSpoilers),
             status_id = Optional.present(2),
-            last_read_date = Optional.Present(book.userLastReadDate),
-            rating = Optional.Present(book.userRating),
+            last_read_date = Optional.Present(userBook.lastReadDate),
+            rating = Optional.Present(userBook.rating),
             privacy_setting_id = Optional.Present(1),
-            referrer_user_id = Optional.Present(book.userReferrerUserId),
-            reviewed_at = Optional.Present(book.userReviewedAt),
-            date_added = Optional.Present(book.userDateAdded),
+            referrer_user_id = Optional.Present(userBook.referrerUserId),
+            reviewed_at = Optional.Present(userBook.reviewedAt),
+            date_added = Optional.Present(userBook.dateAdded),
             user_date = Optional.present(currentDate)
         )
 
         val book = apolloClient
-            .mutation(mutation = MarkBookAsReadingMutation(id = book.userBookId, `object` = input))
+            .mutation(
+                mutation = MarkBookAsReadingMutation(
+                    id = userBook.id,
+                    `object` = input
+                )
+            )
             .execute()
             .dataOrThrow()
             .update_user_book
@@ -87,12 +91,11 @@ class BookDetailRemoteDataSourceImpl(
     }
 
     override suspend fun removeBookFromLibrary(book: Book) {
-        if (book.userBookId == null) {
-            throw Exception("User was missing a user book id")
-        }
+        val userBookId = book.userBook?.id
+            ?: throw Exception("User did not have a user book")
 
         apolloClient
-            .mutation(mutation = RemoveUserBookMutation(id = book.userBookId))
+            .mutation(mutation = RemoveUserBookMutation(id = userBookId))
             .execute()
             .dataOrThrow()
     }

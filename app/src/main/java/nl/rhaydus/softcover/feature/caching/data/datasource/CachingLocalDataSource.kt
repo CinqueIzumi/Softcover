@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.caching.data.database.BookDao
-import nl.rhaydus.softcover.feature.caching.data.mapper.toUi
+import nl.rhaydus.softcover.feature.caching.data.mapper.toModel
 
 interface CachingLocalDataSource {
     val allUserBooks: Flow<List<Book>>
@@ -25,10 +25,10 @@ class CachingLocalDataSourceImpl(
     private val dao: BookDao,
 ) : CachingLocalDataSource {
     override val allUserBooks: Flow<List<Book>>
-        get() = dao.observeBooks().map { list -> list.map { it.toUi() } }
+        get() = dao.observeBooks().map { list -> list.map { it.toModel() } }
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
-        return dao.getBooksByStatus(statusCode = status.code).map { list -> list.map { it.toUi() } }
+        return dao.getBooksByStatus(statusCode = status.code).map { list -> list.map { it.toModel() } }
     }
 
     override suspend fun cacheBook(book: Book) {

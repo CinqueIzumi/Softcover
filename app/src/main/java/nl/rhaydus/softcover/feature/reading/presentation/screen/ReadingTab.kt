@@ -1,19 +1,18 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import nl.rhaydus.softcover.R
 
 object ReadingTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
             val title = "Reading"
-            val icon = rememberVectorPainter(image = Icons.AutoMirrored.Filled.MenuBook)
+            val icon = painterResource(R.drawable.ic_reading)
 
             return remember {
                 TabOptions(

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,21 +12,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -33,39 +41,41 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
-import nl.rhaydus.softcover.PreviewData
+import nl.rhaydus.softcover.R
+import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
-import nl.rhaydus.softcover.core.presentation.screen.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.viewmodel.LibraryScreenViewModel
 
 object LibraryScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val viewModel = koinScreenModel<LibraryScreenViewModel>()
+        val screenModel = koinScreenModel<LibraryScreenScreenModel>()
 
-        val state by viewModel.state.collectAsStateWithLifecycle()
+        val state by screenModel.state.collectAsStateWithLifecycle()
 
         Screen(
             state = state,
-            runAction = viewModel::runAction,
+            runAction = screenModel::runAction,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
             }
         )
     }
 
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     fun Screen(
         state: LibraryUiState,
@@ -74,6 +84,8 @@ object LibraryScreen : Screen {
     ) {
         val tabs = LibraryStatusTab.entries
         val scope = rememberCoroutineScope()
+
+        val pullToRefreshState = rememberPullToRefreshState()
 
         Scaffold(
             topBar = {
@@ -112,7 +124,17 @@ object LibraryScreen : Screen {
                     isRefreshing = state.isLoading,
                     onRefresh = {
                         runAction(OnRefreshAction())
-                    }
+                    },
+                    indicator = {
+                        IndicatorBox(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            state = pullToRefreshState,
+                            isRefreshing = state.isLoading,
+                        ) {
+                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
+                        }
+                    },
+                    state = pullToRefreshState,
                 ) {
                     HorizontalPager(
                         state = state.pagerState,
@@ -126,14 +148,50 @@ object LibraryScreen : Screen {
                             LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooks
                         }
 
+                        val gridState: LazyGridState = when (tabs[page]) {
+                            LibraryStatusTab.ALL -> state.allBooksGridState
+                            LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooksGridState
+                            LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooksGridState
+                            LibraryStatusTab.READ -> state.readBooksGridState
+                            LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooksGridState
+                        }
+
+                        if (books != null && books.isEmpty() && state.isLoading.not()) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.illu_no_results),
+                                    contentDescription = "No images were found"
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Text(
+                                    text = "No books were found in your ${tabs[page].label} list. Start by adding new books to this list.",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+
+                            return@HorizontalPager
+                        }
+
+                        if (books == null) return@HorizontalPager
+
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(horizontal = 16.dp),
-                            contentPadding = PaddingValues(bottom = LocalBottomBarPadding.current),
+                            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            state = gridState,
                         ) {
                             items(books) { book ->
                                 BookEntry(
@@ -159,6 +217,7 @@ object LibraryScreen : Screen {
             EditionImage(
                 edition = book.currentEdition,
                 modifier = Modifier.fillMaxWidth(),
+                isLoading = false,
             )
 
             Text(
@@ -189,6 +248,21 @@ private fun LibraryScreenPreview() {
                     PreviewData.baseBook.copy(title = "Futility"),
                     PreviewData.baseBook.copy(title = "We call them witches"),
                 )
+            ),
+            onBookClick = {},
+            runAction = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun LibraryEmptyScreenPreview() {
+    SoftcoverTheme {
+        LibraryScreen.Screen(
+            state = LibraryUiState(
+                wantToReadBooks = emptyList(),
+                isLoading = false,
             ),
             onBookClick = {},
             runAction = {},
