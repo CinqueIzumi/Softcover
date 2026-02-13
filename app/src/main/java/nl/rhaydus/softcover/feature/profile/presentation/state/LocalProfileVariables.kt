@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.profile.presentation.state
+package nl.rhaydus.softcover.feature.updated_profile.presentation.state
 
 import nl.rhaydus.softcover.core.presentation.toad.LocalVariables
 

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.library.presentation.model
+package nl.rhaydus.softcover.feature.updated_library.presentation.model
 
 enum class LibraryStatusTab(val label: String) {
     ALL("All"),

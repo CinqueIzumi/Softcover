@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.search.data.datasource
+package nl.rhaydus.softcover.feature.updated_search.data.datasource
 
 import kotlinx.coroutines.flow.Flow
 

@@ -6,12 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import nl.rhaydus.softcover.feature.caching.data.database.BookDao
-import nl.rhaydus.softcover.feature.caching.data.model.AuthorEntity
-import nl.rhaydus.softcover.feature.caching.data.model.BookAuthorCrossRef
-import nl.rhaydus.softcover.feature.caching.data.model.BookEditionEntity
-import nl.rhaydus.softcover.feature.caching.data.model.BookEntity
-import nl.rhaydus.softcover.feature.caching.data.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.feature.books.data.dao.BookDao
+import nl.rhaydus.softcover.feature.books.data.model.AuthorEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
+import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookEntity
+import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 
 @Database(
     entities = [

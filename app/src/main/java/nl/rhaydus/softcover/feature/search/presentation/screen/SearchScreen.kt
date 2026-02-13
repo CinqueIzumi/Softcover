@@ -43,7 +43,6 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.search.presentation.action.OnAddBookToLibraryClickAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveAllSearchQueriesClickedAction
@@ -68,7 +67,11 @@ class SearchScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onBookClick = {
-                navigator.push(BookDetailScreen(id = it.id))
+                navigator.push(
+                    _root_ide_package_.nl.rhaydus.softcover.feature.updated_book_detail.presentation.screen.BookDetailScreen(
+                        id = it.id
+                    )
+                )
             }
         )
     }

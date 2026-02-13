@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.util
 
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.reading.domain.usecase.MarkBookAsReadUseCase
-import nl.rhaydus.softcover.feature.reading.domain.usecase.UpdateBookProgressUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
 import timber.log.Timber
 
 class UpdateBookProgress(

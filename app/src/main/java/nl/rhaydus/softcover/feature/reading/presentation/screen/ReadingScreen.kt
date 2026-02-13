@@ -62,7 +62,6 @@ import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissEditionSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
@@ -76,7 +75,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
+import nl.rhaydus.softcover.feature.updated_search.presentation.screen.SearchScreen
 import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
@@ -92,7 +91,10 @@ object ReadingScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onBookClick = {
-                navigator.parent?.push(item = BookDetailScreen(id = it.id))
+                navigator.parent?.push(item = _root_ide_package_.nl.rhaydus.softcover.feature.updated_book_detail.presentation.screen.BookDetailScreen(
+                    id = it.id
+                )
+                )
             },
             onNavigateToSearch = {
                 navigator.parent?.push(item = SearchScreen())

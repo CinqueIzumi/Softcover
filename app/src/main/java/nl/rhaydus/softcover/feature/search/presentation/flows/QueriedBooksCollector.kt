@@ -1,13 +1,13 @@
-package nl.rhaydus.softcover.feature.search.presentation.flows
+package nl.rhaydus.softcover.feature.updated_search.presentation.flows
 
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.feature.search.presentation.event.SearchEvent
-import nl.rhaydus.softcover.feature.search.presentation.state.SearchLocalVariables
-import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
-import nl.rhaydus.softcover.feature.search.presentation.screenmodel.SearchDependencies
+import nl.rhaydus.softcover.feature.updated_search.presentation.event.SearchEvent
+import nl.rhaydus.softcover.feature.updated_search.presentation.state.SearchLocalVariables
+import nl.rhaydus.softcover.feature.updated_search.presentation.state.SearchScreenUiState
+import nl.rhaydus.softcover.feature.updated_search.presentation.screenmodel.SearchDependencies
 
 class QueriedBooksCollector() : SearchInitializer {
     override suspend fun onLaunch(

@@ -1,16 +1,16 @@
-package nl.rhaydus.softcover.feature.search.presentation.screenmodel
+package nl.rhaydus.softcover.feature.updated_search.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
-import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.feature.book.domain.usecase.RemoveBookFromLibraryUseCase
-import nl.rhaydus.softcover.feature.caching.domain.usecase.GetAllUserBooksUseCase
-import nl.rhaydus.softcover.feature.search.domain.usecase.GetPreviousSearchQueriesUseCase
-import nl.rhaydus.softcover.feature.search.domain.usecase.GetQueriedBooksUseCase
-import nl.rhaydus.softcover.feature.search.domain.usecase.RemoveAllSearchQueriesUseCase
-import nl.rhaydus.softcover.feature.search.domain.usecase.RemoveSearchQueryUseCase
-import nl.rhaydus.softcover.feature.search.domain.usecase.SearchForNameUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.feature.updated_search.domain.usecase.GetPreviousSearchQueriesUseCase
+import nl.rhaydus.softcover.feature.updated_search.domain.usecase.GetQueriedBooksUseCase
+import nl.rhaydus.softcover.feature.updated_search.domain.usecase.RemoveAllSearchQueriesUseCase
+import nl.rhaydus.softcover.feature.updated_search.domain.usecase.RemoveSearchQueryUseCase
+import nl.rhaydus.softcover.feature.updated_search.domain.usecase.SearchForNameUseCase
 
 data class SearchDependencies(
     val getPreviousSearchQueriesUseCase: GetPreviousSearchQueriesUseCase,

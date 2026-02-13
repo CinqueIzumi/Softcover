@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.library.presentation.screen
+package nl.rhaydus.softcover.feature.updated_library.presentation.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -50,13 +50,12 @@ import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
-import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
-import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
-import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
+import nl.rhaydus.softcover.feature.updated_library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.updated_library.presentation.action.OnRefreshAction
+import nl.rhaydus.softcover.feature.updated_library.presentation.model.LibraryStatusTab
+import nl.rhaydus.softcover.feature.updated_library.presentation.screenmodel.LibraryScreenScreenModel
+import nl.rhaydus.softcover.feature.updated_library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.updated_search.presentation.screen.SearchScreen
 
 object LibraryScreen : Screen {
     @Composable
@@ -71,7 +70,10 @@ object LibraryScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onBookClick = {
-                navigator.parent?.push(item = BookDetailScreen(id = it.id))
+                navigator.parent?.push(item = _root_ide_package_.nl.rhaydus.softcover.feature.updated_book_detail.presentation.screen.BookDetailScreen(
+                    id = it.id
+                )
+                )
             },
             onNavigateToSearch = {
                 navigator.parent?.push(item = SearchScreen())

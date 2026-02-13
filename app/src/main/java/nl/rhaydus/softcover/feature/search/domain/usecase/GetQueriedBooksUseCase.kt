@@ -1,8 +1,8 @@
-package nl.rhaydus.softcover.feature.search.domain.usecase
+package nl.rhaydus.softcover.feature.updated_search.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.search.domain.repository.SearchRepository
+import nl.rhaydus.softcover.feature.updated_search.domain.repository.SearchRepository
 
 class GetQueriedBooksUseCase(
     private val searchRepository: SearchRepository

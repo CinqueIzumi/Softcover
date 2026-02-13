@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.di
 
-import nl.rhaydus.softcover.feature.profile.presentation.initializer.ProfileInitializer
-import nl.rhaydus.softcover.feature.profile.presentation.initializer.UserInformationInitializer
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSourceImpl
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
@@ -21,6 +19,8 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.flows.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
+import nl.rhaydus.softcover.feature.profile.presentation.initializer.ProfileInitializer
+import nl.rhaydus.softcover.feature.profile.presentation.initializer.UserInformationInitializer
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -75,14 +75,14 @@ val settingsModule = module {
     factory {
         InitializeUserIdAndBooksUseCase(
             settingsRepository = get(),
-            cachingRepository = get()
+            booksRepository = get(),
         )
     }
 
     factory {
         ResetUserDataUseCase(
             settingsRepository = get(),
-            cachingRepository = get()
+            booksRepository = get(),
         )
     }
 

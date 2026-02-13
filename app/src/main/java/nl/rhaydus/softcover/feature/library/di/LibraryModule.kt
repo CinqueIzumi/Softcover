@@ -1,12 +1,12 @@
-package nl.rhaydus.softcover.feature.library.di
+package nl.rhaydus.softcover.feature.updated_library.di
 
-import nl.rhaydus.softcover.feature.library.presentation.flows.AllBooksCollector
-import nl.rhaydus.softcover.feature.library.presentation.flows.CurrentlyReadingBooksCollector
-import nl.rhaydus.softcover.feature.library.presentation.flows.DidNotFinishBooksCollector
-import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
-import nl.rhaydus.softcover.feature.library.presentation.flows.ReadBooksCollector
-import nl.rhaydus.softcover.feature.library.presentation.flows.WantToReadBooksCollector
-import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
+import nl.rhaydus.softcover.feature.updated_library.presentation.flows.AllBooksCollector
+import nl.rhaydus.softcover.feature.updated_library.presentation.flows.CurrentlyReadingBooksCollector
+import nl.rhaydus.softcover.feature.updated_library.presentation.flows.DidNotFinishBooksCollector
+import nl.rhaydus.softcover.feature.updated_library.presentation.flows.LibraryInitializer
+import nl.rhaydus.softcover.feature.updated_library.presentation.flows.ReadBooksCollector
+import nl.rhaydus.softcover.feature.updated_library.presentation.flows.WantToReadBooksCollector
+import nl.rhaydus.softcover.feature.updated_library.presentation.screenmodel.LibraryScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
 

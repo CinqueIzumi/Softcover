@@ -1,10 +1,10 @@
-package nl.rhaydus.softcover.feature.search.data.repository
+package nl.rhaydus.softcover.feature.updated_search.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.search.data.datasource.SearchLocalDataSource
-import nl.rhaydus.softcover.feature.search.data.datasource.SearchRemoteDataSource
-import nl.rhaydus.softcover.feature.search.domain.repository.SearchRepository
+import nl.rhaydus.softcover.feature.updated_search.data.datasource.SearchLocalDataSource
+import nl.rhaydus.softcover.feature.updated_search.data.datasource.SearchRemoteDataSource
+import nl.rhaydus.softcover.feature.updated_search.domain.repository.SearchRepository
 
 class SearchRepositoryImpl(
     private val searchRemoteDataSource: SearchRemoteDataSource,

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.search.data.datasource
+package nl.rhaydus.softcover.feature.updated_search.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import kotlinx.coroutines.flow.Flow
@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.update
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetIdsForQuery
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.book.data.mapper.toBook
+import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 
 class SearchRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.search.data.datastore.serializer
+package nl.rhaydus.softcover.feature.updated_search.data.datastore.serializer
 
 import androidx.datastore.core.Serializer
 import kotlinx.coroutines.Dispatchers

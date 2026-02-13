@@ -1,6 +1,6 @@
-package nl.rhaydus.softcover.feature.search.domain.usecase
+package nl.rhaydus.softcover.feature.updated_search.domain.usecase
 
-import nl.rhaydus.softcover.feature.search.domain.repository.SearchRepository
+import nl.rhaydus.softcover.feature.updated_search.domain.repository.SearchRepository
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
 
 class SearchForNameUseCase(

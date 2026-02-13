@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.onboarding.presentation.screen
+package nl.rhaydus.softcover.feature.updated_onboarding.presentation.screen
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -55,12 +55,12 @@ import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
-import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
-import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction
-import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
-import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
-import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel
-import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
+import nl.rhaydus.softcover.feature.updated_onboarding.presentation.action.OnApiKeySaveClickAction
+import nl.rhaydus.softcover.feature.updated_onboarding.presentation.action.OnApiKeyValueChangeAction
+import nl.rhaydus.softcover.feature.updated_onboarding.presentation.action.OnboardingAction
+import nl.rhaydus.softcover.feature.updated_onboarding.presentation.model.IntroScreen
+import nl.rhaydus.softcover.feature.updated_onboarding.presentation.screenmodel.OnboardingScreenScreenModel
+import nl.rhaydus.softcover.feature.updated_onboarding.presentation.state.OnboardingUiState
 import org.koin.androidx.compose.koinViewModel
 
 object OnboardingScreen : Screen {
