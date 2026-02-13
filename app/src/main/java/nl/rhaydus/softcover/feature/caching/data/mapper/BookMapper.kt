@@ -63,7 +63,8 @@ fun BookEdition.toEntity(bookId: Int): BookEditionEntity = BookEditionEntity(
     url = url,
     isbn10 = isbn10,
     pages = pages,
-    releaseYear = releaseYear
+    releaseYear = releaseYear,
+    format = format,
 )
 
 fun Author.toEntity(): AuthorEntity = AuthorEntity(name = name, id = id)
@@ -94,7 +95,8 @@ fun BookEditionEntity.toModel(authors: List<AuthorEntity>): BookEdition = BookEd
     isbn10 = isbn10,
     pages = pages,
     releaseYear = releaseYear,
-    authors = authors.map { it.toModel() }
+    authors = authors.map { it.toModel() },
+    format = format,
 )
 
 fun UserBookReadEntity.toModel(): UserBookRead {

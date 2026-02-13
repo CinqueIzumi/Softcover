@@ -9,6 +9,7 @@ data class BookEdition(
     val pages: Int?,
     val authors: List<Author>,
     val releaseYear: Int,
+    val format: String,
 ) {
     val authorString: String
         get() = authors.joinToString(", ") { it.name }

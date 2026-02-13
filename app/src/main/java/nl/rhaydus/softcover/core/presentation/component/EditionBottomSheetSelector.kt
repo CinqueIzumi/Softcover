@@ -200,6 +200,13 @@ fun EditionItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                edition.format.takeIf { it.isNotEmpty() }?.let { format ->
+                    Text(
+                        text = format,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
@@ -224,7 +231,8 @@ private fun EditionBottomSheetContentPreview() {
                 pages = 352,
                 isbn10 = "234",
                 publisher = "Titan Books",
-                id = 20
+                id = 20,
+                format = "",
             ),
             baseEdition.copy(
                 pages = 267,
