@@ -18,21 +18,10 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 
 // region 1.0.2
-// TODO: Connectivity checker... both for no internet as connected without internet
-// TODO: Add support for removing book / marking book as finished from detail screen...
 // TODO: Look at the feature setup, this feels wrong
 // TODO: General code clean-up
 //  Check imports, actions actually used, dependencies actually used, .onFailure/success style etc etc....
-// TODO: google play updater?
 // TODO: Check all queries to see if they match the HC ones
-// endregion
-
-// region 1.1.0
-// TODO: Maybe some sort of home screen, rather than displaying currently reading? -- show stats, reading streak?
-// TODO: Maybe notifications for newly releasing books? -- bind this to user setting, get a notification if a book you're interesting in is released...
-// TODO: Add support for dynamic colors at some point
-// TODO: Navigation animations?
-// TODO: Maybe add some sort of tag/genre searching if possible?
 // endregion
 
 class SoftCoverApp : Application() {
