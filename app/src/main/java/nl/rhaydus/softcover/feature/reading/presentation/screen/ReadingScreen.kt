@@ -76,6 +76,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
 import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
@@ -92,6 +93,9 @@ object ReadingScreen : Screen {
             runAction = screenModel::runAction,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
+            },
+            onNavigateToSearch = {
+                navigator.parent?.push(item = SearchScreen())
             }
         )
     }
@@ -102,12 +106,16 @@ object ReadingScreen : Screen {
         state: ReadingScreenUiState,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
+        onNavigateToSearch: () -> Unit,
     ) {
         val pullToRefreshState = rememberPullToRefreshState()
 
         Scaffold(
             topBar = {
-                SoftcoverTopBar(title = "Currently Reading")
+                SoftcoverTopBar(
+                    title = "Currently Reading",
+                    onNavigateToSearch = onNavigateToSearch,
+                )
             },
             contentWindowInsets = WindowInsets.statusBars,
         ) { innerPadding ->
@@ -384,6 +392,7 @@ private fun ReadingScreenEmptyPreview() {
             state = ReadingScreenUiState(isLoading = false),
             runAction = {},
             onBookClick = {},
+            onNavigateToSearch = {},
         )
     }
 }
@@ -483,6 +492,7 @@ private fun ReadingScreenPreview() {
             state = ReadingScreenUiState(books = books),
             runAction = {},
             onBookClick = {},
+            onNavigateToSearch = {},
         )
     }
 }

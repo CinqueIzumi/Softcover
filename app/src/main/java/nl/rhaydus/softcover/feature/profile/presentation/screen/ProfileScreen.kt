@@ -65,7 +65,7 @@ class ProfileScreen : Screen {
         Screen(
             state = state,
             runAction = screenModel::runAction,
-            onNavigateUp = navigator::pop
+            onNavigateUp = navigator::pop,
         )
     }
 
@@ -80,7 +80,7 @@ class ProfileScreen : Screen {
             topBar = {
                 SoftcoverTopBar(
                     title = "Profile",
-                    onNavigateBack = onNavigateUp
+                    onNavigateBack = onNavigateUp,
                 )
             },
         ) { innerPadding ->

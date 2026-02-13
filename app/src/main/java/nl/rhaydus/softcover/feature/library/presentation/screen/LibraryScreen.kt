@@ -56,6 +56,7 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
 
 object LibraryScreen : Screen {
     @Composable
@@ -71,6 +72,9 @@ object LibraryScreen : Screen {
             runAction = screenModel::runAction,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
+            },
+            onNavigateToSearch = {
+                navigator.parent?.push(item = SearchScreen())
             }
         )
     }
@@ -81,6 +85,7 @@ object LibraryScreen : Screen {
         state: LibraryUiState,
         runAction: (LibraryAction) -> Unit,
         onBookClick: (Book) -> Unit,
+        onNavigateToSearch: () -> Unit,
     ) {
         val tabs = LibraryStatusTab.entries
         val scope = rememberCoroutineScope()
@@ -89,7 +94,10 @@ object LibraryScreen : Screen {
 
         Scaffold(
             topBar = {
-                SoftcoverTopBar(title = "Library")
+                SoftcoverTopBar(
+                    title = "Library",
+                    onNavigateToSearch = onNavigateToSearch,
+                )
             },
             contentWindowInsets = WindowInsets.statusBars,
         ) {
@@ -252,6 +260,7 @@ private fun LibraryScreenPreview() {
             ),
             onBookClick = {},
             runAction = {},
+            onNavigateToSearch = {},
         )
     }
 }
@@ -267,6 +276,7 @@ private fun LibraryEmptyScreenPreview() {
             ),
             onBookClick = {},
             runAction = {},
+            onNavigateToSearch = {},
         )
     }
 }
