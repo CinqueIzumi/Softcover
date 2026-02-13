@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.updated_onboarding.presentation.event
+package nl.rhaydus.softcover.feature.onboarding.presentation.event
 
 import nl.rhaydus.softcover.core.presentation.toad.UiEvent
 

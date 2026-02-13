@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.updated_search.domain.repository
+package nl.rhaydus.softcover.feature.search.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book

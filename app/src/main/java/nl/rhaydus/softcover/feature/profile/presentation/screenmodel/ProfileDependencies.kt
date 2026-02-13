@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.updated_profile.presentation.screenmodel
+package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

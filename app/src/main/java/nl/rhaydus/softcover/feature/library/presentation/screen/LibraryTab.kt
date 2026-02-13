@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.updated_library.presentation.screen
+package nl.rhaydus.softcover.feature.library.presentation.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

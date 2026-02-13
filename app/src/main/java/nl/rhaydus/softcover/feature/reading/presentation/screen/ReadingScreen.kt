@@ -75,7 +75,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.updated_search.presentation.screen.SearchScreen
+import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
 import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {

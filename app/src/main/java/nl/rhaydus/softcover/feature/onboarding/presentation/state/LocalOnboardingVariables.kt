@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.updated_onboarding.presentation.state
+package nl.rhaydus.softcover.feature.onboarding.presentation.state
 
 import nl.rhaydus.softcover.core.presentation.toad.LocalVariables
 

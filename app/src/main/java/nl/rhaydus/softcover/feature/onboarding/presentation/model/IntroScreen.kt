@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.updated_onboarding.presentation.model
+package nl.rhaydus.softcover.feature.onboarding.presentation.model
 
 enum class IntroScreen {
     FIRST,
