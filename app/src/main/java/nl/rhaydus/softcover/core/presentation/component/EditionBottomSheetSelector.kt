@@ -118,10 +118,13 @@ private fun EditionBottomSheetContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(book.editions) { edition ->
+                val defaultEdition = book.defaultEdition ?: return@items
+
                 EditionItem(
                     edition = edition,
                     selected = edition == selectedEdition,
-                    onEditionClick = { selectedEdition = edition }
+                    onEditionClick = { selectedEdition = edition },
+                    defaultEdition = defaultEdition
                 )
             }
         }
@@ -131,6 +134,7 @@ private fun EditionBottomSheetContent(
 @Composable
 fun EditionItem(
     edition: BookEdition,
+    defaultEdition: BookEdition,
     selected: Boolean,
     onEditionClick: () -> Unit,
 ) {
@@ -162,6 +166,7 @@ fun EditionItem(
                 edition = edition,
                 modifier = Modifier.width(width = 60.dp),
                 isLoading = false,
+                defaultEdition = defaultEdition,
             )
 
             Spacer(modifier = Modifier.width(16.dp))

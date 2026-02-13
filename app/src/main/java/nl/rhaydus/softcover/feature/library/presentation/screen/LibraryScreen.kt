@@ -218,6 +218,7 @@ object LibraryScreen : Screen {
                 edition = book.currentEdition,
                 modifier = Modifier.fillMaxWidth(),
                 isLoading = false,
+                defaultEdition = book.defaultEdition,
             )
 
             Text(

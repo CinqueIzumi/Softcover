@@ -11,11 +11,14 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 @Composable
 fun EditionImage(
     edition: BookEdition?,
+    defaultEdition: BookEdition?,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val editionUrl = edition?.url ?: defaultEdition?.url
+
     SoftcoverImage(
-        url = edition?.url,
+        url = editionUrl,
         modifier = modifier
             .aspectRatio(2f / 3f)
             .clip(shape = RoundedCornerShape(4.dp)),

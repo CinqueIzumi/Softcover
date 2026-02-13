@@ -188,7 +188,8 @@ class BookDetailScreen(
                 item {
                     CoverImageSection(
                         edition = state.book?.currentEdition,
-                        isLoading = state.loading
+                        isLoading = state.loading,
+                        fallBackEdition = state.book?.defaultEdition
                     )
                 }
 
@@ -345,8 +346,11 @@ class BookDetailScreen(
     @Composable
     private fun CoverImageSection(
         edition: BookEdition?,
+        fallBackEdition: BookEdition?,
         isLoading: Boolean,
     ) {
+        val editionUrl = edition?.url ?: fallBackEdition?.url
+
         val imageHeight = with(LocalDensity.current) {
             (LocalWindowInfo.current.containerSize.height * 0.5f).toDp()
         }
@@ -367,7 +371,7 @@ class BookDetailScreen(
                 )
         ) {
             SoftcoverImage(
-                url = edition?.url,
+                url = editionUrl,
                 contentDescription = "Blurred cover edition image",
                 isLoading = isLoading,
                 modifier = Modifier
@@ -379,6 +383,7 @@ class BookDetailScreen(
 
             EditionImage(
                 edition = edition,
+                defaultEdition = fallBackEdition,
                 isLoading = isLoading,
                 modifier = Modifier
                     .height(imageHeight * 0.8f)
