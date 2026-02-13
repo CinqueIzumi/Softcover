@@ -553,7 +553,10 @@ class BookDetailScreen(
 
     @Composable
     private fun ReadingContainer(state: BookDetailUiState) {
-        if (state.book == null || state.book.userBookRead?.progress == null) return
+        if (state.book == null || state.book.userBookRead == null) return
+
+        val progress = state.book.userBookRead.progress ?: 0f
+        val pageProgress = state.book.userBookRead.currentPage ?: 0
 
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -583,7 +586,7 @@ class BookDetailScreen(
                     )
 
                     Text(
-                        text = "${state.book.userBookRead.progress.roundToInt()}%",
+                        text = "${progress.roundToInt()}%",
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.titleMedium,
                     )
@@ -592,7 +595,7 @@ class BookDetailScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 LinearProgressIndicator(
-                    progress = { state.book.userBookRead.progress / 100f },
+                    progress = { progress / 100f },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(6.dp),
@@ -606,7 +609,7 @@ class BookDetailScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "${state.book.userBookRead.currentPage} of ${state.book.currentEdition.pages} pages • $amountOfPagesLeft pages left",
+                    text = "$pageProgress of ${state.book.currentEdition.pages} pages • $amountOfPagesLeft pages left",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
