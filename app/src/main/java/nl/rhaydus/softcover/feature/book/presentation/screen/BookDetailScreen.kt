@@ -26,6 +26,7 @@ import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -125,9 +126,160 @@ class BookDetailScreen(
         )
     }
 
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+    @Composable
+    fun Screen(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+        onNavigateBack: () -> Unit,
+    ) {
+        val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+        val lazyListState = rememberLazyListState()
+
+        val shouldBeExpanded by remember {
+            derivedStateOf { lazyListState.firstVisibleItemIndex >= 1 }
+        }
+
+        val title = remember(shouldBeExpanded) {
+            if (shouldBeExpanded.not()) {
+                ""
+            } else {
+                state.book?.title ?: ""
+            }
+        }
+
+        val containerColor by animateColorAsState(
+            if (shouldBeExpanded.not()) {
+                Color.Transparent
+            } else {
+                Color.Unspecified
+            }
+        )
+
+        val defaultIconButtonColors = IconButtonDefaults.iconButtonColors()
+        val iconButtonColorsWithScrim = IconButtonDefaults.iconButtonColors(
+            containerColor = Color.Black.copy(alpha = 0.35f),
+            contentColor = Color.White
+        )
+
+        val backButtonColors = remember(shouldBeExpanded) {
+            if (shouldBeExpanded) {
+                defaultIconButtonColors
+            } else {
+                iconButtonColorsWithScrim
+            }
+        }
+
+        Scaffold(
+            contentWindowInsets = WindowInsets(),
+            floatingActionButton = {
+                FloatingActionButtonMenu(
+                    state = state,
+                    runAction = runAction,
+                )
+            }
+        ) { innerPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                state = lazyListState,
+            ) {
+                item {
+                    CoverImageSection(
+                        edition = state.book?.currentEdition,
+                        isLoading = state.loading,
+                        fallBackEdition = state.book?.defaultEdition
+                    )
+                }
+
+                generalBookInfoSection(state = state)
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                item { ReviewsPagesReleaseDateSection(state = state) }
+
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                item {
+                    BookStatusWidget(
+                        state = state,
+                        runAction = runAction,
+                    )
+                }
+
+                item { Spacer(modifier = Modifier.height(32.dp)) }
+
+                item { DescriptionSection(state = state) }
+
+                item { BottomNavigationSpacer() }
+            }
+
+            SoftcoverTopBar(
+                title = title,
+                onNavigateBack = onNavigateBack,
+                navigateBackButton = {
+                    IconButton(
+                        onClick = onNavigateBack,
+                        colors = backButtonColors,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = "Navigate back icon"
+                        )
+                    }
+                },
+                scrollBehavior = topAppBarScrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors().copy(
+                    containerColor = containerColor,
+                )
+            )
+
+            if (state.showEditEditionSheet && state.book != null) {
+                EditionBottomSheetSelector(
+                    book = state.book,
+                    onDismissRequest = {
+                        runAction(OnDismissEditEditionSheetClickAction())
+                    },
+                    onCancelClick = {
+                        runAction(OnDismissEditEditionSheetClickAction())
+                    },
+                    onConfirmClick = {
+                        runAction(OnNewEditionSaveClickAction(edition = it))
+                    },
+                )
+            }
+
+            if (state.showUpdateProgressSheet && state.book != null) {
+                UpdateProgressBottomSheet(
+                    bookToUpdate = state.book,
+                    selectedTab = state.selectedProgressSheetTab,
+                    onDismissRequest = {
+                        runAction(OnDismissProgressSheetAction())
+                    },
+                    onProgressTabClick = {
+                        runAction(
+                            OnProgressTabClickAction(tab = it)
+                        )
+                    },
+                    onUpdatePercentageClick = {
+                        runAction(
+                            OnUpdatePercentageProgressClickAction(newPercentage = it)
+                        )
+                    },
+                    onUpdatePageProgressClick = {
+                        runAction(
+                            OnUpdatePageProgressClickAction(newPage = it)
+                        )
+                    },
+                )
+            }
+        }
+    }
+
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun FloatingActionButtonMenu(
+    private fun FloatingActionButtonMenu(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
@@ -191,144 +343,14 @@ class BookDetailScreen(
         }
     }
 
-    @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
-    @Composable
-    fun Screen(
-        state: BookDetailUiState,
-        runAction: (BookDetailAction) -> Unit,
-        onNavigateBack: () -> Unit,
-    ) {
-        val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-        val lazyListState = rememberLazyListState()
-
-        val shouldBeExpanded by remember {
-            derivedStateOf { lazyListState.firstVisibleItemIndex >= 1 }
-        }
-
-        val title = remember(shouldBeExpanded) {
-            if (shouldBeExpanded.not()) {
-                ""
-            } else {
-                state.book?.title ?: ""
-            }
-        }
-
-        val containerColor by animateColorAsState(
-            if (shouldBeExpanded.not()) {
-                Color.Transparent
-            } else {
-                Color.Unspecified
-            }
-        )
-
-        Scaffold(
-            contentWindowInsets = WindowInsets(),
-            floatingActionButton = {
-                FloatingActionButtonMenu(
-                    state = state,
-                    runAction = runAction,
-                )
-            }
-        ) { innerPadding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                state = lazyListState,
-            ) {
-                item {
-                    CoverImageSection(
-                        edition = state.book?.currentEdition,
-                        isLoading = state.loading
-                    )
-                }
-
-                generalBookInfoSection(state = state)
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
-                item { ReviewsPagesReleaseDateSection(state = state) }
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
-                item {
-                    BookStatusWidget(
-                        state = state,
-                        runAction = runAction,
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(32.dp)) }
-
-                item { DescriptionSection(state = state) }
-
-                item { BottomNavigationSpacer() }
-            }
-
-            SoftcoverTopBar(
-                title = title,
-                onNavigateBack = onNavigateBack,
-                navigateBackButton = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Navigate back icon"
-                        )
-                    }
-                },
-                scrollBehavior = topAppBarScrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors().copy(
-                    containerColor = containerColor,
-                )
-            )
-
-            if (state.showEditEditionSheet && state.book != null) {
-                EditionBottomSheetSelector(
-                    book = state.book,
-                    onDismissRequest = {
-                        runAction(OnDismissEditEditionSheetClickAction())
-                    },
-                    onCancelClick = {
-                        runAction(OnDismissEditEditionSheetClickAction())
-                    },
-                    onConfirmClick = {
-                        runAction(OnNewEditionSaveClickAction(edition = it))
-                    },
-                )
-            }
-
-            if (state.showUpdateProgressSheet && state.book != null) {
-                UpdateProgressBottomSheet(
-                    bookToUpdate = state.book,
-                    selectedTab = state.selectedProgressSheetTab,
-                    onDismissRequest = {
-                        runAction(OnDismissProgressSheetAction())
-                    },
-                    onProgressTabClick = {
-                        runAction(
-                            OnProgressTabClickAction(tab = it)
-                        )
-                    },
-                    onUpdatePercentageClick = {
-                        runAction(
-                            OnUpdatePercentageProgressClickAction(newPercentage = it)
-                        )
-                    },
-                    onUpdatePageProgressClick = {
-                        runAction(
-                            OnUpdatePageProgressClickAction(newPage = it)
-                        )
-                    },
-                )
-            }
-        }
-    }
-
     @Composable
     private fun CoverImageSection(
         edition: BookEdition?,
+        fallBackEdition: BookEdition?,
         isLoading: Boolean,
     ) {
+        val editionUrl = edition?.url ?: fallBackEdition?.url
+
         val imageHeight = with(LocalDensity.current) {
             (LocalWindowInfo.current.containerSize.height * 0.5f).toDp()
         }
@@ -349,7 +371,7 @@ class BookDetailScreen(
                 )
         ) {
             SoftcoverImage(
-                url = edition?.url,
+                url = editionUrl,
                 contentDescription = "Blurred cover edition image",
                 isLoading = isLoading,
                 modifier = Modifier
@@ -361,6 +383,7 @@ class BookDetailScreen(
 
             EditionImage(
                 edition = edition,
+                defaultEdition = fallBackEdition,
                 isLoading = isLoading,
                 modifier = Modifier
                     .height(imageHeight * 0.8f)
@@ -530,7 +553,10 @@ class BookDetailScreen(
 
     @Composable
     private fun ReadingContainer(state: BookDetailUiState) {
-        if (state.book == null || state.book.userBookRead?.progress == null) return
+        if (state.book == null || state.book.userBookRead == null) return
+
+        val progress = state.book.userBookRead.progress ?: 0f
+        val pageProgress = state.book.userBookRead.currentPage ?: 0
 
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -560,7 +586,7 @@ class BookDetailScreen(
                     )
 
                     Text(
-                        text = "${state.book.userBookRead.progress.roundToInt()}%",
+                        text = "${progress.roundToInt()}%",
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.titleMedium,
                     )
@@ -569,7 +595,7 @@ class BookDetailScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 LinearProgressIndicator(
-                    progress = { state.book.userBookRead.progress / 100f },
+                    progress = { progress / 100f },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(6.dp),
@@ -583,7 +609,7 @@ class BookDetailScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "${state.book.userBookRead.currentPage} of ${state.book.currentEdition.pages} pages • $amountOfPagesLeft pages left",
+                    text = "$pageProgress of ${state.book.currentEdition.pages} pages • $amountOfPagesLeft pages left",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }

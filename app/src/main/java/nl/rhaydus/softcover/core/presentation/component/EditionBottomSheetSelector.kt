@@ -118,10 +118,13 @@ private fun EditionBottomSheetContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(book.editions) { edition ->
+                val defaultEdition = book.defaultEdition ?: return@items
+
                 EditionItem(
                     edition = edition,
                     selected = edition == selectedEdition,
-                    onEditionClick = { selectedEdition = edition }
+                    onEditionClick = { selectedEdition = edition },
+                    defaultEdition = defaultEdition
                 )
             }
         }
@@ -131,6 +134,7 @@ private fun EditionBottomSheetContent(
 @Composable
 fun EditionItem(
     edition: BookEdition,
+    defaultEdition: BookEdition,
     selected: Boolean,
     onEditionClick: () -> Unit,
 ) {
@@ -162,6 +166,7 @@ fun EditionItem(
                 edition = edition,
                 modifier = Modifier.width(width = 60.dp),
                 isLoading = false,
+                defaultEdition = defaultEdition,
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -200,6 +205,13 @@ fun EditionItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                edition.format.takeIf { it.isNotEmpty() }?.let { format ->
+                    Text(
+                        text = format,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
@@ -224,7 +236,8 @@ private fun EditionBottomSheetContentPreview() {
                 pages = 352,
                 isbn10 = "234",
                 publisher = "Titan Books",
-                id = 20
+                id = 20,
+                format = "",
             ),
             baseEdition.copy(
                 pages = 267,

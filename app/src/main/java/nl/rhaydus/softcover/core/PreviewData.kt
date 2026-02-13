@@ -21,7 +21,8 @@ object PreviewData {
         pages = 100,
         url = "",
         releaseYear = 2023,
-        authors = listOf(baseAuthor)
+        authors = listOf(baseAuthor),
+        format = "Hardcover",
     )
 
     val baseBook = Book(

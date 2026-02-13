@@ -15,19 +15,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -79,6 +76,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
 import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
@@ -95,6 +93,9 @@ object ReadingScreen : Screen {
             runAction = screenModel::runAction,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
+            },
+            onNavigateToSearch = {
+                navigator.parent?.push(item = SearchScreen())
             }
         )
     }
@@ -105,12 +106,16 @@ object ReadingScreen : Screen {
         state: ReadingScreenUiState,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
+        onNavigateToSearch: () -> Unit,
     ) {
         val pullToRefreshState = rememberPullToRefreshState()
 
         Scaffold(
             topBar = {
-                SoftcoverTopBar(title = "Currently Reading")
+                SoftcoverTopBar(
+                    title = "Currently Reading",
+                    onNavigateToSearch = onNavigateToSearch,
+                )
             },
             contentWindowInsets = WindowInsets.statusBars,
         ) { innerPadding ->
@@ -272,6 +277,7 @@ object ReadingScreen : Screen {
                         edition = book.currentEdition,
                         modifier = Modifier.width(100.dp),
                         isLoading = false,
+                        defaultEdition = book.defaultEdition,
                     )
 
                     Spacer(modifier = Modifier.width(16.dp))
@@ -293,8 +299,9 @@ object ReadingScreen : Screen {
 
                         Spacer(modifier = Modifier.height(2.dp))
 
+                        val currentPage = book.userBookRead?.currentPage ?: 0
                         Text(
-                            text = "Page ${book.userBookRead?.currentPage} of ${book.currentEdition.pages}",
+                            text = "Page $currentPage of ${book.currentEdition.pages}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -385,6 +392,7 @@ private fun ReadingScreenEmptyPreview() {
             state = ReadingScreenUiState(isLoading = false),
             runAction = {},
             onBookClick = {},
+            onNavigateToSearch = {},
         )
     }
 }
@@ -484,6 +492,7 @@ private fun ReadingScreenPreview() {
             state = ReadingScreenUiState(books = books),
             runAction = {},
             onBookClick = {},
+            onNavigateToSearch = {},
         )
     }
 }

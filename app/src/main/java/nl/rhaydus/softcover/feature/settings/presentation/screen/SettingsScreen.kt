@@ -40,6 +40,7 @@ import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreen
+import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -61,6 +62,9 @@ object SettingsScreen : Screen {
             },
             navigateToAppearanceSettings = {
                 navigator.parent?.push(AppearanceSettingsScreen())
+            },
+            onNavigateToSearch = {
+                navigator.parent?.push(item = SearchScreen())
             }
         )
     }
@@ -72,10 +76,14 @@ object SettingsScreen : Screen {
         runAction: (SettingsAction) -> Unit,
         navigateToProfile: () -> Unit,
         navigateToAppearanceSettings: () -> Unit,
+        onNavigateToSearch: () -> Unit,
     ) {
         Scaffold(
             topBar = {
-                SoftcoverTopBar(title = "Settings")
+                SoftcoverTopBar(
+                    title = "Settings",
+                    onNavigateToSearch = onNavigateToSearch,
+                )
             },
             contentWindowInsets = WindowInsets.statusBars,
         ) {
@@ -172,6 +180,7 @@ private fun SettingsScreenPreview() {
             state = SettingsScreenUiState(),
             navigateToProfile = {},
             navigateToAppearanceSettings = {},
+            onNavigateToSearch = {},
         )
     }
 }

@@ -16,4 +16,5 @@ fragment EditionFragment on editions {
         url
     }
     release_year
+    edition_format
 }

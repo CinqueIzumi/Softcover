@@ -30,6 +30,7 @@ private fun EditionFragment.toBookEdition(): BookEdition {
         },
         isbn10 = isbn_10,
         releaseYear = release_year ?: -1,
+        format = edition_format ?: "",
     )
 }
 

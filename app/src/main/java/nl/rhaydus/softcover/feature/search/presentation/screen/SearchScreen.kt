@@ -212,6 +212,7 @@ class SearchScreen : Screen {
                 edition = book.currentEdition,
                 modifier = Modifier.width(80.dp),
                 isLoading = false,
+                defaultEdition = book.defaultEdition,
             )
 
             Spacer(modifier = Modifier.width(8.dp))

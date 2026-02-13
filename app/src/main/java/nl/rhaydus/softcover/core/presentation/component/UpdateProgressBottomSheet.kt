@@ -180,9 +180,9 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
     onUpdatePageProgressClick: (String) -> Unit,
 ) {
     var number by remember {
-        val currentPageString = book.userBookRead.toString()
+        val currentPage = book.userBookRead?.currentPage ?: 0
 
-        mutableStateOf(TextFieldValue(text = currentPageString))
+        mutableStateOf(TextFieldValue(text = currentPage.toString()))
     }
 
     var firstTimeFocusedGained by remember { mutableStateOf(true) }
