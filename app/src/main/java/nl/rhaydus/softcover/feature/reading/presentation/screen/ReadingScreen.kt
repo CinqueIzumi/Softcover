@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,11 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -36,6 +33,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,6 +50,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
@@ -61,9 +62,9 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
-import nl.rhaydus.softcover.core.presentation.screen.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissEditionSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
@@ -76,35 +77,37 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProg
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
+import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenViewModel
 import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
     @Composable
     override fun Content() {
-        val viewModel = koinScreenModel<ReadingScreenViewModel>()
+        val screenModel = koinScreenModel<ReadingScreenScreenModel>()
 
-        val state by viewModel.state.collectAsStateWithLifecycle()
+        val state by screenModel.state.collectAsStateWithLifecycle()
 
         val navigator = LocalNavigator.currentOrThrow
 
         Screen(
             state = state,
-            runAction = viewModel::runAction,
+            runAction = screenModel::runAction,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
             }
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     fun Screen(
         state: ReadingScreenUiState,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
     ) {
+        val pullToRefreshState = rememberPullToRefreshState()
+
         Scaffold(
             topBar = {
                 SoftcoverTopBar(title = "Currently Reading")
@@ -123,6 +126,16 @@ object ReadingScreen : Screen {
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
+                    state = pullToRefreshState,
+                    indicator = {
+                        IndicatorBox(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            state = pullToRefreshState,
+                            isRefreshing = state.isLoading,
+                        ) {
+                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
+                        }
+                    }
                 ) {
                     when {
                         state.books.isNotEmpty() -> {
@@ -177,14 +190,12 @@ object ReadingScreen : Screen {
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
     ) {
-        val bottomPadding = LocalBottomBarPadding.current
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = bottomPadding)
+            contentPadding = PaddingValues(bottom = rememberBottomBarPadding())
         ) {
             items(books) {
                 BookEntry(
@@ -206,21 +217,10 @@ object ReadingScreen : Screen {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
-                    )
-                    .padding(all = 24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.MenuBook,
-                    contentDescription = "Book icon",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(64.dp)
-                )
-            }
+            Image(
+                painter = painterResource(R.drawable.illu_no_results),
+                contentDescription = "No images were found"
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -271,6 +271,7 @@ object ReadingScreen : Screen {
                     EditionImage(
                         edition = book.currentEdition,
                         modifier = Modifier.width(100.dp),
+                        isLoading = false,
                     )
 
                     Spacer(modifier = Modifier.width(16.dp))
@@ -293,7 +294,7 @@ object ReadingScreen : Screen {
                         Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
-                            text = "Page ${book.currentPage} of ${book.currentEdition.pages}",
+                            text = "Page ${book.userBookRead?.currentPage} of ${book.currentEdition.pages}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -310,8 +311,8 @@ object ReadingScreen : Screen {
 
                                         runAction(OnMarkBookAsReadClickAction(book = book))
                                     },
-                                    icon = SoftcoverIconResource.Vector(
-                                        vector = Icons.Default.CheckCircle,
+                                    icon = SoftcoverIconResource.Drawable(
+                                        id = R.drawable.ic_check_circle,
                                         contentDescription = "Mark as Read icon"
                                     )
                                 ),
@@ -322,15 +323,15 @@ object ReadingScreen : Screen {
 
                                         runAction(OnShowEditionSheetClickAction(book = book))
                                     },
-                                    icon = SoftcoverIconResource.Vector(
-                                        vector = Icons.AutoMirrored.Default.LibraryBooks,
+                                    icon = SoftcoverIconResource.Drawable(
+                                        id = R.drawable.ic_library_books,
                                         contentDescription = "Mark as Read icon"
                                     )
                                 ),
                             ),
                             label = "Set Progress",
-                            trailingIcon = SoftcoverIconResource.Vector(
-                                vector = Icons.Default.ArrowDropDown,
+                            trailingIcon = SoftcoverIconResource.Drawable(
+                                id = R.drawable.ic_arrow_drop_down,
                                 contentDescription = "Drop down icon",
                             ),
                             onDismissMenuRequest = {
@@ -346,7 +347,7 @@ object ReadingScreen : Screen {
                             size = ButtonSize.XS,
                         )
 
-                        book.progress?.let { bookProgress ->
+                        book.userBookRead?.progress?.let { bookProgress ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -403,9 +404,11 @@ private fun ReadingScreenPreview() {
                     )
                 )
             ),
-            currentPage = 470,
-            progress = 88.014984f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 470,
+                progress = 88.014984f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
         PreviewData.baseBook.copy(
             title = "Last to Leave the Room",
@@ -415,9 +418,11 @@ private fun ReadingScreenPreview() {
                     id = 20,
                 )
             ),
-            currentPage = 262,
-            progress = 81.875f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 262,
+                progress = 81.875f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
         PreviewData.baseBook.copy(
             title = "Cursed Bunny",
@@ -431,9 +436,11 @@ private fun ReadingScreenPreview() {
                     )
                 )
             ),
-            currentPage = 49,
-            progress = 19.140625f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 49,
+                progress = 19.140625f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
         PreviewData.baseBook.copy(
             title = "Sherlock Holmes: The complete illustrated novels",
@@ -446,9 +453,11 @@ private fun ReadingScreenPreview() {
                     )
                 )
             ),
-            currentPage = 200,
-            progress = 40.322582f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 200,
+                progress = 40.322582f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
         PreviewData.baseBook.copy(
             title = "The Complete Fiction",
@@ -462,9 +471,11 @@ private fun ReadingScreenPreview() {
                     )
                 )
             ),
-            currentPage = 110,
-            progress = 10.018215f,
-            userEditionId = 20,
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(
+                currentPage = 110,
+                progress = 10.018215f,
+            ),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
         ),
     )
 

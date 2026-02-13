@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 data class AppSettingsEntity(
     val apiKey: String = "",
     val userId: Int = -1,
+    val themeConfig: ThemeConfigurationEntity = ThemeConfigurationEntity(),
 )

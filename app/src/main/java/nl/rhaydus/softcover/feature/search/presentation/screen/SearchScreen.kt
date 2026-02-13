@@ -10,14 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BookmarkAdded
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -29,12 +25,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
@@ -51,8 +50,8 @@ import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveAllSearch
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveSearchQueryClickedAction
 import nl.rhaydus.softcover.feature.search.presentation.action.SearchAction
+import nl.rhaydus.softcover.feature.search.presentation.screenmodel.SearchScreenScreenModel
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
-import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchScreenViewModel
 import kotlin.time.Duration.Companion.seconds
 
 class SearchScreen : Screen {
@@ -60,14 +59,14 @@ class SearchScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val viewModel = koinScreenModel<SearchScreenViewModel>()
+        val screenModel = koinScreenModel<SearchScreenScreenModel>()
 
-        val state by viewModel.state.collectAsStateWithLifecycle()
+        val state by screenModel.state.collectAsStateWithLifecycle()
 
         Screen(
             onNavigateUp = navigator::pop,
             state = state,
-            runAction = viewModel::runAction,
+            runAction = screenModel::runAction,
             onBookClick = {
                 navigator.push(BookDetailScreen(id = it.id))
             }
@@ -212,6 +211,7 @@ class SearchScreen : Screen {
             EditionImage(
                 edition = book.currentEdition,
                 modifier = Modifier.width(80.dp),
+                isLoading = false,
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -232,26 +232,40 @@ class SearchScreen : Screen {
                     style = MaterialTheme.typography.bodyMedium
                 )
 
-                var label = ""
+                val strings = listOf(
+                    book.releaseYear.takeIf { it != -1 },
+                    book.usersCount.let { "$it readers" },
+                    book.rating.takeIf { it != 0.0 },
+                ).mapNotNull { it?.toString() }
 
-                if (book.releaseYear != -1) {
-                    label += book.releaseYear.toString()
+                val label = strings.joinToString(separator = " • ") { it }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    if (book.rating != 0.0) {
+                        Spacer(modifier = Modifier.width(4.dp))
+
+                        Icon(
+                            painter = painterResource(R.drawable.ic_star_filled),
+                            contentDescription = "",
+                            tint = Color(0xFFFBBF23),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
-
-                if (book.rating != 0.0) {
-                    label += " • ${book.rating}"
-                }
-
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            val addedToLibrary = book.userBookId != null
+            val addedToLibrary = book.userBook != null
 
             IconToggleButton(
                 checked = addedToLibrary,
@@ -263,8 +277,8 @@ class SearchScreen : Screen {
                 },
             ) {
                 val iconResource = when {
-                    addedToLibrary -> Icons.Default.BookmarkAdded
-                    else -> Icons.Default.BookmarkBorder
+                    addedToLibrary -> R.drawable.ic_bookmark_added
+                    else -> R.drawable.ic_bookmark_add
                 }
 
                 val contentDescription = when {
@@ -273,7 +287,7 @@ class SearchScreen : Screen {
                 }
 
                 Icon(
-                    imageVector = iconResource,
+                    painter = painterResource(iconResource),
                     contentDescription = contentDescription,
                 )
             }
@@ -302,7 +316,7 @@ class SearchScreen : Screen {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = Icons.Default.History,
+                    painter = painterResource(R.drawable.ic_history),
                     contentDescription = "Previous search icon",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -318,7 +332,7 @@ class SearchScreen : Screen {
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Icon(
-                    imageVector = Icons.Default.Clear,
+                    painter = painterResource(R.drawable.ic_close),
                     contentDescription = "Clear icon",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.noRippleClickable {
@@ -352,7 +366,7 @@ private fun SearchScreenPreview() {
                         defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2021),
                         authors = listOf(PreviewData.baseAuthor.copy(name = "Erica Lee")),
                         rating = 4.2,
-                        userBookId = 20,
+                        userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
                     ),
                     PreviewData.baseBook.copy(
                         title = "Last One to Leave",

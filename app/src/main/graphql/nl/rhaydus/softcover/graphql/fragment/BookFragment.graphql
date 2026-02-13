@@ -7,6 +7,8 @@ fragment BookFragment on books {
         url
     }
 
+    users_count
+
     default_physical_edition {
         ...EditionFragment
     }

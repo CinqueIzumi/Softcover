@@ -6,4 +6,5 @@ data class OnboardingUiState(
     val apiKeyValue: String = "",
     val saveApiKeyButtonEnabled: Boolean = true,
     val isLoading: Boolean = false,
+    val progress: Float? = null,
 ) : UiState

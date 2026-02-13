@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.reading.presentation.viewmodel.ReadingScreenDependencies
+import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import timber.log.Timber
 
 data class OnNewEditionSaveClickAction(val edition: BookEdition) : ReadingAction {
@@ -13,7 +13,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : ReadingAction
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
-        val userBookId = scope.currentState.bookToUpdate?.userBookId ?: return
+        val userBookId = scope.currentState.bookToUpdate?.userBook?.id ?: return
 
         dependencies.launch {
             scope.setState { it.copy(isLoading = true) }

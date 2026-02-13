@@ -19,62 +19,26 @@ import nl.rhaydus.softcover.feature.caching.data.model.EditionAuthorCrossRef
 
 @Dao
 interface BookDao {
-    // ---------- Observing ----------
+    // region Data fetchers
     @Transaction
-    @Query("SELECT * FROM books ORDER BY userUpdatedAt DESC")
+    @Query("SELECT * FROM books ORDER BY userBook_updatedAt DESC")
     fun observeBooks(): Flow<List<BookFullEntity>>
 
     @Transaction
-    @Query("SELECT * from books WHERE statusCode = :statusCode ORDER BY userUpdatedAt DESC")
+    @Query("SELECT * from books WHERE userBook_statusCode = :statusCode ORDER BY userBook_updatedAt DESC")
     fun getBooksByStatus(statusCode: Int): Flow<List<BookFullEntity>>
 
-    @Query("SELECT userBookId FROM books")
+    @Query("SELECT userBook_id FROM books")
     suspend fun getAllUserBookIds(): List<Int>
 
-    // ---------- Inserts ----------
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBook(book: BookEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertEditions(editions: List<BookEditionEntity>)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAuthors(authors: List<AuthorEntity>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBookAuthors(refs: List<BookAuthorCrossRef>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertEditionAuthors(refs: List<EditionAuthorCrossRef>)
-
-    // ---------- Clear helpers ----------
-    @Query("DELETE FROM book_author_cross_ref WHERE bookId = :bookId")
-    suspend fun clearBookAuthors(bookId: Int)
-
-    @Query(
-        """
-        DELETE FROM edition_author_cross_ref
-        WHERE editionId IN (
-            SELECT id FROM book_editions WHERE bookId = :bookId
-        )
-    """
-    )
-    suspend fun clearEditionAuthors(bookId: Int)
-
-    // region fetchers
     @Query("SELECT * FROM authors WHERE name IN (:names)")
     suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
 
-    @Query("SELECT id FROM books WHERE userBookId = :userBookId")
+    @Query("SELECT id FROM books WHERE userBook_id = :userBookId")
     suspend fun getBookIdByUserBookId(userBookId: Int): Int?
     // endregion
 
-    @Query("DELETE FROM book_editions WHERE bookId = :bookId")
-    suspend fun deleteEditions(bookId: Int)
-
-    @Query("DELETE FROM books WHERE id = :bookId")
-    suspend fun deleteBook(bookId: Int)
-
+    // region Data insertions
     @Transaction
     suspend fun cacheBook(book: Book) {
         // Insert book
@@ -101,6 +65,29 @@ interface BookDao {
         insertEditionAuthors(book.toEditionAuthorRefs(authorIdsByName))
     }
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBook(book: BookEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEditions(editions: List<BookEditionEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAuthors(authors: List<AuthorEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBookAuthors(refs: List<BookAuthorCrossRef>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEditionAuthors(refs: List<EditionAuthorCrossRef>)
+    // endregion
+
+    // region Data removers
+    @Query("DELETE FROM book_editions WHERE bookId = :bookId")
+    suspend fun deleteEditions(bookId: Int)
+
+    @Query("DELETE FROM books WHERE id = :bookId")
+    suspend fun deleteBook(bookId: Int)
+
     @Transaction
     suspend fun deleteAllForUserBookId(userBookId: Int) {
         val bookId = getBookIdByUserBookId(userBookId) ?: return
@@ -119,4 +106,18 @@ interface BookDao {
             deleteAllForUserBookId(userBookId = it)
         }
     }
+
+    @Query("DELETE FROM book_author_cross_ref WHERE bookId = :bookId")
+    suspend fun clearBookAuthors(bookId: Int)
+
+    @Query(
+        """
+        DELETE FROM edition_author_cross_ref
+        WHERE editionId IN (
+            SELECT id FROM book_editions WHERE bookId = :bookId
+        )
+    """
+    )
+    suspend fun clearEditionAuthors(bookId: Int)
+    // endregion
 }

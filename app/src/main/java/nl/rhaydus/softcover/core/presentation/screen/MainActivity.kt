@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
@@ -22,7 +24,10 @@ import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
+import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import org.koin.androidx.viewmodel.ext.android.viewModel
+
+val LocalThemeConfiguration = compositionLocalOf { ThemeConfiguration() }
 
 class MainActivity() : ComponentActivity() {
     private val viewModel: MainActivityViewModel by viewModel()
@@ -48,13 +53,18 @@ class MainActivity() : ComponentActivity() {
 
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
+            val themeConfig by viewModel.themeState.collectAsStateWithLifecycle()
 
             SoftcoverTheme {
                 ClearFocusOnTapScreen {
-                    key(state.authenticated) {
-                        Navigator(
-                            screen = if (state.authenticated) RootScreen else OnboardingScreen,
-                        )
+                    CompositionLocalProvider(
+                        LocalThemeConfiguration provides themeConfig
+                    ) {
+                        key(state.authenticated) {
+                            Navigator(
+                                screen = if (state.authenticated) RootScreen else OnboardingScreen,
+                            )
+                        }
                     }
                 }
             }

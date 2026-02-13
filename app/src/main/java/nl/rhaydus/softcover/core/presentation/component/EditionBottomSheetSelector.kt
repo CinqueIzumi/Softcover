@@ -161,6 +161,7 @@ fun EditionItem(
             EditionImage(
                 edition = edition,
                 modifier = Modifier.width(width = 60.dp),
+                isLoading = false,
             )
 
             Spacer(modifier = Modifier.width(16.dp))

@@ -5,6 +5,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.feature.settings.data.datastore.AppSettingsDataStore
+import nl.rhaydus.softcover.feature.settings.data.model.AppSettingsEntity
+import nl.rhaydus.softcover.feature.settings.data.model.toModel
+import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 
 class SettingsLocalDataSourceImpl(
     private val appSettingsDataStore: AppSettingsDataStore,
@@ -23,9 +27,21 @@ class SettingsLocalDataSourceImpl(
         return appSettingsDataStore.store.data.map { it.userId }.distinctUntilChanged()
     }
 
+    override fun getThemeConfig(): Flow<ThemeConfiguration> {
+        return appSettingsDataStore.store.data
+            .map { it.themeConfig.toModel() }
+            .distinctUntilChanged()
+    }
+
     override suspend fun updateUserId(id: Int) {
         appSettingsDataStore.store.updateData {
             it.copy(userId = id)
+        }
+    }
+
+    override suspend fun setBottomBarStyle(style: BottomBarStyle) {
+        appSettingsDataStore.store.updateData { appSettingsEntity: AppSettingsEntity ->
+            appSettingsEntity.copy(themeConfig = appSettingsEntity.themeConfig.copy(bottomBarStyle = style))
         }
     }
 }

@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
@@ -35,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.IconToggleButtonShape
@@ -571,8 +570,8 @@ private fun SoftcoverIconToggleButtonFilledPreview() {
             ButtonSize.entries.forEachIndexed { index, size ->
                 Row {
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Vector(
-                            vector = Icons.Default.PlayArrow,
+                        icon = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_palette,
                             contentDescription = "",
                         ),
                         size = size,
@@ -585,8 +584,8 @@ private fun SoftcoverIconToggleButtonFilledPreview() {
                     Spacer(modifier = Modifier.width(8.dp))
 
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Vector(
-                            vector = Icons.Default.PlayArrow,
+                        icon = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_palette,
                             contentDescription = "",
                         ),
                         size = size,
@@ -615,8 +614,8 @@ private fun SoftcoverIconToggleButtonTonalPreview() {
             ButtonSize.entries.forEachIndexed { index, size ->
                 Row {
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Vector(
-                            vector = Icons.Default.PlayArrow,
+                        icon = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_palette,
                             contentDescription = "",
                         ),
                         size = size,
@@ -629,8 +628,8 @@ private fun SoftcoverIconToggleButtonTonalPreview() {
                     Spacer(modifier = Modifier.width(8.dp))
 
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Vector(
-                            vector = Icons.Default.PlayArrow,
+                        icon = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_palette,
                             contentDescription = "",
                         ),
                         size = size,
@@ -659,8 +658,8 @@ private fun SoftcoverIconToggleButtonOutlinedPreview() {
             ButtonSize.entries.forEachIndexed { index, size ->
                 Row {
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Vector(
-                            vector = Icons.Default.PlayArrow,
+                        icon = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_palette,
                             contentDescription = "",
                         ),
                         size = size,
@@ -673,8 +672,8 @@ private fun SoftcoverIconToggleButtonOutlinedPreview() {
                     Spacer(modifier = Modifier.width(8.dp))
 
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Vector(
-                            vector = Icons.Default.PlayArrow,
+                        icon = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_palette,
                             contentDescription = "",
                         ),
                         size = size,

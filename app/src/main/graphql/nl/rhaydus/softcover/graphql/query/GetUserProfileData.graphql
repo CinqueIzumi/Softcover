@@ -1,0 +1,17 @@
+query GetUserProfileData {
+    me {
+        bio
+        image {
+            url
+        }
+        name
+        user_books(
+            distinct_on: book_id,
+            where: {
+                status_id: {_eq: 3}
+            }
+        ) {
+            read_count
+        }
+    }
+}

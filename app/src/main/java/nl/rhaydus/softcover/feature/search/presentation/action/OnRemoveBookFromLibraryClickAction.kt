@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.search.presentation.event.SearchEvent
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchLocalVariables
 import nl.rhaydus.softcover.feature.search.presentation.state.SearchScreenUiState
-import nl.rhaydus.softcover.feature.search.presentation.viewmodel.SearchDependencies
+import nl.rhaydus.softcover.feature.search.presentation.screenmodel.SearchDependencies
 import timber.log.Timber
 
 class OnRemoveBookFromLibraryClickAction(val book: Book) : SearchAction {
