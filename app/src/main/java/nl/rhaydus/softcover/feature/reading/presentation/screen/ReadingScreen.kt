@@ -62,6 +62,7 @@ import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissEditionSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
@@ -91,10 +92,7 @@ object ReadingScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onBookClick = {
-                navigator.parent?.push(item = _root_ide_package_.nl.rhaydus.softcover.feature.updated_book_detail.presentation.screen.BookDetailScreen(
-                    id = it.id
-                )
-                )
+                navigator.parent?.push(item = BookDetailScreen(id = it.id))
             },
             onNavigateToSearch = {
                 navigator.parent?.push(item = SearchScreen())

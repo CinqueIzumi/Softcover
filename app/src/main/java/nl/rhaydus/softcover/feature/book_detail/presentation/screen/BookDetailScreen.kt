@@ -88,6 +88,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEd
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import kotlin.math.roundToInt
 
@@ -98,27 +100,23 @@ class BookDetailScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val screenModel: nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel =
-            koinScreenModel<nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel>()
+        val screenModel: BookDetailScreenScreenModel =
+            koinScreenModel<BookDetailScreenScreenModel>()
 
-        val state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
+        val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
-                is nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent -> {
-                    screenModel.runAction(action = _root_ide_package_.nl.rhaydus.softcover.feature.updated_book_detail.presentation.action.InitializeBookWithIdAction(
-                        id = id
-                    )
+                is RefreshDetailBookEvent -> {
+                    screenModel.runAction(
+                        action = InitializeBookWithIdAction(id = id)
                     )
                 }
             }
         }
 
         LaunchedEffect(Unit) {
-            val action =
-                _root_ide_package_.nl.rhaydus.softcover.feature.updated_book_detail.presentation.action.InitializeBookWithIdAction(
-                    id = id
-                )
+            val action = InitializeBookWithIdAction(id = id)
 
             screenModel.runAction(action)
         }
@@ -133,8 +131,8 @@ class BookDetailScreen(
     @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
     @Composable
     fun Screen(
-        state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState,
-        runAction: (nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction) -> Unit,
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
         onNavigateBack: () -> Unit,
     ) {
         val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
