@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.type.DatesReadInput
@@ -38,7 +40,7 @@ interface BooksRemoteDataSource {
     suspend fun markBookAsRead(book: Book): Book
 
     suspend fun updateBookEdition(
-        userBookId: Int,
+        userBook: UserBook,
         newEditionId: Int,
     ): Book
 }
@@ -64,8 +66,8 @@ class BooksRemoteDataSourceImpl(
     override suspend fun markBookAsWantToRead(bookId: Int): Book {
         val userBookCreateInput = UserBookCreateInput(
             book_id = bookId,
-            status_id = Optional.Present(1),
-            privacy_setting_id = Optional.Present(1),
+            status_id = Optional.Present(UserBookStatus.WANT_TO_READ.code),
+            privacy_setting_id = Optional.Present(PrivacySetting.PUBLIC.code),
         )
 
         val result = apolloClient
@@ -93,10 +95,10 @@ class BooksRemoteDataSourceImpl(
         val input = UserBookUpdateInput(
             edition_id = Optional.Present(book.currentEdition.id),
             review_has_spoilers = Optional.Present(userBook.reviewHasSpoilers),
-            status_id = Optional.present(2),
+            status_id = Optional.present(UserBookStatus.CURRENTLY_READING.code),
             last_read_date = Optional.Present(userBook.lastReadDate),
             rating = Optional.Present(userBook.rating),
-            privacy_setting_id = Optional.Present(1),
+            privacy_setting_id = Optional.Present(PrivacySetting.PUBLIC.code),
             referrer_user_id = Optional.Present(userBook.referrerUserId),
             reviewed_at = Optional.Present(userBook.reviewedAt),
             date_added = Optional.Present(userBook.dateAdded),
@@ -189,7 +191,8 @@ class BooksRemoteDataSourceImpl(
         val dataObject = UserBookCreateInput(
             book_id = book.id,
             status_id = Optional.present(UserBookStatus.READ.code),
-            user_date = Optional.present(currentDate)
+            user_date = Optional.present(currentDate),
+            privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
         )
 
         val mutation = MarkBookAsReadMutation(userBookCreateInput = dataObject)
@@ -206,13 +209,21 @@ class BooksRemoteDataSourceImpl(
     }
 
     override suspend fun updateBookEdition(
-        userBookId: Int,
+        userBook: UserBook,
         newEditionId: Int,
     ): Book {
         val mutation = UpdateBookEditionMutation(
-            id = userBookId,
+            id = userBook.id,
             `object` = UserBookUpdateInput(
-                edition_id = Optional.present(newEditionId)
+                date_added = Optional.Present(userBook.dateAdded),
+                edition_id = Optional.present(newEditionId),
+                last_read_date = Optional.Present(userBook.lastReadDate),
+                privacy_setting_id = Optional.Present(PrivacySetting.PUBLIC.code),
+                rating = Optional.Present(userBook.rating),
+                referrer_user_id = Optional.Present(userBook.referrerUserId),
+                review_has_spoilers = Optional.Present(userBook.reviewHasSpoilers),
+                status_id = Optional.present(userBook.status.code),
+                reviewed_at = Optional.Present(userBook.reviewedAt)
             )
         )
 

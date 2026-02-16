@@ -13,8 +13,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        val book = scope.currentState.book ?: return
-        val userBookId = book.userBook?.id ?: return
+        val userBook = scope.currentState.book?.userBook ?: return
 
         dependencies.launch {
             scope.setState {
@@ -22,7 +21,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
             }
 
             dependencies.updateBookEditionUseCase(
-                userBookId = userBookId,
+                userBook = userBook,
                 newEditionId = edition.id
             ).onFailure {
                 Timber.e("-=- Something went wrong updating book edition! $it")

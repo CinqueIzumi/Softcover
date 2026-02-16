@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.books.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 
 interface BooksRepository {
@@ -35,7 +36,7 @@ interface BooksRepository {
     suspend fun markBookAsRead(book: Book): Book
 
     suspend fun updateBookEdition(
-        userBookId: Int,
+        userBook: UserBook,
         newEditionId: Int,
     ): Book
 }

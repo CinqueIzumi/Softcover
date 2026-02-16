@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.fragment.BookFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
+import timber.log.Timber
 import kotlin.math.roundToInt
 
 // region DTO -> UI mappers
@@ -49,6 +50,7 @@ fun UserBookFragment.toBook(): Book {
 
 private fun UserBookFragment?.toUserBook(): UserBook? {
     if (this == null) return null
+
     return UserBook(
         id = id,
         status = BookStatus.getFromCode(code = status_id),

@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.books.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
@@ -98,11 +99,11 @@ class BooksRepositoryImpl(
     }
 
     override suspend fun updateBookEdition(
-        userBookId: Int,
+        userBook: UserBook,
         newEditionId: Int,
     ): Book {
         return booksRemoteDataSource.updateBookEdition(
-            userBookId = userBookId,
+            userBook = userBook,
             newEditionId = newEditionId,
         )
     }
