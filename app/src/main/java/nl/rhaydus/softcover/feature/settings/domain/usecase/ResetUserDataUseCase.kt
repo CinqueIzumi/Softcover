@@ -1,17 +1,17 @@
 package nl.rhaydus.softcover.feature.settings.domain.usecase
 
-import nl.rhaydus.softcover.feature.caching.domain.repository.CachingRepository
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
+import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 
 class ResetUserDataUseCase(
     private val settingsRepository: SettingsRepository,
-    private val cachingRepository: CachingRepository,
+    private val booksRepository: BooksRepository,
 ) {
     suspend operator fun invoke(): Result<Unit> {
         return runCatching {
             settingsRepository.updateApiKey(key = "")
 
-            cachingRepository.removeAllBooks()
+            booksRepository.removeAllBooks()
 
             settingsRepository.updateUserId(id = -1)
         }
