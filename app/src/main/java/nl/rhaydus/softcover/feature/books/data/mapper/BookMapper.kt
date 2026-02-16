@@ -59,7 +59,7 @@ fun ReadingJournalFragment.toReadingJournal(): ReadingJournal {
 
 private fun UserBookFragment?.toUserBook(): UserBook? {
     if (this == null) return null
-    
+
     val journals = reading_journals.map {
         it.readingJournalFragment.toReadingJournal()
     }

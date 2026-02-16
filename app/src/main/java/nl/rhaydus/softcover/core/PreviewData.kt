@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
@@ -50,7 +51,18 @@ object PreviewData {
             referrerUserId = null,
             reviewedAt = null,
             updatedAt = null,
-            journals = emptyList(),
+            journals = listOf(
+                ReadingJournal(updatedAt = "2026-02-16T09:30:29.670608", event = "status_stopped"),
+                ReadingJournal(updatedAt = "2026-02-18T10:30:29.670608", event = "status_stopped"),
+                ReadingJournal(
+                    updatedAt = "2026-02-17T10:30:29.670608",
+                    event = "status_want_to_read"
+                ),
+                ReadingJournal(
+                    updatedAt = "2025-02-17T10:30:29.670608",
+                    event = "user_book_read_finished"
+                ),
+            ),
         ),
         userBookRead = UserBookRead(
             id = 1,

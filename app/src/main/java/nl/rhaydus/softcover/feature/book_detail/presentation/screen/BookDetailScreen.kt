@@ -533,6 +533,16 @@ class BookDetailScreen(
         ) {
             when (book.status) {
                 BookStatus.Reading -> ReadingContainer(state = state)
+                BookStatus.DidNotFinish -> DidNotFinishContainer(state = state)
+                BookStatus.Read -> ReadContainer(state = state)
+                BookStatus.Paused -> Unit
+
+                BookStatus.WantToRead -> {
+                    WantToReadContainer(
+                        state = state,
+                        runAction = runAction,
+                    )
+                }
 
                 BookStatus.None -> {
                     WantToReadButton(
@@ -540,16 +550,105 @@ class BookDetailScreen(
                         book = book
                     )
                 }
+            }
+        }
+    }
 
-                else -> {
-                    MarkAsReadingButton(
-                        book = book,
-                        markBookAsReading = {
-                            runAction(OnMarkBookAsReadingClickAction(book = book))
-                        }
+    @Composable
+    private fun DidNotFinishContainer(state: BookDetailUiState) {
+        val userBook = state.book?.userBook ?: return
+
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            tonalElevation = 4.dp,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(all = 16.dp)
+            ) {
+                Text(
+                    text = "Did not Finish",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "You've tried reading this book before, but marked it as 'did not finish' on ${userBook.dnfDate}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ReadContainer(state: BookDetailUiState) {
+        val userBook = state.book?.userBook ?: return
+
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            tonalElevation = 4.dp,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(all = 16.dp)
+            ) {
+                Text(
+                    text = "Read",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "You've read this book before! The last time you've finished reading this book was on ${userBook.readDate}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun WantToReadContainer(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        val userBook = state.book?.userBook ?: return
+
+        Column() {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                tonalElevation = 4.dp,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(all = 16.dp)
+                ) {
+                    Text(
+                        text = "Want to Read",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "You've marked this book as 'want to read' on ${userBook.wantToReadDate}",
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            MarkAsReadingButton(
+                book = state.book,
+                markBookAsReading = {
+                    runAction(OnMarkBookAsReadingClickAction(book = state.book))
+                }
+            )
         }
     }
 
@@ -690,7 +789,7 @@ private fun BookDetailScreenReadingPreview() {
 
 @StandardPreview
 @Composable
-private fun BookDetailScreenIgnoredPreview() {
+private fun BookDetailScreenNonePreview() {
     SoftcoverTheme {
         Column(
             modifier = Modifier
@@ -706,7 +805,88 @@ private fun BookDetailScreenIgnoredPreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = true,
+                    loading = false,
+                ),
+                runAction = {},
+                onNavigateBack = {},
+            )
+        }
+    }
+}
+
+@StandardPreview
+@Composable
+private fun BookDetailScreenDnfPreview() {
+    SoftcoverTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background),
+        ) {
+            val book = PreviewData.baseBook.copy(
+                userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.DidNotFinish),
+            )
+
+            BookDetailScreen(
+                id = 1,
+            ).Screen(
+                state = BookDetailUiState(
+                    book = book,
+                    loading = false,
+                ),
+                runAction = {},
+                onNavigateBack = {},
+            )
+        }
+    }
+}
+
+@StandardPreview
+@Composable
+private fun BookDetailScreenWantToReadPreview() {
+    SoftcoverTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background),
+        ) {
+            val book = PreviewData.baseBook.copy(
+                userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.WantToRead),
+            )
+
+            BookDetailScreen(
+                id = 1,
+            ).Screen(
+                state = BookDetailUiState(
+                    book = book,
+                    loading = false,
+                ),
+                runAction = {},
+                onNavigateBack = {},
+            )
+        }
+    }
+}
+
+@StandardPreview
+@Composable
+private fun BookDetailScreenReadPreview() {
+    SoftcoverTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background),
+        ) {
+            val book = PreviewData.baseBook.copy(
+                userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.Read),
+            )
+
+            BookDetailScreen(
+                id = 1,
+            ).Screen(
+                state = BookDetailUiState(
+                    book = book,
+                    loading = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
