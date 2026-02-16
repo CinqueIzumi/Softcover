@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailIni
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
@@ -24,6 +25,7 @@ class BookDetailScreenScreenModel(
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
@@ -41,6 +43,7 @@ class BookDetailScreenScreenModel(
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
+        markBookAsReadUseCase = markBookAsReadUseCase,
     )
 
     init {

@@ -79,6 +79,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBo
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnFabClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
@@ -302,6 +303,19 @@ class BookDetailScreen(
                 }
             }
         ) {
+            FloatingActionButtonMenuItem(
+                onClick = {
+                    runAction(OnMarkBookAsReadClickAction(book = state.book))
+                },
+                text = { Text(text = "Mark as Read") },
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_bookmark_check),
+                        contentDescription = "Mark book as read icon"
+                    )
+                }
+            )
+
             if (userStatus == BookStatus.Reading) {
                 FloatingActionButtonMenuItem(
                     onClick = {

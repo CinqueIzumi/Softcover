@@ -18,6 +18,7 @@ val bookDetailModule = module {
             markBookAsWantToReadUseCase = get(),
             markBookAsReadingUseCase = get(),
             removeBookFromLibraryUseCase = get(),
+            markBookAsReadUseCase = get(),
             flows = getAll(),
             appDispatchers = get(),
         )

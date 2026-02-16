@@ -62,6 +62,14 @@ object PreviewData {
                     updatedAt = "2025-02-17T10:30:29.670608",
                     event = "user_book_read_finished"
                 ),
+                ReadingJournal(
+                    updatedAt = "2026-02-17T10:30:29.670608",
+                    event = "status_want_to_read"
+                ),
+                ReadingJournal(
+                    updatedAt = "2025-02-17T10:30:29.670608",
+                    event = "user_book_read_finished"
+                ),
             ),
         ),
         userBookRead = UserBookRead(
