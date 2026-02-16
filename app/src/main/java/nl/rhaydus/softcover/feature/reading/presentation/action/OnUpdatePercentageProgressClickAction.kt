@@ -19,7 +19,8 @@ data class OnUpdatePercentageProgressClickAction(
         val newPercentageValue: Double = newPercentage.toDoubleOrNull() ?: 0.0
 
         val newPageValue: Int =
-            ((newPercentageValue / 100) * (bookToUpdate.currentEdition.pages ?: 0)).toInt()
+            ((newPercentageValue / 100) * (bookToUpdate.currentEdition.pages
+                ?: bookToUpdate.defaultEdition?.pages ?: 0)).toInt()
 
         dependencies.launch {
             dependencies.updateBookProgress(

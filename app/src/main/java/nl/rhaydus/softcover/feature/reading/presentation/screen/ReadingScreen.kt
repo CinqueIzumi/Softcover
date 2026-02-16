@@ -301,7 +301,7 @@ object ReadingScreen : Screen {
 
                         val currentPage = book.userBookRead?.currentPage ?: 0
                         Text(
-                            text = "Page $currentPage of ${book.currentEdition.pages}",
+                            text = "Page $currentPage of ${book.currentEdition.pages ?: book.defaultEdition?.pages}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

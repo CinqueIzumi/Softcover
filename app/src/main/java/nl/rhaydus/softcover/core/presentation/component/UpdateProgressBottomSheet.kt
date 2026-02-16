@@ -228,7 +228,10 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
                     return@OutlinedTextField
                 }
 
-                val updatedNumber = min(newNumber, book.currentEdition.pages ?: 0)
+                val updatedNumber = min(
+                    newNumber,
+                    book.currentEdition.pages ?: book.defaultEdition?.pages ?: 0,
+                )
 
                 number = newValue.copy(text = updatedNumber.toString())
             },
@@ -257,7 +260,7 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
             contentAlignment = Alignment.CenterStart,
         ) {
             Text(
-                text = "/ ${book.currentEdition.pages}",
+                text = "/ ${book.currentEdition.pages ?: book.defaultEdition?.pages}",
                 modifier = Modifier.padding(start = 8.dp),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
