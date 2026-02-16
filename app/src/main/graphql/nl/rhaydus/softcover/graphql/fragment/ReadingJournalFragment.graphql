@@ -1,0 +1,4 @@
+fragment ReadingJournalFragment on reading_journals{
+    event
+    updated_at
+}

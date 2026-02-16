@@ -50,6 +50,7 @@ object PreviewData {
             referrerUserId = null,
             reviewedAt = null,
             updatedAt = null,
+            journals = emptyList(),
         ),
         userBookRead = UserBookRead(
             id = 1,

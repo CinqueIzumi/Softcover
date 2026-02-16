@@ -14,4 +14,5 @@ data class UserBook(
     val referrerUserId: Int?,
     val reviewedAt: String?,
     val updatedAt: String?,
+    val journals: List<ReadingJournal>,
 )

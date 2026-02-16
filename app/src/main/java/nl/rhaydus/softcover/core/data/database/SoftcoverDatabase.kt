@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 
 @Database(
     entities = [
@@ -19,9 +20,10 @@ import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
         BookEditionEntity::class,
         AuthorEntity::class,
         BookAuthorCrossRef::class,
-        EditionAuthorCrossRef::class
+        EditionAuthorCrossRef::class,
+        ReadingJournalEntity::class,
     ],
-    version = 4,
+    version = 5,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -35,6 +37,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     name = "books.db"
                 )
                 .addMigrations(MIGRATION_3_4)
+                .addMigrations(MIGRATION_4_5)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -45,6 +48,22 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     """
             ALTER TABLE book_editions 
             ADD COLUMN format TEXT NOT NULL DEFAULT ''
+        """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Create the new reading_journals table
+                db.execSQL(
+                    """
+            CREATE TABLE IF NOT EXISTS reading_journals (
+                localId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userBookId INTEGER NOT NULL,
+                event TEXT NOT NULL,
+                updatedAt TEXT NOT NULL
+            )
         """.trimIndent()
                 )
             }

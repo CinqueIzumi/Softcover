@@ -23,7 +23,13 @@ data class BookFullEntity(
         parentColumn = "id",
         entityColumn = "bookId"
     )
-    val editions: List<BookEditionWithAuthors>
+    val editions: List<BookEditionWithAuthors>,
+
+    @Relation(
+        parentColumn = "userBook_id",
+        entityColumn = "userBookId"
+    )
+    val journals: List<ReadingJournalEntity>,
 )
 
 data class BookEditionWithAuthors(
@@ -38,5 +44,5 @@ data class BookEditionWithAuthors(
             entityColumn = "authorId"   // cross-ref column referencing author
         )
     )
-    val authors: List<AuthorEntity>
+    val authors: List<AuthorEntity>,
 )

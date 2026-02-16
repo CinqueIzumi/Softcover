@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.books.data.mapper
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
@@ -12,13 +13,14 @@ import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
 import nl.rhaydus.softcover.fragment.BookFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
+import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
-import timber.log.Timber
 import kotlin.math.roundToInt
 
 // region DTO -> UI mappers
@@ -48,8 +50,19 @@ fun UserBookFragment.toBook(): Book {
     return book.bookFragment.toBook(userBookFragment = this)
 }
 
+fun ReadingJournalFragment.toReadingJournal(): ReadingJournal {
+    return ReadingJournal(
+        updatedAt = updated_at,
+        event = event,
+    )
+}
+
 private fun UserBookFragment?.toUserBook(): UserBook? {
     if (this == null) return null
+    
+    val journals = reading_journals.map {
+        it.readingJournalFragment.toReadingJournal()
+    }
 
     return UserBook(
         id = id,
@@ -63,6 +76,7 @@ private fun UserBookFragment?.toUserBook(): UserBook? {
         reviewHasSpoilers = review_has_spoilers,
         reviewedAt = reviewed_at,
         updatedAt = updated_at,
+        journals = journals
     )
 }
 
@@ -152,7 +166,15 @@ fun UserBook.toEntity(): UserBookEntity {
         rating = rating,
         referrerUserId = referrerUserId,
         reviewedAt = reviewedAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+    )
+}
+
+fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity {
+    return ReadingJournalEntity(
+        event = event ?: "",
+        updatedAt = updatedAt,
+        userBookId = userBookId
     )
 }
 
@@ -210,7 +232,7 @@ fun UserBookReadEntity.toModel(): UserBookRead {
     )
 }
 
-fun UserBookEntity.toModel(): UserBook {
+fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook {
     return UserBook(
         id = id,
         status = BookStatus.getFromCode(statusCode),
@@ -222,7 +244,15 @@ fun UserBookEntity.toModel(): UserBook {
         rating = rating,
         referrerUserId = referrerUserId,
         reviewedAt = reviewedAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        journals = journals,
+    )
+}
+
+fun ReadingJournalEntity.toModel(): ReadingJournal {
+    return ReadingJournal(
+        updatedAt = updatedAt,
+        event = event,
     )
 }
 
@@ -237,6 +267,8 @@ fun BookFullEntity.toModel(): Book {
         uiEditions.firstOrNull { it.id == id }
     }
 
+    val journals = journals.map { it.toModel() }
+
     return Book(
         id = book.id,
         title = book.title,
@@ -248,7 +280,7 @@ fun BookFullEntity.toModel(): Book {
         coverUrl = book.coverUrl,
         authors = bookAuthors.map { it.toModel() },
         usersCount = book.usersCount,
-        userBook = book.userBook?.toModel(),
+        userBook = book.userBook?.toModel(journals = journals),
         userBookRead = book.userBookReadEntity?.toModel()
     )
 }

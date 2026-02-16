@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
@@ -19,6 +20,7 @@ import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 interface BooksRemoteDataSource {
@@ -171,16 +173,31 @@ class BooksRemoteDataSourceImpl(
             .execute()
             .dataOrThrow()
 
-        val userBookReadFragment =
-            result.update_user_book_read?.user_book_read?.userBookReadFragment
-                ?: throw Exception("Did not receive a new user book read fragment")
+        val userBookReadFragment = result
+            .update_user_book_read
+            ?.user_book_read
+            ?.userBookReadFragment
+            ?: throw Exception("Did not receive a new user book read fragment")
 
         val updatedUserBookRead = userBookRead.copy(
             currentPage = userBookReadFragment.progress_pages,
-            progress = userBookReadFragment.progress?.toFloat()
+            progress = userBookReadFragment.progress?.toFloat(),
         )
 
-        val updatedBook = book.copy(userBookRead = updatedUserBookRead)
+        val formatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+
+        val currentTime = LocalDateTime.now().format(formatter)
+
+        val updatedJournals = book.userBook.journals + ReadingJournal(
+            updatedAt = currentTime,
+            event = "progress_updated"
+        )
+
+        val updatedBook = book.copy(
+            userBookRead = updatedUserBookRead,
+            userBook = book.userBook.copy(journals = updatedJournals)
+        )
 
         return updatedBook
     }
