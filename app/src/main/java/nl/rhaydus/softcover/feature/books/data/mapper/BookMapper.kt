@@ -79,21 +79,25 @@ private fun UserBookReadFragment?.toUserBookRead(): UserBookRead? {
 fun BookFragment.toBook(
     userBookFragment: UserBookFragment? = null,
 ): Book {
-    val rating = ((rating ?: 0.0) * 10).roundToInt() / 10.0
-    val userBookReadFragment =
-        userBookFragment?.user_book_reads?.firstOrNull()?.userBookReadFragment
+    val bookContent = canonical?.bookContentFragment ?: this.bookContentFragment
+
+    val rating = ((bookContent.rating ?: 0.0) * 10).roundToInt() / 10.0
+    val userBookReadFragment = userBookFragment
+        ?.user_book_reads
+        ?.firstOrNull()
+        ?.userBookReadFragment
 
     return Book(
-        id = id,
-        title = title ?: "",
-        editions = editions.map { userBookEdition ->
+        id = bookContent.id,
+        title = bookContent.title ?: "",
+        editions = bookContent.editions.map { userBookEdition ->
             userBookEdition.editionFragment.toBookEdition()
         },
-        description = description ?: "",
+        description = bookContent.description ?: "",
         rating = rating,
-        releaseYear = release_year ?: -1,
-        coverUrl = image?.url ?: "",
-        authors = contributions.mapNotNull { contribution ->
+        releaseYear = bookContent.release_year ?: -1,
+        coverUrl = bookContent.image?.url ?: "",
+        authors = bookContent.contributions.mapNotNull { contribution ->
             val author = contribution.author ?: return@mapNotNull null
             val id = author.id
 
@@ -102,10 +106,10 @@ fun BookFragment.toBook(
                 id = id,
             )
         },
-        defaultEdition = default_physical_edition?.editionFragment?.toBookEdition(),
+        defaultEdition = bookContent.default_physical_edition?.editionFragment?.toBookEdition(),
         userBook = userBookFragment.toUserBook(),
         userBookRead = userBookReadFragment.toUserBookRead(),
-        usersCount = users_count,
+        usersCount = bookContent.users_count,
     )
 }
 // endregion
