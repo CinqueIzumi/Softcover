@@ -43,7 +43,7 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.search.presentation.action.OnAddBookToLibraryClickAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveAllSearchQueriesClickedAction

@@ -3,9 +3,9 @@ package nl.rhaydus.softcover.feature.search.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.feature.book.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.feature.book.domain.usecase.RemoveBookFromLibraryUseCase
-import nl.rhaydus.softcover.feature.caching.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.GetQueriedBooksUseCase
 import nl.rhaydus.softcover.feature.search.domain.usecase.RemoveAllSearchQueriesUseCase

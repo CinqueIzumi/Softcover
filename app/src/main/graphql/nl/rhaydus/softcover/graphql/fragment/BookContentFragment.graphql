@@ -1,0 +1,31 @@
+fragment BookContentFragment on books {
+    id
+    title
+    description
+    rating
+    image {
+        url
+    }
+
+    users_count
+
+    default_physical_edition {
+        ...EditionFragment
+    }
+
+    contributions {
+        author {
+            name
+            id
+        }
+    }
+    release_year
+
+    editions(
+        order_by: {
+            users_count: desc
+        }
+    ) {
+        ...EditionFragment
+    }
+}

@@ -62,7 +62,7 @@ import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.feature.book.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissEditionSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
@@ -301,7 +301,7 @@ object ReadingScreen : Screen {
 
                         val currentPage = book.userBookRead?.currentPage ?: 0
                         Text(
-                            text = "Page $currentPage of ${book.currentEdition.pages}",
+                            text = "Page $currentPage of ${book.currentEdition.pages ?: book.defaultEdition?.pages}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

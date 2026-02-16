@@ -11,6 +11,14 @@ fragment UserBookFragment on user_books{
     reviewed_at
     updated_at
 
+    reading_journals(
+        order_by: {
+            updated_at: desc
+        }
+    ) {
+        ...ReadingJournalFragment
+    }
+
     user_book_reads {
         ...UserBookReadFragment
     }

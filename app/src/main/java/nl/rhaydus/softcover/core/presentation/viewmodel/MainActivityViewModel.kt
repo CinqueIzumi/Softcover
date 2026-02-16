@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.presentation.state.SplashState
-import nl.rhaydus.softcover.feature.caching.domain.usecase.InitializeUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
