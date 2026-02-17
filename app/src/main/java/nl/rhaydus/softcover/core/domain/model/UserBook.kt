@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.domain.model
 
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -27,6 +28,17 @@ data class UserBook(
 
     val readDate: String?
         get(): String? = getUpdatedDateForEventType(type = JournalEventType.StatusFinished)
+
+    val fallbackDateAdded: String
+        get() {
+            val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+            val date = LocalDate.parse(dateAdded, inputFormatter)
+            val result = date.format(outputFormatter)
+
+            return result
+        }
 
     private fun getUpdatedDateForEventType(type: JournalEventType): String? {
         val mostRecentStatusStoppedDate = journals
