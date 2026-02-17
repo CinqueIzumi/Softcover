@@ -59,6 +59,7 @@ import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
@@ -588,10 +589,15 @@ class BookDetailScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Text(
-                    text = "You've tried reading this book before, but marked it as 'did not finish' on ${userBook.dnfDate}",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                when (val dnfDate = userBook.dnfDate) {
+                    null -> FallBackDateText(userBook = userBook)
+                    else -> {
+                        Text(
+                            text = "You've tried reading this book before, but marked it as 'did not finish' on $dnfDate",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             }
         }
     }
@@ -616,10 +622,15 @@ class BookDetailScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Text(
-                    text = "You've read this book before! The last time you've finished reading this book was on ${userBook.readDate}",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                when (val readDate = userBook.readDate) {
+                    null -> FallBackDateText(userBook = userBook)
+                    else -> {
+                        Text(
+                            text = "You've read this book before! The last time you've finished reading this book was on $readDate",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             }
         }
     }
@@ -648,10 +659,15 @@ class BookDetailScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
-                        text = "You've marked this book as 'want to read' on ${userBook.wantToReadDate}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    when (val wantToReadDate = userBook.wantToReadDate) {
+                        null -> FallBackDateText(userBook = userBook)
+                        else -> {
+                            Text(
+                                text = "You've marked this book as 'want to read' on $wantToReadDate",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
                 }
             }
 
@@ -729,6 +745,14 @@ class BookDetailScreen(
                 )
             }
         }
+    }
+
+    @Composable
+    private fun FallBackDateText(userBook: UserBook) {
+        Text(
+            text = "This book has been in your library since ${userBook.fallbackDateAdded}.",
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 
     @Composable
