@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 
 class BookDetailScreenScreenModel(
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
@@ -26,6 +27,7 @@ class BookDetailScreenScreenModel(
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
@@ -44,6 +46,7 @@ class BookDetailScreenScreenModel(
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
+        getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
     )
 
     init {
