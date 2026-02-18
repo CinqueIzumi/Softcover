@@ -93,6 +93,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePerc
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import kotlin.math.roundToInt
 
 class BookDetailScreen(
@@ -589,8 +590,14 @@ class BookDetailScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                when (val dnfDate = userBook.dnfDate) {
-                    null -> FallBackDateText(userBook = userBook)
+                when (val dnfDate = userBook.getDnfDateString(style = state.dateStyle)) {
+                    null -> {
+                        FallBackDateText(
+                            userBook = userBook,
+                            dateStyle = state.dateStyle,
+                        )
+                    }
+
                     else -> {
                         Text(
                             text = "You've tried reading this book before, but marked it as 'did not finish' on $dnfDate",
@@ -622,8 +629,14 @@ class BookDetailScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                when (val readDate = userBook.readDate) {
-                    null -> FallBackDateText(userBook = userBook)
+                when (val readDate = userBook.getReadDateString(style = state.dateStyle)) {
+                    null -> {
+                        FallBackDateText(
+                            userBook = userBook,
+                            dateStyle = state.dateStyle,
+                        )
+                    }
+
                     else -> {
                         Text(
                             text = "You've read this book before! The last time you've finished reading this book was on $readDate",
@@ -659,8 +672,14 @@ class BookDetailScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    when (val wantToReadDate = userBook.wantToReadDate) {
-                        null -> FallBackDateText(userBook = userBook)
+                    when (val wantToReadDate = userBook.getWantToReadDateString(style = state.dateStyle)) {
+                        null -> {
+                            FallBackDateText(
+                                userBook = userBook,
+                                dateStyle = state.dateStyle,
+                            )
+                        }
+
                         else -> {
                             Text(
                                 text = "You've marked this book as 'want to read' on $wantToReadDate",
@@ -748,9 +767,12 @@ class BookDetailScreen(
     }
 
     @Composable
-    private fun FallBackDateText(userBook: UserBook) {
+    private fun FallBackDateText(
+        userBook: UserBook,
+        dateStyle: DateStyle,
+    ) {
         Text(
-            text = "This book has been in your library since ${userBook.fallbackDateAdded}.",
+            text = "This book has been in your library since ${userBook.getFallbackDateString(style = dateStyle)}.",
             style = MaterialTheme.typography.bodySmall
         )
     }
