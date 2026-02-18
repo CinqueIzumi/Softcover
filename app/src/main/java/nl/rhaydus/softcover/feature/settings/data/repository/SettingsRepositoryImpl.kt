@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.settings.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
@@ -12,6 +13,12 @@ class SettingsRepositoryImpl(
     private val settingsLocalDataSource: SettingsLocalDataSource,
     private val settingsRemoteDataSource: SettingsRemoteDataSource,
 ) : SettingsRepository {
+    override val dateStyle: Flow<DateStyle> = settingsLocalDataSource.dateStyle
+
+    override suspend fun setDateStyle(style: DateStyle) {
+        settingsLocalDataSource.setDateStyle(style = style)
+    }
+
     override suspend fun updateApiKey(key: String) {
         settingsLocalDataSource.updateApiKey(key = key)
     }
