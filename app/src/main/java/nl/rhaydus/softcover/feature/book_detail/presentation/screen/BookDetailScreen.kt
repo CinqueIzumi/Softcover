@@ -290,6 +290,8 @@ class BookDetailScreen(
     ) {
         val userStatus = state.book?.status ?: return
 
+        if (userStatus == BookStatus.None) return
+
         FloatingActionButtonMenu(
             expanded = state.fabMenuExpanded,
             button = {
@@ -323,19 +325,6 @@ class BookDetailScreen(
             if (userStatus == BookStatus.Reading) {
                 FloatingActionButtonMenuItem(
                     onClick = {
-                        runAction(OnShowEditEditionSheetClickAction())
-                    },
-                    text = { Text(text = "Change edition") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_library_books),
-                            contentDescription = "Edition icon"
-                        )
-                    }
-                )
-
-                FloatingActionButtonMenuItem(
-                    onClick = {
                         runAction(OnShowUpdateProgressSheetClickAction())
                     },
                     text = { Text(text = "Update progress") },
@@ -347,6 +336,19 @@ class BookDetailScreen(
                     }
                 )
             }
+
+            FloatingActionButtonMenuItem(
+                onClick = {
+                    runAction(OnShowEditEditionSheetClickAction())
+                },
+                text = { Text(text = "Change edition") },
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_library_books),
+                        contentDescription = "Edition icon"
+                    )
+                }
+            )
 
             FloatingActionButtonMenuItem(
                 onClick = {
