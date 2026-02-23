@@ -305,18 +305,20 @@ class BookDetailScreen(
                 }
             }
         ) {
-            FloatingActionButtonMenuItem(
-                onClick = {
-                    runAction(OnMarkBookAsReadClickAction(book = state.book))
-                },
-                text = { Text(text = "Mark as Read") },
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_bookmark_check),
-                        contentDescription = "Mark book as read icon"
-                    )
-                }
-            )
+            if (userStatus != BookStatus.Read) {
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        runAction(OnMarkBookAsReadClickAction(book = state.book))
+                    },
+                    text = { Text(text = "Mark as Read") },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_bookmark_check),
+                            contentDescription = "Mark book as read icon"
+                        )
+                    }
+                )
+            }
 
             if (userStatus == BookStatus.Reading) {
                 FloatingActionButtonMenuItem(
@@ -672,7 +674,9 @@ class BookDetailScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    when (val wantToReadDate = userBook.getWantToReadDateString(style = state.dateStyle)) {
+                    val wantToReadDate = userBook.getWantToReadDateString(style = state.dateStyle)
+
+                    when (wantToReadDate) {
                         null -> {
                             FallBackDateText(
                                 userBook = userBook,
