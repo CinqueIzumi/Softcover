@@ -1,0 +1,14 @@
+query GetUserBookLists {
+    me {
+        lists {
+            id
+            name
+
+            list_books {
+                edition {
+                    ...EditionFragment
+                }
+            }
+        }
+    }
+}

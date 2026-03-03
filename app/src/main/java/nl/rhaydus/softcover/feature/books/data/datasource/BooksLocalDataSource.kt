@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.books.data.datasource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.dao.BookDao
 import nl.rhaydus.softcover.feature.books.data.mapper.toModel
@@ -17,6 +18,8 @@ interface BooksLocalDataSource {
     suspend fun cacheBooks(books: List<Book>)
 
     suspend fun removeUserBooksById(ids: List<Int>)
+
+    suspend fun cacheUserBookLists(lists: List<BookList>)
 
     suspend fun removeAllBooks()
 }
@@ -44,6 +47,10 @@ class BooksLocalDataSourceImpl(
         ids.forEach { userBookId ->
             dao.deleteAllForUserBookId(userBookId = userBookId)
         }
+    }
+
+    override suspend fun cacheUserBookLists(lists: List<BookList>) {
+        lists.forEach { dao.cacheBookList(bookList = it) }
     }
 
     override suspend fun removeAllBooks() = dao.deleteAllUserBooksAndData()

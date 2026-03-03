@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.feature.books.data.model.AuthorEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookListEditionCrossRef
+import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
@@ -26,8 +28,10 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
         BookAuthorCrossRef::class,
         EditionAuthorCrossRef::class,
         ReadingJournalEntity::class,
+        BookListEntity::class,
+        BookListEditionCrossRef::class,
     ],
-    version = 6,
+    version = 7,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -43,6 +47,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_3_4)
                 .addMigrations(MIGRATION_4_5)
                 .addMigrations(MIGRATION_5_6)
+                .addMigrations(MIGRATION_6_7)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -213,6 +218,34 @@ abstract class SoftcoverDatabase : RoomDatabase() {
 
                 db.execSQL("DROP TABLE books")
                 db.execSQL("ALTER TABLE books_new RENAME TO books")
+            }
+        }
+
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_lists (
+                            id INTEGER PRIMARY KEY NOT NULL,
+                            name TEXT NOT NULL
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_list_edition_cross_ref (
+                            bookListId INTEGER NOT NULL,
+                            editionId INTEGER NOT NULL,
+                            PRIMARY KEY(bookListId, editionId),
+                            FOREIGN KEY(bookListId) REFERENCES book_lists(id) ON DELETE CASCADE,
+                            FOREIGN KEY(editionId) REFERENCES book_editions(id) ON DELETE CASCADE
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_bookListId ON book_list_edition_cross_ref(bookListId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_editionId ON book_list_edition_cross_ref(editionId)")
             }
         }
     }

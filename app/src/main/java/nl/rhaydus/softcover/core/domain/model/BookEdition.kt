@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.domain.model
 
 data class BookEdition(
     val id: Int,
+    val bookId: Int,
     val publisher: String?,
     val title: String?,
     val url: String?,

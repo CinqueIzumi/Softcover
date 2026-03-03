@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.books.data.datasource
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import nl.rhaydus.softcover.GetBookByIdQuery
+import nl.rhaydus.softcover.GetUserBookListsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.MarkBookAsReadingMutation
@@ -11,11 +12,13 @@ import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
+import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
@@ -33,6 +36,8 @@ interface BooksRemoteDataSource {
     suspend fun removeBookFromLibrary(book: Book)
 
     suspend fun initializeBooks(userId: Int): List<Book>
+
+    suspend fun fetchUserLists(userId: Int): List<BookList>
 
     suspend fun updateBookProgress(
         book: Book,
@@ -144,6 +149,28 @@ class BooksRemoteDataSourceImpl(
             ?: throw Exception("No books were found")
 
         return userBooks.map { it.userBookFragment.toBook() }
+    }
+
+    override suspend fun fetchUserLists(userId: Int): List<BookList> {
+        val result = apolloClient
+            .query(GetUserBookListsQuery())
+            .execute()
+            .dataOrThrow()
+
+        val lists = result.me.firstOrNull()?.lists
+            ?: throw Exception("No lists were found")
+
+        return lists.map { entry ->
+            val editions = entry
+                .list_books
+                .mapNotNull { it.edition?.editionFragment?.toBookEdition() }
+
+            BookList(
+                name = entry.name,
+                id = entry.id,
+                editions = editions,
+            )
+        }
     }
 
     override suspend fun updateBookProgress(

@@ -24,6 +24,7 @@ object PreviewData {
         releaseYear = 2023,
         authors = listOf(baseAuthor),
         format = "Hardcover",
+        bookId = 1,
     )
 
     val baseBook = Book(

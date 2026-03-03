@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookAuthorRefs
 import nl.rhaydus.softcover.feature.books.data.mapper.toEditionAuthorRefs
 import nl.rhaydus.softcover.feature.books.data.mapper.toEntity
@@ -15,6 +16,7 @@ import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
@@ -100,7 +102,7 @@ interface BookDao {
         }
 
         // Insert editions
-        val editionEntities = book.editions.map { it.toEntity(book.id) }
+        val editionEntities = book.editions.map { it.toEntity() }
         insertEditions(editionEntities)
 
         // Insert authors (deduplicated)
@@ -120,8 +122,19 @@ interface BookDao {
         insertEditionAuthors(book.toEditionAuthorRefs(authorIdsByName))
     }
 
+    @Transaction
+    suspend fun cacheBookList(bookList: BookList) {
+        val editionEntities = bookList.editions.map { it.toEntity() }
+        insertEditions(editionEntities)
+
+        insertBookList(bookList.toEntity())
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(book: BookEntity)
+
+    @Insert
+    suspend fun insertBookList(bookList: BookListEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserBook(userBook: UserBookEntity)

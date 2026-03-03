@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.books.data.mapper
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
@@ -12,6 +13,7 @@ import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
@@ -24,7 +26,7 @@ import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import kotlin.math.roundToInt
 
 // region DTO -> UI mappers
-private fun EditionFragment.toBookEdition(): BookEdition {
+fun EditionFragment.toBookEdition(): BookEdition {
     return BookEdition(
         id = id,
         title = title,
@@ -43,6 +45,7 @@ private fun EditionFragment.toBookEdition(): BookEdition {
         isbn10 = isbn_10,
         releaseYear = release_year ?: -1,
         format = edition_format ?: "",
+        bookId = book_id
     )
 }
 
@@ -131,6 +134,11 @@ fun BookFragment.toBook(
 // endregion
 
 // region UI -> Entity mappers
+fun BookList.toEntity(): BookListEntity = BookListEntity(
+    id = id,
+    name = name,
+)
+
 fun Book.toEntity(): BookEntity = BookEntity(
     id = id,
     title = title,
@@ -178,7 +186,7 @@ fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity {
     )
 }
 
-fun BookEdition.toEntity(bookId: Int): BookEditionEntity = BookEditionEntity(
+fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     id = id,
     bookId = bookId,
     publisher = publisher,
@@ -220,6 +228,7 @@ fun BookEditionEntity.toModel(authors: List<AuthorEntity>): BookEdition = BookEd
     releaseYear = releaseYear,
     authors = authors.map { it.toModel() },
     format = format,
+    bookId = bookId,
 )
 
 fun UserBookReadEntity.toModel(): UserBookRead {

@@ -1,0 +1,21 @@
+package nl.rhaydus.softcover.feature.books.data.model
+
+import androidx.room.Embedded
+import androidx.room.Junction
+import androidx.room.Relation
+
+data class BookListWithEditions(
+    @Embedded
+    val bookList: BookListEntity,
+
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "id",
+        associateBy = Junction(
+            value = BookListEditionCrossRef::class,
+            parentColumn = "bookListId",
+            entityColumn = "editionId"
+        )
+    )
+    val editions: List<BookEditionEntity>,
+)

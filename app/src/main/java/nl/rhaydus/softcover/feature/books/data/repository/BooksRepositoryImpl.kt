@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
+import timber.log.Timber
 
 class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
@@ -50,6 +51,10 @@ class BooksRepositoryImpl(
             .filterNot { it in fetchedBookUserBookIds }
 
         booksLocalDataSource.removeUserBooksById(ids = userBookIdsToRemove)
+
+        val lists = booksRemoteDataSource.fetchUserLists(userId = userId)
+
+        booksLocalDataSource.cacheUserBookLists(lists = lists)
     }
 
     override suspend fun cacheBook(book: Book) {
