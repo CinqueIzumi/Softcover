@@ -140,21 +140,20 @@ fun Book.toEntity(): BookEntity = BookEntity(
     coverUrl = coverUrl,
     defaultEditionId = defaultEdition?.id,
     usersCount = usersCount,
-    userBook = userBook?.toEntity(),
-    userBookReadEntity = userBookRead?.toEntity(),
 )
 
-fun UserBookRead.toEntity(): UserBookReadEntity {
+fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity {
     return UserBookReadEntity(
         id = id,
         currentPage = currentPage,
         progress = progress,
         startedAt = startedAt,
-        finishedAt = finishedAt
+        finishedAt = finishedAt,
+        userBookId = userBookId
     )
 }
 
-fun UserBook.toEntity(): UserBookEntity {
+fun UserBook.toEntity(bookId: Int): UserBookEntity {
     return UserBookEntity(
         id = id,
         statusCode = status.code,
@@ -167,6 +166,7 @@ fun UserBook.toEntity(): UserBookEntity {
         referrerUserId = referrerUserId,
         reviewedAt = reviewedAt,
         updatedAt = updatedAt,
+        bookId = bookId,
     )
 }
 
@@ -267,7 +267,7 @@ fun BookFullEntity.toModel(): Book {
         uiEditions.firstOrNull { it.id == id }
     }
 
-    val journals = journals.map { it.toModel() }
+    val journals = userBookWithJournals?.journals?.map { it.toModel() } ?: emptyList()
 
     return Book(
         id = book.id,
@@ -280,8 +280,8 @@ fun BookFullEntity.toModel(): Book {
         coverUrl = book.coverUrl,
         authors = bookAuthors.map { it.toModel() },
         usersCount = book.usersCount,
-        userBook = book.userBook?.toModel(journals = journals),
-        userBookRead = book.userBookReadEntity?.toModel()
+        userBook = userBookWithJournals?.userBook?.toModel(journals = journals),
+        userBookRead = userBookWithJournals?.userBookRead?.toModel()
     )
 }
 // endregion

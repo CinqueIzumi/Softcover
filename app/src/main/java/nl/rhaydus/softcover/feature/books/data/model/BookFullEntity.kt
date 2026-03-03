@@ -5,7 +5,8 @@ import androidx.room.Junction
 import androidx.room.Relation
 
 data class BookFullEntity(
-    @Embedded val book: BookEntity,
+    @Embedded
+    val book: BookEntity,
 
     @Relation(
         parentColumn = "id",
@@ -26,23 +27,9 @@ data class BookFullEntity(
     val editions: List<BookEditionWithAuthors>,
 
     @Relation(
-        parentColumn = "userBook_id",
-        entityColumn = "userBookId"
+        entity = UserBookEntity::class,
+        parentColumn = "id",
+        entityColumn = "bookId"
     )
-    val journals: List<ReadingJournalEntity>,
-)
-
-data class BookEditionWithAuthors(
-    @Embedded val edition: BookEditionEntity,
-
-    @Relation(
-        parentColumn = "id", // BookEditionEntity.id
-        entityColumn = "id", // AuthorEntity.id
-        associateBy = Junction(
-            value = EditionAuthorCrossRef::class,
-            parentColumn = "editionId", // cross-ref column referencing edition
-            entityColumn = "authorId"   // cross-ref column referencing author
-        )
-    )
-    val authors: List<AuthorEntity>,
+    val userBookWithJournals: UserBookWithJournals?,
 )

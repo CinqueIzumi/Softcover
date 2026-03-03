@@ -17,6 +17,8 @@ import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
+import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
+import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
 
 @Dao
 interface BookDao {
@@ -24,50 +26,57 @@ interface BookDao {
     @Transaction
     @Query(
         """
-    SELECT b.*
-    FROM books b
-    LEFT JOIN (
-        SELECT userBookId, MAX(updatedAt) AS latestProgress
-        FROM reading_journals
-        WHERE event = 'progress_updated'
-        GROUP BY userBookId
-    ) rj ON b.userBook_id = rj.userBookId
-    ORDER BY
-        (rj.latestProgress IS NULL) ASC,  -- books with progress come first
-        rj.latestProgress DESC,           -- latest progress first
-        b.userBook_updatedAt DESC         -- tie-breaker
-    """
+            SELECT b.*
+            FROM books b
+            LEFT JOIN user_books ub ON ub.bookId = b.id
+            LEFT JOIN (
+                SELECT userBookId, MAX(updatedAt) AS latestProgress
+                FROM reading_journals
+                WHERE event = 'progress_updated'
+                GROUP BY userBookId
+            ) rj ON ub.id = rj.userBookId
+            ORDER BY
+                (rj.latestProgress IS NULL) ASC,
+                rj.latestProgress DESC,
+                ub.updatedAt DESC
+            """
     )
     fun observeBooks(): Flow<List<BookFullEntity>>
 
     @Transaction
     @Query(
         """
-    SELECT b.*
-    FROM books b
-    
-    LEFT JOIN (
-        SELECT userBookId, MAX(updatedAt) AS latestProgress
-        FROM reading_journals
-        WHERE event = 'progress_updated'
-        GROUP BY userBookId
-    ) rj ON b.userBook_id = rj.userBookId
-    WHERE userBook_statusCode = :statusCode
-    ORDER BY
-        (rj.latestProgress IS NULL) ASC,  -- books with progress come first
-        rj.latestProgress DESC,           -- latest progress first
-        b.userBook_updatedAt DESC         -- tie-breaker
-"""
+                SELECT b.*
+                FROM books b
+
+                INNER JOIN user_books ub 
+                    ON ub.bookId = b.id
+
+                LEFT JOIN (
+                    SELECT userBookId, MAX(updatedAt) AS latestProgress
+                    FROM reading_journals
+                    WHERE event = 'progress_updated'
+                    GROUP BY userBookId
+                ) rj 
+                    ON ub.id = rj.userBookId
+
+                WHERE ub.statusCode = :statusCode
+
+                ORDER BY
+                    (rj.latestProgress IS NULL) ASC,
+                    rj.latestProgress DESC,
+                    ub.updatedAt DESC
+            """
     )
     fun getBooksByStatus(statusCode: Int): Flow<List<BookFullEntity>>
 
-    @Query("SELECT userBook_id FROM books")
+    @Query("SELECT id FROM user_books")
     suspend fun getAllUserBookIds(): List<Int>
 
     @Query("SELECT * FROM authors WHERE name IN (:names)")
     suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
 
-    @Query("SELECT id FROM books WHERE userBook_id = :userBookId")
+    @Query("SELECT bookId FROM user_books WHERE id = :userBookId")
     suspend fun getBookIdByUserBookId(userBookId: Int): Int?
     // endregion
 
@@ -77,11 +86,17 @@ interface BookDao {
         // Insert book
         insertBook(book.toEntity())
 
-        // Insert the journals
         book.userBook?.id?.let { userBookId ->
+            insertUserBook(userBook = book.userBook.toEntity(bookId = book.id))
+
+            // Manually update all journals
             deleteJournals(userBookId = userBookId)
 
             insertJournals(journals = book.userBook.journals.map { it.toEntity(userBookId = userBookId) })
+
+            book.userBookRead?.let { userBookRead ->
+                insertUserBookRead(userBookRead.toEntity(userBookId = userBookId))
+            }
         }
 
         // Insert editions
@@ -109,6 +124,12 @@ interface BookDao {
     suspend fun insertBook(book: BookEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserBook(userBook: UserBookEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserBookRead(userBookRead: UserBookReadEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEditions(editions: List<BookEditionEntity>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -134,6 +155,12 @@ interface BookDao {
     @Query("DELETE FROM reading_journals WHERE userBookId = :userBookId")
     suspend fun deleteJournals(userBookId: Int)
 
+    @Query("DELETE FROM user_books WHERE bookId = :bookId")
+    suspend fun deleteUserBook(bookId: Int)
+
+    @Query("DELETE FROM user_book_reads WHERE userBookId = :userBookId")
+    suspend fun deleteUserBookRead(userBookId: Int)
+
     @Transaction
     suspend fun deleteAllForUserBookId(userBookId: Int) {
         val bookId = getBookIdByUserBookId(userBookId) ?: return
@@ -142,6 +169,8 @@ interface BookDao {
         clearEditionAuthors(bookId)
         deleteEditions(bookId)
         deleteBook(bookId)
+        deleteUserBook(bookId)
+        deleteUserBookRead(userBookId)
         deleteJournals(userBookId = userBookId)
     }
 
