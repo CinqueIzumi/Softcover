@@ -11,6 +11,7 @@ data class BookEdition(
     val authors: List<Author>,
     val releaseYear: Int,
     val format: String,
+    val owned: Boolean,
 ) {
     val authorString: String
         get() = authors.joinToString(", ") { it.name }

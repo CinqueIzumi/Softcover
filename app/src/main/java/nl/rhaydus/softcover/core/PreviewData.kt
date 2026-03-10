@@ -25,6 +25,7 @@ object PreviewData {
         authors = listOf(baseAuthor),
         format = "Hardcover",
         bookId = 1,
+        owned = false,
     )
 
     val baseBook = Book(

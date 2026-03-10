@@ -41,10 +41,15 @@ class BooksLocalDataSourceImpl(
             .distinctUntilChanged()
             .map { lists ->
                 lists.map { list ->
-                    val editionsWithAuthors = list.editions.map { edition ->
-                        val authors = dao.getAuthorsForEdition(edition.id)
+                    val editionsWithAuthors = list.editions.map { editionView ->
+                        val edition = editionView.edition
 
-                        edition.toModel(authors = authors)
+                        val authors = dao.getAuthorsForEdition(editionId = edition.id)
+
+                        edition.toModel(
+                            authors = authors,
+                            owned = editionView.isOwned
+                        )
                     }
 
                     BookList(

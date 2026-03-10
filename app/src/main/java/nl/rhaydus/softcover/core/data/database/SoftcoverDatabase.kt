@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.feature.books.data.dao.BookDao
 import nl.rhaydus.softcover.feature.books.data.model.AuthorEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookEditionView
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListEditionCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
@@ -31,7 +32,10 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
         BookListEntity::class,
         BookListEditionCrossRef::class,
     ],
-    version = 7,
+    views = [
+        BookEditionView::class
+    ],
+    version = 8,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -48,6 +52,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_4_5)
                 .addMigrations(MIGRATION_5_6)
                 .addMigrations(MIGRATION_6_7)
+                .addMigrations(MIGRATION_7_8)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -247,6 +252,25 @@ abstract class SoftcoverDatabase : RoomDatabase() {
 
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_bookListId ON book_list_edition_cross_ref(bookListId)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_editionId ON book_list_edition_cross_ref(editionId)")
+            }
+        }
+
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+            CREATE VIEW `book_edition_view` AS SELECT 
+                    edition.*,
+                    EXISTS(
+                        SELECT 1
+                        FROM book_list_edition_cross_ref bler
+                        JOIN book_lists bl ON bl.id = bler.bookListId
+                        WHERE bler.editionId = edition.id
+                        AND bl.slug = 'owned'
+                    ) AS isOwned
+                FROM book_editions edition
+            """.trimIndent()
+                )
             }
         }
     }

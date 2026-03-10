@@ -20,7 +20,7 @@ data class BookFullEntity(
     val bookAuthors: List<AuthorEntity>,
 
     @Relation(
-        entity = BookEditionEntity::class,
+        entity = BookEditionView::class,
         parentColumn = "id",
         entityColumn = "bookId"
     )

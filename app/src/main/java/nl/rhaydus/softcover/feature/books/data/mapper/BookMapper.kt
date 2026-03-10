@@ -45,7 +45,8 @@ fun EditionFragment.toBookEdition(): BookEdition {
         isbn10 = isbn_10,
         releaseYear = release_year ?: -1,
         format = edition_format ?: "",
-        bookId = book_id
+        bookId = book_id,
+        owned = false,
     )
 }
 
@@ -219,7 +220,10 @@ fun Book.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAut
 // region Entity -> UI mappers
 fun AuthorEntity.toModel(): Author = Author(name = name, id = id)
 
-fun BookEditionEntity.toModel(authors: List<AuthorEntity>): BookEdition = BookEdition(
+fun BookEditionEntity.toModel(
+    authors: List<AuthorEntity>,
+    owned: Boolean,
+): BookEdition = BookEdition(
     id = id,
     publisher = publisher,
     title = title,
@@ -230,6 +234,7 @@ fun BookEditionEntity.toModel(authors: List<AuthorEntity>): BookEdition = BookEd
     authors = authors.map { it.toModel() },
     format = format,
     bookId = bookId,
+    owned = owned,
 )
 
 fun UserBookReadEntity.toModel(): UserBookRead {
@@ -268,8 +273,9 @@ fun ReadingJournalEntity.toModel(): ReadingJournal {
 
 fun BookFullEntity.toModel(): Book {
     val uiEditions = editions.map { editionWithAuthors ->
-        editionWithAuthors.edition.toModel(
-            authors = editionWithAuthors.authors
+        editionWithAuthors.edition.edition.toModel(
+            authors = editionWithAuthors.authors,
+            owned = editionWithAuthors.edition.isOwned,
         )
     }
 

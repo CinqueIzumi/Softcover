@@ -5,7 +5,8 @@ import androidx.room.Junction
 import androidx.room.Relation
 
 data class BookEditionWithAuthors(
-    @Embedded val edition: BookEditionEntity,
+    @Embedded
+    val edition: BookEditionView,
 
     @Relation(
         parentColumn = "id",
