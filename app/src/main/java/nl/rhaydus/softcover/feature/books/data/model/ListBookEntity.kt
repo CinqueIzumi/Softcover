@@ -5,28 +5,34 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 
 @Entity(
-    tableName = "book_list_edition_cross_ref",
-    primaryKeys = ["bookListId", "editionId"],
+    tableName = "list_books",
+    primaryKeys = ["listId", "bookId", "editionId"],
     foreignKeys = [
         ForeignKey(
             entity = BookListEntity::class,
             parentColumns = ["id"],
-            childColumns = ["bookListId"],
-            onDelete = ForeignKey.Companion.CASCADE
+            childColumns = ["listId"],
+        ),
+        ForeignKey(
+            entity = BookEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["bookId"],
         ),
         ForeignKey(
             entity = BookEditionEntity::class,
             parentColumns = ["id"],
             childColumns = ["editionId"],
-            onDelete = ForeignKey.Companion.CASCADE
         )
     ],
     indices = [
-        Index("bookListId"),
-        Index("editionId"),
+        Index("listId"),
+        Index("bookId"),
+        Index("editionId")
     ]
 )
-data class BookListEditionCrossRef(
-    val bookListId: Int,
+data class ListBookEntity(
+    val listId: Int,
+    val bookId: Int,
     val editionId: Int,
+    val position: Int? = null,
 )

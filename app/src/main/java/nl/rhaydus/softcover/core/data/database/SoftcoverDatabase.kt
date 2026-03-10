@@ -12,9 +12,9 @@ import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionView
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListEditionCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
@@ -30,12 +30,12 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
         EditionAuthorCrossRef::class,
         ReadingJournalEntity::class,
         BookListEntity::class,
-        BookListEditionCrossRef::class,
+        ListBookEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 8,
+    version = 9,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -53,6 +53,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_5_6)
                 .addMigrations(MIGRATION_6_7)
                 .addMigrations(MIGRATION_7_8)
+                .addMigrations(MIGRATION_8_9)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -233,10 +234,15 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         CREATE TABLE IF NOT EXISTS book_lists (
                             id INTEGER PRIMARY KEY NOT NULL,
                             name TEXT NOT NULL,
-                            slug TEXT NOT NULL
+                            slug TEXT NOT NULL DEFAULT ''
                         )
                     """.trimIndent()
                 )
+
+                try {
+                    db.execSQL("ALTER TABLE book_lists ADD COLUMN slug TEXT NOT NULL DEFAULT ''")
+                } catch (_: Exception) {
+                }
 
                 db.execSQL(
                     """
@@ -271,6 +277,61 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 FROM book_editions edition
             """.trimIndent()
                 )
+            }
+        }
+
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                try {
+                    db.execSQL("ALTER TABLE book_lists ADD COLUMN slug TEXT NOT NULL DEFAULT ''")
+                } catch (_: Exception) {
+                }
+
+                db.execSQL(
+                    """
+                CREATE TABLE IF NOT EXISTS list_books (
+                    listId INTEGER NOT NULL,
+                    bookId INTEGER NOT NULL,
+                    editionId INTEGER NOT NULL,
+                    position INTEGER,
+                    PRIMARY KEY(listId, bookId, editionId),
+                    FOREIGN KEY(listId) REFERENCES book_lists(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+                    FOREIGN KEY(bookId) REFERENCES books(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+                    FOREIGN KEY(editionId) REFERENCES book_editions(id) ON UPDATE NO ACTION ON DELETE NO ACTION
+                )
+            """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                INSERT INTO list_books (listId, bookId, editionId)
+                SELECT bler.bookListId, be.bookId, bler.editionId
+                FROM book_list_edition_cross_ref bler
+                JOIN book_editions be ON bler.editionId = be.id
+            """.trimIndent()
+                )
+
+                db.execSQL("DROP VIEW IF EXISTS book_edition_view")
+                db.execSQL(
+                    """
+                CREATE VIEW `book_edition_view` AS SELECT 
+                        edition.*,
+                        EXISTS(
+                            SELECT 1
+                            FROM list_books lb
+                            JOIN book_lists bl ON bl.id = lb.listId
+                            WHERE lb.editionId = edition.id
+                            AND bl.slug = 'owned'
+                        ) AS isOwned
+                    FROM book_editions edition
+            """.trimIndent()
+                )
+
+                db.execSQL("DROP TABLE IF EXISTS book_list_edition_cross_ref")
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_listId ON list_books(listId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_bookId ON list_books(bookId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_editionId ON list_books(editionId)")
             }
         }
     }

@@ -9,9 +9,9 @@ import androidx.room.Embedded
         edition.*,
         EXISTS(
             SELECT 1
-            FROM book_list_edition_cross_ref bler
-            JOIN book_lists bl ON bl.id = bler.bookListId
-            WHERE bler.editionId = edition.id
+            FROM list_books lb
+            JOIN book_lists bl ON bl.id = lb.listId
+            WHERE lb.editionId = edition.id
             AND bl.slug = 'owned'
         ) AS isOwned
     FROM book_editions edition

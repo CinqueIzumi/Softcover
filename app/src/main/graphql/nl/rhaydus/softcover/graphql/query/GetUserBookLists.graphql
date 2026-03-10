@@ -6,9 +6,7 @@ query GetUserBookLists {
             slug
 
             list_books {
-                edition {
-                    ...EditionFragment
-                }
+                ...ListBookFragment
             }
         }
     }

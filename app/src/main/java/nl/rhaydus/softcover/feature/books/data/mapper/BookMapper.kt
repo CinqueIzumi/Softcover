@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
@@ -14,12 +15,15 @@ import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
 import nl.rhaydus.softcover.fragment.BookFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
+import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
@@ -47,6 +51,15 @@ fun EditionFragment.toBookEdition(): BookEdition {
         format = edition_format ?: "",
         bookId = book_id,
         owned = false,
+    )
+}
+
+fun ListBookFragment.toListBook(): ListBook? {
+    val edition = edition?.editionFragment?.toBookEdition() ?: return null
+
+    return ListBook(
+        book = book.bookFragment.toBook(),
+        edition = edition,
     )
 }
 
@@ -270,6 +283,21 @@ fun ReadingJournalEntity.toModel(): ReadingJournal {
         event = event,
     )
 }
+
+fun ListBookFull.toModel(): ListBook = ListBook(
+    book = book.toModel(),
+    edition = edition.edition.edition.toModel(
+        authors = edition.authors,
+        owned = edition.edition.isOwned
+    )
+)
+
+fun BookListWithBooks.toModel(): BookList = BookList(
+    id = bookList.id,
+    name = bookList.name,
+    slug = bookList.slug,
+    books = listBooks.map { it.toModel() }
+)
 
 fun BookFullEntity.toModel(): Book {
     val uiEditions = editions.map { editionWithAuthors ->

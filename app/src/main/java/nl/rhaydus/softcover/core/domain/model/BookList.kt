@@ -4,5 +4,5 @@ data class BookList(
     val id: Int,
     val name: String,
     val slug: String,
-    val editions: List<BookEdition>,
+    val books: List<ListBook>,
 )

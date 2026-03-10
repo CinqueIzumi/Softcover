@@ -15,10 +15,10 @@ import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListEditionCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListWithEditions
+import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
@@ -48,7 +48,7 @@ interface BookDao {
 
     @Transaction
     @Query("SELECT * FROM book_lists")
-    fun observeBookLists(): Flow<List<BookListWithEditions>>
+    fun observeBookLists(): Flow<List<BookListWithBooks>>
 
     @Transaction
     @Query(
@@ -140,26 +140,23 @@ interface BookDao {
 
     @Transaction
     suspend fun cacheBookList(bookList: BookList) {
-        insertBookList(bookList = bookList.toEntity())
+        insertBookList(bookList.toEntity())
 
-        bookList.editions.forEach { currentEdition ->
-            insertEditions(editions = listOf(currentEdition.toEntity()))
+        bookList.books.forEach { listBook ->
+            // 1. Save the Book
+            insertBook(listBook.book.toEntity())
 
-            insertAuthors(authors = currentEdition.authors.map { it.toEntity() })
+            // 2. Save the Edition
+            insertEditions(listOf(listBook.edition.toEntity()))
 
-            val editionAuthorCrossRefs = currentEdition.authors.map { author ->
-                EditionAuthorCrossRef(
-                    editionId = currentEdition.id,
-                    authorId = author.id,
+            // 3. Save the Link
+            insertListBook(
+                ListBookEntity(
+                    listId = bookList.id,
+                    bookId = listBook.book.id,
+                    editionId = listBook.edition.id
                 )
-            }
-            insertEditionAuthors(refs = editionAuthorCrossRefs)
-
-            val bookListEditionRef = BookListEditionCrossRef(
-                bookListId = bookList.id,
-                editionId = currentEdition.id,
             )
-            insertBookListEditions(refs = listOf(bookListEditionRef))
         }
     }
 
@@ -179,7 +176,7 @@ interface BookDao {
     suspend fun insertEditions(editions: List<BookEditionEntity>)
 
     @Upsert
-    suspend fun insertBookListEditions(refs: List<BookListEditionCrossRef>)
+    suspend fun insertListBook(listBook: ListBookEntity)
 
     @Upsert
     suspend fun insertAuthors(authors: List<AuthorEntity>)
@@ -210,8 +207,8 @@ interface BookDao {
     @Query("DELETE FROM book_editions")
     suspend fun deleteAllBookEditions()
 
-    @Query("DELETE FROM book_list_edition_cross_ref")
-    suspend fun deleteAllBookListEditionCrossRefs()
+    @Query("DELETE FROM list_books")
+    suspend fun deleteAllListBooks()
 
     @Query("DELETE FROM authors")
     suspend fun deleteAllAuthors()
@@ -255,15 +252,18 @@ interface BookDao {
 
     @Transaction
     suspend fun deleteAllUserBooksAndData() {
-        deleteAllBooks()
-        deleteAllBookLists()
-        deleteAllUserBooks()
+        deleteAllListBooks()
         deleteAllUserBookReads()
-        deleteAllBookEditions()
-        deleteAllBookListEditionCrossRefs()
-        deleteAllAuthors()
         deleteAllReadingJournals()
         deleteAllBookAuthorCrossRefs()
+        deleteAllEditionAuthorCrossRefs()
+
+        deleteAllUserBooks()
+        deleteAllBookEditions()
+
+        deleteAllBooks()
+        deleteAllBookLists()
+        deleteAllAuthors()
     }
 
     @Query("DELETE FROM book_author_cross_ref WHERE bookId = :bookId")

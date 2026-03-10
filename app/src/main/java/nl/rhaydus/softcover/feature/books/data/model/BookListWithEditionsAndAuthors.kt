@@ -13,8 +13,8 @@ data class BookListWithEditions(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
-            value = BookListEditionCrossRef::class,
-            parentColumn = "bookListId",
+            value = ListBookEntity::class,
+            parentColumn = "listId",
             entityColumn = "editionId"
         )
     )

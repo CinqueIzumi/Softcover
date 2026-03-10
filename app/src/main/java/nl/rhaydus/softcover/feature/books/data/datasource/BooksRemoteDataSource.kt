@@ -18,7 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
-import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
+import nl.rhaydus.softcover.feature.books.data.mapper.toListBook
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
@@ -160,16 +160,14 @@ class BooksRemoteDataSourceImpl(
         val lists = result.me.firstOrNull()?.lists
             ?: throw Exception("No lists were found")
 
-        return lists.map { entry ->
-            val editions = entry
-                .list_books
-                .mapNotNull { it.edition?.editionFragment?.toBookEdition() }
+        return lists.map { list ->
+            val listBooks = list.list_books.mapNotNull { it.listBookFragment.toListBook() }
 
             BookList(
-                name = entry.name,
-                id = entry.id,
-                editions = editions,
-                slug = entry.slug ?: "",
+                id = list.id,
+                name = list.name,
+                slug = list.slug ?: "",
+                books = listBooks
             )
         }
     }

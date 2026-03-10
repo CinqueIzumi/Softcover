@@ -39,27 +39,7 @@ class BooksLocalDataSourceImpl(
         get() = dao
             .observeBookLists()
             .distinctUntilChanged()
-            .map { lists ->
-                lists.map { list ->
-                    val editionsWithAuthors = list.editions.map { editionView ->
-                        val edition = editionView.edition
-
-                        val authors = dao.getAuthorsForEdition(editionId = edition.id)
-
-                        edition.toModel(
-                            authors = authors,
-                            owned = editionView.isOwned
-                        )
-                    }
-
-                    BookList(
-                        id = list.bookList.id,
-                        name = list.bookList.name,
-                        editions = editionsWithAuthors,
-                        slug = list.bookList.slug,
-                    )
-                }
-            }
+            .map { lists -> lists.map { it.toModel() } }
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return dao
