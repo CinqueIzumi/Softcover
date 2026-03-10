@@ -195,6 +195,36 @@ interface BookDao {
     // endregion
 
     // region Data removers
+    @Query("DELETE FROM books")
+    suspend fun deleteAllBooks()
+
+    @Query("DELETE FROM book_lists")
+    suspend fun deleteAllBookLists()
+
+    @Query("DELETE FROM user_books")
+    suspend fun deleteAllUserBooks()
+
+    @Query("DELETE FROM user_book_reads")
+    suspend fun deleteAllUserBookReads()
+
+    @Query("DELETE FROM book_editions")
+    suspend fun deleteAllBookEditions()
+
+    @Query("DELETE FROM book_list_edition_cross_ref")
+    suspend fun deleteAllBookListEditionCrossRefs()
+
+    @Query("DELETE FROM authors")
+    suspend fun deleteAllAuthors()
+
+    @Query("DELETE FROM reading_journals")
+    suspend fun deleteAllReadingJournals()
+
+    @Query("DELETE FROM book_author_cross_ref")
+    suspend fun deleteAllBookAuthorCrossRefs()
+
+    @Query("DELETE FROM edition_author_cross_ref")
+    suspend fun deleteAllEditionAuthorCrossRefs()
+
     @Query("DELETE FROM book_editions WHERE bookId = :bookId")
     suspend fun deleteEditions(bookId: Int)
 
@@ -225,11 +255,15 @@ interface BookDao {
 
     @Transaction
     suspend fun deleteAllUserBooksAndData() {
-        val bookIds = getAllUserBookIds()
-
-        bookIds.forEach {
-            deleteAllForUserBookId(userBookId = it)
-        }
+        deleteAllBooks()
+        deleteAllBookLists()
+        deleteAllUserBooks()
+        deleteAllUserBookReads()
+        deleteAllBookEditions()
+        deleteAllBookListEditionCrossRefs()
+        deleteAllAuthors()
+        deleteAllReadingJournals()
+        deleteAllBookAuthorCrossRefs()
     }
 
     @Query("DELETE FROM book_author_cross_ref WHERE bookId = :bookId")
