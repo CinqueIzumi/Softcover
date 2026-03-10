@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.di
 
 import nl.rhaydus.softcover.feature.library.presentation.flows.AllBooksCollector
+import nl.rhaydus.softcover.feature.library.presentation.flows.BookListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.CurrentlyReadingBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.DidNotFinishBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
@@ -14,6 +15,8 @@ val libraryModule = module {
     factory { AllBooksCollector() } bind LibraryInitializer::class
 
     factory { CurrentlyReadingBooksCollector() } bind LibraryInitializer::class
+
+    factory { BookListsCollector() } bind LibraryInitializer::class
 
     factory { DidNotFinishBooksCollector() } bind LibraryInitializer::class
 
@@ -31,6 +34,7 @@ val libraryModule = module {
             refreshUserBooksUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
+            getAllUserListsUseCase = get(),
         )
     }
 }

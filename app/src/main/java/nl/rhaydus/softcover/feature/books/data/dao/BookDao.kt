@@ -16,7 +16,9 @@ import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookListEditionCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookListWithEditions
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
@@ -44,6 +46,10 @@ interface BookDao {
             """
     )
     fun observeBooks(): Flow<List<BookFullEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM book_lists")
+    fun observeBookLists(): Flow<List<BookListWithEditions>>
 
     @Transaction
     @Query(
@@ -80,6 +86,17 @@ interface BookDao {
 
     @Query("SELECT bookId FROM user_books WHERE id = :userBookId")
     suspend fun getBookIdByUserBookId(userBookId: Int): Int?
+
+    @Query(
+        """
+            SELECT a.* 
+            FROM authors a
+            INNER JOIN edition_author_cross_ref ea 
+            ON a.id = ea.authorId
+            WHERE ea.editionId = :editionId
+        """
+    )
+    suspend fun getAuthorsForEdition(editionId: Int): List<AuthorEntity>
     // endregion
 
     // region Data insertions
@@ -124,16 +141,33 @@ interface BookDao {
 
     @Transaction
     suspend fun cacheBookList(bookList: BookList) {
-        val editionEntities = bookList.editions.map { it.toEntity() }
-        insertEditions(editionEntities)
+        insertBookList(bookList = bookList.toEntity())
 
-        insertBookList(bookList.toEntity())
+        bookList.editions.forEach { currentEdition ->
+            insertEditions(editions = listOf(currentEdition.toEntity()))
+
+            insertAuthors(authors = currentEdition.authors.map { it.toEntity() })
+
+            val editionAuthorCrossRefs = currentEdition.authors.map { author ->
+                EditionAuthorCrossRef(
+                    editionId = currentEdition.id,
+                    authorId = author.id,
+                )
+            }
+            insertEditionAuthors(refs = editionAuthorCrossRefs)
+
+            val bookListEditionRef = BookListEditionCrossRef(
+                bookListId = bookList.id,
+                editionId = currentEdition.id,
+            )
+            insertBookListEditions(refs = listOf(bookListEditionRef))
+        }
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(book: BookEntity)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBookList(bookList: BookListEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -144,6 +178,9 @@ interface BookDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEditions(editions: List<BookEditionEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBookListEditions(refs: List<BookListEditionCrossRef>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAuthors(authors: List<AuthorEntity>)

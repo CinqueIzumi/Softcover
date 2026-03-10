@@ -9,6 +9,7 @@ data class BookListWithEditions(
     val bookList: BookListEntity,
 
     @Relation(
+        entity = BookEditionEntity::class,
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(

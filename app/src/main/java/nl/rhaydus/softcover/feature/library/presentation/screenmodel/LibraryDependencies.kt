@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
@@ -17,6 +18,7 @@ class LibraryDependencies(
     val getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase,
     val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     val refreshUserBooksUseCase: RefreshUserBooksUseCase,
+    val getAllUserListsUseCase: GetAllUserListsUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

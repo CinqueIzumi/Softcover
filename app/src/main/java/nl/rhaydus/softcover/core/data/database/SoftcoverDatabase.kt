@@ -227,7 +227,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     """
                         CREATE TABLE IF NOT EXISTS book_lists (
                             id INTEGER PRIMARY KEY NOT NULL,
-                            name TEXT NOT NULL
+                            name TEXT NOT NULL,
+                            slug TEXT NOT NULL
                         )
                     """.trimIndent()
                 )

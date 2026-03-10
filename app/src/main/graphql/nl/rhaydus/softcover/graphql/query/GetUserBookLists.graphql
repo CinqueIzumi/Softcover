@@ -3,6 +3,7 @@ query GetUserBookLists {
         lists {
             id
             name
+            slug
 
             list_books {
                 edition {

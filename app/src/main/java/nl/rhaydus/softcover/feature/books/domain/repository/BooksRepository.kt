@@ -2,11 +2,13 @@ package nl.rhaydus.softcover.feature.books.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 
 interface BooksRepository {
     val books: Flow<List<Book>>
+    val allUserLists: Flow<List<BookList>>
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 

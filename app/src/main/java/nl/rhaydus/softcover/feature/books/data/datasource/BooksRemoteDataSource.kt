@@ -169,6 +169,7 @@ class BooksRemoteDataSourceImpl(
                 name = entry.name,
                 id = entry.id,
                 editions = editions,
+                slug = entry.slug ?: "",
             )
         }
     }

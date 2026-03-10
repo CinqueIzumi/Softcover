@@ -137,6 +137,7 @@ fun BookFragment.toBook(
 fun BookList.toEntity(): BookListEntity = BookListEntity(
     id = id,
     name = name,
+    slug = slug,
 )
 
 fun Book.toEntity(): BookEntity = BookEntity(

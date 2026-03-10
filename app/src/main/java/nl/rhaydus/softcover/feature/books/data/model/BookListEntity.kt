@@ -9,4 +9,5 @@ data class BookListEntity(
     val id: Int,
 
     val name: String,
+    val slug: String,
 )

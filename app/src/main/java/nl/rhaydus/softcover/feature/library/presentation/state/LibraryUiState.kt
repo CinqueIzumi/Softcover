@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.pager.PagerState
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
 
@@ -21,6 +22,9 @@ data class LibraryUiState(
 
     val dnfBooks: List<Book>? = null,
     val dnfBooksGridState: LazyGridState = LazyGridState(),
+
+    val ownedEditions: List<BookEdition>? = null,
+    val ownedEditionsGridState: LazyGridState = LazyGridState(),
 
     val isLoading: Boolean = true,
     val pagerState: PagerState = PagerState(
