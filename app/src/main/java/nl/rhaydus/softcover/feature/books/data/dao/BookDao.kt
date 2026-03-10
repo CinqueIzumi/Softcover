@@ -7,6 +7,7 @@ import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookAuthorRefs
 import nl.rhaydus.softcover.feature.books.data.mapper.toEditionAuthorRefs
@@ -18,6 +19,7 @@ import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
+import nl.rhaydus.softcover.feature.books.data.model.BookSeriesEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
@@ -114,7 +116,10 @@ interface BookDao {
     // region Data insertions
     @Transaction
     suspend fun cacheBook(book: Book) {
-        // Insert book
+        book.bookSeries?.let { series ->
+            insertBookSeries(bookSeries = series.toEntity())
+        }
+
         insertBook(book.toEntity())
 
         book.userBook?.id?.let { userBookId ->
@@ -176,6 +181,9 @@ interface BookDao {
 
     @Upsert
     suspend fun insertBookList(bookList: BookListEntity)
+
+    @Upsert
+    suspend fun insertBookSeries(bookSeries: BookSeriesEntity)
 
     @Upsert
     suspend fun insertUserBook(userBook: UserBookEntity)

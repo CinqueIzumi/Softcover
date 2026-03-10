@@ -60,6 +60,7 @@ import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
@@ -471,6 +472,30 @@ class BookDetailScreen(
     private fun LazyListScope.generalBookInfoSection(state: BookDetailUiState) {
         item {
             Spacer(modifier = Modifier.height(12.dp))
+
+            state.book?.seriesText?.let { seriesText ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Surface(
+                        tonalElevation = 2.dp,
+                        shape = RoundedCornerShape(4.dp),
+                    ) {
+                        Text(
+                            text = seriesText,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+            }
 
             Text(
                 text = "${state.book?.title}",
@@ -891,6 +916,12 @@ private fun BookDetailScreenReadingPreview() {
                     currentPage = 20,
                     progress = 0.8f,
                 ),
+                bookSeries = BookSeries(
+                    id = 1,
+                    name = "The Maze Runner",
+                    amountOfBooks = 3,
+                ),
+                positionInSeries = 2,
             )
 
             BookDetailScreen(

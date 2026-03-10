@@ -15,4 +15,6 @@ data class BookEntity(
     val releaseYear: Int,
     val coverUrl: String,
     val usersCount: Int,
+    val positionInSeries: Int?,
+    val seriesId: Int?,
 )

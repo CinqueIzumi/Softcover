@@ -89,5 +89,7 @@ object PreviewData {
             startedAt = null,
             finishedAt = null,
         ),
+        bookSeries = null,
+        positionInSeries = null,
     )
 }

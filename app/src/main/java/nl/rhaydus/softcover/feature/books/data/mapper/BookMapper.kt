@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
@@ -16,6 +17,7 @@ import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
+import nl.rhaydus.softcover.feature.books.data.model.BookSeriesEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
@@ -23,6 +25,7 @@ import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
 import nl.rhaydus.softcover.fragment.BookFragment
+import nl.rhaydus.softcover.fragment.BookSeriesFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ListFragment
@@ -158,6 +161,18 @@ fun BookFragment.toBook(
         userBook = userBookFragment.toUserBook(),
         userBookRead = userBookReadFragment.toUserBookRead(),
         usersCount = bookContent.users_count,
+        bookSeries = bookContent.book_series.firstOrNull()?.bookSeriesFragment?.toBookSeries(),
+        positionInSeries = bookContent.book_series.firstOrNull()?.bookSeriesFragment?.position?.toInt(),
+    )
+}
+
+private fun BookSeriesFragment.toBookSeries(): BookSeries? {
+    val series = series ?: return null
+
+    return BookSeries(
+        id = series.id,
+        name = series.name,
+        amountOfBooks = series.primary_books_count ?: 0
     )
 }
 // endregion
@@ -168,6 +183,14 @@ fun BookList.toEntity(): BookListEntity = BookListEntity(
     name = name,
     slug = slug,
 )
+
+fun BookSeries.toEntity(): BookSeriesEntity {
+    return BookSeriesEntity(
+        id = id,
+        name = name,
+        amountOfBooks = amountOfBooks,
+    )
+}
 
 fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
     listId = listId,
@@ -185,6 +208,8 @@ fun Book.toEntity(): BookEntity = BookEntity(
     coverUrl = coverUrl,
     defaultEditionId = defaultEdition?.id,
     usersCount = usersCount,
+    positionInSeries = positionInSeries,
+    seriesId = bookSeries?.id,
 )
 
 fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity {
@@ -349,7 +374,17 @@ fun BookFullEntity.toModel(): Book {
         authors = bookAuthors.map { it.toModel() },
         usersCount = book.usersCount,
         userBook = userBookWithJournals?.userBook?.toModel(journals = journals),
-        userBookRead = userBookWithJournals?.userBookRead?.toModel()
+        userBookRead = userBookWithJournals?.userBookRead?.toModel(),
+        positionInSeries = book.positionInSeries,
+        bookSeries = series?.toModel()
+    )
+}
+
+fun BookSeriesEntity.toModel(): BookSeries {
+    return BookSeries(
+        id = id,
+        name = name,
+        amountOfBooks = amountOfBooks,
     )
 }
 // endregion

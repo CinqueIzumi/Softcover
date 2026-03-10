@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionView
 import nl.rhaydus.softcover.feature.books.data.model.BookEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
+import nl.rhaydus.softcover.feature.books.data.model.BookSeriesEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
@@ -31,11 +32,12 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
         ReadingJournalEntity::class,
         BookListEntity::class,
         ListBookEntity::class,
+        BookSeriesEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 9,
+    version = 10,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -54,6 +56,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_6_7)
                 .addMigrations(MIGRATION_7_8)
                 .addMigrations(MIGRATION_8_9)
+                .addMigrations(MIGRATION_9_10)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -333,6 +336,24 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_listId ON list_books(listId)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_bookId ON list_books(bookId)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_editionId ON list_books(editionId)")
+            }
+        }
+
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+            CREATE TABLE IF NOT EXISTS book_series (
+                id INTEGER NOT NULL, 
+                name TEXT NOT NULL, 
+                amountOfBooks INTEGER NOT NULL, 
+                PRIMARY KEY(id)
+            )
+            """.trimIndent()
+                )
+
+                db.execSQL("ALTER TABLE books ADD COLUMN seriesId INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE books ADD COLUMN positionInSeries INTEGER DEFAULT NULL")
             }
         }
     }
