@@ -266,13 +266,14 @@ fun Book.toBookAuthorRefs(authorIdsByName: Map<String, Int>): List<BookAuthorCro
     authors.map { BookAuthorCrossRef(bookId = id, authorId = authorIdsByName.getValue(it.name)) }
 
 fun Book.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
-    editions.flatMap { edition ->
-        edition.authors.map {
-            EditionAuthorCrossRef(
-                editionId = edition.id,
-                authorId = authorIdsByName.getValue(it.name)
-            )
-        }
+    editions.flatMap { it.toEditionAuthorRefs(authorIdsByName) }
+
+fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
+    authors.map {
+        EditionAuthorCrossRef(
+            editionId = id,
+            authorId = authorIdsByName.getValue(it.name)
+        )
     }
 
 // endregion

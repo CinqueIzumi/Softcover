@@ -7,7 +7,6 @@ import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookAuthorRefs
 import nl.rhaydus.softcover.feature.books.data.mapper.toEditionAuthorRefs
@@ -169,11 +168,21 @@ interface BookDao {
 
     @Transaction
     suspend fun cacheListBook(listBook: ListBook) {
-        insertBook(listBook.book.toEntity())
+        val book = listBook.book
+        val edition = listBook.edition
 
-        insertEditions(listOf(listBook.edition.toEntity()))
-
+        insertBook(book.toEntity())
+        insertEditions(listOf(edition.toEntity()))
         insertListBook(listBook.toEntity())
+
+        val allAuthors = (book.authors + edition.authors).distinctBy { it.name }
+        insertAuthors(allAuthors.map { it.toEntity() })
+
+        val authorEntities = getAuthorsByName(allAuthors.map { it.name })
+        val authorIdsByName = authorEntities.associateBy({ it.name }, { it.id })
+
+        insertBookAuthors(book.toBookAuthorRefs(authorIdsByName))
+        insertEditionAuthors(edition.toEditionAuthorRefs(authorIdsByName))
     }
 
     @Upsert
