@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
@@ -204,6 +205,15 @@ class BookDetailScreen(
 
                 item { ReviewsPagesReleaseDateSection(state = state) }
 
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+
+                item {
+                    EditionOwnedSection(
+                        state = state,
+                        runAction = runAction
+                    )
+                }
+
                 item { Spacer(modifier = Modifier.height(16.dp)) }
 
                 item {
@@ -279,6 +289,44 @@ class BookDetailScreen(
                     },
                 )
             }
+        }
+    }
+
+    @Composable
+    private fun EditionOwnedSection(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        val edition = state.book?.currentEdition ?: return
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            val leadingIcon: @Composable (() -> Unit)? = when (edition.owned) {
+                true -> {
+                    {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_check),
+                            contentDescription = "Check icon"
+                        )
+                    }
+                }
+
+                false -> null
+            }
+
+            val chipLabel = when (edition.owned) {
+                true -> "Owned"
+                false -> "Mark as owned"
+            }
+
+            FilterChip(
+                selected = edition.owned,
+                onClick = { TODO() },
+                leadingIcon = leadingIcon,
+                label = { Text(text = chipLabel) },
+            )
         }
     }
 
@@ -659,7 +707,7 @@ class BookDetailScreen(
     ) {
         val userBook = state.book?.userBook ?: return
 
-        Column() {
+        Column {
             Surface(
                 shape = RoundedCornerShape(12.dp),
                 tonalElevation = 4.dp,
