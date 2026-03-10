@@ -205,11 +205,20 @@ fun EditionItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
                 edition.format.takeIf { it.isNotEmpty() }?.let { format ->
                     Text(
                         text = format,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                if (edition.owned) {
+                    Text(
+                        text = "You own this edition!",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }
@@ -238,6 +247,7 @@ private fun EditionBottomSheetContentPreview() {
                 publisher = "Titan Books",
                 id = 20,
                 format = "",
+                owned = true,
             ),
             baseEdition.copy(
                 pages = 267,

@@ -24,6 +24,7 @@ val bookDetailModule = module {
             flows = getAll(),
             appDispatchers = get(),
             getDateStyleAsFlowUseCase = get(),
+            setEditionAsOwnedUseCase = get(),
         )
     }
 }

@@ -8,32 +8,23 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import timber.log.Timber
 
-data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAction {
+class OnEditionOwnedToggleAction(
+    val edition: BookEdition,
+) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        val userBook = scope.currentState.book?.userBook ?: return
+        scope.setState { it.copy(settingEditionOwned = true) }
 
-        dependencies.launch {
-            scope.setState {
-                it.copy(loadingBookDetails = true)
+        dependencies.setEditionAsOwnedUseCase(
+            edition = edition,
+            owned = edition.owned.not(),
+        )
+            .onFailure {
+                Timber.e("-=- $it")
             }
 
-            dependencies.updateBookEditionUseCase(
-                userBook = userBook,
-                newEditionId = edition.id
-            ).onFailure {
-                Timber.e("-=- Something went wrong updating book edition! $it")
-            }
-
-            scope.setState {
-                it.copy(loadingBookDetails = false)
-            }
-        }
-
-        scope.setState {
-            it.copy(showEditEditionSheet = false)
-        }
+        scope.setState { it.copy(settingEditionOwned = false) }
     }
 }

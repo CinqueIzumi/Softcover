@@ -1,13 +1,7 @@
 query GetUserBookLists {
     me {
         lists {
-            id
-            name
-            slug
-
-            list_books {
-                ...ListBookFragment
-            }
+            ...ListFragment
         }
     }
 }

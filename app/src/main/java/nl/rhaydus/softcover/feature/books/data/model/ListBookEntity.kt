@@ -3,10 +3,11 @@ package nl.rhaydus.softcover.feature.books.data.model
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "list_books",
-    primaryKeys = ["listId", "bookId", "editionId"],
+    primaryKeys = ["listId", "bookId", "editionId", "listBookId"],
     foreignKeys = [
         ForeignKey(
             entity = BookListEntity::class,
@@ -31,6 +32,7 @@ import androidx.room.Index
     ]
 )
 data class ListBookEntity(
+    val listBookId: Int,
     val listId: Int,
     val bookId: Int,
     val editionId: Int,

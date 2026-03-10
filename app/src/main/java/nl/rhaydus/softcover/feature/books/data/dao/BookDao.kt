@@ -7,6 +7,7 @@ import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookAuthorRefs
 import nl.rhaydus.softcover.feature.books.data.mapper.toEditionAuthorRefs
 import nl.rhaydus.softcover.feature.books.data.mapper.toEntity
@@ -19,6 +20,7 @@ import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
+import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
@@ -96,6 +98,17 @@ interface BookDao {
         """
     )
     suspend fun getAuthorsForEdition(editionId: Int): List<AuthorEntity>
+
+    @Transaction
+    @Query(
+        """
+        SELECT lb.* 
+        FROM list_books lb
+        INNER JOIN book_lists bl ON lb.listId = bl.id
+        WHERE lb.editionId = :editionId AND bl.slug = 'owned'
+    """
+    )
+    suspend fun getOwnedListBookByEditionId(editionId: Int): ListBookFull?
     // endregion
 
     // region Data insertions
@@ -140,24 +153,22 @@ interface BookDao {
 
     @Transaction
     suspend fun cacheBookList(bookList: BookList) {
+        clearBookList(bookListId = bookList.id)
+
         insertBookList(bookList.toEntity())
 
         bookList.books.forEach { listBook ->
-            // 1. Save the Book
-            insertBook(listBook.book.toEntity())
-
-            // 2. Save the Edition
-            insertEditions(listOf(listBook.edition.toEntity()))
-
-            // 3. Save the Link
-            insertListBook(
-                ListBookEntity(
-                    listId = bookList.id,
-                    bookId = listBook.book.id,
-                    editionId = listBook.edition.id
-                )
-            )
+            cacheListBook(listBook)
         }
+    }
+
+    @Transaction
+    suspend fun cacheListBook(listBook: ListBook) {
+        insertBook(listBook.book.toEntity())
+
+        insertEditions(listOf(listBook.edition.toEntity()))
+
+        insertListBook(listBook.toEntity())
     }
 
     @Upsert
@@ -236,6 +247,9 @@ interface BookDao {
 
     @Query("DELETE FROM user_book_reads WHERE userBookId = :userBookId")
     suspend fun deleteUserBookRead(userBookId: Int)
+
+    @Query("DELETE FROM list_books WHERE listId = :bookListId")
+    suspend fun clearBookList(bookListId: Int)
 
     @Transaction
     suspend fun deleteAllForUserBookId(userBookId: Int) {

@@ -3,7 +3,9 @@ package nl.rhaydus.softcover.feature.books.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
@@ -112,5 +114,23 @@ class BooksRepositoryImpl(
             userBook = userBook,
             newEditionId = newEditionId,
         )
+    }
+
+    override suspend fun markEditionAsOwned(edition: BookEdition): ListBook {
+        return booksRemoteDataSource.markEditionAsOwned(edition = edition)
+    }
+
+    override suspend fun getListBookByEditionId(editionId: Int): ListBook {
+        return booksLocalDataSource.getOwnedListBookByEditionId(editionId = editionId)
+    }
+
+    override suspend fun removeListBook(book: ListBook) {
+        val updatedList = booksRemoteDataSource.removeListBook(book = book)
+
+        booksLocalDataSource.cacheUserBookLists(lists = listOf(updatedList))
+    }
+
+    override suspend fun cacheListBook(book: ListBook) {
+        booksLocalDataSource.cacheListBook(book = book)
     }
 }

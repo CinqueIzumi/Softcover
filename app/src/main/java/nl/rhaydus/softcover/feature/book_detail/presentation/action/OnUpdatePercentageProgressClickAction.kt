@@ -27,7 +27,7 @@ data class OnUpdatePercentageProgressClickAction(
                 book = bookToUpdate,
                 newPage = newPageValue,
                 setLoading = { newLoading ->
-                    scope.setState { it.copy(loading = newLoading) }
+                    scope.setState { it.copy(loadingBookDetails = newLoading) }
                 }
             )
         }

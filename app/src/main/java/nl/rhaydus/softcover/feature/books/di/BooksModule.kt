@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseC
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
@@ -112,5 +113,9 @@ val booksModule = module {
 
     factory {
         GetAllUserListsUseCase(booksRepository = get())
+    }
+
+    factory {
+        SetEditionAsOwnedUseCase(booksRepository = get())
     }
 }

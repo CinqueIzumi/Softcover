@@ -33,7 +33,7 @@ class InitializeBookWithIdAction(
             scope.setState {
                 it.copy(
                     book = result,
-                    loading = false,
+                    loadingBookDetails = false,
                 )
             }
         }

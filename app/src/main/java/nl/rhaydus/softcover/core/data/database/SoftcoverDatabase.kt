@@ -290,11 +290,12 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL(
                     """
                 CREATE TABLE IF NOT EXISTS list_books (
+                    listBookId INTEGER NOT NULL,
                     listId INTEGER NOT NULL,
                     bookId INTEGER NOT NULL,
                     editionId INTEGER NOT NULL,
                     position INTEGER,
-                    PRIMARY KEY(listId, bookId, editionId),
+                    PRIMARY KEY(listId, bookId, editionId, listBookId),
                     FOREIGN KEY(listId) REFERENCES book_lists(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
                     FOREIGN KEY(bookId) REFERENCES books(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
                     FOREIGN KEY(editionId) REFERENCES book_editions(id) ON UPDATE NO ACTION ON DELETE NO ACTION

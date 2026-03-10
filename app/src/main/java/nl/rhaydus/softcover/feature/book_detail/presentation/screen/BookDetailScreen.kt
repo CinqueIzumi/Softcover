@@ -80,6 +80,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAc
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnFabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
@@ -194,7 +195,7 @@ class BookDetailScreen(
                 item {
                     CoverImageSection(
                         edition = state.book?.currentEdition,
-                        isLoading = state.loading,
+                        isLoading = state.loadingBookDetails,
                         fallBackEdition = state.book?.defaultEdition
                     )
                 }
@@ -300,7 +301,9 @@ class BookDetailScreen(
         val edition = state.book?.currentEdition ?: return
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shimmer(isLoading = state.loadingBookDetails),
             horizontalArrangement = Arrangement.Center,
         ) {
             val leadingIcon: @Composable (() -> Unit)? = when (edition.owned) {
@@ -323,7 +326,10 @@ class BookDetailScreen(
 
             FilterChip(
                 selected = edition.owned,
-                onClick = { TODO() },
+                enabled = state.settingEditionOwned.not(),
+                onClick = {
+                    runAction(OnEditionOwnedToggleAction(edition = edition))
+                },
                 leadingIcon = leadingIcon,
                 label = { Text(text = chipLabel) },
             )
@@ -471,7 +477,7 @@ class BookDetailScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .shimmer(isLoading = state.loading)
+                    .shimmer(isLoading = state.loadingBookDetails)
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center,
             )
@@ -486,7 +492,7 @@ class BookDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .shimmer(isLoading = state.loading),
+                    .shimmer(isLoading = state.loadingBookDetails),
                 textAlign = TextAlign.Center,
             )
         }
@@ -499,7 +505,7 @@ class BookDetailScreen(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
                 .padding(horizontal = 16.dp)
-                .shimmer(isLoading = state.loading),
+                .shimmer(isLoading = state.loadingBookDetails),
         ) {
             Row(
                 modifier = Modifier.weight(1f),
@@ -582,7 +588,7 @@ class BookDetailScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxSize()
-                    .shimmer(isLoading = state.loading)
+                    .shimmer(isLoading = state.loadingBookDetails)
             )
         }
     }
@@ -592,7 +598,7 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        if (state.loading) return
+        if (state.loadingBookDetails) return
 
         val book = state.book ?: return
 
@@ -892,7 +898,7 @@ private fun BookDetailScreenReadingPreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
@@ -919,7 +925,7 @@ private fun BookDetailScreenNonePreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
@@ -946,7 +952,7 @@ private fun BookDetailScreenDnfPreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
@@ -973,7 +979,7 @@ private fun BookDetailScreenWantToReadPreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
@@ -1000,7 +1006,7 @@ private fun BookDetailScreenReadPreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},

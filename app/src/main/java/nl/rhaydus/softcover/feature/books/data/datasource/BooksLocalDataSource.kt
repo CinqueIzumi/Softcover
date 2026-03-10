@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.dao.BookDao
 import nl.rhaydus.softcover.feature.books.data.mapper.toModel
@@ -23,7 +24,11 @@ interface BooksLocalDataSource {
 
     suspend fun cacheUserBookLists(lists: List<BookList>)
 
+    suspend fun cacheListBook(book: ListBook)
+
     suspend fun removeAllBooks()
+
+    suspend fun getOwnedListBookByEditionId(editionId: Int): ListBook
 }
 
 class BooksLocalDataSourceImpl(
@@ -66,5 +71,16 @@ class BooksLocalDataSourceImpl(
         lists.forEach { dao.cacheBookList(bookList = it) }
     }
 
+    override suspend fun cacheListBook(book: ListBook) {
+        dao.cacheListBook(listBook = book)
+    }
+
     override suspend fun removeAllBooks() = dao.deleteAllUserBooksAndData()
+
+    override suspend fun getOwnedListBookByEditionId(editionId: Int): ListBook {
+        val book = dao.getOwnedListBookByEditionId(editionId = editionId)
+            ?: throw Exception("List book was not found!")
+
+        return book.toModel()
+    }
 }

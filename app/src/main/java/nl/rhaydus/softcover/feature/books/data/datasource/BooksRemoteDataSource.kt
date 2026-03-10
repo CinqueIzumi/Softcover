@@ -8,16 +8,21 @@ import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.MarkBookAsReadingMutation
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
+import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
+import nl.rhaydus.softcover.RemoveListBookMutation
 import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
+import nl.rhaydus.softcover.feature.books.data.mapper.toBookList
 import nl.rhaydus.softcover.feature.books.data.mapper.toListBook
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
@@ -50,6 +55,10 @@ interface BooksRemoteDataSource {
         userBook: UserBook,
         newEditionId: Int,
     ): Book
+
+    suspend fun markEditionAsOwned(edition: BookEdition): ListBook
+
+    suspend fun removeListBook(book: ListBook): BookList
 }
 
 class BooksRemoteDataSourceImpl(
@@ -161,14 +170,7 @@ class BooksRemoteDataSourceImpl(
             ?: throw Exception("No lists were found")
 
         return lists.map { list ->
-            val listBooks = list.list_books.mapNotNull { it.listBookFragment.toListBook() }
-
-            BookList(
-                id = list.id,
-                name = list.name,
-                slug = list.slug ?: "",
-                books = listBooks
-            )
+            list.listFragment.toBookList()
         }
     }
 
@@ -279,5 +281,34 @@ class BooksRemoteDataSourceImpl(
             ?: throw Exception("Did not receive a new user book fragment")
 
         return userBookFragment.toBook()
+    }
+
+    override suspend fun markEditionAsOwned(edition: BookEdition): ListBook {
+        val mutation = MarkEditionAsOwnedMutation(id = edition.id)
+
+        val result = apolloClient
+            .mutation(mutation = mutation)
+            .execute()
+            .dataOrThrow()
+
+        val listBookFragment = result.edition_owned?.list_book?.listBookFragment
+            ?: throw Exception("Did not receive a list book fragment")
+
+        return listBookFragment.toListBook()
+            ?: throw Exception("List book mapping resulted in null")
+    }
+
+    override suspend fun removeListBook(book: ListBook): BookList {
+        val mutation = RemoveListBookMutation(id = book.listBookId)
+
+        val result = apolloClient
+            .mutation(mutation = mutation)
+            .execute()
+            .dataOrThrow()
+
+        val listFragment = result.delete_list_book?.list?.listFragment
+            ?: throw Exception("Did not receive a list fragment")
+
+        return listFragment.toBookList()
     }
 }
