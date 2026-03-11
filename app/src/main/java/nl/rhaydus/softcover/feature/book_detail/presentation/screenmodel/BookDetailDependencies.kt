@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
@@ -23,6 +24,7 @@ class BookDetailDependencies(
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
+    val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

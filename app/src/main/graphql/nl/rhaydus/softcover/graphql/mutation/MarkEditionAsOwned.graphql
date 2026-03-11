@@ -1,0 +1,7 @@
+mutation MarkEditionAsOwned($id: Int!) {
+    edition_owned(id: $id) {
+        list_book {
+            ...ListBookFragment
+        }
+    }
+}

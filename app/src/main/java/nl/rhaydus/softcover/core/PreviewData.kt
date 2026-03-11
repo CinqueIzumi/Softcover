@@ -24,6 +24,8 @@ object PreviewData {
         releaseYear = 2023,
         authors = listOf(baseAuthor),
         format = "Hardcover",
+        bookId = 1,
+        owned = false,
     )
 
     val baseBook = Book(
@@ -87,5 +89,7 @@ object PreviewData {
             startedAt = null,
             finishedAt = null,
         ),
+        bookSeries = null,
+        positionInSeries = null,
     )
 }

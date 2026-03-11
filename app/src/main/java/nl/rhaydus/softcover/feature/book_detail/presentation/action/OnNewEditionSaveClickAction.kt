@@ -17,7 +17,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
 
         dependencies.launch {
             scope.setState {
-                it.copy(loading = true)
+                it.copy(loadingBookDetails = true)
             }
 
             dependencies.updateBookEditionUseCase(
@@ -28,7 +28,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
             }
 
             scope.setState {
-                it.copy(loading = false)
+                it.copy(loadingBookDetails = false)
             }
         }
 

@@ -2,20 +2,40 @@ package nl.rhaydus.softcover.feature.books.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.GetBookByIdQuery
+import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookFragment
+import nl.rhaydus.softcover.GetUserBookListsQuery
+import nl.rhaydus.softcover.GetUserBookListsQuery.Data.Me.List.Companion.listFragment
 import nl.rhaydus.softcover.GetUserBooksQuery
+import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.MarkBookAsReadMutation
+import nl.rhaydus.softcover.MarkBookAsReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.MarkBookAsReadingMutation
+import nl.rhaydus.softcover.MarkBookAsReadingMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
+import nl.rhaydus.softcover.MarkBookAsWantToReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
+import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
+import nl.rhaydus.softcover.MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion.listBookFragment
+import nl.rhaydus.softcover.RemoveListBookMutation
+import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Companion.listFragment
 import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
+import nl.rhaydus.softcover.UpdateBookEditionMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
+import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion.userBookReadFragment
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
+import nl.rhaydus.softcover.feature.books.data.mapper.toBookList
+import nl.rhaydus.softcover.feature.books.data.mapper.toListBook
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
@@ -34,6 +54,8 @@ interface BooksRemoteDataSource {
 
     suspend fun initializeBooks(userId: Int): List<Book>
 
+    suspend fun fetchUserLists(userId: Int): List<BookList>
+
     suspend fun updateBookProgress(
         book: Book,
         newPage: Int,
@@ -45,6 +67,10 @@ interface BooksRemoteDataSource {
         userBook: UserBook,
         newEditionId: Int,
     ): Book
+
+    suspend fun markEditionAsOwned(edition: BookEdition): ListBook
+
+    suspend fun removeListBook(book: ListBook): BookList
 }
 
 class BooksRemoteDataSourceImpl(
@@ -59,7 +85,7 @@ class BooksRemoteDataSourceImpl(
         val book = result
             .books
             .firstOrNull()
-            ?.bookFragment
+            ?.bookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
 
         return book
@@ -80,7 +106,7 @@ class BooksRemoteDataSourceImpl(
         val book = result
             .insert_user_book
             ?.user_book
-            ?.userBookFragment
+            ?.userBookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
 
         return book
@@ -118,7 +144,7 @@ class BooksRemoteDataSourceImpl(
             .dataOrThrow()
             .update_user_book
             ?.user_book
-            ?.userBookFragment
+            ?.userBookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
 
         return book
@@ -134,16 +160,34 @@ class BooksRemoteDataSourceImpl(
             .dataOrThrow()
     }
 
-    override suspend fun initializeBooks(userId: Int): List<Book> {
+    override suspend fun initializeBooks(userId: Int): List<Book> = withContext(Dispatchers.IO) {
         val result = apolloClient
             .query(query = GetUserBooksQuery())
             .execute()
-            .dataOrThrow()
 
-        val userBooks = result.me.firstOrNull()?.user_books
+        result.exception?.let {
+            throw it
+        }
+
+        val userBooks = result.data?.me?.firstOrNull()?.user_books
             ?: throw Exception("No books were found")
 
-        return userBooks.map { it.userBookFragment.toBook() }
+        return@withContext userBooks.mapNotNull { it.userBookFragment()?.toBook() }
+    }
+
+    override suspend fun fetchUserLists(userId: Int): List<BookList> = withContext(Dispatchers.IO) {
+        val result = apolloClient
+            .query(GetUserBookListsQuery())
+            .execute()
+
+        result.exception?.let { throw it }
+
+        val lists = result.data?.me?.firstOrNull()?.lists
+            ?: throw Exception("No lists were found")
+
+        return@withContext lists.mapNotNull { list ->
+            list.listFragment()?.toBookList()
+        }
     }
 
     override suspend fun updateBookProgress(
@@ -176,7 +220,7 @@ class BooksRemoteDataSourceImpl(
         val userBookReadFragment = result
             .update_user_book_read
             ?.user_book_read
-            ?.userBookReadFragment
+            ?.userBookReadFragment()
             ?: throw Exception("Did not receive a new user book read fragment")
 
         val updatedUserBookRead = userBookRead.copy(
@@ -219,10 +263,10 @@ class BooksRemoteDataSourceImpl(
             .execute()
             .dataOrThrow()
 
-        val userBookFragment = result.insert_user_book?.user_book?.userBookFragment
+        val userBookFragment = result.insert_user_book?.user_book?.userBookFragment()
             ?: throw Exception("Did not receive a new user book fragment")
 
-        return userBookFragment.toBook()
+        return userBookFragment.toBook() ?: throw Exception("Book was not mapped successfully")
     }
 
     override suspend fun updateBookEdition(
@@ -249,9 +293,38 @@ class BooksRemoteDataSourceImpl(
             .execute()
             .dataOrThrow()
 
-        val userBookFragment = result.update_user_book?.user_book?.userBookFragment
+        val userBookFragment = result.update_user_book?.user_book?.userBookFragment()
             ?: throw Exception("Did not receive a new user book fragment")
 
-        return userBookFragment.toBook()
+        return userBookFragment.toBook() ?: throw Exception("Book was not mapped successfully")
+    }
+
+    override suspend fun markEditionAsOwned(edition: BookEdition): ListBook {
+        val mutation = MarkEditionAsOwnedMutation(id = edition.id)
+
+        val result = apolloClient
+            .mutation(mutation = mutation)
+            .execute()
+            .dataOrThrow()
+
+        val listBookFragment = result.edition_owned?.list_book?.listBookFragment()
+            ?: throw Exception("Did not receive a list book fragment")
+
+        return listBookFragment.toListBook()
+            ?: throw Exception("List book mapping resulted in null")
+    }
+
+    override suspend fun removeListBook(book: ListBook): BookList {
+        val mutation = RemoveListBookMutation(id = book.listBookId)
+
+        val result = apolloClient
+            .mutation(mutation = mutation)
+            .execute()
+            .dataOrThrow()
+
+        val listFragment = result.delete_list_book?.list?.listFragment()
+            ?: throw Exception("Did not receive a list fragment")
+
+        return listFragment.toBookList()
     }
 }

@@ -50,6 +50,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
@@ -283,6 +284,14 @@ object ReadingScreen : Screen {
                     Spacer(modifier = Modifier.width(16.dp))
 
                     Column {
+                        book.seriesText?.let { seriesText ->
+                            Text(
+                                text = seriesText,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
                         Text(
                             text = book.title,
                             style = MaterialTheme.typography.titleMediumEmphasized,
@@ -417,6 +426,11 @@ private fun ReadingScreenPreview() {
                 progress = 88.014984f,
             ),
             userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
+            bookSeries = BookSeries(
+                id = 1,
+                name = "Dungeon Crawler Carl",
+                amountOfBooks = 20
+            ),
         ),
         PreviewData.baseBook.copy(
             title = "Last to Leave the Room",
@@ -431,6 +445,12 @@ private fun ReadingScreenPreview() {
                 progress = 81.875f,
             ),
             userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
+            bookSeries = BookSeries(
+                id = 1,
+                name = "Dungeon Crawler Carl",
+                amountOfBooks = 20
+            ),
+            positionInSeries = 3,
         ),
         PreviewData.baseBook.copy(
             title = "Cursed Bunny",

@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.feature.books.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
@@ -18,6 +19,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseC
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
@@ -107,5 +109,13 @@ val booksModule = module {
 
     factory {
         UpdateBookProgressUseCase(repository = get())
+    }
+
+    factory {
+        GetAllUserListsUseCase(booksRepository = get())
+    }
+
+    factory {
+        SetEditionAsOwnedUseCase(booksRepository = get())
     }
 }

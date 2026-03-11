@@ -24,7 +24,7 @@ data class OnUpdatePageProgressClickAction(
                 newPage = newPageValue,
                 setLoading = { newValue ->
                     scope.setState {
-                        it.copy(loading = newValue)
+                        it.copy(loadingBookDetails = newValue)
                     }
                 }
             )

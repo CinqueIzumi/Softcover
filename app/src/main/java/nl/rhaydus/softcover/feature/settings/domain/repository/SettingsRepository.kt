@@ -13,8 +13,6 @@ interface SettingsRepository {
 
     suspend fun updateApiKey(key: String)
 
-    suspend fun getApiKey(): String
-
     fun getUserId(): Flow<Int>
 
     fun getThemeConfig(): Flow<ThemeConfiguration>

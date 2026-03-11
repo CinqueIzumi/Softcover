@@ -1,0 +1,9 @@
+mutation RemoveListBook($id: Int!) {
+    delete_list_book(id: $id) {
+        id
+
+        list {
+            ...ListFragment
+        }
+    }
+}

@@ -1,8 +1,13 @@
 package nl.rhaydus.softcover.feature.books.data.repository
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
@@ -14,6 +19,7 @@ class BooksRepositoryImpl(
     private val booksLocalDataSource: BooksLocalDataSource,
 ) : BooksRepository {
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
+    override val allUserLists: Flow<List<BookList>> = booksLocalDataSource.allUserLists
 
     private var initializedBooksThisSession: Boolean = false
 
@@ -35,21 +41,25 @@ class BooksRepositoryImpl(
         fetchAndCacheBooks(userId = userId)
     }
 
-    private suspend fun fetchAndCacheBooks(userId: Int) {
-        val fetchedBooks: List<Book> = booksRemoteDataSource.initializeBooks(userId = userId)
+    private suspend fun fetchAndCacheBooks(userId: Int) = withContext(Dispatchers.IO) {
+        val booksDeferred = async { booksRemoteDataSource.initializeBooks(userId = userId) }
+        val listsDeferred = async { booksRemoteDataSource.fetchUserLists(userId = userId) }
+
+        val fetchedBooks = booksDeferred.await()
+        val fetchedLists = listsDeferred.await()
 
         booksLocalDataSource.cacheBooks(books = fetchedBooks)
 
-        val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }
+        val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }.toSet()
 
-        val locallyStoredUserBookIds = books
-            .firstOrNull()
-            ?.mapNotNull { it.userBook?.id } ?: emptyList()
+        val locallyStoredUserBookIds = booksLocalDataSource.getAllUserBookIds()
 
         val userBookIdsToRemove: List<Int> = locallyStoredUserBookIds
             .filterNot { it in fetchedBookUserBookIds }
 
         booksLocalDataSource.removeUserBooksById(ids = userBookIdsToRemove)
+
+        booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
     }
 
     override suspend fun cacheBook(book: Book) {
@@ -106,5 +116,23 @@ class BooksRepositoryImpl(
             userBook = userBook,
             newEditionId = newEditionId,
         )
+    }
+
+    override suspend fun markEditionAsOwned(edition: BookEdition): ListBook {
+        return booksRemoteDataSource.markEditionAsOwned(edition = edition)
+    }
+
+    override suspend fun getListBookByEditionId(editionId: Int): ListBook {
+        return booksLocalDataSource.getOwnedListBookByEditionId(editionId = editionId)
+    }
+
+    override suspend fun removeListBook(book: ListBook) {
+        val updatedList = booksRemoteDataSource.removeListBook(book = book)
+
+        booksLocalDataSource.cacheUserBookLists(lists = listOf(updatedList))
+    }
+
+    override suspend fun cacheListBook(book: ListBook) {
+        booksLocalDataSource.cacheListBook(book = book)
     }
 }

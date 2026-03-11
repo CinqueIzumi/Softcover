@@ -6,11 +6,13 @@ import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 
 data class BookDetailUiState(
-    val loading: Boolean = true,
+    val loadingBookDetails: Boolean = true,
     val book: Book? = null,
     val fabMenuExpanded: Boolean = false,
     val showEditEditionSheet: Boolean = false,
     val showUpdateProgressSheet: Boolean = false,
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+
+    val settingEditionOwned: Boolean = false,
 ) : UiState

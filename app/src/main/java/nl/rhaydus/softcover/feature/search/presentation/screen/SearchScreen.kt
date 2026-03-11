@@ -36,6 +36,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
@@ -223,6 +224,14 @@ class SearchScreen : Screen {
                     .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
+                book.seriesText?.let { seriesText ->
+                    Text(
+                        text = seriesText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
                 Text(
                     text = book.title,
                     style = MaterialTheme.typography.bodyLarge,
@@ -361,6 +370,11 @@ private fun SearchScreenPreview() {
                         title = "Last to Leave the Room",
                         defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2023),
                         rating = 3.7,
+                        bookSeries = BookSeries(
+                            id = 1,
+                            name = "Starling",
+                            amountOfBooks = 20,
+                        ),
                     ),
                     PreviewData.baseBook.copy(
                         title = "The Last to Leave",
@@ -368,6 +382,12 @@ private fun SearchScreenPreview() {
                         authors = listOf(PreviewData.baseAuthor.copy(name = "Erica Lee")),
                         rating = 4.2,
                         userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
+                        bookSeries = BookSeries(
+                            id = 1,
+                            name = "Starling",
+                            amountOfBooks = 20,
+                        ),
+                        positionInSeries = 2,
                     ),
                     PreviewData.baseBook.copy(
                         title = "Last One to Leave",

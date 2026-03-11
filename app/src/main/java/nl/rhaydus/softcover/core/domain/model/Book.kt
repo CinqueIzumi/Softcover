@@ -13,6 +13,8 @@ data class Book(
     val coverUrl: String,
     val authors: List<Author>,
     val usersCount: Int,
+    val bookSeries: BookSeries?,
+    val positionInSeries: Int?,
 
     val userBook: UserBook?,
     val userBookRead: UserBookRead?,
@@ -27,5 +29,16 @@ data class Book(
             val matchingEdition = editions.firstOrNull { it.id == userEditionId }
 
             return matchingEdition ?: defaultEdition ?: editions.first()
+        }
+
+    val seriesText: String?
+        get() {
+            val series = bookSeries ?: return null
+
+            return if (positionInSeries == null) {
+                series.name
+            } else {
+                "#$positionInSeries of ${series.amountOfBooks} in ${series.name}"
+            }
         }
 }

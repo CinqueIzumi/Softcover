@@ -1,0 +1,9 @@
+fragment ListFragment on lists {
+    id
+    name
+    slug
+
+    list_books {
+        ...ListBookFragment
+    }
+}

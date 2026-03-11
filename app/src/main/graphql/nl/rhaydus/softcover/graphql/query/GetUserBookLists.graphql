@@ -1,0 +1,7 @@
+query GetUserBookLists {
+    me {
+        lists {
+            ...ListFragment
+        }
+    }
+}

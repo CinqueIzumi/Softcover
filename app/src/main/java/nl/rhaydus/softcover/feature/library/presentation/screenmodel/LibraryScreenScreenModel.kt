@@ -4,6 +4,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
@@ -22,6 +23,7 @@ class LibraryScreenScreenModel(
     private val getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase,
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
+    private val getAllUserListsUseCase: GetAllUserListsUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryInitializer>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
@@ -37,6 +39,7 @@ class LibraryScreenScreenModel(
         getDidNotFinishUserBooksUseCase = getDidNotFinishUserBooksUseCase,
         mainDispatcher = appDispatchers.main,
         refreshUserBooksUseCase = refreshUserBooksUseCase,
+        getAllUserListsUseCase = getAllUserListsUseCase,
         coroutineScope = screenModelScope,
     )
 

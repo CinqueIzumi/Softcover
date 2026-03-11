@@ -1,6 +1,7 @@
 fragment EditionFragment on editions {
     id
     title
+    book_id
     contributions {
         author {
             name

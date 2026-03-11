@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 
@@ -28,6 +29,7 @@ class BookDetailScreenScreenModel(
     private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
+    private val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
@@ -47,6 +49,7 @@ class BookDetailScreenScreenModel(
         removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
+        setEditionAsOwnedUseCase = setEditionAsOwnedUseCase,
     )
 
     init {

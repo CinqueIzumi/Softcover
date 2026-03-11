@@ -1,0 +1,8 @@
+package nl.rhaydus.softcover.core.domain.model
+
+data class BookList(
+    val id: Int,
+    val name: String,
+    val slug: String,
+    val books: List<ListBook>,
+)

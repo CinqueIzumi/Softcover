@@ -44,6 +44,7 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
@@ -75,6 +76,9 @@ object LibraryScreen : Screen {
             },
             onNavigateToSearch = {
                 navigator.parent?.push(item = SearchScreen())
+            },
+            onEditionClick = {
+                navigator.parent?.push(item = BookDetailScreen(id = it.bookId))
             }
         )
     }
@@ -85,6 +89,7 @@ object LibraryScreen : Screen {
         state: LibraryUiState,
         runAction: (LibraryAction) -> Unit,
         onBookClick: (Book) -> Unit,
+        onEditionClick: (BookEdition) -> Unit,
         onNavigateToSearch: () -> Unit,
     ) {
         val tabs = LibraryStatusTab.entries
@@ -148,69 +153,130 @@ object LibraryScreen : Screen {
                         state = state.pagerState,
                         modifier = pagerModifier,
                     ) { page ->
-                        val books = when (tabs[page]) {
-                            LibraryStatusTab.ALL -> state.allBooks
-                            LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooks
-                            LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooks
-                            LibraryStatusTab.READ -> state.readBooks
-                            LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooks
-                        }
+                        val currentTab: LibraryStatusTab = tabs[page]
 
-                        val gridState: LazyGridState = when (tabs[page]) {
-                            LibraryStatusTab.ALL -> state.allBooksGridState
-                            LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooksGridState
-                            LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooksGridState
-                            LibraryStatusTab.READ -> state.readBooksGridState
-                            LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooksGridState
-                        }
-
-                        if (books != null && books.isEmpty() && state.isLoading.not()) {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                            ) {
-                                Image(
-                                    painter = painterResource(R.drawable.illu_no_results),
-                                    contentDescription = "No images were found"
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Text(
-                                    text = "No books were found in your ${tabs[page].label} list. Start by adding new books to this list.",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp),
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-
-                            return@HorizontalPager
-                        }
-
-                        if (books == null) return@HorizontalPager
-
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp),
-                            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            state = gridState,
-                        ) {
-                            items(books) { book ->
-                                BookEntry(
-                                    book = book,
-                                    onBookClick = onBookClick,
-                                )
-                            }
+                        if (currentTab == LibraryStatusTab.OWNED) {
+                            EditionList(
+                                state = state,
+                                onEditionClick = onEditionClick,
+                            )
+                        } else {
+                            BookList(
+                                statusTab = currentTab,
+                                state = state,
+                                onBookClick = onBookClick
+                            )
                         }
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun EditionList(
+        state: LibraryUiState,
+        onEditionClick: (BookEdition) -> Unit,
+    ) {
+        val editions = state.ownedEditions ?: return
+
+        if (editions.isEmpty() && state.isLoading.not()) {
+            EmptyListScreen(listName = LibraryStatusTab.OWNED.label)
+
+            return
+        }
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            state = state.ownedEditionsGridState,
+        ) {
+            items(editions) { edition ->
+                EditionEntry(
+                    edition = edition,
+                    onEditionClick = onEditionClick,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun BookList(
+        statusTab: LibraryStatusTab,
+        state: LibraryUiState,
+        onBookClick: (Book) -> Unit,
+    ) {
+        val books = when (statusTab) {
+            LibraryStatusTab.ALL -> state.allBooks
+            LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooks
+            LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooks
+            LibraryStatusTab.READ -> state.readBooks
+            LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooks
+            LibraryStatusTab.OWNED -> return
+        }
+
+        val gridState: LazyGridState = when (statusTab) {
+            LibraryStatusTab.ALL -> state.allBooksGridState
+            LibraryStatusTab.WANT_TO_READ -> state.wantToReadBooksGridState
+            LibraryStatusTab.CURRENTLY_READING -> state.currentlyReadingBooksGridState
+            LibraryStatusTab.READ -> state.readBooksGridState
+            LibraryStatusTab.DID_NOT_FINISH -> state.dnfBooksGridState
+            LibraryStatusTab.OWNED -> return
+        }
+
+        if (books != null && books.isEmpty() && state.isLoading.not()) {
+            EmptyListScreen(listName = statusTab.label)
+
+            return
+        }
+
+        if (books == null) return
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            state = gridState,
+        ) {
+            items(books) { book ->
+                BookEntry(
+                    book = book,
+                    onBookClick = onBookClick,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun EmptyListScreen(listName: String) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.illu_no_results),
+                contentDescription = "No images were found"
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "No books were found in your $listName list. Start by adding new books to this list.",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 
@@ -244,6 +310,37 @@ object LibraryScreen : Screen {
             )
         }
     }
+
+    @Composable
+    private fun EditionEntry(
+        edition: BookEdition,
+        onEditionClick: (BookEdition) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier.noRippleClickable(onClick = { onEditionClick(edition) })
+        ) {
+            EditionImage(
+                edition = edition,
+                modifier = Modifier.fillMaxWidth(),
+                isLoading = false,
+                defaultEdition = edition,
+            )
+
+            Text(
+                text = edition.title ?: "",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = edition.authors.map { it.name }.firstOrNull().toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
 }
 
 @StandardPreview
@@ -261,6 +358,7 @@ private fun LibraryScreenPreview() {
             onBookClick = {},
             runAction = {},
             onNavigateToSearch = {},
+            onEditionClick = {},
         )
     }
 }
@@ -277,6 +375,7 @@ private fun LibraryEmptyScreenPreview() {
             onBookClick = {},
             runAction = {},
             onNavigateToSearch = {},
+            onEditionClick = {},
         )
     }
 }

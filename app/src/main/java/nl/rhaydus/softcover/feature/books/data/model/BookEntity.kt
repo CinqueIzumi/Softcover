@@ -1,20 +1,12 @@
 package nl.rhaydus.softcover.feature.books.data.model
 
-import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
-@Entity(
-    tableName = "books",
-    indices = [
-        Index(value = ["userBook_id"], unique = true),
-    ]
-)
+@Entity(tableName = "books")
 @Serializable
 data class BookEntity(
-    // region book
     @PrimaryKey val id: Int,
     val title: String,
     val defaultEditionId: Int?,
@@ -23,11 +15,6 @@ data class BookEntity(
     val releaseYear: Int,
     val coverUrl: String,
     val usersCount: Int,
-    // endregion
-
-    @Embedded(prefix = "userBook_")
-    val userBook: UserBookEntity?,
-
-    @Embedded(prefix = "userBookRead_")
-    val userBookReadEntity: UserBookReadEntity?,
+    val positionInSeries: Int?,
+    val seriesId: Int?,
 )

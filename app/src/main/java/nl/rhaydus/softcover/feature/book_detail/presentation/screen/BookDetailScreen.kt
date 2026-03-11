@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
@@ -59,6 +60,7 @@ import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
@@ -79,6 +81,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAc
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnFabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
@@ -193,7 +196,7 @@ class BookDetailScreen(
                 item {
                     CoverImageSection(
                         edition = state.book?.currentEdition,
-                        isLoading = state.loading,
+                        isLoading = state.loadingBookDetails,
                         fallBackEdition = state.book?.defaultEdition
                     )
                 }
@@ -203,6 +206,15 @@ class BookDetailScreen(
                 item { Spacer(modifier = Modifier.height(16.dp)) }
 
                 item { ReviewsPagesReleaseDateSection(state = state) }
+
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+
+                item {
+                    EditionOwnedSection(
+                        state = state,
+                        runAction = runAction
+                    )
+                }
 
                 item { Spacer(modifier = Modifier.height(16.dp)) }
 
@@ -282,6 +294,49 @@ class BookDetailScreen(
         }
     }
 
+    @Composable
+    private fun EditionOwnedSection(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        val edition = state.book?.currentEdition ?: return
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shimmer(isLoading = state.loadingBookDetails),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            val leadingIcon: @Composable (() -> Unit)? = when (edition.owned) {
+                true -> {
+                    {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_check),
+                            contentDescription = "Check icon"
+                        )
+                    }
+                }
+
+                false -> null
+            }
+
+            val chipLabel = when (edition.owned) {
+                true -> "Owned"
+                false -> "Mark as owned"
+            }
+
+            FilterChip(
+                selected = edition.owned,
+                enabled = state.settingEditionOwned.not(),
+                onClick = {
+                    runAction(OnEditionOwnedToggleAction(edition = edition))
+                },
+                leadingIcon = leadingIcon,
+                label = { Text(text = chipLabel) },
+            )
+        }
+    }
+
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     private fun FloatingActionButtonMenu(
@@ -289,6 +344,8 @@ class BookDetailScreen(
         runAction: (BookDetailAction) -> Unit,
     ) {
         val userStatus = state.book?.status ?: return
+
+        if (userStatus == BookStatus.None) return
 
         FloatingActionButtonMenu(
             expanded = state.fabMenuExpanded,
@@ -305,33 +362,22 @@ class BookDetailScreen(
                 }
             }
         ) {
-            FloatingActionButtonMenuItem(
-                onClick = {
-                    runAction(OnMarkBookAsReadClickAction(book = state.book))
-                },
-                text = { Text(text = "Mark as Read") },
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_bookmark_check),
-                        contentDescription = "Mark book as read icon"
-                    )
-                }
-            )
-
-            if (userStatus == BookStatus.Reading) {
+            if (userStatus != BookStatus.Read) {
                 FloatingActionButtonMenuItem(
                     onClick = {
-                        runAction(OnShowEditEditionSheetClickAction())
+                        runAction(OnMarkBookAsReadClickAction(book = state.book))
                     },
-                    text = { Text(text = "Change edition") },
+                    text = { Text(text = "Mark as Read") },
                     icon = {
                         Icon(
-                            painter = painterResource(R.drawable.ic_library_books),
-                            contentDescription = "Edition icon"
+                            painter = painterResource(R.drawable.ic_bookmark_check),
+                            contentDescription = "Mark book as read icon"
                         )
                     }
                 )
+            }
 
+            if (userStatus == BookStatus.Reading) {
                 FloatingActionButtonMenuItem(
                     onClick = {
                         runAction(OnShowUpdateProgressSheetClickAction())
@@ -345,6 +391,19 @@ class BookDetailScreen(
                     }
                 )
             }
+
+            FloatingActionButtonMenuItem(
+                onClick = {
+                    runAction(OnShowEditEditionSheetClickAction())
+                },
+                text = { Text(text = "Change edition") },
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_library_books),
+                        contentDescription = "Edition icon"
+                    )
+                }
+            )
 
             FloatingActionButtonMenuItem(
                 onClick = {
@@ -414,12 +473,36 @@ class BookDetailScreen(
         item {
             Spacer(modifier = Modifier.height(12.dp))
 
+            state.book?.seriesText?.let { seriesText ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Surface(
+                        tonalElevation = 2.dp,
+                        shape = RoundedCornerShape(4.dp),
+                    ) {
+                        Text(
+                            text = seriesText,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+
             Text(
                 text = "${state.book?.title}",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .shimmer(isLoading = state.loading)
+                    .shimmer(isLoading = state.loadingBookDetails)
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center,
             )
@@ -434,7 +517,7 @@ class BookDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .shimmer(isLoading = state.loading),
+                    .shimmer(isLoading = state.loadingBookDetails),
                 textAlign = TextAlign.Center,
             )
         }
@@ -447,7 +530,7 @@ class BookDetailScreen(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
                 .padding(horizontal = 16.dp)
-                .shimmer(isLoading = state.loading),
+                .shimmer(isLoading = state.loadingBookDetails),
         ) {
             Row(
                 modifier = Modifier.weight(1f),
@@ -530,7 +613,7 @@ class BookDetailScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxSize()
-                    .shimmer(isLoading = state.loading)
+                    .shimmer(isLoading = state.loadingBookDetails)
             )
         }
     }
@@ -540,7 +623,7 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        if (state.loading) return
+        if (state.loadingBookDetails) return
 
         val book = state.book ?: return
 
@@ -655,7 +738,7 @@ class BookDetailScreen(
     ) {
         val userBook = state.book?.userBook ?: return
 
-        Column() {
+        Column {
             Surface(
                 shape = RoundedCornerShape(12.dp),
                 tonalElevation = 4.dp,
@@ -672,7 +755,9 @@ class BookDetailScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    when (val wantToReadDate = userBook.getWantToReadDateString(style = state.dateStyle)) {
+                    val wantToReadDate = userBook.getWantToReadDateString(style = state.dateStyle)
+
+                    when (wantToReadDate) {
                         null -> {
                             FallBackDateText(
                                 userBook = userBook,
@@ -831,6 +916,12 @@ private fun BookDetailScreenReadingPreview() {
                     currentPage = 20,
                     progress = 0.8f,
                 ),
+                bookSeries = BookSeries(
+                    id = 1,
+                    name = "The Maze Runner",
+                    amountOfBooks = 3,
+                ),
+                positionInSeries = 2,
             )
 
             BookDetailScreen(
@@ -838,7 +929,7 @@ private fun BookDetailScreenReadingPreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
@@ -865,7 +956,7 @@ private fun BookDetailScreenNonePreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
@@ -892,7 +983,7 @@ private fun BookDetailScreenDnfPreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
@@ -919,7 +1010,7 @@ private fun BookDetailScreenWantToReadPreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
@@ -946,7 +1037,7 @@ private fun BookDetailScreenReadPreview() {
             ).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loading = false,
+                    loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},

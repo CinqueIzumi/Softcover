@@ -6,4 +6,5 @@ enum class LibraryStatusTab(val label: String) {
     CURRENTLY_READING("Currently Reading"),
     READ("Read"),
     DID_NOT_FINISH("Did Not Finish"),
+    OWNED("Owned"),
 }
