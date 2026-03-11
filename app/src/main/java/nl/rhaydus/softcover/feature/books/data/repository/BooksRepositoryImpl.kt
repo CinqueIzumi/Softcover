@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.feature.books.data.repository
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -39,25 +41,25 @@ class BooksRepositoryImpl(
         fetchAndCacheBooks(userId = userId)
     }
 
-    private suspend fun fetchAndCacheBooks(userId: Int) {
-        val fetchedBooks: List<Book> = booksRemoteDataSource.initializeBooks(userId = userId)
+    private suspend fun fetchAndCacheBooks(userId: Int) = withContext(Dispatchers.IO) {
+        val booksDeferred = async { booksRemoteDataSource.initializeBooks(userId = userId) }
+        val listsDeferred = async { booksRemoteDataSource.fetchUserLists(userId = userId) }
+
+        val fetchedBooks = booksDeferred.await()
+        val fetchedLists = listsDeferred.await()
 
         booksLocalDataSource.cacheBooks(books = fetchedBooks)
 
-        val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }
+        val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }.toSet()
 
-        val locallyStoredUserBookIds = books
-            .firstOrNull()
-            ?.mapNotNull { it.userBook?.id } ?: emptyList()
+        val locallyStoredUserBookIds = booksLocalDataSource.getAllUserBookIds()
 
         val userBookIdsToRemove: List<Int> = locallyStoredUserBookIds
             .filterNot { it in fetchedBookUserBookIds }
 
         booksLocalDataSource.removeUserBooksById(ids = userBookIdsToRemove)
 
-        val lists = booksRemoteDataSource.fetchUserLists(userId = userId)
-
-        booksLocalDataSource.cacheUserBookLists(lists = lists)
+        booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
     }
 
     override suspend fun cacheBook(book: Book) {

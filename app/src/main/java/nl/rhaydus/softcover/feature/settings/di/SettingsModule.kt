@@ -10,7 +10,6 @@ import nl.rhaydus.softcover.feature.settings.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.feature.settings.data.datastore.appSettings
 import nl.rhaydus.softcover.feature.settings.data.repository.SettingsRepositoryImpl
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdAsFlowUseCase
@@ -64,12 +63,6 @@ val settingsModule = module {
     factory { ThemeConfigurationCollector() } bind SettingsInitializer::class
 
     factory { DateStyleCollector() } bind SettingsInitializer::class
-
-    factory {
-        GetApiKeyUseCase(
-            settingsRepository = get()
-        )
-    }
 
     factory {
         GetUserIdUseCase(getUserIdAsFlowUseCase = get())

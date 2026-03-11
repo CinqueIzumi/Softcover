@@ -23,10 +23,6 @@ class SettingsRepositoryImpl(
         settingsLocalDataSource.updateApiKey(key = key)
     }
 
-    override suspend fun getApiKey(): String {
-        return settingsLocalDataSource.getApiKey()
-    }
-
     override fun getUserId(): Flow<Int> {
         return settingsLocalDataSource.getUserId()
     }

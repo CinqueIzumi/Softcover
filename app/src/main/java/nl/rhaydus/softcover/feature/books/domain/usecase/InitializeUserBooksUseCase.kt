@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.feature.books.domain.usecase
 
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
+
 
 class InitializeUserBooksUseCase(
     private val booksRepository: BooksRepository,

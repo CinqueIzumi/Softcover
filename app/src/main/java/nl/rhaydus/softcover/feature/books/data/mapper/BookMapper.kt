@@ -24,13 +24,24 @@ import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
+import nl.rhaydus.softcover.fragment.BookContentFragment.Book_series.Companion.bookSeriesFragment
+import nl.rhaydus.softcover.fragment.BookContentFragment.Default_physical_edition.Companion.editionFragment
+import nl.rhaydus.softcover.fragment.BookContentFragment.Edition.Companion.editionFragment
 import nl.rhaydus.softcover.fragment.BookFragment
+import nl.rhaydus.softcover.fragment.BookFragment.Canonical.Companion.bookContentFragment
+import nl.rhaydus.softcover.fragment.BookFragment.Companion.bookContentFragment
 import nl.rhaydus.softcover.fragment.BookSeriesFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.ListBookFragment
+import nl.rhaydus.softcover.fragment.ListBookFragment.Book.Companion.bookFragment
+import nl.rhaydus.softcover.fragment.ListBookFragment.Edition.Companion.editionFragment
 import nl.rhaydus.softcover.fragment.ListFragment
+import nl.rhaydus.softcover.fragment.ListFragment.List_book.Companion.listBookFragment
 import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Book.Companion.bookFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Reading_journal.Companion.readingJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read.Companion.userBookReadFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import kotlin.math.roundToInt
 
@@ -60,7 +71,7 @@ fun EditionFragment.toBookEdition(): BookEdition {
 }
 
 fun ListFragment.toBookList(): BookList {
-    val listBooks = list_books.mapNotNull { it.listBookFragment.toListBook() }
+    val listBooks = list_books.mapNotNull { it.listBookFragment()?.toListBook() }
 
     return BookList(
         id = id,
@@ -71,18 +82,19 @@ fun ListFragment.toBookList(): BookList {
 }
 
 fun ListBookFragment.toListBook(): ListBook? {
-    val edition = edition?.editionFragment?.toBookEdition() ?: return null
+    val edition = edition?.editionFragment()?.toBookEdition() ?: return null
+    val book = book.bookFragment()?.toBook() ?: return null
 
     return ListBook(
-        book = book.bookFragment.toBook(),
+        book = book,
         edition = edition,
         listId = list_id,
         listBookId = id
     )
 }
 
-fun UserBookFragment.toBook(): Book {
-    return book.bookFragment.toBook(userBookFragment = this)
+fun UserBookFragment.toBook(): Book? {
+    return book.bookFragment()?.toBook(userBookFragment = this)
 }
 
 fun ReadingJournalFragment.toReadingJournal(): ReadingJournal {
@@ -95,8 +107,8 @@ fun ReadingJournalFragment.toReadingJournal(): ReadingJournal {
 private fun UserBookFragment?.toUserBook(): UserBook? {
     if (this == null) return null
 
-    val journals = reading_journals.map {
-        it.readingJournalFragment.toReadingJournal()
+    val journals = reading_journals.mapNotNull {
+        it.readingJournalFragment()?.toReadingJournal()
     }
 
     return UserBook(
@@ -130,19 +142,21 @@ private fun UserBookReadFragment?.toUserBookRead(): UserBookRead? {
 fun BookFragment.toBook(
     userBookFragment: UserBookFragment? = null,
 ): Book {
-    val bookContent = canonical?.bookContentFragment ?: this.bookContentFragment
+    val bookContent = canonical?.bookContentFragment()
+        ?: this.bookContentFragment()
+        ?: throw Exception("No book content was found")
 
     val rating = ((bookContent.rating ?: 0.0) * 10).roundToInt() / 10.0
     val userBookReadFragment = userBookFragment
         ?.user_book_reads
         ?.firstOrNull()
-        ?.userBookReadFragment
+        ?.userBookReadFragment()
 
     return Book(
         id = bookContent.id,
         title = bookContent.title ?: "",
-        editions = bookContent.editions.map { userBookEdition ->
-            userBookEdition.editionFragment.toBookEdition()
+        editions = bookContent.editions.mapNotNull { userBookEdition ->
+            userBookEdition.editionFragment()?.toBookEdition()
         },
         description = bookContent.description ?: "",
         rating = rating,
@@ -157,12 +171,13 @@ fun BookFragment.toBook(
                 id = id,
             )
         },
-        defaultEdition = bookContent.default_physical_edition?.editionFragment?.toBookEdition(),
+        defaultEdition = bookContent.default_physical_edition?.editionFragment()?.toBookEdition(),
         userBook = userBookFragment.toUserBook(),
         userBookRead = userBookReadFragment.toUserBookRead(),
         usersCount = bookContent.users_count,
-        bookSeries = bookContent.book_series.firstOrNull()?.bookSeriesFragment?.toBookSeries(),
-        positionInSeries = bookContent.book_series.firstOrNull()?.bookSeriesFragment?.position?.toInt(),
+        bookSeries = bookContent.book_series.firstOrNull()?.bookSeriesFragment()?.toBookSeries(),
+        positionInSeries = bookContent.book_series.firstOrNull()
+            ?.bookSeriesFragment()?.position?.toInt(),
     )
 }
 

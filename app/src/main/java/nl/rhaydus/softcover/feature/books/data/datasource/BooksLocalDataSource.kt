@@ -14,6 +14,8 @@ interface BooksLocalDataSource {
     val allUserBooks: Flow<List<Book>>
     val allUserLists: Flow<List<BookList>>
 
+    suspend fun getAllUserBookIds(): List<Int>
+
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
     suspend fun cacheBook(book: Book)
@@ -46,6 +48,10 @@ class BooksLocalDataSourceImpl(
             .distinctUntilChanged()
             .map { lists -> lists.map { it.toModel() } }
 
+    override suspend fun getAllUserBookIds(): List<Int> {
+        return dao.getAllUserBookIds()
+    }
+
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return dao
             .getBooksByStatus(statusCode = status.code)
@@ -58,17 +64,15 @@ class BooksLocalDataSourceImpl(
     }
 
     override suspend fun cacheBooks(books: List<Book>) {
-        books.forEach { dao.cacheBook(book = it) }
+        dao.cacheBooks(books = books)
     }
 
     override suspend fun removeUserBooksById(ids: List<Int>) {
-        ids.forEach { userBookId ->
-            dao.deleteAllForUserBookId(userBookId = userBookId)
-        }
+        dao.deleteUserBooksByIds(ids)
     }
 
     override suspend fun cacheUserBookLists(lists: List<BookList>) {
-        lists.forEach { dao.cacheBookList(bookList = it) }
+        dao.cacheBookLists(lists = lists)
     }
 
     override suspend fun cacheListBook(book: ListBook) {

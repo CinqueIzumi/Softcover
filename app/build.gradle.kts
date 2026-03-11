@@ -69,7 +69,6 @@ dependencies {
 
     // Apollo (graph ql communication)
     implementation(libs.apollo)
-    implementation(libs.apollo.cache)
 
     // Datastore
     implementation(libs.dataStore)
@@ -117,5 +116,8 @@ apollo {
         mapScalar("timestamp", "kotlin.String")
         mapScalar("timestamptz", "kotlin.String")
         mapScalar("smallint", "kotlin.Int")
+
+        codegenModels.set("responseBased")
+        generateMethods.set(listOf("dataClass"))
     }
 }

@@ -114,6 +114,11 @@ interface BookDao {
 
     // region Data insertions
     @Transaction
+    suspend fun cacheBooks(books: List<Book>) {
+        books.forEach { cacheBook(it) }
+    }
+
+    @Transaction
     suspend fun cacheBook(book: Book) {
         book.bookSeries?.let { series ->
             insertBookSeries(bookSeries = series.toEntity())
@@ -153,6 +158,11 @@ interface BookDao {
 
         clearEditionAuthors(book.id)
         insertEditionAuthors(book.toEditionAuthorRefs(authorIdsByName))
+    }
+
+    @Transaction
+    suspend fun cacheBookLists(lists: List<BookList>) {
+        lists.forEach { cacheBookList(it) }
     }
 
     @Transaction
@@ -267,6 +277,13 @@ interface BookDao {
 
     @Query("DELETE FROM list_books WHERE listId = :bookListId")
     suspend fun clearBookList(bookListId: Int)
+
+    @Transaction
+    suspend fun deleteUserBooksByIds(ids: List<Int>) {
+        ids.forEach { id ->
+            deleteAllForUserBookId(id)
+        }
+    }
 
     @Transaction
     suspend fun deleteAllForUserBookId(userBookId: Int) {
