@@ -250,7 +250,7 @@ object OnboardingScreen : Screen {
             itemResource = R.drawable.illu_sign_up,
             illustrationContentDescription = "Illustration containing someone reading a book.",
             title = "Hardcover",
-            description = "To get started within Softcover, you'll need your Hardcover API key. This allows the app to sync your reading progress.",
+            description = "To get started with Softcover, you'll need a Hardcover account to sync your reading progress.",
             buttonLabel = "Continue",
             buttonOnClick = onContinueClick,
         )
@@ -291,7 +291,7 @@ object OnboardingScreen : Screen {
             Spacer(modifier = Modifier.height(16.dp))
 
             val annotatedString = buildAnnotatedString {
-                append("For syncing your reading progress. This key can be found ")
+                append("For syncing your reading progress. This key can be found on the website ")
 
                 pushStringAnnotation(
                     tag = "url",
@@ -307,6 +307,8 @@ object OnboardingScreen : Screen {
                     append("here")
                 }
 
+                append(".")
+
                 pop()
             }
 
@@ -314,6 +316,13 @@ object OnboardingScreen : Screen {
                 annotatedText = annotatedString,
                 style = MaterialTheme.typography.labelSmall,
                 handleUrlClick = openUrl,
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "If you already have the Hardcover app installed, this key can be found within the app as well. Profile → Settings → Hardcover API.",
+                style = MaterialTheme.typography.labelSmall,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
