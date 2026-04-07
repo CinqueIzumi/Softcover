@@ -141,7 +141,7 @@ private fun UserBookReadFragment?.toUserBookRead(): UserBookRead? {
 
 fun BookFragment.toBook(
     userBookFragment: UserBookFragment? = null,
-): Book {
+): Book? {
     val bookContent = canonical?.bookContentFragment()
         ?: this.bookContentFragment()
         ?: throw Exception("No book content was found")
@@ -152,12 +152,18 @@ fun BookFragment.toBook(
         ?.firstOrNull()
         ?.userBookReadFragment()
 
+    val editions = bookContent.editions.mapNotNull { userBookEdition ->
+        userBookEdition.editionFragment()?.toBookEdition()
+    }
+
+    if (editions.isEmpty()) {
+        return null
+    }
+
     return Book(
         id = bookContent.id,
         title = bookContent.title ?: "",
-        editions = bookContent.editions.mapNotNull { userBookEdition ->
-            userBookEdition.editionFragment()?.toBookEdition()
-        },
+        editions = editions,
         description = bookContent.description ?: "",
         rating = rating,
         releaseYear = bookContent.release_year ?: -1,
