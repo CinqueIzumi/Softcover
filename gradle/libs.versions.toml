@@ -20,6 +20,11 @@ timberVersion = "5.0.1"
 koinVersion = "3.5.3"
 roomVersion = "2.7.2"
 splashVersion = "1.0.1"
+jUnitVersion = "5.11.4"
+kotestVersion = "5.9.1"
+mockkVersion = "1.13.17"
+coroutinesTestVersion = "1.10.2"
+turbineVersion = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -52,6 +57,13 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVers
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
 material3 = {group  = "com.google.android.material", name = "material", version.ref = "material3Version"}
 androidx-splash = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashVersion" }
+junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "jUnitVersion" }
+junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "jUnitVersion" }
+junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "jUnitVersion" }
+kotest = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotestVersion" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTestVersion" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbineVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

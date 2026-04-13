@@ -101,6 +101,19 @@ dependencies {
 
     // Splash screen
     implementation(libs.androidx.splash)
+
+    // Unit test dependencies
+    testImplementation(libs.junit.params)
+    testImplementation(libs.junit.engine)
+    testImplementation(libs.junit.api)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotest)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.turbine)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 apollo {
