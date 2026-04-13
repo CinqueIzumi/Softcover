@@ -41,3 +41,6 @@ output-metadata.json
 
 # Temp file for build system
 *.salive
+
+# Claude
+.claude/settings.local.json

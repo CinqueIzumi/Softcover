@@ -1,0 +1,2 @@
+- [Softcover Test Conventions](project_test_conventions.md) — JUnit 5 + mockk + kotest + Turbine, AAA markers, 3-line stub rule, mockk domain models, test directory layout
+- [MockK only — no mock servers](feedback_no_mock_servers.md) — never propose MockServer/WireMock; mock only the public surface actually consumed via MockK (mockkStatic for extensions is fine)
