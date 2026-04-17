@@ -67,6 +67,7 @@ class BookMapperTest {
         publisher: String? = "Publisher",
         title: String? = "Edition Title",
         url: String? = "https://example.com/cover.jpg",
+        localImagePath: String? = null,
         isbn10: String? = "1234567890",
         pages: Int? = 300,
         authors: List<Author> = emptyList(),
@@ -93,6 +94,10 @@ class BookMapperTest {
         every {
             this@mockk.url
         } returns url
+
+        every {
+            this@mockk.localImagePath
+        } returns localImagePath
 
         every {
             this@mockk.isbn10
@@ -385,6 +390,7 @@ class BookMapperTest {
         publisher: String? = "Publisher",
         title: String? = "Edition Title",
         url: String? = "https://example.com/cover.jpg",
+        localImagePath: String? = null,
         isbn10: String? = "1234567890",
         pages: Int? = 300,
         releaseYear: Int = 2020,
@@ -395,6 +401,7 @@ class BookMapperTest {
         publisher = publisher,
         title = title,
         url = url,
+        localImagePath = localImagePath,
         isbn10 = isbn10,
         pages = pages,
         releaseYear = releaseYear,
@@ -934,6 +941,30 @@ class BookMapperTest {
             result.isbn10 shouldBe null
             result.pages shouldBe null
         }
+
+        @Test
+        fun `passes through non-null localImagePath to entity`() {
+            // ----- Arrange -----
+            val edition = stubBookEdition(localImagePath = "/data/edition_images/10")
+
+            // ----- Act -----
+            val result = edition.toEntity()
+
+            // ----- Assert -----
+            result.localImagePath shouldBe "/data/edition_images/10"
+        }
+
+        @Test
+        fun `passes through null localImagePath to entity`() {
+            // ----- Arrange -----
+            val edition = stubBookEdition(localImagePath = null)
+
+            // ----- Act -----
+            val result = edition.toEntity()
+
+            // ----- Assert -----
+            result.localImagePath shouldBe null
+        }
     }
 
     @Nested
@@ -1272,6 +1303,36 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.authors shouldBe emptyList()
+        }
+
+        @Test
+        fun `passes through non-null localImagePath to model`() {
+            // ----- Arrange -----
+            val entity = stubBookEditionEntity(localImagePath = "/data/edition_images/10")
+
+            // ----- Act -----
+            val result = entity.toModel(
+                authors = emptyList(),
+                owned = false,
+            )
+
+            // ----- Assert -----
+            result.localImagePath shouldBe "/data/edition_images/10"
+        }
+
+        @Test
+        fun `passes through null localImagePath to model`() {
+            // ----- Arrange -----
+            val entity = stubBookEditionEntity(localImagePath = null)
+
+            // ----- Act -----
+            val result = entity.toModel(
+                authors = emptyList(),
+                owned = false,
+            )
+
+            // ----- Assert -----
+            result.localImagePath shouldBe null
         }
     }
 
@@ -2197,6 +2258,28 @@ class BookMapperTest {
             result.pages shouldBe 328
             result.releaseYear shouldBe 1949
             result.format shouldBe "Paperback"
+        }
+
+        @Test
+        fun `always sets localImagePath to null on the resulting BookEdition`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.localImagePath shouldBe null
         }
     }
 

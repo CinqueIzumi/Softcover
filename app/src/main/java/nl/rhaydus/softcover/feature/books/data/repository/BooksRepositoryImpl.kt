@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.books.data.repository
 
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -178,5 +179,12 @@ class BooksRepositoryImpl(
 
     override suspend fun cacheListBook(book: ListBook) {
         booksLocalDataSource.cacheListBook(book = book)
+    }
+
+    override suspend fun persistEditionImage(
+        editionId: Int,
+        source: File,
+    ) {
+        booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
     }
 }

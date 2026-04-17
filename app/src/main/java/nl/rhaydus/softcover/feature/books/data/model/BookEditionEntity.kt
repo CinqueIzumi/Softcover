@@ -12,6 +12,7 @@ data class BookEditionEntity(
     val publisher: String?,
     val title: String?,
     val url: String?,
+    val localImagePath: String?,
     val isbn10: String?,
     val pages: Int?,
     val releaseYear: Int,

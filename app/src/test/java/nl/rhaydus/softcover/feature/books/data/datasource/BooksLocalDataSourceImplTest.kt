@@ -5,6 +5,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
@@ -14,7 +15,10 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import java.io.File
+import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.feature.books.data.dao.BookDao
+import nl.rhaydus.softcover.feature.books.data.model.EditionLocalImagePath
 import nl.rhaydus.softcover.feature.books.data.mapper.toModel
 import nl.rhaydus.softcover.feature.books.data.model.AuthorEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
@@ -33,12 +37,17 @@ import org.junit.jupiter.api.Test
 class BooksLocalDataSourceImplTest {
 
     private lateinit var dao: BookDao
+    private lateinit var editionImageStorage: EditionImageStorage
     private lateinit var dataSource: BooksLocalDataSourceImpl
 
     @BeforeEach
     fun setUp() {
         dao = mockk(relaxed = true)
-        dataSource = BooksLocalDataSourceImpl(dao = dao)
+        editionImageStorage = mockk(relaxed = true)
+        dataSource = BooksLocalDataSourceImpl(
+            dao = dao,
+            editionImageStorage = editionImageStorage,
+        )
     }
 
     private fun stubBookEntity(id: Int = 1): BookEntity = BookEntity(
@@ -60,6 +69,7 @@ class BooksLocalDataSourceImplTest {
         publisher = null,
         title = null,
         url = null,
+        localImagePath = null,
         isbn10 = null,
         pages = null,
         releaseYear = 2020,
@@ -536,6 +546,8 @@ class BooksLocalDataSourceImplTest {
             // ----- Arrange -----
             val ids = listOf(10, 20, 30)
 
+            coEvery { dao.getBookIdByUserBookId(userBookId = any()) } returns null
+
             // ----- Act -----
             dataSource.removeUserBooksById(ids = ids)
 
@@ -556,6 +568,74 @@ class BooksLocalDataSourceImplTest {
             // ----- Assert -----
             coVerify {
                 dao.deleteUserBooksByIds(ids)
+            }
+        }
+
+        @Test
+        fun `deletes image files for each non-null localImagePath after DB removal`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 5
+            val bookId = 100
+            val imagePath = "/data/user/0/edition_images/10"
+
+            coEvery {
+                dao.getBookIdByUserBookId(userBookId = userBookId)
+            } returns bookId
+
+            coEvery {
+                dao.getLocalImagePathsByBookId(bookId = bookId)
+            } returns listOf(EditionLocalImagePath(id = 10, localImagePath = imagePath))
+
+            // ----- Act -----
+            dataSource.removeUserBooksById(ids = listOf(userBookId))
+
+            // ----- Assert -----
+            coVerifyOrder {
+                dao.getBookIdByUserBookId(userBookId = userBookId)
+                dao.getLocalImagePathsByBookId(bookId = bookId)
+                dao.deleteUserBooksByIds(listOf(userBookId))
+                editionImageStorage.delete(path = imagePath)
+            }
+        }
+
+        @Test
+        fun `does not call editionImageStorage delete for null localImagePath entries`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 7
+            val bookId = 200
+
+            coEvery {
+                dao.getBookIdByUserBookId(userBookId = userBookId)
+            } returns bookId
+
+            coEvery {
+                dao.getLocalImagePathsByBookId(bookId = bookId)
+            } returns listOf(EditionLocalImagePath(id = 20, localImagePath = null))
+
+            // ----- Act -----
+            dataSource.removeUserBooksById(ids = listOf(userBookId))
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                editionImageStorage.delete(path = any())
+            }
+        }
+
+        @Test
+        fun `skips editionImageStorage delete when getBookIdByUserBookId returns null`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 9
+
+            coEvery {
+                dao.getBookIdByUserBookId(userBookId = userBookId)
+            } returns null
+
+            // ----- Act -----
+            dataSource.removeUserBooksById(ids = listOf(userBookId))
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                editionImageStorage.delete(path = any())
             }
         }
     }
@@ -616,7 +696,7 @@ class BooksLocalDataSourceImplTest {
         @Test
         fun `delegates to DAO deleteAllUserBooksAndData`() = runTest {
             // ----- Arrange -----
-            // (dao is relaxed — no additional setup needed)
+            coEvery { dao.getAllLocalImagePaths() } returns emptyList()
 
             // ----- Act -----
             dataSource.removeAllBooks()
@@ -624,6 +704,135 @@ class BooksLocalDataSourceImplTest {
             // ----- Assert -----
             coVerify {
                 dao.deleteAllUserBooksAndData()
+            }
+        }
+
+        @Test
+        fun `deletes image files for each non-null path after DB removal`() = runTest {
+            // ----- Arrange -----
+            val path1 = "/data/user/0/edition_images/1"
+            val path2 = "/data/user/0/edition_images/2"
+
+            coEvery {
+                dao.getAllLocalImagePaths()
+            } returns listOf(
+                EditionLocalImagePath(id = 1, localImagePath = path1),
+                EditionLocalImagePath(id = 2, localImagePath = path2),
+            )
+
+            // ----- Act -----
+            dataSource.removeAllBooks()
+
+            // ----- Assert -----
+            coVerifyOrder {
+                dao.getAllLocalImagePaths()
+                dao.deleteAllUserBooksAndData()
+                editionImageStorage.delete(path = path1)
+                editionImageStorage.delete(path = path2)
+            }
+        }
+
+        @Test
+        fun `does not call editionImageStorage delete for null localImagePath entries`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                dao.getAllLocalImagePaths()
+            } returns listOf(EditionLocalImagePath(id = 3, localImagePath = null))
+
+            // ----- Act -----
+            dataSource.removeAllBooks()
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                editionImageStorage.delete(path = any())
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateEditionLocalImagePath {
+
+        @Test
+        fun `delegates to DAO with the given editionId and path`() = runTest {
+            // ----- Arrange -----
+            val editionId = 10
+            val path = "/data/user/0/edition_images/10"
+
+            // ----- Act -----
+            dataSource.updateEditionLocalImagePath(editionId = editionId, path = path)
+
+            // ----- Assert -----
+            coVerify {
+                dao.updateEditionLocalImagePath(editionId = editionId, path = path)
+            }
+        }
+
+        @Test
+        fun `delegates to DAO with a null path`() = runTest {
+            // ----- Arrange -----
+            val editionId = 20
+
+            // ----- Act -----
+            dataSource.updateEditionLocalImagePath(editionId = editionId, path = null)
+
+            // ----- Assert -----
+            coVerify {
+                dao.updateEditionLocalImagePath(editionId = editionId, path = null)
+            }
+        }
+    }
+
+    @Nested
+    inner class PersistEditionImage {
+
+        @Test
+        fun `skips copy and DAO update when storage already has the file`() = runTest {
+            // ----- Arrange -----
+            val editionId = 42
+            val source: File = mockk()
+
+            every {
+                editionImageStorage.exists(editionId = editionId)
+            } returns true
+
+            // ----- Act -----
+            dataSource.persistEditionImage(editionId = editionId, source = source)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                editionImageStorage.copyFrom(editionId = any(), source = any())
+            }
+
+            coVerify(exactly = 0) {
+                dao.updateEditionLocalImagePath(editionId = any(), path = any())
+            }
+        }
+
+        @Test
+        fun `copies the file and updates the DAO when storage does not have the file`() = runTest {
+            // ----- Arrange -----
+            val editionId = 55
+            val source: File = mockk()
+            val storedPath = "/data/user/0/edition_images/55"
+
+            every {
+                editionImageStorage.exists(editionId = editionId)
+            } returns false
+
+            every {
+                editionImageStorage.copyFrom(editionId = editionId, source = source)
+            } returns storedPath
+
+            // ----- Act -----
+            dataSource.persistEditionImage(editionId = editionId, source = source)
+
+            // ----- Assert -----
+            coVerify {
+                editionImageStorage.copyFrom(editionId = editionId, source = source)
+            }
+
+            coVerify {
+                dao.updateEditionLocalImagePath(editionId = editionId, path = storedPath)
             }
         }
     }

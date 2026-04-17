@@ -37,7 +37,7 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 12,
+    version = 13,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -59,6 +59,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_9_10)
                 .addMigrations(MIGRATION_10_11)
                 .addMigrations(MIGRATION_11_12)
+                .addMigrations(MIGRATION_12_13)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -399,6 +400,26 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         WHERE id NOT IN (SELECT authorId FROM book_author_cross_ref)
                         AND id NOT IN (SELECT authorId FROM edition_author_cross_ref)
                     """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE book_editions ADD COLUMN localImagePath TEXT DEFAULT NULL")
+
+                db.execSQL("DROP VIEW IF EXISTS book_edition_view")
+                db.execSQL(
+                    "CREATE VIEW `book_edition_view` AS SELECT${' '}\n" +
+                        "        edition.*,\n" +
+                        "        EXISTS(\n" +
+                        "            SELECT 1\n" +
+                        "            FROM list_books lb\n" +
+                        "            JOIN book_lists bl ON bl.id = lb.listId\n" +
+                        "            WHERE lb.editionId = edition.id\n" +
+                        "            AND bl.slug = 'owned'\n" +
+                        "        ) AS isOwned\n" +
+                        "    FROM book_editions edition"
                 )
             }
         }
