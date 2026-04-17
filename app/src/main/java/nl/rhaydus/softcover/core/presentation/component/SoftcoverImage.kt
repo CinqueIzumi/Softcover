@@ -9,14 +9,14 @@ import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 
 @Composable
 fun SoftcoverImage(
-    url: String?,
+    model: Any?,
     contentDescription: String,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
 ) {
     SubcomposeAsyncImage(
-        model = url,
+        model = model,
         contentDescription = contentDescription,
         modifier = modifier.shimmer(isLoading = isLoading),
         loading = { Box(modifier = Modifier.shimmer()) },

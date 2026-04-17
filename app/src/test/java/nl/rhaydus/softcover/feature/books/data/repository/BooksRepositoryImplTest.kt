@@ -1198,4 +1198,27 @@ class BooksRepositoryImplTest {
             }
         }
     }
+
+    @Nested
+    inner class PersistEditionImage {
+
+        @Test
+        fun `delegates to local data source with the given editionId and source`() = runTest {
+            // ----- Arrange -----
+            val editionId = 42
+            val source: java.io.File = mockk()
+
+            coEvery {
+                booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
+            } returns Unit
+
+            // ----- Act -----
+            repository.persistEditionImage(editionId = editionId, source = source)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
+            }
+        }
+    }
 }

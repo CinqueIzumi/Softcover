@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.SetEditionAsOwnedUseCase
@@ -40,7 +41,10 @@ val booksModule = module {
     }
 
     single<BooksLocalDataSource> {
-        BooksLocalDataSourceImpl(dao = get())
+        BooksLocalDataSourceImpl(
+            dao = get(),
+            editionImageStorage = get(),
+        )
     }
 
     single<BookDao> {
@@ -122,5 +126,9 @@ val booksModule = module {
 
     factory {
         SetEditionAsOwnedUseCase(booksRepository = get())
+    }
+
+    factory {
+        PersistEditionImageUseCase(booksRepository = get())
     }
 }

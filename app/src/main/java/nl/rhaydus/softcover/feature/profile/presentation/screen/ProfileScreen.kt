@@ -94,7 +94,7 @@ class ProfileScreen : Screen {
                     horizontalArrangement = Arrangement.Center
                 ) {
                     SoftcoverImage(
-                        url = state.userProfileData?.profileImageUrl,
+                        model = state.userProfileData?.profileImageUrl,
                         contentDescription = "User profile image",
                         isLoading = state.isLoading,
                         modifier = Modifier

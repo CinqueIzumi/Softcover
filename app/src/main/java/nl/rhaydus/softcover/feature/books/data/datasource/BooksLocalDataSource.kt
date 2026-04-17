@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.books.data.datasource
 
+import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -8,6 +9,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.feature.books.data.dao.BookDao
 import nl.rhaydus.softcover.feature.books.data.mapper.toModel
 
@@ -22,6 +24,16 @@ interface BooksLocalDataSource {
     suspend fun getExistingEditionIds(ids: List<Int>): List<Int>
 
     suspend fun cacheEditions(editions: List<BookEdition>)
+
+    suspend fun updateEditionLocalImagePath(
+        editionId: Int,
+        path: String?,
+    )
+
+    suspend fun persistEditionImage(
+        editionId: Int,
+        source: File,
+    )
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
@@ -42,6 +54,7 @@ interface BooksLocalDataSource {
 
 class BooksLocalDataSourceImpl(
     private val dao: BookDao,
+    private val editionImageStorage: EditionImageStorage,
 ) : BooksLocalDataSource {
     override val allUserBooks: Flow<List<Book>>
         get() = dao
@@ -75,6 +88,24 @@ class BooksLocalDataSourceImpl(
         dao.cacheEditions(editions = editions)
     }
 
+    override suspend fun updateEditionLocalImagePath(
+        editionId: Int,
+        path: String?,
+    ) {
+        dao.updateEditionLocalImagePath(editionId = editionId, path = path)
+    }
+
+    override suspend fun persistEditionImage(
+        editionId: Int,
+        source: File,
+    ) {
+        if (editionImageStorage.exists(editionId = editionId)) return
+
+        val storedPath = editionImageStorage.copyFrom(editionId = editionId, source = source)
+
+        dao.updateEditionLocalImagePath(editionId = editionId, path = storedPath)
+    }
+
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return dao
             .getBooksByStatus(statusCode = status.code)
@@ -91,7 +122,14 @@ class BooksLocalDataSourceImpl(
     }
 
     override suspend fun removeUserBooksById(ids: List<Int>) {
+        val bookIds = ids.mapNotNull { dao.getBookIdByUserBookId(userBookId = it) }
+        val pathsToDelete = bookIds.flatMap { bookId ->
+            dao.getLocalImagePathsByBookId(bookId = bookId).mapNotNull { it.localImagePath }
+        }
+
         dao.deleteUserBooksByIds(ids)
+
+        pathsToDelete.forEach { editionImageStorage.delete(path = it) }
     }
 
     override suspend fun cacheUserBookLists(lists: List<BookList>) {
@@ -102,7 +140,13 @@ class BooksLocalDataSourceImpl(
         dao.cacheListBook(listBook = book)
     }
 
-    override suspend fun removeAllBooks() = dao.deleteAllUserBooksAndData()
+    override suspend fun removeAllBooks() {
+        val pathsToDelete = dao.getAllLocalImagePaths().mapNotNull { it.localImagePath }
+
+        dao.deleteAllUserBooksAndData()
+
+        pathsToDelete.forEach { editionImageStorage.delete(path = it) }
+    }
 
     override suspend fun getOwnedListBookByEditionId(editionId: Int): ListBook {
         val book = dao.getOwnedListBookByEditionId(editionId = editionId)

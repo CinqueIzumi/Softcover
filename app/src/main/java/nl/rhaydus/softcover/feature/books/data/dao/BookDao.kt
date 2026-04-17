@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
 import nl.rhaydus.softcover.feature.books.data.model.BookSeriesEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.feature.books.data.model.EditionLocalImagePath
 import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
@@ -93,6 +94,21 @@ interface BookDao {
     @Query("SELECT * FROM authors WHERE name IN (:names)")
     suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
 
+    @Query("SELECT id, localImagePath FROM book_editions WHERE id IN (:editionIds)")
+    suspend fun getLocalImagePathsByEditionIds(editionIds: List<Int>): List<EditionLocalImagePath>
+
+    @Query("SELECT id, localImagePath FROM book_editions WHERE bookId = :bookId")
+    suspend fun getLocalImagePathsByBookId(bookId: Int): List<EditionLocalImagePath>
+
+    @Query("SELECT id, localImagePath FROM book_editions")
+    suspend fun getAllLocalImagePaths(): List<EditionLocalImagePath>
+
+    @Query("UPDATE book_editions SET localImagePath = :path WHERE id = :editionId")
+    suspend fun updateEditionLocalImagePath(
+        editionId: Int,
+        path: String?,
+    )
+
     @Query("SELECT bookId FROM user_books WHERE id = :userBookId")
     suspend fun getBookIdByUserBookId(userBookId: Int): Int?
 
@@ -147,8 +163,7 @@ interface BookDao {
         }
 
         // Insert editions
-        val editionEntities = book.editions.map { it.toEntity() }
-        insertEditions(editionEntities)
+        insertEditions(toEntitiesPreservingLocalImagePath(editions = book.editions))
 
         // Insert authors (deduplicated)
         val allAuthors = (book.authors + book.editions.flatMap { it.authors })
@@ -188,11 +203,25 @@ interface BookDao {
         insertListBook(listBook.toEntity())
     }
 
+    suspend fun toEntitiesPreservingLocalImagePath(
+        editions: List<BookEdition>,
+    ): List<BookEditionEntity> {
+        if (editions.isEmpty()) return emptyList()
+
+        val existing = getLocalImagePathsByEditionIds(editionIds = editions.map { it.id })
+            .associateBy { it.id }
+
+        return editions.map { edition ->
+            val preserved = edition.localImagePath ?: existing[edition.id]?.localImagePath
+            edition.toEntity().copy(localImagePath = preserved)
+        }
+    }
+
     @Transaction
     suspend fun cacheEditions(editions: List<BookEdition>) {
         if (editions.isEmpty()) return
 
-        insertEditions(editions.map { it.toEntity() })
+        insertEditions(toEntitiesPreservingLocalImagePath(editions = editions))
 
         val allAuthors = editions.flatMap { it.authors }.distinctBy { it.name }
 
