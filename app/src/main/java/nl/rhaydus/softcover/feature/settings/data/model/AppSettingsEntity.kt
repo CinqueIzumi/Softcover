@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 
 @Serializable
 data class AppSettingsEntity(
+    // Kept only so ApiKeyLocalDataSource can migrate pre-1.2.3 plaintext keys into the Keystore-backed store. Cleared after migration.
     val apiKey: String = "",
     val userId: Int = -1,
     val themeConfig: ThemeConfigurationEntity = ThemeConfigurationEntity(),

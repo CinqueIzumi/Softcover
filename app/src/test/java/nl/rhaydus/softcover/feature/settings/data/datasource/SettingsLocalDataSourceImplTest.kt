@@ -22,12 +22,17 @@ import org.junit.jupiter.api.Test
 class SettingsLocalDataSourceImplTest {
 
     private lateinit var dataStore: DataStore<AppSettingsEntity>
+    private lateinit var apiKeyLocalDataSource: ApiKeyLocalDataSource
     private lateinit var dataSource: SettingsLocalDataSourceImpl
 
     @BeforeEach
     fun setUp() {
         dataStore = mockk(relaxed = true)
-        dataSource = SettingsLocalDataSourceImpl(appSettingsDataStore = AppSettingsDataStore(store = dataStore))
+        apiKeyLocalDataSource = mockk(relaxed = true)
+        dataSource = SettingsLocalDataSourceImpl(
+            appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+            apiKeyLocalDataSource = apiKeyLocalDataSource,
+        )
     }
 
     private fun stubEntity(
@@ -54,7 +59,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.data
             } returns flowOf(entity)
 
-            val freshDataSource = SettingsLocalDataSourceImpl(appSettingsDataStore = AppSettingsDataStore(store = dataStore))
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
 
             // ----- Act & Assert -----
             freshDataSource.dateStyle.test {
@@ -73,7 +81,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.data
             } returns flowOf(entity1, entity2)
 
-            val freshDataSource = SettingsLocalDataSourceImpl(appSettingsDataStore = AppSettingsDataStore(store = dataStore))
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
 
             // ----- Act & Assert -----
             freshDataSource.dateStyle.test {
@@ -92,7 +103,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.data
             } returns flowOf(entity1, entity2)
 
-            val freshDataSource = SettingsLocalDataSourceImpl(appSettingsDataStore = AppSettingsDataStore(store = dataStore))
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
 
             // ----- Act & Assert -----
             freshDataSource.dateStyle.test {
@@ -155,68 +169,33 @@ class SettingsLocalDataSourceImplTest {
     inner class UpdateApiKey {
 
         @Test
-        fun `update lambda sets apiKey to the given key`() = runTest {
+        fun `delegates to apiKeyLocalDataSource with the given key`() = runTest {
             // ----- Arrange -----
-            val newKey = "new-api-key"
-            val existingEntity = stubEntity(apiKey = "old-key")
-            var capturedResult: AppSettingsEntity? = null
-
-            coEvery {
-                dataStore.updateData(any())
-            } coAnswers {
-                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
-            }
+            val key = "new-api-key"
 
             // ----- Act -----
-            dataSource.updateApiKey(key = newKey)
+            dataSource.updateApiKey(key = key)
 
             // ----- Assert -----
-            capturedResult?.apiKey shouldBe newKey
+            coVerify { apiKeyLocalDataSource.updateApiKey(key = key) }
         }
 
         @Test
-        fun `update lambda preserves other fields when updating apiKey`() = runTest {
-            // ----- Arrange -----
-            val existingEntity = stubEntity(apiKey = "old", userId = 7, dateStyle = DateStyle.YEAR_MONTH_DAY)
-            var capturedResult: AppSettingsEntity? = null
-
-            coEvery {
-                dataStore.updateData(any())
-            } coAnswers {
-                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
-            }
-
-            // ----- Act -----
-            dataSource.updateApiKey(key = "new")
-
-            // ----- Assert -----
-            capturedResult?.userId shouldBe 7
-            capturedResult?.dateStyle shouldBe DateStyle.YEAR_MONTH_DAY
-        }
-
-        @Test
-        fun `update lambda sets apiKey to empty string when clearing the key`() = runTest {
-            // ----- Arrange -----
-            val existingEntity = stubEntity(apiKey = "old-key")
-            var capturedResult: AppSettingsEntity? = null
-
-            coEvery {
-                dataStore.updateData(any())
-            } coAnswers {
-                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
-            }
-
+        fun `delegates to apiKeyLocalDataSource with empty string when clearing`() = runTest {
             // ----- Act -----
             dataSource.updateApiKey(key = "")
 
             // ----- Assert -----
-            capturedResult?.apiKey shouldBe ""
+            coVerify { apiKeyLocalDataSource.updateApiKey(key = "") }
+        }
+
+        @Test
+        fun `does not call dataStore updateData for api key updates`() = runTest {
+            // ----- Act -----
+            dataSource.updateApiKey(key = "any-key")
+
+            // ----- Assert -----
+            coVerify(exactly = 0) { dataStore.updateData(any()) }
         }
     }
 
