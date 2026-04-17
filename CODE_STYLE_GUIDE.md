@@ -150,14 +150,59 @@ fun `does the thing`() = runTest {
 
 ## Code Block Whitespace
 
-- Leave a blank line immediately **after the opening `{`** of a class, object, or init block.
-- Do **not** add a blank line at the top of a function body — the first statement should follow the opening `{` directly.
+**Core principle: every multi-line construct acts as a *paragraph* — it gets a blank line before and after it.**
+
+### Opening and closing braces
+
+- **No blank line after an opening `{`.** Exception: sealed class / sealed interface bodies have a blank line after `{`.
+- **No blank line before a closing `}`.**
 - Leave a blank line immediately **after the closing `}`** of a code block (unless it is the very last line of its enclosing block).
-- mockk's `coEvery { ... }` and `every { ... }` stubs are never one-liners. Always open the block onto its own line so the body sits on a separate line, and leave a blank line after the closing `}` of each stub.
+
+### Paragraph rule for multi-line constructs
+
+Every multi-line construct (code block, multi-line call, multi-line assignment) gets a blank line before and after it. This includes:
+
+- `val`/`var` assignments where the right-hand side spans multiple lines (e.g. `if/else`, `when`, multi-line lambda, multi-line constructor/function call).
+- A single-line `val` followed by a multi-line `val` needs a blank line between them.
+- mockk's `coEvery { ... }` / `every { ... }` stubs are never one-liners — always open the block onto its own line and leave a blank line after each stub's closing `}`.
+
+### Consecutive single-line statements
+
+- Blank line **between logically unrelated groups**.
+- **No blank line within a related group** (e.g. related property declarations, consecutive guard clauses bodies that belong to one extraction).
+
+### Guard clauses
+
+- Blank line **after** a `val`/`var` extraction before the first guard clause.
+- Blank line **between** each guard clause.
+- Blank line **after** the last guard clause before the main logic.
+- Every guard clause is its own paragraph.
+
+### Between declarations
+
+- **Functions / methods**: always one blank line between them, in both classes and interfaces.
+- **Interface members**: always one blank line between method signatures.
+- **Sealed class variants**: always one blank line between variants.
+- **Data class properties**: no blank lines between properties. DTO properties annotated with `@SerializedName` (or similar): blank line between each property — each is a 2-line construct.
+- **Enum entries**: no blank lines between entries. One blank line before `companion object`.
+- **Property groups in classes**: no blank lines within a logical group; one blank line between different groups.
+
+### `when` expressions
+
+- `when` inside `onEvent()`-style dispatchers: single-line branches grouped without blanks; blank line before the first block-body branch; blank lines between all block-body branches.
+- `when` where **all** branches have block bodies: blank lines between each branch.
+
+### Coroutine launches
+
+- Blank lines between sequential `launch { }` blocks (e.g. in `init`).
+
+### Super calls and error logs
+
+- Blank line between a `super.*()` inheritance call (e.g. `super.onResume()`, `super.onCreate(...)`) and the following code.
+- Blank line between a `Timber.e(...)` error log and the following code.
 
 ```kotlin
 class Example {
-
     fun doWork() {
         coEvery {
             repository.fetch()
