@@ -8,6 +8,6 @@ query GetBookById(
             }
         }
     ) {
-        ...BookFragment
+        ...BookDetailFragment
     }
 }

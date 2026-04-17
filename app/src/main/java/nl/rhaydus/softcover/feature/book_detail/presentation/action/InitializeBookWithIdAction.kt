@@ -10,20 +10,10 @@ import timber.log.Timber
 class InitializeBookWithIdAction(
     val id: Int,
 ) : BookDetailAction {
-    private lateinit var dependencies: BookDetailDependencies
-    private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
-
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        this.dependencies = dependencies
-        this.scope = scope
-
-        handleAction()
-    }
-
-    private fun handleAction() {
         dependencies.launch {
             val result = dependencies
                 .fetchBookByIdUseCase(id = id)
@@ -33,8 +23,15 @@ class InitializeBookWithIdAction(
             scope.setState {
                 it.copy(
                     book = result,
+                    editions = result?.editions ?: emptyList(),
                     loadingBookDetails = false,
                 )
+            }
+
+            result?.let { book ->
+                scope.setLocalVariables { locals ->
+                    locals.copy(editionsLoadedForBookId = book.id)
+                }
             }
         }
     }

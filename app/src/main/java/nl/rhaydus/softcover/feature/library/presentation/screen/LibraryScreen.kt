@@ -293,6 +293,7 @@ object LibraryScreen : Screen {
                 modifier = Modifier.fillMaxWidth(),
                 isLoading = false,
                 defaultEdition = book.defaultEdition,
+                fallbackCoverUrl = book.coverUrl,
             )
 
             Text(

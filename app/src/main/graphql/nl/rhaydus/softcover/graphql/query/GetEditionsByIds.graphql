@@ -1,0 +1,13 @@
+query GetEditionsByIds(
+    $ids: [Int!]!,
+) {
+    editions(
+        where: {
+            id: {
+                _in: $ids
+            }
+        }
+    ) {
+        ...EditionDetailFragment
+    }
+}

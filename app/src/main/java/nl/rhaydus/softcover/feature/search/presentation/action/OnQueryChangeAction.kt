@@ -46,7 +46,7 @@ class OnQueryChangeAction(
         }
 
         val newTimberJob: Job = dependencies.launch {
-            delay(1.seconds)
+            delay(searchDelay)
 
             dependencies.searchForNameUseCase(name = scope.currentState.searchText).onFailure {
                 Timber.e("-=- $it")

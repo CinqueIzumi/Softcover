@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSourceI
 import nl.rhaydus.softcover.feature.books.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
@@ -17,6 +18,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.SetEditionAsOwnedUseCase
@@ -39,7 +41,10 @@ val booksModule = module {
     }
 
     single<BooksLocalDataSource> {
-        BooksLocalDataSourceImpl(dao = get())
+        BooksLocalDataSourceImpl(
+            dao = get(),
+            editionImageStorage = get(),
+        )
     }
 
     single<BookDao> {
@@ -88,6 +93,10 @@ val booksModule = module {
     }
 
     factory {
+        GetEditionsByBookIdUseCase(booksRepository = get())
+    }
+
+    factory {
         MarkBookAsReadingUseCase(booksRepository = get())
     }
 
@@ -117,5 +126,9 @@ val booksModule = module {
 
     factory {
         SetEditionAsOwnedUseCase(booksRepository = get())
+    }
+
+    factory {
+        PersistEditionImageUseCase(booksRepository = get())
     }
 }

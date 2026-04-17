@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 import timber.log.Timber
 
 class OnEditionOwnedToggleAction(
-    val edition: BookEdition,
+    private val edition: BookEdition,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,

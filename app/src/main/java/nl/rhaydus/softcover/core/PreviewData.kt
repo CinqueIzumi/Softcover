@@ -21,6 +21,7 @@ object PreviewData {
         isbn10 = "",
         pages = 100,
         url = "",
+        localImagePath = null,
         releaseYear = 2023,
         authors = listOf(baseAuthor),
         format = "Hardcover",

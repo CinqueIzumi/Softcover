@@ -65,6 +65,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
@@ -254,7 +255,11 @@ class BookDetailScreen(
 
             if (state.showEditEditionSheet && state.book != null) {
                 EditionBottomSheetSelector(
-                    book = state.book,
+                    bookTitle = state.book.title,
+                    currentEdition = state.book.currentEdition,
+                    defaultEdition = state.book.defaultEdition,
+                    editions = state.editions,
+                    isLoading = state.loadingEditions,
                     onDismissRequest = {
                         runAction(OnDismissEditEditionSheetClickAction())
                     },
@@ -426,7 +431,10 @@ class BookDetailScreen(
         fallBackEdition: BookEdition?,
         isLoading: Boolean,
     ) {
-        val editionUrl = edition?.url ?: fallBackEdition?.url
+        val editionImageModel = rememberEditionImageRequest(
+            edition = edition,
+            defaultEdition = fallBackEdition,
+        )
 
         val imageHeight = with(LocalDensity.current) {
             (LocalWindowInfo.current.containerSize.height * 0.5f).toDp()
@@ -448,7 +456,7 @@ class BookDetailScreen(
                 )
         ) {
             SoftcoverImage(
-                url = editionUrl,
+                model = editionImageModel,
                 contentDescription = "Blurred cover edition image",
                 isLoading = isLoading,
                 modifier = Modifier

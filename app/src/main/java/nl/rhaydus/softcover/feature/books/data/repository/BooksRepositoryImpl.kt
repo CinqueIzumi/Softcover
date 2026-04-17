@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.books.data.repository
 
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -59,7 +60,39 @@ class BooksRepositoryImpl(
 
         booksLocalDataSource.removeUserBooksById(ids = userBookIdsToRemove)
 
+        hydrateOrphanOwnedBooks(lists = fetchedLists)
+
         booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
+    }
+
+    private suspend fun hydrateOrphanOwnedBooks(lists: List<BookList>) {
+        val referenced = lists.flatMap { list -> list.books.map { it.bookId to it.editionId } }
+
+        if (referenced.isEmpty()) return
+
+        val referencedBookIds = referenced.map { it.first }.distinct()
+        val cachedBookIds = booksLocalDataSource.getExistingBookIds(ids = referencedBookIds).toSet()
+        val missingBookIds = referencedBookIds.filterNot { it in cachedBookIds }
+
+        if (missingBookIds.isNotEmpty()) {
+            val orphanBooks = booksRemoteDataSource.fetchBooksByIds(ids = missingBookIds)
+
+            if (orphanBooks.isNotEmpty()) {
+                booksLocalDataSource.cacheBooks(books = orphanBooks)
+            }
+        }
+
+        val referencedEditionIds = referenced.map { it.second }.distinct()
+        val cachedEditionIds = booksLocalDataSource.getExistingEditionIds(ids = referencedEditionIds).toSet()
+        val missingEditionIds = referencedEditionIds.filterNot { it in cachedEditionIds }
+
+        if (missingEditionIds.isNotEmpty()) {
+            val orphanEditions = booksRemoteDataSource.fetchEditionsByIds(ids = missingEditionIds)
+
+            if (orphanEditions.isNotEmpty()) {
+                booksLocalDataSource.cacheEditions(editions = orphanEditions)
+            }
+        }
     }
 
     override suspend fun cacheBook(book: Book) {
@@ -80,6 +113,18 @@ class BooksRepositoryImpl(
 
     override suspend fun fetchBookById(id: Int): Book {
         return booksRemoteDataSource.fetchBookById(id = id)
+    }
+
+    override suspend fun fetchBooksByIds(ids: List<Int>): List<Book> {
+        return booksRemoteDataSource.fetchBooksByIds(ids = ids)
+    }
+
+    override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
+        return booksRemoteDataSource.getEditionsByBookId(bookId = bookId)
+    }
+
+    override suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition> {
+        return booksRemoteDataSource.fetchEditionsByIds(ids = ids)
     }
 
     override suspend fun markBookAsWantToRead(bookId: Int): Book {
@@ -134,5 +179,12 @@ class BooksRepositoryImpl(
 
     override suspend fun cacheListBook(book: ListBook) {
         booksLocalDataSource.cacheListBook(book = book)
+    }
+
+    override suspend fun persistEditionImage(
+        editionId: Int,
+        source: File,
+    ) {
+        booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
     }
 }

@@ -14,6 +14,7 @@ val bookDetailModule = module {
     factory {
         BookDetailScreenScreenModel(
             fetchBookByIdUseCase = get(),
+            getEditionsByBookIdUseCase = get(),
             updateBookEditionUseCase = get(),
             updateBookProgress = get(),
             getAllUserBooksUseCase = get(),

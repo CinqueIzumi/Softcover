@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.books.domain.repository
 
+import java.io.File
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -26,6 +27,12 @@ interface BooksRepository {
 
     suspend fun fetchBookById(id: Int): Book
 
+    suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
+
+    suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
+
+    suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition>
+
     suspend fun markBookAsWantToRead(bookId: Int): Book
 
     suspend fun markBookAsReading(book: Book): Book
@@ -51,4 +58,9 @@ interface BooksRepository {
     suspend fun removeListBook(book: ListBook)
 
     suspend fun cacheListBook(book: ListBook)
+
+    suspend fun persistEditionImage(
+        editionId: Int,
+        source: File,
+    )
 }

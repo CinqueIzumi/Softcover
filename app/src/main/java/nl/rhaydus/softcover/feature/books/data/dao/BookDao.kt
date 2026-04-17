@@ -6,6 +6,7 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookAuthorRefs
@@ -20,6 +21,7 @@ import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
 import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
 import nl.rhaydus.softcover.feature.books.data.model.BookSeriesEntity
 import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.feature.books.data.model.EditionLocalImagePath
 import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
@@ -83,8 +85,29 @@ interface BookDao {
     @Query("SELECT id FROM user_books")
     suspend fun getAllUserBookIds(): List<Int>
 
+    @Query("SELECT id FROM books WHERE id IN (:bookIds)")
+    suspend fun getExistingBookIds(bookIds: List<Int>): List<Int>
+
+    @Query("SELECT id FROM book_editions WHERE id IN (:editionIds)")
+    suspend fun getExistingEditionIds(editionIds: List<Int>): List<Int>
+
     @Query("SELECT * FROM authors WHERE name IN (:names)")
     suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
+
+    @Query("SELECT id, localImagePath FROM book_editions WHERE id IN (:editionIds)")
+    suspend fun getLocalImagePathsByEditionIds(editionIds: List<Int>): List<EditionLocalImagePath>
+
+    @Query("SELECT id, localImagePath FROM book_editions WHERE bookId = :bookId")
+    suspend fun getLocalImagePathsByBookId(bookId: Int): List<EditionLocalImagePath>
+
+    @Query("SELECT id, localImagePath FROM book_editions")
+    suspend fun getAllLocalImagePaths(): List<EditionLocalImagePath>
+
+    @Query("UPDATE book_editions SET localImagePath = :path WHERE id = :editionId")
+    suspend fun updateEditionLocalImagePath(
+        editionId: Int,
+        path: String?,
+    )
 
     @Query("SELECT bookId FROM user_books WHERE id = :userBookId")
     suspend fun getBookIdByUserBookId(userBookId: Int): Int?
@@ -140,8 +163,7 @@ interface BookDao {
         }
 
         // Insert editions
-        val editionEntities = book.editions.map { it.toEntity() }
-        insertEditions(editionEntities)
+        insertEditions(toEntitiesPreservingLocalImagePath(editions = book.editions))
 
         // Insert authors (deduplicated)
         val allAuthors = (book.authors + book.editions.flatMap { it.authors })
@@ -178,21 +200,39 @@ interface BookDao {
 
     @Transaction
     suspend fun cacheListBook(listBook: ListBook) {
-        val book = listBook.book
-        val edition = listBook.edition
-
-        insertBook(book.toEntity())
-        insertEditions(listOf(edition.toEntity()))
         insertListBook(listBook.toEntity())
+    }
 
-        val allAuthors = (book.authors + edition.authors).distinctBy { it.name }
+    suspend fun toEntitiesPreservingLocalImagePath(
+        editions: List<BookEdition>,
+    ): List<BookEditionEntity> {
+        if (editions.isEmpty()) return emptyList()
+
+        val existing = getLocalImagePathsByEditionIds(editionIds = editions.map { it.id })
+            .associateBy { it.id }
+
+        return editions.map { edition ->
+            val preserved = edition.localImagePath ?: existing[edition.id]?.localImagePath
+            edition.toEntity().copy(localImagePath = preserved)
+        }
+    }
+
+    @Transaction
+    suspend fun cacheEditions(editions: List<BookEdition>) {
+        if (editions.isEmpty()) return
+
+        insertEditions(toEntitiesPreservingLocalImagePath(editions = editions))
+
+        val allAuthors = editions.flatMap { it.authors }.distinctBy { it.name }
+
+        if (allAuthors.isEmpty()) return
+
         insertAuthors(allAuthors.map { it.toEntity() })
-
         val authorEntities = getAuthorsByName(allAuthors.map { it.name })
         val authorIdsByName = authorEntities.associateBy({ it.name }, { it.id })
 
-        insertBookAuthors(book.toBookAuthorRefs(authorIdsByName))
-        insertEditionAuthors(edition.toEditionAuthorRefs(authorIdsByName))
+        val crossRefs = editions.flatMap { edition -> edition.toEditionAuthorRefs(authorIdsByName) }
+        insertEditionAuthors(crossRefs)
     }
 
     @Upsert

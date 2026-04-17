@@ -17,8 +17,8 @@ android {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "1.2.1"
+        versionCode = 18
+        versionName = "1.2.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -101,6 +101,23 @@ dependencies {
 
     // Splash screen
     implementation(libs.androidx.splash)
+
+    // Google Play in-app updates
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
+
+    // Unit test dependencies
+    testImplementation(libs.junit.params)
+    testImplementation(libs.junit.engine)
+    testImplementation(libs.junit.api)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotest)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.turbine)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 apollo {

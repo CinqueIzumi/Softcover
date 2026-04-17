@@ -24,50 +24,50 @@ import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
-import nl.rhaydus.softcover.fragment.BookContentFragment.Book_series.Companion.bookSeriesFragment
-import nl.rhaydus.softcover.fragment.BookContentFragment.Default_physical_edition.Companion.editionFragment
-import nl.rhaydus.softcover.fragment.BookContentFragment.Edition.Companion.editionFragment
-import nl.rhaydus.softcover.fragment.BookFragment
-import nl.rhaydus.softcover.fragment.BookFragment.Canonical.Companion.bookContentFragment
-import nl.rhaydus.softcover.fragment.BookFragment.Companion.bookContentFragment
+import nl.rhaydus.softcover.fragment.BookDetailFragment
+import nl.rhaydus.softcover.fragment.BookDetailFragment.Default_physical_edition.Companion.editionFragment
+import nl.rhaydus.softcover.fragment.BookListFragment
+import nl.rhaydus.softcover.fragment.BookListFragment.Book_series.Companion.bookSeriesFragment
 import nl.rhaydus.softcover.fragment.BookSeriesFragment
+import nl.rhaydus.softcover.fragment.EditionDetailFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.ListBookFragment
-import nl.rhaydus.softcover.fragment.ListBookFragment.Book.Companion.bookFragment
-import nl.rhaydus.softcover.fragment.ListBookFragment.Edition.Companion.editionFragment
 import nl.rhaydus.softcover.fragment.ListFragment
 import nl.rhaydus.softcover.fragment.ListFragment.List_book.Companion.listBookFragment
 import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.Book.Companion.bookFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Book.Companion.bookListFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Edition.Companion.editionFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Reading_journal.Companion.readingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read.Companion.userBookReadFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import kotlin.math.roundToInt
 
 // region DTO -> UI mappers
-fun EditionFragment.toBookEdition(): BookEdition {
-    return BookEdition(
-        id = id,
-        title = title,
-        url = image?.url,
-        publisher = publisher?.name,
-        pages = pages,
-        authors = contributions.mapNotNull { contribution ->
-            val author = contribution.author ?: return@mapNotNull null
-            val id = author.id
+fun EditionFragment.toBookEdition(
+    authors: List<Author> = emptyList(),
+): BookEdition = BookEdition(
+    id = id,
+    title = title,
+    url = image?.url,
+    localImagePath = null,
+    publisher = publisher?.name,
+    pages = pages,
+    authors = authors,
+    isbn10 = isbn_10,
+    releaseYear = release_year ?: -1,
+    format = edition_format ?: "",
+    bookId = book_id,
+    owned = false,
+)
 
-            Author(
-                name = author.name,
-                id = id,
-            )
-        },
-        isbn10 = isbn_10,
-        releaseYear = release_year ?: -1,
-        format = edition_format ?: "",
-        bookId = book_id,
-        owned = false,
-    )
+fun EditionDetailFragment.toBookEdition(): BookEdition {
+    val authors = contributions.mapNotNull { contribution ->
+        val author = contribution.author ?: return@mapNotNull null
+
+        Author(name = author.name, id = author.id)
+    }
+    return (this as EditionFragment).toBookEdition(authors = authors)
 }
 
 fun ListFragment.toBookList(): BookList {
@@ -82,31 +82,22 @@ fun ListFragment.toBookList(): BookList {
 }
 
 fun ListBookFragment.toListBook(): ListBook? {
-    val edition = edition?.editionFragment()?.toBookEdition() ?: return null
-    val book = book.bookFragment()?.toBook() ?: return null
+    val editionId = edition_id ?: return null
 
     return ListBook(
-        book = book,
-        edition = edition,
+        listBookId = id,
         listId = list_id,
-        listBookId = id
+        bookId = book_id,
+        editionId = editionId,
     )
 }
 
-fun UserBookFragment.toBook(): Book? {
-    return book.bookFragment()?.toBook(userBookFragment = this)
-}
+fun ReadingJournalFragment.toReadingJournal(): ReadingJournal = ReadingJournal(
+    updatedAt = updated_at,
+    event = event,
+)
 
-fun ReadingJournalFragment.toReadingJournal(): ReadingJournal {
-    return ReadingJournal(
-        updatedAt = updated_at,
-        event = event,
-    )
-}
-
-private fun UserBookFragment?.toUserBook(): UserBook? {
-    if (this == null) return null
-
+private fun UserBookFragment.toUserBook(): UserBook {
     val journals = reading_journals.mapNotNull {
         it.readingJournalFragment()?.toReadingJournal()
     }
@@ -127,63 +118,92 @@ private fun UserBookFragment?.toUserBook(): UserBook? {
     )
 }
 
-private fun UserBookReadFragment?.toUserBookRead(): UserBookRead? {
-    if (this == null) return null
+private fun UserBookReadFragment.toUserBookRead(): UserBookRead = UserBookRead(
+    currentPage = progress_pages,
+    progress = progress?.toFloat(),
+    id = id,
+    startedAt = started_at,
+    finishedAt = finished_at,
+)
 
-    return UserBookRead(
-        currentPage = progress_pages,
-        progress = progress?.toFloat(),
-        id = id,
-        startedAt = started_at,
-        finishedAt = finished_at,
+private fun BookListFragment.authors(): List<Author> = contributions.mapNotNull { contribution ->
+    val author = contribution.author ?: return@mapNotNull null
+
+    Author(name = author.name, id = author.id)
+}
+
+private fun BookListFragment.bookSeries(): BookSeries? =
+    book_series.firstOrNull()?.bookSeriesFragment()?.toBookSeries()
+
+private fun BookListFragment.positionInSeries(): Int? =
+    book_series.firstOrNull()?.bookSeriesFragment()?.position?.toInt()
+
+private fun BookListFragment.canonicalIdOrNull(): Int? {
+    val canonicalId = canonical?.id ?: return null
+
+    return canonicalId.takeIf { it != id }
+}
+
+private fun BookListFragment.roundedRating(): Double =
+    ((rating ?: 0.0) * 10).roundToInt() / 10.0
+
+fun UserBookFragment.toBook(): Book? {
+    val listFragment = book.bookListFragment() ?: return null
+
+    val bookAuthors = listFragment.authors()
+    val selectedEdition = edition?.editionFragment()
+        ?.toBookEdition(authors = bookAuthors)
+
+    val editions = listOfNotNull(selectedEdition)
+
+    if (editions.isEmpty()) return null
+
+    val userBookReadFragment = user_book_reads.firstOrNull()?.userBookReadFragment()
+
+    return Book(
+        id = listFragment.id,
+        canonicalId = listFragment.canonicalIdOrNull(),
+        title = listFragment.title ?: "",
+        editions = editions,
+        defaultEdition = null,
+        rating = listFragment.roundedRating(),
+        description = "",
+        releaseYear = listFragment.release_year ?: -1,
+        coverUrl = listFragment.image?.url ?: "",
+        authors = bookAuthors,
+        usersCount = 0,
+        bookSeries = listFragment.bookSeries(),
+        positionInSeries = listFragment.positionInSeries(),
+        userBook = toUserBook(),
+        userBookRead = userBookReadFragment?.toUserBookRead(),
     )
 }
 
-fun BookFragment.toBook(
-    userBookFragment: UserBookFragment? = null,
-): Book? {
-    val bookContent = canonical?.bookContentFragment()
-        ?: this.bookContentFragment()
-        ?: throw Exception("No book content was found")
+fun BookDetailFragment.toBook(): Book? {
+    val listFragment: BookListFragment = this
+    val bookAuthors = listFragment.authors()
+    val defaultEdition = default_physical_edition?.editionFragment()
+        ?.toBookEdition(authors = bookAuthors)
+    val editions = listOfNotNull(defaultEdition)
 
-    val rating = ((bookContent.rating ?: 0.0) * 10).roundToInt() / 10.0
-    val userBookReadFragment = userBookFragment
-        ?.user_book_reads
-        ?.firstOrNull()
-        ?.userBookReadFragment()
-
-    val editions = bookContent.editions.mapNotNull { userBookEdition ->
-        userBookEdition.editionFragment()?.toBookEdition()
-    }
-
-    if (editions.isEmpty()) {
-        return null
-    }
+    if (editions.isEmpty()) return null
 
     return Book(
-        id = bookContent.id,
-        title = bookContent.title ?: "",
+        id = listFragment.id,
+        canonicalId = listFragment.canonicalIdOrNull(),
+        title = listFragment.title ?: "",
         editions = editions,
-        description = bookContent.description ?: "",
-        rating = rating,
-        releaseYear = bookContent.release_year ?: -1,
-        coverUrl = bookContent.image?.url ?: "",
-        authors = bookContent.contributions.mapNotNull { contribution ->
-            val author = contribution.author ?: return@mapNotNull null
-            val id = author.id
-
-            Author(
-                name = author.name,
-                id = id,
-            )
-        },
-        defaultEdition = bookContent.default_physical_edition?.editionFragment()?.toBookEdition(),
-        userBook = userBookFragment.toUserBook(),
-        userBookRead = userBookReadFragment.toUserBookRead(),
-        usersCount = bookContent.users_count,
-        bookSeries = bookContent.book_series.firstOrNull()?.bookSeriesFragment()?.toBookSeries(),
-        positionInSeries = bookContent.book_series.firstOrNull()
-            ?.bookSeriesFragment()?.position?.toInt(),
+        defaultEdition = defaultEdition,
+        rating = listFragment.roundedRating(),
+        description = description ?: "",
+        releaseYear = listFragment.release_year ?: -1,
+        coverUrl = listFragment.image?.url ?: "",
+        authors = bookAuthors,
+        usersCount = users_count,
+        bookSeries = listFragment.bookSeries(),
+        positionInSeries = listFragment.positionInSeries(),
+        userBook = null,
+        userBookRead = null,
     )
 }
 
@@ -205,18 +225,16 @@ fun BookList.toEntity(): BookListEntity = BookListEntity(
     slug = slug,
 )
 
-fun BookSeries.toEntity(): BookSeriesEntity {
-    return BookSeriesEntity(
-        id = id,
-        name = name,
-        amountOfBooks = amountOfBooks,
-    )
-}
+fun BookSeries.toEntity(): BookSeriesEntity = BookSeriesEntity(
+    id = id,
+    name = name,
+    amountOfBooks = amountOfBooks,
+)
 
 fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
     listId = listId,
-    bookId = book.id,
-    editionId = edition.id,
+    bookId = bookId,
+    editionId = editionId,
     listBookId = listBookId,
 )
 
@@ -233,41 +251,35 @@ fun Book.toEntity(): BookEntity = BookEntity(
     seriesId = bookSeries?.id,
 )
 
-fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity {
-    return UserBookReadEntity(
-        id = id,
-        currentPage = currentPage,
-        progress = progress,
-        startedAt = startedAt,
-        finishedAt = finishedAt,
-        userBookId = userBookId
-    )
-}
+fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity = UserBookReadEntity(
+    id = id,
+    currentPage = currentPage,
+    progress = progress,
+    startedAt = startedAt,
+    finishedAt = finishedAt,
+    userBookId = userBookId
+)
 
-fun UserBook.toEntity(bookId: Int): UserBookEntity {
-    return UserBookEntity(
-        id = id,
-        statusCode = status.code,
-        dateAdded = dateAdded,
-        privacySettingId = privacySettingId,
-        reviewHasSpoilers = reviewHasSpoilers,
-        editionId = editionId,
-        lastReadDate = lastReadDate,
-        rating = rating,
-        referrerUserId = referrerUserId,
-        reviewedAt = reviewedAt,
-        updatedAt = updatedAt,
-        bookId = bookId,
-    )
-}
+fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
+    id = id,
+    statusCode = status.code,
+    dateAdded = dateAdded,
+    privacySettingId = privacySettingId,
+    reviewHasSpoilers = reviewHasSpoilers,
+    editionId = editionId,
+    lastReadDate = lastReadDate,
+    rating = rating,
+    referrerUserId = referrerUserId,
+    reviewedAt = reviewedAt,
+    updatedAt = updatedAt,
+    bookId = bookId,
+)
 
-fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity {
-    return ReadingJournalEntity(
-        event = event ?: "",
-        updatedAt = updatedAt,
-        userBookId = userBookId
-    )
-}
+fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity = ReadingJournalEntity(
+    event = event ?: "",
+    updatedAt = updatedAt,
+    userBookId = userBookId
+)
 
 fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     id = id,
@@ -275,6 +287,7 @@ fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     publisher = publisher,
     title = title,
     url = url,
+    localImagePath = localImagePath,
     isbn10 = isbn10,
     pages = pages,
     releaseYear = releaseYear,
@@ -310,6 +323,7 @@ fun BookEditionEntity.toModel(
     publisher = publisher,
     title = title,
     url = url,
+    localImagePath = localImagePath,
     isbn10 = isbn10,
     pages = pages,
     releaseYear = releaseYear,
@@ -319,48 +333,44 @@ fun BookEditionEntity.toModel(
     owned = owned,
 )
 
-fun UserBookReadEntity.toModel(): UserBookRead {
-    return UserBookRead(
-        id = id,
-        currentPage = currentPage,
-        progress = progress,
-        startedAt = startedAt,
-        finishedAt = finishedAt
-    )
-}
+fun UserBookReadEntity.toModel(): UserBookRead = UserBookRead(
+    id = id,
+    currentPage = currentPage,
+    progress = progress,
+    startedAt = startedAt,
+    finishedAt = finishedAt
+)
 
-fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook {
-    return UserBook(
-        id = id,
-        status = BookStatus.getFromCode(statusCode),
-        dateAdded = dateAdded,
-        privacySettingId = privacySettingId,
-        reviewHasSpoilers = reviewHasSpoilers,
-        editionId = editionId,
-        lastReadDate = lastReadDate,
-        rating = rating,
-        referrerUserId = referrerUserId,
-        reviewedAt = reviewedAt,
-        updatedAt = updatedAt,
-        journals = journals,
-    )
-}
+fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook = UserBook(
+    id = id,
+    status = BookStatus.getFromCode(statusCode),
+    dateAdded = dateAdded,
+    privacySettingId = privacySettingId,
+    reviewHasSpoilers = reviewHasSpoilers,
+    editionId = editionId,
+    lastReadDate = lastReadDate,
+    rating = rating,
+    referrerUserId = referrerUserId,
+    reviewedAt = reviewedAt,
+    updatedAt = updatedAt,
+    journals = journals,
+)
 
-fun ReadingJournalEntity.toModel(): ReadingJournal {
-    return ReadingJournal(
-        updatedAt = updatedAt,
-        event = event,
-    )
-}
+fun ReadingJournalEntity.toModel(): ReadingJournal = ReadingJournal(
+    updatedAt = updatedAt,
+    event = event,
+)
 
 fun ListBookFull.toModel(): ListBook = ListBook(
+    listBookId = listBook.listBookId,
+    listId = listBook.listId,
+    bookId = listBook.bookId,
+    editionId = listBook.editionId,
     book = book.toModel(),
     edition = edition.edition.edition.toModel(
         authors = edition.authors,
         owned = edition.edition.isOwned
     ),
-    listId = listBook.listId,
-    listBookId = listBook.listBookId
 )
 
 fun BookListWithBooks.toModel(): BookList = BookList(
@@ -372,8 +382,9 @@ fun BookListWithBooks.toModel(): BookList = BookList(
 
 fun BookFullEntity.toModel(): Book {
     val uiEditions = editions.map { editionWithAuthors ->
+        val editionAuthors = editionWithAuthors.authors.ifEmpty { bookAuthors }
         editionWithAuthors.edition.edition.toModel(
-            authors = editionWithAuthors.authors,
+            authors = editionAuthors,
             owned = editionWithAuthors.edition.isOwned,
         )
     }
@@ -402,11 +413,9 @@ fun BookFullEntity.toModel(): Book {
     )
 }
 
-fun BookSeriesEntity.toModel(): BookSeries {
-    return BookSeries(
-        id = id,
-        name = name,
-        amountOfBooks = amountOfBooks,
-    )
-}
+fun BookSeriesEntity.toModel(): BookSeries = BookSeries(
+    id = id,
+    name = name,
+    amountOfBooks = amountOfBooks,
+)
 // endregion

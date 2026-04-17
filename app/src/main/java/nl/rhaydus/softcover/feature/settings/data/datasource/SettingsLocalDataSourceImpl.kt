@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 
 class SettingsLocalDataSourceImpl(
     private val appSettingsDataStore: AppSettingsDataStore,
+    private val apiKeyLocalDataSource: ApiKeyLocalDataSource,
 ) : SettingsLocalDataSource {
     override val dateStyle: Flow<DateStyle> = appSettingsDataStore.store.data
         .map { it.dateStyle }
@@ -24,9 +25,7 @@ class SettingsLocalDataSourceImpl(
     }
 
     override suspend fun updateApiKey(key: String) {
-        appSettingsDataStore.store.updateData {
-            it.copy(apiKey = key)
-        }
+        apiKeyLocalDataSource.updateApiKey(key = key)
     }
 
     override fun getUserId(): Flow<Int> {
