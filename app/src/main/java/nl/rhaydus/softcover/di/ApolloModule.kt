@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 val apolloModule = module {
     single {
-        AuthInterceptor(appSettingsDataStore = get())
+        AuthInterceptor(apiKeyLocalDataSource = get())
     }
 
     single {
