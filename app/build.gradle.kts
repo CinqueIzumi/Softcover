@@ -102,6 +102,10 @@ dependencies {
     // Splash screen
     implementation(libs.androidx.splash)
 
+    // Google Play in-app updates
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
+
     // Unit test dependencies
     testImplementation(libs.junit.params)
     testImplementation(libs.junit.engine)
