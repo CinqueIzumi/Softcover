@@ -37,6 +37,8 @@ The agent is required to run the tests after writing them. Prefer narrow filters
 
 ## Architecture
 
+Always consult [ARCHITECTURE.md](ARCHITECTURE.md) before writing or reviewing code that touches layering, DI, navigation, or the TOAD state-management framework. Read it before adding a new feature module, modifying a ScreenModel / Action / Initializer, or changing data flow between layers — it is the source of truth for Clean Architecture boundaries and TOAD implementation details (generic signatures, per-feature boilerplate, Koin wiring). The summary below is a quick reference only; resolve any ambiguity against `ARCHITECTURE.md`.
+
 The app follows **Clean Architecture** with a custom **TOAD** state management framework. Code lives under `app/src/main/java/nl/rhaydus/softcover/`.
 
 ### Core vs Feature

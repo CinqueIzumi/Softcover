@@ -25,6 +25,7 @@ kotestVersion = "5.9.1"
 mockkVersion = "1.13.17"
 coroutinesTestVersion = "1.10.2"
 turbineVersion = "1.2.0"
+appUpdateVersion = "2.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +65,8 @@ kotest = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTestVersion" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbineVersion" }
+play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "appUpdateVersion" }
+play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "appUpdateVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

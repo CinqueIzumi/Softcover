@@ -5,6 +5,8 @@ import nl.rhaydus.softcover.di.apolloModule
 import nl.rhaydus.softcover.di.coreModule
 import nl.rhaydus.softcover.di.databaseModule
 import nl.rhaydus.softcover.di.dispatcherModule
+import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
+import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
 import nl.rhaydus.softcover.feature.reading.di.readingModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import nl.rhaydus.softcover.feature.book_detail.di.bookDetailModule
@@ -47,6 +49,8 @@ class SoftCoverApp : Application() {
                 searchModule,
                 settingsModule,
                 profileModule,
+                appUpdateModule,
+                appUpdateVariantModule,
             )
         }
     }

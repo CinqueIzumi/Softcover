@@ -17,7 +17,7 @@ android {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
+        versionCode = 17
         versionName = "1.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -101,6 +101,10 @@ dependencies {
 
     // Splash screen
     implementation(libs.androidx.splash)
+
+    // Google Play in-app updates
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
     // Unit test dependencies
     testImplementation(libs.junit.params)
