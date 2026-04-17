@@ -12,7 +12,7 @@ Files are named in **PascalCase**, matching their primary class.
 |------|-----------|---------|
 | Domain models | Plain nouns | `Book`, `Author`, `UserBook` |
 | Data entities | `*Entity` suffix | `BookEntity`, `UserBookEntity` |
-| Data sources | `*DataSource` / `*DataSourceImpl` | `BookRemoteDataSource`, `BookLocalDataSourceImpl` |
+| Data sources | `*DataSource` / `*DataSourceImpl` (both in the same file, named after the interface) | `BookRemoteDataSource`, `BookLocalDataSourceImpl` |
 | Repositories | `*Repository` / `*RepositoryImpl` | `BookRepository`, `BookRepositoryImpl` |
 | Use cases | `*UseCase` | `SearchForNameUseCase`, `MarkBookAsReadUseCase` |
 | Screens | `*Screen` | `SearchScreen`, `LibraryScreen` |
@@ -37,6 +37,10 @@ Files are named in **PascalCase**, matching their primary class.
 ### Feature Organization
 
 Every feature follows the `data` / `domain` / `presentation` layer split. See [ARCHITECTURE.md](ARCHITECTURE.md) for the full directory layout.
+
+### Data Source Interface and Implementation Colocation
+
+A data source interface and its implementation live in the **same file**, named after the interface (e.g. `BookRemoteDataSource.kt` contains both `BookRemoteDataSource` and `BookRemoteDataSourceImpl`). Do not split them into separate files.
 
 ### Koin Module per Feature
 
