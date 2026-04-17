@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 
 data class Book(
     val id: Int,
+    val canonicalId: Int? = null,
     val title: String,
     val editions: List<BookEdition>,
     val defaultEdition: BookEdition?,

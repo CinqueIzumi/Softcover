@@ -5,6 +5,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -50,9 +51,21 @@ class BooksRepositoryImplTest {
         } returns id
     }
 
-    private fun stubBookList(): BookList = mockk()
+    private fun stubBookList(listBooks: List<ListBook> = emptyList()): BookList = mockk {
+        every {
+            books
+        } returns listBooks
+    }
 
-    private fun stubListBook(): ListBook = mockk()
+    private fun stubListBook(bookId: Int = 1, editionId: Int = 100): ListBook = mockk {
+        every {
+            this@mockk.bookId
+        } returns bookId
+
+        every {
+            this@mockk.editionId
+        } returns editionId
+    }
 
     private fun stubBookEdition(): BookEdition = mockk()
 
@@ -486,6 +499,43 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
+    inner class GetEditionsByBookId {
+
+        @Test
+        fun `getEditionsByBookId delegates to remote data source and returns result`() = runTest {
+            // ----- Arrange -----
+            val bookId = 7
+            val expectedEditions = listOf(stubBookEdition())
+
+            coEvery {
+                booksRemoteDataSource.getEditionsByBookId(bookId = bookId)
+            } returns expectedEditions
+
+            // ----- Act -----
+            val result = repository.getEditionsByBookId(bookId = bookId)
+
+            // ----- Assert -----
+            result shouldBe expectedEditions
+        }
+
+        @Test
+        fun `getEditionsByBookId returns empty list when remote returns no editions`() = runTest {
+            // ----- Arrange -----
+            val bookId = 7
+
+            coEvery {
+                booksRemoteDataSource.getEditionsByBookId(bookId = bookId)
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = repository.getEditionsByBookId(bookId = bookId)
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+        }
+    }
+
+    @Nested
     inner class FetchBookById {
 
         @Test
@@ -736,6 +786,415 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerify {
                 booksLocalDataSource.cacheListBook(book = listBook)
+            }
+        }
+    }
+
+    @Nested
+    inner class FetchBooksByIds {
+
+        @Test
+        fun `fetchBooksByIds delegates to remote data source and returns result`() = runTest {
+            // ----- Arrange -----
+            val ids = listOf(1, 2, 3)
+            val expectedBooks = listOf(stubBook(userBookId = null), stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = ids)
+            } returns expectedBooks
+
+            // ----- Act -----
+            val result = repository.fetchBooksByIds(ids = ids)
+
+            // ----- Assert -----
+            result shouldBe expectedBooks
+        }
+
+        @Test
+        fun `fetchBooksByIds returns empty list when remote returns no books`() = runTest {
+            // ----- Arrange -----
+            val ids = listOf(99)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = ids)
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = repository.fetchBooksByIds(ids = ids)
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+        }
+    }
+
+    @Nested
+    inner class FetchEditionsByIds {
+
+        @Test
+        fun `fetchEditionsByIds delegates to remote data source and returns result`() = runTest {
+            // ----- Arrange -----
+            val ids = listOf(10, 20)
+            val expectedEditions = listOf(stubBookEdition(), stubBookEdition())
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(ids = ids)
+            } returns expectedEditions
+
+            // ----- Act -----
+            val result = repository.fetchEditionsByIds(ids = ids)
+
+            // ----- Assert -----
+            result shouldBe expectedEditions
+        }
+
+        @Test
+        fun `fetchEditionsByIds returns empty list when remote returns no editions`() = runTest {
+            // ----- Arrange -----
+            val ids = listOf(99)
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(ids = ids)
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = repository.fetchEditionsByIds(ids = ids)
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+        }
+    }
+
+    @Nested
+    inner class HydrateOrphanOwnedBooks {
+
+        private fun setupFetchAndCache(
+            fetchedBooks: List<Book> = emptyList(),
+            fetchedLists: List<BookList> = emptyList(),
+            localUserBookIds: List<Int> = emptyList(),
+        ) {
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = any())
+            } returns fetchedBooks
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = any())
+            } returns fetchedLists
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns localUserBookIds
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(ids = any())
+            } returns emptyList()
+        }
+
+        @Test
+        fun `does not call fetchBooksByIds when lists have no referenced bookIds`() = runTest {
+            // ----- Arrange -----
+            setupFetchAndCache(fetchedLists = emptyList())
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            }
+        }
+
+        @Test
+        fun `does not call fetchBooksByIds when all referenced bookIds are already cached`() = runTest {
+            // ----- Arrange -----
+            val listBook = stubListBook(bookId = 5)
+            val bookList = stubBookList(listBooks = listOf(listBook))
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(5))
+            } returns listOf(5)
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            }
+        }
+
+        @Test
+        fun `fetches and caches missing bookIds when orphans are present`() = runTest {
+            // ----- Arrange -----
+            val listBook = stubListBook(bookId = 7)
+            val bookList = stubBookList(listBooks = listOf(listBook))
+            val orphanBook = stubBook(userBookId = null)
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(7))
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(7))
+            } returns listOf(orphanBook)
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.cacheBooks(books = listOf(orphanBook))
+            }
+        }
+
+        @Test
+        fun `cacheBooks is called before cacheUserBookLists for orphan books`() = runTest {
+            // ----- Arrange -----
+            val listBook = stubListBook(bookId = 8)
+            val bookList = stubBookList(listBooks = listOf(listBook))
+            val orphanBook = stubBook(userBookId = null)
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(8))
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(8))
+            } returns listOf(orphanBook)
+
+            val callOrder = mutableListOf<String>()
+
+            coEvery {
+                booksLocalDataSource.cacheBooks(books = listOf(orphanBook))
+            } answers {
+                callOrder += "cacheBooks(orphan)"
+            }
+
+            coEvery {
+                booksLocalDataSource.cacheUserBookLists(lists = listOf(bookList))
+            } answers {
+                callOrder += "cacheUserBookLists"
+            }
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            val orphanCacheIdx = callOrder.indexOf("cacheBooks(orphan)")
+            val listCacheIdx = callOrder.indexOf("cacheUserBookLists")
+            (orphanCacheIdx < listCacheIdx) shouldBe true
+        }
+
+        @Test
+        fun `only fetches the ids that are missing from the local cache`() = runTest {
+            // ----- Arrange -----
+            val listBook1 = stubListBook(bookId = 10)
+            val listBook2 = stubListBook(bookId = 11)
+            val bookList = stubBookList(listBooks = listOf(listBook1, listBook2))
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(10, 11))
+            } returns listOf(10)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(11))
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerify {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(11))
+            }
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(10))
+            }
+        }
+
+        @Test
+        fun `does not cache orphan books when fetchBooksByIds returns empty list`() = runTest {
+            // ----- Arrange -----
+            val listBook = stubListBook(bookId = 9)
+            val bookList = stubBookList(listBooks = listOf(listBook))
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(9))
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(9))
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            // cacheBooks is called once for user books (emptyList), not a second time for orphans
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBooks(books = any())
+            }
+        }
+
+        @Test
+        fun `does not call fetchEditionsByIds when all referenced editionIds are already cached`() = runTest {
+            // ----- Arrange -----
+            val listBook = stubListBook(bookId = 5, editionId = 20)
+            val bookList = stubBookList(listBooks = listOf(listBook))
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(5))
+            } returns listOf(5)
+
+            coEvery {
+                booksLocalDataSource.getExistingEditionIds(ids = listOf(20))
+            } returns listOf(20)
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchEditionsByIds(ids = any())
+            }
+        }
+
+        @Test
+        fun `fetches and caches missing editionIds when orphan editions are present`() = runTest {
+            // ----- Arrange -----
+            val listBook = stubListBook(bookId = 5, editionId = 30)
+            val bookList = stubBookList(listBooks = listOf(listBook))
+            val orphanEdition = stubBookEdition()
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(5))
+            } returns listOf(5)
+
+            coEvery {
+                booksLocalDataSource.getExistingEditionIds(ids = listOf(30))
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(ids = listOf(30))
+            } returns listOf(orphanEdition)
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.cacheEditions(editions = listOf(orphanEdition))
+            }
+        }
+
+        @Test
+        fun `does not call cacheEditions when fetchEditionsByIds returns empty list`() = runTest {
+            // ----- Arrange -----
+            val listBook = stubListBook(bookId = 5, editionId = 40)
+            val bookList = stubBookList(listBooks = listOf(listBook))
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(5))
+            } returns listOf(5)
+
+            coEvery {
+                booksLocalDataSource.getExistingEditionIds(ids = listOf(40))
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(ids = listOf(40))
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheEditions(editions = any())
+            }
+        }
+
+        @Test
+        fun `book hydration runs before edition hydration`() = runTest {
+            // ----- Arrange -----
+            val listBook = stubListBook(bookId = 50, editionId = 50)
+            val bookList = stubBookList(listBooks = listOf(listBook))
+            val orphanBook = stubBook(userBookId = null)
+            val orphanEdition = stubBookEdition()
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(50))
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(50))
+            } returns listOf(orphanBook)
+
+            coEvery {
+                booksLocalDataSource.getExistingEditionIds(ids = listOf(50))
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(ids = listOf(50))
+            } returns listOf(orphanEdition)
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerifyOrder {
+                booksLocalDataSource.cacheBooks(books = listOf(orphanBook))
+                booksLocalDataSource.cacheEditions(editions = listOf(orphanEdition))
+            }
+        }
+
+        @Test
+        fun `only fetches the editionIds that are missing from the local cache`() = runTest {
+            // ----- Arrange -----
+            val listBook1 = stubListBook(bookId = 10, editionId = 10)
+            val listBook2 = stubListBook(bookId = 11, editionId = 11)
+            val bookList = stubBookList(listBooks = listOf(listBook1, listBook2))
+
+            setupFetchAndCache(fetchedLists = listOf(bookList))
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(10, 11))
+            } returns listOf(10, 11)
+
+            coEvery {
+                booksLocalDataSource.getExistingEditionIds(ids = listOf(10, 11))
+            } returns listOf(10)
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(ids = listOf(11))
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerify {
+                booksRemoteDataSource.fetchEditionsByIds(ids = listOf(11))
+            }
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchEditionsByIds(ids = listOf(10))
             }
         }
     }

@@ -14,7 +14,6 @@ val readingModule = module {
             updateBookProgressUseCase = get(),
             markBookAsReadUseCase = get(),
             refreshUserBooksUseCase = get(),
-            updateBookEditionUseCase = get(),
             updateBookProgress = get(),
             initializeUserBooksUseCase = get(),
             appDispatchers = get(),

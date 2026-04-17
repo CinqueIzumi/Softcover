@@ -16,7 +16,7 @@ class BookListsCollector : LibraryInitializer {
         dependencies.getAllUserListsUseCase().collectLatest { lists: List<BookList> ->
             val ownedList = lists.find { it.slug == "owned" } ?: return@collectLatest
 
-            val editions = ownedList.books.map { it.edition }
+            val editions = ownedList.books.mapNotNull { it.edition }
 
             scope.setState {
                 it.copy(ownedEditions = editions)

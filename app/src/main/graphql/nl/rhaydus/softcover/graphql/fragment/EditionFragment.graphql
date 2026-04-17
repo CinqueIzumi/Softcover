@@ -2,12 +2,6 @@ fragment EditionFragment on editions {
     id
     title
     book_id
-    contributions {
-        author {
-            name
-            id
-        }
-    }
     isbn_10
     pages
     publisher {

@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSourceI
 import nl.rhaydus.softcover.feature.books.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
@@ -85,6 +86,10 @@ val booksModule = module {
             booksRepository = get(),
             getAllUserBooksUseCase = get(),
         )
+    }
+
+    factory {
+        GetEditionsByBookIdUseCase(booksRepository = get())
     }
 
     factory {

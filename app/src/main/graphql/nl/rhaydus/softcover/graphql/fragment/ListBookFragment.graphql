@@ -1,12 +1,6 @@
 fragment ListBookFragment on list_books {
     id
     list_id
-
-    book {
-        ...BookFragment
-    }
-
-    edition {
-        ...EditionFragment
-    }
+    book_id
+    edition_id
 }

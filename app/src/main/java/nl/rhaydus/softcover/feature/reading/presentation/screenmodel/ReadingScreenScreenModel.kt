@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUser
 import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -21,7 +20,6 @@ class ReadingScreenScreenModel(
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
-    private val updateBookEditionUseCase: UpdateBookEditionUseCase,
     private val updateBookProgress: UpdateBookProgress,
     private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
     appDispatchers: AppDispatchers,
@@ -38,7 +36,6 @@ class ReadingScreenScreenModel(
         updateBookProgressUseCase = updateBookProgressUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
         refreshUserBooksUseCase = refreshUserBooksUseCase,
-        updateBookEditionUseCase = updateBookEditionUseCase,
         updateBookProgress = updateBookProgress,
         initializeUserBooksUseCase = initializeUserBooksUseCase,
     )

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -29,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.PreviewData
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
@@ -40,7 +40,11 @@ import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditionBottomSheetSelector(
-    book: Book,
+    bookTitle: String,
+    currentEdition: BookEdition,
+    defaultEdition: BookEdition?,
+    editions: List<BookEdition>,
+    isLoading: Boolean,
     onDismissRequest: () -> Unit,
     onCancelClick: () -> Unit,
     onConfirmClick: (BookEdition) -> Unit,
@@ -50,7 +54,11 @@ fun EditionBottomSheetSelector(
         sheetState = rememberModalBottomSheetState()
     ) {
         EditionBottomSheetContent(
-            book = book,
+            bookTitle = bookTitle,
+            currentEdition = currentEdition,
+            defaultEdition = defaultEdition,
+            editions = editions,
+            isLoading = isLoading,
             onCancelClick = onCancelClick,
             onConfirmClick = onConfirmClick
         )
@@ -59,12 +67,16 @@ fun EditionBottomSheetSelector(
 
 @Composable
 private fun EditionBottomSheetContent(
-    book: Book,
+    bookTitle: String,
+    currentEdition: BookEdition,
+    defaultEdition: BookEdition?,
+    editions: List<BookEdition>,
+    isLoading: Boolean,
     onCancelClick: () -> Unit,
     onConfirmClick: (BookEdition) -> Unit,
 ) {
     var selectedEdition by remember {
-        mutableStateOf(book.currentEdition)
+        mutableStateOf(currentEdition)
     }
 
     Column(
@@ -93,7 +105,7 @@ private fun EditionBottomSheetContent(
 
             SoftcoverButton(
                 label = "Confirm",
-                enabled = selectedEdition != book.currentEdition,
+                enabled = !isLoading && selectedEdition != currentEdition,
                 onClick = { onConfirmClick(selectedEdition) },
                 style = ButtonStyle.TEXT
             )
@@ -106,7 +118,7 @@ private fun EditionBottomSheetContent(
             horizontalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = book.title,
+                text = bookTitle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -114,18 +126,27 @@ private fun EditionBottomSheetContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(book.editions) { edition ->
-                val defaultEdition = book.defaultEdition ?: return@items
-
-                EditionItem(
-                    edition = edition,
-                    selected = edition == selectedEdition,
-                    onEditionClick = { selectedEdition = edition },
-                    defaultEdition = defaultEdition
-                )
+        if (isLoading && editions.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(editions) { edition ->
+                    EditionItem(
+                        edition = edition,
+                        selected = edition.id == selectedEdition.id,
+                        onEditionClick = { selectedEdition = edition },
+                        defaultEdition = defaultEdition ?: edition,
+                    )
+                }
             }
         }
     }
@@ -233,34 +254,19 @@ private fun EditionBottomSheetContentPreview() {
         title = "Snake-Eater",
     )
 
-    val baseBook = PreviewData.baseBook.copy(
-        editions = listOf(
-            baseEdition.copy(
-                pages = 271,
-                isbn10 = "123",
-                publisher = "47 north",
-                id = 40
-            ),
-            baseEdition.copy(
-                pages = 352,
-                isbn10 = "234",
-                publisher = "Titan Books",
-                id = 20,
-                format = "",
-                owned = true,
-            ),
-            baseEdition.copy(
-                pages = 267,
-                isbn10 = null,
-                publisher = "47 north",
-                id = 80
-            ),
-        )
+    val editions = listOf(
+        baseEdition.copy(pages = 271, isbn10 = "123", publisher = "47 north", id = 40),
+        baseEdition.copy(pages = 352, isbn10 = "234", publisher = "Titan Books", id = 20, format = "", owned = true),
+        baseEdition.copy(pages = 267, isbn10 = null, publisher = "47 north", id = 80),
     )
 
     SoftcoverTheme {
         EditionBottomSheetContent(
-            book = baseBook,
+            bookTitle = PreviewData.baseBook.title,
+            currentEdition = editions.first(),
+            defaultEdition = editions.first(),
+            editions = editions,
+            isLoading = false,
             onConfirmClick = {},
             onCancelClick = {},
         )

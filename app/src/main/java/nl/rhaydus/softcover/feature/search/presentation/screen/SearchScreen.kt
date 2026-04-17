@@ -214,6 +214,7 @@ class SearchScreen : Screen {
                 modifier = Modifier.width(80.dp),
                 isLoading = false,
                 defaultEdition = book.defaultEdition,
+                fallbackCoverUrl = book.coverUrl,
             )
 
             Spacer(modifier = Modifier.width(8.dp))

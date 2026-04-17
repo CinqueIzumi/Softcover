@@ -1,0 +1,16 @@
+query GetEditionsByBookId(
+    $bookId: Int!,
+) {
+    editions(
+        where: {
+            book_id: {
+                _eq: $bookId
+            }
+        }
+        order_by: {
+            users_count: desc
+        }
+    ) {
+        ...EditionDetailFragment
+    }
+}

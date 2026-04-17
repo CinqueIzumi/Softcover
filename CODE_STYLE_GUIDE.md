@@ -181,6 +181,11 @@ Every multi-line construct (code block, multi-line call, multi-line assignment) 
 - Blank line **between** each guard clause.
 - Blank line **after** the last guard clause before the main logic.
 - Every guard clause is its own paragraph.
+- This applies to **every** form of safeguard, including single-line ones that return a value pre-emptively (e.g. `if (ids.isEmpty()) return emptyList()`, `val x = foo ?: return null`, `val x = foo ?: return@map other`). Whether the guard exits with `return`, `return <value>`, `return@label`, `throw`, or `continue`, a blank line always follows it before the next statement.
+
+### `if` statements that consume an extracted variable
+
+- When an `if` statement references a `val`/`var` declared on the line directly above it, leave a blank line **between** the assignment and the `if`. The extraction is its own paragraph; the `if` that consumes it begins a new one. This applies to both single-line and multi-line `if` bodies, and whether the `if` is a guard clause or branching logic.
 
 ### Between declarations
 

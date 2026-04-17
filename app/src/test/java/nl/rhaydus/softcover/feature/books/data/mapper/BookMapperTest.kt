@@ -4,6 +4,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -29,10 +31,20 @@ import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookWithJournals
+import nl.rhaydus.softcover.fragment.BookDetailFragment
+import nl.rhaydus.softcover.fragment.EditionDetailFragment
+import nl.rhaydus.softcover.fragment.EditionFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookMapperTest {
+
+    @AfterEach
+    fun tearDown() {
+        unmockkAll()
+    }
 
     // region Shared stubs for UI -> Entity section
 
@@ -151,8 +163,10 @@ class BookMapperTest {
     private fun stubListBook(
         listId: Int = 20,
         listBookId: Int = 99,
-        book: Book = stubBook(),
-        edition: BookEdition = stubBookEdition(),
+        bookId: Int = 1,
+        editionId: Int = 10,
+        book: Book? = null,
+        edition: BookEdition? = null,
     ): ListBook = mockk {
         every {
             this@mockk.listId
@@ -161,6 +175,14 @@ class BookMapperTest {
         every {
             this@mockk.listBookId
         } returns listBookId
+
+        every {
+            this@mockk.bookId
+        } returns bookId
+
+        every {
+            this@mockk.editionId
+        } returns editionId
 
         every {
             this@mockk.book
@@ -601,15 +623,13 @@ class BookMapperTest {
     inner class ListBookToEntity {
 
         @Test
-        fun `maps listId, bookId, editionId and listBookId from ListBook to ListBookEntity`() {
+        fun `maps listId, bookId, editionId and listBookId directly from ListBook fields`() {
             // ----- Arrange -----
-            val innerBook = stubBook(id = 1)
-            val innerEdition = stubBookEdition(id = 10)
             val listBook = stubListBook(
                 listId = 20,
                 listBookId = 99,
-                book = innerBook,
-                edition = innerEdition,
+                bookId = 1,
+                editionId = 10,
             )
 
             // ----- Act -----
@@ -1422,7 +1442,7 @@ class BookMapperTest {
     inner class ListBookFullToModel {
 
         @Test
-        fun `maps listId and listBookId from ListBookEntity`() {
+        fun `maps listId, listBookId, bookId and editionId from ListBookEntity`() {
             // ----- Arrange -----
             val listBookEntity = stubListBookEntity(
                 listId = 20,
@@ -1455,6 +1475,33 @@ class BookMapperTest {
             // ----- Assert -----
             result.listId shouldBe 20
             result.listBookId shouldBe 99
+            result.bookId shouldBe 1
+            result.editionId shouldBe 10
+        }
+
+        @Test
+        fun `populates book and edition from Room join data`() {
+            // ----- Arrange -----
+            val listBookEntity = stubListBookEntity(bookId = 1, editionId = 10)
+            val editionEntity = stubBookEditionEntity(id = 10, bookId = 1)
+            val editionView = stubBookEditionView(entity = editionEntity, isOwned = false)
+            val editionWithAuthors = stubBookEditionWithAuthors(editionView = editionView)
+            val bookFullEntity = stubBookFullEntity(
+                book = stubBookEntity(id = 1),
+                editions = listOf(editionWithAuthors),
+            )
+            val listBookFull = stubListBookFull(
+                listBook = listBookEntity,
+                book = bookFullEntity,
+                edition = editionWithAuthors,
+            )
+
+            // ----- Act -----
+            val result = listBookFull.toModel()
+
+            // ----- Assert -----
+            result.book shouldBe bookFullEntity.toModel()
+            result.edition?.id shouldBe 10
         }
 
         @Test
@@ -1472,7 +1519,7 @@ class BookMapperTest {
             val result = listBookFull.toModel()
 
             // ----- Assert -----
-            result.edition.owned shouldBe true
+            result.edition?.owned shouldBe true
         }
 
         @Test
@@ -1490,7 +1537,7 @@ class BookMapperTest {
             val result = listBookFull.toModel()
 
             // ----- Assert -----
-            result.edition.owned shouldBe false
+            result.edition?.owned shouldBe false
         }
     }
 
@@ -1850,6 +1897,874 @@ class BookMapperTest {
             result.editions.size shouldBe 1
             result.editions[0].id shouldBe 10
             result.editions[0].owned shouldBe true
+        }
+    }
+
+    // =========================================================
+    // DTO -> UI (GraphQL fragment) mappers
+    // =========================================================
+
+    @Nested
+    inner class EditionFragmentToBookEdition {
+
+        @Test
+        fun `maps all scalar fields from EditionFragment to BookEdition`() {
+            // ----- Arrange -----
+            val publisher = mockk<EditionFragment.Publisher> {
+                every { name } returns "Penguin"
+            }
+
+            val image = mockk<EditionFragment.Image> {
+                every { url } returns "https://example.com/cover.jpg"
+            }
+
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns "Edition Title"
+                every { book_id } returns 1
+                every { isbn_10 } returns "1234567890"
+                every { pages } returns 300
+                every { this@mockk.publisher } returns publisher
+                every { this@mockk.image } returns image
+                every { release_year } returns 2020
+                every { edition_format } returns "Paperback"
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.id shouldBe 10
+            result.title shouldBe "Edition Title"
+            result.bookId shouldBe 1
+            result.isbn10 shouldBe "1234567890"
+            result.pages shouldBe 300
+            result.publisher shouldBe "Penguin"
+            result.url shouldBe "https://example.com/cover.jpg"
+            result.releaseYear shouldBe 2020
+            result.format shouldBe "Paperback"
+            result.owned shouldBe false
+        }
+
+        @Test
+        fun `maps authors from provided list parameter`() {
+            // ----- Arrange -----
+            val author = Author(id = 7, name = "Jane Austen")
+
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition(authors = listOf(author))
+
+            // ----- Assert -----
+            result.authors.size shouldBe 1
+            result.authors[0].id shouldBe 7
+            result.authors[0].name shouldBe "Jane Austen"
+        }
+
+        @Test
+        fun `maps null publisher name as null`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.publisher shouldBe null
+        }
+
+        @Test
+        fun `maps null image url as null`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.url shouldBe null
+        }
+
+        @Test
+        fun `maps null release_year as -1`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.releaseYear shouldBe -1
+        }
+
+        @Test
+        fun `maps null edition_format as empty string`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.format shouldBe ""
+        }
+
+        @Test
+        fun `defaults authors to empty list when not supplied`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.authors shouldBe emptyList()
+        }
+    }
+
+    @Nested
+    inner class EditionDetailFragmentToBookEdition {
+
+        @Test
+        fun `extracts authors from contributions and maps them`() {
+            // ----- Arrange -----
+            val authorInner = mockk<EditionDetailFragment.Contribution.Author> {
+                every { id } returns 5
+                every { name } returns "George Orwell"
+            }
+
+            val contribution = mockk<EditionDetailFragment.Contribution> {
+                every { author } returns authorInner
+            }
+
+            val fragment = mockk<EditionDetailFragment> {
+                every { id } returns 20
+                every { title } returns "Animal Farm"
+                every { book_id } returns 2
+                every { isbn_10 } returns null
+                every { pages } returns 112
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns 1945
+                every { edition_format } returns "Hardcover"
+                every { contributions } returns listOf(contribution)
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.authors.size shouldBe 1
+            result.authors[0].id shouldBe 5
+            result.authors[0].name shouldBe "George Orwell"
+        }
+
+        @Test
+        fun `skips contributions whose author is null`() {
+            // ----- Arrange -----
+            val contribution = mockk<EditionDetailFragment.Contribution> {
+                every { author } returns null
+            }
+
+            val fragment = mockk<EditionDetailFragment> {
+                every { id } returns 20
+                every { title } returns null
+                every { book_id } returns 2
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+                every { contributions } returns listOf(contribution)
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.authors shouldBe emptyList()
+        }
+
+        @Test
+        fun `produces empty authors list when contributions is empty`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionDetailFragment> {
+                every { id } returns 20
+                every { title } returns null
+                every { book_id } returns 2
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+                every { contributions } returns emptyList()
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.authors shouldBe emptyList()
+        }
+
+        @Test
+        fun `maps scalar edition fields correctly`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionDetailFragment> {
+                every { id } returns 77
+                every { title } returns "1984"
+                every { book_id } returns 3
+                every { isbn_10 } returns "0451524934"
+                every { pages } returns 328
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns 1949
+                every { edition_format } returns "Paperback"
+                every { contributions } returns emptyList()
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.id shouldBe 77
+            result.title shouldBe "1984"
+            result.bookId shouldBe 3
+            result.isbn10 shouldBe "0451524934"
+            result.pages shouldBe 328
+            result.releaseYear shouldBe 1949
+            result.format shouldBe "Paperback"
+        }
+    }
+
+    @Nested
+    inner class ListBookFragmentToListBook {
+
+        private fun stubListBookFragment(
+            id: Int = 99,
+            listId: Int = 20,
+            bookId: Int = 1,
+            editionId: Int? = 10,
+        ): nl.rhaydus.softcover.fragment.ListBookFragment = mockk {
+            every { this@mockk.id } returns id
+            every { list_id } returns listId
+            every { book_id } returns bookId
+            every { edition_id } returns editionId
+        }
+
+        @Test
+        fun `returns null when edition_id is null`() {
+            // ----- Arrange -----
+            val fragment = stubListBookFragment(editionId = null)
+
+            // ----- Act -----
+            val result = fragment.toListBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `returns ids-only ListBook when edition_id is present`() {
+            // ----- Arrange -----
+            val fragment = stubListBookFragment(
+                id = 99,
+                listId = 20,
+                bookId = 1,
+                editionId = 10,
+            )
+
+            // ----- Act -----
+            val result = fragment.toListBook()
+
+            // ----- Assert -----
+            result?.listBookId shouldBe 99
+            result?.listId shouldBe 20
+            result?.bookId shouldBe 1
+            result?.editionId shouldBe 10
+        }
+
+        @Test
+        fun `book and edition are null on the GraphQL path`() {
+            // ----- Arrange -----
+            val fragment = stubListBookFragment(editionId = 10)
+
+            // ----- Act -----
+            val result = fragment.toListBook()
+
+            // ----- Assert -----
+            result?.book shouldBe null
+            result?.edition shouldBe null
+        }
+    }
+
+    @Nested
+    inner class UserBookFragmentToBook {
+
+        @Test
+        fun `returns null when bookListFragment companion extension returns null`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+
+            val bookInner = mockk<UserBookFragment.Book>()
+            val fragment = mockk<UserBookFragment> {
+                every { book } returns bookInner
+            }
+
+            every {
+                with(UserBookFragment.Book.Companion) { bookInner.bookListFragment() }
+            } returns null
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `returns null when edition is null`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+
+            val bookListFragment = mockk<UserBookFragment.Book>()
+            val fragment = mockk<UserBookFragment> {
+                every { book } returns bookListFragment
+                every { edition } returns null
+                every { reading_journals } returns emptyList()
+                every { user_book_reads } returns emptyList()
+                every { id } returns 1
+                every { status_id } returns 1
+                every { edition_id } returns null
+                every { last_read_date } returns null
+                every { date_added } returns "2024-01-01"
+                every { privacy_setting_id } returns 1
+                every { rating } returns null
+                every { referrer_user_id } returns null
+                every { review_has_spoilers } returns false
+                every { reviewed_at } returns null
+                every { updated_at } returns null
+            }
+
+            every {
+                with(UserBookFragment.Book.Companion) { bookListFragment.bookListFragment() }
+            } returns mockk {
+                every { id } returns 100
+                every { canonical } returns null
+                every { title } returns "Test"
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+            }
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `returns non-null Book when edition is present and all fields map correctly`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.User_book_read.Companion)
+            mockkObject(UserBookFragment.Reading_journal.Companion)
+
+            val bookListFragment = mockk<UserBookFragment.Book>()
+            val editionInner = mockk<UserBookFragment.Edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns "My Edition"
+                every { book_id } returns 100
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
+                every { id } returns 100
+                every { canonical } returns null
+                every { title } returns "My Book"
+                every { rating } returns 4.0
+                every { image } returns null
+                every { release_year } returns 2020
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+            }
+
+            val fragment = mockk<UserBookFragment> {
+                every { book } returns bookListFragment
+                every { edition } returns editionInner
+                every { reading_journals } returns emptyList()
+                every { user_book_reads } returns emptyList()
+                every { id } returns 1
+                every { status_id } returns 1
+                every { edition_id } returns 10
+                every { last_read_date } returns null
+                every { date_added } returns "2024-01-01"
+                every { privacy_setting_id } returns 1
+                every { rating } returns null
+                every { referrer_user_id } returns null
+                every { review_has_spoilers } returns false
+                every { reviewed_at } returns null
+                every { updated_at } returns null
+            }
+
+            every {
+                with(UserBookFragment.Book.Companion) { bookListFragment.bookListFragment() }
+            } returns bookListFragmentModel
+
+            every {
+                with(UserBookFragment.Edition.Companion) { editionInner.editionFragment() }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.id shouldBe 100
+            result?.title shouldBe "My Book"
+            result?.defaultEdition shouldBe null
+            result?.description shouldBe ""
+            result?.usersCount shouldBe 0
+            result?.editions?.size shouldBe 1
+            result?.editions?.get(0)?.id shouldBe 10
+        }
+
+        @Test
+        fun `sets canonicalId when canonical id differs from book id`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.User_book_read.Companion)
+            mockkObject(UserBookFragment.Reading_journal.Companion)
+
+            val canonical = mockk<nl.rhaydus.softcover.fragment.BookListFragment.Canonical> {
+                every { id } returns 999
+            }
+
+            val bookListFragment = mockk<UserBookFragment.Book>()
+            val editionInner = mockk<UserBookFragment.Edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 100
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
+                every { id } returns 100
+                every { this@mockk.canonical } returns canonical
+                every { title } returns "My Book"
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+            }
+
+            val fragment = mockk<UserBookFragment> {
+                every { book } returns bookListFragment
+                every { edition } returns editionInner
+                every { reading_journals } returns emptyList()
+                every { user_book_reads } returns emptyList()
+                every { id } returns 1
+                every { status_id } returns 1
+                every { edition_id } returns 10
+                every { last_read_date } returns null
+                every { date_added } returns "2024-01-01"
+                every { privacy_setting_id } returns 1
+                every { rating } returns null
+                every { referrer_user_id } returns null
+                every { review_has_spoilers } returns false
+                every { reviewed_at } returns null
+                every { updated_at } returns null
+            }
+
+            every {
+                with(UserBookFragment.Book.Companion) { bookListFragment.bookListFragment() }
+            } returns bookListFragmentModel
+
+            every {
+                with(UserBookFragment.Edition.Companion) { editionInner.editionFragment() }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.canonicalId shouldBe 999
+        }
+
+        @Test
+        fun `sets canonicalId to null when canonical id equals book id`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.User_book_read.Companion)
+            mockkObject(UserBookFragment.Reading_journal.Companion)
+
+            val canonical = mockk<nl.rhaydus.softcover.fragment.BookListFragment.Canonical> {
+                every { id } returns 100
+            }
+
+            val bookListFragment = mockk<UserBookFragment.Book>()
+            val editionInner = mockk<UserBookFragment.Edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 100
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
+                every { id } returns 100
+                every { this@mockk.canonical } returns canonical
+                every { title } returns "My Book"
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+            }
+
+            val fragment = mockk<UserBookFragment> {
+                every { book } returns bookListFragment
+                every { edition } returns editionInner
+                every { reading_journals } returns emptyList()
+                every { user_book_reads } returns emptyList()
+                every { id } returns 1
+                every { status_id } returns 1
+                every { edition_id } returns 10
+                every { last_read_date } returns null
+                every { date_added } returns "2024-01-01"
+                every { privacy_setting_id } returns 1
+                every { rating } returns null
+                every { referrer_user_id } returns null
+                every { review_has_spoilers } returns false
+                every { reviewed_at } returns null
+                every { updated_at } returns null
+            }
+
+            every {
+                with(UserBookFragment.Book.Companion) { bookListFragment.bookListFragment() }
+            } returns bookListFragmentModel
+
+            every {
+                with(UserBookFragment.Edition.Companion) { editionInner.editionFragment() }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.canonicalId shouldBe null
+        }
+    }
+
+    @Nested
+    inner class BookDetailFragmentToBook {
+
+        @Test
+        fun `returns null when default_physical_edition is null`() {
+            // ----- Arrange -----
+            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+
+            val fragment = mockk<BookDetailFragment> {
+                every { id } returns 1
+                every { canonical } returns null
+                every { title } returns "My Book"
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+                every { description } returns null
+                every { users_count } returns 0
+                every { default_physical_edition } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `returns non-null Book when default_physical_edition is present`() {
+            // ----- Arrange -----
+            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+
+            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns "Hardcover Edition"
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns 400
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns 2021
+                every { edition_format } returns "Hardcover"
+            }
+
+            val fragment = mockk<BookDetailFragment> {
+                every { id } returns 1
+                every { canonical } returns null
+                every { title } returns "My Book"
+                every { rating } returns 4.5
+                every { image } returns null
+                every { release_year } returns 2021
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+                every { description } returns "A great book."
+                every { users_count } returns 500
+                every { default_physical_edition } returns defaultEditionInner
+            }
+
+            every {
+                with(BookDetailFragment.Default_physical_edition.Companion) {
+                    defaultEditionInner.editionFragment()
+                }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.id shouldBe 1
+            result?.title shouldBe "My Book"
+            result?.description shouldBe "A great book."
+            result?.usersCount shouldBe 500
+            result?.userBook shouldBe null
+            result?.userBookRead shouldBe null
+            result?.defaultEdition?.id shouldBe 10
+            result?.editions?.size shouldBe 1
+            result?.editions?.get(0)?.id shouldBe 10
+        }
+
+        @Test
+        fun `maps description as empty string when null`() {
+            // ----- Arrange -----
+            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+
+            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            val fragment = mockk<BookDetailFragment> {
+                every { id } returns 1
+                every { canonical } returns null
+                every { title } returns null
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+                every { description } returns null
+                every { users_count } returns 0
+                every { default_physical_edition } returns defaultEditionInner
+            }
+
+            every {
+                with(BookDetailFragment.Default_physical_edition.Companion) {
+                    defaultEditionInner.editionFragment()
+                }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.description shouldBe ""
+        }
+
+        @Test
+        fun `sets canonicalId when canonical id differs from book id`() {
+            // ----- Arrange -----
+            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+
+            val canonical = mockk<BookDetailFragment.Canonical> {
+                every { id } returns 999
+            }
+
+            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            val fragment = mockk<BookDetailFragment> {
+                every { id } returns 1
+                every { this@mockk.canonical } returns canonical
+                every { title } returns null
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+                every { description } returns null
+                every { users_count } returns 0
+                every { default_physical_edition } returns defaultEditionInner
+            }
+
+            every {
+                with(BookDetailFragment.Default_physical_edition.Companion) {
+                    defaultEditionInner.editionFragment()
+                }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.canonicalId shouldBe 999
+        }
+
+        @Test
+        fun `sets canonicalId to null when canonical id equals book id`() {
+            // ----- Arrange -----
+            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+
+            val canonical = mockk<BookDetailFragment.Canonical> {
+                every { id } returns 1
+            }
+
+            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            val fragment = mockk<BookDetailFragment> {
+                every { id } returns 1
+                every { this@mockk.canonical } returns canonical
+                every { title } returns null
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+                every { description } returns null
+                every { users_count } returns 0
+                every { default_physical_edition } returns defaultEditionInner
+            }
+
+            every {
+                with(BookDetailFragment.Default_physical_edition.Companion) {
+                    defaultEditionInner.editionFragment()
+                }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.canonicalId shouldBe null
         }
     }
 }

@@ -149,7 +149,6 @@ class CurrentlyReadingBooksCollectorTest {
             stateFlow.value = ReadingScreenUiState(
                 isLoading = true,
                 showProgressSheet = true,
-                showEditionSheet = true,
             )
             val books = listOf(stubBook())
             val collector = CurrentlyReadingBooksCollector()
@@ -160,7 +159,6 @@ class CurrentlyReadingBooksCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.showProgressSheet shouldBe true
-            stateFlow.value.showEditionSheet shouldBe true
             stateFlow.value.books shouldBe books
             job.cancel()
         }

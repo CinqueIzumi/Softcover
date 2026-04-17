@@ -10,6 +10,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -338,6 +339,142 @@ class BooksLocalDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
+        }
+    }
+
+    @Nested
+    inner class GetExistingBookIds {
+
+        @Test
+        fun `returns empty list immediately when ids input is empty`() = runTest {
+            // ----- Arrange -----
+            // (no DAO call expected — short-circuit path)
+
+            // ----- Act -----
+            val result = dataSource.getExistingBookIds(ids = emptyList())
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+            coVerify(exactly = 0) {
+                dao.getExistingBookIds(any())
+            }
+        }
+
+        @Test
+        fun `delegates to DAO and returns the filtered id list when ids are non-empty`() = runTest {
+            // ----- Arrange -----
+            val inputIds = listOf(1, 2, 3)
+            val cachedIds = listOf(1, 3)
+
+            coEvery {
+                dao.getExistingBookIds(bookIds = inputIds)
+            } returns cachedIds
+
+            // ----- Act -----
+            val result = dataSource.getExistingBookIds(ids = inputIds)
+
+            // ----- Assert -----
+            result shouldBe cachedIds
+        }
+
+        @Test
+        fun `returns empty list when none of the given ids exist in the database`() = runTest {
+            // ----- Arrange -----
+            val inputIds = listOf(10, 20)
+
+            coEvery {
+                dao.getExistingBookIds(bookIds = inputIds)
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = dataSource.getExistingBookIds(ids = inputIds)
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+        }
+    }
+
+    @Nested
+    inner class GetExistingEditionIds {
+
+        @Test
+        fun `returns empty list immediately when ids input is empty`() = runTest {
+            // ----- Arrange -----
+            // (no DAO call expected — short-circuit path)
+
+            // ----- Act -----
+            val result = dataSource.getExistingEditionIds(ids = emptyList())
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+            coVerify(exactly = 0) {
+                dao.getExistingEditionIds(any())
+            }
+        }
+
+        @Test
+        fun `delegates to DAO and returns the filtered id list when ids are non-empty`() = runTest {
+            // ----- Arrange -----
+            val inputIds = listOf(10, 20, 30)
+            val cachedIds = listOf(10, 30)
+
+            coEvery {
+                dao.getExistingEditionIds(editionIds = inputIds)
+            } returns cachedIds
+
+            // ----- Act -----
+            val result = dataSource.getExistingEditionIds(ids = inputIds)
+
+            // ----- Assert -----
+            result shouldBe cachedIds
+        }
+
+        @Test
+        fun `returns empty list when none of the given edition ids exist in the database`() = runTest {
+            // ----- Arrange -----
+            val inputIds = listOf(99, 100)
+
+            coEvery {
+                dao.getExistingEditionIds(editionIds = inputIds)
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = dataSource.getExistingEditionIds(ids = inputIds)
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+        }
+    }
+
+    @Nested
+    inner class CacheEditions {
+
+        @Test
+        fun `delegates to DAO with the given editions`() = runTest {
+            // ----- Arrange -----
+            val editions = listOf<BookEdition>(mockk(), mockk())
+
+            // ----- Act -----
+            dataSource.cacheEditions(editions = editions)
+
+            // ----- Assert -----
+            coVerify {
+                dao.cacheEditions(editions = editions)
+            }
+        }
+
+        @Test
+        fun `delegates to DAO with an empty list`() = runTest {
+            // ----- Arrange -----
+            val editions = emptyList<BookEdition>()
+
+            // ----- Act -----
+            dataSource.cacheEditions(editions = editions)
+
+            // ----- Assert -----
+            coVerify {
+                dao.cacheEditions(editions = editions)
+            }
         }
     }
 
