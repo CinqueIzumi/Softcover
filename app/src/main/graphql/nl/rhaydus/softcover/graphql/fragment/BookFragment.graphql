@@ -1,7 +1,0 @@
-fragment BookFragment on books {
-    canonical {
-        ...BookContentFragment
-    }   
-
-    ...BookContentFragment
-}

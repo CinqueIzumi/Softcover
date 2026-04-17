@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -15,6 +16,12 @@ interface BooksLocalDataSource {
     val allUserLists: Flow<List<BookList>>
 
     suspend fun getAllUserBookIds(): List<Int>
+
+    suspend fun getExistingBookIds(ids: List<Int>): List<Int>
+
+    suspend fun getExistingEditionIds(ids: List<Int>): List<Int>
+
+    suspend fun cacheEditions(editions: List<BookEdition>)
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
@@ -50,6 +57,22 @@ class BooksLocalDataSourceImpl(
 
     override suspend fun getAllUserBookIds(): List<Int> {
         return dao.getAllUserBookIds()
+    }
+
+    override suspend fun getExistingBookIds(ids: List<Int>): List<Int> {
+        if (ids.isEmpty()) return emptyList()
+
+        return dao.getExistingBookIds(bookIds = ids)
+    }
+
+    override suspend fun getExistingEditionIds(ids: List<Int>): List<Int> {
+        if (ids.isEmpty()) return emptyList()
+
+        return dao.getExistingEditionIds(editionIds = ids)
+    }
+
+    override suspend fun cacheEditions(editions: List<BookEdition>) {
+        dao.cacheEditions(editions = editions)
     }
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {

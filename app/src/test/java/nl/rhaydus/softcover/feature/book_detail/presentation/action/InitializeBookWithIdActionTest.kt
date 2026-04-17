@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -25,15 +26,17 @@ class InitializeBookWithIdActionTest {
     private lateinit var fetchBookByIdUseCase: FetchBookByIdUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         fetchBookByIdUseCase = mockk()
         stateFlow = MutableStateFlow(BookDetailUiState())
+        localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
+            localVariablesFlow = localVariablesFlow,
             eventChannel = Channel(Channel.BUFFERED),
         )
     }
@@ -59,7 +62,13 @@ class InitializeBookWithIdActionTest {
         }
     }
 
-    private fun stubBook(): Book = mockk()
+    private fun stubBook(
+        id: Int = 42,
+        editions: List<BookEdition> = listOf(mockk(), mockk()),
+    ): Book = mockk {
+        every { this@mockk.id } returns id
+        every { this@mockk.editions } returns editions
+    }
 
     @Nested
     inner class Execute {
@@ -68,7 +77,8 @@ class InitializeBookWithIdActionTest {
         fun `sets book and clears loadingBookDetails flag when use case succeeds`() = runTest {
             // ----- Arrange -----
             val bookId = 42
-            val expectedBook = stubBook()
+            val expectedEditions = listOf<BookEdition>(mockk(), mockk())
+            val expectedBook = stubBook(id = bookId, editions = expectedEditions)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -86,10 +96,12 @@ class InitializeBookWithIdActionTest {
             // ----- Assert -----
             stateFlow.value.book shouldBe expectedBook
             stateFlow.value.loadingBookDetails shouldBe false
+            stateFlow.value.editions shouldBe expectedEditions
+            localVariablesFlow.value.editionsLoadedForBookId shouldBe bookId
         }
 
         @Test
-        fun `sets book to null and clears loadingBookDetails flag when use case fails`() = runTest {
+        fun `sets book to null, clears loadingBookDetails, leaves editions empty, and does not stamp editionsLoadedForBookId when use case fails`() = runTest {
             // ----- Arrange -----
             val bookId = 7
             dependencies = stubDependencies(this)
@@ -109,13 +121,15 @@ class InitializeBookWithIdActionTest {
             // ----- Assert -----
             stateFlow.value.book shouldBe null
             stateFlow.value.loadingBookDetails shouldBe false
+            stateFlow.value.editions shouldBe emptyList()
+            localVariablesFlow.value.editionsLoadedForBookId shouldBe null
         }
 
         @Test
         fun `invokes use case with the id provided to the action constructor`() = runTest {
             // ----- Arrange -----
             val bookId = 99
-            val expectedBook = stubBook()
+            val expectedBook = stubBook(id = bookId)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -140,7 +154,7 @@ class InitializeBookWithIdActionTest {
         fun `loadingBookDetails remains true while the use case is executing`() = runTest {
             // ----- Arrange -----
             val bookId = 5
-            val expectedBook = stubBook()
+            val expectedBook = stubBook(id = bookId)
             dependencies = stubDependencies(this)
 
             var loadingAtInvocation: Boolean? = null

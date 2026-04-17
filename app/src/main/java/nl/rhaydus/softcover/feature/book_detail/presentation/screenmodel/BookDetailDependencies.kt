@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
@@ -18,6 +19,7 @@ class BookDetailDependencies(
     val updateBookProgress: UpdateBookProgress,
     val updateBookEditionUseCase: UpdateBookEditionUseCase,
     val fetchBookByIdUseCase: FetchBookByIdUseCase,
+    val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
     val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,

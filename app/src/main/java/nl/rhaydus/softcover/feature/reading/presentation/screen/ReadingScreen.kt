@@ -51,7 +51,6 @@ import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
-import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
@@ -64,12 +63,9 @@ import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
-import nl.rhaydus.softcover.feature.reading.presentation.action.DismissEditionSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowEditionSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
@@ -178,14 +174,6 @@ object ReadingScreen : Screen {
                     )
                 }
 
-                if (state.bookToUpdate != null && state.showEditionSheet) {
-                    EditionBottomSheetSelector(
-                        onDismissRequest = { runAction(DismissEditionSheetAction) },
-                        onCancelClick = { runAction(DismissEditionSheetAction) },
-                        onConfirmClick = { runAction(OnNewEditionSaveClickAction(edition = it)) },
-                        book = state.bookToUpdate,
-                    )
-                }
             }
         }
     }
@@ -279,6 +267,7 @@ object ReadingScreen : Screen {
                         modifier = Modifier.width(100.dp),
                         isLoading = false,
                         defaultEdition = book.defaultEdition,
+                        fallbackCoverUrl = book.coverUrl,
                     )
 
                     Spacer(modifier = Modifier.width(16.dp))
@@ -329,18 +318,6 @@ object ReadingScreen : Screen {
                                     },
                                     icon = SoftcoverIconResource.Drawable(
                                         id = R.drawable.ic_check_circle,
-                                        contentDescription = "Mark as Read icon"
-                                    )
-                                ),
-                                SoftcoverMenuItem(
-                                    label = "Switch Edition",
-                                    onClick = {
-                                        updateProgressSplitButtonActive = false
-
-                                        runAction(OnShowEditionSheetClickAction(book = book))
-                                    },
-                                    icon = SoftcoverIconResource.Drawable(
-                                        id = R.drawable.ic_library_books,
                                         contentDescription = "Mark as Read icon"
                                     )
                                 ),

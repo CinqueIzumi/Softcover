@@ -95,7 +95,6 @@ class DismissProgressSheetActionTest {
                 isLoading = false,
                 bookToUpdate = stubBook(),
                 showProgressSheet = true,
-                showEditionSheet = true,
             )
 
             // ----- Act -----
@@ -107,7 +106,6 @@ class DismissProgressSheetActionTest {
             // ----- Assert -----
             stateFlow.value.books shouldBe existingBooks
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.showEditionSheet shouldBe true
         }
     }
 }

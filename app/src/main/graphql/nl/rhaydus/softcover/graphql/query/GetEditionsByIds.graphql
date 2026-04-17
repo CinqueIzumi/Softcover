@@ -1,13 +1,13 @@
-query GetBooksByIds(
+query GetEditionsByIds(
     $ids: [Int!]!,
 ) {
-    books(
+    editions(
         where: {
             id: {
                 _in: $ids
             }
         }
     ) {
-        ...BookDetailFragment
+        ...EditionDetailFragment
     }
 }

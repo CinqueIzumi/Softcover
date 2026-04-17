@@ -26,6 +26,12 @@ interface BooksRepository {
 
     suspend fun fetchBookById(id: Int): Book
 
+    suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
+
+    suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
+
+    suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition>
+
     suspend fun markBookAsWantToRead(bookId: Int): Book
 
     suspend fun markBookAsReading(book: Book): Book

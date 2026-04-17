@@ -1,0 +1,9 @@
+fragment EditionDetailFragment on editions {
+    ...EditionFragment
+    contributions {
+        author {
+            id
+            name
+        }
+    }
+}

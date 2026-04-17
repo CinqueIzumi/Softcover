@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.books.domain.usecase
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.firstOrNull
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
@@ -8,14 +10,28 @@ class FetchBookByIdUseCase(
     private val booksRepository: BooksRepository,
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
 ) {
-    suspend operator fun invoke(id: Int): Result<Book> {
-        return runCatching {
-            val originalBook: Book = booksRepository.fetchBookById(id = id)
+    suspend operator fun invoke(id: Int): Result<Book> = runCatching {
+        coroutineScope {
+            val bookDeferred = async { booksRepository.fetchBookById(id = id) }
+            val editionsDeferred = async { booksRepository.getEditionsByBookId(bookId = id) }
 
-            val userBooks: List<Book> = getAllUserBooksUseCase().firstOrNull()
-                ?: return@runCatching originalBook
+            val remoteBook = bookDeferred.await()
+            val initialEditions = editionsDeferred.await()
 
-            userBooks.find { it.id == originalBook.id } ?: originalBook
+            val remoteEditions = if (remoteBook.id != id) {
+                booksRepository.getEditionsByBookId(bookId = remoteBook.id)
+            } else {
+                initialEditions
+            }
+
+            val userBooks: List<Book> = getAllUserBooksUseCase().firstOrNull() ?: emptyList()
+            val localBook = userBooks.find { it.id == remoteBook.id }
+
+            remoteBook.copy(
+                editions = remoteEditions,
+                userBook = localBook?.userBook,
+                userBookRead = localBook?.userBookRead,
+            )
         }
     }
 }

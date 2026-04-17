@@ -1,0 +1,21 @@
+fragment BookListFragment on books {
+    id
+    canonical {
+        id
+    }
+    title
+    rating
+    image {
+        url
+    }
+    release_year
+    book_series {
+        ...BookSeriesFragment
+    }
+    contributions {
+        author {
+            id
+            name
+        }
+    }
+}

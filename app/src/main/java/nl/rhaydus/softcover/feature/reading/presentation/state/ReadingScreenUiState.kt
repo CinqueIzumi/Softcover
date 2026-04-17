@@ -10,5 +10,4 @@ data class ReadingScreenUiState(
     val bookToUpdate: Book? = null,
     val progressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val showProgressSheet: Boolean = false,
-    val showEditionSheet: Boolean = false,
 ) : UiState

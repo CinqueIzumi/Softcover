@@ -6,6 +6,7 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookAuthorRefs
@@ -82,6 +83,12 @@ interface BookDao {
 
     @Query("SELECT id FROM user_books")
     suspend fun getAllUserBookIds(): List<Int>
+
+    @Query("SELECT id FROM books WHERE id IN (:bookIds)")
+    suspend fun getExistingBookIds(bookIds: List<Int>): List<Int>
+
+    @Query("SELECT id FROM book_editions WHERE id IN (:editionIds)")
+    suspend fun getExistingEditionIds(editionIds: List<Int>): List<Int>
 
     @Query("SELECT * FROM authors WHERE name IN (:names)")
     suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
@@ -178,21 +185,25 @@ interface BookDao {
 
     @Transaction
     suspend fun cacheListBook(listBook: ListBook) {
-        val book = listBook.book
-        val edition = listBook.edition
-
-        insertBook(book.toEntity())
-        insertEditions(listOf(edition.toEntity()))
         insertListBook(listBook.toEntity())
+    }
 
-        val allAuthors = (book.authors + edition.authors).distinctBy { it.name }
+    @Transaction
+    suspend fun cacheEditions(editions: List<BookEdition>) {
+        if (editions.isEmpty()) return
+
+        insertEditions(editions.map { it.toEntity() })
+
+        val allAuthors = editions.flatMap { it.authors }.distinctBy { it.name }
+
+        if (allAuthors.isEmpty()) return
+
         insertAuthors(allAuthors.map { it.toEntity() })
-
         val authorEntities = getAuthorsByName(allAuthors.map { it.name })
         val authorIdsByName = authorEntities.associateBy({ it.name }, { it.id })
 
-        insertBookAuthors(book.toBookAuthorRefs(authorIdsByName))
-        insertEditionAuthors(edition.toEditionAuthorRefs(authorIdsByName))
+        val crossRefs = editions.flatMap { edition -> edition.toEditionAuthorRefs(authorIdsByName) }
+        insertEditionAuthors(crossRefs)
     }
 
     @Upsert

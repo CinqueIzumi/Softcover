@@ -14,11 +14,14 @@ fun EditionImage(
     defaultEdition: BookEdition?,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
+    fallbackCoverUrl: String? = null,
 ) {
-    val editionUrl = edition?.url ?: defaultEdition?.url
+    val resolvedUrl = edition?.url
+        ?: defaultEdition?.url
+        ?: fallbackCoverUrl
 
     SoftcoverImage(
-        url = editionUrl,
+        url = resolvedUrl,
         modifier = modifier
             .aspectRatio(2f / 3f)
             .clip(shape = RoundedCornerShape(4.dp)),

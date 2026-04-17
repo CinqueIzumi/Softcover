@@ -94,7 +94,6 @@ class OnShowProgressSheetClickActionTest {
             val book = stubBook()
             stateFlow.value = ReadingScreenUiState(
                 isLoading = false,
-                showEditionSheet = true,
                 showProgressSheet = false,
             )
             val action = OnShowProgressSheetClickAction(book = book)
@@ -107,7 +106,6 @@ class OnShowProgressSheetClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.showEditionSheet shouldBe true
         }
     }
 }

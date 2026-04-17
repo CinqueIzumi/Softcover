@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailIni
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
@@ -21,6 +22,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUs
 
 class BookDetailScreenScreenModel(
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
+    private val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
     private val updateBookProgress: UpdateBookProgress,
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
@@ -41,6 +43,7 @@ class BookDetailScreenScreenModel(
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,
         fetchBookByIdUseCase = fetchBookByIdUseCase,
+        getEditionsByBookIdUseCase = getEditionsByBookIdUseCase,
         updateBookEditionUseCase = updateBookEditionUseCase,
         updateBookProgress = updateBookProgress,
         getAllUserBooksUseCase = getAllUserBooksUseCase,

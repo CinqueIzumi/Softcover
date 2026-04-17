@@ -254,7 +254,11 @@ class BookDetailScreen(
 
             if (state.showEditEditionSheet && state.book != null) {
                 EditionBottomSheetSelector(
-                    book = state.book,
+                    bookTitle = state.book.title,
+                    currentEdition = state.book.currentEdition,
+                    defaultEdition = state.book.defaultEdition,
+                    editions = state.editions,
+                    isLoading = state.loadingEditions,
                     onDismissRequest = {
                         runAction(OnDismissEditEditionSheetClickAction())
                     },

@@ -5,7 +5,13 @@ import com.apollographql.apollo.api.Optional
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.GetBookByIdQuery
-import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookFragment
+import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragment
+import nl.rhaydus.softcover.GetBooksByIdsQuery
+import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment as booksByIdsBookDetailFragment
+import nl.rhaydus.softcover.GetEditionsByBookIdQuery
+import nl.rhaydus.softcover.GetEditionsByBookIdQuery.Data.Edition.Companion.editionDetailFragment
+import nl.rhaydus.softcover.GetEditionsByIdsQuery
+import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.editionDetailFragment as editionsByIdsDetailFragment
 import nl.rhaydus.softcover.GetUserBookListsQuery
 import nl.rhaydus.softcover.GetUserBookListsQuery.Data.Me.List.Companion.listFragment
 import nl.rhaydus.softcover.GetUserBooksQuery
@@ -36,17 +42,21 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
+import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookList
 import nl.rhaydus.softcover.feature.books.data.mapper.toListBook
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
+import timber.log.Timber
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
+
+    suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
     suspend fun markBookAsWantToRead(bookId: Int): Book
 
@@ -57,6 +67,10 @@ interface BooksRemoteDataSource {
     suspend fun initializeBooks(userId: Int): List<Book>
 
     suspend fun fetchUserLists(userId: Int): List<BookList>
+
+    suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
+
+    suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition>
 
     suspend fun updateBookProgress(
         book: Book,
@@ -79,15 +93,48 @@ class BooksRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : BooksRemoteDataSource {
     override suspend fun fetchBookById(id: Int): Book {
-        val result = apolloClient.safeQuery(query = GetBookByIdQuery(id = id))
+        val book = fetchBookByIdRaw(id)
 
-        val book = result
-            .books
-            .firstOrNull()
-            ?.bookFragment()
-            ?.toBook() ?: throw Exception("Book could not be mapped")
+        val canonicalId = book.canonicalId
+
+        if (canonicalId != null && canonicalId != book.id) {
+            Timber.i("-=- Book $id has canonical $canonicalId; refetching canonical.")
+            return fetchBookByIdRaw(canonicalId).copy(canonicalId = null)
+        }
 
         return book
+    }
+
+    private suspend fun fetchBookByIdRaw(id: Int): Book {
+        val result = apolloClient.safeQuery(query = GetBookByIdQuery(id = id))
+
+        return result
+            .books
+            .firstOrNull()
+            ?.bookDetailFragment()
+            ?.toBook() ?: throw Exception("Book could not be mapped")
+    }
+
+    override suspend fun fetchBooksByIds(ids: List<Int>): List<Book> {
+        if (ids.isEmpty()) return emptyList()
+
+        val result = apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = ids))
+
+        return result.books.mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
+    }
+
+    override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
+        val result = apolloClient.safeQuery(query = GetEditionsByBookIdQuery(bookId = bookId))
+
+        return result.editions.mapNotNull { it.editionDetailFragment()?.toBookEdition() }
+    }
+
+    override suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition> {
+        if (ids.isEmpty()) return emptyList()
+
+        val result = apolloClient.safeQuery(query = GetEditionsByIdsQuery(ids = ids))
+
+        return result.editions.mapNotNull { it.editionsByIdsDetailFragment()?.toBookEdition() }
     }
 
     override suspend fun markBookAsWantToRead(bookId: Int): Book {
@@ -97,14 +144,12 @@ class BooksRemoteDataSourceImpl(
             privacy_setting_id = Optional.Present(PrivacySetting.PUBLIC.code),
         )
 
-        val book = apolloClient
+        return apolloClient
             .safeMutation(mutation = MarkBookAsWantToReadMutation(`object` = userBookCreateInput))
             .insert_user_book
             ?.user_book
             ?.userBookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
-
-        return book
     }
 
     override suspend fun markBookAsReading(book: Book): Book {
@@ -128,7 +173,7 @@ class BooksRemoteDataSourceImpl(
             user_date = Optional.present(currentDate)
         )
 
-        val book = apolloClient
+        return apolloClient
             .safeMutation(
                 mutation = MarkBookAsReadingMutation(
                     id = userBook.id,
@@ -139,8 +184,6 @@ class BooksRemoteDataSourceImpl(
             ?.user_book
             ?.userBookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
-
-        return book
     }
 
     override suspend fun removeBookFromLibrary(book: Book) {
@@ -156,8 +199,46 @@ class BooksRemoteDataSourceImpl(
         val userBooks = result.me.firstOrNull()?.user_books
             ?: throw Exception("No books were found")
 
-        return@withContext userBooks.mapNotNull { it.userBookFragment()?.toBook() }
+        val mapped = userBooks.mapNotNull { it.userBookFragment()?.toBook() }
+
+        resolveCanonicalMerges(books = mapped)
     }
+
+    private suspend fun resolveCanonicalMerges(books: List<Book>): List<Book> {
+        val canonicalIds = books.mapNotNull { it.canonicalId }.distinct()
+
+        if (canonicalIds.isEmpty()) return books
+
+        Timber.i("-=- Resolving ${canonicalIds.size} canonical merge(s): $canonicalIds")
+
+        val canonicalBooks = fetchBooksByIds(ids = canonicalIds).associateBy { it.id }
+
+        return books.map { book ->
+            val canonicalId = book.canonicalId ?: return@map book
+
+            val canonical = canonicalBooks[canonicalId]
+
+            if (canonical == null) {
+                Timber.w("-=- Canonical $canonicalId for book ${book.id} not returned; keeping pre-merge metadata.")
+                return@map book
+            }
+            book.withCanonicalMetadata(canonical = canonical)
+        }
+    }
+
+    private fun Book.withCanonicalMetadata(canonical: Book): Book = copy(
+        id = canonical.id,
+        canonicalId = null,
+        title = canonical.title,
+        rating = canonical.rating,
+        description = canonical.description,
+        releaseYear = canonical.releaseYear,
+        coverUrl = canonical.coverUrl,
+        authors = canonical.authors,
+        usersCount = canonical.usersCount,
+        bookSeries = canonical.bookSeries,
+        positionInSeries = canonical.positionInSeries,
+    )
 
     override suspend fun fetchUserLists(userId: Int): List<BookList> = withContext(Dispatchers.IO) {
         val result = apolloClient.safeQuery(GetUserBookListsQuery())
@@ -165,7 +246,7 @@ class BooksRemoteDataSourceImpl(
         val lists = result.me.firstOrNull()?.lists
             ?: throw Exception("No lists were found")
 
-        return@withContext lists.mapNotNull { list ->
+        lists.mapNotNull { list ->
             list.listFragment()?.toBookList()
         }
     }
@@ -214,12 +295,10 @@ class BooksRemoteDataSourceImpl(
             event = "progress_updated"
         )
 
-        val updatedBook = book.copy(
+        return book.copy(
             userBookRead = updatedUserBookRead,
             userBook = book.userBook.copy(journals = updatedJournals)
         )
-
-        return updatedBook
     }
 
     override suspend fun markBookAsRead(book: Book): Book {

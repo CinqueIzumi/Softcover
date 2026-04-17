@@ -16,7 +16,7 @@ import nl.rhaydus.softcover.GetIdsForQuery
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
-import nl.rhaydus.softcover.fragment.BookFragment
+import nl.rhaydus.softcover.fragment.BookDetailFragment
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -52,14 +52,14 @@ class SearchRemoteDataSourceImplTest {
         book: Book,
     ): GetBooksByIdsQuery.Data.Book {
         val bookEntry = mockk<GetBooksByIdsQuery.Data.Book>()
-        val bookFragment = mockk<BookFragment>()
+        val bookDetailFragment = mockk<BookDetailFragment>()
 
         every {
-            with(GetBooksByIdsQuery.Data.Book.Companion) { bookEntry.bookFragment() }
-        } returns bookFragment
+            with(GetBooksByIdsQuery.Data.Book.Companion) { bookEntry.bookDetailFragment() }
+        } returns bookDetailFragment
 
         every {
-            bookFragment.toBook()
+            bookDetailFragment.toBook()
         } returns book
 
         return bookEntry
@@ -272,7 +272,7 @@ class SearchRemoteDataSourceImplTest {
             } returns listOf(bookEntry7, bookEntryNull)
 
             every {
-                with(GetBooksByIdsQuery.Data.Book.Companion) { bookEntryNull.bookFragment() }
+                with(GetBooksByIdsQuery.Data.Book.Companion) { bookEntryNull.bookDetailFragment() }
             } returns null
 
             // ----- Act -----

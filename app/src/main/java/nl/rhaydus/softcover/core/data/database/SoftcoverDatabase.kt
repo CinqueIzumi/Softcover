@@ -37,7 +37,7 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 10,
+    version = 12,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -57,6 +57,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_7_8)
                 .addMigrations(MIGRATION_8_9)
                 .addMigrations(MIGRATION_9_10)
+                .addMigrations(MIGRATION_10_11)
+                .addMigrations(MIGRATION_11_12)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -336,6 +338,68 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_listId ON list_books(listId)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_bookId ON list_books(bookId)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_editionId ON list_books(editionId)")
+            }
+        }
+
+        private val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE list_books_new (
+                            listBookId INTEGER NOT NULL,
+                            listId INTEGER NOT NULL,
+                            bookId INTEGER NOT NULL,
+                            editionId INTEGER NOT NULL,
+                            position INTEGER,
+                            PRIMARY KEY(listId, bookId, editionId, listBookId)
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        INSERT INTO list_books_new (listBookId, listId, bookId, editionId, position)
+                        SELECT listBookId, listId, bookId, editionId, position FROM list_books
+                    """.trimIndent()
+                )
+
+                db.execSQL("DROP TABLE list_books")
+                db.execSQL("ALTER TABLE list_books_new RENAME TO list_books")
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_listId ON list_books(listId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_bookId ON list_books(bookId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_list_books_editionId ON list_books(editionId)")
+            }
+        }
+
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        DELETE FROM book_editions
+                        WHERE id NOT IN (
+                            SELECT editionId FROM user_books WHERE editionId IS NOT NULL
+                        )
+                        AND id NOT IN (
+                            SELECT editionId FROM list_books
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        DELETE FROM edition_author_cross_ref
+                        WHERE editionId NOT IN (SELECT id FROM book_editions)
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        DELETE FROM authors
+                        WHERE id NOT IN (SELECT authorId FROM book_author_cross_ref)
+                        AND id NOT IN (SELECT authorId FROM edition_author_cross_ref)
+                    """.trimIndent()
+                )
             }
         }
 

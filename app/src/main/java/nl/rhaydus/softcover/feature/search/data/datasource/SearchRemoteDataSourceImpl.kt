@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import nl.rhaydus.softcover.GetBooksByIdsQuery
-import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookFragment
+import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment
 import nl.rhaydus.softcover.GetIdsForQuery
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -34,7 +34,7 @@ class SearchRemoteDataSourceImpl(
                 query = GetBooksByIdsQuery(ids = matchingIds)
             )
             .books
-            .mapNotNull { it.bookFragment()?.toBook() }
+            .mapNotNull { it.bookDetailFragment()?.toBook() }
             .sortedBy { book -> idOrdered[book.id] }
 
         _queriedBooks.update { books }
