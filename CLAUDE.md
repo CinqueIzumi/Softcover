@@ -27,7 +27,11 @@ Always follow the project's code formatting rules in [CODE_STYLE_GUIDE.md](CODE_
 
 ALWAYS delegate test writing to the `unit-test-writer` agent, regardless of how small or simple the task appears. Never write or modify unit tests directly in the main conversation — even for a single function, a one-line change, or a trivial assertion. This rule has no exceptions.
 
-The agent is required to run the tests after writing them. When relaying its report to the user:
+When the target is a whole package or directory (not a single file), the agent's brief must include: "audit existing test files in the target for coverage gaps and close them in the same pass." Do not run a separate audit round — gap-fills belong in the initial delegation.
+
+When multiple independent files need tests, spawn unit-test-writers in parallel on disjoint file sets rather than sequentially in one agent.
+
+The agent is required to run the tests after writing them. Prefer narrow filters (e.g. `./gradlew :app:testDebugUnitTest --tests "nl.rhaydus.softcover.feature.<name>.*"`) over the full suite. When relaying its report to the user:
 - If all tests pass, mention that the suite was executed and passed.
 - If any test fails, surface the failing test names and the agent's diagnosis to the user verbatim, then **stop** and wait for the user to approve any fixes. Do not delegate a fix round until the user has reviewed and authorized it.
 

@@ -1,2 +1,3 @@
 - [Softcover Test Conventions](project_test_conventions.md) — JUnit 5 + mockk + kotest + Turbine, AAA markers, 3-line stub rule, mockk domain models, test directory layout
+- [Canonical test templates by layer](project_canonical_test_templates.md) — one template file per layer (action/use case/repo/data source/mapper); clone the matching one, skip broad exploration
 - [MockK only — no mock servers](feedback_no_mock_servers.md) — never propose MockServer/WireMock; mock only the public surface actually consumed via MockK (mockkStatic for extensions is fine)

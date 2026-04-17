@@ -26,6 +26,8 @@ Canonical example tests (paths relative to the project root):
 - `app/src/test/java/nl/rhaydus/softcover/feature/books/domain/usecase/FetchBookByIdUseCaseTest.kt`
 - `app/src/test/java/nl/rhaydus/softcover/feature/books/data/repository/BooksRepositoryImplTest.kt`
 
+**TOAD action testing pattern:** `ActionScope` is a concrete class — construct it with real `MutableStateFlow`s and a `Channel`, hold the `stateFlow` reference, assert on `stateFlow.value` after `execute()`. `BookDetailDependencies` (and other `*Dependencies` classes) extend the abstract `ActionDependencies` which has a concrete `launch` method. When mocking dependencies with `mockk(relaxed = true)`, the `launch` method is also mocked (does nothing). Fix: add `every { mock.launch(any()) } answers { callOriginal() }` to make the real `launch` execute using the mocked `coroutineScope` + `mainDispatcher`. Use `UnconfinedTestDispatcher(testScope.testScheduler)` as `mainDispatcher` and the `runTest` scope as `coroutineScope` so launched coroutines run eagerly. Note: `UnconfinedTestDispatcher` triggers an `ExperimentalCoroutinesApi` compiler warning — this is acceptable and matches the existing codebase pattern (no `@OptIn` annotation used anywhere in test files).
+
 **Why:** CODE_STYLE_GUIDE.md and CLAUDE.md mandate these rules; violations cause style inconsistency across the codebase.
 
 **How to apply:** Every new test file in this project must follow these conventions exactly, regardless of test complexity.

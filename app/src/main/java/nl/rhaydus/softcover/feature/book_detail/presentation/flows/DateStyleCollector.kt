@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-class DateStyleCollector() : BookDetailInitializer {
+class DateStyleCollector : BookDetailInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
         dependencies: BookDetailDependencies,

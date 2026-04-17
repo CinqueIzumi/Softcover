@@ -1,0 +1,279 @@
+package nl.rhaydus.softcover.feature.search.data.datasource
+
+import app.cash.turbine.test
+import com.apollographql.apollo.ApolloClient
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.GetBooksByIdsQuery
+import nl.rhaydus.softcover.GetIdsForQuery
+import nl.rhaydus.softcover.core.data.network.helper.safeQuery
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.books.data.mapper.toBook
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class SearchRemoteDataSourceImplTest {
+
+    private lateinit var apolloClient: ApolloClient
+    private lateinit var dataSource: SearchRemoteDataSourceImpl
+
+    @BeforeEach
+    fun setUp() {
+        apolloClient = mockk()
+        dataSource = SearchRemoteDataSourceImpl(apolloClient = apolloClient)
+
+        mockkStatic("nl.rhaydus.softcover.core.data.network.helper.ApolloExtensionsKt")
+        mockkStatic("nl.rhaydus.softcover.feature.books.data.mapper.BookMapperKt")
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkAll()
+    }
+
+    private fun stubBook(id: Int = 1): Book = mockk {
+        every {
+            this@mockk.id
+        } returns id
+    }
+
+    @Nested
+    inner class QueriedBooks {
+
+        @Test
+        fun `emits empty list before any search is performed`() = runTest {
+            // ----- Act & Assert -----
+            dataSource.queriedBooks.test {
+                awaitItem() shouldBe emptyList()
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+    }
+
+    @Nested
+    inner class SearchForName {
+
+        @Test
+        fun `updates queriedBooks with books sorted by id order from the search result`() = runTest {
+            // ----- Arrange -----
+            val name = "dune"
+            val userId = 42
+            val idsList = listOf(3, 1, 2)
+            val book1 = stubBook(id = 1)
+            val book2 = stubBook(id = 2)
+            val book3 = stubBook(id = 3)
+
+            val idsQueryData = mockk<GetIdsForQuery.Data>()
+            val searchData = mockk<GetIdsForQuery.Data.Search>()
+
+            coEvery {
+                apolloClient.safeQuery(query = GetIdsForQuery(query = name))
+            } returns idsQueryData
+
+            every {
+                idsQueryData.search
+            } returns searchData
+
+            every {
+                searchData.ids
+            } returns listOf(3, 1, 2)
+
+            val booksQueryData = mockk<GetBooksByIdsQuery.Data>()
+            val bookEntry1 = mockk<GetBooksByIdsQuery.Data.Book>()
+            val bookEntry2 = mockk<GetBooksByIdsQuery.Data.Book>()
+            val bookEntry3 = mockk<GetBooksByIdsQuery.Data.Book>()
+
+            coEvery {
+                apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = idsList))
+            } returns booksQueryData
+
+            every {
+                booksQueryData.books
+            } returns listOf(bookEntry1, bookEntry2, bookEntry3)
+
+            every { bookEntry1.bookFragment() } returns bookEntry1
+            every { bookEntry2.bookFragment() } returns bookEntry2
+            every { bookEntry3.bookFragment() } returns bookEntry3
+            every { (bookEntry1 as nl.rhaydus.softcover.fragment.BookFragment).toBook() } returns book1
+            every { (bookEntry2 as nl.rhaydus.softcover.fragment.BookFragment).toBook() } returns book2
+            every { (bookEntry3 as nl.rhaydus.softcover.fragment.BookFragment).toBook() } returns book3
+
+            // ----- Act -----
+            dataSource.searchForName(name = name, userId = userId)
+
+            // ----- Assert -----
+            dataSource.queriedBooks.test {
+                val result = awaitItem()
+                result.map { it.id } shouldBe listOf(3, 1, 2)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `throws when search returns null ids`() = runTest {
+            // ----- Arrange -----
+            val idsQueryData = mockk<GetIdsForQuery.Data>()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetIdsForQuery>())
+            } returns idsQueryData
+
+            every {
+                idsQueryData.search
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.searchForName(name = "something", userId = 1)
+            }
+        }
+
+        @Test
+        fun `updates queriedBooks to empty list when books query returns no books`() = runTest {
+            // ----- Arrange -----
+            val name = "obscure title"
+            val matchingIds = listOf(99)
+            val idsQueryData = mockk<GetIdsForQuery.Data>()
+            val searchData = mockk<GetIdsForQuery.Data.Search>()
+
+            coEvery {
+                apolloClient.safeQuery(query = GetIdsForQuery(query = name))
+            } returns idsQueryData
+
+            every {
+                idsQueryData.search
+            } returns searchData
+
+            every {
+                searchData.ids
+            } returns listOf(99)
+
+            val booksQueryData = mockk<GetBooksByIdsQuery.Data>()
+
+            coEvery {
+                apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = matchingIds))
+            } returns booksQueryData
+
+            every {
+                booksQueryData.books
+            } returns emptyList()
+
+            // ----- Act -----
+            dataSource.searchForName(name = name, userId = 1)
+
+            // ----- Assert -----
+            dataSource.queriedBooks.test {
+                awaitItem() shouldBe emptyList()
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `filters null ids from the search result before fetching books`() = runTest {
+            // ----- Arrange -----
+            val name = "mixed ids"
+            val userId = 1
+            val nonNullIds = listOf(10, 20)
+            val idsQueryData = mockk<GetIdsForQuery.Data>()
+            val searchData = mockk<GetIdsForQuery.Data.Search>()
+            val book10 = stubBook(id = 10)
+            val book20 = stubBook(id = 20)
+
+            coEvery {
+                apolloClient.safeQuery(query = GetIdsForQuery(query = name))
+            } returns idsQueryData
+
+            every {
+                idsQueryData.search
+            } returns searchData
+
+            every {
+                searchData.ids
+            } returns listOf(10, null, 20)
+
+            val booksQueryData = mockk<GetBooksByIdsQuery.Data>()
+            val bookEntry10 = mockk<GetBooksByIdsQuery.Data.Book>()
+            val bookEntry20 = mockk<GetBooksByIdsQuery.Data.Book>()
+
+            coEvery {
+                apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = nonNullIds))
+            } returns booksQueryData
+
+            every {
+                booksQueryData.books
+            } returns listOf(bookEntry10, bookEntry20)
+
+            every { bookEntry10.bookFragment() } returns bookEntry10
+            every { bookEntry20.bookFragment() } returns bookEntry20
+            every { (bookEntry10 as nl.rhaydus.softcover.fragment.BookFragment).toBook() } returns book10
+            every { (bookEntry20 as nl.rhaydus.softcover.fragment.BookFragment).toBook() } returns book20
+
+            // ----- Act -----
+            dataSource.searchForName(name = name, userId = userId)
+
+            // ----- Assert -----
+            dataSource.queriedBooks.test {
+                val result = awaitItem()
+                result.map { it.id } shouldBe listOf(10, 20)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `excludes book entries whose bookFragment returns null`() = runTest {
+            // ----- Arrange -----
+            val name = "fragment nulls"
+            val userId = 1
+            val matchingIds = listOf(7, 8)
+            val book7 = stubBook(id = 7)
+            val idsQueryData = mockk<GetIdsForQuery.Data>()
+            val searchData = mockk<GetIdsForQuery.Data.Search>()
+
+            coEvery {
+                apolloClient.safeQuery(query = GetIdsForQuery(query = name))
+            } returns idsQueryData
+
+            every {
+                idsQueryData.search
+            } returns searchData
+
+            every {
+                searchData.ids
+            } returns listOf(7, 8)
+
+            val booksQueryData = mockk<GetBooksByIdsQuery.Data>()
+            val bookEntry7 = mockk<GetBooksByIdsQuery.Data.Book>()
+            val bookEntryNull = mockk<GetBooksByIdsQuery.Data.Book>()
+
+            coEvery {
+                apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = matchingIds))
+            } returns booksQueryData
+
+            every {
+                booksQueryData.books
+            } returns listOf(bookEntry7, bookEntryNull)
+
+            every { bookEntry7.bookFragment() } returns bookEntry7
+            every { bookEntryNull.bookFragment() } returns null
+            every { (bookEntry7 as nl.rhaydus.softcover.fragment.BookFragment).toBook() } returns book7
+
+            // ----- Act -----
+            dataSource.searchForName(name = name, userId = userId)
+
+            // ----- Assert -----
+            dataSource.queriedBooks.test {
+                val result = awaitItem()
+                result.map { it.id } shouldBe listOf(7)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+    }
+}
