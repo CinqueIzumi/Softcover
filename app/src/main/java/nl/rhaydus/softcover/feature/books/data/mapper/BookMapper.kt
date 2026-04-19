@@ -50,7 +50,7 @@ fun EditionFragment.toBookEdition(
     id = id,
     canonicalId = canonical_id,
     title = title,
-    url = image?.url,
+    url = image?.url ?: fallbackImages.firstOrNull()?.url,
     localImagePath = null,
     publisher = publisher?.name,
     pages = pages,
