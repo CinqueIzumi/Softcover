@@ -2087,6 +2087,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2112,6 +2113,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2124,7 +2126,62 @@ class BookMapperTest {
         }
 
         @Test
-        fun `maps null image url as null`() {
+        fun `url uses image url when image is present`() {
+            // ----- Arrange -----
+            val image = mockk<EditionFragment.Image> {
+                every { url } returns "https://example.com/primary.jpg"
+            }
+
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { this@mockk.image } returns image
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.url shouldBe "https://example.com/primary.jpg"
+        }
+
+        @Test
+        fun `url falls back to first fallbackImages url when image is null`() {
+            // ----- Arrange -----
+            val fallback = mockk<EditionFragment.FallbackImage> {
+                every { url } returns "https://example.com/fallback.jpg"
+            }
+
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns listOf(fallback)
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.url shouldBe "https://example.com/fallback.jpg"
+        }
+
+        @Test
+        fun `url is null when image is null and fallbackImages is empty`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
                 every { id } returns 10
@@ -2135,6 +2192,35 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { edition_format } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.url shouldBe null
+        }
+
+        @Test
+        fun `url is null when image is null and all fallbackImages have null url`() {
+            // ----- Arrange -----
+            val fallback = mockk<EditionFragment.FallbackImage> {
+                every { url } returns null
+            }
+
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns listOf(fallback)
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2158,6 +2244,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2181,6 +2268,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2204,6 +2292,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2227,6 +2316,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2250,6 +2340,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2286,6 +2377,7 @@ class BookMapperTest {
                 every { pages } returns 112
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns 1945
                 every { edition_format } returns "Hardcover"
                 every { contributions } returns listOf(contribution)
@@ -2316,6 +2408,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
                 every { contributions } returns listOf(contribution)
@@ -2340,6 +2433,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
                 every { contributions } returns emptyList()
@@ -2364,6 +2458,7 @@ class BookMapperTest {
                 every { pages } returns 328
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns 1949
                 every { edition_format } returns "Paperback"
                 every { contributions } returns emptyList()
@@ -2394,6 +2489,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2554,6 +2650,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2631,6 +2728,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2702,6 +2800,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2772,6 +2871,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2865,6 +2965,7 @@ class BookMapperTest {
                 every { pages } returns 400
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns 2021
                 every { edition_format } returns "Hardcover"
             }
@@ -2919,6 +3020,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -2969,6 +3071,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -3019,6 +3122,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
@@ -3068,6 +3172,7 @@ class BookMapperTest {
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
+                every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
             }
