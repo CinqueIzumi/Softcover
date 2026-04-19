@@ -27,9 +27,10 @@ data class Book(
         get() {
             val userEditionId = userBook?.editionId
 
-            val matchingEdition = editions.firstOrNull { it.id == userEditionId }
-
-            return matchingEdition ?: defaultEdition ?: editions.first()
+            return editions.firstOrNull { it.id == userEditionId }
+                ?: editions.firstOrNull { it.owned }
+                ?: defaultEdition
+                ?: editions.first()
         }
 
     val seriesText: String?

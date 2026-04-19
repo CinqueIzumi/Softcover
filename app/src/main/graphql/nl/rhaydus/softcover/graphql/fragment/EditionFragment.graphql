@@ -1,5 +1,6 @@
 fragment EditionFragment on editions {
     id
+    canonical_id
     title
     book_id
     isbn_10

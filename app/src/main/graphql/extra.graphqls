@@ -2,4 +2,10 @@
 extend type user_books @typePolicy(keyFields: "id")
 extend type user_book_reads @typePolicy(keyFields: "id")
 extend type editions @typePolicy(keyFields: "id")
+
+# The live API exposes canonical_id on editions, but the current schema.graphqls
+# dump does not include it. Declared here so Apollo can generate the field.
+extend type editions {
+    canonical_id: Int
+}
 extend type books @typePolicy(keyFields: "id")

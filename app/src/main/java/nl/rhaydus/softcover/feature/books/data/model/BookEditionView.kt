@@ -5,14 +5,21 @@ import androidx.room.Embedded
 
 @DatabaseView(
     """
-    SELECT 
+    SELECT
         edition.*,
         EXISTS(
             SELECT 1
             FROM list_books lb
             JOIN book_lists bl ON bl.id = lb.listId
-            WHERE lb.editionId = edition.id
-            AND bl.slug = 'owned'
+            WHERE bl.slug = 'owned'
+            AND (
+                lb.editionId = edition.id
+                OR lb.editionId = edition.canonicalId
+                OR lb.editionId IN (
+                    SELECT sub.id FROM book_editions sub
+                    WHERE sub.canonicalId = edition.id
+                )
+            )
         ) AS isOwned
     FROM book_editions edition
     """,

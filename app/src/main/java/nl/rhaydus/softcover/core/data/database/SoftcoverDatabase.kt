@@ -37,7 +37,7 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 13,
+    version = 14,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -60,6 +60,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_10_11)
                 .addMigrations(MIGRATION_11_12)
                 .addMigrations(MIGRATION_12_13)
+                .addMigrations(MIGRATION_13_14)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -420,6 +421,35 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         "            AND bl.slug = 'owned'\n" +
                         "        ) AS isOwned\n" +
                         "    FROM book_editions edition"
+                )
+            }
+        }
+
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE book_editions ADD COLUMN canonicalId INTEGER DEFAULT NULL")
+
+                db.execSQL("DROP VIEW IF EXISTS book_edition_view")
+                db.execSQL(
+                    """
+                        CREATE VIEW `book_edition_view` AS SELECT
+                                edition.*,
+                                EXISTS(
+                                    SELECT 1
+                                    FROM list_books lb
+                                    JOIN book_lists bl ON bl.id = lb.listId
+                                    WHERE bl.slug = 'owned'
+                                    AND (
+                                        lb.editionId = edition.id
+                                        OR lb.editionId = edition.canonicalId
+                                        OR lb.editionId IN (
+                                            SELECT sub.id FROM book_editions sub
+                                            WHERE sub.canonicalId = edition.id
+                                        )
+                                    )
+                                ) AS isOwned
+                            FROM book_editions edition
+                    """.trimIndent()
                 )
             }
         }

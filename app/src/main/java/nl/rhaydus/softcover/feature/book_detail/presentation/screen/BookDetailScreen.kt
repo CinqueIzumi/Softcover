@@ -198,7 +198,8 @@ class BookDetailScreen(
                     CoverImageSection(
                         edition = state.book?.currentEdition,
                         isLoading = state.loadingBookDetails,
-                        fallBackEdition = state.book?.defaultEdition
+                        fallBackEdition = state.book?.defaultEdition,
+                        fallbackCoverUrl = state.book?.coverUrl,
                     )
                 }
 
@@ -430,10 +431,12 @@ class BookDetailScreen(
         edition: BookEdition?,
         fallBackEdition: BookEdition?,
         isLoading: Boolean,
+        fallbackCoverUrl: String?,
     ) {
         val editionImageModel = rememberEditionImageRequest(
             edition = edition,
             defaultEdition = fallBackEdition,
+            fallbackCoverUrl = fallbackCoverUrl,
         )
 
         val imageHeight = with(LocalDensity.current) {
@@ -469,6 +472,7 @@ class BookDetailScreen(
             EditionImage(
                 edition = edition,
                 defaultEdition = fallBackEdition,
+                fallbackCoverUrl = fallbackCoverUrl,
                 isLoading = isLoading,
                 modifier = Modifier
                     .height(imageHeight * 0.8f)
