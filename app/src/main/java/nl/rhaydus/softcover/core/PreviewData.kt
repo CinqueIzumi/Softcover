@@ -16,6 +16,7 @@ object PreviewData {
 
     val baseEdition = BookEdition(
         id = 1,
+        canonicalId = null,
         title = "Last to leave the Room",
         publisher = "",
         isbn10 = "",

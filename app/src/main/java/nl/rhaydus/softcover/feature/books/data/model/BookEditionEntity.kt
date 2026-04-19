@@ -8,6 +8,7 @@ data class BookEditionEntity(
     @PrimaryKey
     val id: Int,
 
+    val canonicalId: Int?,
     val bookId: Int,
     val publisher: String?,
     val title: String?,

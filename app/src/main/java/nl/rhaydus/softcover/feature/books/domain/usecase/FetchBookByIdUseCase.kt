@@ -2,13 +2,11 @@ package nl.rhaydus.softcover.feature.books.domain.usecase
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.firstOrNull
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 
 class FetchBookByIdUseCase(
     private val booksRepository: BooksRepository,
-    private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
 ) {
     suspend operator fun invoke(id: Int): Result<Book> = runCatching {
         coroutineScope {
@@ -24,14 +22,7 @@ class FetchBookByIdUseCase(
                 initialEditions
             }
 
-            val userBooks: List<Book> = getAllUserBooksUseCase().firstOrNull() ?: emptyList()
-            val localBook = userBooks.find { it.id == remoteBook.id }
-
-            remoteBook.copy(
-                editions = remoteEditions,
-                userBook = localBook?.userBook,
-                userBookRead = localBook?.userBookRead,
-            )
+            remoteBook.copy(editions = remoteEditions)
         }
     }
 }

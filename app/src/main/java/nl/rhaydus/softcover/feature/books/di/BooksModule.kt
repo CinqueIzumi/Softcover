@@ -88,7 +88,6 @@ val booksModule = module {
     factory {
         FetchBookByIdUseCase(
             booksRepository = get(),
-            getAllUserBooksUseCase = get(),
         )
     }
 

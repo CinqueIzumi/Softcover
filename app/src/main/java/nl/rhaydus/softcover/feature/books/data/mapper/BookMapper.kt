@@ -48,8 +48,9 @@ fun EditionFragment.toBookEdition(
     authors: List<Author> = emptyList(),
 ): BookEdition = BookEdition(
     id = id,
+    canonicalId = canonical_id,
     title = title,
-    url = image?.url,
+    url = image?.url ?: fallbackImages.firstOrNull()?.url,
     localImagePath = null,
     publisher = publisher?.name,
     pages = pages,
@@ -153,6 +154,7 @@ fun UserBookFragment.toBook(): Book? {
     val bookAuthors = listFragment.authors()
     val selectedEdition = edition?.editionFragment()
         ?.toBookEdition(authors = bookAuthors)
+        ?.copy(bookId = listFragment.id)
 
     val editions = listOfNotNull(selectedEdition)
 
@@ -184,6 +186,7 @@ fun BookDetailFragment.toBook(): Book? {
     val bookAuthors = listFragment.authors()
     val defaultEdition = default_physical_edition?.editionFragment()
         ?.toBookEdition(authors = bookAuthors)
+        ?.copy(bookId = listFragment.id)
     val editions = listOfNotNull(defaultEdition)
 
     if (editions.isEmpty()) return null
@@ -283,6 +286,7 @@ fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity = ReadingJour
 
 fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     id = id,
+    canonicalId = canonicalId,
     bookId = bookId,
     publisher = publisher,
     title = title,
@@ -320,6 +324,7 @@ fun BookEditionEntity.toModel(
     owned: Boolean,
 ): BookEdition = BookEdition(
     id = id,
+    canonicalId = canonicalId,
     publisher = publisher,
     title = title,
     url = url,

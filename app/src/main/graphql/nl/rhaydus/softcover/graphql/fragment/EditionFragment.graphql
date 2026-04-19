@@ -1,5 +1,6 @@
 fragment EditionFragment on editions {
     id
+    canonical_id
     title
     book_id
     isbn_10
@@ -8,6 +9,9 @@ fragment EditionFragment on editions {
         name
     }
     image {
+        url
+    }
+    fallbackImages: images {
         url
     }
     release_year

@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -47,6 +48,9 @@ class ActionScope<S : UiState, E : UiEvent, V : LocalVariables>(
 ) {
     val currentState: S
         get() = stateFlow.value
+
+    val state: StateFlow<S>
+        get() = stateFlow
 
     val currentLocalVariables: V
         get() = localVariablesFlow.value
