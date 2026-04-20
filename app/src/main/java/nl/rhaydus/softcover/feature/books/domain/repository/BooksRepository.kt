@@ -41,7 +41,8 @@ interface BooksRepository {
 
     suspend fun updateBookProgress(
         book: Book,
-        newPage: Int,
+        newPage: Int? = null,
+        newSeconds: Int? = null,
     ): Book
 
     suspend fun markBookAsRead(book: Book): Book

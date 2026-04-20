@@ -69,6 +69,46 @@ val label = when (status) {
 }
 ```
 
+## Data Classes
+
+- **One data class per file.** Every `data class` lives in its own file, named after the class. This applies to models, DTOs, snapshots, small result holders, wrappers — everything. Never declare a `data class` locally inside a function, method, or `init` block, and never colocate multiple `data class` declarations in a shared file.
+- If a data class is only used by a single caller, it still gets its own file next to that caller.
+
+```kotlin
+// Good — HoursMinutesSeconds.kt
+data class HoursMinutesSeconds(
+    val hours: Int,
+    val minutes: Int,
+    val seconds: Int,
+)
+
+// Bad — declared locally inside a function
+fun onLaunch(...) {
+    data class ProgressSnapshot(val bookId: Int?, val total: Int?)
+    ...
+}
+
+// Bad — second data class tacked onto TimeFormat.kt alongside helper functions
+fun secondsToHm(seconds: Int): String { ... }
+data class HoursMinutesSeconds(...)
+```
+
+## Boolean Negation
+
+Never use the `!` prefix operator for boolean negation — always use `.not()`. This applies to all booleans: local variables, properties, function call results, and complex expressions. The rule does not apply to the non-null assertion operator `!!`, which stays as-is where needed (though it should be rare).
+
+```kotlin
+// Good
+if (isLoading.not()) { ... }
+if (state.hasFocus.not()) { ... }
+(book.editions.isEmpty()).not()
+
+// Bad
+if (!isLoading) { ... }
+if (!state.hasFocus) { ... }
+!book.editions.isEmpty()
+```
+
 ## If / Else
 
 - A single-line `if` / `else` expression (one where the whole statement fits on one line) may omit braces: `val x = if (a) b else c`.
@@ -96,6 +136,32 @@ val message = if (progress.isOnTrack) "You're on track."
 - Reusable UI components live in `core/presentation/component/`.
 - Custom modifiers live in `core/presentation/modifier/`.
 - Material 3 theming is applied via the shared `core/presentation/theme/` setup.
+- **Blank line between sibling composables.** Inside any layout scope (`Column`, `Row`, `Box`, etc.), leave a blank line between each child composable call — including `Spacer`. Never stack two composable calls back-to-back without a blank line between them.
+- **Multi-argument composables break across lines.** Any composable invocation (or any function call, see *Argument and Property Layout*) that takes two or more arguments must put each argument on its own line with a trailing comma, even for short calls like `Text(text = ":", modifier = Modifier.padding(horizontal = 4.dp))`. Single-argument composables stay inline.
+
+```kotlin
+// Good
+Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.Center,
+) {
+    TimeField(value = hours, ...)
+
+    Text(
+        text = ":",
+        modifier = Modifier.padding(horizontal = 4.dp),
+    )
+
+    TimeField(value = minutes, ...)
+}
+
+// Bad — siblings touching, inline multi-arg Text
+Row(...) {
+    TimeField(value = hours, ...)
+    Text(text = ":", modifier = Modifier.padding(horizontal = 4.dp))
+    TimeField(value = minutes, ...)
+}
+```
 
 ## Error Handling
 
@@ -322,9 +388,11 @@ Follow this order:
 
 Remove unused imports.
 
-### No fully-qualified type references
+### No fully-qualified references
 
-Never reference a type by its fully-qualified name inline (e.g. `androidx.compose.foundation.layout.RowScope.() -> Unit`, `kotlinx.coroutines.test.TestScope`, `java.io.File`). Always add an `import` for the type and use its short name at the call/declaration site. This applies to production and test code, including parameter types, return types, generic arguments, receiver types on lambdas, and `mockk()` type witnesses.
+Never reference anything by its fully-qualified name inline — not types, not top-level functions, not enum entries, not object members. Always add an `import` and use the short name at the call/declaration site. This applies to production and test code, including parameter types, return types, generic arguments, receiver types on lambdas, `mockk()` type witnesses, and top-level function calls such as `secondsToHm(...)`.
+
+**This is especially strict for project-own code** (anything under `nl.rhaydus.softcover.*`). Never inline a project-qualified reference just because it saves an import line — always add the import.
 
 ```kotlin
 // Bad

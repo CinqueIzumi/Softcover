@@ -141,11 +141,13 @@ class BooksRepositoryImpl(
 
     override suspend fun updateBookProgress(
         book: Book,
-        newPage: Int,
+        newPage: Int?,
+        newSeconds: Int?,
     ): Book {
         return booksRemoteDataSource.updateBookProgress(
             book = book,
             newPage = newPage,
+            newSeconds = newSeconds,
         )
     }
 

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.books.data.datasource
 
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.Query
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -106,6 +107,7 @@ class BooksRemoteDataSourceImplTest {
         id: Int = 1,
         startedAt: String? = null,
         finishedAt: String? = null,
+        currentSeconds: Int? = null,
     ): UserBookRead = mockk {
         every {
             this@mockk.id
@@ -118,6 +120,10 @@ class BooksRemoteDataSourceImplTest {
         every {
             this@mockk.finishedAt
         } returns finishedAt
+
+        every {
+            this@mockk.currentSeconds
+        } returns currentSeconds
     }
 
     private fun stubCanonicalBook(
@@ -1616,7 +1622,7 @@ class BooksRemoteDataSourceImplTest {
 
             every {
                 userBookRead.progress
-            } returns null
+            } returns 0f
 
             coEvery {
                 apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
@@ -1689,11 +1695,15 @@ class BooksRemoteDataSourceImplTest {
             } returns newPage
 
             every {
+                userBookReadFragmentMock.progress_seconds
+            } returns 0
+
+            every {
                 userBookReadFragmentMock.progress
             } returns 0.5
 
             every {
-                userBookRead.copy(currentPage = newPage, progress = 0.5f)
+                userBookRead.copy(currentPage = newPage, currentSeconds = 0, progress = 0.5f)
             } returns updatedUserBookReadMock
 
             every {
@@ -1709,6 +1719,221 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe expectedBook
+        }
+
+        @Test
+        fun `omits progress_pages and sends progress_seconds when newSeconds is provided`() = runTest {
+            // ----- Arrange -----
+            val newSeconds = 3600
+            val userBook = stubUserBook(id = 3)
+            val userBookRead = stubUserBookRead(id = 5)
+            val book = stubBook(userBook = userBook, userBookRead = userBookRead)
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+            val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
+            val userBookReadFragmentMock = mockk<UserBookReadFragment>()
+            val updatedUserBookReadMock = stubUserBookRead(id = 5)
+            val updatedUserBookMock = stubUserBook(id = 3)
+            val expectedBook = stubBook()
+
+            every {
+                userBook.editionId
+            } returns 10
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+
+            every {
+                updateUserBookRead.user_book_read
+            } returns userBookReadEntry
+
+            every {
+                userBookReadEntry.userBookReadFragment()
+            } returns userBookReadFragmentMock
+
+            every {
+                userBookReadFragmentMock.progress_pages
+            } returns 0
+
+            every {
+                userBookReadFragmentMock.progress_seconds
+            } returns newSeconds
+
+            every {
+                userBookReadFragmentMock.progress
+            } returns null
+
+            every {
+                userBookRead.copy(currentPage = 0, currentSeconds = newSeconds, progress = 0f)
+            } returns updatedUserBookReadMock
+
+            every {
+                userBook.copy(journals = any())
+            } returns updatedUserBookMock
+
+            every {
+                book.copy(userBookRead = updatedUserBookReadMock, userBook = updatedUserBookMock)
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.updateBookProgress(book = book, newSeconds = newSeconds)
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateReadingProgressMutation> { mutation ->
+                        val input = mutation.datesReadInput
+                        input.progress_pages is Optional.Absent &&
+                            input.progress_seconds.getOrNull() == newSeconds
+                    }
+                )
+            }
+        }
+
+        @Test
+        fun `sends progress_pages and omits progress_seconds when newPage is provided`() = runTest {
+            // ----- Arrange -----
+            val newPage = 75
+            val userBook = stubUserBook(id = 3)
+            val userBookRead = stubUserBookRead(id = 5)
+            val book = stubBook(userBook = userBook, userBookRead = userBookRead)
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+            val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
+            val userBookReadFragmentMock = mockk<UserBookReadFragment>()
+            val updatedUserBookReadMock = stubUserBookRead(id = 5)
+            val updatedUserBookMock = stubUserBook(id = 3)
+            val expectedBook = stubBook()
+
+            every {
+                userBook.editionId
+            } returns 10
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+
+            every {
+                updateUserBookRead.user_book_read
+            } returns userBookReadEntry
+
+            every {
+                userBookReadEntry.userBookReadFragment()
+            } returns userBookReadFragmentMock
+
+            every {
+                userBookReadFragmentMock.progress_pages
+            } returns newPage
+
+            every {
+                userBookReadFragmentMock.progress_seconds
+            } returns 0
+
+            every {
+                userBookReadFragmentMock.progress
+            } returns null
+
+            every {
+                userBookRead.copy(currentPage = newPage, currentSeconds = 0, progress = 0f)
+            } returns updatedUserBookReadMock
+
+            every {
+                userBook.copy(journals = any())
+            } returns updatedUserBookMock
+
+            every {
+                book.copy(userBookRead = updatedUserBookReadMock, userBook = updatedUserBookMock)
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.updateBookProgress(book = book, newPage = newPage)
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateReadingProgressMutation> { mutation ->
+                        val input = mutation.datesReadInput
+                        input.progress_pages.getOrNull() == newPage &&
+                            input.progress_seconds is Optional.Absent
+                    }
+                )
+            }
+        }
+
+        @Test
+        fun `returns updated book with currentSeconds set when newSeconds is provided`() = runTest {
+            // ----- Arrange -----
+            val newSeconds = 3600
+            val existingJournals = listOf(ReadingJournal(updatedAt = "2024-01-01T00:00:00.000000", event = "status_updated"))
+            val userBook = stubUserBook(id = 3, journals = existingJournals)
+            val userBookRead = stubUserBookRead(id = 5)
+            val book = stubBook(userBook = userBook, userBookRead = userBookRead)
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+            val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
+            val userBookReadFragmentMock = mockk<UserBookReadFragment>()
+            val updatedUserBookReadMock = stubUserBookRead(id = 5, currentSeconds = newSeconds)
+            val updatedUserBookMock = stubUserBook(id = 3)
+            val expectedBook = stubBook(userBookRead = updatedUserBookReadMock)
+
+            every {
+                userBook.editionId
+            } returns 10
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+
+            every {
+                updateUserBookRead.user_book_read
+            } returns userBookReadEntry
+
+            every {
+                userBookReadEntry.userBookReadFragment()
+            } returns userBookReadFragmentMock
+
+            every {
+                userBookReadFragmentMock.progress_pages
+            } returns 0
+
+            every {
+                userBookReadFragmentMock.progress_seconds
+            } returns newSeconds
+
+            every {
+                userBookReadFragmentMock.progress
+            } returns null
+
+            every {
+                userBookRead.copy(currentPage = 0, currentSeconds = newSeconds, progress = 0f)
+            } returns updatedUserBookReadMock
+
+            every {
+                userBook.copy(journals = match { it.size == existingJournals.size + 1 })
+            } returns updatedUserBookMock
+
+            every {
+                book.copy(userBookRead = updatedUserBookReadMock, userBook = updatedUserBookMock)
+            } returns expectedBook
+
+            // ----- Act -----
+            val result = dataSource.updateBookProgress(book = book, newSeconds = newSeconds)
+
+            // ----- Assert -----
+            result.userBookRead?.currentSeconds shouldBe newSeconds
         }
     }
 

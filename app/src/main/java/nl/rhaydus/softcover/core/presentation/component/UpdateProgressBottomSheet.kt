@@ -30,12 +30,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.util.toHoursMinutesSeconds
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
@@ -53,6 +56,7 @@ fun UpdateProgressBottomSheet(
     onProgressTabClick: (ProgressSheetTab) -> Unit,
     onUpdatePercentageClick: (String) -> Unit,
     onUpdatePageProgressClick: (String) -> Unit,
+    onUpdateTimeProgressClick: (String, String, String) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -65,6 +69,7 @@ fun UpdateProgressBottomSheet(
             onProgressTabClick = onProgressTabClick,
             onUpdatePercentageClick = onUpdatePercentageClick,
             onUpdatePageProgressClick = onUpdatePageProgressClick,
+            onUpdateTimeProgressClick = onUpdateTimeProgressClick,
         )
     }
 }
@@ -77,7 +82,19 @@ private fun ProgressBottomSheetContent(
     onProgressTabClick: (ProgressSheetTab) -> Unit,
     onUpdatePercentageClick: (String) -> Unit,
     onUpdatePageProgressClick: (String) -> Unit,
+    onUpdateTimeProgressClick: (String, String, String) -> Unit = { _, _, _ -> },
 ) {
+    val isAudiobook = book.currentEdition?.isAudiobook == true
+    val visibleTabs = if (isAudiobook) {
+        listOf(ProgressSheetTab.TIME, ProgressSheetTab.PERCENTAGE)
+    } else {
+        listOf(ProgressSheetTab.PAGE, ProgressSheetTab.PERCENTAGE)
+    }
+    val activeTab = if (progressSheetTab in visibleTabs) {
+        progressSheetTab
+    } else {
+        visibleTabs.first()
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -92,7 +109,7 @@ private fun ProgressBottomSheetContent(
             Text(
                 text = "Update progress",
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
         }
 
@@ -105,7 +122,7 @@ private fun ProgressBottomSheetContent(
             Text(
                 text = book.title,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
             )
         }
 
@@ -120,8 +137,8 @@ private fun ProgressBottomSheetContent(
                 )
                 .padding(all = 4.dp)
         ) {
-            ProgressSheetTab.entries.forEach { tab ->
-                val isSelected = tab == progressSheetTab
+            visibleTabs.forEach { tab ->
+                val isSelected = tab == activeTab
 
                 Box(
                     modifier = Modifier
@@ -156,11 +173,18 @@ private fun ProgressBottomSheetContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        when (progressSheetTab) {
+        when (activeTab) {
             ProgressSheetTab.PAGE -> {
                 ProgressBottomSheetPageContent(
                     book = book,
                     onUpdatePageProgressClick = onUpdatePageProgressClick,
+                )
+            }
+
+            ProgressSheetTab.TIME -> {
+                ProgressBottomSheetTimeContent(
+                    book = book,
+                    onUpdateTimeProgressClick = onUpdateTimeProgressClick,
                 )
             }
 
@@ -172,6 +196,151 @@ private fun ProgressBottomSheetContent(
             }
         }
     }
+}
+
+@Composable
+private fun ColumnScope.ProgressBottomSheetTimeContent(
+    book: Book,
+    onUpdateTimeProgressClick: (String, String, String) -> Unit,
+) {
+    val initial = (book.userBookRead?.currentSeconds ?: 0).toHoursMinutesSeconds()
+    val totalSeconds = book.currentEdition?.audioSeconds ?: 0
+    val totalHms = totalSeconds.toHoursMinutesSeconds()
+
+    var hours by remember { mutableStateOf(TextFieldValue(text = initial.hours.toString())) }
+    var minutes by remember { mutableStateOf(TextFieldValue(text = initial.minutes.toString())) }
+    var seconds by remember { mutableStateOf(TextFieldValue(text = initial.seconds.toString())) }
+
+    val density = LocalDensity.current
+    val textFieldTextStyle = MaterialTheme.typography.bodyLarge
+    val fieldWidth = remember(density) {
+        with(density) {
+            val fontSizeInPx = textFieldTextStyle.fontSize.toPx()
+            val charCount = 3
+            val padding = 32.dp.toPx()
+            ((charCount * fontSizeInPx * 0.6f) + padding).toDp()
+        }
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TimeField(
+            value = hours,
+            width = fieldWidth,
+            textStyle = textFieldTextStyle,
+            onValueChange = { newValue ->
+                val parsed = newValue.text.toIntOrNull()
+                hours = when {
+                    newValue.text.isEmpty() -> newValue
+                    parsed == null -> hours
+                    else -> newValue.copy(text = parsed.coerceAtLeast(0).toString())
+                }
+            },
+        )
+
+        Text(
+            text = ":",
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+
+        TimeField(
+            value = minutes,
+            width = fieldWidth,
+            textStyle = textFieldTextStyle,
+            onValueChange = { newValue ->
+                val parsed = newValue.text.toIntOrNull()
+                minutes = when {
+                    newValue.text.isEmpty() -> newValue
+                    parsed == null -> minutes
+                    else -> newValue.copy(text = parsed.coerceIn(0, 59).toString())
+                }
+            },
+        )
+
+        Text(
+            text = ":",
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+
+        TimeField(
+            value = seconds,
+            width = fieldWidth,
+            textStyle = textFieldTextStyle,
+            onValueChange = { newValue ->
+                val parsed = newValue.text.toIntOrNull()
+                seconds = when {
+                    newValue.text.isEmpty() -> newValue
+                    parsed == null -> seconds
+                    else -> newValue.copy(text = parsed.coerceIn(0, 59).toString())
+                }
+            },
+        )
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = "of %02d:%02d:%02d".format(totalHms.hours, totalHms.minutes, totalHms.seconds),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    SoftcoverButton(
+        label = "Update Progress",
+        onClick = {
+            onUpdateTimeProgressClick(hours.text, minutes.text, seconds.text)
+        },
+        modifier = Modifier.fillMaxWidth(),
+        style = ButtonStyle.FILLED,
+        size = ButtonSize.M,
+    )
+
+    Spacer(modifier = Modifier.height(4.dp))
+}
+
+@Composable
+private fun TimeField(
+    value: TextFieldValue,
+    width: Dp,
+    textStyle: TextStyle,
+    onValueChange: (TextFieldValue) -> Unit,
+) {
+    var shouldSelectOnNextFocus by remember { mutableStateOf(true) }
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        textStyle = textStyle.copy(textAlign = TextAlign.Center),
+        modifier = Modifier
+            .width(width)
+            .onFocusChanged { focusState ->
+                if (focusState.hasFocus.not()) {
+                    shouldSelectOnNextFocus = true
+                    return@onFocusChanged
+                }
+
+                if (shouldSelectOnNextFocus) {
+                    shouldSelectOnNextFocus = false
+                    onValueChange(
+                        value.copy(
+                            selection = TextRange(start = 0, end = value.text.length),
+                        ),
+                    )
+                }
+            },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+    )
 }
 
 @Composable
@@ -230,7 +399,7 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
 
                 val updatedNumber = min(
                     newNumber,
-                    book.currentEdition.pages ?: book.defaultEdition?.pages ?: 0,
+                    book.currentEdition?.pages ?: book.defaultEdition?.pages ?: 0,
                 )
 
                 number = newValue.copy(text = updatedNumber.toString())
@@ -260,10 +429,10 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
             contentAlignment = Alignment.CenterStart,
         ) {
             Text(
-                text = "/ ${book.currentEdition.pages ?: book.defaultEdition?.pages}",
+                text = "/ ${book.currentEdition?.pages ?: book.defaultEdition?.pages}",
                 modifier = Modifier.padding(start = 8.dp),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -289,9 +458,9 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
     onUpdatePercentageClick: (String) -> Unit,
 ) {
     var number by remember {
-        val currentPageString = book.userBookRead?.progress?.roundToInt()
+        val currentProgress = book.userBookRead?.progress?.roundToInt() ?: 0
 
-        mutableStateOf(TextFieldValue(text = currentPageString.toString()))
+        mutableStateOf(TextFieldValue(text = currentProgress.toString()))
     }
 
     var firstTimeFocusedGained by remember { mutableStateOf(true) }

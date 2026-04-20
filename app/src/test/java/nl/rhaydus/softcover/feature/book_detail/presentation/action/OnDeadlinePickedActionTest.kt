@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -66,17 +67,32 @@ class OnDeadlinePickedActionTest {
         id: Int = 42,
         pages: Int? = 300,
         currentPage: Int? = 50,
+        audioSeconds: Int? = null,
+        currentSeconds: Int? = null,
     ): Book {
+        val isAudiobook = (audioSeconds ?: 0) > 0
         val edition = mockk<BookEdition> {
             every {
                 this@mockk.pages
             } returns pages
+
+            every {
+                this@mockk.audioSeconds
+            } returns audioSeconds
+
+            every {
+                this@mockk.isAudiobook
+            } returns isAudiobook
         }
-        val userBookRead = if (currentPage != null) {
+        val userBookRead = if (currentPage != null || currentSeconds != null) {
             mockk<UserBookRead> {
                 every {
                     this@mockk.currentPage
                 } returns currentPage
+
+                every {
+                    this@mockk.currentSeconds
+                } returns currentSeconds
             }
         } else {
             null
@@ -100,7 +116,7 @@ class OnDeadlinePickedActionTest {
     inner class Execute {
 
         @Test
-        fun `calls setBookDeadlineUseCase with bookId totalPages and currentPage from state`() = runTest {
+        fun `calls setBookDeadlineUseCase with bookId total current and PAGES unit for regular edition`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 7, pages = 250, currentPage = 75)
             stateFlow.value = BookDetailUiState(book = book)
@@ -111,8 +127,9 @@ class OnDeadlinePickedActionTest {
                 setBookDeadlineUseCase(
                     bookId = 7,
                     deadlineDate = date,
-                    currentPage = 75,
-                    totalPages = 250,
+                    current = 75,
+                    total = 250,
+                    unit = DeadlineUnit.PAGES,
                 )
             } returns Result.success(Unit)
 
@@ -126,14 +143,15 @@ class OnDeadlinePickedActionTest {
                 setBookDeadlineUseCase(
                     bookId = 7,
                     deadlineDate = date,
-                    currentPage = 75,
-                    totalPages = 250,
+                    current = 75,
+                    total = 250,
+                    unit = DeadlineUnit.PAGES,
                 )
             }
         }
 
         @Test
-        fun `uses zero for totalPages when currentEdition pages is null`() = runTest {
+        fun `uses zero for total when currentEdition pages is null for regular edition`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 1, pages = null, currentPage = 10)
             stateFlow.value = BookDetailUiState(book = book)
@@ -144,8 +162,9 @@ class OnDeadlinePickedActionTest {
                 setBookDeadlineUseCase(
                     bookId = any(),
                     deadlineDate = any(),
-                    currentPage = any(),
-                    totalPages = 0,
+                    current = any(),
+                    total = 0,
+                    unit = DeadlineUnit.PAGES,
                 )
             } returns Result.success(Unit)
 
@@ -159,16 +178,17 @@ class OnDeadlinePickedActionTest {
                 setBookDeadlineUseCase(
                     bookId = any(),
                     deadlineDate = any(),
-                    currentPage = any(),
-                    totalPages = 0,
+                    current = any(),
+                    total = 0,
+                    unit = DeadlineUnit.PAGES,
                 )
             }
         }
 
         @Test
-        fun `uses zero for currentPage when userBookRead is null`() = runTest {
+        fun `uses zero for current when userBookRead is null for regular edition`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(id = 3, pages = 200, currentPage = null)
+            val book = stubBook(id = 3, pages = 200, currentPage = null, currentSeconds = null)
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
             val date = LocalDate.of(2026, 6, 1)
@@ -177,8 +197,9 @@ class OnDeadlinePickedActionTest {
                 setBookDeadlineUseCase(
                     bookId = any(),
                     deadlineDate = any(),
-                    currentPage = 0,
-                    totalPages = any(),
+                    current = 0,
+                    total = any(),
+                    unit = DeadlineUnit.PAGES,
                 )
             } returns Result.success(Unit)
 
@@ -192,8 +213,9 @@ class OnDeadlinePickedActionTest {
                 setBookDeadlineUseCase(
                     bookId = any(),
                     deadlineDate = any(),
-                    currentPage = 0,
-                    totalPages = any(),
+                    current = 0,
+                    total = any(),
+                    unit = DeadlineUnit.PAGES,
                 )
             }
         }
@@ -210,8 +232,9 @@ class OnDeadlinePickedActionTest {
                 setBookDeadlineUseCase(
                     bookId = any(),
                     deadlineDate = any(),
-                    currentPage = any(),
-                    totalPages = any(),
+                    current = any(),
+                    total = any(),
+                    unit = any(),
                 )
             } returns Result.success(Unit)
 
@@ -241,8 +264,141 @@ class OnDeadlinePickedActionTest {
                 setBookDeadlineUseCase(
                     bookId = any(),
                     deadlineDate = any(),
-                    currentPage = any(),
-                    totalPages = any(),
+                    current = any(),
+                    total = any(),
+                    unit = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `calls setBookDeadlineUseCase with currentSeconds and audioSeconds and SECONDS unit for audiobook edition`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 8, audioSeconds = 18000, currentSeconds = 3600)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+            val date = LocalDate.of(2026, 6, 1)
+
+            coEvery {
+                setBookDeadlineUseCase(
+                    bookId = 8,
+                    deadlineDate = date,
+                    current = 3600,
+                    total = 18000,
+                    unit = DeadlineUnit.SECONDS,
+                )
+            } returns Result.success(Unit)
+
+            val action = OnDeadlinePickedAction(date = date)
+
+            // ----- Act -----
+            action.execute(dependencies = dependencies, scope = scope)
+
+            // ----- Assert -----
+            coVerify {
+                setBookDeadlineUseCase(
+                    bookId = 8,
+                    deadlineDate = date,
+                    current = 3600,
+                    total = 18000,
+                    unit = DeadlineUnit.SECONDS,
+                )
+            }
+        }
+
+        @Test
+        fun `uses zero for total when audioSeconds is null for audiobook edition`() = runTest {
+            // ----- Arrange -----
+            // audioSeconds=null but isAudiobook would be false in this case; simulate by providing
+            // an edition with audioSeconds=null and explicitly forcing isAudiobook true would be
+            // contradictory — instead test the null-safety for audioSeconds when audioSeconds is 0
+            // (not an audiobook). Here we test the null guard: audioSeconds null → total = 0.
+            // We stub isAudiobook=true explicitly to isolate the null-safety path.
+            val edition = mockk<BookEdition> {
+                every { this@mockk.pages } returns null
+                every { this@mockk.audioSeconds } returns null
+                every { this@mockk.isAudiobook } returns true
+            }
+            val userBookRead = mockk<UserBookRead> {
+                every { this@mockk.currentPage } returns null
+                every { this@mockk.currentSeconds } returns 0
+            }
+            val book = mockk<Book> {
+                every { this@mockk.id } returns 9
+                every { this@mockk.currentEdition } returns edition
+                every { this@mockk.userBookRead } returns userBookRead
+            }
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+            val date = LocalDate.of(2026, 6, 1)
+
+            coEvery {
+                setBookDeadlineUseCase(
+                    bookId = any(),
+                    deadlineDate = any(),
+                    current = any(),
+                    total = 0,
+                    unit = DeadlineUnit.SECONDS,
+                )
+            } returns Result.success(Unit)
+
+            val action = OnDeadlinePickedAction(date = date)
+
+            // ----- Act -----
+            action.execute(dependencies = dependencies, scope = scope)
+
+            // ----- Assert -----
+            coVerify {
+                setBookDeadlineUseCase(
+                    bookId = any(),
+                    deadlineDate = any(),
+                    current = any(),
+                    total = 0,
+                    unit = DeadlineUnit.SECONDS,
+                )
+            }
+        }
+
+        @Test
+        fun `uses zero for current when userBookRead is null for audiobook edition`() = runTest {
+            // ----- Arrange -----
+            val edition = mockk<BookEdition> {
+                every { this@mockk.pages } returns null
+                every { this@mockk.audioSeconds } returns 18000
+                every { this@mockk.isAudiobook } returns true
+            }
+            val book = mockk<Book> {
+                every { this@mockk.id } returns 10
+                every { this@mockk.currentEdition } returns edition
+                every { this@mockk.userBookRead } returns null
+            }
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+            val date = LocalDate.of(2026, 6, 1)
+
+            coEvery {
+                setBookDeadlineUseCase(
+                    bookId = any(),
+                    deadlineDate = any(),
+                    current = 0,
+                    total = any(),
+                    unit = DeadlineUnit.SECONDS,
+                )
+            } returns Result.success(Unit)
+
+            val action = OnDeadlinePickedAction(date = date)
+
+            // ----- Act -----
+            action.execute(dependencies = dependencies, scope = scope)
+
+            // ----- Assert -----
+            coVerify {
+                setBookDeadlineUseCase(
+                    bookId = any(),
+                    deadlineDate = any(),
+                    current = 0,
+                    total = any(),
+                    unit = DeadlineUnit.SECONDS,
                 )
             }
         }

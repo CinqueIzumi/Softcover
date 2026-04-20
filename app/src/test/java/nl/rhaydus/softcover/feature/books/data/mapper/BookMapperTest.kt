@@ -71,6 +71,7 @@ class BookMapperTest {
         localImagePath: String? = null,
         isbn10: String? = "1234567890",
         pages: Int? = 300,
+        audioSeconds: Int? = null,
         authors: List<Author> = emptyList(),
         releaseYear: Int = 2020,
         format: String = "Paperback",
@@ -111,6 +112,10 @@ class BookMapperTest {
         every {
             this@mockk.pages
         } returns pages
+
+        every {
+            this@mockk.audioSeconds
+        } returns audioSeconds
 
         every {
             this@mockk.authors
@@ -206,7 +211,8 @@ class BookMapperTest {
     private fun stubUserBookRead(
         id: Int = 7,
         currentPage: Int? = 42,
-        progress: Float? = 0.14f,
+        currentSeconds: Int? = null,
+        progress: Float = 0.14f,
         startedAt: String? = "2024-01-01",
         finishedAt: String? = null,
     ): UserBookRead = mockk {
@@ -217,6 +223,10 @@ class BookMapperTest {
         every {
             this@mockk.currentPage
         } returns currentPage
+
+        every {
+            this@mockk.currentSeconds
+        } returns currentSeconds
 
         every {
             this@mockk.progress
@@ -399,6 +409,7 @@ class BookMapperTest {
         localImagePath: String? = null,
         isbn10: String? = "1234567890",
         pages: Int? = 300,
+        audioSeconds: Int? = null,
         releaseYear: Int = 2020,
         format: String = "Paperback",
     ): BookEditionEntity = BookEditionEntity(
@@ -411,6 +422,7 @@ class BookMapperTest {
         localImagePath = localImagePath,
         isbn10 = isbn10,
         pages = pages,
+        audioSeconds = audioSeconds,
         releaseYear = releaseYear,
         format = format,
     )
@@ -487,13 +499,15 @@ class BookMapperTest {
         id: Int = 7,
         userBookId: Int = 3,
         currentPage: Int? = 42,
-        progress: Float? = 0.14f,
+        currentSeconds: Int? = null,
+        progress: Float = 0.14f,
         startedAt: String? = "2024-01-01",
         finishedAt: String? = null,
     ): UserBookReadEntity = UserBookReadEntity(
         id = id,
         userBookId = userBookId,
         currentPage = currentPage,
+        currentSeconds = currentSeconds,
         progress = progress,
         startedAt = startedAt,
         finishedAt = finishedAt,
@@ -766,11 +780,11 @@ class BookMapperTest {
         }
 
         @Test
-        fun `maps nullable fields as null when absent`() {
+        fun `maps absent nullable fields to null and progress to zero`() {
             // ----- Arrange -----
             val userBookRead = stubUserBookRead(
                 currentPage = null,
-                progress = null,
+                progress = 0f,
                 startedAt = null,
                 finishedAt = null,
             )
@@ -780,9 +794,33 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.currentPage shouldBe null
-            result.progress shouldBe null
+            result.progress shouldBe 0f
             result.startedAt shouldBe null
             result.finishedAt shouldBe null
+        }
+
+        @Test
+        fun `maps non-null currentSeconds to entity`() {
+            // ----- Arrange -----
+            val userBookRead = stubUserBookRead(currentSeconds = 3600)
+
+            // ----- Act -----
+            val result = userBookRead.toEntity(userBookId = 3)
+
+            // ----- Assert -----
+            result.currentSeconds shouldBe 3600
+        }
+
+        @Test
+        fun `maps null currentSeconds to entity as null`() {
+            // ----- Arrange -----
+            val userBookRead = stubUserBookRead(currentSeconds = null)
+
+            // ----- Act -----
+            val result = userBookRead.toEntity(userBookId = 3)
+
+            // ----- Assert -----
+            result.currentSeconds shouldBe null
         }
     }
 
@@ -997,6 +1035,30 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.localImagePath shouldBe null
+        }
+
+        @Test
+        fun `passes through non-null audioSeconds to entity`() {
+            // ----- Arrange -----
+            val edition = stubBookEdition(audioSeconds = 3600)
+
+            // ----- Act -----
+            val result = edition.toEntity()
+
+            // ----- Assert -----
+            result.audioSeconds shouldBe 3600
+        }
+
+        @Test
+        fun `passes through null audioSeconds to entity`() {
+            // ----- Arrange -----
+            val edition = stubBookEdition(audioSeconds = null)
+
+            // ----- Act -----
+            val result = edition.toEntity()
+
+            // ----- Assert -----
+            result.audioSeconds shouldBe null
         }
     }
 
@@ -1399,6 +1461,36 @@ class BookMapperTest {
             // ----- Assert -----
             result.localImagePath shouldBe null
         }
+
+        @Test
+        fun `passes through non-null audioSeconds from entity to model`() {
+            // ----- Arrange -----
+            val entity = stubBookEditionEntity(audioSeconds = 5400)
+
+            // ----- Act -----
+            val result = entity.toModel(
+                authors = emptyList(),
+                owned = false,
+            )
+
+            // ----- Assert -----
+            result.audioSeconds shouldBe 5400
+        }
+
+        @Test
+        fun `passes through null audioSeconds from entity to model`() {
+            // ----- Arrange -----
+            val entity = stubBookEditionEntity(audioSeconds = null)
+
+            // ----- Act -----
+            val result = entity.toModel(
+                authors = emptyList(),
+                owned = false,
+            )
+
+            // ----- Assert -----
+            result.audioSeconds shouldBe null
+        }
     }
 
     @Nested
@@ -1428,11 +1520,11 @@ class BookMapperTest {
         }
 
         @Test
-        fun `maps nullable fields as null when absent`() {
+        fun `maps absent nullable fields to null and progress to zero`() {
             // ----- Arrange -----
             val entity = stubUserBookReadEntity(
                 currentPage = null,
-                progress = null,
+                progress = 0f,
                 startedAt = null,
                 finishedAt = null,
             )
@@ -1442,9 +1534,33 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.currentPage shouldBe null
-            result.progress shouldBe null
+            result.progress shouldBe 0f
             result.startedAt shouldBe null
             result.finishedAt shouldBe null
+        }
+
+        @Test
+        fun `maps non-null currentSeconds from entity to model`() {
+            // ----- Arrange -----
+            val entity = stubUserBookReadEntity(currentSeconds = 7200)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.currentSeconds shouldBe 7200
+        }
+
+        @Test
+        fun `maps null currentSeconds from entity to model as null`() {
+            // ----- Arrange -----
+            val entity = stubUserBookReadEntity(currentSeconds = null)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.currentSeconds shouldBe null
         }
     }
 
@@ -2055,6 +2171,7 @@ class BookMapperTest {
                 every { this@mockk.image } returns image
                 every { release_year } returns 2020
                 every { edition_format } returns "Paperback"
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2090,6 +2207,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2116,6 +2234,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2143,6 +2262,7 @@ class BookMapperTest {
                 every { this@mockk.image } returns image
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2171,6 +2291,7 @@ class BookMapperTest {
                 every { fallbackImages } returns listOf(fallback)
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2195,6 +2316,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2223,6 +2345,7 @@ class BookMapperTest {
                 every { fallbackImages } returns listOf(fallback)
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2247,6 +2370,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2271,6 +2395,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2295,6 +2420,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2319,6 +2445,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2343,6 +2470,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2350,6 +2478,56 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.canonicalId shouldBe null
+        }
+
+        @Test
+        fun `maps non-null audio_seconds from fragment to audioSeconds on BookEdition`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns 3600
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.audioSeconds shouldBe 3600
+        }
+
+        @Test
+        fun `maps null audio_seconds from fragment to null audioSeconds on BookEdition`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.audioSeconds shouldBe null
         }
     }
 
@@ -2380,6 +2558,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns 1945
                 every { edition_format } returns "Hardcover"
+                every { audio_seconds } returns null
                 every { contributions } returns listOf(contribution)
             }
 
@@ -2411,6 +2590,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
                 every { contributions } returns listOf(contribution)
             }
 
@@ -2436,6 +2616,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
                 every { contributions } returns emptyList()
             }
 
@@ -2461,6 +2642,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns 1949
                 every { edition_format } returns "Paperback"
+                every { audio_seconds } returns null
                 every { contributions } returns emptyList()
             }
 
@@ -2478,6 +2660,32 @@ class BookMapperTest {
         }
 
         @Test
+        fun `maps non-null audio_seconds from EditionDetailFragment to audioSeconds on BookEdition`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionDetailFragment> {
+                every { id } returns 20
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 2
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns 7200
+                every { contributions } returns emptyList()
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.audioSeconds shouldBe 7200
+        }
+
+        @Test
         fun `always sets localImagePath to null on the resulting BookEdition`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
@@ -2492,6 +2700,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             // ----- Act -----
@@ -2653,6 +2862,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -2728,6 +2938,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -2801,6 +3012,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -2874,6 +3086,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -2946,6 +3159,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -3041,6 +3255,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns 2021
                 every { edition_format } returns "Hardcover"
+                every { audio_seconds } returns null
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -3096,6 +3311,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -3147,6 +3363,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -3198,6 +3415,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -3248,6 +3466,7 @@ class BookMapperTest {
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
                 every { edition_format } returns null
+                every { audio_seconds } returns null
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -3276,6 +3495,82 @@ class BookMapperTest {
             // ----- Assert -----
             result?.defaultEdition?.bookId shouldBe 1
             result?.editions?.get(0)?.bookId shouldBe 1
+        }
+    }
+
+    @Nested
+    inner class BookEditionIsAudiobook {
+
+        @Test
+        fun `returns true when audioSeconds is positive`() {
+            // ----- Arrange -----
+            val edition = BookEdition(
+                id = 1,
+                canonicalId = null,
+                bookId = 1,
+                publisher = null,
+                title = null,
+                url = null,
+                localImagePath = null,
+                isbn10 = null,
+                pages = null,
+                audioSeconds = 3600,
+                authors = emptyList(),
+                releaseYear = 2020,
+                format = "Audiobook",
+                owned = false,
+            )
+
+            // ----- Act & Assert -----
+            edition.isAudiobook shouldBe true
+        }
+
+        @Test
+        fun `returns false when audioSeconds is zero`() {
+            // ----- Arrange -----
+            val edition = BookEdition(
+                id = 1,
+                canonicalId = null,
+                bookId = 1,
+                publisher = null,
+                title = null,
+                url = null,
+                localImagePath = null,
+                isbn10 = null,
+                pages = null,
+                audioSeconds = 0,
+                authors = emptyList(),
+                releaseYear = 2020,
+                format = "Audiobook",
+                owned = false,
+            )
+
+            // ----- Act & Assert -----
+            edition.isAudiobook shouldBe false
+        }
+
+        @Test
+        fun `returns false when audioSeconds is null`() {
+            // ----- Arrange -----
+            val edition = BookEdition(
+                id = 1,
+                canonicalId = null,
+                bookId = 1,
+                publisher = null,
+                title = null,
+                url = null,
+                localImagePath = null,
+                isbn10 = null,
+                pages = null,
+                audioSeconds = null,
+                authors = emptyList(),
+                releaseYear = 2020,
+                format = "Paperback",
+                owned = false,
+            )
+
+            // ----- Act & Assert -----
+            edition.isAudiobook shouldBe false
         }
     }
 }

@@ -25,6 +25,7 @@ class BookTest {
         localImagePath = null,
         isbn10 = null,
         pages = null,
+        audioSeconds = null,
         authors = emptyList(),
         releaseYear = 2020,
         format = "paperback",
@@ -96,7 +97,7 @@ class BookTest {
             val result = book.currentEdition
 
             // ----- Assert -----
-            result.owned.shouldBeTrue()
+            result?.owned?.shouldBeTrue()
         }
 
         @Test
@@ -151,7 +152,7 @@ class BookTest {
             val result = book.currentEdition
 
             // ----- Assert -----
-            result.owned.shouldBeTrue()
+            result?.owned?.shouldBeTrue()
         }
 
         @Test

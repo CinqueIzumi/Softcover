@@ -7,12 +7,13 @@ import kotlin.math.max
 data class DeadlineProgress(
     val deadline: LocalDate,
     val daysRemaining: Long,
-    val pagesRemaining: Int,
-    val requiredPagesPerDay: Float,
-    val initialPagesPerDay: Float,
+    val unitsRemaining: Int,
+    val requiredPerDay: Float,
+    val initialPerDay: Float,
     val isExpired: Boolean,
     val isOnTrack: Boolean,
-    val pagesBehindSchedule: Int,
+    val unitsBehindSchedule: Int,
+    val unit: DeadlineUnit,
 ) {
     val status: DeadlineStatus
         get() = when {
@@ -24,41 +25,42 @@ data class DeadlineProgress(
     companion object {
         fun compute(
             deadline: BookDeadline,
-            currentPage: Int,
-            totalPages: Int,
+            current: Int,
+            total: Int,
             today: LocalDate = LocalDate.now(),
         ): DeadlineProgress {
             val daysRemaining = ChronoUnit.DAYS.between(today, deadline.deadlineDate)
-            val pagesRemaining = max(0, totalPages - currentPage)
-            val isExpired = daysRemaining < 0 || (daysRemaining == 0L && pagesRemaining > 0)
+            val unitsRemaining = max(0, total - current)
+            val isExpired = daysRemaining < 0 || (daysRemaining == 0L && unitsRemaining > 0)
 
-            val requiredPagesPerDay = when {
-                pagesRemaining == 0 -> 0f
-                daysRemaining <= 0 -> pagesRemaining.toFloat()
-                else -> pagesRemaining.toFloat() / daysRemaining.toFloat()
+            val requiredPerDay = when {
+                unitsRemaining == 0 -> 0f
+                daysRemaining <= 0 -> unitsRemaining.toFloat()
+                else -> unitsRemaining.toFloat() / daysRemaining.toFloat()
             }
 
-            val isOnTrack = !isExpired && requiredPagesPerDay <= deadline.initialPagesPerDay
+            val isOnTrack = isExpired.not() && requiredPerDay <= deadline.initialPerDay
 
-            val expectedPagesRemaining = when {
+            val expectedRemaining = when {
                 daysRemaining <= 0 -> 0f
-                else -> deadline.initialPagesPerDay * daysRemaining.toFloat()
+                else -> deadline.initialPerDay * daysRemaining.toFloat()
             }
 
-            val pagesBehindSchedule = max(
+            val unitsBehindSchedule = max(
                 0,
-                (pagesRemaining.toFloat() - expectedPagesRemaining).toInt(),
+                (unitsRemaining.toFloat() - expectedRemaining).toInt(),
             )
 
             return DeadlineProgress(
                 deadline = deadline.deadlineDate,
                 daysRemaining = daysRemaining,
-                pagesRemaining = pagesRemaining,
-                requiredPagesPerDay = requiredPagesPerDay,
-                initialPagesPerDay = deadline.initialPagesPerDay,
+                unitsRemaining = unitsRemaining,
+                requiredPerDay = requiredPerDay,
+                initialPerDay = deadline.initialPerDay,
                 isExpired = isExpired,
                 isOnTrack = isOnTrack,
-                pagesBehindSchedule = pagesBehindSchedule,
+                unitsBehindSchedule = unitsBehindSchedule,
+                unit = deadline.unit,
             )
         }
     }

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class OnUpdatePercentageProgressClickActionTest {
+class OnUpdateTimeProgressClickActionTest {
 
     private lateinit var updateBookProgress: UpdateBookProgress
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
@@ -58,27 +58,11 @@ class OnUpdatePercentageProgressClickActionTest {
         }
     }
 
-    private fun stubEditionWithPages(pages: Int?): BookEdition = mockk<BookEdition>().also { edition ->
-        every { edition.pages } returns pages
-        every { edition.isAudiobook } returns false
-        every { edition.audioSeconds } returns null
-    }
-
-    private fun stubAudiobookEdition(audioSeconds: Int?): BookEdition = mockk<BookEdition>().also { edition ->
-        every { edition.isAudiobook } returns true
-        every { edition.audioSeconds } returns audioSeconds
-    }
-
-    private fun stubBookWithCurrentEditionPages(pages: Int?): Book = mockk<Book>().also { book ->
-        val edition = stubEditionWithPages(pages = pages)
+    private fun stubBookWithAudioSeconds(audioSeconds: Int?): Book = mockk<Book>().also { book ->
+        val edition = mockk<BookEdition>().also { e ->
+            every { e.audioSeconds } returns audioSeconds
+        }
         every { book.currentEdition } returns edition
-        every { book.defaultEdition } returns null
-    }
-
-    private fun stubAudiobook(audioSeconds: Int?): Book = mockk<Book>().also { book ->
-        val edition = stubAudiobookEdition(audioSeconds = audioSeconds)
-        every { book.currentEdition } returns edition
-        every { book.defaultEdition } returns null
     }
 
     @Nested
@@ -87,13 +71,13 @@ class OnUpdatePercentageProgressClickActionTest {
         @Test
         fun `sets showProgressSheet to false after execute`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 300)
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = book,
                 showProgressSheet = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
 
             // ----- Act -----
             action.execute(
@@ -108,10 +92,10 @@ class OnUpdatePercentageProgressClickActionTest {
         @Test
         fun `sets bookToUpdate to null after execute`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 200)
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "25")
+            val action = OnUpdateTimeProgressClickAction(hours = "0", minutes = "30", seconds = "0")
 
             // ----- Act -----
             action.execute(
@@ -124,107 +108,11 @@ class OnUpdatePercentageProgressClickActionTest {
         }
 
         @Test
-        fun `computes page from percentage and currentEdition pages`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 200)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newPage = 100,
-                    setLoading = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `falls back to 0 pages when currentEdition pages is null and no defaultEdition`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = null)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newPage = 0,
-                    setLoading = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `uses 0 percentage when newPercentage is not a valid double`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 300)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "not-a-number")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newPage = 0,
-                    setLoading = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `uses 0 percentage when newPercentage is an empty string`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 300)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newPage = 0,
-                    setLoading = any(),
-                )
-            }
-        }
-
-        @Test
         fun `does not invoke updateBookProgress when bookToUpdate is null`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(bookToUpdate = null)
             val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
 
             // ----- Act -----
             action.execute(
@@ -246,7 +134,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 showProgressSheet = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
 
             // ----- Act -----
             action.execute(
@@ -260,17 +148,13 @@ class OnUpdatePercentageProgressClickActionTest {
         }
 
         @Test
-        fun `uses defaultEdition pages when currentEdition pages is null`() = runTest {
+        fun `computes total seconds as h times 3600 plus m times 60 plus s`() = runTest {
             // ----- Arrange -----
-            val currentEdition = stubEditionWithPages(pages = null)
-            val defaultEdition = stubEditionWithPages(pages = 400)
-            val book = mockk<Book>().also { b ->
-                every { b.currentEdition } returns currentEdition
-                every { b.defaultEdition } returns defaultEdition
-            }
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "25")
+            // 1*3600 + 2*60 + 3 = 3723
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "2", seconds = "3")
 
             // ----- Act -----
             action.execute(
@@ -282,24 +166,20 @@ class OnUpdatePercentageProgressClickActionTest {
             coVerify {
                 updateBookProgress(
                     book = book,
-                    newPage = 100,
+                    newSeconds = 3723,
                     setLoading = any(),
                 )
             }
         }
 
         @Test
-        fun `falls back to 0 pages when both currentEdition and defaultEdition pages are null`() = runTest {
+        fun `treats non-numeric hours as 0`() = runTest {
             // ----- Arrange -----
-            val currentEdition = stubEditionWithPages(pages = null)
-            val defaultEdition = stubEditionWithPages(pages = null)
-            val book = mockk<Book>().also { b ->
-                every { b.currentEdition } returns currentEdition
-                every { b.defaultEdition } returns defaultEdition
-            }
+            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
+            // 0*3600 + 0*60 + 30 = 30
+            val action = OnUpdateTimeProgressClickAction(hours = "abc", minutes = "0", seconds = "30")
 
             // ----- Act -----
             action.execute(
@@ -311,68 +191,20 @@ class OnUpdatePercentageProgressClickActionTest {
             coVerify {
                 updateBookProgress(
                     book = book,
-                    newPage = 0,
+                    newSeconds = 30,
                     setLoading = any(),
                 )
             }
         }
 
         @Test
-        fun `computes newSeconds from percentage and audioSeconds for an audiobook edition`() = runTest {
+        fun `treats non-numeric minutes as 0`() = runTest {
             // ----- Arrange -----
-            val book = stubAudiobook(audioSeconds = 3600)
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 1800,
-                    setLoading = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `passes newPage as null when edition is audiobook`() = runTest {
-            // ----- Arrange -----
-            val book = stubAudiobook(audioSeconds = 3600)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "25")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newPage = null,
-                    newSeconds = 900,
-                    setLoading = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `clamps percentage above 100 to 100 when edition is audiobook`() = runTest {
-            // ----- Arrange -----
-            val book = stubAudiobook(audioSeconds = 3600)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "150")
+            // 1*3600 + 0*60 + 0 = 3600
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "abc", seconds = "0")
 
             // ----- Act -----
             action.execute(
@@ -391,12 +223,37 @@ class OnUpdatePercentageProgressClickActionTest {
         }
 
         @Test
-        fun `clamps percentage below 0 to 0 when edition is audiobook`() = runTest {
+        fun `treats non-numeric seconds as 0`() = runTest {
             // ----- Arrange -----
-            val book = stubAudiobook(audioSeconds = 3600)
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "-50")
+            // 1*3600 + 0*60 + 0 = 3600
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "abc")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                    setLoading = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `treats empty string fields as 0`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+            val action = OnUpdateTimeProgressClickAction(hours = "", minutes = "", seconds = "")
 
             // ----- Act -----
             action.execute(
@@ -415,12 +272,114 @@ class OnUpdatePercentageProgressClickActionTest {
         }
 
         @Test
-        fun `uses 0 seconds when audioSeconds is null and edition is audiobook`() = runTest {
+        fun `coerces minutes greater than 59 to 59`() = runTest {
             // ----- Arrange -----
-            val book = stubAudiobook(audioSeconds = null)
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
+            // 0*3600 + 59*60 + 0 = 3540
+            val action = OnUpdateTimeProgressClickAction(hours = "0", minutes = "90", seconds = "0")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3540,
+                    setLoading = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `coerces seconds greater than 59 to 59`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+            // 0*3600 + 0*60 + 59 = 59
+            val action = OnUpdateTimeProgressClickAction(hours = "0", minutes = "0", seconds = "90")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 59,
+                    setLoading = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `treats negative hours as 0 via coerceAtLeast`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+            // 0*3600 + 30*60 + 0 = 1800
+            val action = OnUpdateTimeProgressClickAction(hours = "-2", minutes = "30", seconds = "0")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 1800,
+                    setLoading = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `clamps total seconds to audioSeconds of current edition`() = runTest {
+            // ----- Arrange -----
+            val audioSeconds = 3600
+            val book = stubBookWithAudioSeconds(audioSeconds = audioSeconds)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+            // 2*3600 + 0 + 0 = 7200, clamped to 3600
+            val action = OnUpdateTimeProgressClickAction(hours = "2", minutes = "0", seconds = "0")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                    setLoading = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `uses 0 as total when audioSeconds is null and still clamps`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = null)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+            // total = 0, so (1*3600).coerceIn(0,0) = 0
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
 
             // ----- Act -----
             action.execute(
@@ -433,6 +392,56 @@ class OnUpdatePercentageProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 0,
+                    setLoading = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `coerces minutes below 0 to 0 via coerceIn`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+            // 1*3600 + 0*60 + 0 = 3600
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "-10", seconds = "0")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                    setLoading = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `coerces seconds below 0 to 0 via coerceIn`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+            // 1*3600 + 0 + 0 = 3600
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "-30")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
                     setLoading = any(),
                 )
             }

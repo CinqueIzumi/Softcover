@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 
 class BookDeadlineCollector : BookDetailInitializer {
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -26,10 +27,13 @@ class BookDeadlineCollector : BookDetailInitializer {
 
         val bookProgressFlow = scope.state
             .map {
-                Triple(
-                    it.book?.id,
-                    it.book?.currentEdition?.pages,
-                    it.book?.userBookRead?.currentPage ?: 0,
+                val edition = it.book?.currentEdition
+                ProgressSnapshot(
+                    bookId = it.book?.id,
+                    totalPages = edition?.pages,
+                    currentPage = it.book?.userBookRead?.currentPage ?: 0,
+                    totalSeconds = edition?.audioSeconds,
+                    currentSeconds = it.book?.userBookRead?.currentSeconds ?: 0,
                 )
             }
             .distinctUntilChanged()
@@ -42,14 +46,23 @@ class BookDeadlineCollector : BookDetailInitializer {
             }
         }
 
-        combine(deadlineFlow, bookProgressFlow) { deadline, progress ->
-            val (_, totalPages, currentPage) = progress
+        combine(deadlineFlow, bookProgressFlow) { deadline, snapshot ->
+            val total = when (deadline?.unit) {
+                DeadlineUnit.PAGES -> snapshot.totalPages
+                DeadlineUnit.SECONDS -> snapshot.totalSeconds
+                null -> null
+            }
+            val current = when (deadline?.unit) {
+                DeadlineUnit.PAGES -> snapshot.currentPage
+                DeadlineUnit.SECONDS -> snapshot.currentSeconds
+                null -> 0
+            }
 
-            val computed = if (deadline != null && totalPages != null) {
+            val computed = if (deadline != null && total != null) {
                 DeadlineProgress.compute(
                     deadline = deadline,
-                    currentPage = currentPage,
-                    totalPages = totalPages,
+                    current = current,
+                    total = total,
                 )
             } else {
                 null

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.deadlines.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import java.time.LocalDate
 
 interface BookDeadlineRepository {
@@ -12,8 +13,9 @@ interface BookDeadlineRepository {
     suspend fun setDeadline(
         bookId: Int,
         deadlineDate: LocalDate,
-        currentPage: Int,
-        totalPages: Int,
+        current: Int,
+        total: Int,
+        unit: DeadlineUnit,
         today: LocalDate = LocalDate.now(),
     )
 

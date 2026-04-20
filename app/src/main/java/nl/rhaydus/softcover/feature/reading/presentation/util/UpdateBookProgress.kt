@@ -11,12 +11,21 @@ class UpdateBookProgress(
 ) {
     suspend operator fun invoke(
         book: Book,
-        newPage: Int,
+        newPage: Int? = null,
+        newSeconds: Int? = null,
         setLoading: (Boolean) -> Unit,
     ) {
         setLoading(true)
 
-        if (newPage == book.currentEdition.pages) {
+        val edition = book.currentEdition
+        val finished = when {
+            edition == null -> false
+            newSeconds != null -> edition.audioSeconds?.let { newSeconds >= it } == true
+            newPage != null -> newPage == edition.pages
+            else -> false
+        }
+
+        if (finished) {
             markBookAsReadUseCase(book = book).onFailure {
                 Timber.e("Something went wrong marking book as read! $it")
             }
@@ -24,6 +33,7 @@ class UpdateBookProgress(
             updateBookProgressUseCase(
                 book = book,
                 newPage = newPage,
+                newSeconds = newSeconds,
             ).onFailure {
                 Timber.e("Something went wrong updating book progress! $it")
             }

@@ -40,7 +40,7 @@ import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
     views = [
         BookEditionView::class
     ],
-    version = 15,
+    version = 16,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -67,6 +67,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_12_13)
                 .addMigrations(MIGRATION_13_14)
                 .addMigrations(MIGRATION_14_15)
+                .addMigrations(MIGRATION_15_16)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -470,6 +471,57 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             setAt TEXT NOT NULL,
                             initialPagesPerDay REAL NOT NULL
                         )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE book_editions ADD COLUMN audioSeconds INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE user_book_reads ADD COLUMN currentSeconds INTEGER DEFAULT NULL")
+
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_deadlines_new (
+                            bookId INTEGER NOT NULL PRIMARY KEY,
+                            deadlineDate TEXT NOT NULL,
+                            setAt TEXT NOT NULL,
+                            initialPerDay REAL NOT NULL,
+                            unit TEXT NOT NULL DEFAULT 'PAGES'
+                        )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                        INSERT INTO book_deadlines_new (bookId, deadlineDate, setAt, initialPerDay, unit)
+                        SELECT bookId, deadlineDate, setAt, initialPagesPerDay, 'PAGES'
+                        FROM book_deadlines
+                    """.trimIndent()
+                )
+                db.execSQL("DROP TABLE book_deadlines")
+                db.execSQL("ALTER TABLE book_deadlines_new RENAME TO book_deadlines")
+
+                db.execSQL("DROP VIEW IF EXISTS book_edition_view")
+                db.execSQL(
+                    """
+                        CREATE VIEW `book_edition_view` AS SELECT
+                                edition.*,
+                                EXISTS(
+                                    SELECT 1
+                                    FROM list_books lb
+                                    JOIN book_lists bl ON bl.id = lb.listId
+                                    WHERE bl.slug = 'owned'
+                                    AND (
+                                        lb.editionId = edition.id
+                                        OR lb.editionId = edition.canonicalId
+                                        OR lb.editionId IN (
+                                            SELECT sub.id FROM book_editions sub
+                                            WHERE sub.canonicalId = edition.id
+                                        )
+                                    )
+                                ) AS isOwned
+                            FROM book_editions edition
                     """.trimIndent()
                 )
             }

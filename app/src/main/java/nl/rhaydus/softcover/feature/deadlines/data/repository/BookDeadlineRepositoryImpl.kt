@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.feature.deadlines.data.datasource.BookDeadlineLocalD
 import nl.rhaydus.softcover.feature.deadlines.data.mapper.toDomain
 import nl.rhaydus.softcover.feature.deadlines.data.mapper.toEntity
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.deadlines.domain.repository.BookDeadlineRepository
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -23,24 +24,26 @@ class BookDeadlineRepositoryImpl(
     override suspend fun setDeadline(
         bookId: Int,
         deadlineDate: LocalDate,
-        currentPage: Int,
-        totalPages: Int,
+        current: Int,
+        total: Int,
+        unit: DeadlineUnit,
         today: LocalDate,
     ) {
-        val pagesRemaining = max(0, totalPages - currentPage)
+        val remaining = max(0, total - current)
         val daysUntilDeadline = ChronoUnit.DAYS.between(today, deadlineDate)
 
-        val initialPagesPerDay = when {
-            pagesRemaining == 0 -> 0f
-            daysUntilDeadline <= 0 -> pagesRemaining.toFloat()
-            else -> pagesRemaining.toFloat() / daysUntilDeadline.toFloat()
+        val initialPerDay = when {
+            remaining == 0 -> 0f
+            daysUntilDeadline <= 0 -> remaining.toFloat()
+            else -> remaining.toFloat() / daysUntilDeadline.toFloat()
         }
 
         val deadline = BookDeadline(
             bookId = bookId,
             deadlineDate = deadlineDate,
             setAt = today,
-            initialPagesPerDay = initialPagesPerDay,
+            initialPerDay = initialPerDay,
+            unit = unit,
         )
 
         localDataSource.upsert(entity = deadline.toEntity())

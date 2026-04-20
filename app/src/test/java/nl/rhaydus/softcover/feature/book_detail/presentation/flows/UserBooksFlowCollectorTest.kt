@@ -64,6 +64,7 @@ class UserBooksFlowCollectorTest {
         localImagePath = null,
         isbn10 = null,
         pages = null,
+        audioSeconds = null,
         authors = emptyList<Author>(),
         releaseYear = 2020,
         format = "Paperback",
@@ -88,7 +89,8 @@ class UserBooksFlowCollectorTest {
     private fun buildUserBookRead(): UserBookRead = UserBookRead(
         id = 1,
         currentPage = null,
-        progress = null,
+        currentSeconds = null,
+        progress = 0f,
         startedAt = null,
         finishedAt = null,
     )

@@ -7,8 +7,10 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-data class OnUpdatePercentageProgressClickAction(
-    val newPercentage: String,
+data class OnUpdateTimeProgressClickAction(
+    val hours: String,
+    val minutes: String,
+    val seconds: String,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
@@ -16,37 +18,22 @@ data class OnUpdatePercentageProgressClickAction(
     ) {
         val bookToUpdate: Book = scope.currentState.book ?: return
 
-        val newPercentageValue: Double = newPercentage.toDoubleOrNull() ?: 0.0
-        val fraction = (newPercentageValue / 100.0).coerceIn(0.0, 1.0)
+        val h = hours.toIntOrNull()?.coerceAtLeast(0) ?: 0
+        val m = minutes.toIntOrNull()?.coerceIn(0, 59) ?: 0
+        val s = seconds.toIntOrNull()?.coerceIn(0, 59) ?: 0
 
-        val edition = bookToUpdate.currentEdition ?: run {
-            scope.setState { it.copy(showUpdateProgressSheet = false) }
-            return
-        }
-        val isAudiobook = edition.isAudiobook
-
-        val newPage: Int? = if (isAudiobook) {
-            null
-        } else {
-            val total = edition.pages ?: bookToUpdate.defaultEdition?.pages ?: 0
-            (fraction * total).toInt()
-        }
-
-        val newSeconds: Int? = if (isAudiobook) {
-            val total = edition.audioSeconds ?: 0
-            (fraction * total).toInt()
-        } else {
-            null
-        }
+        val total = bookToUpdate.currentEdition?.audioSeconds ?: 0
+        val newSeconds = (h * 3600 + m * 60 + s).coerceIn(0, total)
 
         dependencies.launch {
             dependencies.updateBookProgress(
                 book = bookToUpdate,
-                newPage = newPage,
                 newSeconds = newSeconds,
-                setLoading = { newLoading ->
-                    scope.setState { it.copy(loadingBookDetails = newLoading) }
-                },
+                setLoading = { newValue ->
+                    scope.setState {
+                        it.copy(loadingBookDetails = newValue)
+                    }
+                }
             )
         }
 

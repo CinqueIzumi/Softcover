@@ -12,8 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.R
+import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineStatus
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 
 @Composable
@@ -28,10 +30,14 @@ fun DeadlineSummaryLine(
     val paceText = if (status == DeadlineStatus.Expired) {
         status.label
     } else {
-        val pace = ceilToInt(progress.requiredPagesPerDay)
-        val pageLabel = if (pace == 1) "page" else "pages"
-
-        "$pace $pageLabel / day"
+        val pace = ceilToInt(progress.requiredPerDay)
+        when (progress.unit) {
+            DeadlineUnit.PAGES -> {
+                val pageLabel = if (pace == 1) "page" else "pages"
+                "$pace $pageLabel / day"
+            }
+            DeadlineUnit.SECONDS -> "${secondsToHm(pace)} / day"
+        }
     }
 
     Row(

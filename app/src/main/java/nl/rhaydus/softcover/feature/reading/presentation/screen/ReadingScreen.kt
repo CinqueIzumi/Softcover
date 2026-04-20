@@ -66,6 +66,7 @@ import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
@@ -73,6 +74,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabCli
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdateTimeProgressClickAction
+import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
@@ -176,6 +179,9 @@ object ReadingScreen : Screen {
                         onUpdatePageProgressClick = {
                             runAction(OnUpdatePageProgressClickAction(it))
                         },
+                        onUpdateTimeProgressClick = { h, m, s ->
+                            runAction(OnUpdateTimeProgressClickAction(h, m, s))
+                        },
                     )
                 }
 
@@ -201,10 +207,20 @@ object ReadingScreen : Screen {
                 val deadline = state.deadlines[book.id]
 
                 val deadlineProgress = deadline?.let {
+                    val edition = book.currentEdition ?: return@let null
+                    val current = when (it.unit) {
+                        DeadlineUnit.PAGES -> book.userBookRead?.currentPage ?: 0
+                        DeadlineUnit.SECONDS -> book.userBookRead?.currentSeconds ?: 0
+                    }
+                    val total = when (it.unit) {
+                        DeadlineUnit.PAGES -> edition.pages ?: 0
+                        DeadlineUnit.SECONDS -> edition.audioSeconds ?: 0
+                    }
+
                     DeadlineProgress.compute(
                         deadline = it,
-                        currentPage = book.userBookRead?.currentPage ?: 0,
-                        totalPages = book.currentEdition.pages ?: 0,
+                        current = current,
+                        total = total,
                     )
                 }
 
@@ -312,16 +328,15 @@ object ReadingScreen : Screen {
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
-                            text = book.currentEdition.authorString,
+                            text = book.currentEdition?.authorString.orEmpty(),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         Spacer(modifier = Modifier.height(2.dp))
 
-                        val currentPage = book.userBookRead?.currentPage ?: 0
                         Text(
-                            text = "Page $currentPage of ${book.currentEdition.pages ?: book.defaultEdition?.pages}",
+                            text = progressLabel(book),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -371,7 +386,8 @@ object ReadingScreen : Screen {
                             size = ButtonSize.XS,
                         )
 
-                        book.userBookRead?.progress?.let { bookProgress ->
+                        book.userBookRead?.let { userBookRead ->
+                            val bookProgress = userBookRead.progress
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -398,6 +414,19 @@ object ReadingScreen : Screen {
                 }
             }
         }
+    }
+}
+
+private fun progressLabel(book: Book): String {
+    val edition = book.currentEdition
+    return if (edition?.isAudiobook == true) {
+        val current = book.userBookRead?.currentSeconds ?: 0
+        val total = edition.audioSeconds ?: 0
+        "${secondsToHm(current)} of ${secondsToHm(total)}"
+    } else {
+        val currentPage = book.userBookRead?.currentPage ?: 0
+        val totalPages = edition?.pages ?: book.defaultEdition?.pages
+        "Page $currentPage of $totalPages"
     }
 }
 

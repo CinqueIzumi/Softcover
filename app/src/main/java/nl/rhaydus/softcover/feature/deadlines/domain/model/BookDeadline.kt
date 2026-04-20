@@ -6,5 +6,6 @@ data class BookDeadline(
     val bookId: Int,
     val deadlineDate: LocalDate,
     val setAt: LocalDate,
-    val initialPagesPerDay: Float,
+    val initialPerDay: Float,
+    val unit: DeadlineUnit,
 )
