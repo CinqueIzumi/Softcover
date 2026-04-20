@@ -1,0 +1,2 @@
+- [Project architecture](project_architecture.md) — Softcover Android app: Kotlin/Jetpack Compose, Clean Architecture + TOAD, Apollo GraphQL, Room, Koin, Voyager
+- [Style guide highlights](style_conventions.md) — trailing commas required on all multi-arg calls/declarations, blank lines between sibling composables, one data class per file
