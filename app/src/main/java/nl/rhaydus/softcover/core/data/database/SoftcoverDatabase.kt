@@ -19,6 +19,8 @@ import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
+import nl.rhaydus.softcover.feature.deadlines.data.dao.BookDeadlineDao
+import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
 
 @Database(
     entities = [
@@ -33,14 +35,17 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
         BookListEntity::class,
         ListBookEntity::class,
         BookSeriesEntity::class,
+        BookDeadlineEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 14,
+    version = 15,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
+
+    abstract fun bookDeadlineDao(): BookDeadlineDao
 
     companion object {
         fun buildDatabase(context: Context): SoftcoverDatabase {
@@ -61,6 +66,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_11_12)
                 .addMigrations(MIGRATION_12_13)
                 .addMigrations(MIGRATION_13_14)
+                .addMigrations(MIGRATION_14_15)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -449,6 +455,21 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                                     )
                                 ) AS isOwned
                             FROM book_editions edition
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_deadlines (
+                            bookId INTEGER NOT NULL PRIMARY KEY,
+                            deadlineDate TEXT NOT NULL,
+                            setAt TEXT NOT NULL,
+                            initialPagesPerDay REAL NOT NULL
+                        )
                     """.trimIndent()
                 )
             }

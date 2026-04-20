@@ -56,9 +56,14 @@ import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
+import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
+import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
@@ -71,6 +76,7 @@ import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
+import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 
 object LibraryScreen : Screen {
@@ -301,6 +307,8 @@ object LibraryScreen : Screen {
                     book = book,
                     layout = state.gridLayout,
                     onBookClick = onBookClick,
+                    deadline = state.deadlines[book.id],
+                    dateStyle = state.dateStyle,
                 )
             }
         }
@@ -344,8 +352,18 @@ object LibraryScreen : Screen {
         book: Book,
         layout: LibraryGridLayout,
         onBookClick: (Book) -> Unit,
+        deadline: BookDeadline? = null,
+        dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     ) {
         val authorName = book.authors.map { it.name }.firstOrNull().orEmpty()
+
+        val deadlineProgress = deadline?.let {
+            DeadlineProgress.compute(
+                deadline = it,
+                currentPage = book.userBookRead?.currentPage ?: 0,
+                totalPages = book.currentEdition.pages ?: 0,
+            )
+        }
 
         when (layout) {
             LibraryGridLayout.GRID_TWO_COLUMNS,
@@ -355,13 +373,15 @@ object LibraryScreen : Screen {
                     authorName = authorName,
                     onClick = { onBookClick(book) },
                 ) { modifier ->
-                    EditionImage(
-                        edition = book.currentEdition,
-                        modifier = modifier,
-                        isLoading = false,
-                        defaultEdition = book.defaultEdition,
-                        fallbackCoverUrl = book.coverUrl,
-                    )
+                    DeadlineCoverOverlay(progress = deadlineProgress) {
+                        EditionImage(
+                            edition = book.currentEdition,
+                            modifier = modifier,
+                            isLoading = false,
+                            defaultEdition = book.defaultEdition,
+                            fallbackCoverUrl = book.coverUrl,
+                        )
+                    }
                 }
             }
 
@@ -370,6 +390,7 @@ object LibraryScreen : Screen {
                     title = book.title,
                     authorName = authorName,
                     onClick = { onBookClick(book) },
+                    deadlineProgress = deadlineProgress,
                 )
             }
 
@@ -382,14 +403,18 @@ object LibraryScreen : Screen {
                     releaseYear = book.releaseYear,
                     usersCount = book.usersCount,
                     rating = book.rating,
+                    deadlineProgress = deadlineProgress,
+                    dateStyle = dateStyle,
                 ) { modifier ->
-                    EditionImage(
-                        edition = book.currentEdition,
-                        modifier = modifier,
-                        isLoading = false,
-                        defaultEdition = book.defaultEdition,
-                        fallbackCoverUrl = book.coverUrl,
-                    )
+                    DeadlineCoverOverlay(progress = deadlineProgress) {
+                        EditionImage(
+                            edition = book.currentEdition,
+                            modifier = modifier,
+                            isLoading = false,
+                            defaultEdition = book.defaultEdition,
+                            fallbackCoverUrl = book.coverUrl,
+                        )
+                    }
                 }
             }
         }
@@ -479,6 +504,7 @@ object LibraryScreen : Screen {
         title: String,
         authorName: String,
         onClick: () -> Unit,
+        deadlineProgress: DeadlineProgress? = null,
     ) {
         Column(
             modifier = Modifier
@@ -486,11 +512,22 @@ object LibraryScreen : Screen {
                 .noRippleClickable(onClick = onClick)
                 .padding(vertical = 8.dp)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
+                )
+
+                if (deadlineProgress != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    DeadlineBadge(status = deadlineProgress.status)
+                }
+            }
 
             Spacer(modifier = Modifier.height(2.dp))
 
@@ -512,6 +549,8 @@ object LibraryScreen : Screen {
         releaseYear: Int? = null,
         usersCount: Int? = null,
         rating: Double? = null,
+        deadlineProgress: DeadlineProgress? = null,
+        dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
         cover: @Composable (Modifier) -> Unit,
     ) {
         Row(
@@ -581,6 +620,13 @@ object LibraryScreen : Screen {
                             )
                         }
                     }
+                }
+
+                if (deadlineProgress != null) {
+                    DeadlineSummaryLine(
+                        progress = deadlineProgress,
+                        dateStyle = dateStyle,
+                    )
                 }
             }
         }

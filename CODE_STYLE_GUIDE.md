@@ -46,6 +46,50 @@ A data source interface and its implementation live in the **same file**, named 
 
 Each feature has its own Koin DI module in a `di/` subdirectory, keeping dependency declarations close to the code they serve.
 
+## Enums
+
+- **One enum per file.** Enum classes always live in their own file, named after the enum.
+- **Attach labels and other display data as properties on the enum**, not as mappings in call sites. When every entry has a `label`, icon, color, etc., declare it as a constructor parameter on the enum so callers reference `MyEnum.FOO.label` rather than duplicating a `when` / `if` block wherever the enum is used. This prevents drift when a new entry is added.
+
+```kotlin
+// Good — label lives on the enum.
+enum class DeadlineStatus(val label: String) {
+    OnTrack(label = "On track"),
+    Behind(label = "Behind"),
+    Expired(label = "Expired"),
+}
+
+Text(text = status.label)
+
+// Bad — label duplicated at every call site.
+val label = when (status) {
+    DeadlineStatus.OnTrack -> "On track"
+    DeadlineStatus.Behind -> "Behind"
+    DeadlineStatus.Expired -> "Expired"
+}
+```
+
+## If / Else
+
+- A single-line `if` / `else` expression (one where the whole statement fits on one line) may omit braces: `val x = if (a) b else c`.
+- As soon as the `if` / `else` breaks across multiple lines — whether because the condition, a branch body, or the combined length exceeds one line — **every branch must use an explicit `{ ... }` block**. Never mix a braced branch with a brace-less branch, and never span a brace-less branch across multiple lines.
+
+```kotlin
+// Good — single line, no braces needed.
+val dayLabel = if (daysRemaining == 1L) "day" else "days"
+
+// Good — multi-line, both branches use blocks.
+val message = if (progress.isOnTrack) {
+    "You're on track."
+} else {
+    "You're ${progress.pagesBehindSchedule} pages behind schedule."
+}
+
+// Bad — brace-less branch spans multiple lines.
+val message = if (progress.isOnTrack) "You're on track."
+    else "You're ${progress.pagesBehindSchedule} pages behind schedule."
+```
+
 ## Compose
 
 - Screens are top-level `@Composable` functions, not classes.

@@ -18,6 +18,9 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCas
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 
 class BookDetailScreenScreenModel(
@@ -32,6 +35,9 @@ class BookDetailScreenScreenModel(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
+    private val observeBookDeadlineUseCase: ObserveBookDeadlineUseCase,
+    private val setBookDeadlineUseCase: SetBookDeadlineUseCase,
+    private val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
@@ -53,6 +59,9 @@ class BookDetailScreenScreenModel(
         markBookAsReadUseCase = markBookAsReadUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         setEditionAsOwnedUseCase = setEditionAsOwnedUseCase,
+        observeBookDeadlineUseCase = observeBookDeadlineUseCase,
+        setBookDeadlineUseCase = setBookDeadlineUseCase,
+        clearBookDeadlineUseCase = clearBookDeadlineUseCase,
     )
 
     init {

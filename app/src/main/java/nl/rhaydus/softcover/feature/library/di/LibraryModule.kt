@@ -1,8 +1,10 @@
 package nl.rhaydus.softcover.feature.library.di
 
 import nl.rhaydus.softcover.feature.library.presentation.flows.AllBooksCollector
+import nl.rhaydus.softcover.feature.library.presentation.flows.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.BookListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.CurrentlyReadingBooksCollector
+import nl.rhaydus.softcover.feature.library.presentation.flows.DateStyleCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.DidNotFinishBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
@@ -27,6 +29,10 @@ val libraryModule = module {
 
     factory { GridLayoutCollector() } bind LibraryInitializer::class
 
+    factory { BookDeadlinesCollector() } bind LibraryInitializer::class
+
+    factory { DateStyleCollector() } bind LibraryInitializer::class
+
     factory {
         LibraryScreenScreenModel(
             getWantToReadUserBooksUseCase = get(),
@@ -40,6 +46,8 @@ val libraryModule = module {
             getAllUserListsUseCase = get(),
             getLibraryGridLayoutAsFlowUseCase = get(),
             setLibraryGridLayoutUseCase = get(),
+            observeAllBookDeadlinesUseCase = get(),
+            getDateStyleAsFlowUseCase = get(),
         )
     }
 }
