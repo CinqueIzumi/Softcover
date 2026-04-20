@@ -51,6 +51,8 @@ import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
+import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
@@ -63,6 +65,8 @@ import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
@@ -145,6 +149,7 @@ object ReadingScreen : Screen {
                                 books = state.books,
                                 runAction = runAction,
                                 onBookClick = onBookClick,
+                                state = state,
                             )
                         }
 
@@ -183,6 +188,7 @@ object ReadingScreen : Screen {
         books: List<Book>,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
+        state: ReadingScreenUiState,
     ) {
         LazyColumn(
             modifier = Modifier
@@ -191,11 +197,23 @@ object ReadingScreen : Screen {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(bottom = rememberBottomBarPadding())
         ) {
-            items(books) {
+            items(books) { book ->
+                val deadline = state.deadlines[book.id]
+
+                val deadlineProgress = deadline?.let {
+                    DeadlineProgress.compute(
+                        deadline = it,
+                        currentPage = book.userBookRead?.currentPage ?: 0,
+                        totalPages = book.currentEdition.pages ?: 0,
+                    )
+                }
+
                 BookEntry(
-                    book = it,
+                    book = book,
                     runAction = runAction,
-                    onBookClick = onBookClick
+                    onBookClick = onBookClick,
+                    deadlineProgress = deadlineProgress,
+                    dateStyle = state.dateStyle,
                 )
             }
         }
@@ -242,6 +260,8 @@ object ReadingScreen : Screen {
         book: Book,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
+        deadlineProgress: DeadlineProgress? = null,
+        dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     ) {
         var updateProgressSplitButtonActive by remember { mutableStateOf(false) }
 
@@ -262,13 +282,15 @@ object ReadingScreen : Screen {
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    EditionImage(
-                        edition = book.currentEdition,
-                        modifier = Modifier.width(100.dp),
-                        isLoading = false,
-                        defaultEdition = book.defaultEdition,
-                        fallbackCoverUrl = book.coverUrl,
-                    )
+                    DeadlineCoverOverlay(progress = deadlineProgress) {
+                        EditionImage(
+                            edition = book.currentEdition,
+                            modifier = Modifier.width(100.dp),
+                            isLoading = false,
+                            defaultEdition = book.defaultEdition,
+                            fallbackCoverUrl = book.coverUrl,
+                        )
+                    }
 
                     Spacer(modifier = Modifier.width(16.dp))
 
@@ -303,6 +325,15 @@ object ReadingScreen : Screen {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+
+                        if (deadlineProgress != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            DeadlineSummaryLine(
+                                progress = deadlineProgress,
+                                dateStyle = dateStyle,
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(8.dp))
 

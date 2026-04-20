@@ -12,12 +12,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 
 @Composable
 fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier {
@@ -70,6 +76,22 @@ fun Modifier.shimmer(shape: Shape = RectangleShape): Modifier {
 
         onDrawWithContent {
             drawOutline(outline, brush = brush)
+        }
+    }
+}
+
+fun Modifier.grayscale(): Modifier {
+    val paint = Paint().apply {
+        colorFilter = ColorFilter.colorMatrix(
+            ColorMatrix().apply { setToSaturation(0f) }
+        )
+    }
+
+    return this.drawWithContent {
+        drawIntoCanvas { canvas ->
+            canvas.saveLayer(bounds = Rect(Offset.Zero, size), paint = paint)
+            drawContent()
+            canvas.restore()
         }
     }
 }
