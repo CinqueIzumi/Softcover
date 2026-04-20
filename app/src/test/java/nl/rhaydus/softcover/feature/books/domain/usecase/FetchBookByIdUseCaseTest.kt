@@ -34,6 +34,7 @@ class FetchBookByIdUseCaseTest {
         localImagePath = null,
         isbn10 = null,
         pages = null,
+        audioSeconds = null,
         authors = emptyList<Author>(),
         releaseYear = 2020,
         format = "Paperback",

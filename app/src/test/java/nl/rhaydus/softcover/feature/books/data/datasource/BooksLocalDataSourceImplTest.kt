@@ -73,6 +73,7 @@ class BooksLocalDataSourceImplTest {
         localImagePath = null,
         isbn10 = null,
         pages = null,
+        audioSeconds = null,
         releaseYear = 2020,
         format = "Paperback",
     )

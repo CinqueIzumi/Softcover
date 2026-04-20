@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.deadlines.domain.repository.BookDeadlineRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -30,15 +31,16 @@ class SetBookDeadlineUseCaseTest {
             // ----- Arrange -----
             val bookId = 42
             val deadlineDate = LocalDate.of(2026, 7, 1)
-            val currentPage = 50
-            val totalPages = 300
+            val current = 50
+            val total = 300
 
             // ----- Act -----
             useCase(
                 bookId = bookId,
                 deadlineDate = deadlineDate,
-                currentPage = currentPage,
-                totalPages = totalPages,
+                current = current,
+                total = total,
+                unit = DeadlineUnit.PAGES,
             )
 
             // ----- Assert -----
@@ -46,8 +48,9 @@ class SetBookDeadlineUseCaseTest {
                 repository.setDeadline(
                     bookId = bookId,
                     deadlineDate = deadlineDate,
-                    currentPage = currentPage,
-                    totalPages = totalPages,
+                    current = current,
+                    total = total,
+                    unit = DeadlineUnit.PAGES,
                 )
             }
         }
@@ -62,8 +65,9 @@ class SetBookDeadlineUseCaseTest {
                 repository.setDeadline(
                     bookId = bookId,
                     deadlineDate = deadlineDate,
-                    currentPage = any(),
-                    totalPages = any(),
+                    current = any(),
+                    total = any(),
+                    unit = any(),
                 )
             } returns Unit
 
@@ -71,8 +75,9 @@ class SetBookDeadlineUseCaseTest {
             val result = useCase(
                 bookId = bookId,
                 deadlineDate = deadlineDate,
-                currentPage = 0,
-                totalPages = 200,
+                current = 0,
+                total = 200,
+                unit = DeadlineUnit.PAGES,
             )
 
             // ----- Assert -----
@@ -90,8 +95,9 @@ class SetBookDeadlineUseCaseTest {
                 repository.setDeadline(
                     bookId = bookId,
                     deadlineDate = deadlineDate,
-                    currentPage = any(),
-                    totalPages = any(),
+                    current = any(),
+                    total = any(),
+                    unit = any(),
                 )
             } throws expectedError
 
@@ -99,13 +105,51 @@ class SetBookDeadlineUseCaseTest {
             val result = useCase(
                 bookId = bookId,
                 deadlineDate = deadlineDate,
-                currentPage = 0,
-                totalPages = 200,
+                current = 0,
+                total = 200,
+                unit = DeadlineUnit.PAGES,
             )
 
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
+        }
+
+        @Test
+        fun `passes SECONDS unit to repository for audiobook deadline`() = runTest {
+            // ----- Arrange -----
+            val bookId = 5
+            val deadlineDate = LocalDate.of(2026, 8, 1)
+
+            coEvery {
+                repository.setDeadline(
+                    bookId = bookId,
+                    deadlineDate = deadlineDate,
+                    current = any(),
+                    total = any(),
+                    unit = DeadlineUnit.SECONDS,
+                )
+            } returns Unit
+
+            // ----- Act -----
+            useCase(
+                bookId = bookId,
+                deadlineDate = deadlineDate,
+                current = 0,
+                total = 18000,
+                unit = DeadlineUnit.SECONDS,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                repository.setDeadline(
+                    bookId = bookId,
+                    deadlineDate = deadlineDate,
+                    current = any(),
+                    total = any(),
+                    unit = DeadlineUnit.SECONDS,
+                )
+            }
         }
     }
 }

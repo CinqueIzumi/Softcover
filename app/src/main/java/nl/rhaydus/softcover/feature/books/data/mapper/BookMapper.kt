@@ -54,6 +54,7 @@ fun EditionFragment.toBookEdition(
     localImagePath = null,
     publisher = publisher?.name,
     pages = pages,
+    audioSeconds = audio_seconds,
     authors = authors,
     isbn10 = isbn_10,
     releaseYear = release_year ?: -1,
@@ -121,7 +122,8 @@ private fun UserBookFragment.toUserBook(): UserBook {
 
 private fun UserBookReadFragment.toUserBookRead(): UserBookRead = UserBookRead(
     currentPage = progress_pages,
-    progress = progress?.toFloat(),
+    currentSeconds = progress_seconds,
+    progress = progress?.toFloat() ?: 0f,
     id = id,
     startedAt = started_at,
     finishedAt = finished_at,
@@ -257,6 +259,7 @@ fun Book.toEntity(): BookEntity = BookEntity(
 fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity = UserBookReadEntity(
     id = id,
     currentPage = currentPage,
+    currentSeconds = currentSeconds,
     progress = progress,
     startedAt = startedAt,
     finishedAt = finishedAt,
@@ -294,6 +297,7 @@ fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     localImagePath = localImagePath,
     isbn10 = isbn10,
     pages = pages,
+    audioSeconds = audioSeconds,
     releaseYear = releaseYear,
     format = format,
 )
@@ -331,6 +335,7 @@ fun BookEditionEntity.toModel(
     localImagePath = localImagePath,
     isbn10 = isbn10,
     pages = pages,
+    audioSeconds = audioSeconds,
     releaseYear = releaseYear,
     authors = authors.map { it.toModel() },
     format = format,
@@ -341,9 +346,10 @@ fun BookEditionEntity.toModel(
 fun UserBookReadEntity.toModel(): UserBookRead = UserBookRead(
     id = id,
     currentPage = currentPage,
-    progress = progress,
+    currentSeconds = currentSeconds,
+    progress = progress ?: 0f,
     startedAt = startedAt,
-    finishedAt = finishedAt
+    finishedAt = finishedAt,
 )
 
 fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook = UserBook(

@@ -64,12 +64,24 @@ class BookDeadlineCollectorTest {
             every {
                 this@mockk.pages
             } returns pages
+
+            every {
+                this@mockk.audioSeconds
+            } returns null
+
+            every {
+                this@mockk.isAudiobook
+            } returns false
         }
         val userBookRead = if (currentPage != null) {
             mockk<UserBookRead> {
                 every {
                     this@mockk.currentPage
                 } returns currentPage
+
+                every {
+                    this@mockk.currentSeconds
+                } returns null
             }
         } else {
             null
@@ -92,12 +104,13 @@ class BookDeadlineCollectorTest {
     private fun buildDeadline(
         bookId: Int = 1,
         deadlineDate: LocalDate = LocalDate.of(2026, 5, 20),
-        initialPagesPerDay: Float = 10f,
+        initialPerDay: Float = 10f,
     ) = BookDeadline(
         bookId = bookId,
         deadlineDate = deadlineDate,
         setAt = LocalDate.of(2026, 4, 20),
-        initialPagesPerDay = initialPagesPerDay,
+        initialPerDay = initialPerDay,
+        unit = nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit.PAGES,
     )
 
     @Nested
@@ -108,7 +121,7 @@ class BookDeadlineCollectorTest {
             // ----- Arrange -----
             val book = stubBook(id = 1, pages = 300, currentPage = 0)
             stateFlow.value = BookDetailUiState(book = book)
-            val deadline = buildDeadline(bookId = 1, initialPagesPerDay = 10f)
+            val deadline = buildDeadline(bookId = 1, initialPerDay = 10f)
 
             val collector = BookDeadlineCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
@@ -160,7 +173,7 @@ class BookDeadlineCollectorTest {
         }
 
         @Test
-        fun `requiredPagesPerDay recomputes when currentPage on the book changes`() = runTest(UnconfinedTestDispatcher()) {
+        fun `requiredPerDay recomputes when currentPage on the book changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val bookId = 1
             val totalPages = 300
@@ -169,13 +182,13 @@ class BookDeadlineCollectorTest {
             val bookBefore = stubBook(id = bookId, pages = totalPages, currentPage = 0)
             stateFlow.value = BookDetailUiState(book = bookBefore)
 
-            val deadline = buildDeadline(bookId = bookId, initialPagesPerDay = 10f)
+            val deadline = buildDeadline(bookId = bookId, initialPerDay = 10f)
 
             val collector = BookDeadlineCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
 
             deadlineFlow.emit(deadline)
-            val progressBefore = stateFlow.value.deadlineProgress!!.requiredPagesPerDay
+            val progressBefore = stateFlow.value.deadlineProgress!!.requiredPerDay
 
             // ----- Act -----
             // Simulate reading 150 pages → 150 remaining / 30 days = 5 p/day
@@ -183,7 +196,7 @@ class BookDeadlineCollectorTest {
             stateFlow.value = stateFlow.value.copy(book = bookAfter)
 
             // ----- Assert -----
-            val progressAfter = stateFlow.value.deadlineProgress!!.requiredPagesPerDay
+            val progressAfter = stateFlow.value.deadlineProgress!!.requiredPerDay
             (progressAfter < progressBefore) shouldBe true
             job.cancel()
         }

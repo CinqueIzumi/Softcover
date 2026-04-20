@@ -23,14 +23,14 @@ data class Book(
     val status: BookStatus
         get() = userBook?.status ?: BookStatus.None
 
-    val currentEdition: BookEdition
+    val currentEdition: BookEdition?
         get() {
             val userEditionId = userBook?.editionId
 
             return editions.firstOrNull { it.id == userEditionId }
                 ?: editions.firstOrNull { it.owned }
                 ?: defaultEdition
-                ?: editions.first()
+                ?: editions.firstOrNull()
         }
 
     val seriesText: String?

@@ -239,7 +239,7 @@ class SearchScreen : Screen {
                 )
 
                 Text(
-                    text = "By ${book.currentEdition.authorString}",
+                    text = "By ${book.currentEdition?.authorString.orEmpty()}",
                     style = MaterialTheme.typography.bodyMedium
                 )
 

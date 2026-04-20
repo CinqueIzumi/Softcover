@@ -29,7 +29,8 @@ class ObserveBookDeadlineUseCaseTest {
         bookId = bookId,
         deadlineDate = LocalDate.of(2026, 5, 1),
         setAt = LocalDate.of(2026, 4, 1),
-        initialPagesPerDay = 10f,
+        initialPerDay = 10f,
+        unit = nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit.PAGES,
     )
 
     @Nested

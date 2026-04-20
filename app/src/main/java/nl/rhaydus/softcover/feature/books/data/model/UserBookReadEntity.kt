@@ -26,6 +26,7 @@ data class UserBookReadEntity(
     val userBookId: Int,
 
     val currentPage: Int?,
+    val currentSeconds: Int?,
     val progress: Float?,
     val startedAt: String?,
     val finishedAt: String?,

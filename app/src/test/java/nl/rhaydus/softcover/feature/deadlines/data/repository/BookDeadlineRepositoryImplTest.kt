@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.feature.deadlines.data.datasource.BookDeadlineLocalDataSource
 import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -31,12 +32,14 @@ class BookDeadlineRepositoryImplTest {
         bookId: Int = 1,
         deadlineDate: String = "2026-05-01",
         setAt: String = "2026-04-01",
-        initialPagesPerDay: Float = 10f,
+        initialPerDay: Float = 10f,
+        unit: String = "PAGES",
     ) = BookDeadlineEntity(
         bookId = bookId,
         deadlineDate = deadlineDate,
         setAt = setAt,
-        initialPagesPerDay = initialPagesPerDay,
+        initialPerDay = initialPerDay,
+        unit = unit,
     )
 
     @Nested
@@ -45,7 +48,7 @@ class BookDeadlineRepositoryImplTest {
         @Test
         fun `returns mapped domain object when data source emits an entity`() = runTest {
             // ----- Arrange -----
-            val entity = buildEntity(bookId = 42, deadlineDate = "2026-07-10", setAt = "2026-04-01", initialPagesPerDay = 8f)
+            val entity = buildEntity(bookId = 42, deadlineDate = "2026-07-10", setAt = "2026-04-01", initialPerDay = 8f)
 
             every {
                 localDataSource.observe(bookId = 42)
@@ -56,7 +59,7 @@ class BookDeadlineRepositoryImplTest {
                 val item = awaitItem()
                 item!!.bookId shouldBe 42
                 item.deadlineDate shouldBe LocalDate.of(2026, 7, 10)
-                item.initialPagesPerDay shouldBe 8f
+                item.initialPerDay shouldBe 8f
                 awaitComplete()
             }
         }
@@ -98,8 +101,8 @@ class BookDeadlineRepositoryImplTest {
         @Test
         fun `returns list of mapped domain objects`() = runTest {
             // ----- Arrange -----
-            val entity1 = buildEntity(bookId = 1, deadlineDate = "2026-05-01", setAt = "2026-04-01", initialPagesPerDay = 10f)
-            val entity2 = buildEntity(bookId = 2, deadlineDate = "2026-06-15", setAt = "2026-04-10", initialPagesPerDay = 5f)
+            val entity1 = buildEntity(bookId = 1, deadlineDate = "2026-05-01", setAt = "2026-04-01", initialPerDay = 10f)
+            val entity2 = buildEntity(bookId = 2, deadlineDate = "2026-06-15", setAt = "2026-04-10", initialPerDay = 5f)
 
             every {
                 localDataSource.observeAll()
@@ -134,11 +137,11 @@ class BookDeadlineRepositoryImplTest {
     inner class SetDeadline {
 
         @Test
-        fun `upserts entity with correct initialPagesPerDay for future deadline`() = runTest {
+        fun `upserts entity with correct initialPerDay for future deadline`() = runTest {
             // ----- Arrange -----
             val today = LocalDate.of(2026, 4, 20)
             val deadlineDate = LocalDate.of(2026, 5, 20)  // 30 days away
-            // 300 pages, currentPage 0 → 300 remaining / 30 days = 10f
+            // 300 units, current 0 → 300 remaining / 30 days = 10f
             val entitySlot = slot<BookDeadlineEntity>()
 
             coEvery {
@@ -149,20 +152,21 @@ class BookDeadlineRepositoryImplTest {
             repository.setDeadline(
                 bookId = 1,
                 deadlineDate = deadlineDate,
-                currentPage = 0,
-                totalPages = 300,
+                current = 0,
+                total = 300,
+                unit = DeadlineUnit.PAGES,
                 today = today,
             )
 
             // ----- Assert -----
-            entitySlot.captured.initialPagesPerDay shouldBe 10f
+            entitySlot.captured.initialPerDay shouldBe 10f
             entitySlot.captured.bookId shouldBe 1
             entitySlot.captured.deadlineDate shouldBe "2026-05-20"
             entitySlot.captured.setAt shouldBe "2026-04-20"
         }
 
         @Test
-        fun `initialPagesPerDay is zero when pagesRemaining is zero`() = runTest {
+        fun `initialPerDay is zero when remaining is zero`() = runTest {
             // ----- Arrange -----
             val today = LocalDate.of(2026, 4, 20)
             val deadlineDate = LocalDate.of(2026, 5, 20)
@@ -176,21 +180,22 @@ class BookDeadlineRepositoryImplTest {
             repository.setDeadline(
                 bookId = 2,
                 deadlineDate = deadlineDate,
-                currentPage = 300,
-                totalPages = 300,
+                current = 300,
+                total = 300,
+                unit = DeadlineUnit.PAGES,
                 today = today,
             )
 
             // ----- Assert -----
-            entitySlot.captured.initialPagesPerDay shouldBe 0f
+            entitySlot.captured.initialPerDay shouldBe 0f
         }
 
         @Test
-        fun `initialPagesPerDay equals pagesRemaining when deadlineDate equals today`() = runTest {
+        fun `initialPerDay equals remaining when deadlineDate equals today`() = runTest {
             // ----- Arrange -----
             val today = LocalDate.of(2026, 4, 20)
             val deadlineDate = today  // 0 days until deadline
-            // 200 pages remaining, 0 days → requiredPerDay = pagesRemaining.toFloat()
+            // 200 units remaining, 0 days → initialPerDay = remaining.toFloat()
             val entitySlot = slot<BookDeadlineEntity>()
 
             coEvery {
@@ -201,17 +206,18 @@ class BookDeadlineRepositoryImplTest {
             repository.setDeadline(
                 bookId = 3,
                 deadlineDate = deadlineDate,
-                currentPage = 100,
-                totalPages = 300,
+                current = 100,
+                total = 300,
+                unit = DeadlineUnit.PAGES,
                 today = today,
             )
 
             // ----- Assert -----
-            entitySlot.captured.initialPagesPerDay shouldBe 200f
+            entitySlot.captured.initialPerDay shouldBe 200f
         }
 
         @Test
-        fun `initialPagesPerDay equals pagesRemaining when deadline is in the past`() = runTest {
+        fun `initialPerDay equals remaining when deadline is in the past`() = runTest {
             // ----- Arrange -----
             val today = LocalDate.of(2026, 4, 20)
             val deadlineDate = LocalDate.of(2026, 4, 19)  // yesterday
@@ -225,17 +231,18 @@ class BookDeadlineRepositoryImplTest {
             repository.setDeadline(
                 bookId = 4,
                 deadlineDate = deadlineDate,
-                currentPage = 50,
-                totalPages = 200,
+                current = 50,
+                total = 200,
+                unit = DeadlineUnit.PAGES,
                 today = today,
             )
 
             // ----- Assert -----
-            entitySlot.captured.initialPagesPerDay shouldBe 150f
+            entitySlot.captured.initialPerDay shouldBe 150f
         }
 
         @Test
-        fun `pagesRemaining clamps to zero when currentPage exceeds totalPages`() = runTest {
+        fun `remaining clamps to zero when current exceeds total`() = runTest {
             // ----- Arrange -----
             val today = LocalDate.of(2026, 4, 20)
             val deadlineDate = LocalDate.of(2026, 5, 20)
@@ -249,13 +256,64 @@ class BookDeadlineRepositoryImplTest {
             repository.setDeadline(
                 bookId = 5,
                 deadlineDate = deadlineDate,
-                currentPage = 400,
-                totalPages = 300,
+                current = 400,
+                total = 300,
+                unit = DeadlineUnit.PAGES,
                 today = today,
             )
 
             // ----- Assert -----
-            entitySlot.captured.initialPagesPerDay shouldBe 0f
+            entitySlot.captured.initialPerDay shouldBe 0f
+        }
+
+        @Test
+        fun `unit PAGES is stored as string PAGES on the entity`() = runTest {
+            // ----- Arrange -----
+            val today = LocalDate.of(2026, 4, 20)
+            val deadlineDate = LocalDate.of(2026, 5, 20)
+            val entitySlot = slot<BookDeadlineEntity>()
+
+            coEvery {
+                localDataSource.upsert(entity = capture(entitySlot))
+            } returns Unit
+
+            // ----- Act -----
+            repository.setDeadline(
+                bookId = 6,
+                deadlineDate = deadlineDate,
+                current = 0,
+                total = 300,
+                unit = DeadlineUnit.PAGES,
+                today = today,
+            )
+
+            // ----- Assert -----
+            entitySlot.captured.unit shouldBe "PAGES"
+        }
+
+        @Test
+        fun `unit SECONDS is stored as string SECONDS on the entity`() = runTest {
+            // ----- Arrange -----
+            val today = LocalDate.of(2026, 4, 20)
+            val deadlineDate = LocalDate.of(2026, 5, 20)
+            val entitySlot = slot<BookDeadlineEntity>()
+
+            coEvery {
+                localDataSource.upsert(entity = capture(entitySlot))
+            } returns Unit
+
+            // ----- Act -----
+            repository.setDeadline(
+                bookId = 7,
+                deadlineDate = deadlineDate,
+                current = 0,
+                total = 18000,
+                unit = DeadlineUnit.SECONDS,
+                today = today,
+            )
+
+            // ----- Assert -----
+            entitySlot.captured.unit shouldBe "SECONDS"
         }
     }
 

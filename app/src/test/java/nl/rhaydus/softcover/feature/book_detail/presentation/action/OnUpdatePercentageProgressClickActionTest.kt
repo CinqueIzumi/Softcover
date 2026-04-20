@@ -63,6 +63,13 @@ class OnUpdatePercentageProgressClickActionTest {
     private fun stubEdition(pages: Int?): BookEdition = mockk {
         every { this@mockk.pages } returns pages
         every { id } returns 1
+        every { isAudiobook } returns false
+        every { audioSeconds } returns null
+    }
+
+    private fun stubAudiobookEdition(audioSeconds: Int?): BookEdition = mockk {
+        every { this@mockk.audioSeconds } returns audioSeconds
+        every { isAudiobook } returns true
     }
 
     private fun stubBook(currentEditionPages: Int?, defaultEditionPages: Int? = null): Book = mockk {
@@ -71,6 +78,12 @@ class OnUpdatePercentageProgressClickActionTest {
 
         every { currentEdition } returns edition
         every { this@mockk.defaultEdition } returns defaultEdition
+    }
+
+    private fun stubAudiobook(audioSeconds: Int?): Book = mockk {
+        val edition = stubAudiobookEdition(audioSeconds = audioSeconds)
+        every { currentEdition } returns edition
+        every { defaultEdition } returns null
     }
 
     @Nested
@@ -105,7 +118,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe true
-            coVerify(exactly = 0) { updateBookProgress(any(), any(), any()) }
+            coVerify(exactly = 0) { updateBookProgress(any(), any(), any(), any()) }
         }
 
         @Test
@@ -237,9 +250,8 @@ class OnUpdatePercentageProgressClickActionTest {
         }
 
         @Test
-        fun `propagates negative page count when percentage is negative — no low-end clamping`() = runTest {
+        fun `clamps negative percentage to zero pages`() = runTest {
             // ----- Arrange -----
-            // -10% of 300 pages = -30; no clamping on the low end
             val book = stubBook(currentEditionPages = 300)
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
@@ -251,14 +263,13 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = -30, setLoading = any())
+                updateBookProgress(book = book, newPage = 0, newSeconds = null, setLoading = any())
             }
         }
 
         @Test
-        fun `propagates page count greater than total pages when percentage exceeds 100 — no high-end clamping`() = runTest {
+        fun `clamps percentage greater than 100 to total pages`() = runTest {
             // ----- Arrange -----
-            // 150% of 200 pages = 300, which is greater than the book's total page count
             val book = stubBook(currentEditionPages = 200)
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
@@ -270,7 +281,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 300, setLoading = any())
+                updateBookProgress(book = book, newPage = 200, newSeconds = null, setLoading = any())
             }
         }
 
@@ -284,9 +295,9 @@ class OnUpdatePercentageProgressClickActionTest {
             val loadingStates = mutableListOf<Boolean>()
 
             coEvery {
-                updateBookProgress(book = book, newPage = 50, setLoading = any())
+                updateBookProgress(book = book, newPage = 50, newSeconds = null, setLoading = any())
             } coAnswers {
-                val setLoading = thirdArg<(Boolean) -> Unit>()
+                val setLoading = arg<(Boolean) -> Unit>(3)
                 setLoading(true)
                 loadingStates.add(stateFlow.value.loadingBookDetails)
                 setLoading(false)
@@ -300,6 +311,112 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             loadingStates shouldBe listOf(true, false)
+        }
+
+        @Test
+        fun `computes newSeconds from percentage and audioSeconds for an audiobook edition`() = runTest {
+            // ----- Arrange -----
+            val book = stubAudiobook(audioSeconds = 3600)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
+
+            // ----- Act -----
+            action.execute(dependencies = dependencies, scope = scope)
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(book = book, newSeconds = 1800, setLoading = any())
+            }
+        }
+
+        @Test
+        fun `passes newPage as null when edition is audiobook`() = runTest {
+            // ----- Arrange -----
+            val book = stubAudiobook(audioSeconds = 3600)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            val action = OnUpdatePercentageProgressClickAction(newPercentage = "25")
+
+            // ----- Act -----
+            action.execute(dependencies = dependencies, scope = scope)
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(book = book, newPage = null, newSeconds = 900, setLoading = any())
+            }
+        }
+
+        @Test
+        fun `clamps percentage above 100 to 100 when edition is audiobook`() = runTest {
+            // ----- Arrange -----
+            val book = stubAudiobook(audioSeconds = 3600)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            val action = OnUpdatePercentageProgressClickAction(newPercentage = "150")
+
+            // ----- Act -----
+            action.execute(dependencies = dependencies, scope = scope)
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(book = book, newSeconds = 3600, setLoading = any())
+            }
+        }
+
+        @Test
+        fun `clamps percentage below 0 to 0 when edition is audiobook`() = runTest {
+            // ----- Arrange -----
+            val book = stubAudiobook(audioSeconds = 3600)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            val action = OnUpdatePercentageProgressClickAction(newPercentage = "-50")
+
+            // ----- Act -----
+            action.execute(dependencies = dependencies, scope = scope)
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(book = book, newSeconds = 0, setLoading = any())
+            }
+        }
+
+        @Test
+        fun `uses 0 seconds when audioSeconds is null and edition is audiobook`() = runTest {
+            // ----- Arrange -----
+            val book = stubAudiobook(audioSeconds = null)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
+
+            // ----- Act -----
+            action.execute(dependencies = dependencies, scope = scope)
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(book = book, newSeconds = 0, setLoading = any())
+            }
+        }
+
+        @Test
+        fun `hides the update progress sheet for audiobook edition`() = runTest {
+            // ----- Arrange -----
+            val book = stubAudiobook(audioSeconds = 3600)
+            stateFlow.value = BookDetailUiState(book = book, showUpdateProgressSheet = true)
+            dependencies = stubDependencies(this)
+
+            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
+
+            // ----- Act -----
+            action.execute(dependencies = dependencies, scope = scope)
+
+            // ----- Assert -----
+            stateFlow.value.showUpdateProgressSheet shouldBe false
         }
     }
 }

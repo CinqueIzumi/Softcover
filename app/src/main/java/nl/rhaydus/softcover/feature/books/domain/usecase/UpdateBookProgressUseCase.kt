@@ -8,11 +8,13 @@ class UpdateBookProgressUseCase(
 ) {
     suspend operator fun invoke(
         book: Book,
-        newPage: Int,
+        newPage: Int? = null,
+        newSeconds: Int? = null,
     ): Result<Unit> = runCatching {
         val updatedBook = repository.updateBookProgress(
             book = book,
             newPage = newPage,
+            newSeconds = newSeconds,
         )
 
         repository.cacheBook(book = updatedBook)

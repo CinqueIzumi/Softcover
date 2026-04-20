@@ -64,6 +64,7 @@ import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
@@ -357,11 +358,22 @@ object LibraryScreen : Screen {
     ) {
         val authorName = book.authors.map { it.name }.firstOrNull().orEmpty()
 
+        val currentEdition = book.currentEdition
         val deadlineProgress = deadline?.let {
+            if (currentEdition == null) return@let null
+            val current = when (it.unit) {
+                DeadlineUnit.PAGES -> book.userBookRead?.currentPage ?: 0
+                DeadlineUnit.SECONDS -> book.userBookRead?.currentSeconds ?: 0
+            }
+            val total = when (it.unit) {
+                DeadlineUnit.PAGES -> currentEdition.pages ?: 0
+                DeadlineUnit.SECONDS -> currentEdition.audioSeconds ?: 0
+            }
+
             DeadlineProgress.compute(
                 deadline = it,
-                currentPage = book.userBookRead?.currentPage ?: 0,
-                totalPages = book.currentEdition.pages ?: 0,
+                current = current,
+                total = total,
             )
         }
 
@@ -375,7 +387,7 @@ object LibraryScreen : Screen {
                 ) { modifier ->
                     DeadlineCoverOverlay(progress = deadlineProgress) {
                         EditionImage(
-                            edition = book.currentEdition,
+                            edition = currentEdition,
                             modifier = modifier,
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
@@ -397,7 +409,7 @@ object LibraryScreen : Screen {
             LibraryGridLayout.LIST_LARGE -> {
                 LargeRow(
                     title = book.title,
-                    authorName = book.currentEdition.authorString,
+                    authorName = currentEdition?.authorString.orEmpty(),
                     onClick = { onBookClick(book) },
                     seriesText = book.seriesText,
                     releaseYear = book.releaseYear,
@@ -408,7 +420,7 @@ object LibraryScreen : Screen {
                 ) { modifier ->
                     DeadlineCoverOverlay(progress = deadlineProgress) {
                         EditionImage(
-                            edition = book.currentEdition,
+                            edition = currentEdition,
                             modifier = modifier,
                             isLoading = false,
                             defaultEdition = book.defaultEdition,

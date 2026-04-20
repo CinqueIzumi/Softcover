@@ -8,5 +8,6 @@ data class BookDeadlineEntity(
     @PrimaryKey val bookId: Int,
     val deadlineDate: String,
     val setAt: String,
-    val initialPagesPerDay: Float,
+    val initialPerDay: Float,
+    val unit: String,
 )

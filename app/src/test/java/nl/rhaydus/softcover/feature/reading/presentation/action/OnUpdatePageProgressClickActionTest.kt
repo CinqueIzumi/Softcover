@@ -188,7 +188,7 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                updateBookProgress(any(), any(), any())
+                updateBookProgress(any(), any(), any(), any())
             }
         }
 

@@ -33,9 +33,18 @@ class UpdateBookProgressTest {
     private fun stubBookWithCurrentEditionPages(pages: Int?): Book = mockk<Book>().also { book ->
         val edition = mockk<BookEdition>().also { e ->
             every { e.pages } returns pages
+            every { e.audioSeconds } returns null
         }
         every { book.currentEdition } returns edition
     }
+
+    private fun stubBookWithCurrentEditionAudioSeconds(audioSeconds: Int?): Book =
+        mockk<Book>().also { book ->
+            val edition = mockk<BookEdition>().also { e ->
+                every { e.audioSeconds } returns audioSeconds
+            }
+            every { book.currentEdition } returns edition
+        }
 
     @Nested
     inner class Invoke {
@@ -289,6 +298,202 @@ class UpdateBookProgressTest {
             coVerify(exactly = 0) {
                 markBookAsReadUseCase(any())
             }
+        }
+
+        @Test
+        fun `invokes markBookAsReadUseCase when newSeconds equals audioSeconds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = 3600)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            updateBookProgress(
+                book = book,
+                newSeconds = 3600,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            coVerify {
+                markBookAsReadUseCase(book = book)
+            }
+        }
+
+        @Test
+        fun `invokes markBookAsReadUseCase when newSeconds exceeds audioSeconds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = 3600)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            updateBookProgress(
+                book = book,
+                newSeconds = 4000,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            coVerify {
+                markBookAsReadUseCase(book = book)
+            }
+        }
+
+        @Test
+        fun `does not invoke updateBookProgressUseCase when newSeconds equals audioSeconds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = 3600)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            updateBookProgress(
+                book = book,
+                newSeconds = 3600,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                updateBookProgressUseCase(any(), any(), any())
+            }
+        }
+
+        @Test
+        fun `invokes updateBookProgressUseCase with newPage null and newSeconds when newSeconds is less than audioSeconds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = 3600)
+
+            coEvery {
+                updateBookProgressUseCase(book = book, newPage = null, newSeconds = 1800)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            updateBookProgress(
+                book = book,
+                newSeconds = 1800,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgressUseCase(book = book, newPage = null, newSeconds = 1800)
+            }
+        }
+
+        @Test
+        fun `does not invoke markBookAsReadUseCase when newSeconds is less than audioSeconds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = 3600)
+
+            coEvery {
+                updateBookProgressUseCase(book = book, newPage = null, newSeconds = 1800)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            updateBookProgress(
+                book = book,
+                newSeconds = 1800,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                markBookAsReadUseCase(any())
+            }
+        }
+
+        @Test
+        fun `invokes updateBookProgressUseCase when newSeconds is non-null but audioSeconds is null`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = null)
+
+            coEvery {
+                updateBookProgressUseCase(book = book, newPage = null, newSeconds = 1800)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            updateBookProgress(
+                book = book,
+                newSeconds = 1800,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgressUseCase(book = book, newPage = null, newSeconds = 1800)
+            }
+        }
+
+        @Test
+        fun `does not invoke markBookAsReadUseCase when newSeconds is non-null but audioSeconds is null`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = null)
+
+            coEvery {
+                updateBookProgressUseCase(book = book, newPage = null, newSeconds = 1800)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            updateBookProgress(
+                book = book,
+                newSeconds = 1800,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                markBookAsReadUseCase(any())
+            }
+        }
+
+        @Test
+        fun `calls setLoading true then false for audiobook progress update`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = 3600)
+            val loadingStates = mutableListOf<Boolean>()
+
+            coEvery {
+                updateBookProgressUseCase(book = book, newPage = null, newSeconds = 1800)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            updateBookProgress(
+                book = book,
+                newSeconds = 1800,
+                setLoading = { loadingStates.add(it) },
+            )
+
+            // ----- Assert -----
+            loadingStates shouldBe listOf(true, false)
+        }
+
+        @Test
+        fun `calls setLoading false even when marking audiobook as read fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = 3600)
+            val loadingStates = mutableListOf<Boolean>()
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.failure(RuntimeException("network error"))
+
+            // ----- Act -----
+            updateBookProgress(
+                book = book,
+                newSeconds = 3600,
+                setLoading = { loadingStates.add(it) },
+            )
+
+            // ----- Assert -----
+            loadingStates.last() shouldBe false
         }
     }
 }

@@ -162,7 +162,7 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe true
-            coVerify(exactly = 0) { updateBookProgress(any(), any(), any()) }
+            coVerify(exactly = 0) { updateBookProgress(any(), any(), any(), any()) }
         }
 
         @Test
@@ -237,9 +237,9 @@ class OnUpdatePageProgressClickActionTest {
             val loadingStates = mutableListOf<Boolean>()
 
             coEvery {
-                updateBookProgress(book = book, newPage = 100, setLoading = any())
+                updateBookProgress(book = book, newPage = 100, newSeconds = null, setLoading = any())
             } coAnswers {
-                val setLoading = thirdArg<(Boolean) -> Unit>()
+                val setLoading = arg<(Boolean) -> Unit>(3)
                 setLoading(true)
                 loadingStates.add(stateFlow.value.loadingBookDetails)
                 setLoading(false)
