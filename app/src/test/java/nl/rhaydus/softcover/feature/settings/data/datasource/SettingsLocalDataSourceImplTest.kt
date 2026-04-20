@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.feature.settings.data.model.AppSettingsEntity
 import nl.rhaydus.softcover.feature.settings.data.model.ThemeConfigurationEntity
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -40,11 +41,13 @@ class SettingsLocalDataSourceImplTest {
         userId: Int = -1,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
         themeConfig: ThemeConfigurationEntity = ThemeConfigurationEntity(),
+        libraryGridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
     ): AppSettingsEntity = AppSettingsEntity(
         apiKey = apiKey,
         userId = userId,
         dateStyle = dateStyle,
         themeConfig = themeConfig,
+        libraryGridLayout = libraryGridLayout,
     )
 
     @Nested
@@ -352,6 +355,152 @@ class SettingsLocalDataSourceImplTest {
 
             // ----- Assert -----
             capturedResult?.apiKey shouldBe "key-abc"
+            capturedResult?.dateStyle shouldBe DateStyle.MONTH_DAY_YEAR
+        }
+    }
+
+    @Nested
+    inner class LibraryGridLayoutFlow {
+
+        @Test
+        fun `emits the libraryGridLayout field from each entity in the data store flow`() = runTest {
+            // ----- Arrange -----
+            val entity = stubEntity(libraryGridLayout = LibraryGridLayout.GRID_THREE_COLUMNS)
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.libraryGridLayout.test {
+                awaitItem() shouldBe LibraryGridLayout.GRID_THREE_COLUMNS
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `deduplicates identical consecutive libraryGridLayout values`() = runTest {
+            // ----- Arrange -----
+            val entity1 = stubEntity(libraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS)
+            val entity2 = stubEntity(libraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS)
+
+            every {
+                dataStore.data
+            } returns flowOf(entity1, entity2)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.libraryGridLayout.test {
+                awaitItem() shouldBe LibraryGridLayout.GRID_TWO_COLUMNS
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits distinct consecutive libraryGridLayout values`() = runTest {
+            // ----- Arrange -----
+            val entity1 = stubEntity(libraryGridLayout = LibraryGridLayout.LIST_COMPACT)
+            val entity2 = stubEntity(libraryGridLayout = LibraryGridLayout.LIST_LARGE)
+
+            every {
+                dataStore.data
+            } returns flowOf(entity1, entity2)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.libraryGridLayout.test {
+                awaitItem() shouldBe LibraryGridLayout.LIST_COMPACT
+                awaitItem() shouldBe LibraryGridLayout.LIST_LARGE
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class SetLibraryGridLayout {
+
+        @Test
+        fun `calls updateData on the data store`() = runTest {
+            // ----- Arrange -----
+            val layout = LibraryGridLayout.GRID_THREE_COLUMNS
+            val existingEntity = stubEntity(libraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS)
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                updater(existingEntity)
+            }
+
+            // ----- Act -----
+            dataSource.setLibraryGridLayout(layout = layout)
+
+            // ----- Assert -----
+            coVerify {
+                dataStore.updateData(any())
+            }
+        }
+
+        @Test
+        fun `update lambda sets libraryGridLayout to the given layout`() = runTest {
+            // ----- Arrange -----
+            val layout = LibraryGridLayout.LIST_COMPACT
+            val existingEntity = stubEntity(libraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS)
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setLibraryGridLayout(layout = layout)
+
+            // ----- Assert -----
+            capturedResult?.libraryGridLayout shouldBe layout
+        }
+
+        @Test
+        fun `update lambda preserves other entity fields when updating libraryGridLayout`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                apiKey = "key-xyz",
+                userId = 7,
+                dateStyle = DateStyle.MONTH_DAY_YEAR,
+                libraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setLibraryGridLayout(layout = LibraryGridLayout.LIST_LARGE)
+
+            // ----- Assert -----
+            capturedResult?.apiKey shouldBe "key-xyz"
+            capturedResult?.userId shouldBe 7
             capturedResult?.dateStyle shouldBe DateStyle.MONTH_DAY_YEAR
         }
     }

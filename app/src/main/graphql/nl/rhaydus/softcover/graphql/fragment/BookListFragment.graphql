@@ -9,6 +9,7 @@ fragment BookListFragment on books {
         url
     }
     release_year
+    users_count
     book_series {
         ...BookSeriesFragment
     }

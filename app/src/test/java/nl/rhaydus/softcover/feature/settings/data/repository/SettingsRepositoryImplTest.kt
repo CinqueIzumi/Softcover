@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSo
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.settings.domain.model.UserProfileData
 import org.junit.jupiter.api.BeforeEach
@@ -54,6 +55,47 @@ class SettingsRepositoryImplTest {
             freshRepository.dateStyle.test {
                 awaitItem() shouldBe nl.rhaydus.softcover.feature.settings.domain.model.DateStyle.MONTH_DAY_YEAR
                 awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class LibraryGridLayoutProperty {
+
+        @Test
+        fun `libraryGridLayout property is wired to local data source libraryGridLayout flow`() = runTest {
+            // ----- Arrange -----
+            every {
+                settingsLocalDataSource.libraryGridLayout
+            } returns flowOf(LibraryGridLayout.GRID_THREE_COLUMNS)
+
+            val freshRepository = SettingsRepositoryImpl(
+                settingsLocalDataSource = settingsLocalDataSource,
+                settingsRemoteDataSource = settingsRemoteDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshRepository.libraryGridLayout.test {
+                awaitItem() shouldBe LibraryGridLayout.GRID_THREE_COLUMNS
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class SetLibraryGridLayout {
+
+        @Test
+        fun `delegates to local data source with the given layout`() = runTest {
+            // ----- Arrange -----
+            val layout = LibraryGridLayout.LIST_COMPACT
+
+            // ----- Act -----
+            repository.setLibraryGridLayout(layout = layout)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setLibraryGridLayout(layout = layout)
             }
         }
     }

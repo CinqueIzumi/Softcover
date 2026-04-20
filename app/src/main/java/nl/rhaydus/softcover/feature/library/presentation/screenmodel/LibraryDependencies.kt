@@ -10,6 +10,8 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBook
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
 
 class LibraryDependencies(
     val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
@@ -19,6 +21,8 @@ class LibraryDependencies(
     val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     val getAllUserListsUseCase: GetAllUserListsUseCase,
+    val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
+    val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

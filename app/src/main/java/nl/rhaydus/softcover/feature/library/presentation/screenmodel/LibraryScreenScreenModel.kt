@@ -15,6 +15,8 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
 
 class LibraryScreenScreenModel(
     private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
@@ -24,6 +26,8 @@ class LibraryScreenScreenModel(
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
+    private val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
+    private val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryInitializer>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
@@ -40,6 +44,8 @@ class LibraryScreenScreenModel(
         mainDispatcher = appDispatchers.main,
         refreshUserBooksUseCase = refreshUserBooksUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
+        getLibraryGridLayoutAsFlowUseCase = getLibraryGridLayoutAsFlowUseCase,
+        setLibraryGridLayoutUseCase = setLibraryGridLayoutUseCase,
         coroutineScope = screenModelScope,
     )
 
