@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.feature.settings.data.datastore.appSettings
 import nl.rhaydus.softcover.feature.settings.data.repository.SettingsRepositoryImpl
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
@@ -20,6 +21,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdAndB
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.flows.DateStyleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
@@ -113,6 +115,14 @@ val settingsModule = module {
 
     factory {
         GetDateStyleAsFlowUseCase(settingsRepository = get())
+    }
+
+    factory {
+        GetLibraryGridLayoutAsFlowUseCase(settingsRepository = get())
+    }
+
+    factory {
+        SetLibraryGridLayoutUseCase(settingsRepository = get())
     }
 
     single<GetThemeConfigurationUseCase> {

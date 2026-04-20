@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.feature.library.presentation.flows.AllBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.BookListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.CurrentlyReadingBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.DidNotFinishBooksCollector
+import nl.rhaydus.softcover.feature.library.presentation.flows.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
 import nl.rhaydus.softcover.feature.library.presentation.flows.ReadBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.WantToReadBooksCollector
@@ -24,6 +25,8 @@ val libraryModule = module {
 
     factory { WantToReadBooksCollector() } bind LibraryInitializer::class
 
+    factory { GridLayoutCollector() } bind LibraryInitializer::class
+
     factory {
         LibraryScreenScreenModel(
             getWantToReadUserBooksUseCase = get(),
@@ -35,6 +38,8 @@ val libraryModule = module {
             appDispatchers = get(),
             flows = getAll(),
             getAllUserListsUseCase = get(),
+            getLibraryGridLayoutAsFlowUseCase = get(),
+            setLibraryGridLayoutUseCase = get(),
         )
     }
 }

@@ -278,6 +278,20 @@ Follow this order:
 
 Remove unused imports.
 
+### No fully-qualified type references
+
+Never reference a type by its fully-qualified name inline (e.g. `androidx.compose.foundation.layout.RowScope.() -> Unit`, `kotlinx.coroutines.test.TestScope`, `java.io.File`). Always add an `import` for the type and use its short name at the call/declaration site. This applies to production and test code, including parameter types, return types, generic arguments, receiver types on lambdas, and `mockk()` type witnesses.
+
+```kotlin
+// Bad
+additionalActions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
+
+// Good
+import androidx.compose.foundation.layout.RowScope
+
+additionalActions: @Composable RowScope.() -> Unit = {},
+```
+
 ## Data Flow
 
 - UI state is always exposed as `StateFlow` (immutable from the UI's perspective).

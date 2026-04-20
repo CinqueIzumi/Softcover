@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSo
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.settings.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
@@ -15,8 +16,14 @@ class SettingsRepositoryImpl(
 ) : SettingsRepository {
     override val dateStyle: Flow<DateStyle> = settingsLocalDataSource.dateStyle
 
+    override val libraryGridLayout: Flow<LibraryGridLayout> = settingsLocalDataSource.libraryGridLayout
+
     override suspend fun setDateStyle(style: DateStyle) {
         settingsLocalDataSource.setDateStyle(style = style)
+    }
+
+    override suspend fun setLibraryGridLayout(layout: LibraryGridLayout) {
+        settingsLocalDataSource.setLibraryGridLayout(layout = layout)
     }
 
     override suspend fun updateApiKey(key: String) {

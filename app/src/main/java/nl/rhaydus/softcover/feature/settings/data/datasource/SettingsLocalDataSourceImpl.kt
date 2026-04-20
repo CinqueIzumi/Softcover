@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.settings.data.model.AppSettingsEntity
 import nl.rhaydus.softcover.feature.settings.data.model.toModel
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 
 class SettingsLocalDataSourceImpl(
@@ -18,9 +19,19 @@ class SettingsLocalDataSourceImpl(
         .map { it.dateStyle }
         .distinctUntilChanged()
 
+    override val libraryGridLayout: Flow<LibraryGridLayout> = appSettingsDataStore.store.data
+        .map { it.libraryGridLayout }
+        .distinctUntilChanged()
+
     override suspend fun setDateStyle(style: DateStyle) {
         appSettingsDataStore.store.updateData {
             it.copy(dateStyle = style)
+        }
+    }
+
+    override suspend fun setLibraryGridLayout(layout: LibraryGridLayout) {
+        appSettingsDataStore.store.updateData {
+            it.copy(libraryGridLayout = layout)
         }
     }
 

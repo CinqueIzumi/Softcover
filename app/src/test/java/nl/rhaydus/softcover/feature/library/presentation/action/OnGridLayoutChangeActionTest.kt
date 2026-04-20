@@ -10,26 +10,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class OnRefreshActionTest {
+class OnGridLayoutChangeActionTest {
 
-    private lateinit var refreshUserBooksUseCase: RefreshUserBooksUseCase
+    private lateinit var setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     @BeforeEach
     fun setUp() {
-        refreshUserBooksUseCase = mockk()
+        setLibraryGridLayoutUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -42,8 +42,8 @@ class OnRefreshActionTest {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
-                mock.refreshUserBooksUseCase
-            } returns refreshUserBooksUseCase
+                mock.setLibraryGridLayoutUseCase
+            } returns setLibraryGridLayoutUseCase
 
             every {
                 mock.coroutineScope
@@ -63,15 +63,16 @@ class OnRefreshActionTest {
     inner class Execute {
 
         @Test
-        fun `sets isLoading to true then false when use case succeeds`() = runTest {
+        fun `sets isLayoutMenuExpanded to false on success`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+            stateFlow.value = LibraryUiState(isLayoutMenuExpanded = true)
 
             coEvery {
-                refreshUserBooksUseCase()
+                setLibraryGridLayoutUseCase(newLayout = LibraryGridLayout.GRID_THREE_COLUMNS)
             } returns Result.success(Unit)
 
-            val action = OnRefreshAction()
+            val action = OnGridLayoutChangeAction(newLayout = LibraryGridLayout.GRID_THREE_COLUMNS)
 
             // ----- Act -----
             action.execute(
@@ -80,19 +81,20 @@ class OnRefreshActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
+            stateFlow.value.isLayoutMenuExpanded shouldBe false
         }
 
         @Test
-        fun `sets isLoading to false after use case failure`() = runTest {
+        fun `sets isLayoutMenuExpanded to false even when the use case fails`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+            stateFlow.value = LibraryUiState(isLayoutMenuExpanded = true)
 
             coEvery {
-                refreshUserBooksUseCase()
-            } returns Result.failure(RuntimeException("network error"))
+                setLibraryGridLayoutUseCase(newLayout = LibraryGridLayout.LIST_COMPACT)
+            } returns Result.failure(RuntimeException("storage error"))
 
-            val action = OnRefreshAction()
+            val action = OnGridLayoutChangeAction(newLayout = LibraryGridLayout.LIST_COMPACT)
 
             // ----- Act -----
             action.execute(
@@ -101,19 +103,19 @@ class OnRefreshActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
+            stateFlow.value.isLayoutMenuExpanded shouldBe false
         }
 
         @Test
-        fun `invokes refreshUserBooksUseCase exactly once`() = runTest {
+        fun `invokes use case with the layout provided to the action constructor`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshUserBooksUseCase()
+                setLibraryGridLayoutUseCase(newLayout = LibraryGridLayout.LIST_LARGE)
             } returns Result.success(Unit)
 
-            val action = OnRefreshAction()
+            val action = OnGridLayoutChangeAction(newLayout = LibraryGridLayout.LIST_LARGE)
 
             // ----- Act -----
             action.execute(
@@ -122,23 +124,26 @@ class OnRefreshActionTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 1) {
-                refreshUserBooksUseCase()
+            coVerify {
+                setLibraryGridLayoutUseCase(newLayout = LibraryGridLayout.LIST_LARGE)
             }
         }
 
         @Test
-        fun `preserves other state fields when toggling isLoading`() = runTest {
+        fun `preserves other state fields when collapsing the layout menu`() = runTest {
             // ----- Arrange -----
-            val existingBooks = listOf(mockk<Book>())
-            stateFlow.value = LibraryUiState(allBooks = existingBooks, isLoading = false)
             val dependencies = stubDependencies(this)
+            stateFlow.value = LibraryUiState(
+                isLoading = false,
+                isLayoutMenuExpanded = true,
+                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
 
             coEvery {
-                refreshUserBooksUseCase()
+                setLibraryGridLayoutUseCase(newLayout = LibraryGridLayout.GRID_THREE_COLUMNS)
             } returns Result.success(Unit)
 
-            val action = OnRefreshAction()
+            val action = OnGridLayoutChangeAction(newLayout = LibraryGridLayout.GRID_THREE_COLUMNS)
 
             // ----- Act -----
             action.execute(
@@ -147,8 +152,8 @@ class OnRefreshActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.allBooks shouldBe existingBooks
             stateFlow.value.isLoading shouldBe false
+            stateFlow.value.isLayoutMenuExpanded shouldBe false
         }
     }
 }
