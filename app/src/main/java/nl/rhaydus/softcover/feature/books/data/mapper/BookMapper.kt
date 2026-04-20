@@ -173,7 +173,7 @@ fun UserBookFragment.toBook(): Book? {
         releaseYear = listFragment.release_year ?: -1,
         coverUrl = listFragment.image?.url ?: "",
         authors = bookAuthors,
-        usersCount = 0,
+        usersCount = listFragment.users_count ?: 0,
         bookSeries = listFragment.bookSeries(),
         positionInSeries = listFragment.positionInSeries(),
         userBook = toUserBook(),
