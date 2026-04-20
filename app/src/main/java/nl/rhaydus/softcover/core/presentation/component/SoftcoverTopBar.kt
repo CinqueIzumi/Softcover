@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.presentation.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.TextAutoSize
@@ -137,6 +138,7 @@ fun SoftcoverTopBar(
             }
         }
     },
+    additionalActions: @Composable RowScope.() -> Unit = {},
     onNavigateToSearch: (() -> Unit)? = null,
 ) {
     val shouldShowSearchIcon = LocalThemeConfiguration.current
@@ -157,6 +159,8 @@ fun SoftcoverTopBar(
         titleHorizontalAlignment = titleAlignment,
         colors = colors,
         actions = {
+            additionalActions()
+
             actions.forEach { action ->
                 IconButton(onClick = action.onClick) {
                     val resource = action.iconResource

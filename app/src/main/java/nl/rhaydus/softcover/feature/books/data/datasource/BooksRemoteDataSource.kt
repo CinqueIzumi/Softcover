@@ -74,7 +74,8 @@ interface BooksRemoteDataSource {
 
     suspend fun updateBookProgress(
         book: Book,
-        newPage: Int,
+        newPage: Int? = null,
+        newSeconds: Int? = null,
     ): Book
 
     suspend fun markBookAsRead(book: Book): Book
@@ -161,7 +162,7 @@ class BooksRemoteDataSourceImpl(
             .format(DateTimeFormatter.ISO_LOCAL_DATE)
 
         val input = UserBookUpdateInput(
-            edition_id = Optional.Present(book.currentEdition.id),
+            edition_id = Optional.Present(book.currentEdition?.id),
             review_has_spoilers = Optional.Present(userBook.reviewHasSpoilers),
             status_id = Optional.present(UserBookStatus.CURRENTLY_READING.code),
             last_read_date = Optional.Present(userBook.lastReadDate),
@@ -253,7 +254,8 @@ class BooksRemoteDataSourceImpl(
 
     override suspend fun updateBookProgress(
         book: Book,
-        newPage: Int,
+        newPage: Int?,
+        newSeconds: Int?,
     ): Book {
         val userBook = book.userBook
             ?: throw Exception("Book did not contain a user book")
@@ -261,8 +263,11 @@ class BooksRemoteDataSourceImpl(
         val userBookRead =
             book.userBookRead ?: throw Exception("Book did not contain a user book read")
 
+        val isAudiobook = newSeconds != null
+
         val dataObject = DatesReadInput(
-            progress_pages = Optional.present(newPage),
+            progress_pages = if (isAudiobook) Optional.absent() else Optional.present(newPage),
+            progress_seconds = if (isAudiobook) Optional.present(newSeconds) else Optional.absent(),
             started_at = Optional.present(userBookRead.startedAt),
             finished_at = Optional.present(userBookRead.finishedAt),
             edition_id = Optional.present(userBook.editionId),
@@ -282,7 +287,8 @@ class BooksRemoteDataSourceImpl(
 
         val updatedUserBookRead = userBookRead.copy(
             currentPage = userBookReadFragment.progress_pages,
-            progress = userBookReadFragment.progress?.toFloat(),
+            currentSeconds = userBookReadFragment.progress_seconds,
+            progress = userBookReadFragment.progress?.toFloat() ?: 0f,
         )
 
         val formatter = DateTimeFormatter

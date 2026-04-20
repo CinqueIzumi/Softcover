@@ -48,11 +48,13 @@ fun EditionFragment.toBookEdition(
     authors: List<Author> = emptyList(),
 ): BookEdition = BookEdition(
     id = id,
+    canonicalId = canonical_id,
     title = title,
-    url = image?.url,
+    url = image?.url ?: fallbackImages.firstOrNull()?.url,
     localImagePath = null,
     publisher = publisher?.name,
     pages = pages,
+    audioSeconds = audio_seconds,
     authors = authors,
     isbn10 = isbn_10,
     releaseYear = release_year ?: -1,
@@ -120,7 +122,8 @@ private fun UserBookFragment.toUserBook(): UserBook {
 
 private fun UserBookReadFragment.toUserBookRead(): UserBookRead = UserBookRead(
     currentPage = progress_pages,
-    progress = progress?.toFloat(),
+    currentSeconds = progress_seconds,
+    progress = progress?.toFloat() ?: 0f,
     id = id,
     startedAt = started_at,
     finishedAt = finished_at,
@@ -153,6 +156,7 @@ fun UserBookFragment.toBook(): Book? {
     val bookAuthors = listFragment.authors()
     val selectedEdition = edition?.editionFragment()
         ?.toBookEdition(authors = bookAuthors)
+        ?.copy(bookId = listFragment.id)
 
     val editions = listOfNotNull(selectedEdition)
 
@@ -171,7 +175,7 @@ fun UserBookFragment.toBook(): Book? {
         releaseYear = listFragment.release_year ?: -1,
         coverUrl = listFragment.image?.url ?: "",
         authors = bookAuthors,
-        usersCount = 0,
+        usersCount = listFragment.users_count ?: 0,
         bookSeries = listFragment.bookSeries(),
         positionInSeries = listFragment.positionInSeries(),
         userBook = toUserBook(),
@@ -184,6 +188,7 @@ fun BookDetailFragment.toBook(): Book? {
     val bookAuthors = listFragment.authors()
     val defaultEdition = default_physical_edition?.editionFragment()
         ?.toBookEdition(authors = bookAuthors)
+        ?.copy(bookId = listFragment.id)
     val editions = listOfNotNull(defaultEdition)
 
     if (editions.isEmpty()) return null
@@ -254,6 +259,7 @@ fun Book.toEntity(): BookEntity = BookEntity(
 fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity = UserBookReadEntity(
     id = id,
     currentPage = currentPage,
+    currentSeconds = currentSeconds,
     progress = progress,
     startedAt = startedAt,
     finishedAt = finishedAt,
@@ -283,6 +289,7 @@ fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity = ReadingJour
 
 fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     id = id,
+    canonicalId = canonicalId,
     bookId = bookId,
     publisher = publisher,
     title = title,
@@ -290,6 +297,7 @@ fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     localImagePath = localImagePath,
     isbn10 = isbn10,
     pages = pages,
+    audioSeconds = audioSeconds,
     releaseYear = releaseYear,
     format = format,
 )
@@ -320,12 +328,14 @@ fun BookEditionEntity.toModel(
     owned: Boolean,
 ): BookEdition = BookEdition(
     id = id,
+    canonicalId = canonicalId,
     publisher = publisher,
     title = title,
     url = url,
     localImagePath = localImagePath,
     isbn10 = isbn10,
     pages = pages,
+    audioSeconds = audioSeconds,
     releaseYear = releaseYear,
     authors = authors.map { it.toModel() },
     format = format,
@@ -336,9 +346,10 @@ fun BookEditionEntity.toModel(
 fun UserBookReadEntity.toModel(): UserBookRead = UserBookRead(
     id = id,
     currentPage = currentPage,
-    progress = progress,
+    currentSeconds = currentSeconds,
+    progress = progress ?: 0f,
     startedAt = startedAt,
-    finishedAt = finishedAt
+    finishedAt = finishedAt,
 )
 
 fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook = UserBook(

@@ -16,10 +16,12 @@ object PreviewData {
 
     val baseEdition = BookEdition(
         id = 1,
+        canonicalId = null,
         title = "Last to leave the Room",
         publisher = "",
         isbn10 = "",
         pages = 100,
+        audioSeconds = null,
         url = "",
         localImagePath = null,
         releaseYear = 2023,
@@ -86,7 +88,8 @@ object PreviewData {
         userBookRead = UserBookRead(
             id = 1,
             currentPage = null,
-            progress = null,
+            currentSeconds = null,
+            progress = 0f,
             startedAt = null,
             finishedAt = null,
         ),

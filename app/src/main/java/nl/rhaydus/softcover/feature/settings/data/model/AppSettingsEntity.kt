@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.settings.data.model
 
 import kotlinx.serialization.Serializable
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 
 @Serializable
 data class AppSettingsEntity(
@@ -10,4 +11,5 @@ data class AppSettingsEntity(
     val userId: Int = -1,
     val themeConfig: ThemeConfigurationEntity = ThemeConfigurationEntity(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+    val libraryGridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
 )

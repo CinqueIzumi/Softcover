@@ -20,6 +20,7 @@ data class OnUpdatePageProgressClickAction(val newPage: String) : ReadingAction 
             dependencies.updateBookProgress(
                 book = bookToUpdate,
                 newPage = newPageValue,
+                newSeconds = null,
                 setLoading = { newValue ->
                     scope.setState {
                         it.copy(isLoading = newValue)

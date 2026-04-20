@@ -17,20 +17,43 @@ data class OnUpdatePercentageProgressClickAction(
         val bookToUpdate: Book = scope.currentState.bookToUpdate ?: return
 
         val newPercentageValue: Double = newPercentage.toDoubleOrNull() ?: 0.0
+        val fraction = (newPercentageValue / 100.0).coerceIn(0.0, 1.0)
 
-        val newPageValue: Int =
-            ((newPercentageValue / 100) * (bookToUpdate.currentEdition.pages
-                ?: bookToUpdate.defaultEdition?.pages ?: 0)).toInt()
+        val edition = bookToUpdate.currentEdition ?: run {
+            scope.setState {
+                it.copy(
+                    showProgressSheet = false,
+                    bookToUpdate = null,
+                )
+            }
+            return
+        }
+        val isAudiobook = edition.isAudiobook
+
+        val newPage: Int? = if (isAudiobook) {
+            null
+        } else {
+            val total = edition.pages ?: bookToUpdate.defaultEdition?.pages ?: 0
+            (fraction * total).toInt()
+        }
+
+        val newSeconds: Int? = if (isAudiobook) {
+            val total = edition.audioSeconds ?: 0
+            (fraction * total).toInt()
+        } else {
+            null
+        }
 
         dependencies.launch {
             dependencies.updateBookProgress(
                 book = bookToUpdate,
-                newPage = newPageValue,
+                newPage = newPage,
+                newSeconds = newSeconds,
                 setLoading = { newLoading ->
                     scope.setState {
                         it.copy(isLoading = newLoading)
                     }
-                }
+                },
             )
         }
 

@@ -65,6 +65,7 @@ class BooksLocalDataSourceImplTest {
 
     private fun stubEditionEntity(id: Int = 10, bookId: Int = 1): BookEditionEntity = BookEditionEntity(
         id = id,
+        canonicalId = null,
         bookId = bookId,
         publisher = null,
         title = null,
@@ -72,6 +73,7 @@ class BooksLocalDataSourceImplTest {
         localImagePath = null,
         isbn10 = null,
         pages = null,
+        audioSeconds = null,
         releaseYear = 2020,
         format = "Paperback",
     )

@@ -8,7 +8,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -36,7 +38,7 @@ class OnRefreshActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): LibraryDependencies {
+    private fun stubDependencies(testScope: TestScope): LibraryDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
@@ -128,7 +130,7 @@ class OnRefreshActionTest {
         @Test
         fun `preserves other state fields when toggling isLoading`() = runTest {
             // ----- Arrange -----
-            val existingBooks = listOf(mockk<nl.rhaydus.softcover.core.domain.model.Book>())
+            val existingBooks = listOf(mockk<Book>())
             stateFlow.value = LibraryUiState(allBooks = existingBooks, isLoading = false)
             val dependencies = stubDependencies(this)
 

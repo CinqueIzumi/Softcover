@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
@@ -33,8 +35,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -63,8 +67,13 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.presentation.modifier.conditional
+import nl.rhaydus.softcover.core.presentation.modifier.grayscale
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineStatus
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
@@ -78,8 +87,13 @@ import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
@@ -94,10 +108,15 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEd
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.math.roundToInt
 
 class BookDetailScreen(
@@ -198,7 +217,9 @@ class BookDetailScreen(
                     CoverImageSection(
                         edition = state.book?.currentEdition,
                         isLoading = state.loadingBookDetails,
-                        fallBackEdition = state.book?.defaultEdition
+                        fallBackEdition = state.book?.defaultEdition,
+                        fallbackCoverUrl = state.book?.coverUrl,
+                        isExpired = state.deadlineProgress?.isExpired == true,
                     )
                 }
 
@@ -253,10 +274,11 @@ class BookDetailScreen(
                 )
             )
 
-            if (state.showEditEditionSheet && state.book != null) {
+            val currentEditionForSheet = state.book?.currentEdition
+            if (state.showEditEditionSheet && state.book != null && currentEditionForSheet != null) {
                 EditionBottomSheetSelector(
                     bookTitle = state.book.title,
-                    currentEdition = state.book.currentEdition,
+                    currentEdition = currentEditionForSheet,
                     defaultEdition = state.book.defaultEdition,
                     editions = state.editions,
                     isLoading = state.loadingEditions,
@@ -269,6 +291,14 @@ class BookDetailScreen(
                     onConfirmClick = {
                         runAction(OnNewEditionSaveClickAction(edition = it))
                     },
+                )
+            }
+
+            if (state.showDeadlinePicker) {
+                DeadlinePickerDialog(
+                    initialDate = state.deadline?.deadlineDate,
+                    onDismiss = { runAction(OnDismissDeadlinePickerAction()) },
+                    onConfirm = { runAction(OnDeadlinePickedAction(date = it)) },
                 )
             }
 
@@ -292,6 +322,11 @@ class BookDetailScreen(
                     onUpdatePageProgressClick = {
                         runAction(
                             OnUpdatePageProgressClickAction(newPage = it)
+                        )
+                    },
+                    onUpdateTimeProgressClick = { h, m, s ->
+                        runAction(
+                            OnUpdateTimeProgressClickAction(hours = h, minutes = m, seconds = s)
                         )
                     },
                 )
@@ -410,6 +445,47 @@ class BookDetailScreen(
                 }
             )
 
+            if (state.deadline == null) {
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        runAction(OnOpenDeadlinePickerAction())
+                    },
+                    text = { Text(text = "Set deadline") },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_date_range),
+                            contentDescription = "Set deadline icon"
+                        )
+                    }
+                )
+            } else {
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        runAction(OnOpenDeadlinePickerAction())
+                    },
+                    text = { Text(text = "Edit deadline") },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_date_range),
+                            contentDescription = "Edit deadline icon"
+                        )
+                    }
+                )
+
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        runAction(OnClearDeadlineAction())
+                    },
+                    text = { Text(text = "Clear deadline") },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_delete),
+                            contentDescription = "Clear deadline icon"
+                        )
+                    }
+                )
+            }
+
             FloatingActionButtonMenuItem(
                 onClick = {
                     runAction(OnRemoveBookClickAction(book = state.book))
@@ -430,10 +506,13 @@ class BookDetailScreen(
         edition: BookEdition?,
         fallBackEdition: BookEdition?,
         isLoading: Boolean,
+        fallbackCoverUrl: String?,
+        isExpired: Boolean = false,
     ) {
         val editionImageModel = rememberEditionImageRequest(
             edition = edition,
             defaultEdition = fallBackEdition,
+            fallbackCoverUrl = fallbackCoverUrl,
         )
 
         val imageHeight = with(LocalDensity.current) {
@@ -454,6 +533,10 @@ class BookDetailScreen(
                         bottomEnd = cornerRadius,
                     )
                 )
+                .conditional(
+                    condition = isExpired,
+                    ifTrue = { Modifier.grayscale() },
+                )
         ) {
             SoftcoverImage(
                 model = editionImageModel,
@@ -469,6 +552,7 @@ class BookDetailScreen(
             EditionImage(
                 edition = edition,
                 defaultEdition = fallBackEdition,
+                fallbackCoverUrl = fallbackCoverUrl,
                 isLoading = isLoading,
                 modifier = Modifier
                     .height(imageHeight * 0.8f)
@@ -567,17 +651,28 @@ class BookDetailScreen(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                val edition = state.book?.currentEdition
+                val isAudiobook = edition?.isAudiobook == true
+
                 Icon(
-                    painter = painterResource(R.drawable.ic_menu_book),
+                    painter = painterResource(
+                        if (isAudiobook) R.drawable.ic_headset else R.drawable.ic_menu_book,
+                    ),
                     contentDescription = "",
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp),
                 )
 
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
-                    text = "${state.book?.currentEdition?.pages}",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = edition?.let {
+                        if (isAudiobook) {
+                            secondsToHm(it.audioSeconds ?: 0)
+                        } else {
+                            "${it.pages}"
+                        }
+                    }.orEmpty(),
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
 
@@ -798,8 +893,9 @@ class BookDetailScreen(
     private fun ReadingContainer(state: BookDetailUiState) {
         if (state.book == null || state.book.userBookRead == null) return
 
-        val progress = state.book.userBookRead.progress ?: 0f
-        val pageProgress = state.book.userBookRead.currentPage ?: 0
+        val progress = state.book.userBookRead.progress
+        val edition = state.book.currentEdition ?: return
+        val isAudiobook = edition.isAudiobook
 
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -846,17 +942,114 @@ class BookDetailScreen(
                     gapSize = (-2).dp,
                 )
 
-                val amountOfPagesLeft =
-                    state.book.currentEdition.pages?.minus(state.book.userBookRead.currentPage ?: 0)
-
                 Spacer(modifier = Modifier.height(12.dp))
 
+                val summaryText = if (isAudiobook) {
+                    val totalSeconds = edition.audioSeconds ?: 0
+                    val currentSeconds = state.book.userBookRead.currentSeconds ?: 0
+                    val remainingSeconds = (totalSeconds - currentSeconds).coerceAtLeast(0)
+                    val currentLabel = secondsToHm(currentSeconds)
+                    val totalLabel = secondsToHm(totalSeconds)
+                    val remainingLabel = secondsToHm(remainingSeconds)
+                    "$currentLabel of $totalLabel • $remainingLabel left"
+                } else {
+                    val pageProgress = state.book.userBookRead.currentPage ?: 0
+                    val amountOfPagesLeft = edition.pages?.minus(pageProgress)
+                    "$pageProgress of ${edition.pages} pages • $amountOfPagesLeft pages left"
+                }
+
                 Text(
-                    text = "$pageProgress of ${state.book.currentEdition.pages} pages • $amountOfPagesLeft pages left",
+                    text = summaryText,
                     style = MaterialTheme.typography.bodySmall,
                 )
+
+                state.deadlineProgress?.let { deadline ->
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ReadingGoalBlock(
+                        progress = deadline,
+                        dateStyle = state.dateStyle,
+                    )
+                }
             }
         }
+    }
+
+    @Composable
+    private fun ReadingGoalBlock(
+        progress: DeadlineProgress,
+        dateStyle: DateStyle,
+    ) {
+        val status = progress.status
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_date_range),
+                    contentDescription = "Deadline icon",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp),
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Deadline ${progress.deadline.format(dateStyle.formatter)}",
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+
+                DeadlineBadge(status = status)
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            val goalText = buildGoalText(progress = progress)
+
+            Text(
+                text = goalText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+
+    private fun buildGoalText(progress: DeadlineProgress): String {
+        if (progress.isExpired) {
+            val daysPast = -progress.daysRemaining
+            val dayLabel = if (daysPast == 1L) "day" else "days"
+
+            return "Deadline passed $daysPast $dayLabel ago."
+        }
+
+        val required = ceilToInt(progress.requiredPerDay)
+        val dayLabel = if (progress.daysRemaining == 1L) "day" else "days"
+
+        val isSeconds = progress.unit == DeadlineUnit.SECONDS
+
+        val verb = if (isSeconds) "Listen to" else "Read"
+        val perDayLabel = if (isSeconds) {
+            secondsToHm(required)
+        } else {
+            val pageLabel = if (required == 1) "page" else "pages"
+            "$required $pageLabel"
+        }
+
+        val base = "$verb $perDayLabel/day for the next ${progress.daysRemaining} $dayLabel to finish on time."
+
+        if (progress.isOnTrack || progress.unitsBehindSchedule <= 0) return base
+
+        val behindLabel = if (isSeconds) {
+            secondsToHm(progress.unitsBehindSchedule)
+        } else {
+            val label = if (progress.unitsBehindSchedule == 1) "page" else "pages"
+            "${progress.unitsBehindSchedule} $label"
+        }
+
+        return "You're $behindLabel behind schedule — $base"
     }
 
     @Composable
@@ -888,6 +1081,58 @@ class BookDetailScreen(
                 contentDescription = "Add to want to read icon"
             )
         )
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun DeadlinePickerDialog(
+        initialDate: LocalDate?,
+        onDismiss: () -> Unit,
+        onConfirm: (LocalDate) -> Unit,
+    ) {
+        val initialMillis = remember(initialDate) {
+            (initialDate ?: LocalDate.now())
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+        }
+
+        val pickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
+
+        DatePickerDialog(
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val millis = pickerState.selectedDateMillis
+                        if (millis != null) {
+                            val picked = Instant.ofEpochMilli(millis)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+
+                            onConfirm(picked)
+                        } else {
+                            onDismiss()
+                        }
+                    }
+                ) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(text = "Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = pickerState)
+        }
+    }
+
+    private fun ceilToInt(value: Float): Int {
+        val rounded = value.toInt()
+
+        return if (value > rounded) rounded + 1 else rounded
     }
 
     @Composable

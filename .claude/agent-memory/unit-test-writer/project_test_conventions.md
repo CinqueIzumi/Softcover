@@ -32,6 +32,8 @@ Canonical example tests (paths relative to the project root):
 
 **mockk property access inside `every {}` blocks:** Accessing properties of another mock inside an `every {}` recording block captures the default mock value (e.g. `0` for Int, `""` for String) instead of the stubbed value, because mockk is in recording mode. Always extract mock property values into local `val`s BEFORE the `every {}` block and use those vals inside the matcher arguments.
 
+**@Nested class name vs. imported type name clash:** When a `@Nested inner class` is named after a function/property whose name collides with an imported type (e.g. inner class `DateStyle` shadowing the imported `DateStyle` enum), usages of that type inside the nested class must be fully-qualified (`nl.rhaydus.softcover.feature.settings.domain.model.DateStyle.MONTH_DAY_YEAR`). This is the one permitted exception to the "no FQN inline" style rule — the nested class name takes precedence because the naming convention is non-negotiable. No import alias is used anywhere in the project for this purpose.
+
 **Why:** CODE_STYLE_GUIDE.md and CLAUDE.md mandate these rules; violations cause style inconsistency across the codebase.
 
 **How to apply:** Every new test file in this project must follow these conventions exactly, regardless of test complexity.

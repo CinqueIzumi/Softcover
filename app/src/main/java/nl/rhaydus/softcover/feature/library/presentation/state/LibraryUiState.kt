@@ -5,7 +5,10 @@ import androidx.compose.foundation.pager.PagerState
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.toad.UiState
+import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryStatusTab
+import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 
 data class LibraryUiState(
     val allBooks: List<Book>? = null,
@@ -31,4 +34,9 @@ data class LibraryUiState(
         currentPage = LibraryStatusTab.entries.indexOf(LibraryStatusTab.WANT_TO_READ),
         pageCount = { LibraryStatusTab.entries.size }
     ),
+    val gridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+    val isLayoutMenuExpanded: Boolean = false,
+
+    val deadlines: Map<Int, BookDeadline> = emptyMap(),
+    val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 ) : UiState

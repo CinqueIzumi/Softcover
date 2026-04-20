@@ -69,6 +69,22 @@ feature/<name>/
 - **Data** implements domain interfaces. It owns entities, mappers, and data sources.
 - **Presentation** depends on domain (via use cases). It never accesses data layer directly.
 
+### Placing a new type in the correct layer
+
+When introducing a new class, enum, interface, or value object, classify it deliberately before choosing a package — don't default to the layer where the first consumer happens to live.
+
+Ask, in order:
+
+1. **Does it encode a business rule or a state classification derived from domain data?** → `domain/model/` (either feature-local or `core/domain/model/`). Examples: status enums like `BookStatus`, `DeadlineStatus`; value objects computed from domain state; policy results. A classification like "on track / behind / expired" is domain even if only a `@Composable` renders it today.
+2. **Does it represent a persisted row, DTO, or remote payload?** → `data/model/` (entities with `*Entity`, network DTOs with `*Dto`).
+3. **Does it represent display-only concerns — colors, icons, composable argument shapes, routes, tabs?** → `presentation/component/` (shared) or `feature/<x>/presentation/...` (feature-local).
+
+**Heuristic:** if the type could be consumed by a headless use case, a CLI, or a non-Compose client without losing meaning, it belongs in `domain` — even when today's only consumer is UI code. Attribute-bearing enums (e.g. one carrying a `label`) still belong in `domain` when the category itself is a business concept; presentation can layer additional mappings (colors, icons) on top at the call site.
+
+**Derived state:** when a value is purely a function of other fields on a domain type, prefer a computed property on the type itself (e.g. `val DeadlineProgress.status`) rather than a free-standing extension file — it keeps the derivation co-located with the data it depends on.
+
+**Why it matters:** filing a domain-shaped concept under `presentation/` forces downstream code to either invert the dependency direction or duplicate the concept. Once a concept leaks into the wrong layer, relocating it later is a cascading import refactor.
+
 ## TOAD State Management
 
 TOAD is a custom state management framework built on Voyager's `ScreenModel`. Each screen has these components:

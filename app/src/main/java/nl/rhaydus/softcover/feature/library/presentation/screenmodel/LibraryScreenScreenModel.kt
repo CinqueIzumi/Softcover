@@ -10,11 +10,15 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBook
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
 
 class LibraryScreenScreenModel(
     private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
@@ -24,6 +28,10 @@ class LibraryScreenScreenModel(
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
+    private val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
+    private val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
+    private val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
+    private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryInitializer>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
@@ -40,6 +48,10 @@ class LibraryScreenScreenModel(
         mainDispatcher = appDispatchers.main,
         refreshUserBooksUseCase = refreshUserBooksUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
+        getLibraryGridLayoutAsFlowUseCase = getLibraryGridLayoutAsFlowUseCase,
+        setLibraryGridLayoutUseCase = setLibraryGridLayoutUseCase,
+        observeAllBookDeadlinesUseCase = observeAllBookDeadlinesUseCase,
+        getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         coroutineScope = screenModelScope,
     )
 

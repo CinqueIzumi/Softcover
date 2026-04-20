@@ -1,13 +1,18 @@
 fragment EditionFragment on editions {
     id
+    canonical_id
     title
     book_id
     isbn_10
     pages
+    audio_seconds
     publisher {
         name
     }
     image {
+        url
+    }
+    fallbackImages: images {
         url
     }
     release_year

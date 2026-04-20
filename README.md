@@ -36,8 +36,9 @@ Softcover is a native app for Android based on [Hardcover.app](https://hardcover
 - Mark editions as owned.
 
 ### Reading
-- View currently reading books.
-- Track reading progress by page number or percentage.
+- View currently reading books and audiobooks.
+- Track reading progress by page number or percentage for book editions.
+- Track listening progress in HH:MM:SS or percentage for audiobook editions.
 - Mark books as read.
 
 ### Search
@@ -46,10 +47,11 @@ Softcover is a native app for Android based on [Hardcover.app](https://hardcover
 - View and manage search history.
 
 ### Book Details
-- View book information including title, author, description, ratings, release date, and page count.
+- View book information including title, author, description, ratings, release date, and either the page count (for book editions) or the audiobook duration.
 - Change reading status (Want to Read, Currently Reading, Read, Paused, Did Not Finish).
-- Update reading progress.
-- Switch between book editions.
+- Update reading or listening progress.
+- Set a reading deadline with a required pages/day or minutes/day pace.
+- Switch between book and audiobook editions.
 
 ### Profile
 - View user profile and reading statistics.
