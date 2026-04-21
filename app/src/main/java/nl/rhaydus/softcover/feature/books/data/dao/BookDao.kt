@@ -246,7 +246,7 @@ interface BookDao {
         clearBookAuthors(book.id)
         insertBookAuthors(book.toBookAuthorRefs(authorIdsByName))
 
-        clearEditionAuthors(book.id)
+        clearEditionAuthorsByEditionIds(editionIds = book.editions.map { it.id })
         insertEditionAuthors(book.toEditionAuthorRefs(authorIdsByName))
     }
 
@@ -484,5 +484,8 @@ interface BookDao {
     """
     )
     suspend fun clearEditionAuthors(bookId: Int)
+
+    @Query("DELETE FROM edition_author_cross_ref WHERE editionId IN (:editionIds)")
+    suspend fun clearEditionAuthorsByEditionIds(editionIds: List<Int>)
     // endregion
 }

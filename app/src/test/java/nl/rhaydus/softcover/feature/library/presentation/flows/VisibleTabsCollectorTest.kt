@@ -119,7 +119,6 @@ class VisibleTabsCollectorTest {
             listsFlow.emit(emptyList())
 
             // ----- Assert -----
-            val crTab = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING)
             stateFlow.value.visibleTabs.any { it is LibraryTab.Status && it.status == UserBookStatus.CURRENTLY_READING } shouldBe true
             job.cancel()
         }
@@ -153,19 +152,20 @@ class VisibleTabsCollectorTest {
         }
 
         @Test
-        fun `PAUSED tab never appears in visibleTabs even when its code is in the enabled set`() = runTest(UnconfinedTestDispatcher()) {
+        fun `unknown status code in enabled set produces only CURRENTLY_READING tab`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
 
             // ----- Act -----
-            statusCodesFlow.emit(setOf(UserBookStatus.PAUSED.code))
+            // 999 is not a valid UserBookStatus code and must be silently ignored
+            statusCodesFlow.emit(setOf(999))
             enabledListIdsFlow.emit(emptySet())
             listsFlow.emit(emptyList())
 
             // ----- Assert -----
             val statusTabs = stateFlow.value.visibleTabs.filterIsInstance<LibraryTab.Status>()
-            statusTabs.any { it.status == UserBookStatus.PAUSED } shouldBe false
+            statusTabs.map { it.status } shouldBe listOf(UserBookStatus.CURRENTLY_READING)
             job.cancel()
         }
 

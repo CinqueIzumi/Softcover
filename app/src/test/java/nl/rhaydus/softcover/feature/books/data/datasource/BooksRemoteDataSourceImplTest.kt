@@ -41,7 +41,6 @@ import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookList
 import nl.rhaydus.softcover.feature.books.data.mapper.toListBook
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion.userBookReadFragment
-import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -1657,22 +1656,12 @@ class BooksRemoteDataSourceImplTest {
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
-            val userBookReadFragmentMock = mockk<UserBookReadFragment>()
-            val updatedUserBookReadMock = stubUserBookRead(id = 5)
-            val updatedUserBookMock = stubUserBook(id = 3)
+            val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
             val expectedBook = stubBook()
 
             every {
                 userBook.editionId
             } returns 10
-
-            every {
-                userBookRead.currentPage
-            } returns 50
-
-            every {
-                userBookRead.progress
-            } returns 0.25f
 
             coEvery {
                 apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
@@ -1687,31 +1676,11 @@ class BooksRemoteDataSourceImplTest {
             } returns userBookReadEntry
 
             every {
-                userBookReadEntry.userBookReadFragment()
-            } returns userBookReadFragmentMock
+                userBookReadEntry.user_book
+            } returns userBookGqlEntry
 
             every {
-                userBookReadFragmentMock.progress_pages
-            } returns newPage
-
-            every {
-                userBookReadFragmentMock.progress_seconds
-            } returns 0
-
-            every {
-                userBookReadFragmentMock.progress
-            } returns 0.5
-
-            every {
-                userBookRead.copy(currentPage = newPage, currentSeconds = 0, progress = 0.5f)
-            } returns updatedUserBookReadMock
-
-            every {
-                userBook.copy(journals = match { it.size == existingJournals.size + 1 })
-            } returns updatedUserBookMock
-
-            every {
-                book.copy(userBookRead = updatedUserBookReadMock, userBook = updatedUserBookMock)
+                userBookGqlEntry.toBook()
             } returns expectedBook
 
             // ----- Act -----
@@ -1731,9 +1700,7 @@ class BooksRemoteDataSourceImplTest {
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
-            val userBookReadFragmentMock = mockk<UserBookReadFragment>()
-            val updatedUserBookReadMock = stubUserBookRead(id = 5)
-            val updatedUserBookMock = stubUserBook(id = 3)
+            val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
             val expectedBook = stubBook()
 
             every {
@@ -1753,31 +1720,11 @@ class BooksRemoteDataSourceImplTest {
             } returns userBookReadEntry
 
             every {
-                userBookReadEntry.userBookReadFragment()
-            } returns userBookReadFragmentMock
+                userBookReadEntry.user_book
+            } returns userBookGqlEntry
 
             every {
-                userBookReadFragmentMock.progress_pages
-            } returns 0
-
-            every {
-                userBookReadFragmentMock.progress_seconds
-            } returns newSeconds
-
-            every {
-                userBookReadFragmentMock.progress
-            } returns null
-
-            every {
-                userBookRead.copy(currentPage = 0, currentSeconds = newSeconds, progress = 0f)
-            } returns updatedUserBookReadMock
-
-            every {
-                userBook.copy(journals = any())
-            } returns updatedUserBookMock
-
-            every {
-                book.copy(userBookRead = updatedUserBookReadMock, userBook = updatedUserBookMock)
+                userBookGqlEntry.toBook()
             } returns expectedBook
 
             // ----- Act -----
@@ -1805,9 +1752,7 @@ class BooksRemoteDataSourceImplTest {
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
-            val userBookReadFragmentMock = mockk<UserBookReadFragment>()
-            val updatedUserBookReadMock = stubUserBookRead(id = 5)
-            val updatedUserBookMock = stubUserBook(id = 3)
+            val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
             val expectedBook = stubBook()
 
             every {
@@ -1827,31 +1772,11 @@ class BooksRemoteDataSourceImplTest {
             } returns userBookReadEntry
 
             every {
-                userBookReadEntry.userBookReadFragment()
-            } returns userBookReadFragmentMock
+                userBookReadEntry.user_book
+            } returns userBookGqlEntry
 
             every {
-                userBookReadFragmentMock.progress_pages
-            } returns newPage
-
-            every {
-                userBookReadFragmentMock.progress_seconds
-            } returns 0
-
-            every {
-                userBookReadFragmentMock.progress
-            } returns null
-
-            every {
-                userBookRead.copy(currentPage = newPage, currentSeconds = 0, progress = 0f)
-            } returns updatedUserBookReadMock
-
-            every {
-                userBook.copy(journals = any())
-            } returns updatedUserBookMock
-
-            every {
-                book.copy(userBookRead = updatedUserBookReadMock, userBook = updatedUserBookMock)
+                userBookGqlEntry.toBook()
             } returns expectedBook
 
             // ----- Act -----
@@ -1880,9 +1805,8 @@ class BooksRemoteDataSourceImplTest {
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
-            val userBookReadFragmentMock = mockk<UserBookReadFragment>()
+            val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
             val updatedUserBookReadMock = stubUserBookRead(id = 5, currentSeconds = newSeconds)
-            val updatedUserBookMock = stubUserBook(id = 3)
             val expectedBook = stubBook(userBookRead = updatedUserBookReadMock)
 
             every {
@@ -1902,31 +1826,11 @@ class BooksRemoteDataSourceImplTest {
             } returns userBookReadEntry
 
             every {
-                userBookReadEntry.userBookReadFragment()
-            } returns userBookReadFragmentMock
+                userBookReadEntry.user_book
+            } returns userBookGqlEntry
 
             every {
-                userBookReadFragmentMock.progress_pages
-            } returns 0
-
-            every {
-                userBookReadFragmentMock.progress_seconds
-            } returns newSeconds
-
-            every {
-                userBookReadFragmentMock.progress
-            } returns null
-
-            every {
-                userBookRead.copy(currentPage = 0, currentSeconds = newSeconds, progress = 0f)
-            } returns updatedUserBookReadMock
-
-            every {
-                userBook.copy(journals = match { it.size == existingJournals.size + 1 })
-            } returns updatedUserBookMock
-
-            every {
-                book.copy(userBookRead = updatedUserBookReadMock, userBook = updatedUserBookMock)
+                userBookGqlEntry.toBook()
             } returns expectedBook
 
             // ----- Act -----
