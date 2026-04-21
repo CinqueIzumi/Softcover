@@ -20,7 +20,9 @@ sealed class LibraryTab(
     ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
-            if (other !is Status) return false
+
+            if ((other is Status).not()) return false
+
             return status == other.status && label == other.label
         }
 
@@ -34,7 +36,10 @@ sealed class LibraryTab(
                 UserBookStatus.DID_NOT_FINISH -> "Did Not Finish"
             }
 
-            fun of(status: UserBookStatus) = Status(status = status, label = labelFor(status))
+            fun of(status: UserBookStatus) = Status(
+                status = status,
+                label = labelFor(status),
+            )
         }
     }
 

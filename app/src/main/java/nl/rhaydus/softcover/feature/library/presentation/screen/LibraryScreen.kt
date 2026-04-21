@@ -119,7 +119,7 @@ object LibraryScreen : Screen {
             },
             onEditionClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.bookId))
-            }
+            },
         )
     }
 
@@ -240,11 +240,7 @@ object LibraryScreen : Screen {
                 }
 
                 PrimaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage.coerceAtMost(
-                        tabs.lastIndex.coerceAtLeast(
-                            0
-                        )
-                    ),
+                    selectedTabIndex = pagerState.currentPage.coerceAtMost(tabs.lastIndex.coerceAtLeast(0)),
                     tabs = {
                         tabs.forEachIndexed { index, tab ->
                             Tab(
@@ -305,11 +301,11 @@ object LibraryScreen : Screen {
                             is LibraryContentTab.All,
                             is LibraryContentTab.Status,
                                 -> BookList(
-                                tab = currentTab,
-                                state = state,
-                                gridState = gridStateFor(currentTab.id),
-                                onBookClick = onBookClick,
-                            )
+                                    tab = currentTab,
+                                    state = state,
+                                    gridState = gridStateFor(currentTab.id),
+                                    onBookClick = onBookClick,
+                                )
                         }
                     }
                 }
@@ -326,11 +322,11 @@ object LibraryScreen : Screen {
             IconButton(
                 onClick = {
                     runAction(OnLayoutMenuExpandedChangeAction(expanded = true))
-                }
+                },
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_view_layout),
-                    contentDescription = "Change library layout"
+                    contentDescription = "Change library layout",
                 )
             }
 
@@ -338,7 +334,7 @@ object LibraryScreen : Screen {
                 expanded = state.isLayoutMenuExpanded,
                 onDismissRequest = {
                     runAction(OnLayoutMenuExpandedChangeAction(expanded = false))
-                }
+                },
             ) {
                 LibraryGridLayout.entries.forEach { layout ->
                     DropdownMenuItem(
@@ -350,7 +346,7 @@ object LibraryScreen : Screen {
                         },
                         onClick = {
                             runAction(OnGridLayoutChangeAction(newLayout = layout))
-                        }
+                        },
                     )
                 }
             }

@@ -195,12 +195,18 @@ class LibraryVisibilitySettingsScreen : Screen {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Switch(checked = checked, onCheckedChange = onCheckedChange)
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+            )
         }
     }
 
     @Composable
-    private fun AlwaysOnRow(title: String, subtitle: String) {
+    private fun AlwaysOnRow(
+        title: String,
+        subtitle: String,
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
