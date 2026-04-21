@@ -5,6 +5,7 @@ data class ListBook(
     val listId: Int,
     val bookId: Int,
     val editionId: Int,
+    val addedAt: String? = null,
     val book: Book? = null,
     val edition: BookEdition? = null,
 )

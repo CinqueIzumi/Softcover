@@ -31,7 +31,6 @@ sealed class LibraryTab(
                 UserBookStatus.WANT_TO_READ -> "Want to Read"
                 UserBookStatus.CURRENTLY_READING -> "Currently Reading"
                 UserBookStatus.READ -> "Read"
-                UserBookStatus.PAUSED -> "Paused"
                 UserBookStatus.DID_NOT_FINISH -> "Did Not Finish"
             }
 

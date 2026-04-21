@@ -48,7 +48,7 @@ Softcover is a native app for Android based on [Hardcover.app](https://hardcover
 
 ### Book Details
 - View book information including title, author, description, ratings, release date, and either the page count (for book editions) or the audiobook duration.
-- Change reading status (Want to Read, Currently Reading, Read, Paused, Did Not Finish).
+- Change reading status (Want to Read, Currently Reading, Read, Did Not Finish).
 - Update reading or listening progress.
 - Set a reading deadline with a required pages/day or minutes/day pace.
 - Switch between book and audiobook editions.

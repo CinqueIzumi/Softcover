@@ -56,6 +56,7 @@ object PreviewData {
             referrerUserId = null,
             reviewedAt = null,
             updatedAt = null,
+            createdAt = null,
             journals = listOf(
                 ReadingJournal(updatedAt = "2026-02-16T09:30:29.670608", event = "status_stopped"),
                 ReadingJournal(updatedAt = "2026-02-18T10:30:29.670608", event = "status_stopped"),

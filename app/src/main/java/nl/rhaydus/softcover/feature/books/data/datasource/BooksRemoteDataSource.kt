@@ -30,7 +30,7 @@ import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
-import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion.userBookReadFragment
+import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -38,7 +38,6 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
-import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
@@ -52,7 +51,6 @@ import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
 import timber.log.Timber
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 interface BooksRemoteDataSource {
@@ -306,33 +304,15 @@ class BooksRemoteDataSourceImpl(
             datesReadInput = dataObject
         )
 
-        val userBookReadFragment = apolloClient
+        val userBookFragment = apolloClient
             .safeMutation(mutation = mutation)
             .update_user_book_read
             ?.user_book_read
-            ?.userBookReadFragment()
-            ?: throw Exception("Did not receive a new user book read fragment")
+            ?.user_book
+            ?.userBookFragment()
+            ?: throw Exception("Did not receive a new user book fragment")
 
-        val updatedUserBookRead = userBookRead.copy(
-            currentPage = userBookReadFragment.progress_pages,
-            currentSeconds = userBookReadFragment.progress_seconds,
-            progress = userBookReadFragment.progress?.toFloat() ?: 0f,
-        )
-
-        val formatter = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
-
-        val currentTime = LocalDateTime.now().format(formatter)
-
-        val updatedJournals = book.userBook.journals + ReadingJournal(
-            updatedAt = currentTime,
-            event = "progress_updated"
-        )
-
-        return book.copy(
-            userBookRead = updatedUserBookRead,
-            userBook = book.userBook.copy(journals = updatedJournals)
-        )
+        return userBookFragment.toBook() ?: throw Exception("Book could not be mapped")
     }
 
     override suspend fun markBookAsRead(book: Book): Book {

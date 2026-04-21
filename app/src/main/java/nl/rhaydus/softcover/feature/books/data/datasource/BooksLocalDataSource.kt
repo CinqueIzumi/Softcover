@@ -111,8 +111,20 @@ class BooksLocalDataSourceImpl(
     }
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
-        return dao
-            .getBooksByStatus(statusCode = status.code)
+        return when (status) {
+            UserBookStatus.CURRENTLY_READING -> dao.getBooksByStatusAndEvents(
+                statusCode = status.code,
+                events = listOf("progress_updated", "status_currently_reading"),
+            )
+            UserBookStatus.READ -> dao.getReadBooks(statusCode = status.code)
+            UserBookStatus.WANT_TO_READ -> dao.getBooksByStatusSortedByCreatedAt(
+                statusCode = status.code,
+            )
+            UserBookStatus.DID_NOT_FINISH -> dao.getBooksByStatusAndEvents(
+                statusCode = status.code,
+                events = listOf("status_stopped"),
+            )
+        }
             .distinctUntilChanged()
             .map { list -> list.map { it.toModel() } }
     }

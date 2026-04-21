@@ -8,6 +8,9 @@ mutation UpdateReadingProgress(
     ) {
         user_book_read {
             ...UserBookReadFragment
+            user_book {
+                ...UserBookFragment
+            }
         }
     }
 }
