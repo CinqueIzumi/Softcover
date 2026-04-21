@@ -46,18 +46,6 @@ class UserBookStatusTest {
         }
 
         @Test
-        fun `PAUSED is not always visible in library`() {
-            // ----- Arrange -----
-            val status = UserBookStatus.PAUSED
-
-            // ----- Act -----
-            val result = status.isAlwaysVisibleInLibrary
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
         fun `DID_NOT_FINISH is not always visible in library`() {
             // ----- Arrange -----
             val status = UserBookStatus.DID_NOT_FINISH
@@ -101,15 +89,6 @@ class UserBookStatusTest {
         }
 
         @Test
-        fun `togglableInLibrary excludes PAUSED`() {
-            // ----- Arrange & Act -----
-            val result = UserBookStatus.togglableInLibrary
-
-            // ----- Assert -----
-            result.contains(UserBookStatus.PAUSED) shouldBe false
-        }
-
-        @Test
         fun `togglableInLibrary includes DID_NOT_FINISH`() {
             // ----- Arrange & Act -----
             val result = UserBookStatus.togglableInLibrary
@@ -125,70 +104,6 @@ class UserBookStatusTest {
 
             // ----- Assert -----
             result.size shouldBe 3
-        }
-    }
-
-    @Nested
-    inner class IsExposedInLibrary {
-
-        @Test
-        fun `CURRENTLY_READING is exposed in library`() {
-            // ----- Arrange -----
-            val status = UserBookStatus.CURRENTLY_READING
-
-            // ----- Act -----
-            val result = status.isExposedInLibrary
-
-            // ----- Assert -----
-            result shouldBe true
-        }
-
-        @Test
-        fun `WANT_TO_READ is exposed in library`() {
-            // ----- Arrange -----
-            val status = UserBookStatus.WANT_TO_READ
-
-            // ----- Act -----
-            val result = status.isExposedInLibrary
-
-            // ----- Assert -----
-            result shouldBe true
-        }
-
-        @Test
-        fun `READ is exposed in library`() {
-            // ----- Arrange -----
-            val status = UserBookStatus.READ
-
-            // ----- Act -----
-            val result = status.isExposedInLibrary
-
-            // ----- Assert -----
-            result shouldBe true
-        }
-
-        @Test
-        fun `PAUSED is not exposed in library`() {
-            // ----- Arrange -----
-            val status = UserBookStatus.PAUSED
-
-            // ----- Act -----
-            val result = status.isExposedInLibrary
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
-        fun `DID_NOT_FINISH is exposed in library`() {
-            // ----- Arrange -----
-            val status = UserBookStatus.DID_NOT_FINISH
-
-            // ----- Act -----
-            val result = status.isExposedInLibrary
-
-            // ----- Assert -----
-            result shouldBe true
         }
     }
 
@@ -218,14 +133,6 @@ class UserBookStatusTest {
             result.size shouldBe 4
         }
 
-        @Test
-        fun `alwaysCachedCodes does not include PAUSED`() {
-            // ----- Arrange & Act -----
-            val result = UserBookStatus.alwaysCachedCodes
-
-            // ----- Assert -----
-            result.contains(UserBookStatus.PAUSED.code) shouldBe false
-        }
     }
 
     @Nested

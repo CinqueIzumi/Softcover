@@ -1,5 +1,10 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +27,6 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ContainedLoadingIndicator
@@ -33,6 +37,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -82,13 +87,15 @@ import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnGridLayoutChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
-import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab as LibraryContentTab
+import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAction
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab as LibraryContentTab
 
 object LibraryScreen : Screen {
     @Composable
@@ -167,6 +174,17 @@ object LibraryScreen : Screen {
                     title = "Library",
                     onNavigateToSearch = onNavigateToSearch,
                     additionalActions = {
+                        IconButton(
+                            onClick = { runAction(OnToggleSearchAction()) },
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (state.isSearchActive) R.drawable.ic_close else R.drawable.ic_search
+                                ),
+                                contentDescription = if (state.isSearchActive) "Close library search" else "Search in library",
+                            )
+                        }
+
                         LayoutMenuAction(
                             state = state,
                             runAction = runAction,
@@ -179,8 +197,54 @@ object LibraryScreen : Screen {
             Column(
                 modifier = Modifier.padding(it)
             ) {
+                AnimatedVisibility(
+                    visible = state.isSearchActive,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    Column {
+                        OutlinedTextField(
+                            value = state.searchQuery,
+                            onValueChange = { query ->
+                                runAction(OnSearchQueryChangeAction(query = query))
+                            },
+                            placeholder = { Text(text = "Search in library") },
+                            singleLine = true,
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_search),
+                                    contentDescription = "Search",
+                                )
+                            },
+                            trailingIcon = if (state.searchQuery.isNotEmpty()) {
+                                {
+                                    IconButton(
+                                        onClick = { runAction(OnSearchQueryChangeAction(query = "")) },
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_close),
+                                            contentDescription = "Clear search",
+                                        )
+                                    }
+                                }
+                            } else {
+                                null
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+
                 PrimaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage.coerceAtMost(tabs.lastIndex.coerceAtLeast(0)),
+                    selectedTabIndex = pagerState.currentPage.coerceAtMost(
+                        tabs.lastIndex.coerceAtLeast(
+                            0
+                        )
+                    ),
                     tabs = {
                         tabs.forEachIndexed { index, tab ->
                             Tab(
@@ -239,7 +303,8 @@ object LibraryScreen : Screen {
                             )
 
                             is LibraryContentTab.All,
-                            is LibraryContentTab.Status -> BookList(
+                            is LibraryContentTab.Status,
+                                -> BookList(
                                 tab = currentTab,
                                 state = state,
                                 gridState = gridStateFor(currentTab.id),
@@ -307,11 +372,22 @@ object LibraryScreen : Screen {
             return
         }
 
+        val query = state.searchQuery.trim()
+
+        val visibleEditions = if (query.isEmpty()) {
+            editions
+        } else {
+            editions.filter { edition ->
+                edition.title.orEmpty().contains(query, ignoreCase = true) ||
+                        edition.authors.any { it.name.contains(query, ignoreCase = true) }
+            }
+        }
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            items(editions) { edition ->
+            items(visibleEditions) { edition ->
                 LayoutEditionEntry(
                     edition = edition,
                     layout = state.gridLayout,
@@ -338,11 +414,22 @@ object LibraryScreen : Screen {
             return
         }
 
+        val query = state.searchQuery.trim()
+
+        val visibleBooks = if (query.isEmpty()) {
+            books
+        } else {
+            books.filter { book ->
+                book.title.contains(query, ignoreCase = true) ||
+                        book.authors.any { it.name.contains(query, ignoreCase = true) }
+            }
+        }
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            items(books) { book ->
+            items(visibleBooks) { book ->
                 LayoutBookEntry(
                     book = book,
                     layout = state.gridLayout,
@@ -364,13 +451,16 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_TWO_COLUMNS -> 2
             LibraryGridLayout.GRID_THREE_COLUMNS -> 3
             LibraryGridLayout.LIST_COMPACT,
-            LibraryGridLayout.LIST_LARGE -> 1
+            LibraryGridLayout.LIST_LARGE,
+                -> 1
         }
 
         val itemSpacing = when (layout) {
             LibraryGridLayout.GRID_TWO_COLUMNS,
             LibraryGridLayout.GRID_THREE_COLUMNS,
-            LibraryGridLayout.LIST_LARGE -> 16.dp
+            LibraryGridLayout.LIST_LARGE,
+                -> 16.dp
+
             LibraryGridLayout.LIST_COMPACT -> 4.dp
         }
 
@@ -418,7 +508,8 @@ object LibraryScreen : Screen {
 
         when (layout) {
             LibraryGridLayout.GRID_TWO_COLUMNS,
-            LibraryGridLayout.GRID_THREE_COLUMNS -> {
+            LibraryGridLayout.GRID_THREE_COLUMNS,
+                -> {
                 GridBookCell(
                     title = book.title,
                     authorName = authorName,
@@ -482,7 +573,8 @@ object LibraryScreen : Screen {
 
         when (layout) {
             LibraryGridLayout.GRID_TWO_COLUMNS,
-            LibraryGridLayout.GRID_THREE_COLUMNS -> {
+            LibraryGridLayout.GRID_THREE_COLUMNS,
+                -> {
                 GridBookCell(
                     title = title,
                     authorName = authorName,

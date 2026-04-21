@@ -206,20 +206,20 @@ class BooksByStatusCollectorTest {
         }
 
         @Test
-        fun `PAUSED code in enabledStatusCodes produces no status-4 tab — only CR appears`() = runTest(UnconfinedTestDispatcher()) {
+        fun `WANT_TO_READ code in enabledStatusCodes produces a status-1 tab`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val crBook = stubBook(UserBookStatus.CURRENTLY_READING)
+            val wtrBook = stubBook(UserBookStatus.WANT_TO_READ)
             val collector = BooksByStatusCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
 
             // ----- Act -----
-            booksFlow.emit(listOf(crBook))
-            statusCodesFlow.emit(setOf(UserBookStatus.PAUSED.code))
+            booksFlow.emit(listOf(wtrBook))
+            statusCodesFlow.emit(setOf(UserBookStatus.WANT_TO_READ.code))
 
             // ----- Assert -----
-            val crTabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
-            stateFlow.value.booksByTab.containsKey(crTabId) shouldBe true
-            stateFlow.value.booksByTab.keys.none { it == "status-4" } shouldBe true
+            val wtrTabId = LibraryTab.Status.of(UserBookStatus.WANT_TO_READ).id
+            stateFlow.value.booksByTab.containsKey(wtrTabId) shouldBe true
+            stateFlow.value.booksByTab[wtrTabId] shouldBe listOf(wtrBook)
             job.cancel()
         }
 

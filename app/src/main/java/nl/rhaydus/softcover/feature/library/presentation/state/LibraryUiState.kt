@@ -24,4 +24,8 @@ data class LibraryUiState(
 
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+
+    val isSearchActive: Boolean = false,
+    val searchQuery: String = "",
 ) : UiState
+
