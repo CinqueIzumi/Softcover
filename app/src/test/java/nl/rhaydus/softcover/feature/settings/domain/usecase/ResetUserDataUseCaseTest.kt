@@ -134,5 +134,36 @@ class ResetUserDataUseCaseTest {
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
         }
+
+        @Test
+        fun `resets library visibility preferences via settings repository`() = runTest {
+            // ----- Arrange -----
+            // (repositories are relaxed)
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerify {
+                settingsRepository.resetLibraryVisibilityPreferences()
+            }
+        }
+
+        @Test
+        fun `returns failure when resetLibraryVisibilityPreferences throws`() = runTest {
+            // ----- Arrange -----
+            val expectedError = RuntimeException("prefs reset error")
+
+            coEvery {
+                settingsRepository.resetLibraryVisibilityPreferences()
+            } throws expectedError
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            result.exceptionOrNull() shouldBe expectedError
+        }
     }
 }

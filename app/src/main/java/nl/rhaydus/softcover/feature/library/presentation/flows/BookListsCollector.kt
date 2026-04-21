@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.flows
 
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -13,13 +15,21 @@ class BookListsCollector : LibraryInitializer {
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,
     ) {
-        dependencies.getAllUserListsUseCase().collectLatest { lists: List<BookList> ->
-            val ownedList = lists.find { it.slug == "owned" } ?: return@collectLatest
-
-            val editions = ownedList.books.mapNotNull { it.edition }
-
-            scope.setState {
-                it.copy(ownedEditions = editions)
+        combine(
+            dependencies.getAllUserListsUseCase(),
+            dependencies.getEnabledListIdsAsFlowUseCase(),
+        ) { lists: List<BookList>, enabledIds: Set<Int> ->
+            lists
+                .filter { it.id in enabledIds }
+                .associate { list ->
+                    val tabId = LibraryTab.CustomList(listId = list.id, listName = list.name).id
+                    tabId to list.books.mapNotNull { it.edition }
+                }
+        }.collectLatest { editionsPerList ->
+            scope.setState { state ->
+                val retainedKeys = editionsPerList.keys
+                val stripped = state.editionsByTab.filterKeys { key -> key in retainedKeys }
+                state.copy(editionsByTab = stripped + editionsPerList)
             }
         }
     }

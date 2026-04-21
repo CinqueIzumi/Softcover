@@ -272,6 +272,107 @@ class SettingsRepositoryImplTest {
     }
 
     @Nested
+    inner class EnabledStatusCodesProperty {
+
+        @Test
+        fun `enabledStatusCodes is wired to local data source enabledStatusCodes flow`() = runTest {
+            // ----- Arrange -----
+            every {
+                settingsLocalDataSource.enabledStatusCodes
+            } returns flowOf(setOf(1, 3, 5))
+
+            val freshRepository = SettingsRepositoryImpl(
+                settingsLocalDataSource = settingsLocalDataSource,
+                settingsRemoteDataSource = settingsRemoteDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshRepository.enabledStatusCodes.test {
+                awaitItem() shouldBe setOf(1, 3, 5)
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class EnabledListIdsProperty {
+
+        @Test
+        fun `enabledListIds is wired to local data source enabledListIds flow`() = runTest {
+            // ----- Arrange -----
+            every {
+                settingsLocalDataSource.enabledListIds
+            } returns flowOf(setOf(7, 9))
+
+            val freshRepository = SettingsRepositoryImpl(
+                settingsLocalDataSource = settingsLocalDataSource,
+                settingsRemoteDataSource = settingsRemoteDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshRepository.enabledListIds.test {
+                awaitItem() shouldBe setOf(7, 9)
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class ListDefaultsSeededProperty {
+
+        @Test
+        fun `listDefaultsSeeded is wired to local data source listDefaultsSeeded flow`() = runTest {
+            // ----- Arrange -----
+            every {
+                settingsLocalDataSource.listDefaultsSeeded
+            } returns flowOf(true)
+
+            val freshRepository = SettingsRepositoryImpl(
+                settingsLocalDataSource = settingsLocalDataSource,
+                settingsRemoteDataSource = settingsRemoteDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshRepository.listDefaultsSeeded.test {
+                awaitItem() shouldBe true
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class SeedEnabledListIds {
+
+        @Test
+        fun `delegates to local data source with the given ids`() = runTest {
+            // ----- Arrange -----
+            val ids = setOf(1, 5, 9)
+
+            // ----- Act -----
+            repository.seedEnabledListIds(ids = ids)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.seedEnabledListIds(ids = ids)
+            }
+        }
+
+        @Test
+        fun `delegates to local data source with empty set`() = runTest {
+            // ----- Arrange -----
+            val ids = emptySet<Int>()
+
+            // ----- Act -----
+            repository.seedEnabledListIds(ids = ids)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.seedEnabledListIds(ids = ids)
+            }
+        }
+    }
+
+    @Nested
     inner class GetUserIdFromBackendError {
 
         @Test
@@ -288,6 +389,70 @@ class SettingsRepositoryImplTest {
 
             // ----- Assert -----
             thrownError shouldBe expectedError
+        }
+    }
+
+    @Nested
+    inner class SetEnabledStatusCodes {
+
+        @Test
+        fun `delegates to local data source with the given codes`() = runTest {
+            // ----- Arrange -----
+            val codes = setOf(1, 3, 5)
+
+            // ----- Act -----
+            repository.setEnabledStatusCodes(codes = codes)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setEnabledStatusCodes(codes = codes)
+            }
+        }
+
+        @Test
+        fun `delegates to local data source with empty set`() = runTest {
+            // ----- Arrange -----
+            val codes = emptySet<Int>()
+
+            // ----- Act -----
+            repository.setEnabledStatusCodes(codes = codes)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setEnabledStatusCodes(codes = codes)
+            }
+        }
+    }
+
+    @Nested
+    inner class SetEnabledListIds {
+
+        @Test
+        fun `delegates to local data source with the given ids`() = runTest {
+            // ----- Arrange -----
+            val ids = setOf(10, 20, 30)
+
+            // ----- Act -----
+            repository.setEnabledListIds(ids = ids)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setEnabledListIds(ids = ids)
+            }
+        }
+
+        @Test
+        fun `delegates to local data source with empty set`() = runTest {
+            // ----- Arrange -----
+            val ids = emptySet<Int>()
+
+            // ----- Act -----
+            repository.setEnabledListIds(ids = ids)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setEnabledListIds(ids = ids)
+            }
         }
     }
 }

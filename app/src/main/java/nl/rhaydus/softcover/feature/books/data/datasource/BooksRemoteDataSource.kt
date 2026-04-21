@@ -46,6 +46,8 @@ import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookList
 import nl.rhaydus.softcover.feature.books.data.mapper.toListBook
 import nl.rhaydus.softcover.type.DatesReadInput
+import nl.rhaydus.softcover.type.Int_comparison_exp
+import nl.rhaydus.softcover.type.Lists_bool_exp
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
 import timber.log.Timber
@@ -64,9 +66,15 @@ interface BooksRemoteDataSource {
 
     suspend fun removeBookFromLibrary(book: Book)
 
-    suspend fun initializeBooks(userId: Int): List<Book>
+    suspend fun initializeBooks(
+        userId: Int,
+        statusIds: Set<Int>? = null,
+    ): List<Book>
 
-    suspend fun fetchUserLists(userId: Int): List<BookList>
+    suspend fun fetchUserLists(
+        userId: Int,
+        listIds: Set<Int>? = null,
+    ): List<BookList>
 
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
 
@@ -194,8 +202,13 @@ class BooksRemoteDataSourceImpl(
         apolloClient.safeMutation(mutation = RemoveUserBookMutation(id = userBookId))
     }
 
-    override suspend fun initializeBooks(userId: Int): List<Book> = withContext(Dispatchers.IO) {
-        val result = apolloClient.safeQuery(query = GetUserBooksQuery())
+    override suspend fun initializeBooks(
+        userId: Int,
+        statusIds: Set<Int>?,
+    ): List<Book> = withContext(Dispatchers.IO) {
+        val result = apolloClient.safeQuery(
+            query = GetUserBooksQuery(statusIds = Optional.presentIfNotNull(statusIds?.toList())),
+        )
 
         val userBooks = result.me.firstOrNull()?.user_books
             ?: throw Exception("No books were found")
@@ -241,8 +254,23 @@ class BooksRemoteDataSourceImpl(
         positionInSeries = canonical.positionInSeries,
     )
 
-    override suspend fun fetchUserLists(userId: Int): List<BookList> = withContext(Dispatchers.IO) {
-        val result = apolloClient.safeQuery(GetUserBookListsQuery())
+    override suspend fun fetchUserLists(
+        userId: Int,
+        listIds: Set<Int>?,
+    ): List<BookList> = withContext(Dispatchers.IO) {
+        val whereFilter: Optional<Lists_bool_exp?> = if (listIds == null) {
+            Optional.Absent
+        } else {
+            Optional.Present(
+                Lists_bool_exp(
+                    id = Optional.Present(Int_comparison_exp(_in = Optional.Present(listIds.toList()))),
+                ),
+            )
+        }
+
+        val result = apolloClient.safeQuery(
+            GetUserBookListsQuery(where = whereFilter),
+        )
 
         val lists = result.me.firstOrNull()?.lists
             ?: throw Exception("No lists were found")

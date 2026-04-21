@@ -12,4 +12,7 @@ data class AppSettingsEntity(
     val themeConfig: ThemeConfigurationEntity = ThemeConfigurationEntity(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val libraryGridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+    val enabledStatusCodes: Set<Int> = setOf(1, 3, 5),
+    val enabledListIds: Set<Int> = emptySet(),
+    val listDefaultsSeeded: Boolean = false,
 )

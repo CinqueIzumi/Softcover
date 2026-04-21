@@ -60,4 +60,49 @@ class SettingsLocalDataSourceImpl(
             appSettingsEntity.copy(themeConfig = appSettingsEntity.themeConfig.copy(bottomBarStyle = style))
         }
     }
+
+    override val enabledStatusCodes: Flow<Set<Int>> = appSettingsDataStore.store.data
+        .map { it.enabledStatusCodes }
+        .distinctUntilChanged()
+
+    override val enabledListIds: Flow<Set<Int>> = appSettingsDataStore.store.data
+        .map { it.enabledListIds }
+        .distinctUntilChanged()
+
+    override val listDefaultsSeeded: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.listDefaultsSeeded }
+        .distinctUntilChanged()
+
+    override suspend fun seedEnabledListIds(ids: Set<Int>) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(
+                enabledListIds = entity.enabledListIds + ids,
+                listDefaultsSeeded = true,
+            )
+        }
+    }
+
+    override suspend fun setEnabledStatusCodes(codes: Set<Int>) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(enabledStatusCodes = codes)
+        }
+    }
+
+    override suspend fun setEnabledListIds(ids: Set<Int>) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(enabledListIds = ids)
+        }
+    }
+
+    override suspend fun resetLibraryVisibilityPreferences() {
+        val defaults = AppSettingsEntity()
+
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(
+                enabledStatusCodes = defaults.enabledStatusCodes,
+                enabledListIds = defaults.enabledListIds,
+                listDefaultsSeeded = defaults.listDefaultsSeeded,
+            )
+        }
+    }
 }

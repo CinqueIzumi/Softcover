@@ -312,6 +312,53 @@ interface BookDao {
     @Query("DELETE FROM user_books WHERE bookId = :bookId")
     suspend fun deleteUserBook(bookId: Int)
 
+    @Query("DELETE FROM user_books WHERE id = :userBookId")
+    suspend fun deleteUserBookByUserBookId(userBookId: Int)
+
+    @Query("SELECT COUNT(*) FROM list_books WHERE bookId = :bookId")
+    suspend fun countListBooksForBook(bookId: Int): Int
+
+    @Query("SELECT id FROM book_lists")
+    suspend fun getAllBookListIds(): List<Int>
+
+    @Query("DELETE FROM list_books WHERE listId IN (:listIds)")
+    suspend fun deleteListBooksByListIds(listIds: List<Int>)
+
+    @Query("DELETE FROM book_lists WHERE id IN (:ids)")
+    suspend fun deleteBookListsByIds(ids: List<Int>)
+
+    @Query(
+        """
+        SELECT b.id FROM books b
+        WHERE b.id NOT IN (SELECT bookId FROM user_books)
+          AND b.id NOT IN (SELECT bookId FROM list_books)
+        """
+    )
+    suspend fun getOrphanBookIds(): List<Int>
+
+    @Transaction
+    suspend fun syncBookListMetadata(serverListIds: Set<Int>) {
+        val allIds = getAllBookListIds()
+        val toRemove = allIds.filterNot { it in serverListIds }
+
+        if (toRemove.isEmpty()) return
+
+        deleteListBooksByListIds(listIds = toRemove)
+        deleteBookListsByIds(ids = toRemove)
+    }
+
+    @Transaction
+    suspend fun deleteOrphanBooks() {
+        val orphanIds = getOrphanBookIds()
+
+        orphanIds.forEach { bookId ->
+            clearBookAuthors(bookId)
+            clearEditionAuthors(bookId)
+            deleteEditions(bookId)
+            deleteBook(bookId)
+        }
+    }
+
     @Query("DELETE FROM user_book_reads WHERE userBookId = :userBookId")
     suspend fun deleteUserBookRead(userBookId: Int)
 
@@ -329,13 +376,16 @@ interface BookDao {
     suspend fun deleteAllForUserBookId(userBookId: Int) {
         val bookId = getBookIdByUserBookId(userBookId) ?: return
 
+        deleteUserBookRead(userBookId)
+        deleteJournals(userBookId = userBookId)
+        deleteUserBookByUserBookId(userBookId)
+
+        if (countListBooksForBook(bookId = bookId) > 0) return
+
         clearBookAuthors(bookId)
         clearEditionAuthors(bookId)
         deleteEditions(bookId)
         deleteBook(bookId)
-        deleteUserBook(bookId)
-        deleteUserBookRead(userBookId)
-        deleteJournals(userBookId = userBookId)
     }
 
     @Transaction

@@ -1,7 +1,10 @@
 package nl.rhaydus.softcover.di
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import org.koin.dsl.module
 
 val dispatcherModule = module {
@@ -11,5 +14,9 @@ val dispatcherModule = module {
             io = Dispatchers.IO,
             default = Dispatchers.Default
         )
+    }
+
+    single {
+        ApplicationScope(scope = CoroutineScope(Dispatchers.Default + SupervisorJob()))
     }
 }

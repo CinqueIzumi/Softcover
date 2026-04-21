@@ -24,4 +24,18 @@ interface SettingsLocalDataSource {
     suspend fun updateUserId(id: Int)
 
     suspend fun setBottomBarStyle(style: BottomBarStyle)
+
+    val enabledStatusCodes: Flow<Set<Int>>
+
+    val enabledListIds: Flow<Set<Int>>
+
+    val listDefaultsSeeded: Flow<Boolean>
+
+    suspend fun seedEnabledListIds(ids: Set<Int>)
+
+    suspend fun resetLibraryVisibilityPreferences()
+
+    suspend fun setEnabledStatusCodes(codes: Set<Int>)
+
+    suspend fun setEnabledListIds(ids: Set<Int>)
 }

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -128,10 +127,13 @@ class OnRefreshActionTest {
         }
 
         @Test
-        fun `preserves other state fields when toggling isLoading`() = runTest {
+        fun `preserves booksByTab when toggling isLoading`() = runTest {
             // ----- Arrange -----
-            val existingBooks = listOf(mockk<Book>())
-            stateFlow.value = LibraryUiState(allBooks = existingBooks, isLoading = false)
+            val existingBooks = listOf(mockk<nl.rhaydus.softcover.core.domain.model.Book>())
+            stateFlow.value = LibraryUiState(
+                booksByTab = mapOf("all" to existingBooks),
+                isLoading = false,
+            )
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -147,7 +149,34 @@ class OnRefreshActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.allBooks shouldBe existingBooks
+            stateFlow.value.booksByTab["all"] shouldBe existingBooks
+            stateFlow.value.isLoading shouldBe false
+        }
+
+        @Test
+        fun `preserves editionsByTab when toggling isLoading`() = runTest {
+            // ----- Arrange -----
+            val existingEditions = listOf(mockk<nl.rhaydus.softcover.core.domain.model.BookEdition>())
+            stateFlow.value = LibraryUiState(
+                editionsByTab = mapOf("list-1" to existingEditions),
+                isLoading = false,
+            )
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                refreshUserBooksUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnRefreshAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionsByTab["list-1"] shouldBe existingEditions
             stateFlow.value.isLoading shouldBe false
         }
     }

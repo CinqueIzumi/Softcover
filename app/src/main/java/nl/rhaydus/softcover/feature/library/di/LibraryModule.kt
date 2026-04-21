@@ -3,13 +3,11 @@ package nl.rhaydus.softcover.feature.library.di
 import nl.rhaydus.softcover.feature.library.presentation.flows.AllBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.BookListsCollector
-import nl.rhaydus.softcover.feature.library.presentation.flows.CurrentlyReadingBooksCollector
+import nl.rhaydus.softcover.feature.library.presentation.flows.BooksByStatusCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.DateStyleCollector
-import nl.rhaydus.softcover.feature.library.presentation.flows.DidNotFinishBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
-import nl.rhaydus.softcover.feature.library.presentation.flows.ReadBooksCollector
-import nl.rhaydus.softcover.feature.library.presentation.flows.WantToReadBooksCollector
+import nl.rhaydus.softcover.feature.library.presentation.flows.VisibleTabsCollector
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -17,15 +15,11 @@ import org.koin.dsl.module
 val libraryModule = module {
     factory { AllBooksCollector() } bind LibraryInitializer::class
 
-    factory { CurrentlyReadingBooksCollector() } bind LibraryInitializer::class
+    factory { BooksByStatusCollector() } bind LibraryInitializer::class
 
     factory { BookListsCollector() } bind LibraryInitializer::class
 
-    factory { DidNotFinishBooksCollector() } bind LibraryInitializer::class
-
-    factory { ReadBooksCollector() } bind LibraryInitializer::class
-
-    factory { WantToReadBooksCollector() } bind LibraryInitializer::class
+    factory { VisibleTabsCollector() } bind LibraryInitializer::class
 
     factory { GridLayoutCollector() } bind LibraryInitializer::class
 
@@ -35,10 +29,6 @@ val libraryModule = module {
 
     factory {
         LibraryScreenScreenModel(
-            getWantToReadUserBooksUseCase = get(),
-            getCurrentlyReadingUserBooksUseCase = get(),
-            getReadUserBooksUseCase = get(),
-            getDidNotFinishUserBooksUseCase = get(),
             getAllUserBooksUseCase = get(),
             refreshUserBooksUseCase = get(),
             appDispatchers = get(),
@@ -48,6 +38,8 @@ val libraryModule = module {
             setLibraryGridLayoutUseCase = get(),
             observeAllBookDeadlinesUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
+            getEnabledStatusCodesAsFlowUseCase = get(),
+            getEnabledListIdsAsFlowUseCase = get(),
         )
     }
 }

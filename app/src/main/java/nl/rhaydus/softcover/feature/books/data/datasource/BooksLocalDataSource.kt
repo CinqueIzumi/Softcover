@@ -50,6 +50,10 @@ interface BooksLocalDataSource {
     suspend fun removeAllBooks()
 
     suspend fun getOwnedListBookByEditionId(editionId: Int): ListBook
+
+    suspend fun syncBookListMetadata(serverListIds: Set<Int>)
+
+    suspend fun deleteOrphanBooks()
 }
 
 class BooksLocalDataSourceImpl(
@@ -153,5 +157,13 @@ class BooksLocalDataSourceImpl(
             ?: throw Exception("List book was not found!")
 
         return book.toModel()
+    }
+
+    override suspend fun syncBookListMetadata(serverListIds: Set<Int>) {
+        dao.syncBookListMetadata(serverListIds = serverListIds)
+    }
+
+    override suspend fun deleteOrphanBooks() {
+        dao.deleteOrphanBooks()
     }
 }

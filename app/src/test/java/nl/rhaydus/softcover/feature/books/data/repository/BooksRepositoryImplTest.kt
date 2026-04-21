@@ -8,7 +8,6 @@ import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -19,6 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -27,15 +27,31 @@ class BooksRepositoryImplTest {
 
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
     private lateinit var booksLocalDataSource: BooksLocalDataSource
+    private lateinit var settingsRepository: SettingsRepository
     private lateinit var repository: BooksRepositoryImpl
 
     @BeforeEach
     fun setUp() {
         booksRemoteDataSource = mockk()
         booksLocalDataSource = mockk(relaxed = true)
+        settingsRepository = mockk(relaxed = true)
+
+        every {
+            settingsRepository.enabledStatusCodes
+        } returns flowOf(setOf(1, 3, 5))
+
+        every {
+            settingsRepository.enabledListIds
+        } returns flowOf(emptySet())
+
+        every {
+            settingsRepository.listDefaultsSeeded
+        } returns flowOf(true)
+
         repository = BooksRepositoryImpl(
             booksRemoteDataSource = booksRemoteDataSource,
             booksLocalDataSource = booksLocalDataSource,
+            settingsRepository = settingsRepository,
         )
     }
 
@@ -51,21 +67,23 @@ class BooksRepositoryImplTest {
         } returns id
     }
 
-    private fun stubBookList(listBooks: List<ListBook> = emptyList()): BookList = mockk {
-        every {
-            books
-        } returns listBooks
-    }
+    private fun stubBookList(
+        listBooks: List<ListBook> = emptyList(),
+        id: Int = 1,
+        slug: String = "some-list",
+    ): BookList = BookList(
+        id = id,
+        name = slug,
+        slug = slug,
+        books = listBooks,
+    )
 
-    private fun stubListBook(bookId: Int = 1, editionId: Int = 100): ListBook = mockk {
-        every {
-            this@mockk.bookId
-        } returns bookId
-
-        every {
-            this@mockk.editionId
-        } returns editionId
-    }
+    private fun stubListBook(bookId: Int = 1, editionId: Int = 100): ListBook = ListBook(
+        listBookId = 0,
+        listId = 0,
+        bookId = bookId,
+        editionId = editionId,
+    )
 
     private fun stubBookEdition(): BookEdition = mockk()
 
@@ -84,6 +102,7 @@ class BooksRepositoryImplTest {
             val freshRepository = BooksRepositoryImpl(
                 booksRemoteDataSource = booksRemoteDataSource,
                 booksLocalDataSource = booksLocalDataSource,
+                settingsRepository = settingsRepository,
             )
 
             // ----- Act & Assert -----
@@ -109,6 +128,7 @@ class BooksRepositoryImplTest {
             val freshRepository = BooksRepositoryImpl(
                 booksRemoteDataSource = booksRemoteDataSource,
                 booksLocalDataSource = booksLocalDataSource,
+                settingsRepository = settingsRepository,
             )
 
             // ----- Act & Assert -----
@@ -144,22 +164,26 @@ class BooksRepositoryImplTest {
     inner class InitializeBooks {
 
         @Test
-        fun `initializeBooks fetches remote books and lists then caches them`() = runTest {
+        fun `initializeBooks fetches remote books and caches them`() = runTest {
             // ----- Arrange -----
             val userId = 10
+            val enabledStatuses = setOf(1, 3, 5)
             val fetchedBooks = listOf(
                 stubBook(userBookId = 1),
                 stubBook(userBookId = 2),
             )
-            val fetchedLists = listOf(stubBookList())
+
+            every {
+                settingsRepository.enabledStatusCodes
+            } returns flowOf(enabledStatuses)
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns fetchedBooks
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
-            } returns fetchedLists
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns emptyList()
 
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
@@ -172,8 +196,148 @@ class BooksRepositoryImplTest {
             coVerify {
                 booksLocalDataSource.cacheBooks(books = fetchedBooks)
             }
+        }
+
+        @Test
+        fun `initializeBooks caches all fetched lists with disabled ones having empty books`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+            val enabledListId = 1
+            val disabledListId = 2
+            val enabledList = stubBookList(id = enabledListId, slug = "owned")
+            val disabledList = stubBookList(id = disabledListId, slug = "favorites")
+
+            every {
+                settingsRepository.enabledListIds
+            } returns flowOf(setOf(enabledListId))
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns listOf(enabledList, disabledList)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
             coVerify {
-                booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
+                booksLocalDataSource.cacheUserBookLists(
+                    lists = match { lists ->
+                        lists.any { it.id == enabledListId } &&
+                            lists.any { it.id == disabledListId && it.books.isEmpty() }
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `initializeBooks always includes CURRENTLY_READING code in statusIds passed to remote`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+            val enabledStatuses = setOf(1, 3, 5)
+
+            every {
+                settingsRepository.enabledStatusCodes
+            } returns flowOf(enabledStatuses)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns emptyList()
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = match { ids -> UserBookStatus.CURRENTLY_READING.code in ids!! },
+                )
+            }
+        }
+
+        @Test
+        fun `initializeBooks passes union of enabled codes, CR, and alwaysCachedCodes to remote`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+            val enabledStatuses = setOf(1, 3, 5)
+            val expectedStatusIds =
+                UserBookStatus.activeLibraryCodes(enabledCodes = enabledStatuses) +
+                    UserBookStatus.alwaysCachedCodes
+
+            every {
+                settingsRepository.enabledStatusCodes
+            } returns flowOf(enabledStatuses)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns emptyList()
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = expectedStatusIds,
+                )
+            }
+        }
+
+        @Test
+        fun `initializeBooks passes all alwaysCachedCodes to remote even when enabledStatusCodes is empty`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+
+            every {
+                settingsRepository.enabledStatusCodes
+            } returns flowOf(emptySet())
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns emptyList()
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = match { ids -> ids.containsAll(UserBookStatus.alwaysCachedCodes) },
+                )
             }
         }
 
@@ -187,11 +351,11 @@ class BooksRepositoryImplTest {
             val staleLocalId = 99
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns fetchedBooks
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
             } returns fetchedLists
 
             coEvery {
@@ -218,11 +382,11 @@ class BooksRepositoryImplTest {
             val fetchedLists = emptyList<BookList>()
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns fetchedBooks
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
             } returns fetchedLists
 
             coEvery {
@@ -247,11 +411,11 @@ class BooksRepositoryImplTest {
             val fetchedLists = emptyList<BookList>()
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns fetchedBooks
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
             } returns fetchedLists
 
             coEvery {
@@ -273,11 +437,11 @@ class BooksRepositoryImplTest {
             val userId = 10
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns emptyList()
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
             } returns emptyList()
 
             coEvery {
@@ -298,11 +462,11 @@ class BooksRepositoryImplTest {
             val userId = 1
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns emptyList()
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
             } returns emptyList()
 
             coEvery {
@@ -315,25 +479,268 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
         }
+
+        @Test
+        fun `initializeBooks calls syncBookListMetadata with server list ids after fetch`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+            val list1 = stubBookList(id = 3, slug = "one")
+            val list2 = stubBookList(id = 7, slug = "two")
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns listOf(list1, list2)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.syncBookListMetadata(serverListIds = setOf(3, 7))
+            }
+        }
+
+        @Test
+        fun `initializeBooks calls deleteOrphanBooks after caching`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns emptyList()
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.deleteOrphanBooks()
+            }
+        }
+
+        @Test
+        fun `initializeBooks always passes null listIds to fetchUserLists`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+            val enabledListIds = setOf(5, 8)
+
+            every {
+                settingsRepository.listDefaultsSeeded
+            } returns flowOf(true)
+
+            every {
+                settingsRepository.enabledListIds
+            } returns flowOf(enabledListIds)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns emptyList()
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            }
+        }
+
+        @Test
+        fun `initializeBooks on first run fetches all lists and seeds the owned list id`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+            val ownedListId = 42
+            val ownedList = stubBookList(id = ownedListId, slug = "owned")
+            val otherList = stubBookList(id = 99, slug = "favorites")
+
+            every {
+                settingsRepository.listDefaultsSeeded
+            } returns flowOf(false)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns listOf(ownedList, otherList)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                settingsRepository.seedEnabledListIds(ids = setOf(ownedListId))
+            }
+        }
+
+        @Test
+        fun `initializeBooks on first run caches all fetched lists`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+            val ownedListId = 42
+            val ownedList = stubBookList(id = ownedListId, slug = "owned")
+            val otherList = stubBookList(id = 99, slug = "favorites")
+
+            every {
+                settingsRepository.listDefaultsSeeded
+            } returns flowOf(false)
+
+            // After seeding, enabledListIds returns {ownedListId}
+            every {
+                settingsRepository.enabledListIds
+            } returns flowOf(setOf(ownedListId))
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns listOf(ownedList, otherList)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            // Both lists are cached — the non-enabled one with empty books
+            coVerify {
+                booksLocalDataSource.cacheUserBookLists(
+                    lists = match { lists -> lists.size == 2 },
+                )
+            }
+        }
+
+        @Test
+        fun `initializeBooks caches owned list with its books even when owned id is not in enabledListIds`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+            val ownedListId = 55
+            val disabledCustomListId = 99
+            val ownedListBook = stubListBook(bookId = 1, editionId = 10)
+            val disabledListBook = stubListBook(bookId = 2, editionId = 20)
+            val ownedList = stubBookList(id = ownedListId, slug = "owned", listBooks = listOf(ownedListBook))
+            val disabledCustomList = stubBookList(id = disabledCustomListId, slug = "favorites", listBooks = listOf(disabledListBook))
+
+            // Neither the owned list nor the custom list is in enabledListIds
+            every {
+                settingsRepository.enabledListIds
+            } returns flowOf(emptySet())
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns listOf(ownedList, disabledCustomList)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = any())
+            } returns listOf(ownedListBook.bookId)
+
+            coEvery {
+                booksLocalDataSource.getExistingEditionIds(ids = any())
+            } returns listOf(ownedListBook.editionId)
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.cacheUserBookLists(
+                    lists = match { lists ->
+                        lists.any { it.id == ownedListId && it.books.isNotEmpty() } &&
+                            lists.any { it.id == disabledCustomListId && it.books.isEmpty() }
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `initializeBooks on first run when no owned list exists seeds empty set`() = runTest {
+            // ----- Arrange -----
+            val userId = 10
+            val someList = stubBookList(id = 10, slug = "favorites")
+
+            every {
+                settingsRepository.listDefaultsSeeded
+            } returns flowOf(false)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns listOf(someList)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                settingsRepository.seedEnabledListIds(ids = emptySet())
+            }
+        }
     }
 
     @Nested
     inner class RefreshUserBooks {
 
         @Test
-        fun `refreshUserBooks fetches remote books and lists then caches them`() = runTest {
+        fun `refreshUserBooks fetches remote books and caches them`() = runTest {
             // ----- Arrange -----
             val userId = 20
             val fetchedBooks = listOf(stubBook(userBookId = 3))
-            val fetchedLists = listOf(stubBookList())
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns fetchedBooks
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
-            } returns fetchedLists
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns emptyList()
 
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
@@ -346,8 +753,37 @@ class BooksRepositoryImplTest {
             coVerify {
                 booksLocalDataSource.cacheBooks(books = fetchedBooks)
             }
+        }
+
+        @Test
+        fun `refreshUserBooks caches all fetched lists`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val enabledListId = 1
+            val fetchedList = stubBookList(id = enabledListId)
+
+            every {
+                settingsRepository.enabledListIds
+            } returns flowOf(setOf(enabledListId))
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
+            } returns listOf(fetchedList)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = userId)
+
+            // ----- Assert -----
             coVerify {
-                booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
+                booksLocalDataSource.cacheUserBookLists(lists = match { it.size == 1 })
             }
         }
 
@@ -357,11 +793,11 @@ class BooksRepositoryImplTest {
             val userId = 20
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns emptyList()
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
             } returns emptyList()
 
             coEvery {
@@ -383,11 +819,11 @@ class BooksRepositoryImplTest {
             val userId = 20
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns emptyList()
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
             } returns emptyList()
 
             coEvery {
@@ -476,11 +912,11 @@ class BooksRepositoryImplTest {
             val userId = 5
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId)
+                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             } returns emptyList()
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = userId)
+                booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
             } returns emptyList()
 
             coEvery {
@@ -867,17 +1303,24 @@ class BooksRepositoryImplTest {
     @Nested
     inner class HydrateOrphanOwnedBooks {
 
+        // The default stubBookList id is 1. We set enabledListIds = {1} so the list is
+        // treated as enabled and its books are passed into hydrateOrphanOwnedBooks.
         private fun setupFetchAndCache(
             fetchedBooks: List<Book> = emptyList(),
             fetchedLists: List<BookList> = emptyList(),
             localUserBookIds: List<Int> = emptyList(),
+            enabledListId: Int = 1,
         ) {
+            every {
+                settingsRepository.enabledListIds
+            } returns flowOf(setOf(enabledListId))
+
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = any())
+                booksRemoteDataSource.initializeBooks(userId = any(), statusIds = any())
             } returns fetchedBooks
 
             coEvery {
-                booksRemoteDataSource.fetchUserLists(userId = any())
+                booksRemoteDataSource.fetchUserLists(userId = any(), listIds = null)
             } returns fetchedLists
 
             coEvery {
@@ -976,7 +1419,7 @@ class BooksRepositoryImplTest {
             }
 
             coEvery {
-                booksLocalDataSource.cacheUserBookLists(lists = listOf(bookList))
+                booksLocalDataSource.cacheUserBookLists(lists = any())
             } answers {
                 callOrder += "cacheUserBookLists"
             }
@@ -1195,6 +1638,55 @@ class BooksRepositoryImplTest {
             }
             coVerify(exactly = 0) {
                 booksRemoteDataSource.fetchEditionsByIds(ids = listOf(10))
+            }
+        }
+
+        @Test
+        fun `hydrateOrphanOwnedBooks still runs for the owned list even when it is not in enabledListIds`() = runTest {
+            // ----- Arrange -----
+            val ownedListId = 77
+            val ownedBookId = 200
+            val ownedEditionId = 300
+            val ownedListBook = stubListBook(bookId = ownedBookId, editionId = ownedEditionId)
+            val ownedList = stubBookList(id = ownedListId, slug = "owned", listBooks = listOf(ownedListBook))
+            val orphanBook = stubBook(userBookId = null)
+
+            // Owned list is NOT in enabledListIds
+            every {
+                settingsRepository.enabledListIds
+            } returns flowOf(emptySet())
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(userId = any(), statusIds = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchUserLists(userId = any(), listIds = null)
+            } returns listOf(ownedList)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // The owned book is not yet in the local cache → hydrateOrphanOwnedBooks must fetch it
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = listOf(ownedBookId))
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(ownedBookId))
+            } returns listOf(orphanBook)
+
+            coEvery {
+                booksLocalDataSource.getExistingEditionIds(ids = listOf(ownedEditionId))
+            } returns listOf(ownedEditionId)
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = 1)
+
+            // ----- Assert -----
+            coVerify {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(ownedBookId))
             }
         }
     }

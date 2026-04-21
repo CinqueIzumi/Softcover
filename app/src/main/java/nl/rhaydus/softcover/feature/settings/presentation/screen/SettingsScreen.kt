@@ -76,6 +76,9 @@ object SettingsScreen : Screen {
             navigateToAppearanceSettings = {
                 navigator.parent?.push(AppearanceSettingsScreen())
             },
+            navigateToLibraryVisibility = {
+                navigator.parent?.push(LibraryVisibilitySettingsScreen())
+            },
             onNavigateToSearch = {
                 navigator.parent?.push(item = SearchScreen())
             },
@@ -92,6 +95,7 @@ object SettingsScreen : Screen {
         runAction: (SettingsAction) -> Unit,
         navigateToProfile: () -> Unit,
         navigateToAppearanceSettings: () -> Unit,
+        navigateToLibraryVisibility: () -> Unit,
         onNavigateToSearch: () -> Unit,
         appUpdateState: AppUpdateState = AppUpdateState.Idle,
         onStartAppUpdate: () -> Unit = {},
@@ -153,6 +157,17 @@ object SettingsScreen : Screen {
                     icon = SoftcoverIconResource.Drawable(
                         id = R.drawable.ic_palette,
                         contentDescription = "Appearance icon"
+                    )
+                )
+
+                HorizontalDivider()
+
+                SectionCard(
+                    title = "Library tabs",
+                    onClick = navigateToLibraryVisibility,
+                    icon = SoftcoverIconResource.Drawable(
+                        id = R.drawable.ic_shelf,
+                        contentDescription = "Library tabs icon"
                     )
                 )
 
@@ -332,6 +347,7 @@ private fun SettingsScreenPreview() {
             state = SettingsScreenUiState(),
             navigateToProfile = {},
             navigateToAppearanceSettings = {},
+            navigateToLibraryVisibility = {},
             onNavigateToSearch = {},
         )
     }

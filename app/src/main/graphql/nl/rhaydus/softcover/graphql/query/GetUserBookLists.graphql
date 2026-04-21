@@ -1,6 +1,6 @@
-query GetUserBookLists {
+query GetUserBookLists($where: lists_bool_exp) {
     me {
-        lists {
+        lists(where: $where) {
             ...ListFragment
         }
     }

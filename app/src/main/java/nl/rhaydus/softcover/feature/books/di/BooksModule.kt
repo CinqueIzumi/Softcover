@@ -37,6 +37,7 @@ val booksModule = module {
         BooksRepositoryImpl(
             booksRemoteDataSource = get(),
             booksLocalDataSource = get(),
+            settingsRepository = get(),
         )
     }
 
