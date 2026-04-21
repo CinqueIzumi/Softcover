@@ -17,7 +17,7 @@ private val statusOrder: List<UserBookStatus> = listOf(
     UserBookStatus.WANT_TO_READ,
     UserBookStatus.READ,
     UserBookStatus.DID_NOT_FINISH,
-).filter { it.isExposedInLibrary }
+)
 
 class VisibleTabsCollector : LibraryInitializer {
     override suspend fun onLaunch(

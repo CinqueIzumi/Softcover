@@ -737,7 +737,6 @@ class BookDetailScreen(
                 BookStatus.Reading -> ReadingContainer(state = state)
                 BookStatus.DidNotFinish -> DidNotFinishContainer(state = state)
                 BookStatus.Read -> ReadContainer(state = state)
-                BookStatus.Paused -> Unit
 
                 BookStatus.WantToRead -> {
                     WantToReadContainer(
@@ -858,23 +857,10 @@ class BookDetailScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    val wantToReadDate = userBook.getWantToReadDateString(style = state.dateStyle)
-
-                    when (wantToReadDate) {
-                        null -> {
-                            FallBackDateText(
-                                userBook = userBook,
-                                dateStyle = state.dateStyle,
-                            )
-                        }
-
-                        else -> {
-                            Text(
-                                text = "You've marked this book as 'want to read' on $wantToReadDate",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
+                    FallBackDateText(
+                        userBook = userBook,
+                        dateStyle = state.dateStyle,
+                    )
                 }
             }
 

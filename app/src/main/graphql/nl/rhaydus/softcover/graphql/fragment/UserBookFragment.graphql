@@ -10,15 +10,41 @@ fragment UserBookFragment on user_books {
     review_has_spoilers
     reviewed_at
     updated_at
+    created_at
 
-    reading_journals(
+    progress_updated_journal: reading_journals(
+        where: { event: { _eq: "progress_updated" } }
         order_by: { updated_at: desc }
         limit: 1
     ) {
         ...ReadingJournalFragment
     }
 
-    user_book_reads {
+    status_currently_reading_journal: reading_journals(
+        where: { event: { _eq: "status_currently_reading" } }
+        order_by: { updated_at: desc }
+        limit: 1
+    ) {
+        ...ReadingJournalFragment
+    }
+
+    user_book_read_finished_journal: reading_journals(
+        where: { event: { _eq: "user_book_read_finished" } }
+        order_by: { updated_at: desc }
+        limit: 1
+    ) {
+        ...ReadingJournalFragment
+    }
+
+    status_stopped_journal: reading_journals(
+        where: { event: { _eq: "status_stopped" } }
+        order_by: { updated_at: desc }
+        limit: 1
+    ) {
+        ...ReadingJournalFragment
+    }
+
+    user_book_reads(order_by: { finished_at: desc_nulls_last }) {
         ...UserBookReadFragment
     }
 

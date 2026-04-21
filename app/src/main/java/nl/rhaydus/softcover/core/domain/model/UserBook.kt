@@ -11,6 +11,7 @@ data class UserBook(
     val id: Int,
     val status: BookStatus,
     val dateAdded: String,
+    val createdAt: String?,
     val privacySettingId: Int,
     val reviewHasSpoilers: Boolean,
     val editionId: Int?,
@@ -24,13 +25,6 @@ data class UserBook(
     fun getDnfDateString(style: DateStyle): String? {
         return getUpdatedDateForEventType(
             type = JournalEventType.StatusDidNotFinish,
-            style = style,
-        )
-    }
-
-    fun getWantToReadDateString(style: DateStyle): String? {
-        return getUpdatedDateForEventType(
-            type = JournalEventType.StatusWantToRead,
             style = style,
         )
     }

@@ -75,6 +75,7 @@ class UserBooksFlowCollectorTest {
         id = 1,
         status = nl.rhaydus.softcover.core.domain.model.enum.BookStatus.None,
         dateAdded = "2024-01-01",
+        createdAt = null,
         privacySettingId = 0,
         reviewHasSpoilers = false,
         editionId = null,

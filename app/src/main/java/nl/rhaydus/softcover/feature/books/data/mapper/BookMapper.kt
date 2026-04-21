@@ -38,7 +38,10 @@ import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Book.Companion.bookListFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Edition.Companion.editionFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.Reading_journal.Companion.readingJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Progress_updated_journal.Companion.readingJournalFragment as progressUpdatedJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Status_currently_reading_journal.Companion.readingJournalFragment as statusCurrentlyReadingJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Companion.readingJournalFragment as statusStoppedJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read.Companion.userBookReadFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
 import kotlin.math.roundToInt
@@ -91,6 +94,7 @@ fun ListBookFragment.toListBook(): ListBook? {
         listId = list_id,
         bookId = book_id,
         editionId = editionId,
+        addedAt = created_at,
     )
 }
 
@@ -100,8 +104,19 @@ fun ReadingJournalFragment.toReadingJournal(): ReadingJournal = ReadingJournal(
 )
 
 private fun UserBookFragment.toUserBook(): UserBook {
-    val journals = reading_journals.mapNotNull {
-        it.readingJournalFragment()?.toReadingJournal()
+    val journals = buildList {
+        progress_updated_journal.mapNotNullTo(this) {
+            it.progressUpdatedJournalFragment()?.toReadingJournal()
+        }
+        status_currently_reading_journal.mapNotNullTo(this) {
+            it.statusCurrentlyReadingJournalFragment()?.toReadingJournal()
+        }
+        user_book_read_finished_journal.mapNotNullTo(this) {
+            it.userBookReadFinishedJournalFragment()?.toReadingJournal()
+        }
+        status_stopped_journal.mapNotNullTo(this) {
+            it.statusStoppedJournalFragment()?.toReadingJournal()
+        }
     }
 
     return UserBook(
@@ -116,6 +131,7 @@ private fun UserBookFragment.toUserBook(): UserBook {
         reviewHasSpoilers = review_has_spoilers,
         reviewedAt = reviewed_at,
         updatedAt = updated_at,
+        createdAt = created_at,
         journals = journals
     )
 }
@@ -241,6 +257,7 @@ fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
     bookId = bookId,
     editionId = editionId,
     listBookId = listBookId,
+    addedAt = addedAt,
 )
 
 fun Book.toEntity(): BookEntity = BookEntity(
@@ -270,6 +287,7 @@ fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
     id = id,
     statusCode = status.code,
     dateAdded = dateAdded,
+    createdAt = createdAt,
     privacySettingId = privacySettingId,
     reviewHasSpoilers = reviewHasSpoilers,
     editionId = editionId,
@@ -356,6 +374,7 @@ fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook = UserBook(
     id = id,
     status = BookStatus.getFromCode(statusCode),
     dateAdded = dateAdded,
+    createdAt = createdAt,
     privacySettingId = privacySettingId,
     reviewHasSpoilers = reviewHasSpoilers,
     editionId = editionId,
@@ -377,6 +396,7 @@ fun ListBookFull.toModel(): ListBook = ListBook(
     listId = listBook.listId,
     bookId = listBook.bookId,
     editionId = listBook.editionId,
+    addedAt = listBook.addedAt,
     book = book.toModel(),
     edition = edition.edition.edition.toModel(
         authors = edition.authors,
@@ -388,7 +408,12 @@ fun BookListWithBooks.toModel(): BookList = BookList(
     id = bookList.id,
     name = bookList.name,
     slug = bookList.slug,
-    books = listBooks.map { it.toModel() }
+    books = listBooks
+        .sortedWith(
+            compareBy<ListBookFull, String?>(nullsLast(reverseOrder())) { it.listBook.addedAt }
+                .thenByDescending { it.listBook.listBookId }
+        )
+        .map { it.toModel() }
 )
 
 fun BookFullEntity.toModel(): Book {

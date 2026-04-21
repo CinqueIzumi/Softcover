@@ -22,7 +22,6 @@ class BooksByStatusCollector : LibraryInitializer {
         ) { books: List<Book>, enabledStatuses: Set<Int> ->
             UserBookStatus.activeLibraryCodes(enabledCodes = enabledStatuses)
                 .mapNotNull { code -> UserBookStatus.entries.firstOrNull { it.code == code } }
-                .filter { it.isExposedInLibrary }
                 .associate { status ->
                     val tabId = LibraryTab.Status.of(status).id
                     tabId to books.filter { it.userBook?.status?.code == status.code }

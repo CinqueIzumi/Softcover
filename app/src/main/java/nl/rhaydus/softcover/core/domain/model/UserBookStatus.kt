@@ -4,18 +4,14 @@ enum class UserBookStatus(val code: Int) {
     WANT_TO_READ(code = 1),
     CURRENTLY_READING(code = 2),
     READ(code = 3),
-    PAUSED(code = 4),
     DID_NOT_FINISH(code = 5);
 
     val isAlwaysVisibleInLibrary: Boolean
         get() = this == CURRENTLY_READING
 
-    val isExposedInLibrary: Boolean
-        get() = this != PAUSED
-
     companion object {
         val togglableInLibrary: List<UserBookStatus>
-            get() = entries.filter { it.isExposedInLibrary && it.isAlwaysVisibleInLibrary.not() }
+            get() = entries.filter { it.isAlwaysVisibleInLibrary.not() }
 
         fun activeLibraryCodes(enabledCodes: Set<Int>): Set<Int> {
             val alwaysOn = entries.filter { it.isAlwaysVisibleInLibrary }.map { it.code }

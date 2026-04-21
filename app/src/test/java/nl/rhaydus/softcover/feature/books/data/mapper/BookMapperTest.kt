@@ -34,7 +34,12 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookWithJournals
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import nl.rhaydus.softcover.fragment.EditionDetailFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
+import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Progress_updated_journal.Companion.readingJournalFragment as progressUpdatedJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Status_currently_reading_journal.Companion.readingJournalFragment as statusCurrentlyReadingJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Companion.readingJournalFragment as statusStoppedJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -180,6 +185,7 @@ class BookMapperTest {
         listBookId: Int = 99,
         bookId: Int = 1,
         editionId: Int = 10,
+        addedAt: String? = null,
         book: Book? = null,
         edition: BookEdition? = null,
     ): ListBook = mockk {
@@ -198,6 +204,10 @@ class BookMapperTest {
         every {
             this@mockk.editionId
         } returns editionId
+
+        every {
+            this@mockk.addedAt
+        } returns addedAt
 
         every {
             this@mockk.book
@@ -245,6 +255,7 @@ class BookMapperTest {
         id: Int = 3,
         status: BookStatus = BookStatus.Reading,
         dateAdded: String = "2024-01-01",
+        createdAt: String? = null,
         privacySettingId: Int = 1,
         reviewHasSpoilers: Boolean = false,
         editionId: Int? = 10,
@@ -266,6 +277,10 @@ class BookMapperTest {
         every {
             this@mockk.dateAdded
         } returns dateAdded
+
+        every {
+            this@mockk.createdAt
+        } returns createdAt
 
         every {
             this@mockk.privacySettingId
@@ -472,6 +487,7 @@ class BookMapperTest {
         bookId: Int = 1,
         statusCode: Int = BookStatus.Reading.code,
         dateAdded: String = "2024-01-01",
+        createdAt: String? = null,
         privacySettingId: Int = 1,
         reviewHasSpoilers: Boolean = false,
         editionId: Int? = 10,
@@ -485,6 +501,7 @@ class BookMapperTest {
         bookId = bookId,
         statusCode = statusCode,
         dateAdded = dateAdded,
+        createdAt = createdAt,
         privacySettingId = privacySettingId,
         reviewHasSpoilers = reviewHasSpoilers,
         editionId = editionId,
@@ -562,11 +579,13 @@ class BookMapperTest {
         bookId: Int = 1,
         editionId: Int = 10,
         listBookId: Int = 99,
+        addedAt: String? = null,
     ): ListBookEntity = ListBookEntity(
         listId = listId,
         bookId = bookId,
         editionId = editionId,
         listBookId = listBookId,
+        addedAt = addedAt,
     )
 
     private fun stubListBookFull(
@@ -668,6 +687,30 @@ class BookMapperTest {
             result.bookId shouldBe 1
             result.editionId shouldBe 10
             result.listBookId shouldBe 99
+        }
+
+        @Test
+        fun `propagates addedAt when present`() {
+            // ----- Arrange -----
+            val listBook = stubListBook(addedAt = "2024-06-01")
+
+            // ----- Act -----
+            val result = listBook.toEntity()
+
+            // ----- Assert -----
+            result.addedAt shouldBe "2024-06-01"
+        }
+
+        @Test
+        fun `propagates null addedAt as null`() {
+            // ----- Arrange -----
+            val listBook = stubListBook(addedAt = null)
+
+            // ----- Act -----
+            val result = listBook.toEntity()
+
+            // ----- Assert -----
+            result.addedAt shouldBe null
         }
     }
 
@@ -834,6 +877,7 @@ class BookMapperTest {
                 id = 3,
                 status = BookStatus.Reading,
                 dateAdded = "2024-01-01",
+                createdAt = "2024-01-02",
                 privacySettingId = 1,
                 reviewHasSpoilers = true,
                 editionId = 10,
@@ -851,6 +895,7 @@ class BookMapperTest {
             result.id shouldBe 3
             result.statusCode shouldBe BookStatus.Reading.code
             result.dateAdded shouldBe "2024-01-01"
+            result.createdAt shouldBe "2024-01-02"
             result.privacySettingId shouldBe 1
             result.reviewHasSpoilers shouldBe true
             result.editionId shouldBe 10
@@ -866,6 +911,7 @@ class BookMapperTest {
         fun `maps nullable fields as null when absent`() {
             // ----- Arrange -----
             val userBook = stubUserBook(
+                createdAt = null,
                 editionId = null,
                 lastReadDate = null,
                 rating = null,
@@ -878,12 +924,37 @@ class BookMapperTest {
             val result = userBook.toEntity(bookId = 1)
 
             // ----- Assert -----
+            result.createdAt shouldBe null
             result.editionId shouldBe null
             result.lastReadDate shouldBe null
             result.rating shouldBe null
             result.referrerUserId shouldBe null
             result.reviewedAt shouldBe null
             result.updatedAt shouldBe null
+        }
+
+        @Test
+        fun `propagates non-null createdAt to UserBookEntity`() {
+            // ----- Arrange -----
+            val userBook = stubUserBook(createdAt = "2024-03-10")
+
+            // ----- Act -----
+            val result = userBook.toEntity(bookId = 1)
+
+            // ----- Assert -----
+            result.createdAt shouldBe "2024-03-10"
+        }
+
+        @Test
+        fun `propagates null createdAt to UserBookEntity as null`() {
+            // ----- Arrange -----
+            val userBook = stubUserBook(createdAt = null)
+
+            // ----- Act -----
+            val result = userBook.toEntity(bookId = 1)
+
+            // ----- Assert -----
+            result.createdAt shouldBe null
         }
 
         @Test
@@ -1579,6 +1650,7 @@ class BookMapperTest {
                 bookId = 1,
                 statusCode = BookStatus.Read.code,
                 dateAdded = "2024-01-01",
+                createdAt = "2024-01-02",
                 privacySettingId = 1,
                 reviewHasSpoilers = true,
                 editionId = 10,
@@ -1596,6 +1668,7 @@ class BookMapperTest {
             result.id shouldBe 3
             result.status shouldBe BookStatus.Read
             result.dateAdded shouldBe "2024-01-01"
+            result.createdAt shouldBe "2024-01-02"
             result.privacySettingId shouldBe 1
             result.reviewHasSpoilers shouldBe true
             result.editionId shouldBe 10
@@ -1605,6 +1678,30 @@ class BookMapperTest {
             result.reviewedAt shouldBe "2024-05-02"
             result.updatedAt shouldBe "2024-05-03"
             result.journals shouldBe listOf(journalModel)
+        }
+
+        @Test
+        fun `propagates non-null createdAt from entity to model`() {
+            // ----- Arrange -----
+            val entity = stubUserBookEntity(createdAt = "2024-04-15")
+
+            // ----- Act -----
+            val result = entity.toModel(journals = emptyList())
+
+            // ----- Assert -----
+            result.createdAt shouldBe "2024-04-15"
+        }
+
+        @Test
+        fun `propagates null createdAt from entity to model as null`() {
+            // ----- Arrange -----
+            val entity = stubUserBookEntity(createdAt = null)
+
+            // ----- Act -----
+            val result = entity.toModel(journals = emptyList())
+
+            // ----- Assert -----
+            result.createdAt shouldBe null
         }
 
         @Test
@@ -1781,6 +1878,32 @@ class BookMapperTest {
             // ----- Assert -----
             result.edition?.owned shouldBe false
         }
+
+        @Test
+        fun `copies addedAt from ListBookEntity`() {
+            // ----- Arrange -----
+            val listBookEntity = stubListBookEntity(addedAt = "2024-07-20")
+            val listBookFull = stubListBookFull(listBook = listBookEntity)
+
+            // ----- Act -----
+            val result = listBookFull.toModel()
+
+            // ----- Assert -----
+            result.addedAt shouldBe "2024-07-20"
+        }
+
+        @Test
+        fun `copies null addedAt from ListBookEntity`() {
+            // ----- Arrange -----
+            val listBookEntity = stubListBookEntity(addedAt = null)
+            val listBookFull = stubListBookFull(listBook = listBookEntity)
+
+            // ----- Act -----
+            val result = listBookFull.toModel()
+
+            // ----- Assert -----
+            result.addedAt shouldBe null
+        }
     }
 
     @Nested
@@ -1837,6 +1960,63 @@ class BookMapperTest {
             result.books.size shouldBe 1
             result.books[0].listId shouldBe 20
             result.books[0].listBookId shouldBe 99
+        }
+
+        @Test
+        fun `sorts list books by addedAt descending`() {
+            // ----- Arrange -----
+            val older = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 1, addedAt = "2024-01-01"),
+            )
+            val newer = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 2, addedAt = "2024-06-01"),
+            )
+            val wrapper = stubBookListWithBooks(listBooks = listOf(older, newer))
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.books[0].listBookId shouldBe 2
+            result.books[1].listBookId shouldBe 1
+        }
+
+        @Test
+        fun `places null addedAt entries last`() {
+            // ----- Arrange -----
+            val withDate = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 1, addedAt = "2024-01-01"),
+            )
+            val nullDate = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 2, addedAt = null),
+            )
+            val wrapper = stubBookListWithBooks(listBooks = listOf(nullDate, withDate))
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.books[0].listBookId shouldBe 1
+            result.books[1].listBookId shouldBe 2
+        }
+
+        @Test
+        fun `uses listBookId descending as tiebreaker when addedAt values are equal`() {
+            // ----- Arrange -----
+            val lowerIdEntry = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 10, addedAt = "2024-03-01"),
+            )
+            val higherIdEntry = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 20, addedAt = "2024-03-01"),
+            )
+            val wrapper = stubBookListWithBooks(listBooks = listOf(lowerIdEntry, higherIdEntry))
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.books[0].listBookId shouldBe 20
+            result.books[1].listBookId shouldBe 10
         }
     }
 
@@ -2719,11 +2899,13 @@ class BookMapperTest {
             listId: Int = 20,
             bookId: Int = 1,
             editionId: Int? = 10,
+            createdAt: String? = null,
         ): nl.rhaydus.softcover.fragment.ListBookFragment = mockk {
             every { this@mockk.id } returns id
             every { list_id } returns listId
             every { book_id } returns bookId
             every { edition_id } returns editionId
+            every { created_at } returns createdAt
         }
 
         @Test
@@ -2770,6 +2952,30 @@ class BookMapperTest {
             result?.book shouldBe null
             result?.edition shouldBe null
         }
+
+        @Test
+        fun `propagates created_at into addedAt`() {
+            // ----- Arrange -----
+            val fragment = stubListBookFragment(editionId = 10, createdAt = "2024-03-15")
+
+            // ----- Act -----
+            val result = fragment.toListBook()
+
+            // ----- Assert -----
+            result?.addedAt shouldBe "2024-03-15"
+        }
+
+        @Test
+        fun `propagates null created_at as null addedAt`() {
+            // ----- Arrange -----
+            val fragment = stubListBookFragment(editionId = 10, createdAt = null)
+
+            // ----- Act -----
+            val result = fragment.toListBook()
+
+            // ----- Assert -----
+            result?.addedAt shouldBe null
+        }
     }
 
     @Nested
@@ -2805,7 +3011,10 @@ class BookMapperTest {
             val fragment = mockk<UserBookFragment> {
                 every { book } returns bookListFragment
                 every { edition } returns null
-                every { reading_journals } returns emptyList()
+                every { progress_updated_journal } returns emptyList()
+                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_finished_journal } returns emptyList()
+                every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
                 every { id } returns 1
                 every { status_id } returns 1
@@ -2818,6 +3027,7 @@ class BookMapperTest {
                 every { review_has_spoilers } returns false
                 every { reviewed_at } returns null
                 every { updated_at } returns null
+                every { created_at } returns "2024-01-01"
             }
 
             every {
@@ -2846,7 +3056,6 @@ class BookMapperTest {
             mockkObject(UserBookFragment.Book.Companion)
             mockkObject(UserBookFragment.Edition.Companion)
             mockkObject(UserBookFragment.User_book_read.Companion)
-            mockkObject(UserBookFragment.Reading_journal.Companion)
 
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
@@ -2880,7 +3089,10 @@ class BookMapperTest {
             val fragment = mockk<UserBookFragment> {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
-                every { reading_journals } returns emptyList()
+                every { progress_updated_journal } returns emptyList()
+                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_finished_journal } returns emptyList()
+                every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
                 every { id } returns 1
                 every { status_id } returns 1
@@ -2893,6 +3105,7 @@ class BookMapperTest {
                 every { review_has_spoilers } returns false
                 every { reviewed_at } returns null
                 every { updated_at } returns null
+                every { created_at } returns "2024-01-01"
             }
 
             every {
@@ -2922,7 +3135,6 @@ class BookMapperTest {
             mockkObject(UserBookFragment.Book.Companion)
             mockkObject(UserBookFragment.Edition.Companion)
             mockkObject(UserBookFragment.User_book_read.Companion)
-            mockkObject(UserBookFragment.Reading_journal.Companion)
 
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
@@ -2956,7 +3168,10 @@ class BookMapperTest {
             val fragment = mockk<UserBookFragment> {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
-                every { reading_journals } returns emptyList()
+                every { progress_updated_journal } returns emptyList()
+                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_finished_journal } returns emptyList()
+                every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
                 every { id } returns 1
                 every { status_id } returns 1
@@ -2969,6 +3184,7 @@ class BookMapperTest {
                 every { review_has_spoilers } returns false
                 every { reviewed_at } returns null
                 every { updated_at } returns null
+                every { created_at } returns "2024-01-01"
             }
 
             every {
@@ -2992,7 +3208,6 @@ class BookMapperTest {
             mockkObject(UserBookFragment.Book.Companion)
             mockkObject(UserBookFragment.Edition.Companion)
             mockkObject(UserBookFragment.User_book_read.Companion)
-            mockkObject(UserBookFragment.Reading_journal.Companion)
 
             val canonical = mockk<nl.rhaydus.softcover.fragment.BookListFragment.Canonical> {
                 every { id } returns 999
@@ -3030,7 +3245,10 @@ class BookMapperTest {
             val fragment = mockk<UserBookFragment> {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
-                every { reading_journals } returns emptyList()
+                every { progress_updated_journal } returns emptyList()
+                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_finished_journal } returns emptyList()
+                every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
                 every { id } returns 1
                 every { status_id } returns 1
@@ -3043,6 +3261,7 @@ class BookMapperTest {
                 every { review_has_spoilers } returns false
                 every { reviewed_at } returns null
                 every { updated_at } returns null
+                every { created_at } returns "2024-01-01"
             }
 
             every {
@@ -3066,7 +3285,6 @@ class BookMapperTest {
             mockkObject(UserBookFragment.Book.Companion)
             mockkObject(UserBookFragment.Edition.Companion)
             mockkObject(UserBookFragment.User_book_read.Companion)
-            mockkObject(UserBookFragment.Reading_journal.Companion)
 
             val canonical = mockk<nl.rhaydus.softcover.fragment.BookListFragment.Canonical> {
                 every { id } returns 100
@@ -3104,7 +3322,10 @@ class BookMapperTest {
             val fragment = mockk<UserBookFragment> {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
-                every { reading_journals } returns emptyList()
+                every { progress_updated_journal } returns emptyList()
+                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_finished_journal } returns emptyList()
+                every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
                 every { id } returns 1
                 every { status_id } returns 1
@@ -3117,6 +3338,7 @@ class BookMapperTest {
                 every { review_has_spoilers } returns false
                 every { reviewed_at } returns null
                 every { updated_at } returns null
+                every { created_at } returns "2024-01-01"
             }
 
             every {
@@ -3143,7 +3365,6 @@ class BookMapperTest {
             mockkObject(UserBookFragment.Book.Companion)
             mockkObject(UserBookFragment.Edition.Companion)
             mockkObject(UserBookFragment.User_book_read.Companion)
-            mockkObject(UserBookFragment.Reading_journal.Companion)
 
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
@@ -3177,7 +3398,10 @@ class BookMapperTest {
             val fragment = mockk<UserBookFragment> {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
-                every { reading_journals } returns emptyList()
+                every { progress_updated_journal } returns emptyList()
+                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_finished_journal } returns emptyList()
+                every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
                 every { id } returns 1
                 every { status_id } returns 1
@@ -3190,6 +3414,7 @@ class BookMapperTest {
                 every { review_has_spoilers } returns false
                 every { reviewed_at } returns null
                 every { updated_at } returns null
+                every { created_at } returns "2024-01-01"
             }
 
             every {
@@ -3205,6 +3430,233 @@ class BookMapperTest {
 
             // ----- Assert -----
             result?.editions?.get(0)?.bookId shouldBe 100
+        }
+
+        // ---- journal alias tests ----
+
+        private fun stubMinimalUserBookFragment(
+            progressUpdated: List<UserBookFragment.Progress_updated_journal> = emptyList(),
+            statusCurrentlyReading: List<UserBookFragment.Status_currently_reading_journal> = emptyList(),
+            userBookReadFinished: List<UserBookFragment.User_book_read_finished_journal> = emptyList(),
+            statusStopped: List<UserBookFragment.Status_stopped_journal> = emptyList(),
+            createdAt: String = "2024-01-01",
+        ): UserBookFragment {
+            val bookInner = mockk<UserBookFragment.Book>()
+            val editionInner = mockk<UserBookFragment.Edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 100
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+            val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
+                every { id } returns 100
+                every { canonical } returns null
+                every { title } returns "Test Book"
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+                every { users_count } returns 0
+            }
+
+            every {
+                with(UserBookFragment.Book.Companion) { bookInner.bookListFragment() }
+            } returns bookListFragmentModel
+            every {
+                with(UserBookFragment.Edition.Companion) { editionInner.editionFragment() }
+            } returns editionFragment
+
+            return mockk<UserBookFragment> {
+                every { book } returns bookInner
+                every { edition } returns editionInner
+                every { progress_updated_journal } returns progressUpdated
+                every { status_currently_reading_journal } returns statusCurrentlyReading
+                every { user_book_read_finished_journal } returns userBookReadFinished
+                every { status_stopped_journal } returns statusStopped
+                every { user_book_reads } returns emptyList()
+                every { id } returns 1
+                every { status_id } returns 1
+                every { edition_id } returns 10
+                every { last_read_date } returns null
+                every { date_added } returns "2024-01-01"
+                every { privacy_setting_id } returns 1
+                every { rating } returns null
+                every { referrer_user_id } returns null
+                every { review_has_spoilers } returns false
+                every { reviewed_at } returns null
+                every { updated_at } returns null
+                every { created_at } returns createdAt
+            }
+        }
+
+        private fun stubReadingJournalFragment(event: String, updatedAt: String = "2024-01-01"): ReadingJournalFragment = mockk {
+            every { this@mockk.event } returns event
+            every { this@mockk.updated_at } returns updatedAt
+        }
+
+        @Test
+        fun `collects journals from progress_updated_journal alias`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.Progress_updated_journal.Companion)
+
+            val journalFragment = stubReadingJournalFragment(event = "progress_updated")
+            val journalEntry = mockk<UserBookFragment.Progress_updated_journal> {
+                every { with(UserBookFragment.Progress_updated_journal.Companion) { progressUpdatedJournalFragment() } } returns journalFragment
+            }
+            val fragment = stubMinimalUserBookFragment(progressUpdated = listOf(journalEntry))
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.userBook?.journals?.size shouldBe 1
+            result?.userBook?.journals?.get(0)?.event shouldBe "progress_updated"
+        }
+
+        @Test
+        fun `collects journals from status_currently_reading_journal alias`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.Status_currently_reading_journal.Companion)
+
+            val journalFragment = stubReadingJournalFragment(event = "status_currently_reading")
+            val journalEntry = mockk<UserBookFragment.Status_currently_reading_journal> {
+                every { with(UserBookFragment.Status_currently_reading_journal.Companion) { statusCurrentlyReadingJournalFragment() } } returns journalFragment
+            }
+            val fragment = stubMinimalUserBookFragment(statusCurrentlyReading = listOf(journalEntry))
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.userBook?.journals?.size shouldBe 1
+            result?.userBook?.journals?.get(0)?.event shouldBe "status_currently_reading"
+        }
+
+        @Test
+        fun `collects journals from user_book_read_finished_journal alias`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.User_book_read_finished_journal.Companion)
+
+            val journalFragment = stubReadingJournalFragment(event = "user_book_read_finished")
+            val journalEntry = mockk<UserBookFragment.User_book_read_finished_journal> {
+                every { with(UserBookFragment.User_book_read_finished_journal.Companion) { userBookReadFinishedJournalFragment() } } returns journalFragment
+            }
+            val fragment = stubMinimalUserBookFragment(userBookReadFinished = listOf(journalEntry))
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.userBook?.journals?.size shouldBe 1
+            result?.userBook?.journals?.get(0)?.event shouldBe "user_book_read_finished"
+        }
+
+        @Test
+        fun `collects journals from status_stopped_journal alias`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.Status_stopped_journal.Companion)
+
+            val journalFragment = stubReadingJournalFragment(event = "status_stopped")
+            val journalEntry = mockk<UserBookFragment.Status_stopped_journal> {
+                every { with(UserBookFragment.Status_stopped_journal.Companion) { statusStoppedJournalFragment() } } returns journalFragment
+            }
+            val fragment = stubMinimalUserBookFragment(statusStopped = listOf(journalEntry))
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.userBook?.journals?.size shouldBe 1
+            result?.userBook?.journals?.get(0)?.event shouldBe "status_stopped"
+        }
+
+        @Test
+        fun `combines journals from all four aliased lists`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.Progress_updated_journal.Companion)
+            mockkObject(UserBookFragment.Status_currently_reading_journal.Companion)
+            mockkObject(UserBookFragment.User_book_read_finished_journal.Companion)
+            mockkObject(UserBookFragment.Status_stopped_journal.Companion)
+
+            val progressEntry = mockk<UserBookFragment.Progress_updated_journal> {
+                every { with(UserBookFragment.Progress_updated_journal.Companion) { progressUpdatedJournalFragment() } } returns stubReadingJournalFragment("progress_updated")
+            }
+            val currentlyReadingEntry = mockk<UserBookFragment.Status_currently_reading_journal> {
+                every { with(UserBookFragment.Status_currently_reading_journal.Companion) { statusCurrentlyReadingJournalFragment() } } returns stubReadingJournalFragment("status_currently_reading")
+            }
+            val readEntry = mockk<UserBookFragment.User_book_read_finished_journal> {
+                every { with(UserBookFragment.User_book_read_finished_journal.Companion) { userBookReadFinishedJournalFragment() } } returns stubReadingJournalFragment("user_book_read_finished")
+            }
+            val stoppedEntry = mockk<UserBookFragment.Status_stopped_journal> {
+                every { with(UserBookFragment.Status_stopped_journal.Companion) { statusStoppedJournalFragment() } } returns stubReadingJournalFragment("status_stopped")
+            }
+            val fragment = stubMinimalUserBookFragment(
+                progressUpdated = listOf(progressEntry),
+                statusCurrentlyReading = listOf(currentlyReadingEntry),
+                userBookReadFinished = listOf(readEntry),
+                statusStopped = listOf(stoppedEntry),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            val events = result?.userBook?.journals?.map { it.event }
+            events?.size shouldBe 4
+            events shouldBe listOf(
+                "progress_updated",
+                "status_currently_reading",
+                "user_book_read_finished",
+                "status_stopped",
+            )
+        }
+
+        @Test
+        fun `propagates created_at from fragment to UserBook createdAt`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            val fragment = stubMinimalUserBookFragment(createdAt = "2024-05-20")
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.userBook?.createdAt shouldBe "2024-05-20"
+        }
+
+        @Test
+        fun `propagates a different created_at value from fragment to UserBook createdAt`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            val fragment = stubMinimalUserBookFragment(createdAt = "2023-11-01")
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.userBook?.createdAt shouldBe "2023-11-01"
         }
     }
 

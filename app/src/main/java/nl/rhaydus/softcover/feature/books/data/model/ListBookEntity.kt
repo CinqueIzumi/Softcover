@@ -18,4 +18,5 @@ data class ListBookEntity(
     val bookId: Int,
     val editionId: Int,
     val position: Int? = null,
+    val addedAt: String? = null,
 )
