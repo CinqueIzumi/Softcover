@@ -6,16 +6,13 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-class OnDismissEditEditionSheetClickAction : BookDetailAction {
+class OnEditionSearchQueryChangeAction(
+    val query: String,
+) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState {
-            it.copy(
-                showEditEditionSheet = false,
-                editionSearchQuery = "",
-            )
-        }
+        scope.setState { it.copy(editionSearchQuery = query) }
     }
 }

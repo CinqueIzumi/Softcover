@@ -315,29 +315,33 @@ private fun TimeField(
     textStyle: TextStyle,
     onValueChange: (TextFieldValue) -> Unit,
 ) {
-    var shouldSelectOnNextFocus by remember { mutableStateOf(true) }
+    var firstTimeFocusedGained by remember { mutableStateOf(true) }
 
     OutlinedTextField(
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = { newValue ->
+            if (firstTimeFocusedGained) {
+                firstTimeFocusedGained = false
+                if (newValue.text == value.text) return@OutlinedTextField
+            }
+            onValueChange(newValue)
+        },
         singleLine = true,
         textStyle = textStyle.copy(textAlign = TextAlign.Center),
         modifier = Modifier
             .width(width)
             .onFocusChanged { focusState ->
                 if (focusState.hasFocus.not()) {
-                    shouldSelectOnNextFocus = true
+                    firstTimeFocusedGained = true
+                    onValueChange(value.copy(selection = TextRange.Zero))
                     return@onFocusChanged
                 }
 
-                if (shouldSelectOnNextFocus) {
-                    shouldSelectOnNextFocus = false
-                    onValueChange(
-                        value.copy(
-                            selection = TextRange(start = 0, end = value.text.length),
-                        ),
-                    )
-                }
+                onValueChange(
+                    value.copy(
+                        selection = TextRange(start = 0, end = value.text.length),
+                    ),
+                )
             },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
     )

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class OnDismissEditEditionSheetClickActionTest {
+class OnEditionSearchQueryChangeActionTest {
 
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -35,58 +35,42 @@ class OnDismissEditEditionSheetClickActionTest {
     inner class Execute {
 
         @Test
-        fun `sets showEditEditionSheet to false when it was true`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(showEditEditionSheet = true)
-            val action = OnDismissEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe false
-        }
-
-        @Test
-        fun `leaves showEditEditionSheet as false when it was already false`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(showEditEditionSheet = false)
-            val action = OnDismissEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe false
-        }
-
-        @Test
-        fun `resets editionSearchQuery to empty string`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(editionSearchQuery = "Penguin")
-            val action = OnDismissEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.editionSearchQuery shouldBe ""
-        }
-
-        @Test
-        fun `resets editionSearchQuery even when it was already empty`() = runTest {
+        fun `writes the query into editionSearchQuery`() = runTest {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(editionSearchQuery = "")
-            val action = OnDismissEditEditionSheetClickAction()
+            val action = OnEditionSearchQueryChangeAction(query = "978")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionSearchQuery shouldBe "978"
+        }
+
+        @Test
+        fun `overwrites a previous query with the new value`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(editionSearchQuery = "old query")
+            val action = OnEditionSearchQueryChangeAction(query = "new query")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionSearchQuery shouldBe "new query"
+        }
+
+        @Test
+        fun `accepts an empty string and clears editionSearchQuery`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(editionSearchQuery = "something")
+            val action = OnEditionSearchQueryChangeAction(query = "")
 
             // ----- Act -----
             action.execute(
@@ -105,11 +89,10 @@ class OnDismissEditEditionSheetClickActionTest {
                 loadingBookDetails = false,
                 showEditEditionSheet = true,
                 fabMenuExpanded = true,
-                showUpdateProgressSheet = true,
-                editionSearchQuery = "isbn",
+                editionSearchQuery = "",
             )
             stateFlow.value = initialState
-            val action = OnDismissEditEditionSheetClickAction()
+            val action = OnEditionSearchQueryChangeAction(query = "Penguin")
 
             // ----- Act -----
             action.execute(
@@ -118,10 +101,7 @@ class OnDismissEditEditionSheetClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value shouldBe initialState.copy(
-                showEditEditionSheet = false,
-                editionSearchQuery = "",
-            )
+            stateFlow.value shouldBe initialState.copy(editionSearchQuery = "Penguin")
         }
     }
 }
