@@ -168,8 +168,8 @@ For a feature `foo`, create these files under `feature/foo/presentation/`:
        override val mainDispatcher: CoroutineDispatcher,
    ) : ActionDependencies()
    ```
-5. **`action/FooAction.kt`** — `sealed interface FooAction : UiAction<FooDependencies, FooUiState, FooEvent, FooLocalVariables>`.
-6. **`action/OnXxxAction.kt`** — concrete actions implementing `execute(dependencies, scope)`; call use cases via `dependencies.<useCase>(...)`, update state via `scope.setState { it.copy(...) }`, emit events via `scope.sendEvent(...)`.
+5. **`action/FooAction.kt`** — `sealed interface FooAction : UiAction<FooDependencies, FooUiState, FooEvent, FooLocalVariables>`. **One type per file.** This file contains *only* the sealed interface — no concrete action implementations.
+6. **`action/OnXxxAction.kt`** — concrete actions implementing `execute(dependencies, scope)`; call use cases via `dependencies.<useCase>(...)`, update state via `scope.setState { it.copy(...) }`, emit events via `scope.sendEvent(...)`. **Each concrete action lives in its own file** named after the action class (`OnRefreshAction.kt`, `OnSaveAction.kt`, etc.). Never group multiple actions — or the sealed interface and its implementations — into a shared file.
 7. **`flows/FooInitializer.kt`** — `sealed interface FooInitializer : Initializer<FooUiState, FooEvent, FooDependencies, FooLocalVariables>`.
 8. **`flows/XxxCollector.kt`** — concrete initializers collecting repository flows (e.g. `dependencies.useCase().collectLatest { scope.setState { ... } }`).
 9. **`screenmodel/FooScreenModel.kt`**:
