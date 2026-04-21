@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.presentation.component
+package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,8 +16,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -28,9 +31,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
@@ -45,13 +52,15 @@ fun EditionBottomSheetSelector(
     defaultEdition: BookEdition?,
     editions: List<BookEdition>,
     isLoading: Boolean,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onDismissRequest: () -> Unit,
     onCancelClick: () -> Unit,
     onConfirmClick: (BookEdition) -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState()
+        sheetState = rememberModalBottomSheetState(),
     ) {
         EditionBottomSheetContent(
             bookTitle = bookTitle,
@@ -59,8 +68,10 @@ fun EditionBottomSheetSelector(
             defaultEdition = defaultEdition,
             editions = editions,
             isLoading = isLoading,
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
             onCancelClick = onCancelClick,
-            onConfirmClick = onConfirmClick
+            onConfirmClick = onConfirmClick,
         )
     }
 }
@@ -72,6 +83,8 @@ private fun EditionBottomSheetContent(
     defaultEdition: BookEdition?,
     editions: List<BookEdition>,
     isLoading: Boolean,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onCancelClick: () -> Unit,
     onConfirmClick: (BookEdition) -> Unit,
 ) {
@@ -94,20 +107,20 @@ private fun EditionBottomSheetContent(
             SoftcoverButton(
                 label = "Cancel",
                 onClick = onCancelClick,
-                style = ButtonStyle.TEXT
+                style = ButtonStyle.TEXT,
             )
 
             Text(
                 text = "Change edition",
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
 
             SoftcoverButton(
                 label = "Confirm",
-                enabled = !isLoading && selectedEdition != currentEdition,
+                enabled = isLoading.not() && selectedEdition != currentEdition,
                 onClick = { onConfirmClick(selectedEdition) },
-                style = ButtonStyle.TEXT
+                style = ButtonStyle.TEXT,
             )
         }
 
@@ -120,11 +133,39 @@ private fun EditionBottomSheetContent(
             Text(
                 text = bookTitle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            placeholder = { Text(text = "Search by ISBN or publisher") },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = "Search",
+                )
+            },
+            trailingIcon = if (searchQuery.isNotEmpty()) {
+                {
+                    IconButton(onClick = { onSearchQueryChange("") }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Clear search",
+                        )
+                    }
+                }
+            } else {
+                null
+            },
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         if (isLoading && editions.isEmpty()) {
             Box(
@@ -134,6 +175,19 @@ private fun EditionBottomSheetContent(
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
+            }
+        } else if (editions.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "No editions match your search",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
         } else {
             LazyColumn(
@@ -153,7 +207,7 @@ private fun EditionBottomSheetContent(
 }
 
 @Composable
-fun EditionItem(
+private fun EditionItem(
     edition: BookEdition,
     defaultEdition: BookEdition,
     selected: Boolean,
@@ -171,9 +225,9 @@ fun EditionItem(
                     Modifier.border(
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.primary,
-                        shape = cardShape
+                        shape = cardShape,
                     )
-                }
+                },
             )
             .background(color = MaterialTheme.colorScheme.surface)
             .noRippleClickable(onEditionClick)
@@ -181,7 +235,7 @@ fun EditionItem(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             EditionImage(
                 edition = edition,
@@ -199,7 +253,7 @@ fun EditionItem(
                     Text(
                         text = edition.title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
@@ -207,7 +261,7 @@ fun EditionItem(
                     Text(
                         text = edition.publisher,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
@@ -215,7 +269,7 @@ fun EditionItem(
                     Text(
                         text = "${edition.pages} pages",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
@@ -223,7 +277,7 @@ fun EditionItem(
                     Text(
                         text = "ISBN: $isbn",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
@@ -231,7 +285,7 @@ fun EditionItem(
                     Text(
                         text = format,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
@@ -250,9 +304,7 @@ fun EditionItem(
 @StandardPreview
 @Composable
 private fun EditionBottomSheetContentPreview() {
-    val baseEdition = PreviewData.baseEdition.copy(
-        title = "Snake-Eater",
-    )
+    val baseEdition = PreviewData.baseEdition.copy(title = "Snake-Eater")
 
     val editions = listOf(
         baseEdition.copy(pages = 271, isbn10 = "123", publisher = "47 north", id = 40),
@@ -267,6 +319,8 @@ private fun EditionBottomSheetContentPreview() {
             defaultEdition = editions.first(),
             editions = editions,
             isLoading = false,
+            searchQuery = "",
+            onSearchQueryChange = {},
             onConfirmClick = {},
             onCancelClick = {},
         )

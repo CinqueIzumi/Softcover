@@ -15,6 +15,7 @@ data class BookDetailUiState(
     val showEditEditionSheet: Boolean = false,
     val editions: List<BookEdition> = emptyList(),
     val loadingEditions: Boolean = false,
+    val editionSearchQuery: String = "",
     val showUpdateProgressSheet: Boolean = false,
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
@@ -24,4 +25,16 @@ data class BookDetailUiState(
     val deadline: BookDeadline? = null,
     val deadlineProgress: DeadlineProgress? = null,
     val showDeadlinePicker: Boolean = false,
-) : UiState
+) : UiState {
+    val filteredEditions: List<BookEdition>
+        get() {
+            val query = editionSearchQuery.trim()
+
+            if (query.isEmpty()) return editions
+
+            return editions.filter { edition ->
+                edition.isbn10?.contains(other = query, ignoreCase = true) == true ||
+                    edition.publisher?.contains(other = query, ignoreCase = true) == true
+            }
+        }
+}
