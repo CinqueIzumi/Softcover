@@ -22,10 +22,18 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.flows.DateStyleCollector
+import nl.rhaydus.softcover.feature.settings.presentation.flows.PersistedLibraryVisibilityCollector
+import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilityInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.flows.ThemeConfigurationCollector
+import nl.rhaydus.softcover.feature.settings.presentation.flows.UserListsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.bind
@@ -127,5 +135,31 @@ val settingsModule = module {
 
     single<GetThemeConfigurationUseCase> {
         GetThemeConfigurationUseCase(settingsRepository = get())
+    }
+
+    factory { GetEnabledStatusCodesAsFlowUseCase(settingsRepository = get()) }
+
+    factory { GetEnabledListIdsAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetEnabledStatusCodesUseCase(settingsRepository = get()) }
+
+    factory { SetEnabledListIdsUseCase(settingsRepository = get()) }
+
+    factory { PersistedLibraryVisibilityCollector() } bind LibraryVisibilityInitializer::class
+
+    factory { UserListsCollector() } bind LibraryVisibilityInitializer::class
+
+    factory {
+        LibraryVisibilitySettingsScreenModel(
+            getEnabledStatusCodesAsFlowUseCase = get(),
+            getEnabledListIdsAsFlowUseCase = get(),
+            setEnabledStatusCodesUseCase = get(),
+            setEnabledListIdsUseCase = get(),
+            getAllUserListsUseCase = get(),
+            refreshUserBooksUseCase = get(),
+            applicationScope = get(),
+            appDispatchers = get(),
+            flows = getAll(),
+        )
     }
 }

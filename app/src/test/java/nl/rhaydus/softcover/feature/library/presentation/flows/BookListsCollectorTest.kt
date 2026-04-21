@@ -9,16 +9,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -26,15 +27,19 @@ import org.junit.jupiter.api.Test
 class BookListsCollectorTest {
 
     private lateinit var getAllUserListsUseCase: GetAllUserListsUseCase
+    private lateinit var getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
     private lateinit var listsFlow: MutableSharedFlow<List<BookList>>
+    private lateinit var enabledListIdsFlow: MutableSharedFlow<Set<Int>>
 
     @BeforeEach
     fun setUp() {
         listsFlow = MutableSharedFlow()
+        enabledListIdsFlow = MutableSharedFlow()
         getAllUserListsUseCase = mockk()
+        getEnabledListIdsAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -46,152 +51,155 @@ class BookListsCollectorTest {
             getAllUserListsUseCase()
         } returns listsFlow
 
+        every {
+            getEnabledListIdsAsFlowUseCase()
+        } returns enabledListIdsFlow
+
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getAllUserListsUseCase
             } returns getAllUserListsUseCase
+
+            every {
+                mock.getEnabledListIdsAsFlowUseCase
+            } returns getEnabledListIdsAsFlowUseCase
         }
     }
 
-    private fun stubListBook(edition: BookEdition): ListBook = mockk<ListBook>().also { listBook ->
-        every { listBook.edition } returns edition
+    private fun stubEdition(): BookEdition = mockk()
+
+    private fun stubListBook(edition: BookEdition?): ListBook = mockk {
+        every {
+            this@mockk.edition
+        } returns edition
     }
 
-    private fun stubBookList(slug: String, books: List<ListBook>): BookList = mockk<BookList>().also { bookList ->
-        every { bookList.slug } returns slug
-        every { bookList.books } returns books
+    private fun stubBookList(id: Int, name: String, listBooks: List<ListBook>): BookList = mockk {
+        every {
+            this@mockk.id
+        } returns id
+
+        every {
+            this@mockk.name
+        } returns name
+
+        every {
+            books
+        } returns listBooks
     }
 
     @Nested
     inner class OnLaunch {
 
         @Test
-        fun `updates ownedEditions with editions from the owned list when flow emits`() = runTest(UnconfinedTestDispatcher()) {
+        fun `writes editions of enabled list into editionsByTab keyed by list tab id`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val edition1 = mockk<BookEdition>()
-            val edition2 = mockk<BookEdition>()
-            val ownedListBook1 = stubListBook(edition1)
-            val ownedListBook2 = stubListBook(edition2)
-            val ownedList = stubBookList(slug = "owned", books = listOf(ownedListBook1, ownedListBook2))
+            val edition = stubEdition()
+            val listBook = stubListBook(edition = edition)
+            val list = stubBookList(id = 5, name = "Owned", listBooks = listOf(listBook))
+            val tabId = LibraryTab.CustomList(listId = 5, listName = "Owned").id
             val collector = BookListsCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
 
             // ----- Act -----
-            listsFlow.emit(listOf(ownedList))
+            listsFlow.emit(listOf(list))
+            enabledListIdsFlow.emit(setOf(5))
 
             // ----- Assert -----
-            stateFlow.value.ownedEditions shouldBe listOf(edition1, edition2)
+            stateFlow.value.editionsByTab[tabId] shouldBe listOf(edition)
             job.cancel()
         }
 
         @Test
-        fun `does not update ownedEditions when the owned list is absent`() = runTest(UnconfinedTestDispatcher()) {
+        fun `skips list books with null edition`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val otherList = stubBookList(slug = "reading", books = listOf(stubListBook(mockk())))
+            val listBookNoEdition = stubListBook(edition = null)
+            val listBookWithEdition = stubListBook(edition = stubEdition())
+            val list = stubBookList(id = 1, name = "Owned", listBooks = listOf(listBookNoEdition, listBookWithEdition))
+            val tabId = LibraryTab.CustomList(listId = 1, listName = "Owned").id
             val collector = BookListsCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
 
             // ----- Act -----
-            listsFlow.emit(listOf(otherList))
+            listsFlow.emit(listOf(list))
+            enabledListIdsFlow.emit(setOf(1))
 
             // ----- Assert -----
-            stateFlow.value.ownedEditions shouldBe null
+            stateFlow.value.editionsByTab[tabId]?.size shouldBe 1
             job.cancel()
         }
 
         @Test
-        fun `does not update ownedEditions when the emitted list is empty`() = runTest(UnconfinedTestDispatcher()) {
+        fun `disabled lists are not written into editionsByTab`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
+            val edition = stubEdition()
+            val listBook = stubListBook(edition = edition)
+            val disabledList = stubBookList(id = 99, name = "Hidden", listBooks = listOf(listBook))
+            val disabledTabId = LibraryTab.CustomList(listId = 99, listName = "Hidden").id
             val collector = BookListsCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
 
             // ----- Act -----
-            listsFlow.emit(emptyList())
+            listsFlow.emit(listOf(disabledList))
+            enabledListIdsFlow.emit(emptySet())
 
             // ----- Assert -----
-            stateFlow.value.ownedEditions shouldBe null
+            stateFlow.value.editionsByTab.containsKey(disabledTabId) shouldBe false
             job.cancel()
         }
 
         @Test
-        fun `sets ownedEditions to empty list when the owned list exists but has no books`() = runTest(UnconfinedTestDispatcher()) {
+        fun `strips previously enabled list tab when it is disabled on next emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val ownedList = stubBookList(slug = "owned", books = emptyList())
+            val edition = stubEdition()
+            val listBook = stubListBook(edition = edition)
+            val list = stubBookList(id = 3, name = "Owned", listBooks = listOf(listBook))
+            val tabId = LibraryTab.CustomList(listId = 3, listName = "Owned").id
             val collector = BookListsCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
 
+            listsFlow.emit(listOf(list))
+            enabledListIdsFlow.emit(setOf(3))
+            stateFlow.value.editionsByTab.containsKey(tabId) shouldBe true
+
             // ----- Act -----
-            listsFlow.emit(listOf(ownedList))
+            enabledListIdsFlow.emit(emptySet())
 
             // ----- Assert -----
-            stateFlow.value.ownedEditions shouldBe emptyList()
+            stateFlow.value.editionsByTab.containsKey(tabId) shouldBe false
             job.cancel()
         }
 
         @Test
-        fun `uses the first owned list found when multiple lists share the owned slug`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val edition1 = mockk<BookEdition>()
-            val edition2 = mockk<BookEdition>()
-            val firstOwnedList = stubBookList(slug = "owned", books = listOf(stubListBook(edition1)))
-            val secondOwnedList = stubBookList(slug = "owned", books = listOf(stubListBook(edition2)))
-            val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
-
-            // ----- Act -----
-            listsFlow.emit(listOf(firstOwnedList, secondOwnedList))
-
-            // ----- Assert -----
-            stateFlow.value.ownedEditions shouldBe listOf(edition1)
-            job.cancel()
-        }
-
-        @Test
-        fun `updates ownedEditions to the latest owned list on subsequent emissions`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val firstEdition = mockk<BookEdition>()
-            val secondEdition = mockk<BookEdition>()
-            val firstOwnedList = stubBookList(slug = "owned", books = listOf(stubListBook(firstEdition)))
-            val secondOwnedList = stubBookList(slug = "owned", books = listOf(stubListBook(secondEdition)))
-            val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
-
-            // ----- Act -----
-            listsFlow.emit(listOf(firstOwnedList))
-            listsFlow.emit(listOf(secondOwnedList))
-
-            // ----- Assert -----
-            stateFlow.value.ownedEditions shouldBe listOf(secondEdition)
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change ownedEditions before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
+        fun `editionsByTab is not modified before both flows emit`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BookListsCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
 
             // ----- Act & Assert -----
-            stateFlow.value.ownedEditions shouldBe null
+            stateFlow.value.editionsByTab shouldBe emptyMap()
             job.cancel()
         }
 
         @Test
-        fun `preserves other state fields when updating ownedEditions`() = runTest(UnconfinedTestDispatcher()) {
+        fun `multiple enabled lists are all written into editionsByTab`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val existingBooks = listOf(mockk<Book>())
-            stateFlow.value = LibraryUiState(allBooks = existingBooks)
-            val edition = mockk<BookEdition>()
-            val ownedList = stubBookList(slug = "owned", books = listOf(stubListBook(edition)))
+            val edition1 = stubEdition()
+            val edition2 = stubEdition()
+            val list1 = stubBookList(id = 10, name = "List A", listBooks = listOf(stubListBook(edition = edition1)))
+            val list2 = stubBookList(id = 11, name = "List B", listBooks = listOf(stubListBook(edition = edition2)))
+            val tabId1 = LibraryTab.CustomList(listId = 10, listName = "List A").id
+            val tabId2 = LibraryTab.CustomList(listId = 11, listName = "List B").id
             val collector = BookListsCollector()
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
 
             // ----- Act -----
-            listsFlow.emit(listOf(ownedList))
+            listsFlow.emit(listOf(list1, list2))
+            enabledListIdsFlow.emit(setOf(10, 11))
 
             // ----- Assert -----
-            stateFlow.value.allBooks shouldBe existingBooks
-            stateFlow.value.ownedEditions shouldBe listOf(edition)
+            stateFlow.value.editionsByTab[tabId1] shouldBe listOf(edition1)
+            stateFlow.value.editionsByTab[tabId2] shouldBe listOf(edition2)
             job.cancel()
         }
     }

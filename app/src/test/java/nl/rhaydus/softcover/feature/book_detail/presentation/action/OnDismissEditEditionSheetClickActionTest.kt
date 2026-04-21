@@ -67,6 +67,38 @@ class OnDismissEditEditionSheetClickActionTest {
         }
 
         @Test
+        fun `resets editionSearchQuery to empty string`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(editionSearchQuery = "Penguin")
+            val action = OnDismissEditEditionSheetClickAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionSearchQuery shouldBe ""
+        }
+
+        @Test
+        fun `resets editionSearchQuery even when it was already empty`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(editionSearchQuery = "")
+            val action = OnDismissEditEditionSheetClickAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionSearchQuery shouldBe ""
+        }
+
+        @Test
         fun `does not mutate any other state fields`() = runTest {
             // ----- Arrange -----
             val initialState = BookDetailUiState(
@@ -74,6 +106,7 @@ class OnDismissEditEditionSheetClickActionTest {
                 showEditEditionSheet = true,
                 fabMenuExpanded = true,
                 showUpdateProgressSheet = true,
+                editionSearchQuery = "isbn",
             )
             stateFlow.value = initialState
             val action = OnDismissEditEditionSheetClickAction()
@@ -85,7 +118,10 @@ class OnDismissEditEditionSheetClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value shouldBe initialState.copy(showEditEditionSheet = false)
+            stateFlow.value shouldBe initialState.copy(
+                showEditEditionSheet = false,
+                editionSearchQuery = "",
+            )
         }
     }
 }

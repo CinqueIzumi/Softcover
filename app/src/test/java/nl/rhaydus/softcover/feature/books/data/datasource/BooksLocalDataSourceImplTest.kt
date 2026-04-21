@@ -251,13 +251,16 @@ class BooksLocalDataSourceImplTest {
     inner class GetBooksFlowByStatus {
 
         @Test
-        fun `passes correct status code to DAO getBooksByStatus`() = runTest {
+        fun `CURRENTLY_READING dispatches to getBooksByStatusAndEvents with progress_updated and status_currently_reading`() = runTest {
             // ----- Arrange -----
             val status = UserBookStatus.CURRENTLY_READING
-            val entity = stubBookFullEntity(id = 5)
+            val entity = stubBookFullEntity(id = 1)
 
             every {
-                dao.getBooksByStatus(statusCode = status.code)
+                dao.getBooksByStatusAndEvents(
+                    statusCode = status.code,
+                    events = listOf("progress_updated", "status_currently_reading"),
+                )
             } returns flowOf(listOf(entity))
 
             // ----- Act & Assert -----
@@ -268,30 +271,14 @@ class BooksLocalDataSourceImplTest {
         }
 
         @Test
-        fun `passes WANT_TO_READ status code to DAO`() = runTest {
-            // ----- Arrange -----
-            val status = UserBookStatus.WANT_TO_READ
-
-            every {
-                dao.getBooksByStatus(statusCode = status.code)
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            dataSource.getBooksFlowByStatus(status = status).test {
-                awaitItem() shouldBe emptyList<Book>()
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `emits mapped domain books for the given status`() = runTest {
+        fun `READ dispatches to getReadBooks with correct status code`() = runTest {
             // ----- Arrange -----
             val status = UserBookStatus.READ
             val entity1 = stubBookFullEntity(id = 10)
             val entity2 = stubBookFullEntity(id = 11)
 
             every {
-                dao.getBooksByStatus(statusCode = status.code)
+                dao.getReadBooks(statusCode = status.code)
             } returns flowOf(listOf(entity1, entity2))
 
             // ----- Act & Assert -----
@@ -302,19 +289,91 @@ class BooksLocalDataSourceImplTest {
         }
 
         @Test
+        fun `WANT_TO_READ dispatches to getBooksByStatusSortedByCreatedAt with correct status code`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.WANT_TO_READ
+
+            every {
+                dao.getBooksByStatusSortedByCreatedAt(statusCode = status.code)
+            } returns flowOf(emptyList())
+
+            // ----- Act & Assert -----
+            dataSource.getBooksFlowByStatus(status = status).test {
+                awaitItem() shouldBe emptyList<Book>()
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `WANT_TO_READ emits mapped books from getBooksByStatusSortedByCreatedAt`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.WANT_TO_READ
+            val entity = stubBookFullEntity(id = 5)
+
+            every {
+                dao.getBooksByStatusSortedByCreatedAt(statusCode = status.code)
+            } returns flowOf(listOf(entity))
+
+            // ----- Act & Assert -----
+            dataSource.getBooksFlowByStatus(status = status).test {
+                awaitItem() shouldBe listOf(entity.toModel())
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `DID_NOT_FINISH dispatches to getBooksByStatusAndEvents with status_stopped`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.DID_NOT_FINISH
+            val entity = stubBookFullEntity(id = 7)
+
+            every {
+                dao.getBooksByStatusAndEvents(
+                    statusCode = status.code,
+                    events = listOf("status_stopped"),
+                )
+            } returns flowOf(listOf(entity))
+
+            // ----- Act & Assert -----
+            dataSource.getBooksFlowByStatus(status = status).test {
+                awaitItem() shouldBe listOf(entity.toModel())
+                awaitComplete()
+            }
+        }
+
+        @Test
         fun `suppresses consecutive duplicate emissions via distinctUntilChanged`() = runTest {
             // ----- Arrange -----
-            val status = UserBookStatus.PAUSED
+            val status = UserBookStatus.CURRENTLY_READING
             val entity = stubBookFullEntity(id = 3)
             val list = listOf(entity)
 
             every {
-                dao.getBooksByStatus(statusCode = status.code)
+                dao.getBooksByStatusAndEvents(
+                    statusCode = status.code,
+                    events = listOf("progress_updated", "status_currently_reading"),
+                )
             } returns flowOf(list, list)
 
             // ----- Act & Assert -----
             dataSource.getBooksFlowByStatus(status = status).test {
                 awaitItem() shouldBe listOf(entity.toModel())
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits empty list when DAO emits empty list for READ status`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.READ
+
+            every {
+                dao.getReadBooks(statusCode = status.code)
+            } returns flowOf(emptyList())
+
+            // ----- Act & Assert -----
+            dataSource.getBooksFlowByStatus(status = status).test {
+                awaitItem() shouldBe emptyList<Book>()
                 awaitComplete()
             }
         }

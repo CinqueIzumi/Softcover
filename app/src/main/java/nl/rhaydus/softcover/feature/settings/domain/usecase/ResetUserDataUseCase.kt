@@ -13,6 +13,8 @@ class ResetUserDataUseCase(
 
             booksRepository.removeAllBooks()
 
+            settingsRepository.resetLibraryVisibilityPreferences()
+
             settingsRepository.updateUserId(id = -1)
         }
     }

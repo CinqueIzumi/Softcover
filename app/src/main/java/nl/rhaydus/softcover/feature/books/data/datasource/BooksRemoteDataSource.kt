@@ -30,7 +30,7 @@ import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
-import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion.userBookReadFragment
+import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -38,7 +38,6 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
-import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
@@ -46,11 +45,12 @@ import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookList
 import nl.rhaydus.softcover.feature.books.data.mapper.toListBook
 import nl.rhaydus.softcover.type.DatesReadInput
+import nl.rhaydus.softcover.type.Int_comparison_exp
+import nl.rhaydus.softcover.type.Lists_bool_exp
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
 import timber.log.Timber
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 interface BooksRemoteDataSource {
@@ -64,9 +64,15 @@ interface BooksRemoteDataSource {
 
     suspend fun removeBookFromLibrary(book: Book)
 
-    suspend fun initializeBooks(userId: Int): List<Book>
+    suspend fun initializeBooks(
+        userId: Int,
+        statusIds: Set<Int>? = null,
+    ): List<Book>
 
-    suspend fun fetchUserLists(userId: Int): List<BookList>
+    suspend fun fetchUserLists(
+        userId: Int,
+        listIds: Set<Int>? = null,
+    ): List<BookList>
 
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
 
@@ -194,8 +200,13 @@ class BooksRemoteDataSourceImpl(
         apolloClient.safeMutation(mutation = RemoveUserBookMutation(id = userBookId))
     }
 
-    override suspend fun initializeBooks(userId: Int): List<Book> = withContext(Dispatchers.IO) {
-        val result = apolloClient.safeQuery(query = GetUserBooksQuery())
+    override suspend fun initializeBooks(
+        userId: Int,
+        statusIds: Set<Int>?,
+    ): List<Book> = withContext(Dispatchers.IO) {
+        val result = apolloClient.safeQuery(
+            query = GetUserBooksQuery(statusIds = Optional.presentIfNotNull(statusIds?.toList())),
+        )
 
         val userBooks = result.me.firstOrNull()?.user_books
             ?: throw Exception("No books were found")
@@ -241,8 +252,23 @@ class BooksRemoteDataSourceImpl(
         positionInSeries = canonical.positionInSeries,
     )
 
-    override suspend fun fetchUserLists(userId: Int): List<BookList> = withContext(Dispatchers.IO) {
-        val result = apolloClient.safeQuery(GetUserBookListsQuery())
+    override suspend fun fetchUserLists(
+        userId: Int,
+        listIds: Set<Int>?,
+    ): List<BookList> = withContext(Dispatchers.IO) {
+        val whereFilter: Optional<Lists_bool_exp?> = if (listIds == null) {
+            Optional.Absent
+        } else {
+            Optional.Present(
+                Lists_bool_exp(
+                    id = Optional.Present(Int_comparison_exp(_in = Optional.Present(listIds.toList()))),
+                ),
+            )
+        }
+
+        val result = apolloClient.safeQuery(
+            GetUserBookListsQuery(where = whereFilter),
+        )
 
         val lists = result.me.firstOrNull()?.lists
             ?: throw Exception("No lists were found")
@@ -278,33 +304,15 @@ class BooksRemoteDataSourceImpl(
             datesReadInput = dataObject
         )
 
-        val userBookReadFragment = apolloClient
+        val userBookFragment = apolloClient
             .safeMutation(mutation = mutation)
             .update_user_book_read
             ?.user_book_read
-            ?.userBookReadFragment()
-            ?: throw Exception("Did not receive a new user book read fragment")
+            ?.user_book
+            ?.userBookFragment()
+            ?: throw Exception("Did not receive a new user book fragment")
 
-        val updatedUserBookRead = userBookRead.copy(
-            currentPage = userBookReadFragment.progress_pages,
-            currentSeconds = userBookReadFragment.progress_seconds,
-            progress = userBookReadFragment.progress?.toFloat() ?: 0f,
-        )
-
-        val formatter = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
-
-        val currentTime = LocalDateTime.now().format(formatter)
-
-        val updatedJournals = book.userBook.journals + ReadingJournal(
-            updatedAt = currentTime,
-            event = "progress_updated"
-        )
-
-        return book.copy(
-            userBookRead = updatedUserBookRead,
-            userBook = book.userBook.copy(journals = updatedJournals)
-        )
+        return userBookFragment.toBook() ?: throw Exception("Book could not be mapped")
     }
 
     override suspend fun markBookAsRead(book: Book): Book {

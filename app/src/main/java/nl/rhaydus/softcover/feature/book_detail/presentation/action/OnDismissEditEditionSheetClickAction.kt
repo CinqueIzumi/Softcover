@@ -11,6 +11,11 @@ class OnDismissEditEditionSheetClickAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(showEditEditionSheet = false) }
+        scope.setState {
+            it.copy(
+                showEditEditionSheet = false,
+                editionSearchQuery = "",
+            )
+        }
     }
 }

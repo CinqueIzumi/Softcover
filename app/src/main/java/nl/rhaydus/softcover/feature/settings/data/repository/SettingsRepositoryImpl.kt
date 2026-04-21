@@ -53,4 +53,26 @@ class SettingsRepositoryImpl(
     override suspend fun getUserProfileData(): UserProfileData {
         return settingsRemoteDataSource.getUserProfileData()
     }
+
+    override val enabledStatusCodes: Flow<Set<Int>> = settingsLocalDataSource.enabledStatusCodes
+
+    override val enabledListIds: Flow<Set<Int>> = settingsLocalDataSource.enabledListIds
+
+    override val listDefaultsSeeded: Flow<Boolean> = settingsLocalDataSource.listDefaultsSeeded
+
+    override suspend fun seedEnabledListIds(ids: Set<Int>) {
+        settingsLocalDataSource.seedEnabledListIds(ids = ids)
+    }
+
+    override suspend fun resetLibraryVisibilityPreferences() {
+        settingsLocalDataSource.resetLibraryVisibilityPreferences()
+    }
+
+    override suspend fun setEnabledStatusCodes(codes: Set<Int>) {
+        settingsLocalDataSource.setEnabledStatusCodes(codes = codes)
+    }
+
+    override suspend fun setEnabledListIds(ids: Set<Int>) {
+        settingsLocalDataSource.setEnabledListIds(ids = ids)
+    }
 }

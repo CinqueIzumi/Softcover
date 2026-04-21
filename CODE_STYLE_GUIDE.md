@@ -343,9 +343,10 @@ Whenever a function declaration, function call, constructor invocation, or **obj
 - One-argument calls and declarations stay on a single line.
 - As soon as a **second** argument or property is added, all of them break onto their own lines: the opening `(` stays on the same line as the name, the closing `)` sits on its own line, each argument is followed by a comma, and the **last argument also has a trailing comma**.
 - This applies equally to:
-  - function declarations,
+  - function declarations (including abstract/member signatures inside `interface` and `abstract class` bodies — each parameter on its own line with a trailing comma, even when there is no body),
   - function call sites,
   - constructor invocations,
+  - class, `sealed class`, and `sealed interface` declarations: both the primary constructor parameter list and the superclass/supertype invocation (`: Parent(arg1, arg2)`) must break onto one argument per line as soon as there are two or more,
   - data-class instantiations (including `Book(...)`, `BookEdition(...)`, etc.),
   - `apply { ... }` / `copy(...)` invocations on data classes,
   - any other parenthesised parameter list with two or more entries.
@@ -376,6 +377,34 @@ Book(
 
 // Single-property data class — still inline.
 Author(name = name)
+
+// Interface member with two or more parameters — one per line, trailing comma.
+interface BookDao {
+    suspend fun setStatusEnabled(
+        code: Int,
+        enabled: Boolean,
+    )
+}
+
+// Sealed class with a multi-argument primary constructor, and subclasses whose
+// supertype invocation also takes multiple arguments — both lists break apart.
+sealed class LibraryTab(
+    val id: String,
+    val label: String,
+) {
+    data object All : LibraryTab(
+        id = "all",
+        label = "All",
+    )
+
+    data class CustomList(
+        val listId: Int,
+        val listName: String,
+    ) : LibraryTab(
+        id = "list-$listId",
+        label = listName,
+    )
+}
 ```
 
 ## Import Ordering

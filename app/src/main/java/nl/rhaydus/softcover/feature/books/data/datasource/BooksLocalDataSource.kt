@@ -50,6 +50,10 @@ interface BooksLocalDataSource {
     suspend fun removeAllBooks()
 
     suspend fun getOwnedListBookByEditionId(editionId: Int): ListBook
+
+    suspend fun syncBookListMetadata(serverListIds: Set<Int>)
+
+    suspend fun deleteOrphanBooks()
 }
 
 class BooksLocalDataSourceImpl(
@@ -107,8 +111,20 @@ class BooksLocalDataSourceImpl(
     }
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
-        return dao
-            .getBooksByStatus(statusCode = status.code)
+        return when (status) {
+            UserBookStatus.CURRENTLY_READING -> dao.getBooksByStatusAndEvents(
+                statusCode = status.code,
+                events = listOf("progress_updated", "status_currently_reading"),
+            )
+            UserBookStatus.READ -> dao.getReadBooks(statusCode = status.code)
+            UserBookStatus.WANT_TO_READ -> dao.getBooksByStatusSortedByCreatedAt(
+                statusCode = status.code,
+            )
+            UserBookStatus.DID_NOT_FINISH -> dao.getBooksByStatusAndEvents(
+                statusCode = status.code,
+                events = listOf("status_stopped"),
+            )
+        }
             .distinctUntilChanged()
             .map { list -> list.map { it.toModel() } }
     }
@@ -153,5 +169,13 @@ class BooksLocalDataSourceImpl(
             ?: throw Exception("List book was not found!")
 
         return book.toModel()
+    }
+
+    override suspend fun syncBookListMetadata(serverListIds: Set<Int>) {
+        dao.syncBookListMetadata(serverListIds = serverListIds)
+    }
+
+    override suspend fun deleteOrphanBooks() {
+        dao.deleteOrphanBooks()
     }
 }

@@ -38,15 +38,16 @@ interface BookDao {
             FROM books b
             LEFT JOIN user_books ub ON ub.bookId = b.id
             LEFT JOIN (
-                SELECT userBookId, MAX(updatedAt) AS latestProgress
+                SELECT userBookId, MAX(updatedAt) AS latestActivity
                 FROM reading_journals
-                WHERE event = 'progress_updated'
                 GROUP BY userBookId
             ) rj ON ub.id = rj.userBookId
             ORDER BY
-                (rj.latestProgress IS NULL) ASC,
-                rj.latestProgress DESC,
-                ub.updatedAt DESC
+                (rj.latestActivity IS NULL) ASC,
+                rj.latestActivity DESC,
+                (ub.createdAt IS NULL) ASC,
+                ub.createdAt DESC,
+                ub.id DESC
             """
     )
     fun observeBooks(): Flow<List<BookFullEntity>>
@@ -55,32 +56,99 @@ interface BookDao {
     @Query("SELECT * FROM book_lists")
     fun observeBookLists(): Flow<List<BookListWithBooks>>
 
+    /**
+     * Sorts user_books matching [statusCode] by the most recent
+     * reading_journals.updatedAt whose event is in [events], descending.
+     *
+     * Books without any matching journal event fall to the bottom, ordered by
+     * ub.id DESC as a stable tiebreaker. This can happen when the server
+     * never emitted the expected status event for a record.
+     */
     @Transaction
     @Query(
         """
                 SELECT b.*
                 FROM books b
 
-                INNER JOIN user_books ub 
+                INNER JOIN user_books ub
                     ON ub.bookId = b.id
 
                 LEFT JOIN (
-                    SELECT userBookId, MAX(updatedAt) AS latestProgress
+                    SELECT userBookId, MAX(updatedAt) AS latestEvent
                     FROM reading_journals
-                    WHERE event = 'progress_updated'
+                    WHERE event IN (:events)
                     GROUP BY userBookId
-                ) rj 
+                ) rj
                     ON ub.id = rj.userBookId
 
                 WHERE ub.statusCode = :statusCode
 
                 ORDER BY
-                    (rj.latestProgress IS NULL) ASC,
-                    rj.latestProgress DESC,
-                    ub.updatedAt DESC
+                    (rj.latestEvent IS NULL) ASC,
+                    rj.latestEvent DESC,
+                    ub.id DESC
             """
     )
-    fun getBooksByStatus(statusCode: Int): Flow<List<BookFullEntity>>
+    fun getBooksByStatusAndEvents(
+        statusCode: Int,
+        events: List<String>,
+    ): Flow<List<BookFullEntity>>
+
+    @Transaction
+    @Query(
+        """
+                SELECT b.*
+                FROM books b
+
+                INNER JOIN user_books ub
+                    ON ub.bookId = b.id
+
+                WHERE ub.statusCode = :statusCode
+
+                ORDER BY
+                    (ub.createdAt IS NULL) ASC,
+                    ub.createdAt DESC,
+                    ub.id DESC
+            """
+    )
+    fun getBooksByStatusSortedByCreatedAt(statusCode: Int): Flow<List<BookFullEntity>>
+
+    @Transaction
+    @Query(
+        """
+                SELECT b.*
+                FROM books b
+
+                INNER JOIN user_books ub
+                    ON ub.bookId = b.id
+
+                LEFT JOIN (
+                    SELECT userBookId, MAX(finishedAt) AS latestFinishedAt
+                    FROM user_book_reads
+                    WHERE finishedAt IS NOT NULL
+                    GROUP BY userBookId
+                ) ubr
+                    ON ub.id = ubr.userBookId
+
+                LEFT JOIN (
+                    SELECT userBookId, MAX(updatedAt) AS latestReadFinished
+                    FROM reading_journals
+                    WHERE event = 'user_book_read_finished'
+                    GROUP BY userBookId
+                ) rj
+                    ON ub.id = rj.userBookId
+
+                WHERE ub.statusCode = :statusCode
+
+                ORDER BY
+                    (ubr.latestFinishedAt IS NULL) ASC,
+                    ubr.latestFinishedAt DESC,
+                    (rj.latestReadFinished IS NULL) ASC,
+                    rj.latestReadFinished DESC,
+                    ub.id DESC
+            """
+    )
+    fun getReadBooks(statusCode: Int): Flow<List<BookFullEntity>>
 
     @Query("SELECT id FROM user_books")
     suspend fun getAllUserBookIds(): List<Int>
@@ -178,7 +246,7 @@ interface BookDao {
         clearBookAuthors(book.id)
         insertBookAuthors(book.toBookAuthorRefs(authorIdsByName))
 
-        clearEditionAuthors(book.id)
+        clearEditionAuthorsByEditionIds(editionIds = book.editions.map { it.id })
         insertEditionAuthors(book.toEditionAuthorRefs(authorIdsByName))
     }
 
@@ -312,6 +380,53 @@ interface BookDao {
     @Query("DELETE FROM user_books WHERE bookId = :bookId")
     suspend fun deleteUserBook(bookId: Int)
 
+    @Query("DELETE FROM user_books WHERE id = :userBookId")
+    suspend fun deleteUserBookByUserBookId(userBookId: Int)
+
+    @Query("SELECT COUNT(*) FROM list_books WHERE bookId = :bookId")
+    suspend fun countListBooksForBook(bookId: Int): Int
+
+    @Query("SELECT id FROM book_lists")
+    suspend fun getAllBookListIds(): List<Int>
+
+    @Query("DELETE FROM list_books WHERE listId IN (:listIds)")
+    suspend fun deleteListBooksByListIds(listIds: List<Int>)
+
+    @Query("DELETE FROM book_lists WHERE id IN (:ids)")
+    suspend fun deleteBookListsByIds(ids: List<Int>)
+
+    @Query(
+        """
+        SELECT b.id FROM books b
+        WHERE b.id NOT IN (SELECT bookId FROM user_books)
+          AND b.id NOT IN (SELECT bookId FROM list_books)
+        """
+    )
+    suspend fun getOrphanBookIds(): List<Int>
+
+    @Transaction
+    suspend fun syncBookListMetadata(serverListIds: Set<Int>) {
+        val allIds = getAllBookListIds()
+        val toRemove = allIds.filterNot { it in serverListIds }
+
+        if (toRemove.isEmpty()) return
+
+        deleteListBooksByListIds(listIds = toRemove)
+        deleteBookListsByIds(ids = toRemove)
+    }
+
+    @Transaction
+    suspend fun deleteOrphanBooks() {
+        val orphanIds = getOrphanBookIds()
+
+        orphanIds.forEach { bookId ->
+            clearBookAuthors(bookId)
+            clearEditionAuthors(bookId)
+            deleteEditions(bookId)
+            deleteBook(bookId)
+        }
+    }
+
     @Query("DELETE FROM user_book_reads WHERE userBookId = :userBookId")
     suspend fun deleteUserBookRead(userBookId: Int)
 
@@ -329,13 +444,16 @@ interface BookDao {
     suspend fun deleteAllForUserBookId(userBookId: Int) {
         val bookId = getBookIdByUserBookId(userBookId) ?: return
 
+        deleteUserBookRead(userBookId)
+        deleteJournals(userBookId = userBookId)
+        deleteUserBookByUserBookId(userBookId)
+
+        if (countListBooksForBook(bookId = bookId) > 0) return
+
         clearBookAuthors(bookId)
         clearEditionAuthors(bookId)
         deleteEditions(bookId)
         deleteBook(bookId)
-        deleteUserBook(bookId)
-        deleteUserBookRead(userBookId)
-        deleteJournals(userBookId = userBookId)
     }
 
     @Transaction
@@ -366,5 +484,8 @@ interface BookDao {
     """
     )
     suspend fun clearEditionAuthors(bookId: Int)
+
+    @Query("DELETE FROM edition_author_cross_ref WHERE editionId IN (:editionIds)")
+    suspend fun clearEditionAuthorsByEditionIds(editionIds: List<Int>)
     // endregion
 }

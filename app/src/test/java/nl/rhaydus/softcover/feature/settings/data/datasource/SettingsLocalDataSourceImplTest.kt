@@ -506,6 +506,381 @@ class SettingsLocalDataSourceImplTest {
     }
 
     @Nested
+    inner class EnabledStatusCodesFlow {
+
+        @Test
+        fun `emits the enabledStatusCodes field from the data store flow`() = runTest {
+            // ----- Arrange -----
+            val entity = AppSettingsEntity(enabledStatusCodes = setOf(1, 3, 5))
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.enabledStatusCodes.test {
+                awaitItem() shouldBe setOf(1, 3, 5)
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `deduplicates identical consecutive enabledStatusCodes values`() = runTest {
+            // ----- Arrange -----
+            val entity1 = AppSettingsEntity(enabledStatusCodes = setOf(2))
+            val entity2 = AppSettingsEntity(enabledStatusCodes = setOf(2))
+
+            every {
+                dataStore.data
+            } returns flowOf(entity1, entity2)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.enabledStatusCodes.test {
+                awaitItem() shouldBe setOf(2)
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits distinct consecutive enabledStatusCodes values`() = runTest {
+            // ----- Arrange -----
+            val entity1 = AppSettingsEntity(enabledStatusCodes = setOf(1))
+            val entity2 = AppSettingsEntity(enabledStatusCodes = setOf(1, 3))
+
+            every {
+                dataStore.data
+            } returns flowOf(entity1, entity2)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.enabledStatusCodes.test {
+                awaitItem() shouldBe setOf(1)
+                awaitItem() shouldBe setOf(1, 3)
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class EnabledListIdsFlow {
+
+        @Test
+        fun `emits the enabledListIds field from the data store flow`() = runTest {
+            // ----- Arrange -----
+            val entity = AppSettingsEntity(enabledListIds = setOf(10, 20))
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.enabledListIds.test {
+                awaitItem() shouldBe setOf(10, 20)
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `deduplicates identical consecutive enabledListIds values`() = runTest {
+            // ----- Arrange -----
+            val entity1 = AppSettingsEntity(enabledListIds = setOf(7))
+            val entity2 = AppSettingsEntity(enabledListIds = setOf(7))
+
+            every {
+                dataStore.data
+            } returns flowOf(entity1, entity2)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.enabledListIds.test {
+                awaitItem() shouldBe setOf(7)
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class ListDefaultsSeededFlow {
+
+        @Test
+        fun `emits the listDefaultsSeeded field from the data store flow`() = runTest {
+            // ----- Arrange -----
+            val entity = AppSettingsEntity(listDefaultsSeeded = true)
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.listDefaultsSeeded.test {
+                awaitItem() shouldBe true
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits false when listDefaultsSeeded is not set`() = runTest {
+            // ----- Arrange -----
+            val entity = AppSettingsEntity(listDefaultsSeeded = false)
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            val freshDataSource = SettingsLocalDataSourceImpl(
+                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+                apiKeyLocalDataSource = apiKeyLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshDataSource.listDefaultsSeeded.test {
+                awaitItem() shouldBe false
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class SeedEnabledListIds {
+
+        @Test
+        fun `update lambda merges new ids into existing enabledListIds`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(enabledListIds = setOf(1), listDefaultsSeeded = false)
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.seedEnabledListIds(ids = setOf(2, 3))
+
+            // ----- Assert -----
+            capturedResult?.enabledListIds shouldBe setOf(1, 2, 3)
+        }
+
+        @Test
+        fun `update lambda sets listDefaultsSeeded to true`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(listDefaultsSeeded = false)
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.seedEnabledListIds(ids = setOf(5))
+
+            // ----- Assert -----
+            capturedResult?.listDefaultsSeeded shouldBe true
+        }
+
+        @Test
+        fun `seeding empty ids still marks listDefaultsSeeded as true`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(enabledListIds = setOf(99), listDefaultsSeeded = false)
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.seedEnabledListIds(ids = emptySet())
+
+            // ----- Assert -----
+            capturedResult?.listDefaultsSeeded shouldBe true
+            capturedResult?.enabledListIds shouldBe setOf(99)
+        }
+    }
+
+    @Nested
+    inner class SetEnabledStatusCodes {
+
+        @Test
+        fun `update lambda replaces enabledStatusCodes with the given set`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(enabledStatusCodes = setOf(1, 3))
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setEnabledStatusCodes(codes = setOf(5, 7))
+
+            // ----- Assert -----
+            capturedResult?.enabledStatusCodes shouldBe setOf(5, 7)
+        }
+
+        @Test
+        fun `update lambda clears enabledStatusCodes when given an empty set`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(enabledStatusCodes = setOf(1, 3, 5))
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setEnabledStatusCodes(codes = emptySet())
+
+            // ----- Assert -----
+            capturedResult?.enabledStatusCodes shouldBe emptySet()
+        }
+
+        @Test
+        fun `update lambda preserves other entity fields`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(
+                userId = 42,
+                enabledStatusCodes = setOf(1),
+                enabledListIds = setOf(99),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setEnabledStatusCodes(codes = setOf(3))
+
+            // ----- Assert -----
+            capturedResult?.userId shouldBe 42
+            capturedResult?.enabledListIds shouldBe setOf(99)
+        }
+    }
+
+    @Nested
+    inner class SetEnabledListIds {
+
+        @Test
+        fun `update lambda replaces enabledListIds with the given set`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(enabledListIds = setOf(10, 20))
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setEnabledListIds(ids = setOf(30, 40))
+
+            // ----- Assert -----
+            capturedResult?.enabledListIds shouldBe setOf(30, 40)
+        }
+
+        @Test
+        fun `update lambda clears enabledListIds when given an empty set`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(enabledListIds = setOf(10, 20))
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setEnabledListIds(ids = emptySet())
+
+            // ----- Assert -----
+            capturedResult?.enabledListIds shouldBe emptySet()
+        }
+
+        @Test
+        fun `update lambda preserves other entity fields`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(
+                userId = 77,
+                enabledStatusCodes = setOf(1, 3),
+                enabledListIds = setOf(5),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setEnabledListIds(ids = setOf(100))
+
+            // ----- Assert -----
+            capturedResult?.userId shouldBe 77
+            capturedResult?.enabledStatusCodes shouldBe setOf(1, 3)
+        }
+    }
+
+    @Nested
     inner class SetBottomBarStyle {
 
         @Test

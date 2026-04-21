@@ -68,7 +68,6 @@ import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.presentation.modifier.grayscale
@@ -90,6 +89,8 @@ import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
@@ -280,8 +281,12 @@ class BookDetailScreen(
                     bookTitle = state.book.title,
                     currentEdition = currentEditionForSheet,
                     defaultEdition = state.book.defaultEdition,
-                    editions = state.editions,
+                    editions = state.filteredEditions,
                     isLoading = state.loadingEditions,
+                    searchQuery = state.editionSearchQuery,
+                    onSearchQueryChange = {
+                        runAction(OnEditionSearchQueryChangeAction(query = it))
+                    },
                     onDismissRequest = {
                         runAction(OnDismissEditEditionSheetClickAction())
                     },
@@ -737,7 +742,6 @@ class BookDetailScreen(
                 BookStatus.Reading -> ReadingContainer(state = state)
                 BookStatus.DidNotFinish -> DidNotFinishContainer(state = state)
                 BookStatus.Read -> ReadContainer(state = state)
-                BookStatus.Paused -> Unit
 
                 BookStatus.WantToRead -> {
                     WantToReadContainer(
@@ -858,23 +862,10 @@ class BookDetailScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    val wantToReadDate = userBook.getWantToReadDateString(style = state.dateStyle)
-
-                    when (wantToReadDate) {
-                        null -> {
-                            FallBackDateText(
-                                userBook = userBook,
-                                dateStyle = state.dateStyle,
-                            )
-                        }
-
-                        else -> {
-                            Text(
-                                text = "You've marked this book as 'want to read' on $wantToReadDate",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
+                    FallBackDateText(
+                        userBook = userBook,
+                        dateStyle = state.dateStyle,
+                    )
                 }
             }
 
