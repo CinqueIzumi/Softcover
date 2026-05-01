@@ -5,6 +5,10 @@ import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
@@ -20,6 +24,10 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayout
 
 class LibraryScreenScreenModel(
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
+    private val getCurrentlyReadingUserBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
+    private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
+    private val getReadUserBooksUseCase: GetReadUserBooksUseCase,
+    private val getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase,
     private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
     private val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
@@ -37,6 +45,10 @@ class LibraryScreenScreenModel(
 ) {
     override val dependencies = LibraryDependencies(
         getAllUserBooksUseCase = getAllUserBooksUseCase,
+        getCurrentlyReadingUserBooksUseCase = getCurrentlyReadingUserBooksUseCase,
+        getWantToReadUserBooksUseCase = getWantToReadUserBooksUseCase,
+        getReadUserBooksUseCase = getReadUserBooksUseCase,
+        getDidNotFinishUserBooksUseCase = getDidNotFinishUserBooksUseCase,
         refreshUserBooksUseCase = refreshUserBooksUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
         getLibraryGridLayoutAsFlowUseCase = getLibraryGridLayoutAsFlowUseCase,

@@ -30,6 +30,10 @@ val libraryModule = module {
     factory {
         LibraryScreenScreenModel(
             getAllUserBooksUseCase = get(),
+            getCurrentlyReadingUserBooksUseCase = get(),
+            getWantToReadUserBooksUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
             refreshUserBooksUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),

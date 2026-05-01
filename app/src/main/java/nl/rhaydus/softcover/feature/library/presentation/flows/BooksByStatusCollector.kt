@@ -17,15 +17,24 @@ class BooksByStatusCollector : LibraryInitializer {
         dependencies: LibraryDependencies,
     ) {
         combine(
-            dependencies.getAllUserBooksUseCase(),
             dependencies.getEnabledStatusCodesAsFlowUseCase(),
-        ) { books: List<Book>, enabledStatuses: Set<Int> ->
-            UserBookStatus.activeLibraryCodes(enabledCodes = enabledStatuses)
-                .mapNotNull { code -> UserBookStatus.entries.firstOrNull { it.code == code } }
-                .associate { status ->
-                    val tabId = LibraryTab.Status.of(status).id
-                    tabId to books.filter { it.userBook?.status?.code == status.code }
-                }
+            dependencies.getCurrentlyReadingUserBooksUseCase(),
+            dependencies.getWantToReadUserBooksUseCase(),
+            dependencies.getReadUserBooksUseCase(),
+            dependencies.getDidNotFinishUserBooksUseCase(),
+        ) { enabledStatuses: Set<Int>, currentlyReading: List<Book>, wantToRead: List<Book>, read: List<Book>, didNotFinish: List<Book> ->
+            val activeCodes = UserBookStatus.activeLibraryCodes(enabledCodes = enabledStatuses)
+
+            val booksByStatus: Map<UserBookStatus, List<Book>> = mapOf(
+                UserBookStatus.CURRENTLY_READING to currentlyReading,
+                UserBookStatus.WANT_TO_READ to wantToRead,
+                UserBookStatus.READ to read,
+                UserBookStatus.DID_NOT_FINISH to didNotFinish,
+            )
+
+            booksByStatus
+                .filterKeys { it.code in activeCodes }
+                .mapKeys { (status, _) -> LibraryTab.Status.of(status).id }
         }.collectLatest { grouped ->
             scope.setState { state ->
                 val retainedStatusKeys = grouped.keys
