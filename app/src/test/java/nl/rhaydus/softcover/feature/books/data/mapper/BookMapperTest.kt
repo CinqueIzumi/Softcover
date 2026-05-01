@@ -343,6 +343,7 @@ class BookMapperTest {
         coverUrl: String = "https://example.com/book.jpg",
         authors: List<Author> = emptyList(),
         usersCount: Int = 100,
+        ratingsCount: Int = 0,
         bookSeries: BookSeries? = null,
         positionInSeries: Int? = null,
         userBook: UserBook? = null,
@@ -387,6 +388,10 @@ class BookMapperTest {
         every {
             this@mockk.usersCount
         } returns usersCount
+
+        every {
+            this@mockk.ratingsCount
+        } returns ratingsCount
 
         every {
             this@mockk.bookSeries
@@ -467,6 +472,7 @@ class BookMapperTest {
         releaseYear: Int = 2019,
         coverUrl: String = "https://example.com/book.jpg",
         usersCount: Int = 100,
+        ratingsCount: Int = 0,
         positionInSeries: Int? = null,
         seriesId: Int? = null,
     ): BookEntity = BookEntity(
@@ -478,6 +484,7 @@ class BookMapperTest {
         releaseYear = releaseYear,
         coverUrl = coverUrl,
         usersCount = usersCount,
+        ratingsCount = ratingsCount,
         positionInSeries = positionInSeries,
         seriesId = seriesId,
     )
@@ -728,6 +735,7 @@ class BookMapperTest {
                 releaseYear = 2019,
                 coverUrl = "https://example.com/book.jpg",
                 usersCount = 100,
+                ratingsCount = 42,
                 positionInSeries = 2,
             )
 
@@ -742,7 +750,20 @@ class BookMapperTest {
             result.releaseYear shouldBe 2019
             result.coverUrl shouldBe "https://example.com/book.jpg"
             result.usersCount shouldBe 100
+            result.ratingsCount shouldBe 42
             result.positionInSeries shouldBe 2
+        }
+
+        @Test
+        fun `round-trips ratingsCount through Book toEntity`() {
+            // ----- Arrange -----
+            val book = stubBook(ratingsCount = 137)
+
+            // ----- Act -----
+            val result = book.toEntity()
+
+            // ----- Assert -----
+            result.ratingsCount shouldBe 137
         }
 
         @Test
@@ -2056,6 +2077,7 @@ class BookMapperTest {
                 releaseYear = 2019,
                 coverUrl = "https://example.com/book.jpg",
                 usersCount = 100,
+                ratingsCount = 55,
                 positionInSeries = 2,
             )
             val entity = stubBookFullEntity(book = bookEntity)
@@ -2071,7 +2093,21 @@ class BookMapperTest {
             result.releaseYear shouldBe 2019
             result.coverUrl shouldBe "https://example.com/book.jpg"
             result.usersCount shouldBe 100
+            result.ratingsCount shouldBe 55
             result.positionInSeries shouldBe 2
+        }
+
+        @Test
+        fun `round-trips ratingsCount through BookFullEntity toModel`() {
+            // ----- Arrange -----
+            val bookEntity = stubBookEntity(ratingsCount = 200)
+            val entity = stubBookFullEntity(book = bookEntity)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.ratingsCount shouldBe 200
         }
 
         @Test
@@ -3084,6 +3120,7 @@ class BookMapperTest {
                 every { book_series } returns emptyList()
                 every { contributions } returns emptyList()
                 every { users_count } returns 250
+                every { ratings_count } returns 0
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3163,6 +3200,7 @@ class BookMapperTest {
                 every { book_series } returns emptyList()
                 every { contributions } returns emptyList()
                 every { users_count } returns 1234
+                every { ratings_count } returns 0
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3240,6 +3278,7 @@ class BookMapperTest {
                 every { book_series } returns emptyList()
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
+                every { ratings_count } returns 0
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3317,6 +3356,7 @@ class BookMapperTest {
                 every { book_series } returns emptyList()
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
+                every { ratings_count } returns 0
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3393,6 +3433,7 @@ class BookMapperTest {
                 every { book_series } returns emptyList()
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
+                every { ratings_count } returns 0
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3440,6 +3481,7 @@ class BookMapperTest {
             userBookReadFinished: List<UserBookFragment.User_book_read_finished_journal> = emptyList(),
             statusStopped: List<UserBookFragment.Status_stopped_journal> = emptyList(),
             createdAt: String = "2024-01-01",
+            ratingsCount: Int = 0,
         ): UserBookFragment {
             val bookInner = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
@@ -3467,6 +3509,7 @@ class BookMapperTest {
                 every { book_series } returns emptyList()
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
+                every { ratings_count } returns ratingsCount
             }
 
             every {
@@ -3658,6 +3701,20 @@ class BookMapperTest {
             // ----- Assert -----
             result?.userBook?.createdAt shouldBe "2023-11-01"
         }
+
+        @Test
+        fun `maps ratings_count from BookListFragment to ratingsCount`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            val fragment = stubMinimalUserBookFragment(ratingsCount = 77)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.ratingsCount shouldBe 77
+        }
     }
 
     @Nested
@@ -3721,6 +3778,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { description } returns "A great book."
                 every { users_count } returns 500
+                every { ratings_count } returns 0
                 every { default_physical_edition } returns defaultEditionInner
             }
 
@@ -3777,6 +3835,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
+                every { ratings_count } returns 0
                 every { default_physical_edition } returns defaultEditionInner
             }
 
@@ -3829,6 +3888,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
+                every { ratings_count } returns 0
                 every { default_physical_edition } returns defaultEditionInner
             }
 
@@ -3881,6 +3941,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
+                every { ratings_count } returns 0
                 every { default_physical_edition } returns defaultEditionInner
             }
 
@@ -3932,6 +3993,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
+                every { ratings_count } returns 0
                 every { default_physical_edition } returns defaultEditionInner
             }
 
@@ -3947,6 +4009,55 @@ class BookMapperTest {
             // ----- Assert -----
             result?.defaultEdition?.bookId shouldBe 1
             result?.editions?.get(0)?.bookId shouldBe 1
+        }
+
+        @Test
+        fun `maps ratings_count from BookDetailFragment to ratingsCount`() {
+            // ----- Arrange -----
+            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+
+            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+
+            val fragment = mockk<BookDetailFragment> {
+                every { id } returns 1
+                every { canonical } returns null
+                every { title } returns null
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+                every { description } returns null
+                every { users_count } returns 0
+                every { ratings_count } returns 312
+                every { default_physical_edition } returns defaultEditionInner
+            }
+
+            every {
+                with(BookDetailFragment.Default_physical_edition.Companion) {
+                    defaultEditionInner.editionFragment()
+                }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.ratingsCount shouldBe 312
         }
     }
 

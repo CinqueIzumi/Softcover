@@ -55,6 +55,7 @@ class FetchBookByIdUseCaseTest {
         coverUrl = "",
         authors = emptyList<Author>(),
         usersCount = 0,
+        ratingsCount = 0,
         bookSeries = null,
         positionInSeries = null,
         userBook = null,

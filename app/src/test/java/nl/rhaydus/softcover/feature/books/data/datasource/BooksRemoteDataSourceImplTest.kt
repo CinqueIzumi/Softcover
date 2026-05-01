@@ -12,6 +12,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
@@ -133,6 +134,7 @@ class BooksRemoteDataSourceImplTest {
         releaseYear: Int = 2020,
         coverUrl: String = "https://covers.example.com/canonical.jpg",
         usersCount: Int = 500,
+        ratingsCount: Int = 200,
     ): Book = mockk {
         every {
             this@mockk.id
@@ -169,6 +171,10 @@ class BooksRemoteDataSourceImplTest {
         every {
             this@mockk.usersCount
         } returns usersCount
+
+        every {
+            this@mockk.ratingsCount
+        } returns ratingsCount
 
         every {
             this@mockk.bookSeries
@@ -1096,6 +1102,7 @@ class BooksRemoteDataSourceImplTest {
             val canonicalBookCoverUrl = canonicalBook.coverUrl
             val canonicalBookAuthors = canonicalBook.authors
             val canonicalBookUsersCount = canonicalBook.usersCount
+            val canonicalBookReviewsCount = canonicalBook.ratingsCount
             val canonicalBookSeries = canonicalBook.bookSeries
             val canonicalBookPositionInSeries = canonicalBook.positionInSeries
 
@@ -1110,6 +1117,7 @@ class BooksRemoteDataSourceImplTest {
                     coverUrl = canonicalBookCoverUrl,
                     authors = canonicalBookAuthors,
                     usersCount = canonicalBookUsersCount,
+                    ratingsCount = canonicalBookReviewsCount,
                     bookSeries = canonicalBookSeries,
                     positionInSeries = canonicalBookPositionInSeries,
                 )
@@ -1199,6 +1207,7 @@ class BooksRemoteDataSourceImplTest {
             val canonical1CoverUrl = canonicalBook1.coverUrl
             val canonical1Authors = canonicalBook1.authors
             val canonical1UsersCount = canonicalBook1.usersCount
+            val canonical1ReviewsCount = canonicalBook1.ratingsCount
             val canonical1BookSeries = canonicalBook1.bookSeries
             val canonical1PositionInSeries = canonicalBook1.positionInSeries
 
@@ -1210,6 +1219,7 @@ class BooksRemoteDataSourceImplTest {
             val canonical2CoverUrl = canonicalBook2.coverUrl
             val canonical2Authors = canonicalBook2.authors
             val canonical2UsersCount = canonicalBook2.usersCount
+            val canonical2ReviewsCount = canonicalBook2.ratingsCount
             val canonical2BookSeries = canonicalBook2.bookSeries
             val canonical2PositionInSeries = canonicalBook2.positionInSeries
 
@@ -1224,6 +1234,7 @@ class BooksRemoteDataSourceImplTest {
                     coverUrl = canonical1CoverUrl,
                     authors = canonical1Authors,
                     usersCount = canonical1UsersCount,
+                    ratingsCount = canonical1ReviewsCount,
                     bookSeries = canonical1BookSeries,
                     positionInSeries = canonical1PositionInSeries,
                 )
@@ -1240,6 +1251,7 @@ class BooksRemoteDataSourceImplTest {
                     coverUrl = canonical2CoverUrl,
                     authors = canonical2Authors,
                     usersCount = canonical2UsersCount,
+                    ratingsCount = canonical2ReviewsCount,
                     bookSeries = canonical2BookSeries,
                     positionInSeries = canonical2PositionInSeries,
                 )
@@ -1318,6 +1330,7 @@ class BooksRemoteDataSourceImplTest {
             val sharedCoverUrl = canonicalBook.coverUrl
             val sharedAuthors = canonicalBook.authors
             val sharedUsersCount = canonicalBook.usersCount
+            val sharedReviewsCount = canonicalBook.ratingsCount
             val sharedBookSeries = canonicalBook.bookSeries
             val sharedPositionInSeries = canonicalBook.positionInSeries
 
@@ -1332,6 +1345,7 @@ class BooksRemoteDataSourceImplTest {
                     coverUrl = sharedCoverUrl,
                     authors = sharedAuthors,
                     usersCount = sharedUsersCount,
+                    ratingsCount = sharedReviewsCount,
                     bookSeries = sharedBookSeries,
                     positionInSeries = sharedPositionInSeries,
                 )
@@ -1348,6 +1362,7 @@ class BooksRemoteDataSourceImplTest {
                     coverUrl = sharedCoverUrl,
                     authors = sharedAuthors,
                     usersCount = sharedUsersCount,
+                    ratingsCount = sharedReviewsCount,
                     bookSeries = sharedBookSeries,
                     positionInSeries = sharedPositionInSeries,
                 )
@@ -1424,6 +1439,7 @@ class BooksRemoteDataSourceImplTest {
             val mergeTargetCoverUrl = canonicalBook.coverUrl
             val mergeTargetAuthors = canonicalBook.authors
             val mergeTargetUsersCount = canonicalBook.usersCount
+            val mergeTargetReviewsCount = canonicalBook.ratingsCount
             val mergeTargetBookSeries = canonicalBook.bookSeries
             val mergeTargetPositionInSeries = canonicalBook.positionInSeries
 
@@ -1438,6 +1454,7 @@ class BooksRemoteDataSourceImplTest {
                     coverUrl = mergeTargetCoverUrl,
                     authors = mergeTargetAuthors,
                     usersCount = mergeTargetUsersCount,
+                    ratingsCount = mergeTargetReviewsCount,
                     bookSeries = mergeTargetBookSeries,
                     positionInSeries = mergeTargetPositionInSeries,
                 )
@@ -1491,6 +1508,109 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe listOf(bookWithMissingCanonical)
+        }
+
+        @Test
+        fun `withCanonicalMetadata copies ratingsCount from canonical book`() = runTest {
+            // ----- Arrange -----
+            val userId = 1
+            val canonicalId = 20
+            val originalBook = stubBook(id = 10, canonicalId = canonicalId)
+            val canonicalBook = stubCanonicalBook(id = canonicalId, ratingsCount = 999)
+            val mergedBook = stubBook(id = canonicalId, canonicalId = null)
+            val userBooksQueryData = mockk<GetUserBooksQuery.Data>()
+            val meEntry = mockk<GetUserBooksQuery.Data.Me>()
+            val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
+            val booksQueryData = mockk<GetBooksByIdsQuery.Data>()
+            val canonicalBookEntry = mockk<GetBooksByIdsQuery.Data.Book>()
+
+            mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
+
+            coEvery {
+                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery })
+            } returns userBooksQueryData
+
+            coEvery {
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+            } returns booksQueryData
+
+            every {
+                userBooksQueryData.me
+            } returns listOf(meEntry)
+
+            every {
+                meEntry.user_books
+            } returns listOf(userBookEntry)
+
+            every {
+                userBookEntry.toBook()
+            } returns originalBook
+
+            every {
+                booksQueryData.books
+            } returns listOf(canonicalBookEntry)
+
+            every {
+                with(GetBooksByIdsQuery.Data.Book.Companion) { canonicalBookEntry.bookDetailFragment() }
+            } returns mockk {
+                every {
+                    toBook()
+                } returns canonicalBook
+            }
+
+            val canonicalBookId = canonicalBook.id
+            val canonicalBookTitle = canonicalBook.title
+            val canonicalBookRating = canonicalBook.rating
+            val canonicalBookDescription = canonicalBook.description
+            val canonicalBookReleaseYear = canonicalBook.releaseYear
+            val canonicalBookCoverUrl = canonicalBook.coverUrl
+            val canonicalBookAuthors = canonicalBook.authors
+            val canonicalBookUsersCount = canonicalBook.usersCount
+            val canonicalBookReviewsCount = canonicalBook.ratingsCount
+            val canonicalBookSeries = canonicalBook.bookSeries
+            val canonicalBookPositionInSeries = canonicalBook.positionInSeries
+
+            every {
+                originalBook.copy(
+                    id = canonicalBookId,
+                    canonicalId = null,
+                    title = canonicalBookTitle,
+                    rating = canonicalBookRating,
+                    description = canonicalBookDescription,
+                    releaseYear = canonicalBookReleaseYear,
+                    coverUrl = canonicalBookCoverUrl,
+                    authors = canonicalBookAuthors,
+                    usersCount = canonicalBookUsersCount,
+                    ratingsCount = canonicalBookReviewsCount,
+                    bookSeries = canonicalBookSeries,
+                    positionInSeries = canonicalBookPositionInSeries,
+                )
+            } returns mergedBook
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = userId)
+
+            // ----- Assert -----
+            result shouldBe listOf(mergedBook)
+            // The copy call above (which includes ratingsCount = 999) must be invoked:
+            // if withCanonicalMetadata omitted ratingsCount the mock would not match and
+            // copy(...) would return the wrong value, causing the assertion to fail.
+            verify(exactly = 1) {
+                originalBook.copy(
+                    id = canonicalBookId,
+                    canonicalId = null,
+                    title = canonicalBookTitle,
+                    rating = canonicalBookRating,
+                    description = canonicalBookDescription,
+                    releaseYear = canonicalBookReleaseYear,
+                    coverUrl = canonicalBookCoverUrl,
+                    authors = canonicalBookAuthors,
+                    usersCount = canonicalBookUsersCount,
+                    ratingsCount = canonicalBookReviewsCount,
+                    bookSeries = canonicalBookSeries,
+                    positionInSeries = canonicalBookPositionInSeries,
+                )
+            }
         }
     }
 

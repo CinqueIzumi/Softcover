@@ -59,6 +59,7 @@ class BooksLocalDataSourceImplTest {
         releaseYear = 2020,
         coverUrl = "https://example.com/cover.jpg",
         usersCount = 100,
+        ratingsCount = 0,
         positionInSeries = null,
         seriesId = null,
     )

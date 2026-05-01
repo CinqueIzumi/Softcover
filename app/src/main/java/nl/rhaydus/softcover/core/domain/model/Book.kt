@@ -14,6 +14,7 @@ data class Book(
     val coverUrl: String,
     val authors: List<Author>,
     val usersCount: Int,
+    val ratingsCount: Int,
     val bookSeries: BookSeries?,
     val positionInSeries: Int?,
 
