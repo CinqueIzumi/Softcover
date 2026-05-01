@@ -115,6 +115,7 @@ class UserBooksFlowCollectorTest {
         coverUrl = "https://example.com/cover.jpg",
         authors = emptyList<Author>(),
         usersCount = 42,
+        ratingsCount = 0,
         bookSeries = null,
         positionInSeries = null,
         userBook = userBook,

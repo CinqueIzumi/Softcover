@@ -43,17 +43,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -85,11 +90,15 @@ import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
+import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
+import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
@@ -138,14 +147,18 @@ class BookDetailScreen(
                     screenModel.runAction(
                         action = InitializeBookWithIdAction(id = id)
                     )
+
+                    screenModel.runAction(
+                        action = FetchBookReviewsAction(bookId = id)
+                    )
                 }
             }
         }
 
         LaunchedEffect(Unit) {
-            val action = InitializeBookWithIdAction(id = id)
+            screenModel.runAction(InitializeBookWithIdAction(id = id))
 
-            screenModel.runAction(action)
+            screenModel.runAction(FetchBookReviewsAction(bookId = id))
         }
 
         Screen(
@@ -199,12 +212,18 @@ class BookDetailScreen(
             }
         }
 
+        val density = LocalDensity.current
+        var fabHeight by remember { mutableStateOf(0.dp) }
+
         Scaffold(
             contentWindowInsets = WindowInsets(),
             floatingActionButton = {
                 FloatingActionButtonMenu(
                     state = state,
                     runAction = runAction,
+                    onFabSizeChange = { size ->
+                        fabHeight = with(density) { size.height.toDp() }
+                    },
                 )
             }
         ) { innerPadding ->
@@ -251,6 +270,20 @@ class BookDetailScreen(
                 item { Spacer(modifier = Modifier.height(32.dp)) }
 
                 item { DescriptionSection(state = state) }
+
+                item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                item {
+                    ReviewsSection(
+                        state = state,
+                        runAction = runAction,
+                        dateStyle = state.dateStyle,
+                    )
+                }
+
+                if (fabHeight > 0.dp) {
+                    item { Spacer(modifier = Modifier.height(fabHeight + 16.dp)) }
+                }
 
                 item { BottomNavigationSpacer() }
             }
@@ -387,6 +420,7 @@ class BookDetailScreen(
     private fun FloatingActionButtonMenu(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
+        onFabSizeChange: (IntSize) -> Unit,
     ) {
         val userStatus = state.book?.status ?: return
 
@@ -399,6 +433,7 @@ class BookDetailScreen(
                     onClick = {
                         runAction(OnFabClickAction())
                     },
+                    modifier = Modifier.onSizeChanged(onSizeChanged = onFabSizeChange),
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_edit),
@@ -643,8 +678,12 @@ class BookDetailScreen(
 
                 Spacer(modifier = Modifier.width(4.dp))
 
+                val ratingText = state.book?.let { book ->
+                    "${book.rating} (${book.ratingsCount})"
+                } ?: ""
+
                 Text(
-                    text = "${state.book?.rating}",
+                    text = ratingText,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -723,6 +762,128 @@ class BookDetailScreen(
                     .fillMaxSize()
                     .shimmer(isLoading = state.loadingBookDetails)
             )
+        }
+    }
+
+    @Composable
+    private fun ReviewsSection(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+        dateStyle: DateStyle,
+    ) {
+        if (state.loadingBookDetails || state.loadingReviews) return
+
+        if (state.reviews.isEmpty()) return
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            Text(
+                text = "Reviews",
+                style = MaterialTheme.typography.titleLarge,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            state.reviews.forEachIndexed { index, review ->
+                if (index > 0) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                ReviewCard(
+                    review = review,
+                    isSpoilerRevealed = review.id in state.revealedSpoilerReviewIds,
+                    dateStyle = dateStyle,
+                    onRevealSpoilerClick = {
+                        runAction(OnRevealReviewSpoilerAction(reviewId = review.id))
+                    },
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ReviewCard(
+        review: BookReview,
+        isSpoilerRevealed: Boolean,
+        dateStyle: DateStyle,
+        onRevealSpoilerClick: () -> Unit,
+    ) {
+        val formattedDate = review.getFormattedDate(style = dateStyle)
+
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            tonalElevation = 4.dp,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(all = 16.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SoftcoverImage(
+                        model = review.reviewer.avatarUrl,
+                        contentDescription = "Reviewer avatar",
+                        isLoading = false,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(16.dp)),
+                        contentScale = ContentScale.Crop,
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = review.reviewer.name?.takeIf { it.isNotBlank() }
+                                ?: review.reviewer.username,
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+
+                        formattedDate?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    review.rating?.let { rating ->
+                        Icon(
+                            painter = painterResource(R.drawable.ic_star_filled),
+                            contentDescription = "Rating",
+                            tint = Color(0xFFFBBF23),
+                            modifier = Modifier.size(14.dp),
+                        )
+
+                        Spacer(modifier = Modifier.width(4.dp))
+
+                        Text(
+                            text = "%.1f".format(rating),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (review.hasSpoilers && isSpoilerRevealed.not()) {
+                    TextButton(onClick = onRevealSpoilerClick) {
+                        Text(text = "Show spoiler")
+                    }
+                } else {
+                    Text(
+                        text = htmlToAnnotatedString(html = review.review),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
         }
     }
 

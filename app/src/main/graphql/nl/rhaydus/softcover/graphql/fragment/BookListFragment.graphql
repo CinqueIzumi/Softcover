@@ -10,6 +10,7 @@ fragment BookListFragment on books {
     }
     release_year
     users_count
+    ratings_count
     book_series {
         ...BookSeriesFragment
     }

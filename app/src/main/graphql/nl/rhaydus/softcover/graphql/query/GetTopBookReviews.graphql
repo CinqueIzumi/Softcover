@@ -1,0 +1,20 @@
+query GetTopBookReviews(
+    $bookId: Int!,
+) {
+    user_books(
+        where: {
+            book_id: {
+                _eq: $bookId
+            }
+            has_review: {
+                _eq: true
+            }
+        }
+        order_by: {
+            likes_count: desc
+        }
+        limit: 3
+    ) {
+        ...BookReviewFragment
+    }
+}

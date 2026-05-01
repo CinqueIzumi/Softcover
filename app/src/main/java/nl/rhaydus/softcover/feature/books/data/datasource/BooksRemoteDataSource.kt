@@ -248,6 +248,7 @@ class BooksRemoteDataSourceImpl(
         coverUrl = canonical.coverUrl,
         authors = canonical.authors,
         usersCount = canonical.usersCount,
+        ratingsCount = canonical.ratingsCount,
         bookSeries = canonical.bookSeries,
         positionInSeries = canonical.positionInSeries,
     )

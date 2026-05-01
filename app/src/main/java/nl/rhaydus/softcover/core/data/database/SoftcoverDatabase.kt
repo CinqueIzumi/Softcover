@@ -40,7 +40,7 @@ import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
     views = [
         BookEditionView::class
     ],
-    version = 18,
+    version = 19,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -70,6 +70,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_15_16)
                 .addMigrations(MIGRATION_16_17)
                 .addMigrations(MIGRATION_17_18)
+                .addMigrations(MIGRATION_18_19)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -556,6 +557,12 @@ abstract class SoftcoverDatabase : RoomDatabase() {
         private val MIGRATION_17_18 = object : Migration(17, 18) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE user_books ADD COLUMN createdAt TEXT DEFAULT NULL")
+            }
+        }
+
+        private val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE books ADD COLUMN ratingsCount INTEGER NOT NULL DEFAULT 0")
             }
         }
     }
