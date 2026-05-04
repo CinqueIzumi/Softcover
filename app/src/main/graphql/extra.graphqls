@@ -9,3 +9,8 @@ extend type editions {
     canonical_id: Int
 }
 extend type books @typePolicy(keyFields: "id")
+
+# action_at is exposed on the live API but missing from the schema dump.
+extend type reading_journals {
+    action_at: date
+}

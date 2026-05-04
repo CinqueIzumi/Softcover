@@ -1,9 +1,23 @@
 package nl.rhaydus.softcover.feature.settings.data.datasource
 
-import nl.rhaydus.softcover.feature.settings.domain.model.UserProfileData
+import com.apollographql.apollo.ApolloClient
+import nl.rhaydus.softcover.GetUserIdQuery
+import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 
 interface SettingsRemoteDataSource {
     suspend fun getUserIdFromBackend(): Int
+}
 
-    suspend fun getUserProfileData(): UserProfileData
+class SettingsRemoteDataSourceImpl(
+    private val apolloClient: ApolloClient,
+) : SettingsRemoteDataSource {
+    override suspend fun getUserIdFromBackend(): Int {
+        val me = apolloClient
+            .safeQuery(query = GetUserIdQuery())
+            .me
+            .firstOrNull()
+            ?: throw Exception("User could not be initialized")
+
+        return me.id
+    }
 }

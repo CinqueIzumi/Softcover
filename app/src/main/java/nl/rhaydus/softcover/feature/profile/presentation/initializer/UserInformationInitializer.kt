@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.presentation.initializer
 
+import kotlinx.coroutines.flow.filterNotNull
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
@@ -12,10 +13,15 @@ class UserInformationInitializer() : ProfileInitializer {
         scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
         dependencies: ProfileDependencies,
     ) {
-        dependencies.getUserProfileDataUseCase()
-            .onFailure { Timber.e("-=- $it") }
-            .onSuccess { profileData -> scope.setState { it.copy(userProfileData = profileData) } }
+        dependencies.launch {
+            dependencies.refreshUserProfileDataUseCase()
+                .onFailure { Timber.e("-=- $it") }
+        }
 
-        scope.setState { it.copy(isLoading = false) }
+        dependencies.observeUserProfileDataUseCase()
+            .filterNotNull()
+            .collect { profileData ->
+                scope.setState { it.copy(userProfileData = profileData, isLoading = false) }
+            }
     }
 }

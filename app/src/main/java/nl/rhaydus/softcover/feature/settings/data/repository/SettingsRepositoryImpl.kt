@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.feature.settings.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 
 class SettingsRepositoryImpl(
@@ -48,10 +47,6 @@ class SettingsRepositoryImpl(
 
     override suspend fun getUserIdFromBackend(): Int {
         return settingsRemoteDataSource.getUserIdFromBackend()
-    }
-
-    override suspend fun getUserProfileData(): UserProfileData {
-        return settingsRemoteDataSource.getUserProfileData()
     }
 
     override val enabledStatusCodes: Flow<Set<Int>> = settingsLocalDataSource.enabledStatusCodes

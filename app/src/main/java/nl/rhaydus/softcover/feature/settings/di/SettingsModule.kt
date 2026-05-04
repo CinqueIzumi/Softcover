@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.di
 
-import nl.rhaydus.softcover.feature.profile.presentation.initializer.ProfileInitializer
-import nl.rhaydus.softcover.feature.profile.presentation.initializer.UserInformationInitializer
 import nl.rhaydus.softcover.feature.settings.data.datasource.ApiKeyLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.ApiKeyLocalDataSourceImpl
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
@@ -50,8 +48,6 @@ val settingsModule = module {
             setDateStyleUseCase = get(),
         )
     }
-
-    factory { UserInformationInitializer() } bind ProfileInitializer::class
 
     single<SettingsLocalDataSource> {
         SettingsLocalDataSourceImpl(
@@ -106,6 +102,7 @@ val settingsModule = module {
         ResetUserDataUseCase(
             settingsRepository = get(),
             booksRepository = get(),
+            profileRepository = get(),
         )
     }
 

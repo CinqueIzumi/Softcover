@@ -3,9 +3,11 @@ package nl.rhaydus.softcover.feature.settings.domain.usecase
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
+import nl.rhaydus.softcover.feature.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -15,15 +17,18 @@ class ResetUserDataUseCaseTest {
 
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var booksRepository: BooksRepository
+    private lateinit var profileRepository: ProfileRepository
     private lateinit var useCase: ResetUserDataUseCase
 
     @BeforeEach
     fun setUp() {
         settingsRepository = mockk(relaxed = true)
         booksRepository = mockk(relaxed = true)
+        profileRepository = mockk(relaxed = true)
         useCase = ResetUserDataUseCase(
             settingsRepository = settingsRepository,
             booksRepository = booksRepository,
+            profileRepository = profileRepository,
         )
     }
 
@@ -68,6 +73,53 @@ class ResetUserDataUseCaseTest {
             coVerify {
                 booksRepository.removeAllBooks()
             }
+        }
+
+        @Test
+        fun `clears profile cache via profile repository`() = runTest {
+            // ----- Arrange -----
+            // (repositories are relaxed)
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerify {
+                profileRepository.clearProfileCache()
+            }
+        }
+
+        @Test
+        fun `clears profile cache after removing all books and before resetting library visibility`() = runTest {
+            // ----- Arrange -----
+            // (repositories are relaxed)
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerifyOrder {
+                booksRepository.removeAllBooks()
+                profileRepository.clearProfileCache()
+                settingsRepository.resetLibraryVisibilityPreferences()
+            }
+        }
+
+        @Test
+        fun `returns failure when clearProfileCache throws`() = runTest {
+            // ----- Arrange -----
+            val expectedError = RuntimeException("cache clear error")
+
+            coEvery {
+                profileRepository.clearProfileCache()
+            } throws expectedError
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            result.exceptionOrNull() shouldBe expectedError
         }
 
         @Test
