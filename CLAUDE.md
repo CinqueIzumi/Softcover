@@ -31,6 +31,12 @@ When the target is a whole package or directory (not a single file), the agent's
 
 When multiple independent files need tests, spawn unit-test-writers in parallel on disjoint file sets rather than sequentially in one agent.
 
+**Scope the prompt tightly to keep token/tool usage down.** A loose brief on a large test file (e.g. `BookMapperTest` is 3000+ lines) can burn 100K+ tokens on rediscovery and re-reads. For small mechanical changes (adding one field, renaming a symbol, fixing compile breaks):
+- Hand the agent the exact file paths and line numbers of the construction sites you want fixed. Do the `grep` yourself first and paste the results — don't make the agent rediscover them.
+- Skip the package-wide audit ask. List the specific 1-2 round-trip tests you want added and stop there. The audit rule above is for genuinely package-wide work, not single-field additions.
+- Specify ONE narrow gradle `--tests` filter in the prompt; don't let the agent pick.
+- Tell the agent explicitly NOT to re-audit, NOT to run the broader suite, and to keep its report concise (e.g. "under 150 words").
+
 The agent is required to run the tests after writing them. Prefer narrow filters (e.g. `./gradlew :app:testDebugUnitTest --tests "nl.rhaydus.softcover.feature.<name>.*"`) over the full suite. When relaying its report to the user:
 - If all tests pass, mention that the suite was executed and passed.
 - If any test fails, surface the failing test names and the agent's diagnosis to the user verbatim, then **stop** and wait for the user to approve any fixes. Do not delegate a fix round until the user has reviewed and authorized it.

@@ -5,6 +5,10 @@ import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
@@ -15,6 +19,10 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayout
 
 class LibraryDependencies(
     val getAllUserBooksUseCase: GetAllUserBooksUseCase,
+    val getCurrentlyReadingUserBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
+    val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
+    val getReadUserBooksUseCase: GetReadUserBooksUseCase,
+    val getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase,
     val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     val getAllUserListsUseCase: GetAllUserListsUseCase,
     val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,

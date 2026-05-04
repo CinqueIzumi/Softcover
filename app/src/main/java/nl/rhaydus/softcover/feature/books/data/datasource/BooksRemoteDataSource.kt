@@ -94,6 +94,20 @@ interface BooksRemoteDataSource {
     suspend fun markEditionAsOwned(edition: BookEdition): ListBook
 
     suspend fun removeListBook(book: ListBook): BookList
+
+    suspend fun replayUpdateBookProgress(
+        userBookReadId: Int,
+        editionId: Int?,
+        progressPages: Int?,
+        progressSeconds: Int?,
+        startedAt: String?,
+        finishedAt: String?,
+    )
+
+    suspend fun replayMarkBookAsRead(
+        bookId: Int,
+        userDate: String,
+    )
 }
 
 class BooksRemoteDataSourceImpl(
@@ -248,6 +262,7 @@ class BooksRemoteDataSourceImpl(
         coverUrl = canonical.coverUrl,
         authors = canonical.authors,
         usersCount = canonical.usersCount,
+        ratingsCount = canonical.ratingsCount,
         bookSeries = canonical.bookSeries,
         positionInSeries = canonical.positionInSeries,
     )
@@ -391,5 +406,45 @@ class BooksRemoteDataSourceImpl(
             ?: throw Exception("Did not receive a list fragment")
 
         return listFragment.toBookList()
+    }
+
+    override suspend fun replayUpdateBookProgress(
+        userBookReadId: Int,
+        editionId: Int?,
+        progressPages: Int?,
+        progressSeconds: Int?,
+        startedAt: String?,
+        finishedAt: String?,
+    ) {
+        val isAudiobook = progressSeconds != null
+
+        val dataObject = DatesReadInput(
+            progress_pages = if (isAudiobook) Optional.absent() else Optional.present(progressPages),
+            progress_seconds = if (isAudiobook) Optional.present(progressSeconds) else Optional.absent(),
+            started_at = Optional.present(startedAt),
+            finished_at = Optional.present(finishedAt),
+            edition_id = Optional.present(editionId),
+        )
+
+        apolloClient.safeMutation(
+            mutation = UpdateReadingProgressMutation(
+                id = userBookReadId,
+                datesReadInput = dataObject,
+            ),
+        )
+    }
+
+    override suspend fun replayMarkBookAsRead(
+        bookId: Int,
+        userDate: String,
+    ) {
+        val dataObject = UserBookCreateInput(
+            book_id = bookId,
+            status_id = Optional.present(UserBookStatus.READ.code),
+            user_date = Optional.present(userDate),
+            privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
+        )
+
+        apolloClient.safeMutation(mutation = MarkBookAsReadMutation(userBookCreateInput = dataObject))
     }
 }

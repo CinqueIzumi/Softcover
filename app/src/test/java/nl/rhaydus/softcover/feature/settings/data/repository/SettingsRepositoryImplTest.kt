@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.feature.settings.domain.model.UserProfileData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -227,47 +226,6 @@ class SettingsRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe expectedId
-        }
-    }
-
-    @Nested
-    inner class GetUserProfileData {
-
-        @Test
-        fun `delegates to remote data source and returns the result`() = runTest {
-            // ----- Arrange -----
-            val expectedData = UserProfileData(
-                profileImageUrl = "https://example.com/image.png",
-                name = "Jane Doe",
-                bio = "Reader",
-                booksRead = 10,
-            )
-
-            coEvery {
-                settingsRemoteDataSource.getUserProfileData()
-            } returns expectedData
-
-            // ----- Act -----
-            val result = repository.getUserProfileData()
-
-            // ----- Assert -----
-            result shouldBe expectedData
-        }
-
-        @Test
-        fun `propagates exception thrown by remote data source`() = runTest {
-            // ----- Arrange -----
-            val expectedError = RuntimeException("network error")
-
-            coEvery {
-                settingsRemoteDataSource.getUserProfileData()
-            } throws expectedError
-
-            // ----- Act -----
-            val thrownError = runCatching { repository.getUserProfileData() }.exceptionOrNull()
-
-            // ----- Assert -----
-            thrownError shouldBe expectedError
         }
     }
 

@@ -1,5 +1,10 @@
 package nl.rhaydus.softcover.feature.book_detail.di
 
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
+import nl.rhaydus.softcover.feature.book_detail.data.repository.BookReviewsRepositoryImpl
+import nl.rhaydus.softcover.feature.book_detail.domain.repository.BookReviewsRepository
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDeadlineCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailInitializer
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.DateStyleCollector
@@ -12,6 +17,18 @@ val bookDetailModule = module {
     factory { UserBooksFlowCollector() } bind BookDetailInitializer::class
     factory { DateStyleCollector() } bind BookDetailInitializer::class
     factory { BookDeadlineCollector() } bind BookDetailInitializer::class
+
+    single<BookReviewsRemoteDataSource> {
+        BookReviewsRemoteDataSourceImpl(apolloClient = get())
+    }
+
+    single<BookReviewsRepository> {
+        BookReviewsRepositoryImpl(bookReviewsRemoteDataSource = get())
+    }
+
+    factory {
+        GetTopBookReviewsUseCase(bookReviewsRepository = get())
+    }
 
     factory {
         BookDetailScreenScreenModel(
@@ -31,6 +48,7 @@ val bookDetailModule = module {
             observeBookDeadlineUseCase = get(),
             setBookDeadlineUseCase = get(),
             clearBookDeadlineUseCase = get(),
+            getTopBookReviewsUseCase = get(),
         )
     }
 }

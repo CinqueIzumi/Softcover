@@ -1,0 +1,16 @@
+fragment BookReviewFragment on user_books {
+    id
+    review
+    review_has_spoilers
+    rating
+    reviewed_at
+    likes_count
+    user {
+        id
+        username
+        name
+        image {
+            url
+        }
+    }
+}

@@ -1,17 +1,53 @@
-query GetUserProfileData {
+query GetUserProfileData($userId: Int!) {
     me {
         bio
         image {
             url
         }
         name
-        user_books(
-            distinct_on: book_id,
-            where: {
-                status_id: {_eq: 3}
+        books_read: user_books_aggregate(where: { status_id: { _eq: 3 } }) {
+            aggregate {
+                count
             }
-        ) {
-            read_count
         }
+        rated_books: user_books_aggregate(where: { rating: { _is_null: false } }) {
+            aggregate {
+                avg {
+                    rating
+                }
+            }
+        }
+        # Pages read is computed client-side as the sum, per user_book, of the highest
+        # logged progress (max progress_pages across its user_book_reads). For books
+        # marked Read with no per-session progress, we fall back to edition.pages or
+        # book.pages so imported "Read" books still contribute their full page count.
+        user_books_pages: user_books {
+            status_id
+            edition {
+                pages
+            }
+            book {
+                pages
+            }
+            user_book_reads_aggregate {
+                aggregate {
+                    max {
+                        progress_pages
+                    }
+                }
+            }
+        }
+    }
+    # Capped at 1000 rows; users with more journal entries than that will see
+    # streaks longer than ~1000 active days truncated.
+    streak_journals: reading_journals(
+        where: {
+            user_id: { _eq: $userId }
+            event: { _in: ["progress_updated", "user_book_read_finished"] }
+        }
+        order_by: { updated_at: desc }
+        limit: 1000
+    ) {
+        action_at
     }
 }

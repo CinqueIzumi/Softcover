@@ -48,6 +48,7 @@ class BookTest {
         coverUrl = "",
         authors = emptyList(),
         usersCount = 0,
+        ratingsCount = 0,
         bookSeries = null,
         positionInSeries = null,
         userBook = userBook,

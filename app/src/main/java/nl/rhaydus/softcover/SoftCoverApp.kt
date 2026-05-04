@@ -1,12 +1,17 @@
 package nl.rhaydus.softcover
 
 import android.app.Application
+import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
+import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
+import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.di.apolloModule
 import nl.rhaydus.softcover.di.coreModule
 import nl.rhaydus.softcover.di.databaseModule
 import nl.rhaydus.softcover.di.dispatcherModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
+import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingProgressSyncer
+import nl.rhaydus.softcover.feature.connectivity.di.connectivityModule
 import nl.rhaydus.softcover.feature.reading.di.readingModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import nl.rhaydus.softcover.feature.book_detail.di.bookDetailModule
@@ -17,6 +22,7 @@ import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
 import nl.rhaydus.softcover.feature.profile.di.profileModule
 import nl.rhaydus.softcover.feature.search.di.searchModule
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
 
@@ -53,7 +59,12 @@ class SoftCoverApp : Application() {
                 appUpdateModule,
                 appUpdateVariantModule,
                 deadlinesModule,
+                connectivityModule,
             )
         }
+
+        val koin = GlobalContext.get()
+        NetworkAvailability.install(koin.get<NetworkAvailabilityProvider>())
+        koin.get<PendingProgressSyncer>().start(koin.get<ApplicationScope>().scope)
     }
 }

@@ -44,6 +44,7 @@ object PreviewData {
         authors = listOf(baseAuthor),
         defaultEdition = baseEdition,
         usersCount = 20,
+        ratingsCount = 1200,
         userBook = UserBook(
             id = 1,
             status = BookStatus.None,

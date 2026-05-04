@@ -53,6 +53,10 @@ interface BookDao {
     fun observeBooks(): Flow<List<BookFullEntity>>
 
     @Transaction
+    @Query("SELECT * FROM books WHERE id = :id LIMIT 1")
+    suspend fun getBookById(id: Int): BookFullEntity?
+
+    @Transaction
     @Query("SELECT * FROM book_lists")
     fun observeBookLists(): Flow<List<BookListWithBooks>>
 

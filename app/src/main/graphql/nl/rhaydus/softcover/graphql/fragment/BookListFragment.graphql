@@ -4,12 +4,14 @@ fragment BookListFragment on books {
         id
     }
     title
+    description
     rating
     image {
         url
     }
     release_year
     users_count
+    ratings_count
     book_series {
         ...BookSeriesFragment
     }

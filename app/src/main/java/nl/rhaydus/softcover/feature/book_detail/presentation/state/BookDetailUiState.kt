@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.toad.UiState
+import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
@@ -25,6 +26,10 @@ data class BookDetailUiState(
     val deadline: BookDeadline? = null,
     val deadlineProgress: DeadlineProgress? = null,
     val showDeadlinePicker: Boolean = false,
+
+    val reviews: List<BookReview> = emptyList(),
+    val loadingReviews: Boolean = false,
+    val revealedSpoilerReviewIds: Set<Int> = emptySet(),
 ) : UiState {
     val filteredEditions: List<BookEdition>
         get() {

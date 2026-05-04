@@ -13,6 +13,7 @@ val coreModule = module {
             getUserIdUseCase = get(),
             initializeUserBooksUseCase = get(),
             getThemeConfigurationUseCase = get(),
+            refreshUserProfileDataUseCase = get(),
         )
     }
 

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.presentation.state.SplashState
 import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
@@ -19,6 +20,7 @@ class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
     private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
+    private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SplashState())
     val state = _state.asStateFlow()
@@ -60,6 +62,12 @@ class MainActivityViewModel(
 
         MainScope().launch {
             initializeUserBooksUseCase().onFailure {
+                Timber.e("-=- $it")
+            }
+        }
+
+        MainScope().launch {
+            refreshUserProfileDataUseCase().onFailure {
                 Timber.e("-=- $it")
             }
         }
