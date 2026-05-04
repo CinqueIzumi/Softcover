@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserProfileDataUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.GetUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 
 data class ProfileDependencies(

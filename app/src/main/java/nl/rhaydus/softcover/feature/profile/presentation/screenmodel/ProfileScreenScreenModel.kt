@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.initializer.ProfileInitializer
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserProfileDataUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.GetUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 
 class ProfileScreenScreenModel(
