@@ -102,6 +102,7 @@ val settingsModule = module {
         ResetUserDataUseCase(
             settingsRepository = get(),
             booksRepository = get(),
+            profileRepository = get(),
         )
     }
 

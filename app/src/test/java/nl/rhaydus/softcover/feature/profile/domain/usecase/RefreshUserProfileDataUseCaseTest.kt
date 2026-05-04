@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.feature.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
@@ -16,7 +17,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
-class GetUserProfileDataUseCaseTest {
+class RefreshUserProfileDataUseCaseTest {
 
     private val fixedClock: Clock = Clock.fixed(
         Instant.parse("2026-05-04T12:00:00Z"),
@@ -25,13 +26,13 @@ class GetUserProfileDataUseCaseTest {
 
     private lateinit var profileRepository: ProfileRepository
     private lateinit var getUserIdUseCase: GetUserIdUseCase
-    private lateinit var useCase: GetUserProfileDataUseCase
+    private lateinit var useCase: RefreshUserProfileDataUseCase
 
     @BeforeEach
     fun setUp() {
         profileRepository = mockk()
         getUserIdUseCase = mockk()
-        useCase = GetUserProfileDataUseCase(
+        useCase = RefreshUserProfileDataUseCase(
             profileRepository = profileRepository,
             getUserIdUseCase = getUserIdUseCase,
             clock = fixedClock,
@@ -52,49 +53,37 @@ class GetUserProfileDataUseCaseTest {
     inner class Invoke {
 
         @Test
-        fun `returns success result when repository returns data`() = runTest {
+        fun `returns success and caches profile data when repository returns snapshot`() = runTest {
             // ----- Arrange -----
             val profileSnapshot = snapshot(activeReadingDates = emptySet())
+            val expectedData = UserProfileData(
+                profileImageUrl = profileSnapshot.profileImageUrl,
+                name = profileSnapshot.name,
+                bio = profileSnapshot.bio,
+                booksRead = profileSnapshot.booksRead,
+                totalPagesRead = profileSnapshot.totalPagesRead,
+                averageRating = profileSnapshot.averageRating,
+                readingStreak = 0,
+            )
 
             coEvery { getUserIdUseCase() } returns Result.success(42)
             coEvery {
-                profileRepository.getUserProfileSnapshot(userId = 42)
+                profileRepository.fetchUserProfileSnapshot(userId = 42)
             } returns profileSnapshot
+            coEvery {
+                profileRepository.cacheUserProfileData(data = expectedData)
+            } returns Unit
 
             // ----- Act -----
             val result = useCase()
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            result.getOrNull()?.profileImageUrl shouldBe profileSnapshot.profileImageUrl
-            result.getOrNull()?.name shouldBe profileSnapshot.name
-            result.getOrNull()?.bio shouldBe profileSnapshot.bio
-            result.getOrNull()?.booksRead shouldBe profileSnapshot.booksRead
-            result.getOrNull()?.totalPagesRead shouldBe profileSnapshot.totalPagesRead
-            result.getOrNull()?.averageRating shouldBe profileSnapshot.averageRating
-            result.getOrNull()?.readingStreak shouldBe 0
+            coVerify(exactly = 1) { profileRepository.cacheUserProfileData(data = expectedData) }
         }
 
         @Test
-        fun `returns failure result when repository throws`() = runTest {
-            // ----- Arrange -----
-            val exception = RuntimeException("network error")
-
-            coEvery { getUserIdUseCase() } returns Result.success(42)
-            coEvery {
-                profileRepository.getUserProfileSnapshot(userId = 42)
-            } throws exception
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe exception
-        }
-
-        @Test
-        fun `returns failure result when getUserIdUseCase fails and never calls repository`() = runTest {
+        fun `returns failure when getUserIdUseCase fails and never calls repository`() = runTest {
             // ----- Arrange -----
             val exception = RuntimeException("user id error")
 
@@ -106,7 +95,25 @@ class GetUserProfileDataUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe exception
-            coVerify(exactly = 0) { profileRepository.getUserProfileSnapshot(userId = any()) }
+            coVerify(exactly = 0) { profileRepository.fetchUserProfileSnapshot(userId = any()) }
+        }
+
+        @Test
+        fun `returns failure when fetchUserProfileSnapshot throws`() = runTest {
+            // ----- Arrange -----
+            val exception = RuntimeException("network error")
+
+            coEvery { getUserIdUseCase() } returns Result.success(42)
+            coEvery {
+                profileRepository.fetchUserProfileSnapshot(userId = 42)
+            } throws exception
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            result.exceptionOrNull() shouldBe exception
         }
     }
 
@@ -114,11 +121,18 @@ class GetUserProfileDataUseCaseTest {
     inner class ReadingStreak {
 
         private suspend fun streakFor(activeReadingDates: Set<LocalDate>): Int {
+            val capturedData = mutableListOf<UserProfileData>()
             coEvery { getUserIdUseCase() } returns Result.success(42)
             coEvery {
-                profileRepository.getUserProfileSnapshot(userId = 42)
+                profileRepository.fetchUserProfileSnapshot(userId = 42)
             } returns snapshot(activeReadingDates = activeReadingDates)
-            return useCase().getOrThrow().readingStreak
+            coEvery {
+                profileRepository.cacheUserProfileData(data = any())
+            } answers {
+                capturedData.add(firstArg())
+            }
+            useCase()
+            return capturedData.first().readingStreak
         }
 
         @Test

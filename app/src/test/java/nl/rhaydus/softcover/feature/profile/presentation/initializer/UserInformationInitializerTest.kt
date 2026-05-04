@@ -2,15 +2,19 @@ package nl.rhaydus.softcover.feature.profile.presentation.initializer
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.profile.domain.model.UserProfileData
-import nl.rhaydus.softcover.feature.profile.domain.usecase.GetUserProfileDataUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -21,14 +25,18 @@ import org.junit.jupiter.api.Test
 
 class UserInformationInitializerTest {
 
-    private lateinit var getUserProfileDataUseCase: GetUserProfileDataUseCase
+    private lateinit var observeUserProfileDataUseCase: ObserveUserProfileDataUseCase
+    private lateinit var refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
     private lateinit var eventChannel: Channel<ProfileEvent>
     private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
+    private lateinit var profileDataFlow: MutableSharedFlow<UserProfileData?>
 
     @BeforeEach
     fun setUp() {
-        getUserProfileDataUseCase = mockk()
+        profileDataFlow = MutableSharedFlow()
+        observeUserProfileDataUseCase = mockk()
+        refreshUserProfileDataUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -36,14 +44,22 @@ class UserInformationInitializerTest {
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
             eventChannel = eventChannel,
         )
+
+        every {
+            observeUserProfileDataUseCase()
+        } returns profileDataFlow
     }
 
     private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
-                mock.getUserProfileDataUseCase
-            } returns getUserProfileDataUseCase
+                mock.observeUserProfileDataUseCase
+            } returns observeUserProfileDataUseCase
+
+            every {
+                mock.refreshUserProfileDataUseCase
+            } returns refreshUserProfileDataUseCase
 
             every {
                 mock.coroutineScope
@@ -59,7 +75,7 @@ class UserInformationInitializerTest {
         }
     }
 
-    private fun stubUserProfileData() = UserProfileData(
+    private fun buildProfileData(): UserProfileData = UserProfileData(
         profileImageUrl = "https://example.com/avatar.png",
         name = "Jane Doe",
         bio = "Avid reader",
@@ -73,42 +89,74 @@ class UserInformationInitializerTest {
     inner class OnLaunch {
 
         @Test
-        fun `sets userProfileData on state and isLoading false when use case succeeds`() = runTest {
+        fun `invokes refreshUserProfileDataUseCase on launch`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val profileData = stubUserProfileData()
+            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
-
-            coEvery {
-                getUserProfileDataUseCase()
-            } returns Result.success(profileData)
-
             val initializer = UserInformationInitializer()
+            val job = launch { initializer.onLaunch(scope = scope, dependencies = dependencies) }
 
             // ----- Act -----
-            initializer.onLaunch(scope = scope, dependencies = dependencies)
+            // (refresh is triggered immediately on launch via dependencies.launch { ... })
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { refreshUserProfileDataUseCase() }
+            job.cancel()
+        }
+
+        @Test
+        fun `updates state to userProfileData and isLoading false when observe emits non-null`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            val profileData = buildProfileData()
+            val dependencies = stubDependencies(this)
+            val initializer = UserInformationInitializer()
+            val job = launch { initializer.onLaunch(scope = scope, dependencies = dependencies) }
+
+            // ----- Act -----
+            profileDataFlow.emit(profileData)
 
             // ----- Assert -----
             stateFlow.value.userProfileData shouldBe profileData
             stateFlow.value.isLoading shouldBe false
+            job.cancel()
         }
 
         @Test
-        fun `leaves userProfileData null and sets isLoading false when use case fails`() = runTest {
+        fun `does not update state when observe emits null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
+            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
-
-            coEvery {
-                getUserProfileDataUseCase()
-            } returns Result.failure(RuntimeException("fetch error"))
-
             val initializer = UserInformationInitializer()
+            val job = launch { initializer.onLaunch(scope = scope, dependencies = dependencies) }
 
             // ----- Act -----
-            initializer.onLaunch(scope = scope, dependencies = dependencies)
+            profileDataFlow.emit(null)
 
             // ----- Assert -----
             stateFlow.value.userProfileData shouldBe null
+            stateFlow.value.isLoading shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `swallows refresh failure and still collects from observe`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.failure(RuntimeException("refresh error"))
+            val profileData = buildProfileData()
+            val dependencies = stubDependencies(this)
+            val initializer = UserInformationInitializer()
+            val job = launch { initializer.onLaunch(scope = scope, dependencies = dependencies) }
+
+            // ----- Act -----
+            profileDataFlow.emit(profileData)
+
+            // ----- Assert -----
+            stateFlow.value.userProfileData shouldBe profileData
             stateFlow.value.isLoading shouldBe false
+            job.cancel()
         }
     }
 }

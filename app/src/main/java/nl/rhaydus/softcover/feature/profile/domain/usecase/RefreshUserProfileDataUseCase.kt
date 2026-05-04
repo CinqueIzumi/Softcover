@@ -7,16 +7,17 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
 import java.time.Clock
 import java.time.LocalDate
 
-class GetUserProfileDataUseCase(
+class RefreshUserProfileDataUseCase(
     private val profileRepository: ProfileRepository,
     private val getUserIdUseCase: GetUserIdUseCase,
     private val clock: Clock,
 ) {
-    suspend operator fun invoke(): Result<UserProfileData> = runCatching {
+    suspend operator fun invoke(): Result<Unit> = runCatching {
         val userId = getUserIdUseCase().getOrThrow()
-        val snapshot = profileRepository.getUserProfileSnapshot(userId = userId)
+        val snapshot = profileRepository.fetchUserProfileSnapshot(userId = userId)
+        val data = snapshot.toUserProfileData(today = LocalDate.now(clock))
 
-        snapshot.toUserProfileData(today = LocalDate.now(clock))
+        profileRepository.cacheUserProfileData(data = data)
     }
 
     private fun UserProfileSnapshot.toUserProfileData(today: LocalDate): UserProfileData =
