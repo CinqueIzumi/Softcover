@@ -54,6 +54,8 @@ interface BooksLocalDataSource {
     suspend fun syncBookListMetadata(serverListIds: Set<Int>)
 
     suspend fun deleteOrphanBooks()
+
+    suspend fun getBookById(id: Int): Book?
 }
 
 class BooksLocalDataSourceImpl(
@@ -131,6 +133,10 @@ class BooksLocalDataSourceImpl(
 
     override suspend fun cacheBook(book: Book) {
         dao.cacheBook(book = book)
+    }
+
+    override suspend fun getBookById(id: Int): Book? {
+        return dao.getBookById(id = id)?.toModel()
     }
 
     override suspend fun cacheBooks(books: List<Book>) {

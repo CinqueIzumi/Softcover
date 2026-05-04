@@ -1,6 +1,5 @@
 fragment BookDetailFragment on books {
     ...BookListFragment
-    description
     users_count
     default_physical_edition {
         ...EditionFragment

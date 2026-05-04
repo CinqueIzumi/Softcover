@@ -122,6 +122,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTime
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.Instant
@@ -215,18 +217,47 @@ class BookDetailScreen(
         val density = LocalDensity.current
         var fabHeight by remember { mutableStateOf(0.dp) }
 
+        val isOnline = rememberIsOnline()
+        val showOfflinePlaceholder = isOnline.not() && state.book == null && state.loadingBookDetails.not()
+
         Scaffold(
             contentWindowInsets = WindowInsets(),
             floatingActionButton = {
-                FloatingActionButtonMenu(
-                    state = state,
-                    runAction = runAction,
-                    onFabSizeChange = { size ->
-                        fabHeight = with(density) { size.height.toDp() }
-                    },
-                )
+                if (showOfflinePlaceholder.not()) {
+                    FloatingActionButtonMenu(
+                        state = state,
+                        runAction = runAction,
+                        isOnline = isOnline,
+                        onFabSizeChange = { size ->
+                            fabHeight = with(density) { size.height.toDp() }
+                        },
+                    )
+                }
             }
         ) { innerPadding ->
+            if (showOfflinePlaceholder) {
+                OfflineScreenContent(modifier = Modifier.padding(innerPadding))
+
+                SoftcoverTopBar(
+                    title = "",
+                    onNavigateBack = onNavigateBack,
+                    navigateBackButton = {
+                        IconButton(
+                            onClick = onNavigateBack,
+                            colors = backButtonColors,
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_arrow_back),
+                                contentDescription = "Navigate back icon"
+                            )
+                        }
+                    },
+                    scrollBehavior = topAppBarScrollBehavior,
+                )
+
+                return@Scaffold
+            }
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -420,6 +451,7 @@ class BookDetailScreen(
     private fun FloatingActionButtonMenu(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
+        isOnline: Boolean,
         onFabSizeChange: (IntSize) -> Unit,
     ) {
         val userStatus = state.book?.status ?: return
@@ -472,18 +504,20 @@ class BookDetailScreen(
                 )
             }
 
-            FloatingActionButtonMenuItem(
-                onClick = {
-                    runAction(OnShowEditEditionSheetClickAction())
-                },
-                text = { Text(text = "Change edition") },
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_library_books),
-                        contentDescription = "Edition icon"
-                    )
-                }
-            )
+            if (isOnline) {
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        runAction(OnShowEditEditionSheetClickAction())
+                    },
+                    text = { Text(text = "Change edition") },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_library_books),
+                            contentDescription = "Edition icon"
+                        )
+                    }
+                )
+            }
 
             if (state.deadline == null) {
                 FloatingActionButtonMenuItem(
@@ -526,18 +560,20 @@ class BookDetailScreen(
                 )
             }
 
-            FloatingActionButtonMenuItem(
-                onClick = {
-                    runAction(OnRemoveBookClickAction(book = state.book))
-                },
-                text = { Text(text = "Remove") },
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_delete),
-                        contentDescription = "Delete icon"
-                    )
-                }
-            )
+            if (isOnline) {
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        runAction(OnRemoveBookClickAction(book = state.book))
+                    },
+                    text = { Text(text = "Remove") },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_delete),
+                            contentDescription = "Delete icon"
+                        )
+                    }
+                )
+            }
         }
     }
 
