@@ -187,7 +187,7 @@ fun UserBookFragment.toBook(): Book? {
         editions = editions,
         defaultEdition = null,
         rating = listFragment.roundedRating(),
-        description = "",
+        description = listFragment.description ?: "",
         releaseYear = listFragment.release_year ?: -1,
         coverUrl = listFragment.image?.url ?: "",
         authors = bookAuthors,

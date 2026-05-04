@@ -5,10 +5,16 @@ import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
+import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 
 private suspend fun <T : Operation.Data> executeCall(
     call: suspend () -> ApolloResponse<T>,
 ): T {
+    if (NetworkAvailability.isOnline().not()) {
+        throw OfflineException()
+    }
+
     val response = call()
 
     response.exception?.let { exception ->

@@ -3121,6 +3121,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { users_count } returns 250
                 every { ratings_count } returns 0
+                every { description } returns null
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3167,6 +3168,81 @@ class BookMapperTest {
         }
 
         @Test
+        fun `maps description from BookListFragment when non-null`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.User_book_read.Companion)
+
+            val bookListFragment = mockk<UserBookFragment.Book>()
+            val editionInner = mockk<UserBookFragment.Edition>()
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 100
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+
+            val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
+                every { id } returns 100
+                every { canonical } returns null
+                every { title } returns "My Book"
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns emptyList()
+                every { contributions } returns emptyList()
+                every { users_count } returns 0
+                every { ratings_count } returns 0
+                every { description } returns "some description"
+            }
+
+            val fragment = mockk<UserBookFragment> {
+                every { book } returns bookListFragment
+                every { edition } returns editionInner
+                every { progress_updated_journal } returns emptyList()
+                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_finished_journal } returns emptyList()
+                every { status_stopped_journal } returns emptyList()
+                every { user_book_reads } returns emptyList()
+                every { id } returns 1
+                every { status_id } returns 1
+                every { edition_id } returns 10
+                every { last_read_date } returns null
+                every { date_added } returns "2024-01-01"
+                every { privacy_setting_id } returns 1
+                every { rating } returns null
+                every { referrer_user_id } returns null
+                every { review_has_spoilers } returns false
+                every { reviewed_at } returns null
+                every { updated_at } returns null
+                every { created_at } returns "2024-01-01"
+            }
+
+            every {
+                with(UserBookFragment.Book.Companion) { bookListFragment.bookListFragment() }
+            } returns bookListFragmentModel
+
+            every {
+                with(UserBookFragment.Edition.Companion) { editionInner.editionFragment() }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.description shouldBe "some description"
+        }
+
+        @Test
         fun `maps usersCount from BookListFragment users_count when non-null`() {
             // ----- Arrange -----
             mockkObject(UserBookFragment.Book.Companion)
@@ -3201,6 +3277,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { users_count } returns 1234
                 every { ratings_count } returns 0
+                every { description } returns null
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3279,6 +3356,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
                 every { ratings_count } returns 0
+                every { description } returns null
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3357,6 +3435,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
                 every { ratings_count } returns 0
+                every { description } returns null
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3434,6 +3513,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
                 every { ratings_count } returns 0
+                every { description } returns null
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3510,6 +3590,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
                 every { ratings_count } returns ratingsCount
+                every { description } returns null
             }
 
             every {

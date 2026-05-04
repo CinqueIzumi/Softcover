@@ -45,6 +45,8 @@ import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.search.presentation.action.OnAddBookToLibraryClickAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.search.presentation.action.OnRemoveAllSearchQueriesClickedAction
@@ -82,6 +84,8 @@ class SearchScreen : Screen {
         onNavigateUp: () -> Unit,
         onBookClick: (Book) -> Unit,
     ) {
+        val isOnline = rememberIsOnline()
+
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -95,6 +99,11 @@ class SearchScreen : Screen {
                 )
             }
         ) {
+            if (isOnline.not()) {
+                OfflineScreenContent(modifier = Modifier.padding(it))
+                return@Scaffold
+            }
+
             Column(
                 modifier = Modifier
                     .padding(it)
