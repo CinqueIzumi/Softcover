@@ -1,17 +1,29 @@
 package nl.rhaydus.softcover.feature.books.data.repository
 
 import java.io.File
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
+import nl.rhaydus.softcover.core.domain.connectivity.OfflineProgressQueue
+import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdate
+import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdateKind
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
@@ -23,6 +35,9 @@ class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
     private val booksLocalDataSource: BooksLocalDataSource,
     private val settingsRepository: SettingsRepository,
+    private val networkAvailability: NetworkAvailabilityProvider,
+    private val offlineProgressQueue: OfflineProgressQueue,
+    private val pendingProgressDrainer: PendingProgressDrainer,
 ) : BooksRepository {
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
     override val allUserLists: Flow<List<BookList>> = booksLocalDataSource.allUserLists
@@ -48,6 +63,8 @@ class BooksRepositoryImpl(
     }
 
     private suspend fun fetchAndCacheBooks(userId: Int) = withContext(Dispatchers.IO) {
+        val syncedUserBookIds: Set<Int> = pendingProgressDrainer.drainPendingUpdates()
+
         val fetchStatusCodes = UserBookStatus.activeLibraryCodes(
             enabledCodes = settingsRepository.enabledStatusCodes.first(),
         ) + UserBookStatus.alwaysCachedCodes
@@ -77,7 +94,12 @@ class BooksRepositoryImpl(
             if (list.id in listIdsToHydrate) list else list.copy(books = emptyList())
         }
 
-        booksLocalDataSource.cacheBooks(books = fetchedBooks)
+        val booksToCache: List<Book> = preserveSyncedProgress(
+            fetchedBooks = fetchedBooks,
+            syncedUserBookIds = syncedUserBookIds,
+        )
+
+        booksLocalDataSource.cacheBooks(books = booksToCache)
 
         val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }.toSet()
 
@@ -144,6 +166,11 @@ class BooksRepositoryImpl(
     }
 
     override suspend fun fetchBookById(id: Int): Book {
+        if (networkAvailability.isOnline.value.not()) {
+            return booksLocalDataSource.getBookById(id = id)
+                ?: throw OfflineException()
+        }
+
         return booksRemoteDataSource.fetchBookById(id = id)
     }
 
@@ -152,6 +179,10 @@ class BooksRepositoryImpl(
     }
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
+        if (networkAvailability.isOnline.value.not()) {
+            return booksLocalDataSource.getBookById(id = bookId)?.editions.orEmpty()
+        }
+
         return booksRemoteDataSource.getEditionsByBookId(bookId = bookId)
     }
 
@@ -176,15 +207,198 @@ class BooksRepositoryImpl(
         newPage: Int?,
         newSeconds: Int?,
     ): Book {
-        return booksRemoteDataSource.updateBookProgress(
-            book = book,
+        val optimistic = book.withProgress(
             newPage = newPage,
             newSeconds = newSeconds,
         )
+        booksLocalDataSource.cacheBook(book = optimistic)
+
+        if (networkAvailability.isOnline.value) {
+            return runCatching {
+                booksRemoteDataSource.updateBookProgress(
+                    book = book,
+                    newPage = newPage,
+                    newSeconds = newSeconds,
+                )
+            }.getOrElse { error ->
+                if (error is OfflineException) {
+                    enqueueProgressUpdate(
+                        book = optimistic,
+                        newPage = newPage,
+                        newSeconds = newSeconds,
+                    )
+                    optimistic
+                } else {
+                    throw error
+                }
+            }
+        }
+
+        enqueueProgressUpdate(
+            book = optimistic,
+            newPage = newPage,
+            newSeconds = newSeconds,
+        )
+        return optimistic
     }
 
     override suspend fun markBookAsRead(book: Book): Book {
-        return booksRemoteDataSource.markBookAsRead(book = book)
+        val optimistic = book.withMarkedAsRead()
+        booksLocalDataSource.cacheBook(book = optimistic)
+
+        if (networkAvailability.isOnline.value) {
+            return runCatching {
+                booksRemoteDataSource.markBookAsRead(book = book)
+            }.getOrElse { error ->
+                if (error is OfflineException) {
+                    enqueueMarkAsRead(book = optimistic)
+                    optimistic
+                } else {
+                    throw error
+                }
+            }
+        }
+
+        enqueueMarkAsRead(book = optimistic)
+        return optimistic
+    }
+
+    private suspend fun enqueueProgressUpdate(
+        book: Book,
+        newPage: Int?,
+        newSeconds: Int?,
+    ) {
+        val userBook = book.userBook ?: return
+        val userBookRead = book.userBookRead ?: return
+
+        offlineProgressQueue.enqueue(
+            PendingProgressUpdate(
+                kind = PendingProgressUpdateKind.UPDATE_PROGRESS,
+                userBookId = userBook.id,
+                userBookReadId = userBookRead.id,
+                bookId = book.id,
+                editionId = userBook.editionId,
+                progressPages = newPage,
+                progressSeconds = newSeconds,
+                startedAt = userBookRead.startedAt,
+                finishedAt = userBookRead.finishedAt,
+                enqueuedAt = Instant.now().toString(),
+            )
+        )
+    }
+
+    private suspend fun enqueueMarkAsRead(book: Book) {
+        val userBook = book.userBook ?: return
+        val userBookRead = book.userBookRead ?: return
+
+        offlineProgressQueue.enqueue(
+            PendingProgressUpdate(
+                kind = PendingProgressUpdateKind.MARK_AS_READ,
+                userBookId = userBook.id,
+                userBookReadId = userBookRead.id,
+                bookId = book.id,
+                editionId = userBook.editionId,
+                progressPages = userBookRead.currentPage,
+                progressSeconds = userBookRead.currentSeconds,
+                startedAt = userBookRead.startedAt,
+                finishedAt = userBookRead.finishedAt,
+                enqueuedAt = Instant.now().toString(),
+            )
+        )
+    }
+
+    private suspend fun preserveSyncedProgress(
+        fetchedBooks: List<Book>,
+        syncedUserBookIds: Set<Int>,
+    ): List<Book> {
+        if (syncedUserBookIds.isEmpty()) return fetchedBooks
+
+        val snapshots: Map<Int, Book> = booksLocalDataSource.allUserBooks
+            .first()
+            .mapNotNull { book ->
+                val userBookId: Int = book.userBook?.id ?: return@mapNotNull null
+
+                if (userBookId in syncedUserBookIds) userBookId to book else null
+            }
+            .toMap()
+
+        if (snapshots.isEmpty()) return fetchedBooks
+
+        return fetchedBooks.map { fetched ->
+            val userBookId: Int? = fetched.userBook?.id
+            val snapshot: Book? = userBookId?.let { snapshots[it] }
+
+            if (snapshot != null) {
+                fetched.copy(
+                    userBook = snapshot.userBook,
+                    userBookRead = snapshot.userBookRead,
+                )
+            } else {
+                fetched
+            }
+        }
+    }
+
+    private fun Book.withProgress(
+        newPage: Int?,
+        newSeconds: Int?,
+    ): Book {
+        val existingRead = userBookRead ?: return this
+        val edition = currentEdition
+
+        val totalPages = edition?.pages
+        val totalSeconds = edition?.audioSeconds
+
+        val progress: Float = when {
+            newSeconds != null && totalSeconds != null && totalSeconds > 0 ->
+                (newSeconds.toFloat() / totalSeconds.toFloat() * 100f).coerceIn(0f, 100f)
+
+            newPage != null && totalPages != null && totalPages > 0 ->
+                (newPage.toFloat() / totalPages.toFloat() * 100f).coerceIn(0f, 100f)
+
+            else -> existingRead.progress
+        }
+
+        val updatedUserBook: UserBook? = userBook?.withAppendedJournal(
+            event = JournalEventType.ProgressUpdated,
+        )
+
+        return copy(
+            userBook = updatedUserBook,
+            userBookRead = existingRead.copy(
+                currentPage = newPage ?: existingRead.currentPage,
+                currentSeconds = newSeconds ?: existingRead.currentSeconds,
+                progress = progress,
+            ),
+        )
+    }
+
+    private fun Book.withMarkedAsRead(): Book {
+        val existingUserBook = userBook ?: return this
+        val existingRead = userBookRead
+
+        val today = LocalDate.now().toString()
+
+        val updatedUserBook: UserBook = existingUserBook
+            .copy(status = BookStatus.Read)
+            .withAppendedJournal(event = JournalEventType.StatusFinished)
+
+        return copy(
+            userBook = updatedUserBook,
+            userBookRead = existingRead?.copy(
+                finishedAt = today,
+                progress = 100f,
+            ) ?: existingRead,
+        )
+    }
+
+    private fun UserBook.withAppendedJournal(event: JournalEventType): UserBook {
+        val entry = ReadingJournal(
+            updatedAt = LocalDateTime.now().toString(),
+            event = event.eventName,
+        )
+
+        return copy(journals = journals + entry)
     }
 
     override suspend fun updateBookEdition(

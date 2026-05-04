@@ -19,6 +19,8 @@ import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
+import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingProgressUpdateDao
+import nl.rhaydus.softcover.feature.connectivity.data.model.PendingProgressUpdateEntity
 import nl.rhaydus.softcover.feature.deadlines.data.dao.BookDeadlineDao
 import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
 
@@ -36,16 +38,19 @@ import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
         ListBookEntity::class,
         BookSeriesEntity::class,
         BookDeadlineEntity::class,
+        PendingProgressUpdateEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 19,
+    version = 20,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
 
     abstract fun bookDeadlineDao(): BookDeadlineDao
+
+    abstract fun pendingProgressUpdateDao(): PendingProgressUpdateDao
 
     companion object {
         fun buildDatabase(context: Context): SoftcoverDatabase {
@@ -71,6 +76,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_16_17)
                 .addMigrations(MIGRATION_17_18)
                 .addMigrations(MIGRATION_18_19)
+                .addMigrations(MIGRATION_19_20)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -563,6 +569,32 @@ abstract class SoftcoverDatabase : RoomDatabase() {
         private val MIGRATION_18_19 = object : Migration(18, 19) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE books ADD COLUMN ratingsCount INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS pending_progress_updates (
+                            localId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            kind TEXT NOT NULL,
+                            userBookId INTEGER NOT NULL,
+                            userBookReadId INTEGER NOT NULL,
+                            bookId INTEGER NOT NULL,
+                            editionId INTEGER,
+                            progressPages INTEGER,
+                            progressSeconds INTEGER,
+                            startedAt TEXT,
+                            finishedAt TEXT,
+                            enqueuedAt TEXT NOT NULL,
+                            attempts INTEGER NOT NULL DEFAULT 0
+                        )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_progress_updates_userBookId_kind ON pending_progress_updates(userBookId, kind)"
+                )
             }
         }
     }
