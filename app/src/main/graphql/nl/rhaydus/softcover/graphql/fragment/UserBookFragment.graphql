@@ -45,7 +45,7 @@ fragment UserBookFragment on user_books {
     }
 
     user_book_reads(
-        order_by: [{ finished_at: asc_nulls_first }, { id: desc }]
+        order_by: [{ started_at: asc_nulls_first }, { id: desc }]
         limit: 1
     ) {
         ...UserBookReadFragment
