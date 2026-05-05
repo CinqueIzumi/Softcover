@@ -88,6 +88,12 @@ class ProfileScreen : Screen {
     ) {
         val locale = LocalConfiguration.current.locales[0]
         val integerFormat = remember(locale) { NumberFormat.getIntegerInstance(locale) }
+        val ratingFormat = remember(locale) {
+            NumberFormat.getNumberInstance(locale).apply {
+                minimumFractionDigits = 1
+                maximumFractionDigits = 1
+            }
+        }
 
         Scaffold(
             topBar = {
@@ -240,7 +246,7 @@ class ProfileScreen : Screen {
                                     )
 
                                     Text(
-                                        text = "${state.userProfileData?.averageRating ?: 0}",
+                                        text = ratingFormat.format(state.userProfileData?.averageRating ?: 0.0),
                                         style = MaterialTheme.typography.titleLarge,
                                     )
                                 }
