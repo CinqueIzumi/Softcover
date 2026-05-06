@@ -66,13 +66,16 @@ class SearchScreen : Screen {
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
+        val isOnline = rememberIsOnline()
+
         Screen(
             onNavigateUp = navigator::pop,
             state = state,
             runAction = screenModel::runAction,
             onBookClick = {
                 navigator.push(BookDetailScreen(id = it.id))
-            }
+            },
+            isOnline = isOnline,
         )
     }
 
@@ -83,9 +86,8 @@ class SearchScreen : Screen {
         runAction: (SearchAction) -> Unit,
         onNavigateUp: () -> Unit,
         onBookClick: (Book) -> Unit,
+        isOnline: Boolean,
     ) {
-        val isOnline = rememberIsOnline()
-
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -372,6 +374,7 @@ private fun SearchScreenPreview() {
             onNavigateUp = {},
             runAction = {},
             onBookClick = {},
+            isOnline = true,
             state = SearchScreenUiState(
                 searchText = "Last to leave",
                 previousSearchQueries = listOf("Bubblegum", "Earthlings", "Convenience Store"),
@@ -425,6 +428,7 @@ private fun ActiveSearchScreenPreview() {
             onNavigateUp = {},
             runAction = {},
             onBookClick = {},
+            isOnline = true,
             state = SearchScreenUiState(
                 previousSearchQueries = listOf("Bubblegum", "Earthlings", "Convenience Store")
             )
