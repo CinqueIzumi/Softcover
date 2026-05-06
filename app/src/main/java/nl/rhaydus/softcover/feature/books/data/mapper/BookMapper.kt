@@ -39,7 +39,7 @@ import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Book.Companion.bookListFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Edition.Companion.editionFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Progress_updated_journal.Companion.readingJournalFragment as progressUpdatedJournalFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.Status_currently_reading_journal.Companion.readingJournalFragment as statusCurrentlyReadingJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Companion.readingJournalFragment as statusStoppedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read.Companion.userBookReadFragment
@@ -108,8 +108,8 @@ private fun UserBookFragment.toUserBook(): UserBook {
         progress_updated_journal.mapNotNullTo(this) {
             it.progressUpdatedJournalFragment()?.toReadingJournal()
         }
-        status_currently_reading_journal.mapNotNullTo(this) {
-            it.statusCurrentlyReadingJournalFragment()?.toReadingJournal()
+        user_book_read_started_journal.mapNotNullTo(this) {
+            it.userBookReadStartedJournalFragment()?.toReadingJournal()
         }
         user_book_read_finished_journal.mapNotNullTo(this) {
             it.userBookReadFinishedJournalFragment()?.toReadingJournal()

@@ -20,8 +20,8 @@ fragment UserBookFragment on user_books {
         ...ReadingJournalFragment
     }
 
-    status_currently_reading_journal: reading_journals(
-        where: { event: { _eq: "status_currently_reading" } }
+    user_book_read_started_journal: reading_journals(
+        where: { event: { _eq: "user_book_read_started" } }
         order_by: { updated_at: desc }
         limit: 1
     ) {

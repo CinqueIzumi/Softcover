@@ -37,7 +37,7 @@ import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Progress_updated_journal.Companion.readingJournalFragment as progressUpdatedJournalFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.Status_currently_reading_journal.Companion.readingJournalFragment as statusCurrentlyReadingJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Companion.readingJournalFragment as statusStoppedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
 import org.junit.jupiter.api.AfterEach
@@ -3048,7 +3048,7 @@ class BookMapperTest {
                 every { book } returns bookListFragment
                 every { edition } returns null
                 every { progress_updated_journal } returns emptyList()
-                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_started_journal } returns emptyList()
                 every { user_book_read_finished_journal } returns emptyList()
                 every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
@@ -3128,7 +3128,7 @@ class BookMapperTest {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
                 every { progress_updated_journal } returns emptyList()
-                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_started_journal } returns emptyList()
                 every { user_book_read_finished_journal } returns emptyList()
                 every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
@@ -3209,7 +3209,7 @@ class BookMapperTest {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
                 every { progress_updated_journal } returns emptyList()
-                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_started_journal } returns emptyList()
                 every { user_book_read_finished_journal } returns emptyList()
                 every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
@@ -3284,7 +3284,7 @@ class BookMapperTest {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
                 every { progress_updated_journal } returns emptyList()
-                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_started_journal } returns emptyList()
                 every { user_book_read_finished_journal } returns emptyList()
                 every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
@@ -3363,7 +3363,7 @@ class BookMapperTest {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
                 every { progress_updated_journal } returns emptyList()
-                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_started_journal } returns emptyList()
                 every { user_book_read_finished_journal } returns emptyList()
                 every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
@@ -3442,7 +3442,7 @@ class BookMapperTest {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
                 every { progress_updated_journal } returns emptyList()
-                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_started_journal } returns emptyList()
                 every { user_book_read_finished_journal } returns emptyList()
                 every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
@@ -3520,7 +3520,7 @@ class BookMapperTest {
                 every { book } returns bookListFragment
                 every { edition } returns editionInner
                 every { progress_updated_journal } returns emptyList()
-                every { status_currently_reading_journal } returns emptyList()
+                every { user_book_read_started_journal } returns emptyList()
                 every { user_book_read_finished_journal } returns emptyList()
                 every { status_stopped_journal } returns emptyList()
                 every { user_book_reads } returns emptyList()
@@ -3557,7 +3557,7 @@ class BookMapperTest {
 
         private fun stubMinimalUserBookFragment(
             progressUpdated: List<UserBookFragment.Progress_updated_journal> = emptyList(),
-            statusCurrentlyReading: List<UserBookFragment.Status_currently_reading_journal> = emptyList(),
+            userBookReadStarted: List<UserBookFragment.User_book_read_started_journal> = emptyList(),
             userBookReadFinished: List<UserBookFragment.User_book_read_finished_journal> = emptyList(),
             statusStopped: List<UserBookFragment.Status_stopped_journal> = emptyList(),
             createdAt: String = "2024-01-01",
@@ -3604,7 +3604,7 @@ class BookMapperTest {
                 every { book } returns bookInner
                 every { edition } returns editionInner
                 every { progress_updated_journal } returns progressUpdated
-                every { status_currently_reading_journal } returns statusCurrentlyReading
+                every { user_book_read_started_journal } returns userBookReadStarted
                 every { user_book_read_finished_journal } returns userBookReadFinished
                 every { status_stopped_journal } returns statusStopped
                 every { user_book_reads } returns emptyList()
@@ -3650,24 +3650,24 @@ class BookMapperTest {
         }
 
         @Test
-        fun `collects journals from status_currently_reading_journal alias`() {
+        fun `collects journals from user_book_read_started_journal alias`() {
             // ----- Arrange -----
             mockkObject(UserBookFragment.Book.Companion)
             mockkObject(UserBookFragment.Edition.Companion)
-            mockkObject(UserBookFragment.Status_currently_reading_journal.Companion)
+            mockkObject(UserBookFragment.User_book_read_started_journal.Companion)
 
-            val journalFragment = stubReadingJournalFragment(event = "status_currently_reading")
-            val journalEntry = mockk<UserBookFragment.Status_currently_reading_journal> {
-                every { with(UserBookFragment.Status_currently_reading_journal.Companion) { statusCurrentlyReadingJournalFragment() } } returns journalFragment
+            val journalFragment = stubReadingJournalFragment(event = "user_book_read_started")
+            val journalEntry = mockk<UserBookFragment.User_book_read_started_journal> {
+                every { with(UserBookFragment.User_book_read_started_journal.Companion) { userBookReadStartedJournalFragment() } } returns journalFragment
             }
-            val fragment = stubMinimalUserBookFragment(statusCurrentlyReading = listOf(journalEntry))
+            val fragment = stubMinimalUserBookFragment(userBookReadStarted = listOf(journalEntry))
 
             // ----- Act -----
             val result = fragment.toBook()
 
             // ----- Assert -----
             result?.userBook?.journals?.size shouldBe 1
-            result?.userBook?.journals?.get(0)?.event shouldBe "status_currently_reading"
+            result?.userBook?.journals?.get(0)?.event shouldBe "user_book_read_started"
         }
 
         @Test
@@ -3718,15 +3718,15 @@ class BookMapperTest {
             mockkObject(UserBookFragment.Book.Companion)
             mockkObject(UserBookFragment.Edition.Companion)
             mockkObject(UserBookFragment.Progress_updated_journal.Companion)
-            mockkObject(UserBookFragment.Status_currently_reading_journal.Companion)
+            mockkObject(UserBookFragment.User_book_read_started_journal.Companion)
             mockkObject(UserBookFragment.User_book_read_finished_journal.Companion)
             mockkObject(UserBookFragment.Status_stopped_journal.Companion)
 
             val progressEntry = mockk<UserBookFragment.Progress_updated_journal> {
                 every { with(UserBookFragment.Progress_updated_journal.Companion) { progressUpdatedJournalFragment() } } returns stubReadingJournalFragment("progress_updated")
             }
-            val currentlyReadingEntry = mockk<UserBookFragment.Status_currently_reading_journal> {
-                every { with(UserBookFragment.Status_currently_reading_journal.Companion) { statusCurrentlyReadingJournalFragment() } } returns stubReadingJournalFragment("status_currently_reading")
+            val currentlyReadingEntry = mockk<UserBookFragment.User_book_read_started_journal> {
+                every { with(UserBookFragment.User_book_read_started_journal.Companion) { userBookReadStartedJournalFragment() } } returns stubReadingJournalFragment("user_book_read_started")
             }
             val readEntry = mockk<UserBookFragment.User_book_read_finished_journal> {
                 every { with(UserBookFragment.User_book_read_finished_journal.Companion) { userBookReadFinishedJournalFragment() } } returns stubReadingJournalFragment("user_book_read_finished")
@@ -3736,7 +3736,7 @@ class BookMapperTest {
             }
             val fragment = stubMinimalUserBookFragment(
                 progressUpdated = listOf(progressEntry),
-                statusCurrentlyReading = listOf(currentlyReadingEntry),
+                userBookReadStarted = listOf(currentlyReadingEntry),
                 userBookReadFinished = listOf(readEntry),
                 statusStopped = listOf(stoppedEntry),
             )
@@ -3749,7 +3749,7 @@ class BookMapperTest {
             events?.size shouldBe 4
             events shouldBe listOf(
                 "progress_updated",
-                "status_currently_reading",
+                "user_book_read_started",
                 "user_book_read_finished",
                 "status_stopped",
             )
