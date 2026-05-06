@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +41,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,6 +71,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import org.koin.core.parameter.parametersOf
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -141,7 +143,7 @@ class BookDetailScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         val screenModel: BookDetailScreenScreenModel =
-            koinScreenModel<BookDetailScreenScreenModel>()
+            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(id) }
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
@@ -159,18 +161,23 @@ class BookDetailScreen(
             }
         }
 
-        LaunchedEffect(Unit) {
-            screenModel.runAction(InitializeBookWithIdAction(id = id))
-
-            screenModel.runAction(FetchBookReviewsAction(bookId = id))
-        }
-
         val isOnline = rememberIsOnline()
 
         Screen(
             state = state,
             runAction = screenModel::runAction,
             onNavigateBack = navigator::pop,
+            onCoverClick = {
+                val book = state.book ?: return@Screen
+
+                navigator.push(
+                    FullScreenCoverScreen(
+                        edition = book.currentEdition,
+                        defaultEdition = book.defaultEdition,
+                        fallbackCoverUrl = book.coverUrl,
+                    )
+                )
+            },
             isOnline = isOnline,
         )
     }
@@ -181,6 +188,7 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
         onNavigateBack: () -> Unit,
+        onCoverClick: () -> Unit,
         isOnline: Boolean,
     ) {
         val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -267,6 +275,7 @@ class BookDetailScreen(
                         seriesText = state.book?.seriesText,
                         releaseYear = state.book?.currentEdition?.releaseYear.takeIf { it != -1 }
                             ?: state.book?.releaseYear,
+                        onCoverClick = onCoverClick,
                     )
                 }
 
@@ -416,6 +425,7 @@ class BookDetailScreen(
         isLoading: Boolean,
         fallbackCoverUrl: String?,
         isExpired: Boolean,
+        onCoverClick: () -> Unit,
     ) {
         val imageHeight = with(LocalDensity.current) {
             (LocalWindowInfo.current.containerSize.height * 0.3f).toDp()
@@ -466,7 +476,14 @@ class BookDetailScreen(
                     ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box {
+                Box(
+                    modifier = Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        enabled = isLoading.not(),
+                        onClick = onCoverClick,
+                    ),
+                ) {
                     EditionImage(
                         edition = edition,
                         defaultEdition = fallBackEdition,
@@ -1757,6 +1774,7 @@ private fun BookDetailScreenReadingPreview() {
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
                 isOnline = true,
             )
         }
@@ -1783,6 +1801,7 @@ private fun BookDetailScreenNonePreview() {
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
                 isOnline = true,
             )
         }
@@ -1809,6 +1828,7 @@ private fun BookDetailScreenDnfPreview() {
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
                 isOnline = true,
             )
         }
@@ -1835,6 +1855,7 @@ private fun BookDetailScreenWantToReadPreview() {
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
                 isOnline = true,
             )
         }
@@ -1861,6 +1882,7 @@ private fun BookDetailScreenReadPreview() {
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
                 isOnline = true,
             )
         }
