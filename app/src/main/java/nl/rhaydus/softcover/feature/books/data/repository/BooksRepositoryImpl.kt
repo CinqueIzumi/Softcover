@@ -195,6 +195,9 @@ class BooksRepositoryImpl(
     }
 
     override suspend fun markBookAsReading(book: Book): Book {
+        val optimistic = book.withMarkedAsReading()
+        booksLocalDataSource.cacheBook(book = optimistic)
+
         return booksRemoteDataSource.markBookAsReading(book)
     }
 
@@ -371,6 +374,16 @@ class BooksRepositoryImpl(
                 progress = progress,
             ),
         )
+    }
+
+    private fun Book.withMarkedAsReading(): Book {
+        val existingUserBook = userBook ?: return this
+
+        val updatedUserBook: UserBook = existingUserBook
+            .copy(status = BookStatus.Reading)
+            .withAppendedJournal(event = JournalEventType.UserBookReadStarted)
+
+        return copy(userBook = updatedUserBook)
     }
 
     private fun Book.withMarkedAsRead(): Book {

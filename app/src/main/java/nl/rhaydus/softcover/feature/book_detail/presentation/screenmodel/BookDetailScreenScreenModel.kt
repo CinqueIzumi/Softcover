@@ -7,6 +7,8 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailInitializer
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -25,6 +27,7 @@ import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseC
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 
 class BookDetailScreenScreenModel(
+    private val bookId: Int,
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
     private val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
@@ -69,6 +72,10 @@ class BookDetailScreenScreenModel(
 
     init {
         startInitializers()
+
+        dispatch(InitializeBookWithIdAction(id = bookId))
+
+        dispatch(FetchBookReviewsAction(bookId = bookId))
     }
 
     fun runAction(action: BookDetailAction) = dispatch(action)

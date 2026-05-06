@@ -30,8 +30,9 @@ val bookDetailModule = module {
         GetTopBookReviewsUseCase(bookReviewsRepository = get())
     }
 
-    factory {
+    factory { params ->
         BookDetailScreenScreenModel(
+            bookId = params.get(),
             fetchBookByIdUseCase = get(),
             getEditionsByBookIdUseCase = get(),
             updateBookEditionUseCase = get(),

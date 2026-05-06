@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.imageLoader
@@ -51,7 +52,12 @@ fun rememberEditionImageRequest(
     fallbackCoverUrl: String? = null,
 ): ImageRequest? {
     val context = LocalContext.current
-    val persistEditionImageUseCase = koinInject<PersistEditionImageUseCase>()
+    val isInspection = LocalInspectionMode.current
+    val persistEditionImageUseCase = if (isInspection) {
+        null
+    } else {
+        koinInject<PersistEditionImageUseCase>()
+    }
     val coroutineScope = rememberCoroutineScope()
 
     val resolution = resolveEditionImage(
@@ -73,11 +79,12 @@ fun rememberEditionImageRequest(
 
         resolution.persistEditionId?.let { editionId ->
             val sourceUrl = resolution.source as? String ?: return@let
+            val useCase = persistEditionImageUseCase ?: return@let
             builder.listener(
                 onSuccess = { _, _ ->
                     persistFromDiskCache(
                         coroutineScope = coroutineScope,
-                        persistEditionImageUseCase = persistEditionImageUseCase,
+                        persistEditionImageUseCase = useCase,
                         imageLoader = context.imageLoader,
                         editionId = editionId,
                         url = sourceUrl,

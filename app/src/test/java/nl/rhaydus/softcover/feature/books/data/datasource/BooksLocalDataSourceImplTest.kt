@@ -252,7 +252,7 @@ class BooksLocalDataSourceImplTest {
     inner class GetBooksFlowByStatus {
 
         @Test
-        fun `CURRENTLY_READING dispatches to getBooksByStatusAndEvents with progress_updated and status_currently_reading`() = runTest {
+        fun `CURRENTLY_READING dispatches to getBooksByStatusAndEvents with progress_updated and user_book_read_started`() = runTest {
             // ----- Arrange -----
             val status = UserBookStatus.CURRENTLY_READING
             val entity = stubBookFullEntity(id = 1)
@@ -260,7 +260,7 @@ class BooksLocalDataSourceImplTest {
             every {
                 dao.getBooksByStatusAndEvents(
                     statusCode = status.code,
-                    events = listOf("progress_updated", "status_currently_reading"),
+                    events = listOf("progress_updated", "user_book_read_started"),
                 )
             } returns flowOf(listOf(entity))
 
@@ -352,7 +352,7 @@ class BooksLocalDataSourceImplTest {
             every {
                 dao.getBooksByStatusAndEvents(
                     statusCode = status.code,
-                    events = listOf("progress_updated", "status_currently_reading"),
+                    events = listOf("progress_updated", "user_book_read_started"),
                 )
             } returns flowOf(list, list)
 
