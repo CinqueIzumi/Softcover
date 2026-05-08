@@ -20,7 +20,7 @@ import nl.rhaydus.softcover.feature.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.feature.library.di.libraryModule
 import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
 import nl.rhaydus.softcover.feature.profile.di.profileModule
-import nl.rhaydus.softcover.feature.search.di.searchModule
+import nl.rhaydus.softcover.feature.explore.di.exploreModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -53,7 +53,7 @@ class SoftCoverApp : Application() {
                 libraryModule,
                 onboardingModule,
                 readingModule,
-                searchModule,
+                exploreModule,
                 settingsModule,
                 profileModule,
                 appUpdateModule,

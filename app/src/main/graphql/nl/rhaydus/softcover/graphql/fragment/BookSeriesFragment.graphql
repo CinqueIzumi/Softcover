@@ -1,5 +1,6 @@
 fragment BookSeriesFragment on book_series{
     position
+    details
 
     series {
         id

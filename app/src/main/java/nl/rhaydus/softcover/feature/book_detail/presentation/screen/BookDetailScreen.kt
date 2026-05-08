@@ -2,31 +2,34 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonMenu
-import androidx.compose.material3.FloatingActionButtonMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -37,99 +40,100 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import org.koin.core.parameter.parametersOf
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
-import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.presentation.modifier.conditional
-import nl.rhaydus.softcover.core.presentation.modifier.grayscale
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineStatus
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.core.presentation.component.rememberEditionImageRequest
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.presentation.modifier.conditional
+import nl.rhaydus.softcover.core.presentation.modifier.grayscale
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
+import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
-import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
+import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
-import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
-import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnFabClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.roundToInt
+
+private val GoldStar = Color(0xFFFBBF23)
+
+private const val REVIEW_COLLAPSED_LINES = 8
 
 class BookDetailScreen(
     val id: Int,
@@ -139,7 +143,7 @@ class BookDetailScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         val screenModel: BookDetailScreenScreenModel =
-            koinScreenModel<BookDetailScreenScreenModel>()
+            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(id) }
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
@@ -157,16 +161,24 @@ class BookDetailScreen(
             }
         }
 
-        LaunchedEffect(Unit) {
-            screenModel.runAction(InitializeBookWithIdAction(id = id))
-
-            screenModel.runAction(FetchBookReviewsAction(bookId = id))
-        }
+        val isOnline = rememberIsOnline()
 
         Screen(
             state = state,
             runAction = screenModel::runAction,
             onNavigateBack = navigator::pop,
+            onCoverClick = {
+                val book = state.book ?: return@Screen
+
+                navigator.push(
+                    FullScreenCoverScreen(
+                        edition = book.currentEdition,
+                        defaultEdition = book.defaultEdition,
+                        fallbackCoverUrl = book.coverUrl,
+                    )
+                )
+            },
+            isOnline = isOnline,
         )
     }
 
@@ -176,6 +188,8 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
         onNavigateBack: () -> Unit,
+        onCoverClick: () -> Unit,
+        isOnline: Boolean,
     ) {
         val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
         val lazyListState = rememberLazyListState()
@@ -203,7 +217,7 @@ class BookDetailScreen(
         val defaultIconButtonColors = IconButtonDefaults.iconButtonColors()
         val iconButtonColorsWithScrim = IconButtonDefaults.iconButtonColors(
             containerColor = Color.Black.copy(alpha = 0.35f),
-            contentColor = Color.White
+            contentColor = Color.White,
         )
 
         val backButtonColors = remember(shouldBeExpanded) {
@@ -214,26 +228,11 @@ class BookDetailScreen(
             }
         }
 
-        val density = LocalDensity.current
-        var fabHeight by remember { mutableStateOf(0.dp) }
-
-        val isOnline = rememberIsOnline()
-        val showOfflinePlaceholder = isOnline.not() && state.book == null && state.loadingBookDetails.not()
+        val showOfflinePlaceholder =
+            isOnline.not() && state.book == null && state.loadingBookDetails.not()
 
         Scaffold(
             contentWindowInsets = WindowInsets(),
-            floatingActionButton = {
-                if (showOfflinePlaceholder.not()) {
-                    FloatingActionButtonMenu(
-                        state = state,
-                        runAction = runAction,
-                        isOnline = isOnline,
-                        onFabSizeChange = { size ->
-                            fabHeight = with(density) { size.height.toDp() }
-                        },
-                    )
-                }
-            }
         ) { innerPadding ->
             if (showOfflinePlaceholder) {
                 OfflineScreenContent(modifier = Modifier.padding(innerPadding))
@@ -248,7 +247,7 @@ class BookDetailScreen(
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_arrow_back),
-                                contentDescription = "Navigate back icon"
+                                contentDescription = "Navigate back icon",
                             )
                         }
                     },
@@ -265,44 +264,51 @@ class BookDetailScreen(
                 state = lazyListState,
             ) {
                 item {
-                    CoverImageSection(
+                    GeneralBookInfoSection(
                         edition = state.book?.currentEdition,
                         isLoading = state.loadingBookDetails,
                         fallBackEdition = state.book?.defaultEdition,
                         fallbackCoverUrl = state.book?.coverUrl,
                         isExpired = state.deadlineProgress?.isExpired == true,
+                        rating = state.book?.rating,
+                        title = state.book?.title,
+                        seriesText = state.book?.seriesText,
+                        releaseYear = state.book?.currentEdition?.releaseYear.takeIf { it != -1 }
+                            ?: state.book?.releaseYear,
+                        onCoverClick = onCoverClick,
                     )
                 }
 
-                generalBookInfoSection(state = state)
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
-                item { ReviewsPagesReleaseDateSection(state = state) }
-
-                item { Spacer(modifier = Modifier.height(8.dp)) }
+                item { Spacer(modifier = Modifier.height(20.dp)) }
 
                 item {
-                    EditionOwnedSection(
-                        state = state,
-                        runAction = runAction
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
-                item {
-                    BookStatusWidget(
+                    ShelfActionBar(
                         state = state,
                         runAction = runAction,
                     )
                 }
 
-                item { Spacer(modifier = Modifier.height(32.dp)) }
+                item { Spacer(modifier = Modifier.height(20.dp)) }
 
-                item { DescriptionSection(state = state) }
+                item {
+                    ShelfStatusPanel(
+                        state = state,
+                        runAction = runAction,
+                    )
+                }
 
-                item { Spacer(modifier = Modifier.height(24.dp)) }
+                item { Spacer(modifier = Modifier.height(28.dp)) }
+
+                item { AboutSection(state = state) }
+
+                item {
+                    BelowDescriptionStatusPanel(
+                        state = state,
+                        topSpacing = 28.dp,
+                    )
+                }
+
+                item { Spacer(modifier = Modifier.height(36.dp)) }
 
                 item {
                     ReviewsSection(
@@ -312,9 +318,7 @@ class BookDetailScreen(
                     )
                 }
 
-                if (fabHeight > 0.dp) {
-                    item { Spacer(modifier = Modifier.height(fabHeight + 16.dp)) }
-                }
+                item { Spacer(modifier = Modifier.height(32.dp)) }
 
                 item { BottomNavigationSpacer() }
             }
@@ -329,14 +333,22 @@ class BookDetailScreen(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Navigate back icon"
+                            contentDescription = "Navigate back icon",
                         )
                     }
+                },
+                additionalActions = {
+                    BookOverflowMenu(
+                        state = state,
+                        runAction = runAction,
+                        isOnline = isOnline,
+                        iconColors = backButtonColors,
+                    )
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors().copy(
                     containerColor = containerColor,
-                )
+                ),
             )
 
             val currentEditionForSheet = state.book?.currentEdition
@@ -352,9 +364,6 @@ class BookDetailScreen(
                         runAction(OnEditionSearchQueryChangeAction(query = it))
                     },
                     onDismissRequest = {
-                        runAction(OnDismissEditEditionSheetClickAction())
-                    },
-                    onCancelClick = {
                         runAction(OnDismissEditEditionSheetClickAction())
                     },
                     onConfirmClick = {
@@ -379,23 +388,21 @@ class BookDetailScreen(
                         runAction(OnDismissProgressSheetAction())
                     },
                     onProgressTabClick = {
-                        runAction(
-                            OnProgressTabClickAction(tab = it)
-                        )
+                        runAction(OnProgressTabClickAction(tab = it))
                     },
                     onUpdatePercentageClick = {
-                        runAction(
-                            OnUpdatePercentageProgressClickAction(newPercentage = it)
-                        )
+                        runAction(OnUpdatePercentageProgressClickAction(newPercentage = it))
                     },
                     onUpdatePageProgressClick = {
-                        runAction(
-                            OnUpdatePageProgressClickAction(newPage = it)
-                        )
+                        runAction(OnUpdatePageProgressClickAction(newPage = it))
                     },
                     onUpdateTimeProgressClick = { h, m, s ->
                         runAction(
-                            OnUpdateTimeProgressClickAction(hours = h, minutes = m, seconds = s)
+                            OnUpdateTimeProgressClickAction(
+                                hours = h,
+                                minutes = m,
+                                seconds = s,
+                            )
                         )
                     },
                 )
@@ -403,403 +410,1010 @@ class BookDetailScreen(
         }
     }
 
-    @Composable
-    private fun EditionOwnedSection(
-        state: BookDetailUiState,
-        runAction: (BookDetailAction) -> Unit,
-    ) {
-        val edition = state.book?.currentEdition ?: return
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shimmer(isLoading = state.loadingBookDetails),
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            val leadingIcon: @Composable (() -> Unit)? = when (edition.owned) {
-                true -> {
-                    {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_check),
-                            contentDescription = "Check icon"
-                        )
-                    }
-                }
-
-                false -> null
-            }
-
-            val chipLabel = when (edition.owned) {
-                true -> "Owned"
-                false -> "Mark as owned"
-            }
-
-            FilterChip(
-                selected = edition.owned,
-                enabled = state.settingEditionOwned.not(),
-                onClick = {
-                    runAction(OnEditionOwnedToggleAction(edition = edition))
-                },
-                leadingIcon = leadingIcon,
-                label = { Text(text = chipLabel) },
-            )
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-    @Composable
-    private fun FloatingActionButtonMenu(
-        state: BookDetailUiState,
-        runAction: (BookDetailAction) -> Unit,
-        isOnline: Boolean,
-        onFabSizeChange: (IntSize) -> Unit,
-    ) {
-        val userStatus = state.book?.status ?: return
-
-        if (userStatus == BookStatus.None) return
-
-        FloatingActionButtonMenu(
-            expanded = state.fabMenuExpanded,
-            button = {
-                FloatingActionButton(
-                    onClick = {
-                        runAction(OnFabClickAction())
-                    },
-                    modifier = Modifier.onSizeChanged(onSizeChanged = onFabSizeChange),
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_edit),
-                        contentDescription = "Edit book data",
-                    )
-                }
-            }
-        ) {
-            if (userStatus != BookStatus.Read) {
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        runAction(OnMarkBookAsReadClickAction(book = state.book))
-                    },
-                    text = { Text(text = "Mark as Read") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_bookmark_check),
-                            contentDescription = "Mark book as read icon"
-                        )
-                    }
-                )
-            }
-
-            if (userStatus == BookStatus.Reading) {
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        runAction(OnShowUpdateProgressSheetClickAction())
-                    },
-                    text = { Text(text = "Update progress") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_menu_book),
-                            contentDescription = "Progress icon"
-                        )
-                    }
-                )
-            }
-
-            if (isOnline) {
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        runAction(OnShowEditEditionSheetClickAction())
-                    },
-                    text = { Text(text = "Change edition") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_library_books),
-                            contentDescription = "Edition icon"
-                        )
-                    }
-                )
-            }
-
-            if (state.deadline == null) {
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        runAction(OnOpenDeadlinePickerAction())
-                    },
-                    text = { Text(text = "Set deadline") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_date_range),
-                            contentDescription = "Set deadline icon"
-                        )
-                    }
-                )
-            } else {
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        runAction(OnOpenDeadlinePickerAction())
-                    },
-                    text = { Text(text = "Edit deadline") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_date_range),
-                            contentDescription = "Edit deadline icon"
-                        )
-                    }
-                )
-
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        runAction(OnClearDeadlineAction())
-                    },
-                    text = { Text(text = "Clear deadline") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_delete),
-                            contentDescription = "Clear deadline icon"
-                        )
-                    }
-                )
-            }
-
-            if (isOnline) {
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        runAction(OnRemoveBookClickAction(book = state.book))
-                    },
-                    text = { Text(text = "Remove") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_delete),
-                            contentDescription = "Delete icon"
-                        )
-                    }
-                )
-            }
-        }
-    }
+    // region Hero
 
     @Composable
-    private fun CoverImageSection(
+    private fun GeneralBookInfoSection(
         edition: BookEdition?,
         fallBackEdition: BookEdition?,
+        title: String?,
+        seriesText: String?,
+        rating: Double?,
+        releaseYear: Int?,
         isLoading: Boolean,
         fallbackCoverUrl: String?,
-        isExpired: Boolean = false,
+        isExpired: Boolean,
+        onCoverClick: () -> Unit,
     ) {
-        val editionImageModel = rememberEditionImageRequest(
-            edition = edition,
-            defaultEdition = fallBackEdition,
-            fallbackCoverUrl = fallbackCoverUrl,
-        )
-
         val imageHeight = with(LocalDensity.current) {
-            (LocalWindowInfo.current.containerSize.height * 0.5f).toDp()
+            (LocalWindowInfo.current.containerSize.height * 0.3f).toDp()
         }
-
-        val cornerRadius = 32.dp
 
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .height(IntrinsicSize.Min)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 0.dp,
-                        topEnd = 0.dp,
-                        bottomStart = cornerRadius,
-                        bottomEnd = cornerRadius,
-                    )
-                )
+                .fillMaxWidth()
                 .conditional(
                     condition = isExpired,
                     ifTrue = { Modifier.grayscale() },
-                )
+                ),
         ) {
-            SoftcoverImage(
-                model = editionImageModel,
-                contentDescription = "Blurred cover edition image",
-                isLoading = isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(imageHeight)
-                    .blur(8.dp)
-                    .scale(1.8f)
-            )
-
             EditionImage(
                 edition = edition,
                 defaultEdition = fallBackEdition,
                 fallbackCoverUrl = fallbackCoverUrl,
                 isLoading = isLoading,
                 modifier = Modifier
-                    .height(imageHeight * 0.8f)
-                    .align(Alignment.Center)
+                    .matchParentSize()
+                    .blur(8.dp)
+                    .scale(1.8f),
             )
-        }
-    }
 
-    private fun LazyListScope.generalBookInfoSection(state: BookDetailUiState) {
-        item {
-            Spacer(modifier = Modifier.height(12.dp))
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = 0.25f),
+                                Color.Black.copy(alpha = 0.65f),
+                            ),
+                        ),
+                    ),
+            )
 
-            state.book?.seriesText?.let { seriesText ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.Center
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .heightIn(min = imageHeight)
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 64.dp,
+                        bottom = 36.dp,
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        enabled = isLoading.not(),
+                        onClick = onCoverClick,
+                    ),
                 ) {
-                    Surface(
-                        tonalElevation = 2.dp,
-                        shape = RoundedCornerShape(4.dp),
-                    ) {
-                        Text(
-                            text = seriesText,
+                    EditionImage(
+                        edition = edition,
+                        defaultEdition = fallBackEdition,
+                        fallbackCoverUrl = fallbackCoverUrl,
+                        isLoading = isLoading,
+                        modifier = Modifier
+                            .height(imageHeight * 0.8f)
+                            .clip(shape = RoundedCornerShape(16.dp)),
+                    )
+
+                    if (edition?.owned == true) {
+                        OwnedCoverBadge(
                             modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 8.dp, vertical = 2.dp),
-                            textAlign = TextAlign.Center,
+                                .align(Alignment.TopEnd)
+                                .padding(8.dp),
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                val textSecondaryAlpha = 0.85f
+
+                val secondaryShadow = Shadow(
+                    color = Color.Black.copy(alpha = 0.6f),
+                    offset = Offset(x = 0f, y = 1f),
+                    blurRadius = 6f,
+                )
+
+                val bodySmall = MaterialTheme.typography.bodySmall.copy(
+                    color = Color.White,
+                    shadow = secondaryShadow,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                val labelSmall = MaterialTheme.typography.labelSmall.copy(
+                    color = Color.White.copy(alpha = textSecondaryAlpha),
+                    shadow = secondaryShadow,
+                )
+
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .height(12.dp)
+                                .width(120.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .shimmer(isLoading = true),
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .height(22.dp)
+                                .fillMaxWidth(0.85f)
+                                .clip(RoundedCornerShape(4.dp))
+                                .shimmer(isLoading = true),
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .height(12.dp)
+                                .width(140.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .shimmer(isLoading = true),
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            repeat(3) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(10.dp)
+                                            .width(48.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .shimmer(isLoading = true),
+                                    )
+
+                                    Spacer(modifier = Modifier.height(6.dp))
+
+                                    Box(
+                                        modifier = Modifier
+                                            .height(12.dp)
+                                            .width(36.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .shimmer(isLoading = true),
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        seriesText?.takeIf { it.isNotBlank() }?.let { series ->
+                            Text(
+                                text = series,
+                                color = Color.White.copy(alpha = textSecondaryAlpha),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 0.6.sp,
+                                    shadow = secondaryShadow,
+                                ),
+                            )
+
+                            Spacer(modifier = Modifier.height(2.dp))
+                        }
+
+                        Text(
+                            text = title ?: "",
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = 0.75f),
+                                    offset = Offset(x = 0f, y = 1f),
+                                    blurRadius = 8f,
+                                ),
+                            ),
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = "By ${edition?.authorString ?: ""}",
+                            color = Color.White.copy(alpha = textSecondaryAlpha),
+                            style = MaterialTheme.editorialTypography.bodySmall.copy(
+                                shadow = secondaryShadow,
+                            ),
+                        )
+
+                        val isAudiobook = edition?.isAudiobook == true
+
+                        val showRating = rating != null && rating > 0.0
+                        val showLength = if (isAudiobook) {
+                            (edition.audioSeconds ?: 0) > 0
+                        } else {
+                            (edition?.pages ?: 0) > 0
+                        }
+                        val showReleased = releaseYear != null && releaseYear > 0
+
+                        if (showRating || showLength || showReleased) {
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                if (showRating) {
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Text(
+                                            text = "Rating",
+                                            style = labelSmall,
+                                        )
+
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = "%.1f".format(rating),
+                                                style = bodySmall,
+                                            )
+
+                                            Spacer(modifier = Modifier.width(4.dp))
+
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_star_filled),
+                                                contentDescription = "",
+                                                tint = GoldStar,
+                                                modifier = Modifier.size(16.dp),
+                                            )
+                                        }
+                                    }
+                                }
+
+                                if (showLength) {
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Text(
+                                            text = "Length",
+                                            style = labelSmall,
+                                        )
+
+                                        Row {
+                                            val lengthText = if (isAudiobook) {
+                                                secondsToHm(seconds = edition?.audioSeconds ?: 0)
+                                            } else {
+                                                "${edition?.pages ?: ""}"
+                                            }
+
+                                            Text(
+                                                text = lengthText,
+                                                style = bodySmall,
+                                                modifier = Modifier.alignByBaseline(),
+                                            )
+
+                                            if (isAudiobook.not()) {
+                                                Spacer(modifier = Modifier.width(4.dp))
+
+                                                Text(
+                                                    text = "pgs",
+                                                    style = labelSmall,
+                                                    modifier = Modifier.alignByBaseline(),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (showReleased) {
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Text(
+                                            text = "Released",
+                                            style = labelSmall,
+                                        )
+
+                                        Text(
+                                            text = "$releaseYear",
+                                            style = bodySmall,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
-            Text(
-                text = "${state.book?.title}",
-                style = MaterialTheme.typography.headlineMedium,
+            Box(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .shimmer(isLoading = state.loadingBookDetails)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center,
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(20.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                    ),
             )
         }
+    }
 
-        item {
-            Spacer(modifier = Modifier.height(4.dp))
+    @Composable
+    private fun OwnedCoverBadge(modifier: Modifier = Modifier) {
+        Surface(
+            modifier = modifier,
+            shape = RoundedCornerShape(8.dp),
+            color = Color.Black.copy(alpha = 0.55f),
+        ) {
+            Row(
+                modifier = Modifier.padding(
+                    horizontal = 8.dp,
+                    vertical = 4.dp,
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check),
+                    contentDescription = "Owned",
+                    tint = Color.White,
+                    modifier = Modifier.size(14.dp),
+                )
 
-            Text(
-                text = state.book?.currentEdition?.authorString ?: "",
-                style = MaterialTheme.typography.titleMedium,
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(
+                    text = "Owned",
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
+                )
+            }
+        }
+    }
+
+    // endregion
+
+    // region Shelf Action Bar
+
+    @Composable
+    private fun ShelfActionBar(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        if (state.loadingBookDetails) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+            ) {
+                SectionLabel(text = "Your shelf")
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    repeat(3) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(72.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .shimmer(isLoading = true),
+                        )
+                    }
+                }
+            }
+
+            return
+        }
+
+        val book = state.book ?: return
+        val status = book.status
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            SectionLabel(text = "Your shelf")
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ShelfChip(
+                    label = "Want to read",
+                    iconRes = R.drawable.ic_bookmark_add,
+                    selected = status == BookStatus.WantToRead,
+                    onClick = { runAction(OnMarkBookAsWantToReadClickAction(book = book)) },
+                    modifier = Modifier.weight(1f),
+                )
+
+                ShelfChip(
+                    label = "Reading",
+                    iconRes = R.drawable.ic_reading,
+                    selected = status == BookStatus.Reading,
+                    onClick = { runAction(OnMarkBookAsReadingClickAction(book = book)) },
+                    modifier = Modifier.weight(1f),
+                )
+
+                ShelfChip(
+                    label = "Read",
+                    iconRes = R.drawable.ic_bookmark_check,
+                    selected = status == BookStatus.Read,
+                    onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ShelfChip(
+        label: String,
+        iconRes: Int,
+        selected: Boolean,
+        onClick: () -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        val container = if (selected) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        }
+
+        val content = if (selected) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
+
+        Surface(
+            modifier = modifier.height(72.dp),
+            color = container,
+            contentColor = content,
+            shape = RoundedCornerShape(20.dp),
+            onClick = onClick,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                    ),
+                )
+            }
+        }
+    }
+
+    // endregion
+
+    // region Top Bar Overflow / Status
+
+    @Composable
+    private fun BookOverflowMenu(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+        isOnline: Boolean,
+        iconColors: androidx.compose.material3.IconButtonColors =
+            IconButtonDefaults.iconButtonColors(),
+    ) {
+        if (state.loadingBookDetails) return
+
+        val book = state.book ?: return
+
+        if (book.status == BookStatus.None) return
+
+        var menuOpen by remember { mutableStateOf(false) }
+        val dismiss = { menuOpen = false }
+
+        Box {
+            IconButton(
+                onClick = { menuOpen = true },
+                colors = iconColors,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_edit),
+                    contentDescription = "More actions",
+                )
+            }
+
+            DropdownMenu(
+                expanded = menuOpen,
+                onDismissRequest = dismiss,
+            ) {
+                if (isOnline) {
+                    DropdownMenuItem(
+                        text = { Text(text = "Change edition") },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_library_books),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            dismiss()
+                            runAction(OnShowEditEditionSheetClickAction())
+                        },
+                    )
+
+                    book.currentEdition?.let { currentEdition ->
+                        val ownedLabel =
+                            if (currentEdition.owned) "Unmark as owned" else "Mark as owned"
+                        val ownedIconId =
+                            if (currentEdition.owned) R.drawable.ic_close else R.drawable.ic_check
+
+                        DropdownMenuItem(
+                            text = { Text(text = ownedLabel) },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(ownedIconId),
+                                    contentDescription = null,
+                                )
+                            },
+                            enabled = state.settingEditionOwned.not(),
+                            onClick = {
+                                dismiss()
+                                runAction(OnEditionOwnedToggleAction(edition = currentEdition))
+                            },
+                        )
+                    }
+                }
+
+                if (state.deadline == null) {
+                    DropdownMenuItem(
+                        text = { Text(text = "Set deadline") },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_date_range),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            dismiss()
+                            runAction(OnOpenDeadlinePickerAction())
+                        },
+                    )
+                } else {
+                    DropdownMenuItem(
+                        text = { Text(text = "Edit deadline") },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_date_range),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            dismiss()
+                            runAction(OnOpenDeadlinePickerAction())
+                        },
+                    )
+
+                    DropdownMenuItem(
+                        text = { Text(text = "Clear deadline") },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_delete),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            dismiss()
+                            runAction(OnClearDeadlineAction())
+                        },
+                    )
+                }
+
+                if (isOnline) {
+                    DropdownMenuItem(
+                        text = { Text(text = "Remove") },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_delete),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            dismiss()
+                            runAction(OnRemoveBookClickAction(book = book))
+                        },
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ShelfStatusPanel(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        if (state.loadingBookDetails) {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .shimmer(isLoading = state.loadingBookDetails),
-                textAlign = TextAlign.Center,
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .shimmer(isLoading = true),
             )
+
+            return
+        }
+
+        val book = state.book ?: return
+
+        when (book.status) {
+            BookStatus.Reading -> ReadingProgressCard(
+                state = state,
+                runAction = runAction,
+            )
+
+            BookStatus.DidNotFinish -> DnfInfoCallout(state = state)
+            BookStatus.Read,
+            BookStatus.WantToRead,
+            BookStatus.None,
+                -> Unit
         }
     }
 
     @Composable
-    private fun ReviewsPagesReleaseDateSection(state: BookDetailUiState) {
-        Row(
+    private fun BelowDescriptionStatusPanel(
+        state: BookDetailUiState,
+        topSpacing: Dp,
+    ) {
+        if (state.loadingBookDetails) return
+
+        val book = state.book ?: return
+
+        when (book.status) {
+            BookStatus.Read -> {
+                Spacer(modifier = Modifier.height(topSpacing))
+                ReadInfoCallout(state = state)
+            }
+
+            BookStatus.WantToRead -> {
+                Spacer(modifier = Modifier.height(topSpacing))
+                WantToReadInfoCallout(state = state)
+            }
+
+            BookStatus.Reading,
+            BookStatus.DidNotFinish,
+            BookStatus.None,
+                -> Unit
+        }
+    }
+
+    @Composable
+    private fun ReadingProgressCard(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        val book = state.book ?: return
+        val read = book.userBookRead ?: return
+        val edition = book.currentEdition ?: return
+        val progress = read.progress
+        val isAudiobook = edition.isAudiobook
+
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = RoundedCornerShape(20.dp),
+            ) {
+                Column(
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 8.dp,
+                        top = 12.dp,
+                        bottom = 16.dp,
+                    ),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(
+                                if (isAudiobook) R.drawable.ic_headset else R.drawable.ic_menu_book
+                            ),
+                            contentDescription = "Progress icon",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
+                        )
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Text(
+                            text = if (isAudiobook) "Listening progress" else "Reading progress",
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+
+                        Text(
+                            text = "${progress.roundToInt()}%",
+                            style = MaterialTheme.editorialTypography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+
+                        IconButton(
+                            onClick = {
+                                runAction(OnShowUpdateProgressSheetClickAction())
+                            },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_edit),
+                                contentDescription = "Update progress",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    LinearProgressIndicator(
+                        progress = { (progress / 100f).coerceIn(0f, 1f) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp),
+                        drawStopIndicator = {},
+                        gapSize = (-2).dp,
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    val summaryText = if (isAudiobook) {
+                        val totalSeconds = edition.audioSeconds ?: 0
+                        val currentSeconds = read.currentSeconds ?: 0
+                        val remainingSeconds = (totalSeconds - currentSeconds).coerceAtLeast(0)
+
+                        "${secondsToHm(currentSeconds)} of ${secondsToHm(totalSeconds)} • ${
+                            secondsToHm(
+                                remainingSeconds
+                            )
+                        } left"
+                    } else {
+                        val pageProgress = read.currentPage ?: 0
+                        val left = edition.pages?.minus(pageProgress) ?: 0
+
+                        "$pageProgress of ${edition.pages ?: 0} pages • $left pages left"
+                    }
+
+                    Text(
+                        text = summaryText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            state.deadlineProgress?.let { deadline ->
+                Spacer(modifier = Modifier.height(12.dp))
+
+                DeadlineRow(
+                    progress = deadline,
+                    dateStyle = state.dateStyle,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun DeadlineRow(
+        progress: DeadlineProgress,
+        dateStyle: DateStyle,
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(
+                modifier = Modifier.padding(
+                    horizontal = 14.dp,
+                    vertical = 12.dp,
+                ),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_date_range),
+                        contentDescription = "Deadline icon",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp),
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = "Finish by ${progress.deadline.format(dateStyle.formatter)}",
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+
+                    DeadlineBadge(status = progress.status)
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = buildGoalText(progress = progress),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ReadInfoCallout(state: BookDetailUiState) {
+        val userBook = state.book?.userBook ?: return
+
+        StatusCallout(
+            eyebrow = "Finished",
+            iconRes = R.drawable.ic_bookmark_check,
+            body = when (val readDate = userBook.getReadDateString(style = state.dateStyle)) {
+                null -> "This book has been in your library since ${
+                    userBook.getFallbackDateString(
+                        style = state.dateStyle
+                    )
+                }."
+
+                else -> "You finished this on $readDate. A great one to revisit."
+            },
+        )
+    }
+
+    @Composable
+    private fun DnfInfoCallout(state: BookDetailUiState) {
+        val userBook = state.book?.userBook ?: return
+
+        StatusCallout(
+            eyebrow = "Did not finish",
+            iconRes = R.drawable.ic_bookmark,
+            body = when (val dnfDate = userBook.getDnfDateString(style = state.dateStyle)) {
+                null -> "This book has been in your library since ${
+                    userBook.getFallbackDateString(
+                        style = state.dateStyle
+                    )
+                }."
+
+                else -> "You set this aside on $dnfDate."
+            },
+        )
+    }
+
+    @Composable
+    private fun WantToReadInfoCallout(state: BookDetailUiState) {
+        val userBook = state.book?.userBook ?: return
+
+        StatusCallout(
+            eyebrow = "Up next",
+            iconRes = R.drawable.ic_bookmark_add,
+            body = "On your shelf since ${userBook.getFallbackDateString(style = state.dateStyle)}. Ready when you are.",
+        )
+    }
+
+    @Composable
+    private fun StatusCallout(
+        eyebrow: String,
+        iconRes: Int,
+        body: String,
+    ) {
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .padding(horizontal = 16.dp)
-                .shimmer(isLoading = state.loadingBookDetails),
+                .padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = RoundedCornerShape(24.dp),
         ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_star_filled),
-                    contentDescription = "",
-                    tint = Color(0xFFFBBF23),
-                    modifier = Modifier.size(16.dp)
-                )
-
-                Spacer(modifier = Modifier.width(4.dp))
-
-                val ratingText = state.book?.let { book ->
-                    "${book.rating} (${book.ratingsCount})"
-                } ?: ""
-
-                Text(
-                    text = ratingText,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
-            VerticalDivider()
-
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val edition = state.book?.currentEdition
-                val isAudiobook = edition?.isAudiobook == true
-
-                Icon(
-                    painter = painterResource(
-                        if (isAudiobook) R.drawable.ic_headset else R.drawable.ic_menu_book,
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 18.dp,
                     ),
-                    contentDescription = "",
-                    modifier = Modifier.size(16.dp),
-                )
-
-                Spacer(modifier = Modifier.width(4.dp))
-
-                Text(
-                    text = edition?.let {
-                        if (isAudiobook) {
-                            secondsToHm(it.audioSeconds ?: 0)
-                        } else {
-                            "${it.pages}"
-                        }
-                    }.orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-
-            VerticalDivider()
-
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_date_range),
-                    contentDescription = "",
-                    modifier = Modifier.size(16.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp),
+                    )
 
-                Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = eyebrow.uppercase(),
+                        style = MaterialTheme.editorialTypography.eyebrow,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "${state.book?.releaseYear}",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = body,
+                    style = MaterialTheme.editorialTypography.body,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
     }
+
+    // endregion
+
+    // region About
 
     @Composable
-    private fun DescriptionSection(state: BookDetailUiState) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            Text(
-                text = "Description",
-                style = MaterialTheme.typography.titleLarge
-            )
+    private fun AboutSection(state: BookDetailUiState) {
+        val description = state.book?.description.orEmpty()
 
-            Spacer(modifier = Modifier.height(8.dp))
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            SectionLabel(text = "About")
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (state.loadingBookDetails) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .shimmer(isLoading = true),
+                )
+
+                return
+            }
+
+            if (description.isBlank()) {
+                Text(
+                    text = "No description for this book yet.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                return
+            }
 
             Text(
-                text = state.book?.description ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .shimmer(isLoading = state.loadingBookDetails)
+                text = htmlToAnnotatedString(html = description),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    lineHeight = 26.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
+
+    // endregion
+
+    // region Reviews
 
     @Composable
     private fun ReviewsSection(
@@ -811,17 +1425,46 @@ class BookDetailScreen(
 
         if (state.reviews.isEmpty()) return
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        ) {
-            Text(
-                text = "Reviews",
-                style = MaterialTheme.typography.titleLarge,
-            )
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    SectionLabel(text = "Voices")
 
-            Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "What readers think",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
+                state.book?.let { book ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_star_filled),
+                            contentDescription = null,
+                            tint = GoldStar,
+                            modifier = Modifier.size(18.dp),
+                        )
+
+                        Spacer(modifier = Modifier.width(4.dp))
+
+                        Text(
+                            text = "%.1f".format(book.rating),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             state.reviews.forEachIndexed { index, review ->
                 if (index > 0) {
@@ -850,426 +1493,164 @@ class BookDetailScreen(
         val formattedDate = review.getFormattedDate(style = dateStyle)
 
         Surface(
-            shape = RoundedCornerShape(12.dp),
-            tonalElevation = 4.dp,
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(24.dp),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(all = 16.dp),
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SoftcoverImage(
-                        model = review.reviewer.avatarUrl,
-                        contentDescription = "Reviewer avatar",
-                        isLoading = false,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(RoundedCornerShape(16.dp)),
-                        contentScale = ContentScale.Crop,
-                    )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                val quoteAlpha = if (isSystemInDarkTheme()) 0.22f else 0.32f
 
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = review.reviewer.name?.takeIf { it.isNotBlank() }
-                                ?: review.reviewer.username,
-                            style = MaterialTheme.typography.titleSmall,
-                        )
-
-                        formattedDate?.let {
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-
-                    review.rating?.let { rating ->
-                        Icon(
-                            painter = painterResource(R.drawable.ic_star_filled),
-                            contentDescription = "Rating",
-                            tint = Color(0xFFFBBF23),
-                            modifier = Modifier.size(14.dp),
-                        )
-
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Text(
-                            text = "%.1f".format(rating),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (review.hasSpoilers && isSpoilerRevealed.not()) {
-                    TextButton(onClick = onRevealSpoilerClick) {
-                        Text(text = "Show spoiler")
-                    }
-                } else {
-                    Text(
-                        text = htmlToAnnotatedString(html = review.review),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun BookStatusWidget(
-        state: BookDetailUiState,
-        runAction: (BookDetailAction) -> Unit,
-    ) {
-        if (state.loadingBookDetails) return
-
-        val book = state.book ?: return
-
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            when (book.status) {
-                BookStatus.Reading -> ReadingContainer(state = state)
-                BookStatus.DidNotFinish -> DidNotFinishContainer(state = state)
-                BookStatus.Read -> ReadContainer(state = state)
-
-                BookStatus.WantToRead -> {
-                    WantToReadContainer(
-                        state = state,
-                        runAction = runAction,
-                    )
-                }
-
-                BookStatus.None -> {
-                    WantToReadButton(
-                        runAction = runAction,
-                        book = book
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun DidNotFinishContainer(state: BookDetailUiState) {
-        val userBook = state.book?.userBook ?: return
-
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            tonalElevation = 4.dp,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(all = 16.dp)
-            ) {
                 Text(
-                    text = "Did not Finish",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "“",
+                    style = MaterialTheme.editorialTypography.quoteGlyph.copy(
+                        fontSize = 92.sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 16.dp, top = 4.dp),
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                when (val dnfDate = userBook.getDnfDateString(style = state.dateStyle)) {
-                    null -> {
-                        FallBackDateText(
-                            userBook = userBook,
-                            dateStyle = state.dateStyle,
-                        )
-                    }
-
-                    else -> {
-                        Text(
-                            text = "You've tried reading this book before, but marked it as 'did not finish' on $dnfDate",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun ReadContainer(state: BookDetailUiState) {
-        val userBook = state.book?.userBook ?: return
-
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            tonalElevation = 4.dp,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(all = 16.dp)
-            ) {
-                Text(
-                    text = "Read",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                when (val readDate = userBook.getReadDateString(style = state.dateStyle)) {
-                    null -> {
-                        FallBackDateText(
-                            userBook = userBook,
-                            dateStyle = state.dateStyle,
-                        )
-                    }
-
-                    else -> {
-                        Text(
-                            text = "You've read this book before! The last time you've finished reading this book was on $readDate",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun WantToReadContainer(
-        state: BookDetailUiState,
-        runAction: (BookDetailAction) -> Unit,
-    ) {
-        val userBook = state.book?.userBook ?: return
-
-        Column {
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                tonalElevation = 4.dp,
-            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(all = 16.dp)
+                        .padding(
+                            horizontal = 20.dp,
+                            vertical = 20.dp,
+                        ),
                 ) {
-                    Text(
-                        text = "Want to Read",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                    Spacer(modifier = Modifier.height(28.dp))
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    if (review.hasSpoilers && isSpoilerRevealed.not()) {
+                        TextButton(onClick = onRevealSpoilerClick) {
+                            Text(text = "Show spoiler")
+                        }
+                    } else {
+                        var expanded by rememberSaveable(review.id) { mutableStateOf(false) }
+                        var hasOverflow by rememberSaveable(review.id) { mutableStateOf(false) }
 
-                    FallBackDateText(
-                        userBook = userBook,
-                        dateStyle = state.dateStyle,
-                    )
+                        Text(
+                            text = htmlToAnnotatedString(html = review.review),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                lineHeight = 22.sp,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = if (expanded) Int.MAX_VALUE else REVIEW_COLLAPSED_LINES,
+                            overflow = TextOverflow.Ellipsis,
+                            onTextLayout = { layout ->
+                                if (expanded.not() && layout.hasVisualOverflow) {
+                                    hasOverflow = true
+                                }
+                            },
+                        )
+
+                        if (hasOverflow) {
+                            TextButton(
+                                onClick = { expanded = expanded.not() },
+                                contentPadding = PaddingValues(horizontal = 0.dp),
+                            ) {
+                                Text(text = if (expanded) "Show less" else "Show more")
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        SoftcoverImage(
+                            model = review.reviewer.avatarUrl,
+                            contentDescription = "Reviewer avatar",
+                            isLoading = false,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(18.dp)),
+                            contentScale = ContentScale.Crop,
+                        )
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = review.reviewer.name?.takeIf { it.isNotBlank() }
+                                    ?: review.reviewer.username,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+
+                            formattedDate?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+
+                        review.rating?.let { rating ->
+                            Surface(
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                shape = RoundedCornerShape(10.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(
+                                        horizontal = 8.dp,
+                                        vertical = 4.dp,
+                                    ),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_star_filled),
+                                        contentDescription = "Rating",
+                                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                                        modifier = Modifier.size(14.dp),
+                                    )
+
+                                    Spacer(modifier = Modifier.width(4.dp))
+
+                                    Text(
+                                        text = "%.1f".format(rating),
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontFamily = displayFontFamily,
+                                        ),
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            MarkAsReadingButton(
-                book = state.book,
-                markBookAsReading = {
-                    runAction(OnMarkBookAsReadingClickAction(book = state.book))
-                }
-            )
         }
     }
 
+    // endregion
+
+    // region Section Label
+
     @Composable
-    private fun ReadingContainer(state: BookDetailUiState) {
-        if (state.book == null || state.book.userBookRead == null) return
-
-        val progress = state.book.userBookRead.progress
-        val edition = state.book.currentEdition ?: return
-        val isAudiobook = edition.isAudiobook
-
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            tonalElevation = 4.dp
-        ) {
-            Column(
+    private fun SectionLabel(text: String) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(all = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_menu_book),
-                        contentDescription = "Book icon",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    .height(4.dp)
+                    .width(32.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(MaterialTheme.colorScheme.primary),
+            )
 
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = "Reading progress",
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-
-                    Text(
-                        text = "${progress.roundToInt()}%",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                LinearProgressIndicator(
-                    progress = { progress / 100f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp),
-                    drawStopIndicator = {},
-                    gapSize = (-2).dp,
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                val summaryText = if (isAudiobook) {
-                    val totalSeconds = edition.audioSeconds ?: 0
-                    val currentSeconds = state.book.userBookRead.currentSeconds ?: 0
-                    val remainingSeconds = (totalSeconds - currentSeconds).coerceAtLeast(0)
-                    val currentLabel = secondsToHm(currentSeconds)
-                    val totalLabel = secondsToHm(totalSeconds)
-                    val remainingLabel = secondsToHm(remainingSeconds)
-                    "$currentLabel of $totalLabel • $remainingLabel left"
-                } else {
-                    val pageProgress = state.book.userBookRead.currentPage ?: 0
-                    val amountOfPagesLeft = edition.pages?.minus(pageProgress)
-                    "$pageProgress of ${edition.pages} pages • $amountOfPagesLeft pages left"
-                }
-
-                Text(
-                    text = summaryText,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-
-                state.deadlineProgress?.let { deadline ->
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    ReadingGoalBlock(
-                        progress = deadline,
-                        dateStyle = state.dateStyle,
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun ReadingGoalBlock(
-        progress: DeadlineProgress,
-        dateStyle: DateStyle,
-    ) {
-        val status = progress.status
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_date_range),
-                    contentDescription = "Deadline icon",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp),
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = "Deadline ${progress.deadline.format(dateStyle.formatter)}",
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleSmall,
-                )
-
-                DeadlineBadge(status = status)
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            val goalText = buildGoalText(progress = progress)
+            Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                text = goalText,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = text.uppercase(),
+                style = MaterialTheme.editorialTypography.eyebrow,
+                color = MaterialTheme.colorScheme.primary,
             )
         }
     }
 
-    private fun buildGoalText(progress: DeadlineProgress): String {
-        if (progress.isExpired) {
-            val daysPast = -progress.daysRemaining
-            val dayLabel = if (daysPast == 1L) "day" else "days"
+    // endregion
 
-            return "Deadline passed $daysPast $dayLabel ago."
-        }
-
-        val required = ceilToInt(progress.requiredPerDay)
-        val dayLabel = if (progress.daysRemaining == 1L) "day" else "days"
-
-        val isSeconds = progress.unit == DeadlineUnit.SECONDS
-
-        val verb = if (isSeconds) "Listen to" else "Read"
-        val perDayLabel = if (isSeconds) {
-            secondsToHm(required)
-        } else {
-            val pageLabel = if (required == 1) "page" else "pages"
-            "$required $pageLabel"
-        }
-
-        val base = "$verb $perDayLabel/day for the next ${progress.daysRemaining} $dayLabel to finish on time."
-
-        if (progress.isOnTrack || progress.unitsBehindSchedule <= 0) return base
-
-        val behindLabel = if (isSeconds) {
-            secondsToHm(progress.unitsBehindSchedule)
-        } else {
-            val label = if (progress.unitsBehindSchedule == 1) "page" else "pages"
-            "${progress.unitsBehindSchedule} $label"
-        }
-
-        return "You're $behindLabel behind schedule — $base"
-    }
-
-    @Composable
-    private fun FallBackDateText(
-        userBook: UserBook,
-        dateStyle: DateStyle,
-    ) {
-        Text(
-            text = "This book has been in your library since ${userBook.getFallbackDateString(style = dateStyle)}.",
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-
-    @Composable
-    private fun MarkAsReadingButton(
-        book: Book,
-        markBookAsReading: (Book) -> Unit,
-    ) {
-        SoftcoverButton(
-            label = "Start Reading",
-            onClick = {
-                markBookAsReading(book)
-            },
-            style = ButtonStyle.FILLED,
-            modifier = Modifier.fillMaxWidth(),
-            size = ButtonSize.M,
-            icon = SoftcoverIconResource.Drawable(
-                id = R.drawable.ic_menu_book,
-                contentDescription = "Add to want to read icon"
-            )
-        )
-    }
+    // region Helpers
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -1302,7 +1683,7 @@ class BookDetailScreen(
                         } else {
                             onDismiss()
                         }
-                    }
+                    },
                 ) {
                     Text(text = "Confirm")
                 }
@@ -1311,10 +1692,48 @@ class BookDetailScreen(
                 TextButton(onClick = onDismiss) {
                     Text(text = "Cancel")
                 }
-            }
+            },
         ) {
             DatePicker(state = pickerState)
         }
+    }
+
+    private fun buildGoalText(progress: DeadlineProgress): String {
+        if (progress.isExpired) {
+            val daysPast = -progress.daysRemaining
+            val dayLabel = if (daysPast == 1L) "day" else "days"
+
+            return "Deadline passed $daysPast $dayLabel ago."
+        }
+
+        val required = ceilToInt(progress.requiredPerDay)
+        val dayLabel = if (progress.daysRemaining == 1L) "day" else "days"
+
+        val isSeconds = progress.unit == DeadlineUnit.SECONDS
+
+        val verb = if (isSeconds) "Listen to" else "Read"
+        val perDayLabel = if (isSeconds) {
+            secondsToHm(required)
+        } else {
+            val pageLabel = if (required == 1) "page" else "pages"
+
+            "$required $pageLabel"
+        }
+
+        val base =
+            "$verb $perDayLabel/day for the next ${progress.daysRemaining} $dayLabel to finish on time."
+
+        if (progress.isOnTrack || progress.unitsBehindSchedule <= 0) return base
+
+        val behindLabel = if (isSeconds) {
+            secondsToHm(progress.unitsBehindSchedule)
+        } else {
+            val label = if (progress.unitsBehindSchedule == 1) "page" else "pages"
+
+            "${progress.unitsBehindSchedule} $label"
+        }
+
+        return "You're $behindLabel behind schedule — $base"
     }
 
     private fun ceilToInt(value: Float): Int {
@@ -1323,25 +1742,7 @@ class BookDetailScreen(
         return if (value > rounded) rounded + 1 else rounded
     }
 
-    @Composable
-    private fun WantToReadButton(
-        book: Book,
-        runAction: (BookDetailAction) -> Unit,
-    ) {
-        SoftcoverButton(
-            label = "Want to Read",
-            onClick = {
-                runAction(OnMarkBookAsWantToReadClickAction(book = book))
-            },
-            style = ButtonStyle.FILLED,
-            modifier = Modifier.fillMaxWidth(),
-            size = ButtonSize.M,
-            icon = SoftcoverIconResource.Drawable(
-                id = R.drawable.ic_bookmark_add,
-                contentDescription = "Add to want to read icon"
-            )
-        )
-    }
+    // endregion
 }
 
 @StandardPreview
@@ -1362,18 +1763,18 @@ private fun BookDetailScreenReadingPreview() {
                     name = "The Maze Runner",
                     amountOfBooks = 3,
                 ),
-                positionInSeries = 2,
+                positionsInSeries = listOf(2.0),
             )
 
-            BookDetailScreen(
-                id = 1,
-            ).Screen(
+            BookDetailScreen(id = 1).Screen(
                 state = BookDetailUiState(
                     book = book,
-                    loadingBookDetails = false,
+                    loadingBookDetails = true,
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
+                isOnline = true,
             )
         }
     }
@@ -1392,15 +1793,15 @@ private fun BookDetailScreenNonePreview() {
                 userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.None),
             )
 
-            BookDetailScreen(
-                id = 1,
-            ).Screen(
+            BookDetailScreen(id = 1).Screen(
                 state = BookDetailUiState(
                     book = book,
                     loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
+                isOnline = true,
             )
         }
     }
@@ -1419,15 +1820,15 @@ private fun BookDetailScreenDnfPreview() {
                 userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.DidNotFinish),
             )
 
-            BookDetailScreen(
-                id = 1,
-            ).Screen(
+            BookDetailScreen(id = 1).Screen(
                 state = BookDetailUiState(
                     book = book,
                     loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
+                isOnline = true,
             )
         }
     }
@@ -1446,15 +1847,15 @@ private fun BookDetailScreenWantToReadPreview() {
                 userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.WantToRead),
             )
 
-            BookDetailScreen(
-                id = 1,
-            ).Screen(
+            BookDetailScreen(id = 1).Screen(
                 state = BookDetailUiState(
                     book = book,
                     loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
+                isOnline = true,
             )
         }
     }
@@ -1473,15 +1874,15 @@ private fun BookDetailScreenReadPreview() {
                 userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.Read),
             )
 
-            BookDetailScreen(
-                id = 1,
-            ).Screen(
+            BookDetailScreen(id = 1).Screen(
                 state = BookDetailUiState(
                     book = book,
                     loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
+                onCoverClick = {},
+                isOnline = true,
             )
         }
     }

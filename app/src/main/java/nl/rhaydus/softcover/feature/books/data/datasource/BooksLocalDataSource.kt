@@ -116,7 +116,7 @@ class BooksLocalDataSourceImpl(
         return when (status) {
             UserBookStatus.CURRENTLY_READING -> dao.getBooksByStatusAndEvents(
                 statusCode = status.code,
-                events = listOf("progress_updated", "status_currently_reading"),
+                events = listOf("progress_updated", "user_book_read_started"),
             )
             UserBookStatus.READ -> dao.getReadBooks(statusCode = status.code)
             UserBookStatus.WANT_TO_READ -> dao.getBooksByStatusSortedByCreatedAt(

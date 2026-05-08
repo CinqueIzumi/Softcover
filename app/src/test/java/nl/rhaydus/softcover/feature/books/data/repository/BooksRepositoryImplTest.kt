@@ -939,7 +939,8 @@ class BooksRepositoryImplTest {
                 usersCount = 0,
                 ratingsCount = 0,
                 bookSeries = null,
-                positionInSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
                 userBook = staleUserBook,
                 userBookRead = staleUserBookRead,
             )
@@ -1276,6 +1277,71 @@ class BooksRepositoryImplTest {
         @Test
         fun `markBookAsReading delegates to remote data source and returns result`() = runTest {
             // ----- Arrange -----
+            val existingJournal = ReadingJournal(
+                updatedAt = "2026-01-01T10:00:00",
+                event = "some_existing_event",
+            )
+            val userBook = UserBook(
+                id = 1,
+                status = BookStatus.WantToRead,
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = listOf(existingJournal),
+            )
+            val book = Book(
+                id = 42,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = userBook,
+                userBookRead = null,
+            )
+            val expectedBook = stubBook(userBookId = 1)
+            val slot = slot<Book>()
+
+            coEvery {
+                booksRemoteDataSource.markBookAsReading(book)
+            } returns expectedBook
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(slot))
+            } returns Unit
+
+            // ----- Act -----
+            val result = repository.markBookAsReading(book = book)
+
+            // ----- Assert -----
+            result shouldBe expectedBook
+            val capturedUserBook = slot.captured.userBook!!
+            capturedUserBook.status shouldBe BookStatus.Reading
+            val capturedJournals = capturedUserBook.journals
+            capturedJournals.size shouldBe 2
+            capturedJournals[0] shouldBe existingJournal
+            capturedJournals[1].event shouldBe "user_book_read_started"
+            capturedJournals[1].updatedAt.isNotEmpty() shouldBe true
+        }
+
+        @Test
+        fun `cacheBook is called before markBookAsReading on remote`() = runTest {
+            // ----- Arrange -----
             val book = stubBook(userBookId = 1)
             val expectedBook = stubBook(userBookId = 1)
 
@@ -1283,11 +1349,40 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.markBookAsReading(book)
             } returns expectedBook
 
+            coEvery {
+                booksLocalDataSource.cacheBook(book = any())
+            } returns Unit
+
             // ----- Act -----
-            val result = repository.markBookAsReading(book = book)
+            repository.markBookAsReading(book = book)
 
             // ----- Assert -----
-            result shouldBe expectedBook
+            coVerifyOrder {
+                booksLocalDataSource.cacheBook(book = any())
+                booksRemoteDataSource.markBookAsReading(book)
+            }
+        }
+
+        @Test
+        fun `when userBook is null cacheBook receives the original book unchanged`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBookId = null)
+            val expectedBook = stubBook(userBookId = null)
+            val slot = slot<Book>()
+
+            coEvery {
+                booksRemoteDataSource.markBookAsReading(book)
+            } returns expectedBook
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(slot))
+            } returns Unit
+
+            // ----- Act -----
+            repository.markBookAsReading(book = book)
+
+            // ----- Assert -----
+            slot.captured shouldBe book
         }
     }
 
@@ -1339,7 +1434,7 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val existingJournal = ReadingJournal(
                 updatedAt = "2026-01-01T10:00:00",
-                event = "status_currently_reading",
+                event = "user_book_read_started",
             )
             val userBook = UserBook(
                 id = 1,
@@ -1377,7 +1472,8 @@ class BooksRepositoryImplTest {
                 usersCount = 0,
                 ratingsCount = 0,
                 bookSeries = null,
-                positionInSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
                 userBook = userBook,
                 userBookRead = userBookRead,
             )
@@ -1434,7 +1530,7 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val existingJournal = ReadingJournal(
                 updatedAt = "2026-01-01T10:00:00",
-                event = "status_currently_reading",
+                event = "user_book_read_started",
             )
             val userBook = UserBook(
                 id = 1,
@@ -1472,7 +1568,8 @@ class BooksRepositoryImplTest {
                 usersCount = 0,
                 ratingsCount = 0,
                 bookSeries = null,
-                positionInSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
                 userBook = userBook,
                 userBookRead = userBookRead,
             )
@@ -2365,7 +2462,8 @@ class BooksRepositoryImplTest {
             usersCount = 0,
             ratingsCount = 0,
             bookSeries = null,
-            positionInSeries = null,
+            positionsInSeries = emptyList(),
+            isCompilation = false,
             userBook = stubUserBook(id = userBookId),
             userBookRead = stubUserBookRead(id = userBookReadId),
         )

@@ -50,7 +50,8 @@ class BookTest {
         usersCount = 0,
         ratingsCount = 0,
         bookSeries = null,
-        positionInSeries = null,
+        positionsInSeries = emptyList(),
+        isCompilation = false,
         userBook = userBook,
         userBookRead = null,
     )
@@ -290,7 +291,7 @@ class BookTest {
             // ----- Arrange -----
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = null,
-                positionInSeries = null,
+                positionsInSeries = emptyList(),
             )
 
             // ----- Act -----
@@ -301,12 +302,12 @@ class BookTest {
         }
 
         @Test
-        fun `returns series name when positionInSeries is null`() {
+        fun `returns series name when positionsInSeries is empty`() {
             // ----- Arrange -----
             val series = BookSeries(id = 1, name = "The Stormlight Archive", amountOfBooks = 5)
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = series,
-                positionInSeries = null,
+                positionsInSeries = emptyList(),
             )
 
             // ----- Act -----
@@ -317,12 +318,12 @@ class BookTest {
         }
 
         @Test
-        fun `returns position and series name when positionInSeries is set`() {
+        fun `returns position and series name when positionsInSeries is set`() {
             // ----- Arrange -----
             val series = BookSeries(id = 1, name = "The Stormlight Archive", amountOfBooks = 5)
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = series,
-                positionInSeries = 2,
+                positionsInSeries = listOf(2.0),
             )
 
             // ----- Act -----
@@ -333,12 +334,12 @@ class BookTest {
         }
 
         @Test
-        fun `returns position text with positionInSeries of 1`() {
+        fun `returns position text with positionsInSeries of 1`() {
             // ----- Arrange -----
             val series = BookSeries(id = 1, name = "Mistborn", amountOfBooks = 3)
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = series,
-                positionInSeries = 1,
+                positionsInSeries = listOf(1.0),
             )
 
             // ----- Act -----
@@ -346,6 +347,98 @@ class BookTest {
 
             // ----- Assert -----
             result shouldBe "#1 of 3 in Mistborn"
+        }
+
+        @Test
+        fun `returns fractional position in seriesText when positionsInSeries is 1-5`() {
+            // ----- Arrange -----
+            val series = BookSeries(id = 1, name = "Wheel of Time", amountOfBooks = 14)
+            val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
+                bookSeries = series,
+                positionsInSeries = listOf(1.5),
+            )
+
+            // ----- Act -----
+            val result = book.seriesText
+
+            // ----- Assert -----
+            result shouldBe "#1.5 of 14 in Wheel of Time"
+        }
+    }
+
+    // ----- positionInSeriesDisplay -----
+
+    @Nested
+    inner class PositionInSeriesDisplay {
+
+        @Test
+        fun `returns null when positionsInSeries is empty`() {
+            // ----- Arrange -----
+            val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
+                positionsInSeries = emptyList(),
+            )
+
+            // ----- Act -----
+            val result = book.positionInSeriesDisplay
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `returns whole number string for position 1-0`() {
+            // ----- Arrange -----
+            val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
+                positionsInSeries = listOf(1.0),
+            )
+
+            // ----- Act -----
+            val result = book.positionInSeriesDisplay
+
+            // ----- Assert -----
+            result shouldBe "1"
+        }
+
+        @Test
+        fun `returns whole number string for position 5-0`() {
+            // ----- Arrange -----
+            val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
+                positionsInSeries = listOf(5.0),
+            )
+
+            // ----- Act -----
+            val result = book.positionInSeriesDisplay
+
+            // ----- Assert -----
+            result shouldBe "5"
+        }
+
+        @Test
+        fun `returns fractional string for position 1-5`() {
+            // ----- Arrange -----
+            val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
+                positionsInSeries = listOf(1.5),
+            )
+
+            // ----- Act -----
+            val result = book.positionInSeriesDisplay
+
+            // ----- Assert -----
+            result shouldBe "1.5"
+        }
+
+        @Test
+        fun `returns first-last range string for multi-position compilation`() {
+            // ----- Arrange -----
+            val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
+                positionsInSeries = listOf(1.0, 2.0, 3.0),
+            )
+
+            // ----- Act -----
+            val result = book.positionInSeriesDisplay
+
+            // ----- Assert -----
+            result shouldBe "1-3"
         }
     }
 }

@@ -4,8 +4,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -47,6 +49,7 @@ fun SoftcoverSplitButton(
     trailingButtonStyle: SplitButtonStyle = leadingButtonStyle,
     trailingEnabled: Boolean = true,
     leadingIcon: SoftcoverIconResource? = null,
+    fillMaxWidth: Boolean = false,
 ) {
     val leadingButtonShapes =
         SplitButtonDefaults.leadingButtonShapesFor(buttonHeight = size.height)
@@ -92,13 +95,13 @@ fun SoftcoverSplitButton(
         )
     }
 
-    val leadingButton: @Composable () -> Unit = {
+    val leadingButton: @Composable (Modifier) -> Unit = { modifier ->
         when (leadingButtonStyle) {
             SplitButtonStyle.FILLED -> SplitButtonDefaults.LeadingButton(
                 onClick = onLeadingButtonClick,
                 shapes = leadingButtonShapes,
                 contentPadding = leadingButtonContentPadding,
-                modifier = Modifier.height(height = size.height),
+                modifier = modifier,
                 content = leadingContent,
                 enabled = leadingEnabled,
             )
@@ -107,7 +110,7 @@ fun SoftcoverSplitButton(
                 onClick = onLeadingButtonClick,
                 shapes = leadingButtonShapes,
                 contentPadding = leadingButtonContentPadding,
-                modifier = Modifier.height(height = size.height),
+                modifier = modifier,
                 content = leadingContent,
                 enabled = leadingEnabled,
             )
@@ -116,7 +119,7 @@ fun SoftcoverSplitButton(
                 onClick = onLeadingButtonClick,
                 shapes = leadingButtonShapes,
                 contentPadding = leadingButtonContentPadding,
-                modifier = Modifier.height(height = size.height),
+                modifier = modifier,
                 content = leadingContent,
                 enabled = leadingEnabled,
             )
@@ -125,21 +128,21 @@ fun SoftcoverSplitButton(
                 onClick = onLeadingButtonClick,
                 shapes = leadingButtonShapes,
                 contentPadding = leadingButtonContentPadding,
-                modifier = Modifier.height(height = size.height),
+                modifier = modifier,
                 content = leadingContent,
                 enabled = leadingEnabled,
             )
         }
     }
 
-    val trailingButton: @Composable () -> Unit = {
+    val trailingButton: @Composable (Modifier) -> Unit = { modifier ->
         when (trailingButtonStyle) {
             SplitButtonStyle.FILLED -> SplitButtonDefaults.TrailingButton(
                 checked = checked,
                 onCheckedChange = onTrailingButtonClick,
                 shapes = trailingButtonShapes,
                 contentPadding = trailingButtonContentPadding,
-                modifier = Modifier.height(height = size.height),
+                modifier = modifier,
                 content = trailingContent,
                 enabled = trailingEnabled,
             )
@@ -149,7 +152,7 @@ fun SoftcoverSplitButton(
                 onCheckedChange = onTrailingButtonClick,
                 shapes = trailingButtonShapes,
                 contentPadding = trailingButtonContentPadding,
-                modifier = Modifier.height(height = size.height),
+                modifier = modifier,
                 content = trailingContent,
                 enabled = trailingEnabled,
             )
@@ -159,7 +162,7 @@ fun SoftcoverSplitButton(
                 onCheckedChange = onTrailingButtonClick,
                 shapes = trailingButtonShapes,
                 contentPadding = trailingButtonContentPadding,
-                modifier = Modifier.height(height = size.height),
+                modifier = modifier,
                 content = trailingContent,
                 enabled = trailingEnabled,
             )
@@ -169,19 +172,16 @@ fun SoftcoverSplitButton(
                 onCheckedChange = onTrailingButtonClick,
                 shapes = trailingButtonShapes,
                 contentPadding = trailingButtonContentPadding,
-                modifier = Modifier.height(height = size.height),
+                modifier = modifier,
                 content = trailingContent,
                 enabled = trailingEnabled,
             )
         }
     }
 
-    Box {
-        SplitButtonLayout(
-            leadingButton = leadingButton,
-            trailingButton = trailingButton,
-        )
+    val buttonHeightModifier = Modifier.height(height = size.height)
 
+    val dropdownMenu: @Composable () -> Unit = {
         DropdownMenu(
             expanded = checked,
             onDismissRequest = onDismissMenuRequest,
@@ -193,11 +193,37 @@ fun SoftcoverSplitButton(
                     leadingIcon = {
                         Icon(
                             painter = item.icon.getIconPainter(),
-                            contentDescription = item.icon.contentDescription
+                            contentDescription = item.icon.contentDescription,
                         )
-                    }
+                    },
                 )
             }
+        }
+    }
+
+    if (fillMaxWidth) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            leadingButton(
+                Modifier
+                    .weight(weight = 1f)
+                    .height(height = size.height)
+                    .padding(end = SplitButtonDefaults.Spacing)
+            )
+
+            Box {
+                trailingButton(buttonHeightModifier)
+
+                dropdownMenu()
+            }
+        }
+    } else {
+        Box {
+            SplitButtonLayout(
+                leadingButton = { leadingButton(buttonHeightModifier) },
+                trailingButton = { trailingButton(buttonHeightModifier) },
+            )
+
+            dropdownMenu()
         }
     }
 }

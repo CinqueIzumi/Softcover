@@ -96,6 +96,7 @@ object PreviewData {
             finishedAt = null,
         ),
         bookSeries = null,
-        positionInSeries = null,
+        positionsInSeries = emptyList(),
+        isCompilation = false,
     )
 }

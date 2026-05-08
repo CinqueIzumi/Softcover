@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -13,9 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,11 +34,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -46,6 +53,7 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.profile.domain.model.UserProfileData
@@ -98,7 +106,7 @@ class ProfileScreen : Screen {
         Scaffold(
             topBar = {
                 SoftcoverTopBar(
-                    title = "Profile",
+                    title = "",
                     onNavigateBack = onNavigateUp,
                 )
             },
@@ -107,181 +115,69 @@ class ProfileScreen : Screen {
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    val shape = MaterialShapes.Cookie12Sided.toShape()
+                ProfileHeader(
+                    profileImageUrl = state.userProfileData?.profileImageUrl,
+                    name = state.userProfileData?.name.orEmpty(),
+                    bio = state.userProfileData?.bio.orEmpty(),
+                    isLoading = state.isLoading,
+                )
 
-                    SoftcoverImage(
-                        model = state.userProfileData?.profileImageUrl,
-                        contentDescription = "User profile image",
+                Spacer(modifier = Modifier.height(36.dp))
+
+                Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                    SectionLabel(text = "Reading atlas")
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    HeroStatCard(
+                        eyebrow = "Total pages read",
+                        value = integerFormat.format(state.userProfileData?.totalPagesRead ?: 0),
+                        caption = "Every page a step further into the story.",
                         isLoading = state.isLoading,
-                        modifier = Modifier
-                            .size(160.dp)
-                            .clip(shape)
-                            .border(
-                                width = 4.dp,
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = shape
-                            )
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Text(
-                        text = state.userProfileData?.name ?: "",
-                        style = MaterialTheme.typography.displaySmallEmphasized.copy(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontStyle = FontStyle.Italic
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .shimmer(isLoading = state.isLoading),
                     )
 
-                    state.userProfileData?.bio?.takeIf { it != "" }?.let { bio ->
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = bio ?: "",
-                            style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shimmer(isLoading = state.isLoading)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    val totalPagesShape = RoundedCornerShape(32.dp)
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .shimmer(shape = totalPagesShape, isLoading = state.isLoading),
-                        tonalElevation = 1.dp,
-                        shape = totalPagesShape,
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(all = 8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = "TOTAL PAGES READ",
-                                style = MaterialTheme.typography.labelSmallEmphasized.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            )
-
-                            Text(
-                                text = integerFormat.format(state.userProfileData?.totalPagesRead ?: 0),
-                                style = MaterialTheme.typography.displayLargeEmphasized.copy(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontStyle = FontStyle.Italic
-                                ),
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(IntrinsicSize.Max)
+                            .height(IntrinsicSize.Max),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        StatsBox(
+                        StatTile(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight(),
+                            eyebrow = "Volumes",
+                            value = integerFormat.format(state.userProfileData?.booksRead ?: 0),
+                            caption = "books read",
                             isLoading = state.isLoading,
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(all = 8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
-                            ) {
-                                Text(
-                                    text = "BOOKS READ",
-                                    style = MaterialTheme.typography.labelSmallEmphasized.copy(
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                )
-                                Text(
-                                    text = integerFormat.format(state.userProfileData?.booksRead ?: 0),
-                                    style = MaterialTheme.typography.displaySmallEmphasized.copy(
-                                        color = MaterialTheme.colorScheme.primary,
-                                    ),
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
+                        )
 
                         Column(
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
-                            StatsBox(
-                                modifier = Modifier.fillMaxWidth(),
+                            SmallStatTile(
+                                eyebrow = "Avg. rating",
+                                value = ratingFormat.format(state.userProfileData?.averageRating ?: 0.0),
+                                trailing = "★",
                                 isLoading = state.isLoading,
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .padding(all = 8.dp)
-                                        .fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Text(
-                                        text = "AVG. RATING",
-                                        style = MaterialTheme.typography.labelSmallEmphasized.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    )
+                            )
 
-                                    Text(
-                                        text = ratingFormat.format(state.userProfileData?.averageRating ?: 0.0),
-                                        style = MaterialTheme.typography.titleLarge,
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            StatsBox(
-                                modifier = Modifier.fillMaxWidth(),
+                            SmallStatTile(
+                                eyebrow = "Streak",
+                                value = "${state.userProfileData?.readingStreak ?: 0}",
+                                trailing = "days",
                                 isLoading = state.isLoading,
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(all = 8.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = "STREAK (DAYS)",
-                                        style = MaterialTheme.typography.labelSmallEmphasized.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    )
-
-                                    Text(
-                                        text = "${state.userProfileData?.readingStreak ?: 0}",
-                                        style = MaterialTheme.typography.titleLarge,
-                                    )
-                                }
-                            }
+                            )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(40.dp))
 
                 SoftcoverButton(
                     label = "Log out",
@@ -290,8 +186,8 @@ class ProfileScreen : Screen {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            horizontal = 16.dp,
-                            vertical = 32.dp,
+                            horizontal = 24.dp,
+                            vertical = 24.dp,
                         ),
                     enabled = state.isLoading.not(),
                 )
@@ -299,20 +195,269 @@ class ProfileScreen : Screen {
         }
     }
 
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    private fun StatsBox(
-        modifier: Modifier = Modifier,
-        tonalElevation: Dp = 1.dp,
-        isLoading: Boolean = false,
-        content: @Composable () -> Unit,
+    private fun ProfileHeader(
+        profileImageUrl: String?,
+        name: String,
+        bio: String,
+        isLoading: Boolean,
     ) {
-        val shape = RoundedCornerShape(16.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            val shape = MaterialShapes.Cookie12Sided.toShape()
+
+            SoftcoverImage(
+                model = profileImageUrl,
+                contentDescription = "User profile image",
+                isLoading = isLoading,
+                modifier = Modifier
+                    .size(168.dp)
+                    .clip(shape)
+                    .border(
+                        width = 4.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = shape,
+                    ),
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            SectionLabel(text = "The reader")
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = name,
+                style = MaterialTheme.editorialTypography.display,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shimmer(isLoading = isLoading),
+            )
+
+            if (bio.isNotBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .height(1.dp)
+                            .width(28.dp)
+                            .background(MaterialTheme.colorScheme.outline),
+                    )
+
+                    Text(
+                        text = "•",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.padding(horizontal = 10.dp),
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .height(1.dp)
+                            .width(28.dp)
+                            .background(MaterialTheme.colorScheme.outline),
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "“$bio”",
+                    style = MaterialTheme.editorialTypography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.shimmer(isLoading = isLoading),
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
+    private fun HeroStatCard(
+        eyebrow: String,
+        value: String,
+        caption: String,
+        isLoading: Boolean,
+    ) {
+        val shape = RoundedCornerShape(28.dp)
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shimmer(shape = shape, isLoading = isLoading),
+            color = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = shape,
+        ) {
+            val demotedContent = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.75f)
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+            ) {
+                Text(
+                    text = eyebrow.uppercase(),
+                    style = MaterialTheme.editorialTypography.eyebrow,
+                    color = demotedContent,
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = value,
+                    style = MaterialTheme.editorialTypography.statHero,
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = 44.sp,
+                        maxFontSize = 72.sp,
+                        stepSize = 2.sp,
+                    ),
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.25f),
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = caption,
+                    style = MaterialTheme.editorialTypography.body,
+                    color = demotedContent,
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
+    private fun StatTile(
+        eyebrow: String,
+        value: String,
+        caption: String,
+        isLoading: Boolean,
+        modifier: Modifier = Modifier,
+    ) {
+        val shape = RoundedCornerShape(24.dp)
+
         Surface(
             modifier = modifier.shimmer(shape = shape, isLoading = isLoading),
-            tonalElevation = tonalElevation,
-            content = content,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
             shape = shape,
-        )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 18.dp, vertical = 18.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = eyebrow.uppercase(),
+                    style = MaterialTheme.editorialTypography.eyebrowSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = value,
+                    style = MaterialTheme.editorialTypography.statLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+
+                Text(
+                    text = caption,
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun SmallStatTile(
+        eyebrow: String,
+        value: String,
+        trailing: String,
+        isLoading: Boolean,
+        modifier: Modifier = Modifier,
+    ) {
+        val shape = RoundedCornerShape(20.dp)
+
+        Surface(
+            modifier = modifier
+                .fillMaxWidth()
+                .shimmer(shape = shape, isLoading = isLoading),
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = shape,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+            ) {
+                Text(
+                    text = eyebrow.uppercase(),
+                    style = MaterialTheme.editorialTypography.eyebrowSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = value,
+                        style = MaterialTheme.editorialTypography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Text(
+                        text = trailing,
+                        style = MaterialTheme.editorialTypography.body,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 4.dp),
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun SectionLabel(text: String) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .height(1.dp)
+                    .width(20.dp)
+                    .background(MaterialTheme.colorScheme.primary),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = text.uppercase(),
+                style = MaterialTheme.editorialTypography.eyebrow,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
     }
 }
 
@@ -326,13 +471,12 @@ private fun ProfileScreenPreview() {
                 userProfileData = UserProfileData(
                     profileImageUrl = "",
                     name = "Cinque",
-                    bio = "",
-//                    bio = "Lover of classic literature and sci-fi.",
+                    bio = "Lover of classic literature and sci-fi.",
                     booksRead = 20,
                     totalPagesRead = 5_432,
                     averageRating = 4.2,
                     readingStreak = 7,
-                )
+                ),
             ),
             runAction = {},
             onNavigateUp = {},

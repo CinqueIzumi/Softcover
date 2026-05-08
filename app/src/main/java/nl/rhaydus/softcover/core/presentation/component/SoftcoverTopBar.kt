@@ -30,10 +30,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.presentation.screen.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 
 data class SoftcoverTopBarAction(
     val iconResource: SoftcoverIconResource,
@@ -139,11 +137,7 @@ fun SoftcoverTopBar(
         }
     },
     additionalActions: @Composable RowScope.() -> Unit = {},
-    onNavigateToSearch: (() -> Unit)? = null,
 ) {
-    val shouldShowSearchIcon = LocalThemeConfiguration.current
-        .bottomBarStyle == BottomBarStyle.DOCKED
-
     val givenSubtitle: @Composable () -> Unit = { subTitle?.let { Text(text = subTitle) } }
 
     TopAppBar(
@@ -171,15 +165,6 @@ fun SoftcoverTopBar(
                     )
                 }
             }
-
-            if (shouldShowSearchIcon && onNavigateToSearch != null) {
-                IconButton(onClick = onNavigateToSearch) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search),
-                        contentDescription = "Search icon"
-                    )
-                }
-            }
         },
         navigationIcon = navigateBackButton,
     )
@@ -197,7 +182,7 @@ private fun SoftcoverTopBarPreview() {
             SoftcoverTopBar(
                 title = "given title",
                 titleAlignment = Alignment.Start,
-                onNavigateToSearch = {})
+            )
 
             SoftcoverTopBar(
                 title = "given title",
@@ -212,7 +197,6 @@ private fun SoftcoverTopBarPreview() {
                         onClick = {}
                     )
                 },
-                onNavigateToSearch = {},
             )
         }
     }

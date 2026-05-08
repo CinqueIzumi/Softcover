@@ -1,15 +1,29 @@
 package nl.rhaydus.softcover.core.presentation.component
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.isSpecified
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.SubcomposeAsyncImage
 import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.ImageRequest
@@ -17,6 +31,7 @@ import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.feature.books.domain.usecase.PersistEditionImageUseCase
 import org.koin.compose.koinInject
 
@@ -27,6 +42,9 @@ fun EditionImage(
     isLoading: Boolean,
     modifier: Modifier = Modifier,
     fallbackCoverUrl: String? = null,
+    elevation: Dp = 0.dp,
+    cornerRadius: Dp = 4.dp,
+    shadowColor: Color = Color.Unspecified,
 ) {
     val request = rememberEditionImageRequest(
         edition = edition,
@@ -34,13 +52,51 @@ fun EditionImage(
         fallbackCoverUrl = fallbackCoverUrl,
     )
 
-    SoftcoverImage(
+    val shape = RoundedCornerShape(cornerRadius)
+    val imageModifier = if (elevation > 0.dp) {
+        Modifier
+            .shadow(
+                elevation = elevation,
+                shape = shape,
+                clip = false,
+                ambientColor = shadowColor,
+                spotColor = shadowColor,
+            )
+            .clip(shape)
+    } else {
+        Modifier.clip(shape)
+    }
+
+    SubcomposeAsyncImage(
         model = request,
+        contentDescription = "Book edition image",
         modifier = modifier
             .aspectRatio(2f / 3f)
-            .clip(shape = RoundedCornerShape(4.dp)),
-        contentDescription = "Book edition image",
-        isLoading = isLoading,
+            .shimmer(isLoading = isLoading),
+        loading = { Box(modifier = Modifier.fillMaxSize().shimmer()) },
+        success = { state ->
+            val intrinsic = state.painter.intrinsicSize
+            val ratio = if (intrinsic.isSpecified && intrinsic.height > 0f) {
+                intrinsic.width / intrinsic.height
+            } else {
+                2f / 3f
+            }
+            BoxWithConstraints(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                val width = maxWidth
+                Image(
+                    painter = state.painter,
+                    contentDescription = "Book edition image",
+                    modifier = imageModifier
+                        .width(width)
+                        .requiredHeight(width / ratio),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        },
+        contentScale = ContentScale.Fit,
     )
 }
 
@@ -51,7 +107,12 @@ fun rememberEditionImageRequest(
     fallbackCoverUrl: String? = null,
 ): ImageRequest? {
     val context = LocalContext.current
-    val persistEditionImageUseCase = koinInject<PersistEditionImageUseCase>()
+    val isInspection = LocalInspectionMode.current
+    val persistEditionImageUseCase = if (isInspection) {
+        null
+    } else {
+        koinInject<PersistEditionImageUseCase>()
+    }
     val coroutineScope = rememberCoroutineScope()
 
     val resolution = resolveEditionImage(
@@ -73,11 +134,12 @@ fun rememberEditionImageRequest(
 
         resolution.persistEditionId?.let { editionId ->
             val sourceUrl = resolution.source as? String ?: return@let
+            val useCase = persistEditionImageUseCase ?: return@let
             builder.listener(
                 onSuccess = { _, _ ->
                     persistFromDiskCache(
                         coroutineScope = coroutineScope,
-                        persistEditionImageUseCase = persistEditionImageUseCase,
+                        persistEditionImageUseCase = useCase,
                         imageLoader = context.imageLoader,
                         editionId = editionId,
                         url = sourceUrl,

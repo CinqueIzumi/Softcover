@@ -23,6 +23,9 @@ import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingProgressUpdateD
 import nl.rhaydus.softcover.feature.connectivity.data.model.PendingProgressUpdateEntity
 import nl.rhaydus.softcover.feature.deadlines.data.dao.BookDeadlineDao
 import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
+import nl.rhaydus.softcover.feature.explore.data.dao.DismissedContinueSeriesDao
+import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesBookEntity
+import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesEntity
 
 @Database(
     entities = [
@@ -39,11 +42,13 @@ import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
         BookSeriesEntity::class,
         BookDeadlineEntity::class,
         PendingProgressUpdateEntity::class,
+        DismissedContinueSeriesBookEntity::class,
+        DismissedContinueSeriesEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 20,
+    version = 23,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -51,6 +56,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDeadlineDao(): BookDeadlineDao
 
     abstract fun pendingProgressUpdateDao(): PendingProgressUpdateDao
+
+    abstract fun dismissedContinueSeriesDao(): DismissedContinueSeriesDao
 
     companion object {
         fun buildDatabase(context: Context): SoftcoverDatabase {
@@ -77,6 +84,9 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_17_18)
                 .addMigrations(MIGRATION_18_19)
                 .addMigrations(MIGRATION_19_20)
+                .addMigrations(MIGRATION_20_21)
+                .addMigrations(MIGRATION_21_22)
+                .addMigrations(MIGRATION_22_23)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -569,6 +579,141 @@ abstract class SoftcoverDatabase : RoomDatabase() {
         private val MIGRATION_18_19 = object : Migration(18, 19) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE books ADD COLUMN ratingsCount INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_20_21 = object : Migration(20, 21) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE books_new (
+                            id INTEGER NOT NULL PRIMARY KEY,
+                            title TEXT NOT NULL,
+                            defaultEditionId INTEGER,
+                            rating REAL NOT NULL,
+                            description TEXT NOT NULL,
+                            releaseYear INTEGER NOT NULL,
+                            coverUrl TEXT NOT NULL,
+                            usersCount INTEGER NOT NULL,
+                            ratingsCount INTEGER NOT NULL DEFAULT 0,
+                            positionInSeries REAL,
+                            seriesId INTEGER
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        INSERT INTO books_new (
+                            id,
+                            title,
+                            defaultEditionId,
+                            rating,
+                            description,
+                            releaseYear,
+                            coverUrl,
+                            usersCount,
+                            ratingsCount,
+                            positionInSeries,
+                            seriesId
+                        )
+                        SELECT
+                            id,
+                            title,
+                            defaultEditionId,
+                            rating,
+                            description,
+                            releaseYear,
+                            coverUrl,
+                            usersCount,
+                            ratingsCount,
+                            CAST(positionInSeries AS REAL),
+                            seriesId
+                        FROM books
+                    """.trimIndent()
+                )
+
+                db.execSQL("DROP TABLE books")
+                db.execSQL("ALTER TABLE books_new RENAME TO books")
+            }
+        }
+
+        private val MIGRATION_21_22 = object : Migration(21, 22) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE books_new (
+                            id INTEGER NOT NULL PRIMARY KEY,
+                            title TEXT NOT NULL,
+                            defaultEditionId INTEGER,
+                            rating REAL NOT NULL,
+                            description TEXT NOT NULL,
+                            releaseYear INTEGER NOT NULL,
+                            coverUrl TEXT NOT NULL,
+                            usersCount INTEGER NOT NULL,
+                            ratingsCount INTEGER NOT NULL DEFAULT 0,
+                            positionsInSeries TEXT NOT NULL DEFAULT '',
+                            isCompilation INTEGER NOT NULL DEFAULT 0,
+                            seriesId INTEGER
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        INSERT INTO books_new (
+                            id,
+                            title,
+                            defaultEditionId,
+                            rating,
+                            description,
+                            releaseYear,
+                            coverUrl,
+                            usersCount,
+                            ratingsCount,
+                            positionsInSeries,
+                            isCompilation,
+                            seriesId
+                        )
+                        SELECT
+                            id,
+                            title,
+                            defaultEditionId,
+                            rating,
+                            description,
+                            releaseYear,
+                            coverUrl,
+                            usersCount,
+                            ratingsCount,
+                            COALESCE(CAST(positionInSeries AS TEXT), ''),
+                            0,
+                            seriesId
+                        FROM books
+                    """.trimIndent()
+                )
+
+                db.execSQL("DROP TABLE books")
+                db.execSQL("ALTER TABLE books_new RENAME TO books")
+            }
+        }
+
+        private val MIGRATION_22_23 = object : Migration(22, 23) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS dismissed_continue_series_books (
+                            bookId INTEGER NOT NULL PRIMARY KEY
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS dismissed_continue_series (
+                            seriesId INTEGER NOT NULL PRIMARY KEY
+                        )
+                    """.trimIndent()
+                )
             }
         }
 

@@ -5,7 +5,13 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,36 +35,53 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -74,10 +97,10 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
@@ -92,7 +115,6 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAct
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAction
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab as LibraryContentTab
@@ -111,11 +133,9 @@ object LibraryScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             gridStateFor = { id -> localState.gridStates[id] ?: LazyGridState() },
+            topAppBarState = screenModel.headerScrollState,
             onBookClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
-            },
-            onNavigateToSearch = {
-                navigator.parent?.push(item = SearchScreen())
             },
             onEditionClick = {
                 navigator.parent?.push(item = BookDetailScreen(id = it.bookId))
@@ -130,8 +150,8 @@ object LibraryScreen : Screen {
         runAction: (LibraryAction) -> Unit,
         onBookClick: (Book) -> Unit,
         onEditionClick: (BookEdition) -> Unit,
-        onNavigateToSearch: () -> Unit,
         gridStateFor: (String) -> LazyGridState = { LazyGridState() },
+        topAppBarState: androidx.compose.material3.TopAppBarState = rememberTopAppBarState(),
     ) {
         val tabs = state.visibleTabs
         val scope = rememberCoroutineScope()
@@ -168,105 +188,93 @@ object LibraryScreen : Screen {
             }
         }
 
-        Scaffold(
-            topBar = {
-                SoftcoverTopBar(
-                    title = "Library",
-                    onNavigateToSearch = onNavigateToSearch,
-                    additionalActions = {
-                        IconButton(
-                            onClick = { runAction(OnToggleSearchAction()) },
-                        ) {
-                            Icon(
-                                painter = painterResource(
-                                    if (state.isSearchActive) R.drawable.ic_close else R.drawable.ic_search
-                                ),
-                                contentDescription = if (state.isSearchActive) "Close library search" else "Search in library",
-                            )
-                        }
+        val currentTabIndex = pagerState.currentPage.coerceAtMost(tabs.lastIndex.coerceAtLeast(0))
+        val currentTab = tabs.getOrNull(currentTabIndex)
+        val currentTabBookCount = currentTab?.let { tab ->
+            when (tab) {
+                is LibraryContentTab.CustomList -> state.editionsByTab[tab.id]?.size
+                is LibraryContentTab.All,
+                is LibraryContentTab.Status,
+                    -> state.booksByTab[tab.id]?.size
+            }
+        }
 
-                        LayoutMenuAction(
-                            state = state,
-                            runAction = runAction,
-                        )
-                    },
-                )
-            },
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = topAppBarState)
+
+        val collapseFraction = if (topAppBarState.heightOffsetLimit < 0f) {
+            (topAppBarState.heightOffset / topAppBarState.heightOffsetLimit).coerceIn(0f, 1f)
+        } else {
+            0f
+        }
+
+        Scaffold(
             contentWindowInsets = WindowInsets.statusBars,
         ) {
             Column(
                 modifier = Modifier.padding(it)
             ) {
+                EditorialHeader(
+                    tabLabel = currentTab?.label,
+                    bookCount = currentTabBookCount,
+                    isSearchActive = state.isSearchActive,
+                    onToggleSearchClick = { runAction(OnToggleSearchAction()) },
+                    layoutMenu = {
+                        LayoutMenuAction(
+                            state = state,
+                            runAction = runAction,
+                        )
+                    },
+                    collapseFraction = collapseFraction,
+                    onCollapsibleSized = { measured ->
+                        val newLimit = -measured.toFloat()
+                        if (measured > 0 && newLimit != topAppBarState.heightOffsetLimit) {
+                            val previousFraction = if (topAppBarState.heightOffsetLimit < 0f) {
+                                (topAppBarState.heightOffset / topAppBarState.heightOffsetLimit)
+                                    .coerceIn(0f, 1f)
+                            } else {
+                                0f
+                            }
+
+                            topAppBarState.heightOffsetLimit = newLimit
+                            topAppBarState.heightOffset = previousFraction * newLimit
+                        }
+                    },
+                )
+
                 AnimatedVisibility(
                     visible = state.isSearchActive,
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut(),
                 ) {
                     Column {
-                        OutlinedTextField(
-                            value = state.searchQuery,
-                            onValueChange = { query ->
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        EditorialSearchField(
+                            query = state.searchQuery,
+                            onQueryChange = { query ->
                                 runAction(OnSearchQueryChangeAction(query = query))
                             },
-                            placeholder = { Text(text = "Search in library") },
-                            singleLine = true,
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_search),
-                                    contentDescription = "Search",
-                                )
+                            onClearClick = {
+                                runAction(OnSearchQueryChangeAction(query = ""))
                             },
-                            trailingIcon = if (state.searchQuery.isNotEmpty()) {
-                                {
-                                    IconButton(
-                                        onClick = { runAction(OnSearchQueryChangeAction(query = "")) },
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.ic_close),
-                                            contentDescription = "Clear search",
-                                        )
-                                    }
-                                }
-                            } else {
-                                null
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
                 }
 
-                PrimaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage.coerceAtMost(tabs.lastIndex.coerceAtLeast(0)),
-                    tabs = {
-                        tabs.forEachIndexed { index, tab ->
-                            Tab(
-                                selected = pagerState.currentPage == index,
-                                onClick = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(index)
-                                    }
-                                },
-                                modifier = Modifier.padding(all = 8.dp),
-                            ) {
-                                Text(
-                                    text = tab.label,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.widthIn(max = maxTabLabelWidth),
-                                )
-                            }
+                ShelfTabRow(
+                    tabs = tabs,
+                    currentPage = currentTabIndex,
+                    maxLabelWidth = maxTabLabelWidth,
+                    onTabClick = { index ->
+                        scope.launch {
+                            pagerState.animateScrollToPage(index)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                val pagerModifier = Modifier.weight(1f)
+                Spacer(modifier = Modifier.height(12.dp))
 
                 PullToRefreshBox(
                     isRefreshing = state.isLoading,
@@ -283,27 +291,30 @@ object LibraryScreen : Screen {
                         }
                     },
                     state = pullToRefreshState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .nestedScroll(scrollBehavior.nestedScrollConnection),
                 ) {
                     HorizontalPager(
                         state = pagerState,
-                        modifier = pagerModifier,
+                        modifier = Modifier.fillMaxSize(),
                     ) { page ->
-                        val currentTab = tabs.getOrNull(page) ?: return@HorizontalPager
+                        val tab = tabs.getOrNull(page) ?: return@HorizontalPager
 
-                        when (currentTab) {
+                        when (tab) {
                             is LibraryContentTab.CustomList -> EditionList(
-                                tab = currentTab,
+                                tab = tab,
                                 state = state,
-                                gridState = gridStateFor(currentTab.id),
+                                gridState = gridStateFor(tab.id),
                                 onEditionClick = onEditionClick,
                             )
 
                             is LibraryContentTab.All,
                             is LibraryContentTab.Status,
                                 -> BookList(
-                                    tab = currentTab,
+                                    tab = tab,
                                     state = state,
-                                    gridState = gridStateFor(currentTab.id),
+                                    gridState = gridStateFor(tab.id),
                                     onBookClick = onBookClick,
                                 )
                         }
@@ -312,6 +323,284 @@ object LibraryScreen : Screen {
             }
         }
     }
+
+    // region Editorial header
+
+    @Composable
+    private fun EditorialHeader(
+        tabLabel: String?,
+        bookCount: Int?,
+        isSearchActive: Boolean,
+        onToggleSearchClick: () -> Unit,
+        layoutMenu: @Composable () -> Unit,
+        collapseFraction: Float,
+        onCollapsibleSized: (Int) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 8.dp, top = 8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    SectionLabel(text = "Your collection")
+                }
+
+                IconButton(onClick = onToggleSearchClick) {
+                    Icon(
+                        painter = painterResource(
+                            if (isSearchActive) R.drawable.ic_close else R.drawable.ic_search
+                        ),
+                        contentDescription = if (isSearchActive) "Close library search" else "Search in library",
+                    )
+                }
+
+                layoutMenu()
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer { alpha = 1f - collapseFraction }
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(constraints)
+                        onCollapsibleSized(placeable.height)
+                        val visibleHeight = (placeable.height * (1f - collapseFraction))
+                            .toInt()
+                            .coerceAtLeast(0)
+                        layout(placeable.width, visibleHeight) {
+                            placeable.place(0, 0)
+                        }
+                    },
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = tabLabel ?: "Library",
+                        style = MaterialTheme.editorialTypography.pageTitle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        minLines = 2,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(end = 16.dp),
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    val subtitle = when {
+                        bookCount == null -> "Loading your shelf…"
+                        bookCount == 0 -> "No titles yet — your story starts here."
+                        bookCount == 1 -> "1 title resting on this shelf."
+                        else -> "$bookCount titles resting on this shelf."
+                    }
+
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.editorialTypography.body,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(end = 16.dp),
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun SectionLabel(text: String) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .height(1.dp)
+                    .width(20.dp)
+                    .background(MaterialTheme.colorScheme.primary),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = text.uppercase(),
+                style = MaterialTheme.editorialTypography.eyebrow,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+
+    // endregion
+
+    // region Search field
+
+    @Composable
+    private fun EditorialSearchField(
+        query: String,
+        onQueryChange: (String) -> Unit,
+        onClearClick: () -> Unit,
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(28.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = "Search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp),
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Box(modifier = Modifier.weight(1f)) {
+                    if (query.isEmpty()) {
+                        Text(
+                            text = "Search this shelf…",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+
+                    BasicTextField(
+                        value = query,
+                        onValueChange = onQueryChange,
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.merge(
+                            MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+
+                if (query.isNotEmpty()) {
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    IconButton(
+                        onClick = onClearClick,
+                        modifier = Modifier.size(32.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Clear search",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    // endregion
+
+    // region Tabs
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    private fun ShelfTabRow(
+        tabs: List<LibraryContentTab>,
+        currentPage: Int,
+        maxLabelWidth: Dp,
+        onTabClick: (Int) -> Unit,
+    ) {
+        val density = LocalDensity.current
+        val peekPx = with(density) { 48.dp.toPx() }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            tabs.forEachIndexed { index, tab ->
+                val selected = currentPage == index
+                val requester = remember { BringIntoViewRequester() }
+                var pillSize by remember { mutableStateOf(IntSize.Zero) }
+
+                LaunchedEffect(selected, pillSize) {
+                    if (selected && pillSize.width > 0) {
+                        requester.bringIntoView(
+                            Rect(
+                                left = -peekPx,
+                                top = 0f,
+                                right = pillSize.width + peekPx,
+                                bottom = pillSize.height.toFloat(),
+                            ),
+                        )
+                    }
+                }
+
+                ShelfTabPill(
+                    label = tab.label,
+                    selected = selected,
+                    maxLabelWidth = maxLabelWidth,
+                    onClick = { onTabClick(index) },
+                    modifier = Modifier
+                        .bringIntoViewRequester(requester)
+                        .onSizeChanged { pillSize = it },
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ShelfTabPill(
+        label: String,
+        selected: Boolean,
+        maxLabelWidth: Dp,
+        onClick: () -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        val container = if (selected) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        }
+
+        val content = if (selected) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
+        Surface(
+            modifier = modifier,
+            color = container,
+            contentColor = content,
+            shape = RoundedCornerShape(percent = 50),
+            onClick = onClick,
+        ) {
+            Text(
+                text = label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                ),
+                modifier = Modifier
+                    .widthIn(max = maxLabelWidth)
+                    .padding(horizontal = 18.dp, vertical = 10.dp),
+            )
+        }
+    }
+
+    // endregion
 
     @Composable
     private fun LayoutMenuAction(
@@ -363,7 +652,7 @@ object LibraryScreen : Screen {
         val editions = state.editionsByTab[tab.id] ?: return
 
         if (editions.isEmpty() && state.isLoading.not()) {
-            EmptyListScreen(listName = tab.label)
+            EmptyListScreen(tab = tab)
 
             return
         }
@@ -405,7 +694,7 @@ object LibraryScreen : Screen {
         if (books == null) return
 
         if (books.isEmpty() && state.isLoading.not()) {
-            EmptyListScreen(listName = tab.label)
+            EmptyListScreen(tab = tab)
 
             return
         }
@@ -444,27 +733,38 @@ object LibraryScreen : Screen {
         content: LazyGridScope.() -> Unit,
     ) {
         val columns = when (layout) {
-            LibraryGridLayout.GRID_TWO_COLUMNS -> 2
-            LibraryGridLayout.GRID_THREE_COLUMNS -> 3
+            LibraryGridLayout.GRID_TWO_COLUMNS,
+            LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
+                -> 2
+
+            LibraryGridLayout.GRID_THREE_COLUMNS,
+            LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
+                -> 3
+
             LibraryGridLayout.LIST_COMPACT,
             LibraryGridLayout.LIST_LARGE,
                 -> 1
         }
 
         val itemSpacing = when (layout) {
-            LibraryGridLayout.GRID_TWO_COLUMNS,
-            LibraryGridLayout.GRID_THREE_COLUMNS,
-            LibraryGridLayout.LIST_LARGE,
-                -> 16.dp
+            LibraryGridLayout.GRID_TWO_COLUMNS -> 20.dp
+            LibraryGridLayout.GRID_THREE_COLUMNS -> 16.dp
+            LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY -> 14.dp
+            LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY -> 10.dp
+            LibraryGridLayout.LIST_LARGE -> 12.dp
+            LibraryGridLayout.LIST_COMPACT -> 0.dp
+        }
 
-            LibraryGridLayout.LIST_COMPACT -> 4.dp
+        val horizontalPadding = when (layout) {
+            LibraryGridLayout.LIST_COMPACT -> 24.dp
+            else -> 16.dp
         }
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(columns),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = horizontalPadding),
             contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
             verticalArrangement = Arrangement.spacedBy(itemSpacing),
             horizontalArrangement = Arrangement.spacedBy(itemSpacing),
@@ -518,6 +818,28 @@ object LibraryScreen : Screen {
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
                             fallbackCoverUrl = book.coverUrl,
+                            elevation = 6.dp,
+                            cornerRadius = 10.dp,
+                        )
+                    }
+                }
+            }
+
+            LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
+            LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
+                -> {
+                CoverOnlyCell(
+                    onClick = { onBookClick(book) },
+                ) { modifier ->
+                    DeadlineCoverOverlay(progress = deadlineProgress) {
+                        EditionImage(
+                            edition = currentEdition,
+                            modifier = modifier,
+                            isLoading = false,
+                            defaultEdition = book.defaultEdition,
+                            fallbackCoverUrl = book.coverUrl,
+                            elevation = 6.dp,
+                            cornerRadius = 10.dp,
                         )
                     }
                 }
@@ -551,6 +873,8 @@ object LibraryScreen : Screen {
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
                             fallbackCoverUrl = book.coverUrl,
+                            elevation = 6.dp,
+                            cornerRadius = 10.dp,
                         )
                     }
                 }
@@ -581,6 +905,25 @@ object LibraryScreen : Screen {
                         modifier = modifier,
                         isLoading = false,
                         defaultEdition = edition,
+                        elevation = 6.dp,
+                        cornerRadius = 10.dp,
+                    )
+                }
+            }
+
+            LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
+            LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
+                -> {
+                CoverOnlyCell(
+                    onClick = { onEditionClick(edition) },
+                ) { modifier ->
+                    EditionImage(
+                        edition = edition,
+                        modifier = modifier,
+                        isLoading = false,
+                        defaultEdition = edition,
+                        elevation = 6.dp,
+                        cornerRadius = 10.dp,
                     )
                 }
             }
@@ -604,10 +947,25 @@ object LibraryScreen : Screen {
                         modifier = modifier,
                         isLoading = false,
                         defaultEdition = edition,
+                        elevation = 6.dp,
+                        cornerRadius = 10.dp,
                     )
                 }
             }
         }
+    }
+
+    @Composable
+    private fun CoverOnlyCell(
+        onClick: () -> Unit,
+        cover: @Composable (Modifier) -> Unit,
+    ) {
+        cover(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(ratio = 2f / 3f)
+                .noRippleClickable(onClick = onClick)
+        )
     }
 
     @Composable
@@ -620,21 +978,35 @@ object LibraryScreen : Screen {
         Column(
             modifier = Modifier.noRippleClickable(onClick = onClick)
         ) {
-            cover(Modifier.fillMaxWidth())
+            cover(
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(ratio = 2f / 3f)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
+                style = MaterialTheme.editorialTypography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.height(2.dp))
+            if (authorName.isNotBlank()) {
+                Spacer(modifier = Modifier.height(2.dp))
 
-            Text(
-                text = authorName,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
+                Text(
+                    text = authorName,
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
     }
 
@@ -648,18 +1020,35 @@ object LibraryScreen : Screen {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .noRippleClickable(onClick = onClick)
-                .padding(vertical = 8.dp)
+                .noRippleClickable(onClick = onClick),
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.editorialTypography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+
+                    if (authorName.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        Text(
+                            text = "By $authorName",
+                            style = MaterialTheme.editorialTypography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
 
                 if (deadlineProgress != null) {
                     Spacer(modifier = Modifier.width(8.dp))
@@ -668,13 +1057,8 @@ object LibraryScreen : Screen {
                 }
             }
 
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                text = authorName,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth()
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant,
             )
         }
     }
@@ -692,105 +1076,150 @@ object LibraryScreen : Screen {
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
         cover: @Composable (Modifier) -> Unit,
     ) {
-        Row(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .noRippleClickable(onClick = onClick),
-            verticalAlignment = Alignment.CenterVertically,
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(20.dp),
         ) {
-            cover(
-                Modifier
-                    .width(100.dp)
-                    .aspectRatio(ratio = 2f / 3f)
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                seriesText?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
+                cover(
+                    Modifier
+                        .width(96.dp)
+                        .aspectRatio(ratio = 2f / 3f)
                 )
 
-                Text(
-                    text = "By $authorName",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Spacer(modifier = Modifier.width(16.dp))
 
-                val hasRating = rating != null && rating != 0.0
-
-                val statsLabel = listOfNotNull(
-                    releaseYear?.takeIf { it != -1 }?.toString(),
-                    usersCount?.let { "$it readers" },
-                    rating?.takeIf { it != 0.0 }?.toString(),
-                ).joinToString(separator = " • ")
-
-                if (statsLabel.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    seriesText?.takeIf { it.isNotBlank() }?.let { series ->
                         Text(
-                            text = statsLabel,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            text = series.uppercase(),
+                            style = MaterialTheme.editorialTypography.eyebrowSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
+                    }
 
-                        if (hasRating) {
-                            Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = title,
+                        style = MaterialTheme.editorialTypography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
 
-                            Icon(
-                                painter = painterResource(R.drawable.ic_star_filled),
-                                contentDescription = "",
-                                tint = Color(0xFFFBBF23),
-                                modifier = Modifier.size(16.dp),
+                    if (authorName.isNotBlank()) {
+                        Text(
+                            text = "By $authorName",
+                            style = MaterialTheme.editorialTypography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+
+                    val hasRating = rating != null && rating != 0.0
+
+                    val statsLabel = listOfNotNull(
+                        releaseYear?.takeIf { it != -1 }?.toString(),
+                        usersCount?.let { "$it readers" },
+                        rating?.takeIf { it != 0.0 }?.toString(),
+                    ).joinToString(separator = " • ")
+
+                    if (statsLabel.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = statsLabel,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+
+                            if (hasRating) {
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_star_filled),
+                                    contentDescription = "",
+                                    tint = Color(0xFFFBBF23),
+                                    modifier = Modifier.size(14.dp),
+                                )
+                            }
                         }
                     }
-                }
 
-                if (deadlineProgress != null) {
-                    DeadlineSummaryLine(
-                        progress = deadlineProgress,
-                        dateStyle = dateStyle,
-                    )
+                    if (deadlineProgress != null) {
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        DeadlineSummaryLine(
+                            progress = deadlineProgress,
+                            dateStyle = dateStyle,
+                        )
+                    }
                 }
             }
         }
     }
 
     @Composable
-    private fun EmptyListScreen(listName: String) {
+    private fun EmptyListScreen(tab: LibraryContentTab) {
+        val isDnf = tab is LibraryContentTab.Status &&
+                tab.status == UserBookStatus.DID_NOT_FINISH
+
+        val headline = if (isDnf) "Nothing set aside" else "An empty shelf"
+
+        val body = if (isDnf) {
+            "No books abandoned here — long may it stay that way."
+        } else {
+            "Nothing rests on your ${tab.label} list yet. Find a title worth keeping and it will live here."
+        }
+
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp, vertical = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Image(
-                painter = painterResource(R.drawable.illu_no_results),
-                contentDescription = "No images were found"
+            val quoteAlpha = if (isSystemInDarkTheme()) 0.12f else 0.25f
+
+            Text(
+                text = "“",
+                style = MaterialTheme.editorialTypography.quoteGlyph,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = quoteAlpha),
+                modifier = Modifier.padding(top = 8.dp),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "No books were found in your $listName list. Start by adding new books to this list.",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                text = headline,
+                style = MaterialTheme.editorialTypography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium,
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    lineHeight = 22.sp,
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
@@ -817,7 +1246,6 @@ private fun LibraryScreenPreview() {
             ),
             onBookClick = {},
             runAction = {},
-            onNavigateToSearch = {},
             onEditionClick = {},
         )
     }
@@ -838,7 +1266,6 @@ private fun LibraryEmptyScreenPreview() {
             ),
             onBookClick = {},
             runAction = {},
-            onNavigateToSearch = {},
             onEditionClick = {},
         )
     }
