@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.screenmodel
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarState
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
@@ -59,6 +61,13 @@ class LibraryScreenScreenModel(
         getEnabledListIdsAsFlowUseCase = getEnabledListIdsAsFlowUseCase,
         mainDispatcher = appDispatchers.main,
         coroutineScope = screenModelScope,
+    )
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    val headerScrollState: TopAppBarState = TopAppBarState(
+        initialHeightOffsetLimit = -Float.MAX_VALUE,
+        initialHeightOffset = 0f,
+        initialContentOffset = 0f,
     )
 
     init {
