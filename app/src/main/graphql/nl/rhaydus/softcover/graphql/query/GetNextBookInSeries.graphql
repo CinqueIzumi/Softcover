@@ -1,0 +1,20 @@
+query GetNextBookInSeries(
+    $seriesId: Int!,
+    $afterPosition: float8!,
+) {
+    book_series(
+        where: {
+            series_id: { _eq: $seriesId }
+            position: { _gt: $afterPosition }
+        }
+        order_by: [
+            { position: asc },
+            { book: { users_count: desc } },
+        ]
+        limit: 1
+    ) {
+        book {
+            ...BookDetailFragment
+        }
+    }
+}

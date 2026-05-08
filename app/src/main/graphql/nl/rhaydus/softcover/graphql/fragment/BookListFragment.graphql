@@ -12,7 +12,8 @@ fragment BookListFragment on books {
     release_year
     users_count
     ratings_count
-    book_series {
+    compilation
+    book_series(order_by: { position: asc }) {
         ...BookSeriesFragment
     }
     contributions {

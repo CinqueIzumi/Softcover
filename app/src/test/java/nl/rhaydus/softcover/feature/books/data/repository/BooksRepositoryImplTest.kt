@@ -939,7 +939,8 @@ class BooksRepositoryImplTest {
                 usersCount = 0,
                 ratingsCount = 0,
                 bookSeries = null,
-                positionInSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
                 userBook = staleUserBook,
                 userBookRead = staleUserBookRead,
             )
@@ -1308,7 +1309,8 @@ class BooksRepositoryImplTest {
                 usersCount = 0,
                 ratingsCount = 0,
                 bookSeries = null,
-                positionInSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
                 userBook = userBook,
                 userBookRead = null,
             )
@@ -1470,7 +1472,8 @@ class BooksRepositoryImplTest {
                 usersCount = 0,
                 ratingsCount = 0,
                 bookSeries = null,
-                positionInSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
                 userBook = userBook,
                 userBookRead = userBookRead,
             )
@@ -1565,7 +1568,8 @@ class BooksRepositoryImplTest {
                 usersCount = 0,
                 ratingsCount = 0,
                 bookSeries = null,
-                positionInSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
                 userBook = userBook,
                 userBookRead = userBookRead,
             )
@@ -2458,7 +2462,8 @@ class BooksRepositoryImplTest {
             usersCount = 0,
             ratingsCount = 0,
             bookSeries = null,
-            positionInSeries = null,
+            positionsInSeries = emptyList(),
+            isCompilation = false,
             userBook = stubUserBook(id = userBookId),
             userBookRead = stubUserBookRead(id = userBookReadId),
         )

@@ -16,7 +16,8 @@ data class Book(
     val usersCount: Int,
     val ratingsCount: Int,
     val bookSeries: BookSeries?,
-    val positionInSeries: Int?,
+    val positionsInSeries: List<Double>,
+    val isCompilation: Boolean,
 
     val userBook: UserBook?,
     val userBookRead: UserBookRead?,
@@ -34,14 +35,33 @@ data class Book(
                 ?: editions.firstOrNull()
         }
 
+    val firstPositionInSeries: Double?
+        get() = positionsInSeries.firstOrNull()
+
+    val lastPositionInSeries: Double?
+        get() = positionsInSeries.lastOrNull()
+
     val seriesText: String?
         get() {
             val series = bookSeries ?: return null
+            val display = positionInSeriesDisplay ?: return series.name
 
-            return if (positionInSeries == null) {
-                series.name
-            } else {
-                "#$positionInSeries of ${series.amountOfBooks} in ${series.name}"
-            }
+            return "#$display of ${series.amountOfBooks} in ${series.name}"
         }
+
+    val positionInSeriesDisplay: String?
+        get() {
+            if (positionsInSeries.isEmpty()) return null
+
+            val first = positionsInSeries.first().formatPosition()
+
+            if (positionsInSeries.size == 1) return first
+
+            val last = positionsInSeries.last().formatPosition()
+
+            return "$first-$last"
+        }
+
+    private fun Double.formatPosition(): String =
+        if (this % 1.0 == 0.0) toInt().toString() else toString()
 }

@@ -57,7 +57,8 @@ class FetchBookByIdUseCaseTest {
         usersCount = 0,
         ratingsCount = 0,
         bookSeries = null,
-        positionInSeries = null,
+        positionsInSeries = emptyList(),
+        isCompilation = false,
         userBook = null,
         userBookRead = null,
     )

@@ -117,7 +117,8 @@ class UserBooksFlowCollectorTest {
         usersCount = 42,
         ratingsCount = 0,
         bookSeries = null,
-        positionInSeries = null,
+        positionsInSeries = emptyList(),
+        isCompilation = false,
         userBook = userBook,
         userBookRead = userBookRead,
     )

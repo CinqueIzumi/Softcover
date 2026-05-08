@@ -181,8 +181,12 @@ class BooksRemoteDataSourceImplTest {
         } returns null
 
         every {
-            this@mockk.positionInSeries
-        } returns null
+            this@mockk.positionsInSeries
+        } returns emptyList()
+
+        every {
+            this@mockk.isCompilation
+        } returns false
     }
 
     private fun stubBookEdition(id: Int = 10): BookEdition = mockk {
@@ -1104,7 +1108,8 @@ class BooksRemoteDataSourceImplTest {
             val canonicalBookUsersCount = canonicalBook.usersCount
             val canonicalBookReviewsCount = canonicalBook.ratingsCount
             val canonicalBookSeries = canonicalBook.bookSeries
-            val canonicalBookPositionInSeries = canonicalBook.positionInSeries
+            val canonicalBookPositionsInSeries = canonicalBook.positionsInSeries
+            val canonicalBookIsCompilation = canonicalBook.isCompilation
 
             every {
                 originalBook.copy(
@@ -1119,7 +1124,8 @@ class BooksRemoteDataSourceImplTest {
                     usersCount = canonicalBookUsersCount,
                     ratingsCount = canonicalBookReviewsCount,
                     bookSeries = canonicalBookSeries,
-                    positionInSeries = canonicalBookPositionInSeries,
+                    positionsInSeries = canonicalBookPositionsInSeries,
+                    isCompilation = canonicalBookIsCompilation,
                 )
             } returns mergedBook
 
@@ -1209,7 +1215,8 @@ class BooksRemoteDataSourceImplTest {
             val canonical1UsersCount = canonicalBook1.usersCount
             val canonical1ReviewsCount = canonicalBook1.ratingsCount
             val canonical1BookSeries = canonicalBook1.bookSeries
-            val canonical1PositionInSeries = canonicalBook1.positionInSeries
+            val canonical1PositionsInSeries = canonicalBook1.positionsInSeries
+            val canonical1IsCompilation = canonicalBook1.isCompilation
 
             val canonical2Id = canonicalBook2.id
             val canonical2Title = canonicalBook2.title
@@ -1221,7 +1228,8 @@ class BooksRemoteDataSourceImplTest {
             val canonical2UsersCount = canonicalBook2.usersCount
             val canonical2ReviewsCount = canonicalBook2.ratingsCount
             val canonical2BookSeries = canonicalBook2.bookSeries
-            val canonical2PositionInSeries = canonicalBook2.positionInSeries
+            val canonical2PositionsInSeries = canonicalBook2.positionsInSeries
+            val canonical2IsCompilation = canonicalBook2.isCompilation
 
             every {
                 originalBook1.copy(
@@ -1236,7 +1244,8 @@ class BooksRemoteDataSourceImplTest {
                     usersCount = canonical1UsersCount,
                     ratingsCount = canonical1ReviewsCount,
                     bookSeries = canonical1BookSeries,
-                    positionInSeries = canonical1PositionInSeries,
+                    positionsInSeries = canonical1PositionsInSeries,
+                    isCompilation = canonical1IsCompilation,
                 )
             } returns mergedBook1
 
@@ -1253,7 +1262,8 @@ class BooksRemoteDataSourceImplTest {
                     usersCount = canonical2UsersCount,
                     ratingsCount = canonical2ReviewsCount,
                     bookSeries = canonical2BookSeries,
-                    positionInSeries = canonical2PositionInSeries,
+                    positionsInSeries = canonical2PositionsInSeries,
+                    isCompilation = canonical2IsCompilation,
                 )
             } returns mergedBook2
 
@@ -1332,7 +1342,8 @@ class BooksRemoteDataSourceImplTest {
             val sharedUsersCount = canonicalBook.usersCount
             val sharedReviewsCount = canonicalBook.ratingsCount
             val sharedBookSeries = canonicalBook.bookSeries
-            val sharedPositionInSeries = canonicalBook.positionInSeries
+            val sharedPositionsInSeries = canonicalBook.positionsInSeries
+            val sharedIsCompilation = canonicalBook.isCompilation
 
             every {
                 originalBook1.copy(
@@ -1347,7 +1358,8 @@ class BooksRemoteDataSourceImplTest {
                     usersCount = sharedUsersCount,
                     ratingsCount = sharedReviewsCount,
                     bookSeries = sharedBookSeries,
-                    positionInSeries = sharedPositionInSeries,
+                    positionsInSeries = sharedPositionsInSeries,
+                    isCompilation = sharedIsCompilation,
                 )
             } returns mergedBook1
 
@@ -1364,7 +1376,8 @@ class BooksRemoteDataSourceImplTest {
                     usersCount = sharedUsersCount,
                     ratingsCount = sharedReviewsCount,
                     bookSeries = sharedBookSeries,
-                    positionInSeries = sharedPositionInSeries,
+                    positionsInSeries = sharedPositionsInSeries,
+                    isCompilation = sharedIsCompilation,
                 )
             } returns mergedBook2
 
@@ -1441,7 +1454,8 @@ class BooksRemoteDataSourceImplTest {
             val mergeTargetUsersCount = canonicalBook.usersCount
             val mergeTargetReviewsCount = canonicalBook.ratingsCount
             val mergeTargetBookSeries = canonicalBook.bookSeries
-            val mergeTargetPositionInSeries = canonicalBook.positionInSeries
+            val mergeTargetPositionsInSeries = canonicalBook.positionsInSeries
+            val mergeTargetIsCompilation = canonicalBook.isCompilation
 
             every {
                 originalCanonicalBook.copy(
@@ -1456,7 +1470,8 @@ class BooksRemoteDataSourceImplTest {
                     usersCount = mergeTargetUsersCount,
                     ratingsCount = mergeTargetReviewsCount,
                     bookSeries = mergeTargetBookSeries,
-                    positionInSeries = mergeTargetPositionInSeries,
+                    positionsInSeries = mergeTargetPositionsInSeries,
+                    isCompilation = mergeTargetIsCompilation,
                 )
             } returns mergedBook
 
@@ -1568,7 +1583,8 @@ class BooksRemoteDataSourceImplTest {
             val canonicalBookUsersCount = canonicalBook.usersCount
             val canonicalBookReviewsCount = canonicalBook.ratingsCount
             val canonicalBookSeries = canonicalBook.bookSeries
-            val canonicalBookPositionInSeries = canonicalBook.positionInSeries
+            val canonicalBookPositionsInSeries = canonicalBook.positionsInSeries
+            val canonicalBookIsCompilation = canonicalBook.isCompilation
 
             every {
                 originalBook.copy(
@@ -1583,7 +1599,8 @@ class BooksRemoteDataSourceImplTest {
                     usersCount = canonicalBookUsersCount,
                     ratingsCount = canonicalBookReviewsCount,
                     bookSeries = canonicalBookSeries,
-                    positionInSeries = canonicalBookPositionInSeries,
+                    positionsInSeries = canonicalBookPositionsInSeries,
+                    isCompilation = canonicalBookIsCompilation,
                 )
             } returns mergedBook
 
@@ -1608,7 +1625,8 @@ class BooksRemoteDataSourceImplTest {
                     usersCount = canonicalBookUsersCount,
                     ratingsCount = canonicalBookReviewsCount,
                     bookSeries = canonicalBookSeries,
-                    positionInSeries = canonicalBookPositionInSeries,
+                    positionsInSeries = canonicalBookPositionsInSeries,
+                    isCompilation = canonicalBookIsCompilation,
                 )
             }
         }

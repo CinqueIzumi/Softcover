@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookWithJournals
 import nl.rhaydus.softcover.fragment.BookDetailFragment
+import nl.rhaydus.softcover.fragment.BookListFragment
 import nl.rhaydus.softcover.fragment.EditionDetailFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.ReadingJournalFragment
@@ -345,7 +346,8 @@ class BookMapperTest {
         usersCount: Int = 100,
         ratingsCount: Int = 0,
         bookSeries: BookSeries? = null,
-        positionInSeries: Int? = null,
+        positionsInSeries: List<Double> = emptyList(),
+        isCompilation: Boolean = false,
         userBook: UserBook? = null,
         userBookRead: UserBookRead? = null,
     ): Book = mockk {
@@ -398,8 +400,12 @@ class BookMapperTest {
         } returns bookSeries
 
         every {
-            this@mockk.positionInSeries
-        } returns positionInSeries
+            this@mockk.positionsInSeries
+        } returns positionsInSeries
+
+        every {
+            this@mockk.isCompilation
+        } returns isCompilation
 
         every {
             this@mockk.userBook
@@ -473,7 +479,8 @@ class BookMapperTest {
         coverUrl: String = "https://example.com/book.jpg",
         usersCount: Int = 100,
         ratingsCount: Int = 0,
-        positionInSeries: Int? = null,
+        positionsInSeries: String = "",
+        isCompilation: Boolean = false,
         seriesId: Int? = null,
     ): BookEntity = BookEntity(
         id = id,
@@ -485,7 +492,8 @@ class BookMapperTest {
         coverUrl = coverUrl,
         usersCount = usersCount,
         ratingsCount = ratingsCount,
-        positionInSeries = positionInSeries,
+        positionsInSeries = positionsInSeries,
+        isCompilation = isCompilation,
         seriesId = seriesId,
     )
 
@@ -736,7 +744,7 @@ class BookMapperTest {
                 coverUrl = "https://example.com/book.jpg",
                 usersCount = 100,
                 ratingsCount = 42,
-                positionInSeries = 2,
+                positionsInSeries = listOf(2.0),
             )
 
             // ----- Act -----
@@ -751,7 +759,7 @@ class BookMapperTest {
             result.coverUrl shouldBe "https://example.com/book.jpg"
             result.usersCount shouldBe 100
             result.ratingsCount shouldBe 42
-            result.positionInSeries shouldBe 2
+            result.positionsInSeries shouldBe "2.0"
         }
 
         @Test
@@ -814,6 +822,23 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.seriesId shouldBe null
+        }
+
+        @Test
+        fun `book toEntity toModel preserves multi-position compilation`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                positionsInSeries = listOf(1.0, 2.0, 3.0),
+                isCompilation = true,
+            )
+
+            // ----- Act -----
+            val entity = book.toEntity()
+            val result = stubBookFullEntity(book = entity).toModel()
+
+            // ----- Assert -----
+            result.positionsInSeries shouldBe listOf(1.0, 2.0, 3.0)
+            result.isCompilation shouldBe true
         }
     }
 
@@ -2078,7 +2103,7 @@ class BookMapperTest {
                 coverUrl = "https://example.com/book.jpg",
                 usersCount = 100,
                 ratingsCount = 55,
-                positionInSeries = 2,
+                positionsInSeries = "2.0",
             )
             val entity = stubBookFullEntity(book = bookEntity)
 
@@ -2094,7 +2119,7 @@ class BookMapperTest {
             result.coverUrl shouldBe "https://example.com/book.jpg"
             result.usersCount shouldBe 100
             result.ratingsCount shouldBe 55
-            result.positionInSeries shouldBe 2
+            result.positionsInSeries shouldBe listOf(2.0)
         }
 
         @Test
@@ -3076,6 +3101,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
             }
 
@@ -3118,6 +3144,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns 2020
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { users_count } returns 250
                 every { ratings_count } returns 0
@@ -3199,6 +3226,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
                 every { ratings_count } returns 0
@@ -3274,6 +3302,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { users_count } returns 1234
                 every { ratings_count } returns 0
@@ -3353,6 +3382,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
                 every { ratings_count } returns 0
@@ -3432,6 +3462,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
                 every { ratings_count } returns 0
@@ -3510,6 +3541,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
                 every { ratings_count } returns 0
@@ -3587,6 +3619,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { users_count } returns 0
                 every { ratings_count } returns ratingsCount
@@ -3814,6 +3847,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
@@ -3856,6 +3890,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns 2021
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { description } returns "A great book."
                 every { users_count } returns 500
@@ -3913,6 +3948,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
@@ -3966,6 +4002,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
@@ -4019,6 +4056,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
@@ -4071,6 +4109,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
@@ -4121,6 +4160,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { release_year } returns null
                 every { book_series } returns emptyList()
+                every { compilation } returns false
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
@@ -4215,6 +4255,172 @@ class BookMapperTest {
 
             // ----- Act & Assert -----
             edition.isAudiobook shouldBe false
+        }
+    }
+
+    @Nested
+    inner class PositionDetailsParsing {
+
+        private fun buildBookDetailFragment(
+            bookSeriesEntry: BookDetailFragment.Book_series?,
+        ): BookDetailFragment {
+            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+
+            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns "Title"
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+
+            val seriesList = listOfNotNull(bookSeriesEntry)
+
+            val fragment = mockk<BookDetailFragment> {
+                every { id } returns 1
+                every { canonical } returns null
+                every { title } returns "My Book"
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { book_series } returns seriesList
+                every { compilation } returns false
+                every { contributions } returns emptyList()
+                every { description } returns null
+                every { users_count } returns 0
+                every { ratings_count } returns 0
+                every { default_physical_edition } returns defaultEditionInner
+            }
+
+            every {
+                with(BookDetailFragment.Default_physical_edition.Companion) {
+                    defaultEditionInner.editionFragment()
+                }
+            } returns editionFragment
+
+            return fragment
+        }
+
+        private fun bookSeriesEntry(
+            details: String?,
+            position: Double?,
+        ): BookDetailFragment.Book_series = mockk<BookDetailFragment.Book_series> {
+            every { this@mockk.details } returns details
+            every { this@mockk.position } returns position
+            every { this@mockk.series } returns null
+            every { this@mockk.__typename } returns "book_series"
+        }
+
+        @Test
+        fun `details "1" yields single-element list`() {
+            // ----- Arrange -----
+            val entry = bookSeriesEntry(details = "1", position = null)
+            val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.positionsInSeries shouldBe listOf(1.0)
+        }
+
+        @Test
+        fun `details "1-3" expands to 1, 2, 3`() {
+            // ----- Arrange -----
+            val entry = bookSeriesEntry(details = "1-3", position = null)
+            val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.positionsInSeries shouldBe listOf(1.0, 2.0, 3.0)
+        }
+
+        @Test
+        fun `details 1point5 yields single-element list`() {
+            // ----- Arrange -----
+            val entry = bookSeriesEntry(details = "1.5", position = null)
+            val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.positionsInSeries shouldBe listOf(1.5)
+        }
+
+        @Test
+        fun `details "1point5-2point5" yields endpoints without fan-out`() {
+            // ----- Arrange -----
+            val entry = bookSeriesEntry(details = "1.5-2.5", position = null)
+            val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.positionsInSeries shouldBe listOf(1.5, 2.5)
+        }
+
+        @Test
+        fun `unparseable details falls back to position`() {
+            // ----- Arrange -----
+            val entry = bookSeriesEntry(details = "abc", position = 3.0)
+            val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.positionsInSeries shouldBe listOf(3.0)
+        }
+
+        @Test
+        fun `null details falls back to position`() {
+            // ----- Arrange -----
+            val entry = bookSeriesEntry(details = null, position = 2.0)
+            val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.positionsInSeries shouldBe listOf(2.0)
+        }
+
+        @Test
+        fun `empty book_series list yields empty positions`() {
+            // ----- Arrange -----
+            val fragment = buildBookDetailFragment(bookSeriesEntry = null)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.positionsInSeries shouldBe emptyList()
+        }
+
+        @Test
+        fun `inverted range "3-1" falls back to position`() {
+            // ----- Arrange -----
+            val entry = bookSeriesEntry(details = "3-1", position = 1.0)
+            val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.positionsInSeries shouldBe listOf(1.0)
         }
     }
 }

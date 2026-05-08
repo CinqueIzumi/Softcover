@@ -154,8 +154,41 @@ private fun BookListFragment.authors(): List<Author> = contributions.mapNotNull 
 private fun BookListFragment.bookSeries(): BookSeries? =
     book_series.firstOrNull()?.bookSeriesFragment()?.toBookSeries()
 
-private fun BookListFragment.positionInSeries(): Int? =
-    book_series.firstOrNull()?.bookSeriesFragment()?.position?.toInt()
+private fun BookListFragment.positionsInSeries(): List<Double> {
+    val first = book_series.firstOrNull()?.bookSeriesFragment() ?: return emptyList()
+
+    return parsePositionDetails(details = first.details, fallback = first.position)
+}
+
+private fun parsePositionDetails(
+    details: String?,
+    fallback: Double?,
+): List<Double> {
+    val parsed = details?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?.let { raw ->
+            val rangeParts = raw.split("-").map { it.trim() }
+
+            when (rangeParts.size) {
+                1 -> rangeParts[0].toDoubleOrNull()?.let { listOf(it) }
+                2 -> {
+                    val start = rangeParts[0].toDoubleOrNull()
+                    val end = rangeParts[1].toDoubleOrNull()
+
+                    if (start == null || end == null || end < start) {
+                        null
+                    } else if (start % 1.0 == 0.0 && end % 1.0 == 0.0) {
+                        (start.toInt()..end.toInt()).map { it.toDouble() }
+                    } else {
+                        listOf(start, end)
+                    }
+                }
+                else -> null
+            }
+        }
+
+    return parsed ?: listOfNotNull(fallback)
+}
 
 private fun BookListFragment.canonicalIdOrNull(): Int? {
     val canonicalId = canonical?.id ?: return null
@@ -194,7 +227,8 @@ fun UserBookFragment.toBook(): Book? {
         usersCount = listFragment.users_count ?: 0,
         ratingsCount = listFragment.ratings_count,
         bookSeries = listFragment.bookSeries(),
-        positionInSeries = listFragment.positionInSeries(),
+        positionsInSeries = listFragment.positionsInSeries(),
+        isCompilation = listFragment.compilation,
         userBook = toUserBook(),
         userBookRead = userBookReadFragment?.toUserBookRead(),
     )
@@ -224,7 +258,8 @@ fun BookDetailFragment.toBook(): Book? {
         usersCount = users_count,
         ratingsCount = listFragment.ratings_count,
         bookSeries = listFragment.bookSeries(),
-        positionInSeries = listFragment.positionInSeries(),
+        positionsInSeries = listFragment.positionsInSeries(),
+        isCompilation = listFragment.compilation,
         userBook = null,
         userBookRead = null,
     )
@@ -272,7 +307,8 @@ fun Book.toEntity(): BookEntity = BookEntity(
     defaultEditionId = defaultEdition?.id,
     usersCount = usersCount,
     ratingsCount = ratingsCount,
-    positionInSeries = positionInSeries,
+    positionsInSeries = positionsInSeries.joinToString(separator = ","),
+    isCompilation = isCompilation,
     seriesId = bookSeries?.id,
 )
 
@@ -448,7 +484,11 @@ fun BookFullEntity.toModel(): Book {
         ratingsCount = book.ratingsCount,
         userBook = userBookWithJournals?.userBook?.toModel(journals = journals),
         userBookRead = userBookWithJournals?.userBookRead?.toModel(),
-        positionInSeries = book.positionInSeries,
+        positionsInSeries = book.positionsInSeries
+            .split(",")
+            .filter { it.isNotBlank() }
+            .mapNotNull { it.toDoubleOrNull() },
+        isCompilation = book.isCompilation,
         bookSeries = series?.toModel()
     )
 }

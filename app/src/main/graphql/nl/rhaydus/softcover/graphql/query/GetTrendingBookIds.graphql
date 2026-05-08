@@ -1,0 +1,15 @@
+query GetTrendingBookIds(
+    $from: date!,
+    $to: date!,
+    $limit: Int!,
+    $offset: Int!,
+) {
+    books_trending(
+        from: $from,
+        to: $to,
+        limit: $limit,
+        offset: $offset,
+    ) {
+        ids
+    }
+}

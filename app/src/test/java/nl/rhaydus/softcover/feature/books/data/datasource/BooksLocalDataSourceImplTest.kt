@@ -60,7 +60,8 @@ class BooksLocalDataSourceImplTest {
         coverUrl = "https://example.com/cover.jpg",
         usersCount = 100,
         ratingsCount = 0,
-        positionInSeries = null,
+        positionsInSeries = "",
+        isCompilation = false,
         seriesId = null,
     )
 
