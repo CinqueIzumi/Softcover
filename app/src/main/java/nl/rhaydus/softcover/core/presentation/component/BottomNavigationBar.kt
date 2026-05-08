@@ -8,7 +8,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,42 +18,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
-import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.model.IconToggleButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.screen.LocalAppUpdateState
 import nl.rhaydus.softcover.feature.app_update.domain.model.AppUpdateState
+import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
-import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsTab
 
 private val bottomBarScreens = listOf(
     ReadingTab,
     LibraryTab,
+    ExploreTab,
     SettingsTab,
 )
-
-@Composable
-private fun BottomBarFloatingActionButton() {
-    val navigator = LocalNavigator.currentOrThrow
-
-    FloatingActionButton(
-        onClick = { navigator.parent?.push(SearchScreen()) },
-        containerColor = MaterialTheme.colorScheme.secondaryContainer
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_search),
-            contentDescription = "Search icon",
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -103,9 +84,6 @@ fun BottomFloatingBar(modifier: Modifier = Modifier) {
     HorizontalFloatingToolbar(
         expanded = true,
         modifier = modifier,
-        floatingActionButton = {
-            BottomBarFloatingActionButton()
-        }
     ) {
         val tabNavigator = LocalTabNavigator.current
 

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -57,7 +56,7 @@ object BottomBarScreen : Screen {
 
         TabNavigator(ReadingTab) {
             Scaffold(
-                contentWindowInsets = WindowInsets.statusBars,
+                contentWindowInsets = WindowInsets(0),
                 snackbarHost = {
                     SnackbarHost(
                         hostState = snackBarState,
