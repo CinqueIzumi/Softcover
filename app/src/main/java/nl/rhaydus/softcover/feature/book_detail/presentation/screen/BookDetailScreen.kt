@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -60,7 +61,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -87,8 +87,8 @@ import nl.rhaydus.softcover.core.presentation.modifier.grayscale
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.presentation.theme.bodyFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
+import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
@@ -342,6 +342,7 @@ class BookDetailScreen(
                         state = state,
                         runAction = runAction,
                         isOnline = isOnline,
+                        iconColors = backButtonColors,
                     )
                 },
                 scrollBehavior = topAppBarScrollBehavior,
@@ -363,9 +364,6 @@ class BookDetailScreen(
                         runAction(OnEditionSearchQueryChangeAction(query = it))
                     },
                     onDismissRequest = {
-                        runAction(OnDismissEditEditionSheetClickAction())
-                    },
-                    onCancelClick = {
                         runAction(OnDismissEditEditionSheetClickAction())
                     },
                     onConfirmClick = {
@@ -620,97 +618,112 @@ class BookDetailScreen(
                         Text(
                             text = "By ${edition?.authorString ?: ""}",
                             color = Color.White.copy(alpha = textSecondaryAlpha),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontStyle = FontStyle.Italic,
+                            style = MaterialTheme.editorialTypography.bodySmall.copy(
                                 shadow = secondaryShadow,
                             ),
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        val isAudiobook = edition?.isAudiobook == true
 
-                        HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
+                        val showRating = rating != null && rating > 0.0
+                        val showLength = if (isAudiobook) {
+                            (edition.audioSeconds ?: 0) > 0
+                        } else {
+                            (edition?.pages ?: 0) > 0
+                        }
+                        val showReleased = releaseYear != null && releaseYear > 0
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        if (showRating || showLength || showReleased) {
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
-                                Text(
-                                    text = "Rating",
-                                    style = labelSmall,
-                                )
+                                if (showRating) {
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Text(
+                                            text = "Rating",
+                                            style = labelSmall,
+                                        )
 
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = "${rating.takeIf { it != null } ?: ""}",
-                                        style = bodySmall,
-                                    )
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = "%.1f".format(rating),
+                                                style = bodySmall,
+                                            )
 
-                                    Spacer(modifier = Modifier.width(4.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
 
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_star_filled),
-                                        contentDescription = "",
-                                        tint = GoldStar,
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                }
-                            }
-
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                Text(
-                                    text = "Length",
-                                    style = labelSmall,
-                                )
-
-                                Row {
-                                    val isAudiobook = edition?.isAudiobook == true
-
-                                    val lengthText = if (isAudiobook) {
-                                        secondsToHm(seconds = edition.audioSeconds ?: 0)
-                                    } else {
-                                        "${edition?.pages ?: ""}"
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_star_filled),
+                                                contentDescription = "",
+                                                tint = GoldStar,
+                                                modifier = Modifier.size(16.dp),
+                                            )
+                                        }
                                     }
+                                }
 
-                                    Text(
-                                        text = lengthText,
-                                        style = bodySmall,
-                                        modifier = Modifier.alignByBaseline(),
-                                    )
+                                if (showLength) {
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Text(
+                                            text = "Length",
+                                            style = labelSmall,
+                                        )
 
-                                    if (isAudiobook.not()) {
-                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Row {
+                                            val lengthText = if (isAudiobook) {
+                                                secondsToHm(seconds = edition?.audioSeconds ?: 0)
+                                            } else {
+                                                "${edition?.pages ?: ""}"
+                                            }
+
+                                            Text(
+                                                text = lengthText,
+                                                style = bodySmall,
+                                                modifier = Modifier.alignByBaseline(),
+                                            )
+
+                                            if (isAudiobook.not()) {
+                                                Spacer(modifier = Modifier.width(4.dp))
+
+                                                Text(
+                                                    text = "pgs",
+                                                    style = labelSmall,
+                                                    modifier = Modifier.alignByBaseline(),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (showReleased) {
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Text(
+                                            text = "Released",
+                                            style = labelSmall,
+                                        )
 
                                         Text(
-                                            text = "pgs",
-                                            style = labelSmall,
-                                            modifier = Modifier.alignByBaseline(),
+                                            text = "$releaseYear",
+                                            style = bodySmall,
                                         )
                                     }
                                 }
-                            }
-
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                Text(
-                                    text = "Released",
-                                    style = labelSmall,
-                                )
-
-                                Text(
-                                    text = "${releaseYear ?: 0}",
-                                    style = bodySmall,
-                                )
                             }
                         }
                     }
@@ -856,7 +869,7 @@ class BookDetailScreen(
         val container = if (selected) {
             MaterialTheme.colorScheme.secondaryContainer
         } else {
-            MaterialTheme.colorScheme.surfaceContainerLow
+            MaterialTheme.colorScheme.surfaceContainer
         }
 
         val content = if (selected) {
@@ -890,7 +903,6 @@ class BookDetailScreen(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelMedium.copy(
-                        fontFamily = bodyFontFamily,
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                     ),
                 )
@@ -907,6 +919,8 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
         isOnline: Boolean,
+        iconColors: androidx.compose.material3.IconButtonColors =
+            IconButtonDefaults.iconButtonColors(),
     ) {
         if (state.loadingBookDetails) return
 
@@ -918,7 +932,10 @@ class BookDetailScreen(
         val dismiss = { menuOpen = false }
 
         Box {
-            IconButton(onClick = { menuOpen = true }) {
+            IconButton(
+                onClick = { menuOpen = true },
+                colors = iconColors,
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_edit),
                     contentDescription = "More actions",
@@ -1105,7 +1122,7 @@ class BookDetailScreen(
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 shape = RoundedCornerShape(20.dp),
             ) {
                 Column(
@@ -1131,18 +1148,13 @@ class BookDetailScreen(
                         Text(
                             text = if (isAudiobook) "Listening progress" else "Reading progress",
                             modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontFamily = displayFontFamily,
-                            ),
+                            style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
 
                         Text(
                             text = "${progress.roundToInt()}%",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontFamily = displayFontFamily,
-                                fontWeight = FontWeight.SemiBold,
-                            ),
+                            style = MaterialTheme.editorialTypography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                         )
 
@@ -1215,7 +1227,7 @@ class BookDetailScreen(
         dateStyle: DateStyle,
     ) {
         Surface(
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -1315,7 +1327,7 @@ class BookDetailScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
             shape = RoundedCornerShape(24.dp),
         ) {
             Column(
@@ -1338,11 +1350,7 @@ class BookDetailScreen(
 
                     Text(
                         text = eyebrow.uppercase(),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontFamily = bodyFontFamily,
-                            letterSpacing = 2.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        ),
+                        style = MaterialTheme.editorialTypography.eyebrow,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -1351,10 +1359,7 @@ class BookDetailScreen(
 
                 Text(
                     text = body,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontFamily = displayFontFamily,
-                        fontStyle = FontStyle.Italic,
-                    ),
+                    style = MaterialTheme.editorialTypography.body,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -1434,9 +1439,7 @@ class BookDetailScreen(
 
                     Text(
                         text = "What readers think",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontFamily = displayFontFamily,
-                        ),
+                        style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
@@ -1454,9 +1457,7 @@ class BookDetailScreen(
 
                         Text(
                             text = "%.1f".format(book.rating),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontFamily = displayFontFamily,
-                            ),
+                            style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
@@ -1493,17 +1494,18 @@ class BookDetailScreen(
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(24.dp),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
+                val quoteAlpha = if (isSystemInDarkTheme()) 0.22f else 0.32f
+
                 Text(
                     text = "“",
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontFamily = displayFontFamily,
+                    style = MaterialTheme.editorialTypography.quoteGlyph.copy(
                         fontSize = 92.sp,
                     ),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(start = 16.dp, top = 4.dp),
@@ -1599,7 +1601,7 @@ class BookDetailScreen(
                                     Icon(
                                         painter = painterResource(R.drawable.ic_star_filled),
                                         contentDescription = "Rating",
-                                        tint = GoldStar,
+                                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
                                         modifier = Modifier.size(14.dp),
                                     )
 
@@ -1630,20 +1632,17 @@ class BookDetailScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .height(1.dp)
-                    .width(20.dp)
+                    .height(4.dp)
+                    .width(32.dp)
+                    .clip(RoundedCornerShape(2.dp))
                     .background(MaterialTheme.colorScheme.primary),
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Text(
                 text = text.uppercase(),
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontFamily = bodyFontFamily,
-                    letterSpacing = 2.5.sp,
-                    fontWeight = FontWeight.SemiBold,
-                ),
+                style = MaterialTheme.editorialTypography.eyebrow,
                 color = MaterialTheme.colorScheme.primary,
             )
         }
@@ -1764,7 +1763,7 @@ private fun BookDetailScreenReadingPreview() {
                     name = "The Maze Runner",
                     amountOfBooks = 3,
                 ),
-                positionInSeries = 2,
+                positionsInSeries = listOf(2.0),
             )
 
             BookDetailScreen(id = 1).Screen(
