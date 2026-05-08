@@ -1,8 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,14 +9,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,9 +27,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
@@ -39,10 +44,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -55,7 +72,7 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
@@ -63,11 +80,14 @@ import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.theme.bodyFontFamily
+import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
+import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
@@ -75,15 +95,19 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSh
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdateTimeProgressClickAction
-import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.search.presentation.screen.SearchScreen
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
+import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
+import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import java.time.LocalTime
 import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
+    private val booksListState = LazyListState()
+
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<ReadingScreenScreenModel>()
@@ -91,6 +115,7 @@ object ReadingScreen : Screen {
         val state by screenModel.state.collectAsStateWithLifecycle()
 
         val navigator = LocalNavigator.currentOrThrow
+        val tabNavigator = LocalTabNavigator.current
 
         Screen(
             state = state,
@@ -99,7 +124,7 @@ object ReadingScreen : Screen {
                 navigator.parent?.push(item = BookDetailScreen(id = it.id))
             },
             onNavigateToSearch = {
-                navigator.parent?.push(item = SearchScreen())
+                tabNavigator.current = ExploreTab
             }
         )
     }
@@ -115,12 +140,6 @@ object ReadingScreen : Screen {
         val pullToRefreshState = rememberPullToRefreshState()
 
         Scaffold(
-            topBar = {
-                SoftcoverTopBar(
-                    title = "Currently Reading",
-                    onNavigateToSearch = onNavigateToSearch,
-                )
-            },
             contentWindowInsets = WindowInsets.statusBars,
         ) { innerPadding ->
             Column(
@@ -149,15 +168,17 @@ object ReadingScreen : Screen {
                     when {
                         state.books.isNotEmpty() -> {
                             BooksDisplay(
-                                books = state.books,
+                                state = state,
                                 runAction = runAction,
                                 onBookClick = onBookClick,
-                                state = state,
+                                onNavigateToSearch = onNavigateToSearch,
                             )
                         }
 
-                        state.isLoading -> Unit // Show nothing if the books are still loading
-                        else -> EmptyCurrentlyReadingScreen()
+                        state.isLoading -> Unit
+                        else -> EmptyCurrentlyReadingScreen(
+                            onNavigateToSearch = onNavigateToSearch,
+                        )
                     }
                 }
 
@@ -184,237 +205,667 @@ object ReadingScreen : Screen {
                         },
                     )
                 }
-
             }
         }
     }
 
     @Composable
     private fun BooksDisplay(
-        books: List<Book>,
+        state: ReadingScreenUiState,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
-        state: ReadingScreenUiState,
+        onNavigateToSearch: () -> Unit,
     ) {
+        val featured = state.books.first()
+        val rest = state.books.drop(1)
+
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = rememberBottomBarPadding())
+            state = booksListState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
         ) {
-            items(books) { book ->
-                val deadline = state.deadlines[book.id]
-
-                val deadlineProgress = deadline?.let {
-                    val edition = book.currentEdition ?: return@let null
-                    val current = when (it.unit) {
-                        DeadlineUnit.PAGES -> book.userBookRead?.currentPage ?: 0
-                        DeadlineUnit.SECONDS -> book.userBookRead?.currentSeconds ?: 0
-                    }
-                    val total = when (it.unit) {
-                        DeadlineUnit.PAGES -> edition.pages ?: 0
-                        DeadlineUnit.SECONDS -> edition.audioSeconds ?: 0
-                    }
-
-                    DeadlineProgress.compute(
-                        deadline = it,
-                        current = current,
-                        total = total,
-                    )
-                }
-
-                BookEntry(
-                    book = book,
-                    runAction = runAction,
-                    onBookClick = onBookClick,
-                    deadlineProgress = deadlineProgress,
-                    dateStyle = state.dateStyle,
+            item(key = "header") {
+                EditorialHeader(
+                    bookCount = state.books.size,
+                    averageProgress = state.books.averageProgress(),
                 )
             }
+
+            item(key = "featured-${featured.id}") {
+                FeaturedBookCard(
+                    book = featured,
+                    deadlineProgress = featured.deadlineProgressFrom(state),
+                    dateStyle = state.dateStyle,
+                    runAction = runAction,
+                    onBookClick = onBookClick,
+                )
+            }
+
+            if (rest.isNotEmpty()) {
+                item(key = "also-reading-label") {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                        SectionLabel(text = "Also between your fingers")
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                items(rest, key = { it.id }) { book ->
+                    CompactBookEntry(
+                        book = book,
+                        deadlineProgress = book.deadlineProgressFrom(state),
+                        dateStyle = state.dateStyle,
+                        runAction = runAction,
+                        onBookClick = onBookClick,
+                    )
+                }
+            }
+
         }
     }
 
     @Composable
-    private fun EmptyCurrentlyReadingScreen() {
+    private fun EditorialHeader(
+        bookCount: Int,
+        averageProgress: Float?,
+    ) {
+        val greeting = remember { greetingForNow() }
+
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()), // Required for the scroll to refresh
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, top = 24.dp),
         ) {
-            Image(
-                painter = painterResource(R.drawable.illu_no_results),
-                contentDescription = "No images were found"
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "No books yet",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            SectionLabel(text = "Now reading")
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "You haven't added any books to your 'Currently Reading' list. Start by adding new books to your list.",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = greeting,
+                style = MaterialTheme.editorialTypography.headlineMedium.copy(
+                    lineHeight = 32.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
+
+            val subtitle = buildSubtitle(
+                bookCount = bookCount,
+                averageProgress = averageProgress,
+            )
+
+            Text(
+                text = subtitle,
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    private fun BookEntry(
+    private fun FeaturedBookCard(
         book: Book,
+        deadlineProgress: DeadlineProgress?,
+        dateStyle: DateStyle,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
-        deadlineProgress: DeadlineProgress? = null,
-        dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     ) {
-        var updateProgressSplitButtonActive by remember { mutableStateOf(false) }
+        var dropdownActive by remember { mutableStateOf(false) }
+        val shape = RoundedCornerShape(28.dp)
+        val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
+        val surfaceColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        val isInspection = LocalInspectionMode.current
+        val backdropRequest = rememberEditionImageRequest(
+            edition = book.currentEdition,
+            defaultEdition = book.defaultEdition,
+            fallbackCoverUrl = book.coverUrl,
+        )
 
-        Box(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceContainer,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .clickable {
-                    onBookClick(book)
-                }
-                .padding(all = 16.dp),
+                .padding(horizontal = 16.dp),
+            color = surfaceColor,
+            shape = shape,
+            onClick = { onBookClick(book) },
         ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+            Box(modifier = Modifier.fillMaxWidth()) {
+                if (isInspection) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                                        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.30f),
+                                    )
+                                )
+                            ),
+                    )
+                } else if (backdropRequest != null) {
+                    AsyncImage(
+                        model = backdropRequest,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .matchParentSize()
+                            .blur(
+                                radius = 64.dp,
+                                edgeTreatment = BlurredEdgeTreatment.Unbounded,
+                            ),
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colorStops = arrayOf(
+                                    0f to Color.Black.copy(alpha = 0.45f),
+                                    0.35f to Color.Black.copy(alpha = 0.15f),
+                                    0.55f to Color.Transparent,
+                                    1f to Color.Transparent,
+                                )
+                            )
+                        ),
+                )
+
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colorStops = arrayOf(
+                                    0f to surfaceColor.copy(alpha = 0f),
+                                    0.40f to surfaceColor.copy(alpha = 0.15f),
+                                    0.60f to surfaceColor.copy(alpha = 0.92f),
+                                    1f to surfaceColor,
+                                )
+                            )
+                        ),
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 18.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    val overlayShadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.85f),
+                        offset = Offset(x = 0f, y = 1f),
+                        blurRadius = 14f,
+                    )
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .height(1.dp)
+                                .width(20.dp)
+                                .background(Color.White),
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            text = "Up next".uppercase(),
+                            style = MaterialTheme.editorialTypography.eyebrow.copy(
+                                fontWeight = FontWeight.Bold,
+                                shadow = overlayShadow,
+                            ),
+                            color = Color.White,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
                     DeadlineCoverOverlay(progress = deadlineProgress) {
                         EditionImage(
                             edition = book.currentEdition,
-                            modifier = Modifier.width(100.dp),
+                            modifier = Modifier
+                                .width(150.dp)
+                                .aspectRatio(2f / 3f),
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
                             fallbackCoverUrl = book.coverUrl,
+                            elevation = 24.dp,
+                            cornerRadius = 10.dp,
+                            shadowColor = Color.Black.copy(alpha = 0.7f),
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Column {
-                        book.seriesText?.let { seriesText ->
-                            Text(
-                                text = seriesText,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-
+                    book.seriesText?.takeIf { it.isNotBlank() }?.let { series ->
                         Text(
-                            text = book.title,
-                            style = MaterialTheme.typography.titleMediumEmphasized,
-                            color = MaterialTheme.colorScheme.onSurface
+                            text = series.uppercase(),
+                            style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
+                                letterSpacing = 1.4.sp,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
 
                         Spacer(modifier = Modifier.height(4.dp))
+                    }
 
-                        Text(
-                            text = book.currentEdition?.authorString.orEmpty(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Text(
+                        text = book.title,
+                        style = MaterialTheme.editorialTypography.headlineSmall.copy(
+                            lineHeight = 30.sp,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
 
-                        Spacer(modifier = Modifier.height(2.dp))
-
-                        Text(
-                            text = progressLabel(book),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        if (deadlineProgress != null) {
+                    book.currentEdition?.authorString?.takeIf { it.isNotBlank() }
+                        ?.let { authors ->
                             Spacer(modifier = Modifier.height(4.dp))
 
-                            DeadlineSummaryLine(
-                                progress = deadlineProgress,
-                                dateStyle = dateStyle,
+                            Text(
+                                text = "By $authors",
+                                style = MaterialTheme.editorialTypography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                    if (deadlineProgress != null) {
+                        Spacer(modifier = Modifier.height(6.dp))
 
-                        SoftcoverSplitButton(
-                            checked = updateProgressSplitButtonActive,
-                            dropDownItems = listOf(
-                                SoftcoverMenuItem(
-                                    label = "Mark as Read",
-                                    onClick = {
-                                        updateProgressSplitButtonActive = false
-
-                                        runAction(OnMarkBookAsReadClickAction(book = book))
-                                    },
-                                    icon = SoftcoverIconResource.Drawable(
-                                        id = R.drawable.ic_check_circle,
-                                        contentDescription = "Mark as Read icon"
-                                    )
-                                ),
-                            ),
-                            label = "Set Progress",
-                            trailingIcon = SoftcoverIconResource.Drawable(
-                                id = R.drawable.ic_arrow_drop_down,
-                                contentDescription = "Drop down icon",
-                            ),
-                            onDismissMenuRequest = {
-                                updateProgressSplitButtonActive = false
-                            },
-                            onLeadingButtonClick = {
-                                runAction(OnShowProgressSheetClickAction(book = book))
-                            },
-                            onTrailingButtonClick = {
-                                updateProgressSplitButtonActive = it
-                            },
-                            leadingButtonStyle = SplitButtonStyle.OUTLINED,
-                            size = ButtonSize.XS,
+                        DeadlineSummaryLine(
+                            progress = deadlineProgress,
+                            dateStyle = dateStyle,
                         )
-
-                        book.userBookRead?.let { userBookRead ->
-                            val bookProgress = userBookRead.progress
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                val progress = bookProgress / 100f
-
-                                LinearProgressIndicator(
-                                    progress = { progress },
-                                    modifier = Modifier.weight(1f),
-                                    drawStopIndicator = {},
-                                    gapSize = (-2).dp,
-                                )
-
-                                Spacer(modifier = Modifier.width(12.dp))
-
-                                Text(
-                                    text = "${bookProgress.roundToInt()}%",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ProgressBlock(
+                        primaryLabel = progressLabel(book),
+                        progressFraction = progressFraction,
+                        percentage = book.userBookRead?.progress,
+                        emphasized = true,
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    SoftcoverSplitButton(
+                        checked = dropdownActive,
+                        dropDownItems = listOf(
+                            SoftcoverMenuItem(
+                                label = "Mark as Read",
+                                onClick = {
+                                    dropdownActive = false
+                                    runAction(OnMarkBookAsReadClickAction(book = book))
+                                },
+                                icon = SoftcoverIconResource.Drawable(
+                                    id = R.drawable.ic_check_circle,
+                                    contentDescription = "Mark as Read icon"
+                                )
+                            ),
+                        ),
+                        label = "Update progress",
+                        leadingIcon = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_edit,
+                            contentDescription = "Update progress icon",
+                        ),
+                        trailingIcon = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_arrow_drop_down,
+                            contentDescription = "Drop down icon",
+                        ),
+                        onDismissMenuRequest = { dropdownActive = false },
+                        onLeadingButtonClick = {
+                            runAction(OnShowProgressSheetClickAction(book = book))
+                        },
+                        onTrailingButtonClick = { dropdownActive = it },
+                        leadingButtonStyle = SplitButtonStyle.FILLED,
+                        size = ButtonSize.M,
+                        fillMaxWidth = true,
+                    )
                 }
             }
         }
     }
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
+    private fun CompactBookEntry(
+        book: Book,
+        deadlineProgress: DeadlineProgress?,
+        dateStyle: DateStyle,
+        runAction: (ReadingAction) -> Unit,
+        onBookClick: (Book) -> Unit,
+    ) {
+        var dropdownActive by remember { mutableStateOf(false) }
+        val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(20.dp),
+            onClick = { onBookClick(book) },
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
+                DeadlineCoverOverlay(progress = deadlineProgress) {
+                    EditionImage(
+                        edition = book.currentEdition,
+                        modifier = Modifier
+                            .width(80.dp)
+                            .aspectRatio(2f / 3f),
+                        isLoading = false,
+                        defaultEdition = book.defaultEdition,
+                        fallbackCoverUrl = book.coverUrl,
+                        elevation = 6.dp,
+                        cornerRadius = 8.dp,
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    book.seriesText?.takeIf { it.isNotBlank() }?.let { series ->
+                        Text(
+                            text = series.uppercase(),
+                            style = MaterialTheme.editorialTypography.eyebrowSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Spacer(modifier = Modifier.height(2.dp))
+                    }
+
+                    Text(
+                        text = book.title,
+                        style = MaterialTheme.editorialTypography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+
+                    book.currentEdition?.authorString?.takeIf { it.isNotBlank() }
+                        ?.let { authors ->
+                            Spacer(modifier = Modifier.height(2.dp))
+
+                            Text(
+                                text = "By $authors",
+                                style = MaterialTheme.editorialTypography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+
+                    if (deadlineProgress != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        DeadlineSummaryLine(
+                            progress = deadlineProgress,
+                            dateStyle = dateStyle,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    ProgressBlock(
+                        primaryLabel = progressLabel(book),
+                        progressFraction = progressFraction,
+                        percentage = book.userBookRead?.progress,
+                        emphasized = false,
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    SoftcoverSplitButton(
+                        checked = dropdownActive,
+                        dropDownItems = listOf(
+                            SoftcoverMenuItem(
+                                label = "Mark as Read",
+                                onClick = {
+                                    dropdownActive = false
+                                    runAction(OnMarkBookAsReadClickAction(book = book))
+                                },
+                                icon = SoftcoverIconResource.Drawable(
+                                    id = R.drawable.ic_check_circle,
+                                    contentDescription = "Mark as Read icon"
+                                )
+                            ),
+                        ),
+                        label = "Set progress",
+                        trailingIcon = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_arrow_drop_down,
+                            contentDescription = "Drop down icon",
+                        ),
+                        onDismissMenuRequest = { dropdownActive = false },
+                        onLeadingButtonClick = {
+                            runAction(OnShowProgressSheetClickAction(book = book))
+                        },
+                        onTrailingButtonClick = { dropdownActive = it },
+                        leadingButtonStyle = SplitButtonStyle.TONAL,
+                        size = ButtonSize.XS,
+                    )
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
+    private fun ProgressBlock(
+        primaryLabel: String,
+        progressFraction: Float,
+        percentage: Float?,
+        emphasized: Boolean,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                Text(
+                    text = primaryLabel,
+                    style = if (emphasized) {
+                        MaterialTheme.editorialTypography.body
+                    } else {
+                        MaterialTheme.editorialTypography.bodySmall
+                    },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "${(percentage ?: 0f).roundToInt()}%",
+                    style = if (emphasized) {
+                        MaterialTheme.editorialTypography.headlineSmall
+                    } else {
+                        MaterialTheme.editorialTypography.bodyLarge.copy(
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    },
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(if (emphasized) 10.dp else 6.dp))
+
+            LinearProgressIndicator(
+                progress = { progressFraction.coerceIn(0f, 1f) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(if (emphasized) 10.dp else 6.dp),
+                drawStopIndicator = {},
+                gapSize = (-2).dp,
+            )
+        }
+    }
+
+    @Composable
+    private fun SectionLabel(text: String) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .height(1.dp)
+                    .width(20.dp)
+                    .background(MaterialTheme.colorScheme.primary),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = text.uppercase(),
+                style = MaterialTheme.editorialTypography.eyebrow,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+
+    @Composable
+    private fun EmptyCurrentlyReadingScreen(
+        onNavigateToSearch: () -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            val quoteAlpha = if (isSystemInDarkTheme()) 0.15f else 0.3f
+
+            Text(
+                text = "“",
+                style = MaterialTheme.editorialTypography.quoteGlyph.copy(
+                    fontSize = 140.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
+                modifier = Modifier.padding(top = 8.dp),
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "An open page awaits",
+                style = MaterialTheme.editorialTypography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Nothing is currently between your fingers. Find a title worth losing an evening to.",
+                style = MaterialTheme.editorialTypography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Surface(
+                onClick = onNavigateToSearch,
+                color = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(percent = 50),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = "Find a book",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun Book.deadlineProgressFrom(state: ReadingScreenUiState): DeadlineProgress? {
+    val deadline = state.deadlines[id] ?: return null
+    val edition = currentEdition ?: return null
+
+    val current = when (deadline.unit) {
+        DeadlineUnit.PAGES -> userBookRead?.currentPage ?: 0
+        DeadlineUnit.SECONDS -> userBookRead?.currentSeconds ?: 0
+    }
+    val total = when (deadline.unit) {
+        DeadlineUnit.PAGES -> edition.pages ?: 0
+        DeadlineUnit.SECONDS -> edition.audioSeconds ?: 0
+    }
+
+    return DeadlineProgress.compute(
+        deadline = deadline,
+        current = current,
+        total = total,
+    )
+}
+
+private fun List<Book>.averageProgress(): Float? {
+    if (isEmpty()) return null
+    val values = mapNotNull { it.userBookRead?.progress }
+    if (values.isEmpty()) return null
+    return values.average().toFloat()
+}
+
+private fun greetingForNow(): String {
+    val hour = LocalTime.now().hour
+    return when (hour) {
+        in 5..11 -> "Good morning."
+        in 12..17 -> "Good afternoon."
+        in 18..21 -> "Good evening."
+        else -> "Late hours."
+    }
+}
+
+private fun buildSubtitle(bookCount: Int, averageProgress: Float?): String {
+    val countPart = when (bookCount) {
+        1 -> "One title in motion"
+        else -> "$bookCount titles in motion"
+    }
+
+    val progressPart = averageProgress?.let { "${it.roundToInt()}% along, on average" }
+
+    return listOfNotNull(countPart, progressPart).joinToString(" • ")
 }
 
 private fun progressLabel(book: Book): String {
@@ -487,7 +938,7 @@ private fun ReadingScreenPreview() {
                 name = "Dungeon Crawler Carl",
                 amountOfBooks = 20
             ),
-            positionInSeries = 3,
+            positionsInSeries = listOf(3.0),
         ),
         PreviewData.baseBook.copy(
             title = "Cursed Bunny",
@@ -546,7 +997,7 @@ private fun ReadingScreenPreview() {
 
     SoftcoverTheme {
         ReadingScreen.Screen(
-            state = ReadingScreenUiState(books = books),
+            state = ReadingScreenUiState(books = books, isLoading = false),
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},

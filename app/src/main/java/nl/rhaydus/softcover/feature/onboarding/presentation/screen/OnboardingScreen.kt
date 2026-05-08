@@ -47,12 +47,14 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.component.ClickableText
+import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverLoadingSheet
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
@@ -177,8 +179,9 @@ object OnboardingScreen : Screen {
                 isLoading = state.isLoading,
                 progress = state.progress,
                 onLoaderFinished = onInitializingComplete,
-                title = "Fetching user data...",
-                subtitle = "Depending on your library, this might take a bit of time."
+                eyebrow = "Setting up",
+                headline = "Pulling your library together.",
+                description = "Depending on its size, this might take a moment.",
             )
         }
     }
@@ -187,7 +190,8 @@ object OnboardingScreen : Screen {
     private fun ColumnScope.IntroScreen(
         @DrawableRes itemResource: Int,
         illustrationContentDescription: String,
-        title: String,
+        eyebrow: String,
+        headline: String,
         description: String,
         buttonLabel: String,
         buttonOnClick: () -> Unit,
@@ -197,26 +201,38 @@ object OnboardingScreen : Screen {
             contentDescription = illustrationContentDescription,
         )
 
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-        )
+        Spacer(modifier = Modifier.height(32.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Text(
+                text = eyebrow.uppercase(),
+                style = MaterialTheme.editorialTypography.eyebrow,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
 
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = headline,
+                style = MaterialTheme.editorialTypography.display,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.editorialTypography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             SoftcoverButton(
                 label = buttonLabel,
@@ -235,7 +251,8 @@ object OnboardingScreen : Screen {
         IntroScreen(
             itemResource = R.drawable.illu_writing,
             illustrationContentDescription = "Illustration containing someone reading a book.",
-            title = "Book Smart.",
+            eyebrow = "Welcome",
+            headline = "Book smart.",
             description = "Track every book, share them with the world (or don't) and find new life changing reads.",
             buttonLabel = "Continue",
             buttonOnClick = onContinueClick,
@@ -248,8 +265,9 @@ object OnboardingScreen : Screen {
     ) {
         IntroScreen(
             itemResource = R.drawable.illu_sign_up,
-            illustrationContentDescription = "Illustration containing someone reading a book.",
-            title = "Hardcover",
+            illustrationContentDescription = "Illustration containing someone signing up for an account.",
+            eyebrow = "Connect",
+            headline = "Powered by Hardcover.",
             description = "To get started with Softcover, you'll need a Hardcover account to sync your reading progress.",
             buttonLabel = "Continue",
             buttonOnClick = onContinueClick,
@@ -264,14 +282,18 @@ object OnboardingScreen : Screen {
         getCopiedText: () -> String,
     ) {
         Column(
-            modifier = Modifier.padding(all = 16.dp),
+            modifier = Modifier.padding(
+                horizontal = 24.dp,
+                vertical = 16.dp,
+            ),
         ) {
-            Text(
-                text = "API Key",
-                style = MaterialTheme.typography.titleMedium,
+            EditorialSectionHeader(
+                eyebrow = "Api key",
+                headline = "Add your key.",
+                description = "Softcover uses your Hardcover API key to sync reading progress.",
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
                 value = state.apiKeyValue,
@@ -291,18 +313,18 @@ object OnboardingScreen : Screen {
             Spacer(modifier = Modifier.height(16.dp))
 
             val annotatedString = buildAnnotatedString {
-                append("For syncing your reading progress. This key can be found on the website ")
+                append("Find your key on the Hardcover website ")
 
                 pushStringAnnotation(
                     tag = "url",
-                    annotation = "https://hardcover.app/account/api"
+                    annotation = "https://hardcover.app/account/api",
                 )
 
                 withStyle(
                     style = SpanStyle(
                         color = MaterialTheme.colorScheme.primary,
-                        textDecoration = TextDecoration.Underline
-                    )
+                        textDecoration = TextDecoration.Underline,
+                    ),
                 ) {
                     append("here")
                 }
@@ -314,20 +336,23 @@ object OnboardingScreen : Screen {
 
             ClickableText(
                 annotatedText = annotatedString,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.editorialTypography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
                 handleUrlClick = openUrl,
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "If you already have the Hardcover app installed, this key can be found within the app as well. Profile → Settings → Hardcover API.",
-                style = MaterialTheme.typography.labelSmall,
+                text = "If you already have the Hardcover app installed, this key can also be found there: Profile → Settings → Hardcover API.",
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            HorizontalDivider()
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
             Row(
                 modifier = Modifier
@@ -343,16 +368,16 @@ object OnboardingScreen : Screen {
                 Icon(
                     painter = painterResource(R.drawable.ic_content_paste),
                     contentDescription = "Paste icon",
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary,
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
                     text = "Paste from clipboard",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = MaterialTheme.editorialTypography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
 
