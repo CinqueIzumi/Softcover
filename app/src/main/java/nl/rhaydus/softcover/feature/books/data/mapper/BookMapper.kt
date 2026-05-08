@@ -436,11 +436,13 @@ fun ListBookFull.toModel(): ListBook = ListBook(
     bookId = listBook.bookId,
     editionId = listBook.editionId,
     addedAt = listBook.addedAt,
-    book = book.toModel(),
-    edition = edition.edition.edition.toModel(
-        authors = edition.authors,
-        owned = edition.edition.isOwned
-    ),
+    book = book?.toModel(),
+    edition = edition?.let { editionWithAuthors ->
+        editionWithAuthors.edition.edition.toModel(
+            authors = editionWithAuthors.authors,
+            owned = editionWithAuthors.edition.isOwned,
+        )
+    },
 )
 
 fun BookListWithBooks.toModel(): BookList = BookList(
@@ -448,6 +450,7 @@ fun BookListWithBooks.toModel(): BookList = BookList(
     name = bookList.name,
     slug = bookList.slug,
     books = listBooks
+        .filter { it.book != null && it.edition != null }
         .sortedWith(
             compareBy<ListBookFull, String?>(nullsLast(reverseOrder())) { it.listBook.addedAt }
                 .thenByDescending { it.listBook.listBookId }

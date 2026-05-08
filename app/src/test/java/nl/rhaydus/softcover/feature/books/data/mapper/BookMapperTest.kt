@@ -605,8 +605,8 @@ class BookMapperTest {
 
     private fun stubListBookFull(
         listBook: ListBookEntity = stubListBookEntity(),
-        book: BookFullEntity = stubBookFullEntity(),
-        edition: BookEditionWithAuthors = stubBookEditionWithAuthors(),
+        book: BookFullEntity? = stubBookFullEntity(),
+        edition: BookEditionWithAuthors? = stubBookEditionWithAuthors(),
     ): ListBookFull = ListBookFull(
         listBook = listBook,
         book = book,
@@ -1950,6 +1950,40 @@ class BookMapperTest {
             // ----- Assert -----
             result.addedAt shouldBe null
         }
+
+        @Test
+        fun `returns null book when book relation is null`() {
+            // ----- Arrange -----
+            val listBookEntity = stubListBookEntity(listBookId = 42)
+            val listBookFull = stubListBookFull(
+                listBook = listBookEntity,
+                book = null,
+            )
+
+            // ----- Act -----
+            val result = listBookFull.toModel()
+
+            // ----- Assert -----
+            result.book shouldBe null
+            result.listBookId shouldBe 42
+        }
+
+        @Test
+        fun `returns null edition when edition relation is null`() {
+            // ----- Arrange -----
+            val listBookEntity = stubListBookEntity(listBookId = 43)
+            val listBookFull = stubListBookFull(
+                listBook = listBookEntity,
+                edition = null,
+            )
+
+            // ----- Act -----
+            val result = listBookFull.toModel()
+
+            // ----- Assert -----
+            result.edition shouldBe null
+            result.listBookId shouldBe 43
+        }
     }
 
     @Nested
@@ -2063,6 +2097,33 @@ class BookMapperTest {
             // ----- Assert -----
             result.books[0].listBookId shouldBe 20
             result.books[1].listBookId shouldBe 10
+        }
+
+        @Test
+        fun `drops list entries whose book or edition relation is null`() {
+            // ----- Arrange -----
+            val fullyHydrated = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 1),
+            )
+            val nullBook = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 2),
+                book = null,
+            )
+            val nullEdition = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 3),
+                edition = null,
+            )
+
+            val wrapper = stubBookListWithBooks(
+                listBooks = listOf(fullyHydrated, nullBook, nullEdition),
+            )
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.books.size shouldBe 1
+            result.books[0].listBookId shouldBe 1
         }
     }
 

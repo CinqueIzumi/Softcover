@@ -12,12 +12,12 @@ data class ListBookFull(
         parentColumn = "bookId",
         entityColumn = "id",
     )
-    val book: BookFullEntity,
+    val book: BookFullEntity?,
 
     @Relation(
         entity = BookEditionView::class,
         parentColumn = "editionId",
         entityColumn = "id",
     )
-    val edition: BookEditionWithAuthors,
+    val edition: BookEditionWithAuthors?,
 )
