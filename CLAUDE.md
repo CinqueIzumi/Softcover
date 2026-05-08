@@ -19,9 +19,29 @@ Softcover is a native Android client for [Hardcover.app](https://hardcover.app/)
 
 No ktlint or detekt is configured. The project uses `kotlin.code.style=official`.
 
+## Design System
+
+Always consult [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) before designing or modifying any UI surface — it is the source of truth for the app's visual and interaction language (color roles, editorial typography, layout primitives, components, patterns, decision rules).
+
+**Maintenance rule (enforced by review).** Any change that introduces, retires, or alters a foundation, component, or pattern in the design system MUST update `DESIGN_SYSTEM.md` in the same change. The `code-reviewer` agent treats a design-system change without a corresponding doc update as a blocker. Examples that require a doc update: a new shared component under `core/presentation/component/`, a new editorial typography role, a new color role usage, a new layout pattern that other screens should adopt, retirement or renaming of any of the above. Localized tweaks to a single screen that don't change the system itself do not require an update.
+
 ## Code Style
 
 Always follow the project's code formatting rules in [CODE_STYLE_GUIDE.md](CODE_STYLE_GUIDE.md). Read it before writing or modifying any Kotlin code in this repository — it is the source of truth for naming, layout, and whitespace conventions.
+
+The repo has no ktlint/detekt configured, so style is enforced by review, not by tooling. Two-step compliance discipline:
+
+**Before declaring small Kotlin edits done, run the self-check below.** "Small" = a localized edit to an existing file (a few lines, a new helper, a rename, a state-flag addition). The rules below are the ones that are easy to miss because they are not idiomatic Kotlin and are not flagged by the compiler:
+
+- Boolean negation uses `.not()`, never `!` (e.g. `isLoading.not()`, not `!isLoading`).
+- Every sibling composable inside a layout scope (`Column`, `Row`, `Box`, `LazyRow` content, etc.) is separated by a blank line — including `Spacer`.
+- Multi-line constructs (multi-arg calls, multi-line `if`/`when`, mockk stubs, `coEvery { }`) are paragraphs: blank line before and after.
+- A `Timber.e(...)` log is its own paragraph: blank line before the next statement.
+- Imports are grouped androidx → third-party → project (`nl.rhaydus.*`) → kotlin/java, alphabetical within each group, no fully-qualified inline references.
+- Multi-argument calls, declarations, and data-class instantiations break one-per-line with a trailing comma as soon as they have ≥2 arguments.
+- Optional UI rows (rating, badge, etc.) inside fixed-width carousel/list cards must reserve their space (e.g. fixed `Modifier.height(...)`) so cards do not jump as content scrolls in.
+
+**For substantial Kotlin changes, delegate to the `code-reviewer` agent before reporting work done.** "Substantial" = a new file, a new feature module, a change spanning multiple files, or any change touching layout/state/data flow. The reviewer audits against the full current `CODE_STYLE_GUIDE.md` and catches both new violations and pre-existing ones in the touched files (per the on-touch compliance policy). Run it after the build succeeds and before the wrap-up message.
 
 ## Test Writing
 
