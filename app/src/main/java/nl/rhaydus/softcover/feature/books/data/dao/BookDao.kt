@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
+import timber.log.Timber
 
 @Dao
 interface BookDao {
@@ -265,14 +266,48 @@ interface BookDao {
 
         insertBookList(bookList.toEntity())
 
-        bookList.books.forEach { listBook ->
-            cacheListBook(listBook)
+        val safeBooks = filterCacheableListBooks(books = bookList.books)
+
+        val skipped = bookList.books.size - safeBooks.size
+
+        if (skipped > 0) {
+            Timber.w(
+                "cacheBookList: skipped $skipped of ${bookList.books.size} list_books for listId=${bookList.id} due to missing book/edition rows",
+            )
+        }
+
+        safeBooks.forEach { listBook ->
+            insertListBook(listBook.toEntity())
         }
     }
 
     @Transaction
     suspend fun cacheListBook(listBook: ListBook) {
+        if (canCacheListBook(listBook = listBook).not()) {
+            Timber.w(
+                "cacheListBook: skipped insert for listBookId=${listBook.listBookId} (bookId=${listBook.bookId}, editionId=${listBook.editionId}) — missing book/edition rows",
+            )
+
+            return
+        }
+
         insertListBook(listBook.toEntity())
+    }
+
+    private suspend fun canCacheListBook(listBook: ListBook): Boolean {
+        val hasBook = getExistingBookIds(bookIds = listOf(listBook.bookId)).isNotEmpty()
+        val hasEdition = getExistingEditionIds(editionIds = listOf(listBook.editionId)).isNotEmpty()
+
+        return hasBook && hasEdition
+    }
+
+    private suspend fun filterCacheableListBooks(books: List<ListBook>): List<ListBook> {
+        if (books.isEmpty()) return books
+
+        val cachedBookIds = getExistingBookIds(bookIds = books.map { it.bookId }.distinct()).toSet()
+        val cachedEditionIds = getExistingEditionIds(editionIds = books.map { it.editionId }.distinct()).toSet()
+
+        return books.filter { it.bookId in cachedBookIds && it.editionId in cachedEditionIds }
     }
 
     suspend fun toEntitiesPreservingLocalImagePath(

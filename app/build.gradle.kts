@@ -96,8 +96,8 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Material 3 - used for themes
-    implementation(libs.material3)
+    // Material Components for Android - used for XML themes (Theme.Material3.*)
+    implementation(libs.material.components)
 
     // Splash screen
     implementation(libs.androidx.splash)
