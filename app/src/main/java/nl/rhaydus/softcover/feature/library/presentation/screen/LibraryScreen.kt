@@ -97,6 +97,8 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -680,12 +682,15 @@ object LibraryScreen : Screen {
             }
         }
 
+        val animator = rememberLazyItemMutationAnimator(keys = visibleEditions.map { it.id })
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
             items(visibleEditions, key = { it.id }) { edition ->
                 LayoutEditionEntry(
+                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = edition.id),
                     edition = edition,
                     layout = state.gridLayout,
                     onEditionClick = onEditionClick,
@@ -722,12 +727,15 @@ object LibraryScreen : Screen {
             }
         }
 
+        val animator = rememberLazyItemMutationAnimator(keys = visibleBooks.map { it.id })
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
             items(visibleBooks, key = { it.id }) { book ->
                 LayoutBookEntry(
+                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id),
                     book = book,
                     layout = state.gridLayout,
                     onBookClick = onBookClick,
@@ -792,6 +800,7 @@ object LibraryScreen : Screen {
         onBookClick: (Book) -> Unit,
         deadline: BookDeadline? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+        modifier: Modifier = Modifier,
     ) {
         val authorName = book.authors.map { it.name }.firstOrNull().orEmpty()
 
@@ -819,14 +828,15 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS,
                 -> {
                 GridBookCell(
+                    modifier = modifier,
                     title = book.title,
                     authorName = authorName,
                     onClick = { onBookClick(book) },
-                ) { modifier ->
+                ) { coverModifier ->
                     DeadlineCoverOverlay(progress = deadlineProgress) {
                         EditionImage(
                             edition = currentEdition,
-                            modifier = modifier,
+                            modifier = coverModifier,
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
                             fallbackCoverUrl = book.coverUrl,
@@ -845,12 +855,13 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
                 -> {
                 CoverOnlyCell(
+                    modifier = modifier,
                     onClick = { onBookClick(book) },
-                ) { modifier ->
+                ) { coverModifier ->
                     DeadlineCoverOverlay(progress = deadlineProgress) {
                         EditionImage(
                             edition = currentEdition,
-                            modifier = modifier,
+                            modifier = coverModifier,
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
                             fallbackCoverUrl = book.coverUrl,
@@ -867,6 +878,7 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_COMPACT -> {
                 CompactRow(
+                    modifier = modifier,
                     title = book.title,
                     authorName = authorName,
                     onClick = { onBookClick(book) },
@@ -876,6 +888,7 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_LARGE -> {
                 LargeRow(
+                    modifier = modifier,
                     title = book.title,
                     authorName = currentEdition?.authorString.orEmpty(),
                     onClick = { onBookClick(book) },
@@ -885,11 +898,11 @@ object LibraryScreen : Screen {
                     rating = book.rating,
                     deadlineProgress = deadlineProgress,
                     dateStyle = dateStyle,
-                ) { modifier ->
+                ) { coverModifier ->
                     DeadlineCoverOverlay(progress = deadlineProgress) {
                         EditionImage(
                             edition = currentEdition,
-                            modifier = modifier,
+                            modifier = coverModifier,
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
                             fallbackCoverUrl = book.coverUrl,
@@ -911,6 +924,7 @@ object LibraryScreen : Screen {
         edition: BookEdition,
         layout: LibraryGridLayout,
         onEditionClick: (BookEdition) -> Unit,
+        modifier: Modifier = Modifier,
     ) {
         val title = edition.title.orEmpty()
         val authorName = edition.authors.map { it.name }.firstOrNull().orEmpty()
@@ -920,13 +934,14 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS,
                 -> {
                 GridBookCell(
+                    modifier = modifier,
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
-                ) { modifier ->
+                ) { coverModifier ->
                     EditionImage(
                         edition = edition,
-                        modifier = modifier,
+                        modifier = coverModifier,
                         isLoading = false,
                         defaultEdition = edition,
                         elevation = 6.dp,
@@ -943,11 +958,12 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
                 -> {
                 CoverOnlyCell(
+                    modifier = modifier,
                     onClick = { onEditionClick(edition) },
-                ) { modifier ->
+                ) { coverModifier ->
                     EditionImage(
                         edition = edition,
-                        modifier = modifier,
+                        modifier = coverModifier,
                         isLoading = false,
                         defaultEdition = edition,
                         elevation = 6.dp,
@@ -962,6 +978,7 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_COMPACT -> {
                 CompactRow(
+                    modifier = modifier,
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
@@ -970,13 +987,14 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_LARGE -> {
                 LargeRow(
+                    modifier = modifier,
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
-                ) { modifier ->
+                ) { coverModifier ->
                     EditionImage(
                         edition = edition,
-                        modifier = modifier,
+                        modifier = coverModifier,
                         isLoading = false,
                         defaultEdition = edition,
                         elevation = 6.dp,
@@ -994,10 +1012,11 @@ object LibraryScreen : Screen {
     @Composable
     private fun CoverOnlyCell(
         onClick: () -> Unit,
+        modifier: Modifier = Modifier,
         cover: @Composable (Modifier) -> Unit,
     ) {
         cover(
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .aspectRatio(ratio = 2f / 3f)
                 .noRippleClickable(onClick = onClick)
@@ -1009,10 +1028,11 @@ object LibraryScreen : Screen {
         title: String,
         authorName: String,
         onClick: () -> Unit,
+        modifier: Modifier = Modifier,
         cover: @Composable (Modifier) -> Unit,
     ) {
         Column(
-            modifier = Modifier.noRippleClickable(onClick = onClick)
+            modifier = modifier.noRippleClickable(onClick = onClick)
         ) {
             cover(
                 Modifier
@@ -1052,9 +1072,10 @@ object LibraryScreen : Screen {
         authorName: String,
         onClick: () -> Unit,
         deadlineProgress: DeadlineProgress? = null,
+        modifier: Modifier = Modifier,
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .noRippleClickable(onClick = onClick),
         ) {
@@ -1110,10 +1131,11 @@ object LibraryScreen : Screen {
         rating: Double? = null,
         deadlineProgress: DeadlineProgress? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+        modifier: Modifier = Modifier,
         cover: @Composable (Modifier) -> Unit,
     ) {
         Surface(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .noRippleClickable(onClick = onClick),
             color = MaterialTheme.colorScheme.surfaceContainer,

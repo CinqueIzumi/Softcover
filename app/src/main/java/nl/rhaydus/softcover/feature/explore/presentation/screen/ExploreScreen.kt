@@ -59,6 +59,8 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
@@ -522,11 +524,14 @@ object ExploreScreen : Screen {
         queries: List<String>,
         runAction: (ExploreAction) -> Unit,
     ) {
+        val animator = rememberLazyItemMutationAnimator(keys = queries)
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(queries, key = { it }) { query ->
                 FilterChip(
+                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = query),
                     selected = false,
                     onClick = {
                         runAction(

@@ -72,6 +72,8 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
+import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
@@ -228,6 +230,8 @@ object ReadingScreen : Screen {
         val featured = state.books.first()
         val rest = state.books.drop(1)
 
+        val animator = rememberLazyItemMutationAnimator(keys = rest.map { it.id })
+
         LazyColumn(
             state = booksListState,
             modifier = Modifier.fillMaxSize(),
@@ -264,6 +268,7 @@ object ReadingScreen : Screen {
 
                 items(rest, key = { it.id }) { book ->
                     CompactBookEntry(
+                        modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id),
                         book = book,
                         deadlineProgress = book.deadlineProgressFrom(state),
                         dateStyle = state.dateStyle,
@@ -585,12 +590,13 @@ object ReadingScreen : Screen {
         mutationFailed: Boolean,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
+        modifier: Modifier = Modifier,
     ) {
         var dropdownActive by remember { mutableStateOf(false) }
         val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
 
         Surface(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 6.dp)
                 .shakeOnError(
