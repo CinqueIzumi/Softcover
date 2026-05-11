@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
+import timber.log.Timber
 
 private const val OWNED_LIST_SLUG: String = "owned"
 
@@ -195,10 +196,16 @@ class BooksRepositoryImpl(
     }
 
     override suspend fun markBookAsReading(book: Book): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsReading()
         booksLocalDataSource.cacheBook(book = optimistic)
 
-        return booksRemoteDataSource.markBookAsReading(book)
+        return runCatching {
+            booksRemoteDataSource.markBookAsReading(book)
+        }.getOrElse { error ->
+            restoreOptimisticWrite(snapshot = snapshot)
+            throw error
+        }
     }
 
     override suspend fun removeBookFromLibrary(book: Book) {
@@ -210,6 +217,7 @@ class BooksRepositoryImpl(
         newPage: Int?,
         newSeconds: Int?,
     ): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withProgress(
             newPage = newPage,
             newSeconds = newSeconds,
@@ -232,6 +240,7 @@ class BooksRepositoryImpl(
                     )
                     optimistic
                 } else {
+                    restoreOptimisticWrite(snapshot = snapshot)
                     throw error
                 }
             }
@@ -246,6 +255,7 @@ class BooksRepositoryImpl(
     }
 
     override suspend fun markBookAsRead(book: Book): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsRead()
         booksLocalDataSource.cacheBook(book = optimistic)
 
@@ -257,6 +267,7 @@ class BooksRepositoryImpl(
                     enqueueMarkAsRead(book = optimistic)
                     optimistic
                 } else {
+                    restoreOptimisticWrite(snapshot = snapshot)
                     throw error
                 }
             }
@@ -308,6 +319,15 @@ class BooksRepositoryImpl(
                 enqueuedAt = Instant.now().toString(),
             )
         )
+    }
+
+    private suspend fun restoreOptimisticWrite(snapshot: Book?) {
+        if (snapshot == null) {
+            Timber.w("-=- Optimistic rollback skipped: no prior snapshot in cache")
+            return
+        }
+
+        booksLocalDataSource.cacheBook(book = snapshot)
     }
 
     private suspend fun preserveSyncedProgress(
