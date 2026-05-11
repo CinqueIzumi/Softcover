@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailIni
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.DateStyleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.UserBooksFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -33,6 +34,7 @@ val bookDetailModule = module {
     factory { params ->
         BookDetailScreenScreenModel(
             bookId = params.get(),
+            initialCover = params.getOrNull<BookInitialCover>(),
             fetchBookByIdUseCase = get(),
             getEditionsByBookIdUseCase = get(),
             updateBookEditionUseCase = get(),

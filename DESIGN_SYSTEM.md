@@ -87,6 +87,7 @@ Sections always breathe. Two adjacent eyebrow/headline pairs without a generous 
 - Numeric progress animates between values rather than snapping.
 - Sheets enter and dismiss from the bottom; overlays cross-fade.
 - **Mutation-rejection shake.** When an optimistic mutation rolls back, the affected card/row plays a single horizontal shake: 6dp amplitude, 80ms each half-period, 3 cycles, returning to centre. The card's eyebrow slot also swaps to the error role with a "Couldn't save — tap to retry" label for the duration of the failed state. Use the shared `Modifier.shakeOnError` for this — never hand-roll the animation.
+- **Cover-to-detail morph.** A tapped book cover on any source surface (library, explore carousels, reading) morphs into the book-detail hero cover via `Modifier.sharedBounds`. The morph is opt-in: pass `sharedTransitionKey = bookCoverTransitionKey(editionId, bookId)` to `EditionImage` at both source and destination. Both call sites must derive the same key — prefer edition id, fall back to book id. The destination paints the cover immediately from a `BookInitialCover` carried through navigation, so the morph never lands on an empty hero. The shared scopes (`LocalSharedTransitionScope`, `LocalNavAnimatedVisibilityScope`) are provided by the navigator shim in `RootScreen`; non-morphed pushes look identical to before. Do not apply the key to decorative `EditionImage` usages (e.g. blurred backdrops, full-screen cover viewer) — only to the tappable source cover and its detail hero.
 
 ### 2.6 Iconography
 

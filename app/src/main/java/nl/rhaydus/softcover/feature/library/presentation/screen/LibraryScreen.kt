@@ -101,8 +101,10 @@ import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
@@ -135,10 +137,20 @@ object LibraryScreen : Screen {
             gridStateFor = { id -> localState.gridStates[id] ?: LazyGridState() },
             topAppBarState = screenModel.headerScrollState,
             onBookClick = {
-                navigator.parent?.push(item = BookDetailScreen(id = it.id))
+                navigator.parent?.push(
+                    item = BookDetailScreen(
+                        id = it.id,
+                        initialCover = BookInitialCover.fromBook(book = it),
+                    ),
+                )
             },
             onEditionClick = {
-                navigator.parent?.push(item = BookDetailScreen(id = it.bookId))
+                navigator.parent?.push(
+                    item = BookDetailScreen(
+                        id = it.bookId,
+                        initialCover = BookInitialCover.fromEdition(edition = it),
+                    ),
+                )
             },
         )
     }
@@ -820,6 +832,10 @@ object LibraryScreen : Screen {
                             fallbackCoverUrl = book.coverUrl,
                             elevation = 6.dp,
                             cornerRadius = 10.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = currentEdition?.id,
+                                bookId = book.id,
+                            ),
                         )
                     }
                 }
@@ -840,6 +856,10 @@ object LibraryScreen : Screen {
                             fallbackCoverUrl = book.coverUrl,
                             elevation = 6.dp,
                             cornerRadius = 10.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = currentEdition?.id,
+                                bookId = book.id,
+                            ),
                         )
                     }
                 }
@@ -875,6 +895,10 @@ object LibraryScreen : Screen {
                             fallbackCoverUrl = book.coverUrl,
                             elevation = 6.dp,
                             cornerRadius = 10.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = currentEdition?.id,
+                                bookId = book.id,
+                            ),
                         )
                     }
                 }
@@ -907,6 +931,10 @@ object LibraryScreen : Screen {
                         defaultEdition = edition,
                         elevation = 6.dp,
                         cornerRadius = 10.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = edition.id,
+                            bookId = edition.bookId,
+                        ),
                     )
                 }
             }
@@ -924,6 +952,10 @@ object LibraryScreen : Screen {
                         defaultEdition = edition,
                         elevation = 6.dp,
                         cornerRadius = 10.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = edition.id,
+                            bookId = edition.bookId,
+                        ),
                     )
                 }
             }
@@ -949,6 +981,10 @@ object LibraryScreen : Screen {
                         defaultEdition = edition,
                         elevation = 6.dp,
                         cornerRadius = 10.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = edition.id,
+                            bookId = edition.bookId,
+                        ),
                     )
                 }
             }

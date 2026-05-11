@@ -32,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -90,6 +91,7 @@ import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
@@ -123,6 +125,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBo
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
@@ -139,13 +142,14 @@ private const val REVIEW_COLLAPSED_LINES = 8
 
 class BookDetailScreen(
     val id: Int,
+    private val initialCover: BookInitialCover? = null,
 ) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
         val screenModel: BookDetailScreenScreenModel =
-            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(id) }
+            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(id, initialCover) }
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
@@ -284,10 +288,10 @@ class BookDetailScreen(
                         ),
                     ) {
                         GeneralBookInfoSection(
-                            edition = state.book?.currentEdition,
+                            edition = state.book?.currentEdition ?: state.initialCover?.currentEdition,
                             isLoading = state.loadingBookDetails,
-                            fallBackEdition = state.book?.defaultEdition,
-                            fallbackCoverUrl = state.book?.coverUrl,
+                            fallBackEdition = state.book?.defaultEdition ?: state.initialCover?.defaultEdition,
+                            fallbackCoverUrl = state.book?.coverUrl ?: state.initialCover?.fallbackCoverUrl,
                             isExpired = state.deadlineProgress?.isExpired == true,
                             rating = state.book?.rating,
                             title = state.book?.title,
@@ -449,6 +453,9 @@ class BookDetailScreen(
             (LocalWindowInfo.current.containerSize.height * 0.3f).toDp()
         }
 
+        val coverHasContent = edition != null || fallBackEdition != null || fallbackCoverUrl != null
+        val coverIsLoading = isLoading && coverHasContent.not()
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -461,7 +468,7 @@ class BookDetailScreen(
                 edition = edition,
                 defaultEdition = fallBackEdition,
                 fallbackCoverUrl = fallbackCoverUrl,
-                isLoading = isLoading,
+                isLoading = coverIsLoading,
                 modifier = Modifier
                     .matchParentSize()
                     .blur(8.dp)
@@ -506,10 +513,14 @@ class BookDetailScreen(
                         edition = edition,
                         defaultEdition = fallBackEdition,
                         fallbackCoverUrl = fallbackCoverUrl,
-                        isLoading = isLoading,
+                        isLoading = coverIsLoading,
                         modifier = Modifier
                             .height(imageHeight * 0.8f)
                             .clip(shape = RoundedCornerShape(16.dp)),
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = edition?.id,
+                            bookId = id,
+                        ),
                     )
 
                     if (edition?.owned == true) {
@@ -955,8 +966,7 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
         isOnline: Boolean,
-        iconColors: androidx.compose.material3.IconButtonColors =
-            IconButtonDefaults.iconButtonColors(),
+        iconColors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     ) {
         if (state.loadingBookDetails) return
 

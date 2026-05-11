@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.voyager.koin)
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.tabNavigator)
+    implementation(libs.voyager.transitions)
 
     // Image loading
     implementation(libs.coil)

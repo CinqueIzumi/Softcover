@@ -84,9 +84,11 @@ import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.bodyFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
@@ -123,7 +125,12 @@ object ReadingScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onBookClick = {
-                navigator.parent?.push(item = BookDetailScreen(id = it.id))
+                navigator.parent?.push(
+                    item = BookDetailScreen(
+                        id = it.id,
+                        initialCover = BookInitialCover.fromBook(book = it),
+                    ),
+                )
             },
             onNavigateToSearch = {
                 tabNavigator.current = ExploreTab
@@ -460,6 +467,10 @@ object ReadingScreen : Screen {
                             elevation = 24.dp,
                             cornerRadius = 10.dp,
                             shadowColor = Color.Black.copy(alpha = 0.7f),
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = book.currentEdition?.id,
+                                bookId = book.id,
+                            ),
                         )
                     }
 
@@ -609,6 +620,10 @@ object ReadingScreen : Screen {
                         fallbackCoverUrl = book.coverUrl,
                         elevation = 6.dp,
                         cornerRadius = 8.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = book.currentEdition?.id,
+                            bookId = book.id,
+                        ),
                     )
                 }
 

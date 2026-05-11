@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 data class BookDetailUiState(
     val loadingBookDetails: Boolean = true,
     val book: Book? = null,
+    val initialCover: BookInitialCover? = null,
     val fabMenuExpanded: Boolean = false,
     val showEditEditionSheet: Boolean = false,
     val editions: List<BookEdition> = emptyList(),

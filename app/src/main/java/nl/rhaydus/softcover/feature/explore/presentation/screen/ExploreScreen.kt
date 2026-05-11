@@ -67,8 +67,10 @@ import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
@@ -106,7 +108,12 @@ object ExploreScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onBookClick = {
-                navigator.parent?.push(item = BookDetailScreen(id = it.id))
+                navigator.parent?.push(
+                    item = BookDetailScreen(
+                        id = it.id,
+                        initialCover = BookInitialCover.fromBook(book = it),
+                    ),
+                )
             },
             isOnline = isOnline,
         )
@@ -567,6 +574,10 @@ object ExploreScreen : Screen {
                 modifier = Modifier.fillMaxWidth(),
                 elevation = 6.dp,
                 cornerRadius = 6.dp,
+                sharedTransitionKey = bookCoverTransitionKey(
+                    editionId = book.currentEdition?.id,
+                    bookId = book.id,
+                ),
             )
 
             Text(
@@ -631,6 +642,10 @@ object ExploreScreen : Screen {
                     modifier = Modifier.fillMaxWidth(),
                     elevation = 4.dp,
                     cornerRadius = 6.dp,
+                    sharedTransitionKey = bookCoverTransitionKey(
+                        editionId = book.currentEdition?.id,
+                        bookId = book.id,
+                    ),
                 )
 
                 IconButton(
@@ -746,6 +761,10 @@ object ExploreScreen : Screen {
                 isLoading = false,
                 defaultEdition = book.defaultEdition,
                 fallbackCoverUrl = book.coverUrl,
+                sharedTransitionKey = bookCoverTransitionKey(
+                    editionId = book.currentEdition?.id,
+                    bookId = book.id,
+                ),
             )
 
             Spacer(modifier = Modifier.width(12.dp))
