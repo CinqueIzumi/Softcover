@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -19,11 +20,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SplitButtonDefaults
 import androidx.compose.material3.SplitButtonLayout
+import androidx.compose.material3.SplitButtonShapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
@@ -51,13 +54,20 @@ fun SoftcoverSplitButton(
     leadingIcon: SoftcoverIconResource? = null,
     fillMaxWidth: Boolean = false,
 ) {
-    val leadingButtonShapes =
-        SplitButtonDefaults.leadingButtonShapesFor(buttonHeight = size.height)
+    // Workaround for a Material 3 (1.5.0-alpha13) bug: `SplitButtonDefaults.*ShapesFor`
+    // returns shapes whose outer corners use a percentage `CornerSize` (50%). Inside
+    // `rememberAnimatedShape`, those percentage corners are first resolved with
+    // `size = Size.Zero` during the `horizontalCenterOptically` measure pass, so the
+    // backing `Animatable`s initialise at 0 px. The first frame paints the trailing
+    // button with straight outer edges before the side-effect kicks in and animates the
+    // corners to their real radius. We rebuild the shape sets with dp-based outer
+    // corners (half the button height) so every corner is size-independent.
+    val corners = softcoverCornersFor(buttonHeight = size.height)
+    val leadingButtonShapes = leadingShapesFrom(corners)
     val leadingButtonContentPadding =
         SplitButtonDefaults.leadingButtonContentPaddingFor(buttonHeight = size.height)
 
-    val trailingButtonShapes =
-        SplitButtonDefaults.trailingButtonShapesFor(buttonHeight = size.height)
+    val trailingButtonShapes = trailingShapesFrom(corners)
     val trailingButtonContentPadding =
         SplitButtonDefaults.trailingButtonContentPaddingFor(buttonHeight = size.height)
 
@@ -227,6 +237,64 @@ fun SoftcoverSplitButton(
         }
     }
 }
+
+private data class SoftcoverSplitButtonCorners(
+    val outer: Dp,
+    val inner: Dp,
+    val innerPressed: Dp,
+)
+
+private fun softcoverCornersFor(buttonHeight: Dp): SoftcoverSplitButtonCorners {
+    val outer = buttonHeight / 2
+
+    return when (buttonHeight) {
+        ButtonSize.XS.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 4.dp, innerPressed = 8.dp)
+        ButtonSize.S.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 4.dp, innerPressed = 12.dp)
+        ButtonSize.M.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 4.dp, innerPressed = 12.dp)
+        ButtonSize.L.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 8.dp, innerPressed = 20.dp)
+        ButtonSize.XL.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 12.dp, innerPressed = 20.dp)
+        else -> SoftcoverSplitButtonCorners(outer = outer, inner = 4.dp, innerPressed = 8.dp)
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun leadingShapesFrom(corners: SoftcoverSplitButtonCorners): SplitButtonShapes = SplitButtonShapes(
+    shape = RoundedCornerShape(
+        topStart = corners.outer,
+        topEnd = corners.inner,
+        bottomEnd = corners.inner,
+        bottomStart = corners.outer,
+    ),
+    pressedShape = RoundedCornerShape(
+        topStart = corners.outer,
+        topEnd = corners.innerPressed,
+        bottomEnd = corners.innerPressed,
+        bottomStart = corners.outer,
+    ),
+    checkedShape = null,
+)
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun trailingShapesFrom(corners: SoftcoverSplitButtonCorners): SplitButtonShapes = SplitButtonShapes(
+    shape = RoundedCornerShape(
+        topStart = corners.inner,
+        topEnd = corners.outer,
+        bottomEnd = corners.outer,
+        bottomStart = corners.inner,
+    ),
+    pressedShape = RoundedCornerShape(
+        topStart = corners.innerPressed,
+        topEnd = corners.outer,
+        bottomEnd = corners.outer,
+        bottomStart = corners.innerPressed,
+    ),
+    checkedShape = RoundedCornerShape(
+        topStart = corners.outer,
+        topEnd = corners.outer,
+        bottomEnd = corners.outer,
+        bottomStart = corners.outer,
+    ),
+)
 
 @StandardPreview
 @Composable
