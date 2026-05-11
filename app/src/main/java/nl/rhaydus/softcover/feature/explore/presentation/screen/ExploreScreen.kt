@@ -68,6 +68,7 @@ import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
@@ -215,21 +216,31 @@ object ExploreScreen : Screen {
                 title = "Trending",
             )
 
-            LazyRow(
-                state = trendingListState,
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                if (isLoading) {
-                    items(TRENDING_SKELETON_COUNT) {
-                        TrendingCardSkeleton()
+            SkeletonCrossfade(
+                isLoading = isLoading,
+                label = "TrendingRow",
+            ) { loading ->
+                if (loading) {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        items(TRENDING_SKELETON_COUNT) {
+                            TrendingCardSkeleton()
+                        }
                     }
                 } else {
-                    items(books) { book ->
-                        TrendingCard(
-                            book = book,
-                            onClick = { onBookClick(book) },
-                        )
+                    LazyRow(
+                        state = trendingListState,
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        items(books) { book ->
+                            TrendingCard(
+                                book = book,
+                                onClick = { onBookClick(book) },
+                            )
+                        }
                     }
                 }
             }
@@ -290,22 +301,32 @@ object ExploreScreen : Screen {
                 title = "Up next in your series",
             )
 
-            LazyRow(
-                state = continueSeriesListState,
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                if (isLoading) {
-                    items(CONTINUE_SERIES_SKELETON_COUNT) {
-                        SeriesCardSkeleton()
+            SkeletonCrossfade(
+                isLoading = isLoading,
+                label = "ContinueSeriesRow",
+            ) { loading ->
+                if (loading) {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        items(CONTINUE_SERIES_SKELETON_COUNT) {
+                            SeriesCardSkeleton()
+                        }
                     }
                 } else {
-                    items(books) { book ->
-                        SeriesCard(
-                            book = book,
-                            onClick = { onBookClick(book) },
-                            onMenuClick = { sheetBook = book },
-                        )
+                    LazyRow(
+                        state = continueSeriesListState,
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        items(books) { book ->
+                            SeriesCard(
+                                book = book,
+                                onClick = { onBookClick(book) },
+                                onMenuClick = { sheetBook = book },
+                            )
+                        }
                     }
                 }
             }

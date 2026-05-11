@@ -92,6 +92,7 @@ import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
@@ -551,208 +552,216 @@ class BookDetailScreen(
                     shadow = secondaryShadow,
                 )
 
-                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .height(12.dp)
-                                .width(120.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmer(isLoading = true),
-                        )
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .height(22.dp)
-                                .fillMaxWidth(0.85f)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmer(isLoading = true),
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .height(12.dp)
-                                .width(140.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmer(isLoading = true),
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            repeat(3) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .height(10.dp)
-                                            .width(48.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .shimmer(isLoading = true),
-                                    )
-
-                                    Spacer(modifier = Modifier.height(6.dp))
-
-                                    Box(
-                                        modifier = Modifier
-                                            .height(12.dp)
-                                            .width(36.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .shimmer(isLoading = true),
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        seriesText?.takeIf { it.isNotBlank() }?.let { series ->
-                            Text(
-                                text = series,
-                                color = Color.White.copy(alpha = textSecondaryAlpha),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.6.sp,
-                                    shadow = secondaryShadow,
-                                ),
+                SkeletonCrossfade(
+                    isLoading = isLoading,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    label = "BookDetailTitleBlock",
+                ) { loading ->
+                    if (loading) {
+                        Column {
+                            Box(
+                                modifier = Modifier
+                                    .height(12.dp)
+                                    .width(120.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmer(isLoading = true),
                             )
 
-                            Spacer(modifier = Modifier.height(2.dp))
-                        }
+                            Spacer(modifier = Modifier.height(6.dp))
 
-                        Text(
-                            text = title ?: "",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                shadow = Shadow(
-                                    color = Color.Black.copy(alpha = 0.75f),
-                                    offset = Offset(x = 0f, y = 1f),
-                                    blurRadius = 8f,
-                                ),
-                            ),
-                        )
+                            Box(
+                                modifier = Modifier
+                                    .height(22.dp)
+                                    .fillMaxWidth(0.85f)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmer(isLoading = true),
+                            )
 
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Text(
-                            text = "By ${edition?.authorString ?: ""}",
-                            color = Color.White.copy(alpha = textSecondaryAlpha),
-                            style = MaterialTheme.editorialTypography.bodySmall.copy(
-                                shadow = secondaryShadow,
-                            ),
-                        )
-
-                        val isAudiobook = edition?.isAudiobook == true
-
-                        val showRating = rating != null && rating > 0.0
-                        val showLength = if (isAudiobook) {
-                            (edition.audioSeconds ?: 0) > 0
-                        } else {
-                            (edition?.pages ?: 0) > 0
-                        }
-                        val showReleased = releaseYear != null && releaseYear > 0
-
-                        if (showRating || showLength || showReleased) {
                             Spacer(modifier = Modifier.height(8.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .height(12.dp)
+                                    .width(140.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmer(isLoading = true),
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
-                                if (showRating) {
+                                repeat(3) {
                                     Column(
                                         modifier = Modifier.weight(1f),
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
-                                        Text(
-                                            text = "Rating",
-                                            style = labelSmall,
+                                        Box(
+                                            modifier = Modifier
+                                                .height(10.dp)
+                                                .width(48.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .shimmer(isLoading = true),
                                         )
 
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(
-                                                text = "%.1f".format(rating),
-                                                style = bodySmall,
-                                            )
+                                        Spacer(modifier = Modifier.height(6.dp))
 
-                                            Spacer(modifier = Modifier.width(4.dp))
-
-                                            Icon(
-                                                painter = painterResource(R.drawable.ic_star_filled),
-                                                contentDescription = "",
-                                                tint = GoldStar,
-                                                modifier = Modifier.size(16.dp),
-                                            )
-                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .height(12.dp)
+                                                .width(36.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .shimmer(isLoading = true),
+                                        )
                                     }
                                 }
+                            }
+                        }
+                    } else {
+                        Column {
+                            seriesText?.takeIf { it.isNotBlank() }?.let { series ->
+                                Text(
+                                    text = series,
+                                    color = Color.White.copy(alpha = textSecondaryAlpha),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = 0.6.sp,
+                                        shadow = secondaryShadow,
+                                    ),
+                                )
 
-                                if (showLength) {
-                                    Column(
-                                        modifier = Modifier.weight(1f),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ) {
-                                        Text(
-                                            text = "Length",
-                                            style = labelSmall,
-                                        )
+                                Spacer(modifier = Modifier.height(2.dp))
+                            }
 
-                                        Row {
-                                            val lengthText = if (isAudiobook) {
-                                                secondsToHm(seconds = edition?.audioSeconds ?: 0)
-                                            } else {
-                                                "${edition?.pages ?: ""}"
-                                            }
+                            Text(
+                                text = title ?: "",
+                                color = Color.White,
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    shadow = Shadow(
+                                        color = Color.Black.copy(alpha = 0.75f),
+                                        offset = Offset(x = 0f, y = 1f),
+                                        blurRadius = 8f,
+                                    ),
+                                ),
+                            )
 
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = "By ${edition?.authorString ?: ""}",
+                                color = Color.White.copy(alpha = textSecondaryAlpha),
+                                style = MaterialTheme.editorialTypography.bodySmall.copy(
+                                    shadow = secondaryShadow,
+                                ),
+                            )
+
+                            val isAudiobook = edition?.isAudiobook == true
+
+                            val showRating = rating != null && rating > 0.0
+                            val showLength = if (isAudiobook) {
+                                (edition.audioSeconds ?: 0) > 0
+                            } else {
+                                (edition?.pages ?: 0) > 0
+                            }
+                            val showReleased = releaseYear != null && releaseYear > 0
+
+                            if (showRating || showLength || showReleased) {
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    if (showRating) {
+                                        Column(
+                                            modifier = Modifier.weight(1f),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                        ) {
                                             Text(
-                                                text = lengthText,
-                                                style = bodySmall,
-                                                modifier = Modifier.alignByBaseline(),
+                                                text = "Rating",
+                                                style = labelSmall,
                                             )
 
-                                            if (isAudiobook.not()) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = "%.1f".format(rating),
+                                                    style = bodySmall,
+                                                )
+
                                                 Spacer(modifier = Modifier.width(4.dp))
 
-                                                Text(
-                                                    text = "pgs",
-                                                    style = labelSmall,
-                                                    modifier = Modifier.alignByBaseline(),
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_star_filled),
+                                                    contentDescription = "",
+                                                    tint = GoldStar,
+                                                    modifier = Modifier.size(16.dp),
                                                 )
                                             }
                                         }
                                     }
-                                }
 
-                                if (showReleased) {
-                                    Column(
-                                        modifier = Modifier.weight(1f),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ) {
-                                        Text(
-                                            text = "Released",
-                                            style = labelSmall,
-                                        )
+                                    if (showLength) {
+                                        Column(
+                                            modifier = Modifier.weight(1f),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                        ) {
+                                            Text(
+                                                text = "Length",
+                                                style = labelSmall,
+                                            )
 
-                                        Text(
-                                            text = "$releaseYear",
-                                            style = bodySmall,
-                                        )
+                                            Row {
+                                                val lengthText = if (isAudiobook) {
+                                                    secondsToHm(seconds = edition?.audioSeconds ?: 0)
+                                                } else {
+                                                    "${edition?.pages ?: ""}"
+                                                }
+
+                                                Text(
+                                                    text = lengthText,
+                                                    style = bodySmall,
+                                                    modifier = Modifier.alignByBaseline(),
+                                                )
+
+                                                if (isAudiobook.not()) {
+                                                    Spacer(modifier = Modifier.width(4.dp))
+
+                                                    Text(
+                                                        text = "pgs",
+                                                        style = labelSmall,
+                                                        modifier = Modifier.alignByBaseline(),
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (showReleased) {
+                                        Column(
+                                            modifier = Modifier.weight(1f),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                        ) {
+                                            Text(
+                                                text = "Released",
+                                                style = labelSmall,
+                                            )
+
+                                            Text(
+                                                text = "$releaseYear",
+                                                style = bodySmall,
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -817,90 +826,96 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        if (state.loadingBookDetails) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-            ) {
-                SectionLabel(text = "Your shelf")
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+        SkeletonCrossfade(
+            isLoading = state.loadingBookDetails,
+            label = "ShelfActionBar",
+        ) { loading ->
+            if (loading) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                 ) {
-                    repeat(3) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(72.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .shimmer(isLoading = true),
-                        )
+                    SectionLabel(text = "Your shelf")
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        repeat(3) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(72.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .shimmer(isLoading = true),
+                            )
+                        }
                     }
                 }
-            }
-
-            return
-        }
-
-        val book = state.book ?: return
-        val status = book.status
-
-        val mutationFailed = book.id in state.failedMutationBookIds
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        ) {
-            if (mutationFailed) {
-                SectionLabel(
-                    text = "Couldn't save — tap to retry",
-                    color = MaterialTheme.colorScheme.error,
-                )
             } else {
-                SectionLabel(text = "Your shelf")
-            }
+                val book = state.book
 
-            Spacer(modifier = Modifier.height(10.dp))
+                if (book != null) {
+                    val status = book.status
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shakeOnError(
-                        trigger = mutationFailed,
-                        onShakeEnd = {
-                            runAction(OnClearMutationFailureAction(bookId = book.id))
-                        },
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                ShelfChip(
-                    label = "Want to read",
-                    iconRes = R.drawable.ic_bookmark_add,
-                    selected = status == BookStatus.WantToRead,
-                    onClick = { runAction(OnMarkBookAsWantToReadClickAction(book = book)) },
-                    modifier = Modifier.weight(1f),
-                )
+                    val mutationFailed = book.id in state.failedMutationBookIds
 
-                ShelfChip(
-                    label = "Reading",
-                    iconRes = R.drawable.ic_reading,
-                    selected = status == BookStatus.Reading,
-                    onClick = { runAction(OnMarkBookAsReadingClickAction(book = book)) },
-                    modifier = Modifier.weight(1f),
-                )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    ) {
+                        if (mutationFailed) {
+                            SectionLabel(
+                                text = "Couldn't save — tap to retry",
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        } else {
+                            SectionLabel(text = "Your shelf")
+                        }
 
-                ShelfChip(
-                    label = "Read",
-                    iconRes = R.drawable.ic_bookmark_check,
-                    selected = status == BookStatus.Read,
-                    onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
-                    modifier = Modifier.weight(1f),
-                )
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shakeOnError(
+                                    trigger = mutationFailed,
+                                    onShakeEnd = {
+                                        runAction(OnClearMutationFailureAction(bookId = book.id))
+                                    },
+                                ),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            ShelfChip(
+                                label = "Want to read",
+                                iconRes = R.drawable.ic_bookmark_add,
+                                selected = status == BookStatus.WantToRead,
+                                onClick = { runAction(OnMarkBookAsWantToReadClickAction(book = book)) },
+                                modifier = Modifier.weight(1f),
+                            )
+
+                            ShelfChip(
+                                label = "Reading",
+                                iconRes = R.drawable.ic_reading,
+                                selected = status == BookStatus.Reading,
+                                onClick = { runAction(OnMarkBookAsReadingClickAction(book = book)) },
+                                modifier = Modifier.weight(1f),
+                            )
+
+                            ShelfChip(
+                                label = "Read",
+                                iconRes = R.drawable.ic_bookmark_check,
+                                selected = status == BookStatus.Read,
+                                onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -1097,32 +1112,37 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        if (state.loadingBookDetails) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .shimmer(isLoading = true),
-            )
+        SkeletonCrossfade(
+            isLoading = state.loadingBookDetails,
+            label = "ShelfStatusPanel",
+        ) { loading ->
+            if (loading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .shimmer(isLoading = true),
+                )
+            } else {
+                val book = state.book
 
-            return
-        }
+                if (book != null) {
+                    when (book.status) {
+                        BookStatus.Reading -> ReadingProgressCard(
+                            state = state,
+                            runAction = runAction,
+                        )
 
-        val book = state.book ?: return
-
-        when (book.status) {
-            BookStatus.Reading -> ReadingProgressCard(
-                state = state,
-                runAction = runAction,
-            )
-
-            BookStatus.DidNotFinish -> DnfInfoCallout(state = state)
-            BookStatus.Read,
-            BookStatus.WantToRead,
-            BookStatus.None,
-                -> Unit
+                        BookStatus.DidNotFinish -> DnfInfoCallout(state = state)
+                        BookStatus.Read,
+                        BookStatus.WantToRead,
+                        BookStatus.None,
+                            -> Unit
+                    }
+                }
+            }
         }
     }
 
@@ -1424,35 +1444,34 @@ class BookDetailScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (state.loadingBookDetails) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .shimmer(isLoading = true),
-                )
-
-                return
+            SkeletonCrossfade(
+                isLoading = state.loadingBookDetails,
+                label = "AboutSection",
+            ) { loading ->
+                if (loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .shimmer(isLoading = true),
+                    )
+                } else if (description.isBlank()) {
+                    Text(
+                        text = "No description for this book yet.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    Text(
+                        text = htmlToAnnotatedString(html = description),
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            lineHeight = 26.sp,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
             }
-
-            if (description.isBlank()) {
-                Text(
-                    text = "No description for this book yet.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                return
-            }
-
-            Text(
-                text = htmlToAnnotatedString(html = description),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    lineHeight = 26.sp,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
         }
     }
 

@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.presentation.transition.LocalSharedTransitionScope
+import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.feature.books.domain.usecase.PersistEditionImageUseCase
 import org.koin.compose.koinInject
 
@@ -90,37 +91,45 @@ fun EditionImage(
         modifier
     }
 
-    SubcomposeAsyncImage(
-        model = request,
-        contentDescription = "Book edition image",
-        modifier = containerModifier
-            .aspectRatio(2f / 3f)
-            .shimmer(isLoading = isLoading),
-        loading = { Box(modifier = Modifier.fillMaxSize().shimmer()) },
-        success = { state ->
-            val intrinsic = state.painter.intrinsicSize
-            val ratio = if (intrinsic.isSpecified && intrinsic.height > 0f) {
-                intrinsic.width / intrinsic.height
-            } else {
-                2f / 3f
-            }
-            BoxWithConstraints(
+    SkeletonCrossfade(
+        isLoading = isLoading,
+        modifier = containerModifier.aspectRatio(2f / 3f),
+        label = "EditionImage",
+    ) { loading ->
+        if (loading) {
+            Box(modifier = Modifier.fillMaxSize().shimmer())
+        } else {
+            SubcomposeAsyncImage(
+                model = request,
+                contentDescription = "Book edition image",
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                val width = maxWidth
-                Image(
-                    painter = state.painter,
-                    contentDescription = "Book edition image",
-                    modifier = imageModifier
-                        .width(width)
-                        .requiredHeight(width / ratio),
-                    contentScale = ContentScale.Fit,
-                )
-            }
-        },
-        contentScale = ContentScale.Fit,
-    )
+                loading = { Box(modifier = Modifier.fillMaxSize().shimmer()) },
+                success = { state ->
+                    val intrinsic = state.painter.intrinsicSize
+                    val ratio = if (intrinsic.isSpecified && intrinsic.height > 0f) {
+                        intrinsic.width / intrinsic.height
+                    } else {
+                        2f / 3f
+                    }
+                    BoxWithConstraints(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val width = maxWidth
+                        Image(
+                            painter = state.painter,
+                            contentDescription = "Book edition image",
+                            modifier = imageModifier
+                                .width(width)
+                                .requiredHeight(width / ratio),
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                },
+                contentScale = ContentScale.Fit,
+            )
+        }
+    }
 }
 
 @Composable
