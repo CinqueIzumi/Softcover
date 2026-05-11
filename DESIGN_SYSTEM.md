@@ -157,6 +157,7 @@ A short catalogue of shared components and what role they play. Anatomy and styl
 - **Softcover image** — the canonical loader for non-cover images (avatars, author photos, any free-aspect imagery). Use this rather than reaching for a raw image library; it shares the project's caching, shimmer, and fallback behavior. `EditionImage` is for book covers only — everything else uses `SoftcoverImage`.
 - **Update progress sheet** — modal sheet for editing reading progress. Hosts the canonical `pages | percentage | time` segmented switcher with a hero numeric input, an editorial suffix line, and a wavy progress bar. New "edit a single number on a book" surfaces should look at this sheet before inventing a new one.
 - **Deadline badge / cover overlay / summary line** — the family of components that mark a book as time-bound. Used together when a book's deadline matters; never mixed with a stale rating row in the same card.
+- **Haptics helper** — the single entry point for haptic feedback. Exposes two semantic cases only: *commit* (a user-triggered action succeeded) and *reject* (an action was refused or rolled back). No ad-hoc haptics — never call `performHapticFeedback` from a call site; always go through the helper. The "no mixed icon families" rule (§2.6) has a sibling here.
 
 ## 5. Patterns
 
