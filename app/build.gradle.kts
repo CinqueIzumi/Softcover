@@ -69,6 +69,7 @@ dependencies {
 
     // Apollo (graph ql communication)
     implementation(libs.apollo)
+    implementation(libs.apollo.normalized.cache)
 
     // Datastore
     implementation(libs.dataStore)
