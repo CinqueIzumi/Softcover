@@ -65,6 +65,7 @@ import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -589,7 +590,7 @@ object ExploreScreen : Screen {
         Column(
             modifier = Modifier
                 .width(150.dp)
-                .clickable(onClick = onClick),
+                .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             EditionImage(
@@ -656,7 +657,7 @@ object ExploreScreen : Screen {
         Column(
             modifier = Modifier
                 .width(120.dp)
-                .clickable(onClick = onClick),
+                .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -778,7 +779,7 @@ object ExploreScreen : Screen {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onBookClick(book) },
+                .pressScaleClickable(onClick = { onBookClick(book) }),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             EditionImage(

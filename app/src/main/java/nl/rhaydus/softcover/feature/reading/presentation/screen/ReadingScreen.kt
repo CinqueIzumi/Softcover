@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,6 +83,7 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
+import nl.rhaydus.softcover.core.presentation.modifier.pressScale
 import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -386,10 +388,13 @@ object ReadingScreen : Screen {
             fallbackCoverUrl = book.coverUrl,
         )
 
+        val interactionSource = remember { MutableInteractionSource() }
+
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+                .pressScale(interactionSource)
                 .shakeOnError(
                     trigger = mutationFailed,
                     onShakeEnd = {
@@ -399,6 +404,7 @@ object ReadingScreen : Screen {
             color = surfaceColor,
             shape = shape,
             onClick = { onBookClick(book) },
+            interactionSource = interactionSource,
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 if (isInspection) {
@@ -636,10 +642,13 @@ object ReadingScreen : Screen {
         var dropdownActive by remember { mutableStateOf(false) }
         val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
 
+        val interactionSource = remember { MutableInteractionSource() }
+
         Surface(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 6.dp)
+                .pressScale(interactionSource)
                 .shakeOnError(
                     trigger = mutationFailed,
                     onShakeEnd = {
@@ -649,6 +658,7 @@ object ReadingScreen : Screen {
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
             onClick = { onBookClick(book) },
+            interactionSource = interactionSource,
         ) {
             Row(
                 modifier = Modifier

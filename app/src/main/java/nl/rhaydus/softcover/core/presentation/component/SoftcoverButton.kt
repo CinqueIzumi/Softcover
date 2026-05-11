@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.presentation.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,12 +31,14 @@ import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TonalToggleButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.presentation.modifier.pressScale
 import nl.rhaydus.softcover.core.presentation.model.IconToggleButtonShape
 import nl.rhaydus.softcover.core.presentation.model.IconToggleButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
@@ -254,14 +257,21 @@ fun SoftcoverButton(
     }
 
     when (style) {
-        ButtonStyle.FILLED -> Button(
-            onClick = onClick,
-            shapes = shapes,
-            enabled = enabled,
-            contentPadding = size.contentPadding,
-            modifier = modifier.height(height = size.height),
-            content = content,
-        )
+        ButtonStyle.FILLED -> {
+            val filledInteractionSource = remember { MutableInteractionSource() }
+
+            Button(
+                onClick = onClick,
+                shapes = shapes,
+                enabled = enabled,
+                contentPadding = size.contentPadding,
+                modifier = modifier
+                    .height(height = size.height)
+                    .pressScale(filledInteractionSource),
+                content = content,
+                interactionSource = filledInteractionSource,
+            )
+        }
 
         ButtonStyle.TONAL -> FilledTonalButton(
             onClick = onClick,
@@ -317,7 +327,7 @@ private fun SoftcoverButtonFilledPreview() {
                     size = size,
                     onClick = {},
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
             }
         }
@@ -341,7 +351,7 @@ private fun SoftcoverButtonTonalPreview() {
                     size = size,
                     onClick = {},
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
             }
         }
@@ -365,7 +375,7 @@ private fun SoftcoverButtonElevatedPreview() {
                     size = size,
                     onClick = {},
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
             }
         }
@@ -389,7 +399,7 @@ private fun SoftcoverButtonOutlinedPreview() {
                     size = size,
                     onClick = {},
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
             }
         }
@@ -413,7 +423,7 @@ private fun SoftcoverButtonTextPreview() {
                     size = size,
                     onClick = {},
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
             }
         }
@@ -438,7 +448,7 @@ private fun SoftcoverToggleButtonFilledPreview() {
                     onCheckedChange = {},
                     checked = true,
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
 
                 SoftcoverToggleButton(
@@ -447,7 +457,7 @@ private fun SoftcoverToggleButtonFilledPreview() {
                     onCheckedChange = {},
                     checked = false,
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
             }
         }
@@ -472,7 +482,7 @@ private fun SoftcoverToggleButtonTonalPreview() {
                     onCheckedChange = {},
                     checked = true,
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
 
                 SoftcoverToggleButton(
@@ -481,7 +491,7 @@ private fun SoftcoverToggleButtonTonalPreview() {
                     onCheckedChange = {},
                     checked = false,
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
             }
         }
@@ -506,7 +516,7 @@ private fun SoftcoverToggleButtonElevatedPreview() {
                     onCheckedChange = {},
                     checked = true,
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
 
                 SoftcoverToggleButton(
@@ -515,7 +525,7 @@ private fun SoftcoverToggleButtonElevatedPreview() {
                     onCheckedChange = {},
                     checked = false,
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
             }
         }
@@ -540,7 +550,7 @@ private fun SoftcoverToggleButtonOutlinedPreview() {
                     onCheckedChange = {},
                     checked = true,
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
 
                 SoftcoverToggleButton(
@@ -549,7 +559,7 @@ private fun SoftcoverToggleButtonOutlinedPreview() {
                     onCheckedChange = {},
                     checked = false,
                     enabled = index % 2 == 0,
-                    label = "Label $index"
+                    label = "Label $index",
                 )
             }
         }

@@ -2,11 +2,14 @@ package nl.rhaydus.softcover.core.presentation.modifier
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -24,14 +27,62 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.graphicsLayer
+import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
+
+private const val PRESS_SCALE_TARGET = 0.97f
 
 @Composable
 fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier {
     return this.clickable(
         onClick = onClick,
         indication = null,
-        interactionSource = remember { MutableInteractionSource() }
+        interactionSource = remember { MutableInteractionSource() },
     )
+}
+
+/**
+ * Scales the receiver down to ~0.97 while the [interactionSource] reports a press, easing
+ * back to 1f on release. Suppressed when system animations are disabled — under reduced
+ * motion the surface stays at its natural size.
+ *
+ * Pair with the call site's existing click handler; this modifier only renders the visual
+ * press feedback and does not attach a click listener of its own. For ripple-less card and
+ * hero-cover surfaces, prefer [pressScaleClickable] which bundles both.
+ */
+@Composable
+fun Modifier.pressScale(interactionSource: InteractionSource): Modifier {
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val playMotion = playDecorativeMotion()
+    val target = if (isPressed && playMotion) PRESS_SCALE_TARGET else 1f
+
+    val scale by animateFloatAsState(
+        targetValue = target,
+        label = "pressScale",
+    )
+
+    return this.graphicsLayer {
+        scaleX = scale
+        scaleY = scale
+    }
+}
+
+/**
+ * Ripple-less clickable that also plays the press-scale feedback. The default replacement
+ * for [noRippleClickable] on cards and ripple-less hero surfaces (book detail cover) — the
+ * scale stops removing the indication from meaning "remove the feedback".
+ */
+@Composable
+fun Modifier.pressScaleClickable(onClick: () -> Unit): Modifier {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    return this
+        .pressScale(interactionSource)
+        .clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = onClick,
+        )
 }
 
 @Composable
@@ -44,7 +95,7 @@ fun Modifier.shimmer(shape: Shape = RectangleShape): Modifier {
     val shimmerColors = listOf(
         Color.LightGray.copy(alpha = 0.3f),
         Color.White.copy(alpha = 0.6f),
-        Color.LightGray.copy(alpha = 0.3f)
+        Color.LightGray.copy(alpha = 0.3f),
     )
 
     val transition = rememberInfiniteTransition(label = "Shimmer")
@@ -55,9 +106,9 @@ fun Modifier.shimmer(shape: Shape = RectangleShape): Modifier {
             animation = tween(
                 durationMillis = 1600,
                 easing = FastOutSlowInEasing,
-            )
+            ),
         ),
-        label = "Translate"
+        label = "Translate",
     )
 
     return this.drawWithCache {
@@ -65,13 +116,13 @@ fun Modifier.shimmer(shape: Shape = RectangleShape): Modifier {
             colors = shimmerColors,
             start = Offset(translateAnim, 0f),
             // wider gradient
-            end = Offset(translateAnim + size.width / 1.5f, size.height)
+            end = Offset(translateAnim + size.width / 1.5f, size.height),
         )
 
         val outline = shape.createOutline(
             size = size,
             layoutDirection = layoutDirection,
-            density = this
+            density = this,
         )
 
         onDrawWithContent {

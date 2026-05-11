@@ -99,7 +99,7 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
-import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
@@ -1019,7 +1019,7 @@ object LibraryScreen : Screen {
             modifier
                 .fillMaxWidth()
                 .aspectRatio(ratio = 2f / 3f)
-                .noRippleClickable(onClick = onClick)
+                .pressScaleClickable(onClick = onClick)
         )
     }
 
@@ -1032,7 +1032,7 @@ object LibraryScreen : Screen {
         cover: @Composable (Modifier) -> Unit,
     ) {
         Column(
-            modifier = modifier.noRippleClickable(onClick = onClick)
+            modifier = modifier.pressScaleClickable(onClick = onClick)
         ) {
             cover(
                 Modifier
@@ -1077,7 +1077,7 @@ object LibraryScreen : Screen {
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .noRippleClickable(onClick = onClick),
+                .pressScaleClickable(onClick = onClick),
         ) {
             Row(
                 modifier = Modifier
@@ -1137,7 +1137,7 @@ object LibraryScreen : Screen {
         Surface(
             modifier = modifier
                 .fillMaxWidth()
-                .noRippleClickable(onClick = onClick),
+                .pressScaleClickable(onClick = onClick),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
         ) {

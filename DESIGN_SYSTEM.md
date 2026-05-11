@@ -83,6 +83,8 @@ Sections always breathe. Two adjacent eyebrow/headline pairs without a generous 
 ### 2.5 Motion
 
 - Use the Material **expressive** motion scheme; do not hand-author durations or easings unless animating a custom property the scheme cannot express.
+- **Press feedback.** Tappable cards, primary (filled) buttons, and ripple-less hero surfaces scale to ~0.97 while pressed and ease back to 1f on release. The scale rides an `InteractionSource` so it lines up with the platform's pressed-state ticks; it is wired through `Modifier.pressScale` (a press-driven `graphicsLayer` scale) or its `Modifier.pressScaleClickable` convenience (which bundles a ripple-less `clickable`). Suppressed under reduced motion (§2.5 gate). Press scale is the *only* indication on ripple-less surfaces — never strip the ripple from a card or hero without adding the scale, or the surface loses its press feedback entirely. Tonal/outlined/text/elevated buttons keep the Material ripple + pressed-shape morph and do not stack scale on top; a single button surface only carries one press treatment.
+- **Press haptics.** A *commit* haptic fires only on commit-class actions (mark-as-read, save, confirm) — never on navigation taps (tapping a book card to open detail, tapping a row to push a sub-page). Press scale is purely visual; it never implies a haptic.
 - Progress is shown with the wavy progress indicator — flat bars are reserved for chrome (top-bar scrim) and never carry semantic progress.
 - Numeric progress animates between values rather than snapping.
 - Sheets enter and dismiss from the bottom; overlays cross-fade.
