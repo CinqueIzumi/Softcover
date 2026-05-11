@@ -33,7 +33,7 @@ interface BooksRepository {
 
     suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition>
 
-    suspend fun markBookAsWantToRead(bookId: Int): Book
+    suspend fun markBookAsWantToRead(book: Book): Book
 
     suspend fun markBookAsReading(book: Book): Book
 

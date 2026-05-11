@@ -13,7 +13,7 @@ class OnAddBookToLibraryClickAction(val book: Book) : ExploreAction {
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        dependencies.markBookAsWantToReadUseCase(bookId = book.id).onFailure {
+        dependencies.markBookAsWantToReadUseCase(book = book).onFailure {
             Timber.e("-=-= $it")
         }
     }

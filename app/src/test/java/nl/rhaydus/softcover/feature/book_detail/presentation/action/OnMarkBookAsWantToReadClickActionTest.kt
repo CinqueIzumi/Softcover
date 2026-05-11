@@ -67,13 +67,13 @@ class OnMarkBookAsWantToReadClickActionTest {
     inner class Execute {
 
         @Test
-        fun `invokes use case with the book id provided to the action constructor`() = runTest {
+        fun `invokes use case with the book provided to the action constructor`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsWantToReadUseCase(bookId = 42)
+                markBookAsWantToReadUseCase(book = book)
             } returns Result.success(Unit)
 
             val action = OnMarkBookAsWantToReadClickAction(book = book)
@@ -86,7 +86,7 @@ class OnMarkBookAsWantToReadClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                markBookAsWantToReadUseCase(bookId = 42)
+                markBookAsWantToReadUseCase(book = book)
             }
         }
 
@@ -98,7 +98,7 @@ class OnMarkBookAsWantToReadClickActionTest {
             val initialState = stateFlow.value
 
             coEvery {
-                markBookAsWantToReadUseCase(bookId = any())
+                markBookAsWantToReadUseCase(book = any())
             } returns Result.success(Unit)
 
             val action = OnMarkBookAsWantToReadClickAction(book = book)
@@ -121,7 +121,7 @@ class OnMarkBookAsWantToReadClickActionTest {
             val initialState = stateFlow.value
 
             coEvery {
-                markBookAsWantToReadUseCase(bookId = any())
+                markBookAsWantToReadUseCase(book = any())
             } returns Result.failure(RuntimeException("api error"))
 
             val action = OnMarkBookAsWantToReadClickAction(book = book)
@@ -143,7 +143,7 @@ class OnMarkBookAsWantToReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsWantToReadUseCase(bookId = any())
+                markBookAsWantToReadUseCase(book = any())
             } returns Result.failure(RuntimeException("network failure"))
 
             val action = OnMarkBookAsWantToReadClickAction(book = book)

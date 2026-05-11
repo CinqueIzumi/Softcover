@@ -13,7 +13,7 @@ class OnMarkBookAsWantToReadClickAction(private val book: Book) : BookDetailActi
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        dependencies.markBookAsWantToReadUseCase(bookId = book.id).onFailure {
+        dependencies.markBookAsWantToReadUseCase(book = book).onFailure {
             Timber.e("-=- $it")
         }
     }

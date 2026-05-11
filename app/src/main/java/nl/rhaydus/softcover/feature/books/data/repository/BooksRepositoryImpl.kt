@@ -4,6 +4,7 @@ import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -191,8 +192,24 @@ class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchEditionsByIds(ids = ids)
     }
 
-    override suspend fun markBookAsWantToRead(bookId: Int): Book {
-        return booksRemoteDataSource.markBookAsWantToRead(bookId = bookId)
+    override suspend fun markBookAsWantToRead(book: Book): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val optimistic = book.withMarkedAsWantToRead()
+
+        if (optimistic !== book) {
+            booksLocalDataSource.cacheBook(book = optimistic)
+        }
+
+        return runCatching {
+            booksRemoteDataSource.markBookAsWantToRead(bookId = book.id)
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            restoreOptimisticWrite(snapshot = snapshot)
+            throw error
+        }.also { updated ->
+            booksLocalDataSource.cacheBook(book = updated)
+        }
     }
 
     override suspend fun markBookAsReading(book: Book): Book {
@@ -203,13 +220,29 @@ class BooksRepositoryImpl(
         return runCatching {
             booksRemoteDataSource.markBookAsReading(book)
         }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
             restoreOptimisticWrite(snapshot = snapshot)
             throw error
         }
     }
 
     override suspend fun removeBookFromLibrary(book: Book) {
-        return booksRemoteDataSource.removeBookFromLibrary(book = book)
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val userBookId: Int? = book.userBook?.id
+
+        if (userBookId != null) {
+            booksLocalDataSource.removeUserBooksById(ids = listOf(userBookId))
+        }
+
+        runCatching {
+            booksRemoteDataSource.removeBookFromLibrary(book = book)
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            restoreOptimisticWrite(snapshot = snapshot)
+            throw error
+        }
     }
 
     override suspend fun updateBookProgress(
@@ -232,16 +265,22 @@ class BooksRepositoryImpl(
                     newSeconds = newSeconds,
                 )
             }.getOrElse { error ->
-                if (error is OfflineException) {
-                    enqueueProgressUpdate(
-                        book = optimistic,
-                        newPage = newPage,
-                        newSeconds = newSeconds,
-                    )
-                    optimistic
-                } else {
-                    restoreOptimisticWrite(snapshot = snapshot)
-                    throw error
+                when (error) {
+                    is CancellationException -> throw error
+
+                    is OfflineException -> {
+                        enqueueProgressUpdate(
+                            book = optimistic,
+                            newPage = newPage,
+                            newSeconds = newSeconds,
+                        )
+                        optimistic
+                    }
+
+                    else -> {
+                        restoreOptimisticWrite(snapshot = snapshot)
+                        throw error
+                    }
                 }
             }
         }
@@ -263,12 +302,18 @@ class BooksRepositoryImpl(
             return runCatching {
                 booksRemoteDataSource.markBookAsRead(book = book)
             }.getOrElse { error ->
-                if (error is OfflineException) {
-                    enqueueMarkAsRead(book = optimistic)
-                    optimistic
-                } else {
-                    restoreOptimisticWrite(snapshot = snapshot)
-                    throw error
+                when (error) {
+                    is CancellationException -> throw error
+
+                    is OfflineException -> {
+                        enqueueMarkAsRead(book = optimistic)
+                        optimistic
+                    }
+
+                    else -> {
+                        restoreOptimisticWrite(snapshot = snapshot)
+                        throw error
+                    }
                 }
             }
         }
@@ -394,6 +439,16 @@ class BooksRepositoryImpl(
                 progress = progress,
             ),
         )
+    }
+
+    private fun Book.withMarkedAsWantToRead(): Book {
+        val existingUserBook = userBook ?: return this
+
+        if (existingUserBook.status == BookStatus.WantToRead) return this
+
+        val updatedUserBook: UserBook = existingUserBook.copy(status = BookStatus.WantToRead)
+
+        return copy(userBook = updatedUserBook)
     }
 
     private fun Book.withMarkedAsReading(): Book {
