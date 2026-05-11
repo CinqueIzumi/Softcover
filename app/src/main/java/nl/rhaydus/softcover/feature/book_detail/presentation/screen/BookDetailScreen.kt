@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.clickable
@@ -43,8 +45,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -53,7 +57,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -80,6 +87,7 @@ import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
@@ -96,6 +104,8 @@ import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
+import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
+import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -135,6 +145,7 @@ import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 private val GoldStar = Color(0xFFFBBF23)
@@ -870,57 +881,82 @@ class BookDetailScreen(
 
                     val mutationFailed = book.id in state.failedMutationBookIds
 
-                    Column(
+                    val haptics = rememberHaptics()
+
+                    var celebrationKey by remember { mutableIntStateOf(0) }
+                    var prevStatus by remember { mutableStateOf(status) }
+
+                    LaunchedEffect(status) {
+                        if (status == BookStatus.Read && prevStatus != BookStatus.Read) {
+                            haptics.commit()
+                            celebrationKey++
+                        }
+
+                        prevStatus = status
+                    }
+
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                     ) {
-                        if (mutationFailed) {
-                            SectionLabel(
-                                text = "Couldn't save — tap to retry",
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        } else {
-                            SectionLabel(text = "Your shelf")
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            if (mutationFailed) {
+                                SectionLabel(
+                                    text = "Couldn't save — tap to retry",
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            } else {
+                                SectionLabel(
+                                    text = "Your shelf",
+                                    pulseKey = celebrationKey,
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shakeOnError(
+                                        trigger = mutationFailed,
+                                        onShakeEnd = {
+                                            runAction(OnClearMutationFailureAction(bookId = book.id))
+                                        },
+                                    ),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                ShelfChip(
+                                    label = "Want to read",
+                                    iconRes = R.drawable.ic_bookmark_add,
+                                    selected = status == BookStatus.WantToRead,
+                                    onClick = { runAction(OnMarkBookAsWantToReadClickAction(book = book)) },
+                                    modifier = Modifier.weight(1f),
+                                )
+
+                                ShelfChip(
+                                    label = "Reading",
+                                    iconRes = R.drawable.ic_reading,
+                                    selected = status == BookStatus.Reading,
+                                    onClick = { runAction(OnMarkBookAsReadingClickAction(book = book)) },
+                                    modifier = Modifier.weight(1f),
+                                )
+
+                                ShelfChip(
+                                    label = "Read",
+                                    iconRes = R.drawable.ic_bookmark_check,
+                                    selected = status == BookStatus.Read,
+                                    onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
+                                    modifier = Modifier.weight(1f),
+                                    celebrationKey = celebrationKey,
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shakeOnError(
-                                    trigger = mutationFailed,
-                                    onShakeEnd = {
-                                        runAction(OnClearMutationFailureAction(bookId = book.id))
-                                    },
-                                ),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            ShelfChip(
-                                label = "Want to read",
-                                iconRes = R.drawable.ic_bookmark_add,
-                                selected = status == BookStatus.WantToRead,
-                                onClick = { runAction(OnMarkBookAsWantToReadClickAction(book = book)) },
-                                modifier = Modifier.weight(1f),
-                            )
-
-                            ShelfChip(
-                                label = "Reading",
-                                iconRes = R.drawable.ic_reading,
-                                selected = status == BookStatus.Reading,
-                                onClick = { runAction(OnMarkBookAsReadingClickAction(book = book)) },
-                                modifier = Modifier.weight(1f),
-                            )
-
-                            ShelfChip(
-                                label = "Read",
-                                iconRes = R.drawable.ic_bookmark_check,
-                                selected = status == BookStatus.Read,
-                                onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
-                                modifier = Modifier.weight(1f),
-                            )
-                        }
+                        MarkAsReadBurst(
+                            triggerKey = celebrationKey,
+                            modifier = Modifier.matchParentSize(),
+                        )
                     }
                 }
             }
@@ -934,6 +970,7 @@ class BookDetailScreen(
         selected: Boolean,
         onClick: () -> Unit,
         modifier: Modifier = Modifier,
+        celebrationKey: Int = 0,
     ) {
         val container = if (selected) {
             MaterialTheme.colorScheme.secondaryContainer
@@ -946,6 +983,33 @@ class BookDetailScreen(
         } else {
             MaterialTheme.colorScheme.onSurface
         }
+
+        val playMotion = playDecorativeMotion()
+
+        val celebration = remember { Animatable(initialValue = 1f) }
+
+        LaunchedEffect(celebrationKey) {
+            if (celebrationKey == 0 || playMotion.not()) return@LaunchedEffect
+
+            celebration.snapTo(targetValue = 0f)
+            celebration.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 400),
+            )
+        }
+
+        val progress = celebration.value
+
+        val iconScale = if (progress < 0.5f) {
+            1f + progress * 2f * 0.25f
+        } else {
+            1.25f - (progress - 0.5f) * 2f * 0.25f
+        }
+
+        val iconReveal = (progress / 0.6f).coerceIn(
+            minimumValue = 0f,
+            maximumValue = 1f,
+        )
 
         Surface(
             modifier = modifier.height(72.dp),
@@ -964,7 +1028,17 @@ class BookDetailScreen(
                 Icon(
                     painter = painterResource(iconRes),
                     contentDescription = null,
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier
+                        .size(22.dp)
+                        .graphicsLayer {
+                            scaleX = iconScale
+                            scaleY = iconScale
+                        }
+                        .drawWithContent {
+                            clipRect(right = size.width * iconReveal) {
+                                this@drawWithContent.drawContent()
+                            }
+                        },
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -1702,12 +1776,37 @@ class BookDetailScreen(
     private fun SectionLabel(
         text: String,
         color: Color = MaterialTheme.colorScheme.primary,
+        pulseKey: Int = 0,
     ) {
+        val playMotion = playDecorativeMotion()
+
+        val pulse = remember { Animatable(initialValue = 0f) }
+
+        LaunchedEffect(pulseKey) {
+            if (pulseKey == 0 || playMotion.not()) return@LaunchedEffect
+
+            pulse.snapTo(targetValue = 0f)
+            pulse.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 400),
+            )
+        }
+
+        val envelope = (1f - abs(pulse.value * 2f - 1f)).coerceIn(
+            minimumValue = 0f,
+            maximumValue = 1f,
+        )
+
+        val barWidth = 32.dp + (16.dp * envelope)
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .height(4.dp)
-                    .width(32.dp)
+                    .width(barWidth)
+                    .graphicsLayer {
+                        scaleY = 1f + envelope * 0.5f
+                    }
                     .clip(RoundedCornerShape(2.dp))
                     .background(color),
             )

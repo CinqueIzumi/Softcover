@@ -39,6 +39,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorB
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -71,6 +72,7 @@ import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
@@ -88,6 +90,7 @@ import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
@@ -150,73 +153,106 @@ object ReadingScreen : Screen {
     ) {
         val pullToRefreshState = rememberPullToRefreshState()
 
-        Scaffold(
-            contentWindowInsets = WindowInsets.statusBars,
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .imePadding(),
-            ) {
-                PullToRefreshBox(
-                    isRefreshing = state.isLoading,
-                    onRefresh = { runAction(RefreshAction) },
+        val haptics = rememberHaptics()
+
+        var celebrationKey by remember { mutableIntStateOf(0) }
+
+        val onMarkAsRead: (Book) -> Unit = { book ->
+            haptics.commit()
+            celebrationKey++
+            runAction(OnMarkBookAsReadClickAction(book = book))
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                contentWindowInsets = WindowInsets.statusBars,
+            ) { innerPadding ->
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    state = pullToRefreshState,
-                    indicator = {
-                        IndicatorBox(
-                            modifier = Modifier.align(Alignment.TopCenter),
-                            state = pullToRefreshState,
-                            isRefreshing = state.isLoading,
-                        ) {
-                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
-                        }
-                    }
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .imePadding(),
                 ) {
-                    when {
-                        state.books.isNotEmpty() -> {
-                            BooksDisplay(
-                                state = state,
-                                runAction = runAction,
-                                onBookClick = onBookClick,
+                    PullToRefreshBox(
+                        isRefreshing = state.isLoading,
+                        onRefresh = { runAction(RefreshAction) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        state = pullToRefreshState,
+                        indicator = {
+                            IndicatorBox(
+                                modifier = Modifier.align(Alignment.TopCenter),
+                                state = pullToRefreshState,
+                                isRefreshing = state.isLoading,
+                            ) {
+                                ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
+                            }
+                        }
+                    ) {
+                        when {
+                            state.books.isNotEmpty() -> {
+                                BooksDisplay(
+                                    state = state,
+                                    runAction = runAction,
+                                    onBookClick = onBookClick,
+                                    onNavigateToSearch = onNavigateToSearch,
+                                    onMarkAsRead = onMarkAsRead,
+                                )
+                            }
+
+                            state.isLoading -> Unit
+                            else -> EmptyCurrentlyReadingScreen(
                                 onNavigateToSearch = onNavigateToSearch,
                             )
                         }
+                    }
 
-                        state.isLoading -> Unit
-                        else -> EmptyCurrentlyReadingScreen(
-                            onNavigateToSearch = onNavigateToSearch,
+                    if (state.bookToUpdate != null && state.showProgressSheet) {
+                        val updatingBook = state.bookToUpdate
+
+                        UpdateProgressBottomSheet(
+                            bookToUpdate = updatingBook,
+                            selectedTab = state.progressSheetTab,
+                            onDismissRequest = {
+                                runAction(DismissProgressSheetAction)
+                            },
+                            onProgressTabClick = {
+                                runAction(OnProgressTabClickAction(it))
+                            },
+                            onUpdatePercentageClick = { percentage ->
+                                if (percentage.toFloatOrNull() == 100f) {
+                                    haptics.commit()
+                                    celebrationKey++
+                                }
+
+                                runAction(OnUpdatePercentageProgressClickAction(percentage))
+                            },
+                            onUpdatePageProgressClick = { pages ->
+                                val total = updatingBook.currentEdition?.pages
+                                    ?: updatingBook.defaultEdition?.pages
+
+                                if (total != null && pages.toIntOrNull() == total) {
+                                    haptics.commit()
+                                    celebrationKey++
+                                }
+
+                                runAction(OnUpdatePageProgressClickAction(pages))
+                            },
+                            onUpdateTimeProgressClick = { h, m, s ->
+                                runAction(OnUpdateTimeProgressClickAction(h, m, s))
+                            },
                         )
                     }
                 }
-
-                if (state.bookToUpdate != null && state.showProgressSheet) {
-                    UpdateProgressBottomSheet(
-                        bookToUpdate = state.bookToUpdate,
-                        selectedTab = state.progressSheetTab,
-                        onDismissRequest = {
-                            runAction(DismissProgressSheetAction)
-                        },
-                        onProgressTabClick = {
-                            runAction(OnProgressTabClickAction(it))
-                        },
-                        onUpdatePercentageClick = {
-                            runAction(
-                                OnUpdatePercentageProgressClickAction(it)
-                            )
-                        },
-                        onUpdatePageProgressClick = {
-                            runAction(OnUpdatePageProgressClickAction(it))
-                        },
-                        onUpdateTimeProgressClick = { h, m, s ->
-                            runAction(OnUpdateTimeProgressClickAction(h, m, s))
-                        },
-                    )
-                }
             }
+
+            MarkAsReadBurst(
+                triggerKey = celebrationKey,
+                modifier = Modifier.fillMaxSize(),
+                particleCount = 28,
+                durationMillis = 1000,
+            )
         }
     }
 
@@ -226,6 +262,7 @@ object ReadingScreen : Screen {
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
         onNavigateToSearch: () -> Unit,
+        onMarkAsRead: (Book) -> Unit,
     ) {
         val featured = state.books.first()
         val rest = state.books.drop(1)
@@ -252,6 +289,7 @@ object ReadingScreen : Screen {
                     mutationFailed = featured.id in state.failedMutationBookIds,
                     runAction = runAction,
                     onBookClick = onBookClick,
+                    onMarkAsRead = onMarkAsRead,
                 )
             }
 
@@ -275,6 +313,7 @@ object ReadingScreen : Screen {
                         mutationFailed = book.id in state.failedMutationBookIds,
                         runAction = runAction,
                         onBookClick = onBookClick,
+                        onMarkAsRead = onMarkAsRead,
                     )
                 }
             }
@@ -334,6 +373,7 @@ object ReadingScreen : Screen {
         mutationFailed: Boolean,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
+        onMarkAsRead: (Book) -> Unit,
     ) {
         var dropdownActive by remember { mutableStateOf(false) }
         val shape = RoundedCornerShape(28.dp)
@@ -550,7 +590,7 @@ object ReadingScreen : Screen {
                                 label = "Mark as Read",
                                 onClick = {
                                     dropdownActive = false
-                                    runAction(OnMarkBookAsReadClickAction(book = book))
+                                    onMarkAsRead(book)
                                 },
                                 icon = SoftcoverIconResource.Drawable(
                                     id = R.drawable.ic_check_circle,
@@ -590,6 +630,7 @@ object ReadingScreen : Screen {
         mutationFailed: Boolean,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
+        onMarkAsRead: (Book) -> Unit,
         modifier: Modifier = Modifier,
     ) {
         var dropdownActive by remember { mutableStateOf(false) }
@@ -708,7 +749,7 @@ object ReadingScreen : Screen {
                                 label = "Mark as Read",
                                 onClick = {
                                     dropdownActive = false
-                                    runAction(OnMarkBookAsReadClickAction(book = book))
+                                    onMarkAsRead(book)
                                 },
                                 icon = SoftcoverIconResource.Drawable(
                                     id = R.drawable.ic_check_circle,
