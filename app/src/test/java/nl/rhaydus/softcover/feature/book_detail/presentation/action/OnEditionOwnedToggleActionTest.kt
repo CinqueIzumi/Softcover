@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -25,15 +26,17 @@ class OnEditionOwnedToggleActionTest {
     private lateinit var setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         setEditionAsOwnedUseCase = mockk()
         stateFlow = MutableStateFlow(BookDetailUiState())
+        localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
+            localVariablesFlow = localVariablesFlow,
             eventChannel = Channel(Channel.BUFFERED),
         )
     }
@@ -59,56 +62,16 @@ class OnEditionOwnedToggleActionTest {
         }
     }
 
-    private fun stubEdition(owned: Boolean): BookEdition = mockk<BookEdition>().also { mock ->
+    private fun stubEdition(
+        id: Int = 99,
+        owned: Boolean,
+    ): BookEdition = mockk<BookEdition>().also { mock ->
+        every { mock.id } returns id
         every { mock.owned } returns owned
     }
 
     @Nested
     inner class Execute {
-
-        @Test
-        fun `clears settingEditionOwned flag after use case succeeds`() = runTest {
-            // ----- Arrange -----
-            val edition = stubEdition(owned = false)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = true)
-            } returns Result.success(Unit)
-
-            val action = OnEditionOwnedToggleAction(edition = edition)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.settingEditionOwned shouldBe false
-        }
-
-        @Test
-        fun `clears settingEditionOwned flag after use case fails`() = runTest {
-            // ----- Arrange -----
-            val edition = stubEdition(owned = true)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = false)
-            } returns Result.failure(RuntimeException("network error"))
-
-            val action = OnEditionOwnedToggleAction(edition = edition)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.settingEditionOwned shouldBe false
-        }
 
         @Test
         fun `invokes use case with owned toggled to true when edition is currently not owned`() = runTest {
@@ -135,33 +98,6 @@ class OnEditionOwnedToggleActionTest {
         }
 
         @Test
-        fun `sets settingEditionOwned to true before invoking use case then resets to false after`() = runTest {
-            // ----- Arrange -----
-            val edition = stubEdition(owned = false)
-            dependencies = stubDependencies(this)
-
-            var stateAtInvocation: Boolean? = null
-            coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = true)
-            } coAnswers {
-                stateAtInvocation = stateFlow.value.settingEditionOwned
-                Result.success(Unit)
-            }
-
-            val action = OnEditionOwnedToggleAction(edition = edition)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateAtInvocation shouldBe true
-            stateFlow.value.settingEditionOwned shouldBe false
-        }
-
-        @Test
         fun `invokes use case with owned toggled to false when edition is currently owned`() = runTest {
             // ----- Arrange -----
             val edition = stubEdition(owned = true)
@@ -183,6 +119,126 @@ class OnEditionOwnedToggleActionTest {
             coVerify {
                 setEditionAsOwnedUseCase(edition = edition, owned = false)
             }
+        }
+
+        @Test
+        fun `does not add edition id to failedMutationEditionIds when use case succeeds`() = runTest {
+            // ----- Arrange -----
+            val edition = stubEdition(id = 99, owned = false)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                setEditionAsOwnedUseCase(edition = edition, owned = true)
+            } returns Result.success(Unit)
+
+            val action = OnEditionOwnedToggleAction(edition = edition)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.failedMutationEditionIds.contains(99) shouldBe false
+        }
+
+        @Test
+        fun `adds edition id to failedMutationEditionIds when use case fails`() = runTest {
+            // ----- Arrange -----
+            val edition = stubEdition(id = 99, owned = false)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                setEditionAsOwnedUseCase(edition = edition, owned = true)
+            } returns Result.failure(RuntimeException("network error"))
+
+            val action = OnEditionOwnedToggleAction(edition = edition)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.failedMutationEditionIds.contains(99) shouldBe true
+        }
+
+        @Test
+        fun `stores job in editionMutationJobs after execute returns`() = runTest {
+            // ----- Arrange -----
+            val edition = stubEdition(id = 99, owned = false)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                setEditionAsOwnedUseCase(edition = edition, owned = true)
+            } returns Result.success(Unit)
+
+            val action = OnEditionOwnedToggleAction(edition = edition)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.editionMutationJobs.containsKey(99) shouldBe true
+        }
+
+        @Test
+        fun `cancels prior job for same edition id and replaces it with a new one`() = runTest {
+            // ----- Arrange -----
+            val editionId = 99
+            val edition = stubEdition(id = editionId, owned = false)
+            val priorJob = Job()
+            localVariablesFlow.value = BookDetailLocalVariables(
+                editionMutationJobs = mapOf(editionId to priorJob),
+            )
+
+            scope = ActionScope(
+                stateFlow = stateFlow,
+                localVariablesFlow = localVariablesFlow,
+                eventChannel = Channel(Channel.BUFFERED),
+            )
+
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                setEditionAsOwnedUseCase(edition = edition, owned = true)
+            } returns Result.success(Unit)
+
+            val action = OnEditionOwnedToggleAction(edition = edition)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            priorJob.isCancelled shouldBe true
+            localVariablesFlow.value.editionMutationJobs.containsKey(editionId) shouldBe true
+        }
+
+        @Test
+        fun `completes without throwing when use case fails`() = runTest {
+            // ----- Arrange -----
+            val edition = stubEdition(owned = true)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                setEditionAsOwnedUseCase(edition = edition, owned = false)
+            } returns Result.failure(RuntimeException("network error"))
+
+            val action = OnEditionOwnedToggleAction(edition = edition)
+
+            // ----- Act & Assert -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
         }
     }
 }

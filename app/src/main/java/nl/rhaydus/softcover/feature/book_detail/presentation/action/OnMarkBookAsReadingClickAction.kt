@@ -15,8 +15,18 @@ class OnMarkBookAsReadingClickAction(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        dependencies.markBookAsReadingUseCase(book = book).onFailure {
-            Timber.e("-=- $it")
+        scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
+
+        val job = dependencies.launch {
+            dependencies.markBookAsReadingUseCase(book = book).onFailure { error ->
+                Timber.e("-=- $error")
+
+                scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
+            }
+        }
+
+        scope.setLocalVariables {
+            it.copy(bookMutationJobs = it.bookMutationJobs + (book.id to job))
         }
     }
 }

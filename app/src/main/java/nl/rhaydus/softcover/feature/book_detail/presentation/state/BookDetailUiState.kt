@@ -30,6 +30,9 @@ data class BookDetailUiState(
     val reviews: List<BookReview> = emptyList(),
     val loadingReviews: Boolean = false,
     val revealedSpoilerReviewIds: Set<Int> = emptySet(),
+
+    val failedMutationBookIds: Set<Int> = emptySet(),
+    val failedMutationEditionIds: Set<Int> = emptySet(),
 ) : UiState {
     val filteredEditions: List<BookEdition>
         get() {
