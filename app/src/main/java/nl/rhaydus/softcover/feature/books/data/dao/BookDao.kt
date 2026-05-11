@@ -206,6 +206,9 @@ interface BookDao {
     """
     )
     suspend fun getOwnedListBookByEditionId(editionId: Int): ListBookFull?
+
+    @Query("SELECT id FROM book_lists WHERE slug = 'owned' LIMIT 1")
+    suspend fun getOwnedListId(): Int?
     // endregion
 
     // region Data insertions
@@ -430,6 +433,15 @@ interface BookDao {
 
     @Query("DELETE FROM list_books WHERE listId IN (:listIds)")
     suspend fun deleteListBooksByListIds(listIds: List<Int>)
+
+    @Query(
+        """
+        DELETE FROM list_books
+        WHERE editionId = :editionId
+          AND listId IN (SELECT id FROM book_lists WHERE slug = 'owned')
+        """
+    )
+    suspend fun deleteOwnedListBookByEditionId(editionId: Int)
 
     @Query("DELETE FROM book_lists WHERE id IN (:ids)")
     suspend fun deleteBookListsByIds(ids: List<Int>)

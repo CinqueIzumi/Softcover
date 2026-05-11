@@ -11,21 +11,8 @@ class SetEditionAsOwnedUseCase(
         owned: Boolean,
     ): Result<Unit> = runCatching {
         when (owned) {
-            true -> saveEditionAsOwned(edition = edition)
-            false -> removeEditionFromOwned(edition = edition)
+            true -> booksRepository.markEditionAsOwned(edition = edition)
+            false -> booksRepository.removeOwnedEdition(editionId = edition.id)
         }
-    }
-
-    private suspend fun removeEditionFromOwned(edition: BookEdition) {
-        val listBook = booksRepository.getListBookByEditionId(editionId = edition.id)
-
-        booksRepository.removeListBook(book = listBook)
-    }
-
-    private suspend fun saveEditionAsOwned(edition: BookEdition) {
-        // TODO: I feel like this should really be done within the repository, not the use case...
-        val listBook = booksRepository.markEditionAsOwned(edition = edition)
-
-        booksRepository.cacheListBook(book = listBook)
     }
 }

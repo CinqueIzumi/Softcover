@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 
@@ -52,13 +51,9 @@ interface BooksRepository {
         newEditionId: Int,
     ): Book
 
-    suspend fun markEditionAsOwned(edition: BookEdition): ListBook
+    suspend fun markEditionAsOwned(edition: BookEdition)
 
-    suspend fun getListBookByEditionId(editionId: Int): ListBook
-
-    suspend fun removeListBook(book: ListBook)
-
-    suspend fun cacheListBook(book: ListBook)
+    suspend fun removeOwnedEdition(editionId: Int)
 
     suspend fun persistEditionImage(
         editionId: Int,
