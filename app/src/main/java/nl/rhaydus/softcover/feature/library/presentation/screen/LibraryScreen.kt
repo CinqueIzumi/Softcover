@@ -684,7 +684,7 @@ object LibraryScreen : Screen {
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            items(visibleEditions) { edition ->
+            items(visibleEditions, key = { it.id }) { edition ->
                 LayoutEditionEntry(
                     edition = edition,
                     layout = state.gridLayout,
@@ -726,7 +726,7 @@ object LibraryScreen : Screen {
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            items(visibleBooks) { book ->
+            items(visibleBooks, key = { it.id }) { book ->
                 LayoutBookEntry(
                     book = book,
                     layout = state.gridLayout,

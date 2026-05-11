@@ -235,7 +235,7 @@ object ExploreScreen : Screen {
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        items(books) { book ->
+                        items(books, key = { it.id }) { book ->
                             TrendingCard(
                                 book = book,
                                 onClick = { onBookClick(book) },
@@ -320,7 +320,7 @@ object ExploreScreen : Screen {
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        items(books) { book ->
+                        items(books, key = { it.id }) { book ->
                             SeriesCard(
                                 book = book,
                                 onClick = { onBookClick(book) },
@@ -525,7 +525,7 @@ object ExploreScreen : Screen {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(queries) { query ->
+            items(queries, key = { it }) { query ->
                 FilterChip(
                     selected = false,
                     onClick = {
@@ -753,7 +753,7 @@ object ExploreScreen : Screen {
                     .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                items(state.queriedBooks) { book ->
+                items(state.queriedBooks, key = { it.id }) { book ->
                     SearchResultRow(
                         book = book,
                         onBookClick = onBookClick,

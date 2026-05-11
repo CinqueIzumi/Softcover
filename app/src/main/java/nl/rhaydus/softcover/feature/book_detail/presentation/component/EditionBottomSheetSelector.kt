@@ -159,7 +159,7 @@ private fun EditionBottomSheetContent(
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(editions) { edition ->
+                items(editions, key = { it.id }) { edition ->
                     EditionItem(
                         edition = edition,
                         selected = edition.id == selectedEdition.id,
