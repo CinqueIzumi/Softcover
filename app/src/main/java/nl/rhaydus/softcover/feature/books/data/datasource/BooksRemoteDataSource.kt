@@ -128,7 +128,10 @@ class BooksRemoteDataSourceImpl(
     }
 
     private suspend fun fetchBookByIdRaw(id: Int): Book {
-        val result = apolloClient.safeQuery(query = GetBookByIdQuery(id = id))
+        val result = apolloClient.safeQuery(
+            query = GetBookByIdQuery(id = id),
+            fetchPolicy = FetchPolicy.CacheFirst,
+        )
 
         return result
             .books
@@ -149,7 +152,10 @@ class BooksRemoteDataSourceImpl(
     }
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
-        val result = apolloClient.safeQuery(query = GetEditionsByBookIdQuery(bookId = bookId))
+        val result = apolloClient.safeQuery(
+            query = GetEditionsByBookIdQuery(bookId = bookId),
+            fetchPolicy = FetchPolicy.CacheFirst,
+        )
 
         return result.editions.mapNotNull { it.editionDetailFragment()?.toBookEdition() }
     }
