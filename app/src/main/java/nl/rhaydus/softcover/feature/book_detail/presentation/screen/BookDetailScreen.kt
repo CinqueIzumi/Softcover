@@ -290,7 +290,7 @@ class BookDetailScreen(
                     ) {
                         GeneralBookInfoSection(
                             edition = state.book?.currentEdition ?: state.initialCover?.currentEdition,
-                            isLoading = state.loadingBookDetails,
+                            isLoading = state.loadingBookDetails && state.book == null,
                             fallBackEdition = state.book?.defaultEdition ?: state.initialCover?.defaultEdition,
                             fallbackCoverUrl = state.book?.coverUrl ?: state.initialCover?.fallbackCoverUrl,
                             isExpired = state.deadlineProgress?.isExpired == true,
@@ -313,16 +313,24 @@ class BookDetailScreen(
                     )
                 }
 
-                item { Spacer(modifier = Modifier.height(20.dp)) }
+                val shelfPanelStatus = state.book?.status
+                val shelfPanelWillRender = shelfPanelStatus == BookStatus.Reading ||
+                    shelfPanelStatus == BookStatus.DidNotFinish
 
-                item {
-                    ShelfStatusPanel(
-                        state = state,
-                        runAction = runAction,
-                    )
+                if (shelfPanelWillRender) {
+                    item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                    item {
+                        ShelfStatusPanel(
+                            state = state,
+                            runAction = runAction,
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(28.dp)) }
+                } else {
+                    item { Spacer(modifier = Modifier.height(28.dp)) }
                 }
-
-                item { Spacer(modifier = Modifier.height(28.dp)) }
 
                 item { AboutSection(state = state) }
 
@@ -827,7 +835,7 @@ class BookDetailScreen(
         runAction: (BookDetailAction) -> Unit,
     ) {
         SkeletonCrossfade(
-            isLoading = state.loadingBookDetails,
+            isLoading = state.loadingBookDetails && state.book == null,
             label = "ShelfActionBar",
         ) { loading ->
             if (loading) {
@@ -1113,7 +1121,7 @@ class BookDetailScreen(
         runAction: (BookDetailAction) -> Unit,
     ) {
         SkeletonCrossfade(
-            isLoading = state.loadingBookDetails,
+            isLoading = state.loadingBookDetails && state.book == null,
             label = "ShelfStatusPanel",
         ) { loading ->
             if (loading) {
@@ -1445,7 +1453,7 @@ class BookDetailScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             SkeletonCrossfade(
-                isLoading = state.loadingBookDetails,
+                isLoading = state.loadingBookDetails && description.isBlank(),
                 label = "AboutSection",
             ) { loading ->
                 if (loading) {

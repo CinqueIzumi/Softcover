@@ -18,7 +18,7 @@ fun SoftcoverImage(
     contentScale: ContentScale = ContentScale.Fit,
 ) {
     SkeletonCrossfade(
-        isLoading = isLoading,
+        isLoading = isLoading && model == null,
         modifier = modifier,
         label = "SoftcoverImage",
     ) { loading ->

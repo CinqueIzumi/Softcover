@@ -182,13 +182,13 @@ object ExploreScreen : Screen {
 
             TrendingSection(
                 books = state.trendingBooks,
-                isLoading = state.loadingTrendingBooks,
+                isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
                 onBookClick = onBookClick,
             )
 
             ContinueSeriesSection(
                 books = state.continueSeriesBooks,
-                isLoading = state.loadingContinueSeriesBooks,
+                isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
