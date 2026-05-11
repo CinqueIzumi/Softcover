@@ -523,9 +523,8 @@ class BookDetailScreen(
                         defaultEdition = fallBackEdition,
                         fallbackCoverUrl = fallbackCoverUrl,
                         isLoading = coverIsLoading,
-                        modifier = Modifier
-                            .height(imageHeight * 0.8f)
-                            .clip(shape = RoundedCornerShape(16.dp)),
+                        modifier = Modifier.height(imageHeight * 0.8f),
+                        cornerRadius = 16.dp,
                         sharedTransitionKey = bookCoverTransitionKey(
                             editionId = edition?.id,
                             bookId = id,

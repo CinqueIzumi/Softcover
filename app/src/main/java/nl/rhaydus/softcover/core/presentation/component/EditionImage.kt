@@ -93,7 +93,9 @@ fun EditionImage(
 
     SkeletonCrossfade(
         isLoading = isLoading && request == null,
-        modifier = containerModifier.aspectRatio(2f / 3f),
+        modifier = containerModifier
+            .aspectRatio(2f / 3f)
+            .clip(shape),
         label = "EditionImage",
     ) { loading ->
         if (loading) {
