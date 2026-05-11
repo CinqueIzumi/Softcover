@@ -78,6 +78,7 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
+import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.bodyFontFamily
@@ -89,6 +90,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailSc
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
@@ -236,6 +238,7 @@ object ReadingScreen : Screen {
                     book = featured,
                     deadlineProgress = featured.deadlineProgressFrom(state),
                     dateStyle = state.dateStyle,
+                    mutationFailed = featured.id in state.failedMutationBookIds,
                     runAction = runAction,
                     onBookClick = onBookClick,
                 )
@@ -257,6 +260,7 @@ object ReadingScreen : Screen {
                         book = book,
                         deadlineProgress = book.deadlineProgressFrom(state),
                         dateStyle = state.dateStyle,
+                        mutationFailed = book.id in state.failedMutationBookIds,
                         runAction = runAction,
                         onBookClick = onBookClick,
                     )
@@ -315,6 +319,7 @@ object ReadingScreen : Screen {
         book: Book,
         deadlineProgress: DeadlineProgress?,
         dateStyle: DateStyle,
+        mutationFailed: Boolean,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
     ) {
@@ -332,7 +337,13 @@ object ReadingScreen : Screen {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .shakeOnError(
+                    trigger = mutationFailed,
+                    onShakeEnd = {
+                        runAction(OnClearMutationFailureAction(bookId = book.id))
+                    },
+                ),
             color = surfaceColor,
             shape = shape,
             onClick = { onBookClick(book) },
@@ -418,12 +429,20 @@ object ReadingScreen : Screen {
                         Spacer(modifier = Modifier.width(8.dp))
 
                         Text(
-                            text = "Up next".uppercase(),
+                            text = if (mutationFailed) {
+                                "Couldn't save — tap to retry".uppercase()
+                            } else {
+                                "Up next".uppercase()
+                            },
                             style = MaterialTheme.editorialTypography.eyebrow.copy(
                                 fontWeight = FontWeight.Bold,
                                 shadow = overlayShadow,
                             ),
-                            color = Color.White,
+                            color = if (mutationFailed) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                Color.White
+                            },
                         )
                     }
 
@@ -552,6 +571,7 @@ object ReadingScreen : Screen {
         book: Book,
         deadlineProgress: DeadlineProgress?,
         dateStyle: DateStyle,
+        mutationFailed: Boolean,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
     ) {
@@ -561,7 +581,13 @@ object ReadingScreen : Screen {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .shakeOnError(
+                    trigger = mutationFailed,
+                    onShakeEnd = {
+                        runAction(OnClearMutationFailureAction(bookId = book.id))
+                    },
+                ),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
             onClick = { onBookClick(book) },
@@ -589,16 +615,28 @@ object ReadingScreen : Screen {
                 Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    book.seriesText?.takeIf { it.isNotBlank() }?.let { series ->
+                    if (mutationFailed) {
                         Text(
-                            text = series.uppercase(),
+                            text = "Couldn't save — tap to retry".uppercase(),
                             style = MaterialTheme.editorialTypography.eyebrowSmall,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.error,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
 
                         Spacer(modifier = Modifier.height(2.dp))
+                    } else {
+                        book.seriesText?.takeIf { it.isNotBlank() }?.let { series ->
+                            Text(
+                                text = series.uppercase(),
+                                style = MaterialTheme.editorialTypography.eyebrowSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+
+                            Spacer(modifier = Modifier.height(2.dp))
+                        }
                     }
 
                     Text(

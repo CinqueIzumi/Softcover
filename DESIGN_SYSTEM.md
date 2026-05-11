@@ -86,6 +86,7 @@ Sections always breathe. Two adjacent eyebrow/headline pairs without a generous 
 - Progress is shown with the wavy progress indicator — flat bars are reserved for chrome (top-bar scrim) and never carry semantic progress.
 - Numeric progress animates between values rather than snapping.
 - Sheets enter and dismiss from the bottom; overlays cross-fade.
+- **Mutation-rejection shake.** When an optimistic mutation rolls back, the affected card/row plays a single horizontal shake: 6dp amplitude, 80ms each half-period, 3 cycles, returning to centre. The card's eyebrow slot also swaps to the error role with a "Couldn't save — tap to retry" label for the duration of the failed state. Use the shared `Modifier.shakeOnError` for this — never hand-roll the animation.
 
 ### 2.6 Iconography
 

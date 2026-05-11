@@ -84,6 +84,7 @@ import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.presentation.modifier.grayscale
+import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -98,6 +99,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAc
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
@@ -264,19 +266,37 @@ class BookDetailScreen(
                 state = lazyListState,
             ) {
                 item {
-                    GeneralBookInfoSection(
-                        edition = state.book?.currentEdition,
-                        isLoading = state.loadingBookDetails,
-                        fallBackEdition = state.book?.defaultEdition,
-                        fallbackCoverUrl = state.book?.coverUrl,
-                        isExpired = state.deadlineProgress?.isExpired == true,
-                        rating = state.book?.rating,
-                        title = state.book?.title,
-                        seriesText = state.book?.seriesText,
-                        releaseYear = state.book?.currentEdition?.releaseYear.takeIf { it != -1 }
-                            ?: state.book?.releaseYear,
-                        onCoverClick = onCoverClick,
-                    )
+                    val currentEditionId = state.book?.currentEdition?.id
+
+                    val editionMutationFailed =
+                        currentEditionId != null && currentEditionId in state.failedMutationEditionIds
+
+                    Box(
+                        modifier = Modifier.shakeOnError(
+                            trigger = editionMutationFailed,
+                            onShakeEnd = {
+                                if (currentEditionId != null) {
+                                    runAction(
+                                        OnClearMutationFailureAction(editionId = currentEditionId)
+                                    )
+                                }
+                            },
+                        ),
+                    ) {
+                        GeneralBookInfoSection(
+                            edition = state.book?.currentEdition,
+                            isLoading = state.loadingBookDetails,
+                            fallBackEdition = state.book?.defaultEdition,
+                            fallbackCoverUrl = state.book?.coverUrl,
+                            isExpired = state.deadlineProgress?.isExpired == true,
+                            rating = state.book?.rating,
+                            title = state.book?.title,
+                            seriesText = state.book?.seriesText,
+                            releaseYear = state.book?.currentEdition?.releaseYear.takeIf { it != -1 }
+                                ?: state.book?.releaseYear,
+                            onCoverClick = onCoverClick,
+                        )
+                    }
                 }
 
                 item { Spacer(modifier = Modifier.height(20.dp)) }
@@ -818,17 +838,33 @@ class BookDetailScreen(
         val book = state.book ?: return
         val status = book.status
 
+        val mutationFailed = book.id in state.failedMutationBookIds
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
         ) {
-            SectionLabel(text = "Your shelf")
+            if (mutationFailed) {
+                SectionLabel(
+                    text = "Couldn't save — tap to retry",
+                    color = MaterialTheme.colorScheme.error,
+                )
+            } else {
+                SectionLabel(text = "Your shelf")
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shakeOnError(
+                        trigger = mutationFailed,
+                        onShakeEnd = {
+                            runAction(OnClearMutationFailureAction(bookId = book.id))
+                        },
+                    ),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 ShelfChip(
@@ -1628,14 +1664,17 @@ class BookDetailScreen(
     // region Section Label
 
     @Composable
-    private fun SectionLabel(text: String) {
+    private fun SectionLabel(
+        text: String,
+        color: Color = MaterialTheme.colorScheme.primary,
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .height(4.dp)
                     .width(32.dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.primary),
+                    .background(color),
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -1643,7 +1682,7 @@ class BookDetailScreen(
             Text(
                 text = text.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrow,
-                color = MaterialTheme.colorScheme.primary,
+                color = color,
             )
         }
     }
