@@ -12,10 +12,7 @@ class UpdateBookProgress(
         book: Book,
         newPage: Int? = null,
         newSeconds: Int? = null,
-        setLoading: (Boolean) -> Unit = {},
     ): Result<Unit> {
-        setLoading(true)
-
         val edition = book.currentEdition
         val finished = when {
             edition == null -> false
@@ -24,7 +21,7 @@ class UpdateBookProgress(
             else -> false
         }
 
-        val result = if (finished) {
+        return if (finished) {
             markBookAsReadUseCase(book = book)
         } else {
             updateBookProgressUseCase(
@@ -33,9 +30,5 @@ class UpdateBookProgress(
                 newSeconds = newSeconds,
             )
         }
-
-        setLoading(false)
-
-        return result
     }
 }

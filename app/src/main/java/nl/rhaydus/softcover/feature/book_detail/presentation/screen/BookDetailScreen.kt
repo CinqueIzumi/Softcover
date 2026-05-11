@@ -1011,7 +1011,6 @@ class BookDetailScreen(
                                     contentDescription = null,
                                 )
                             },
-                            enabled = state.settingEditionOwned.not(),
                             onClick = {
                                 dismiss()
                                 runAction(OnEditionOwnedToggleAction(edition = currentEdition))

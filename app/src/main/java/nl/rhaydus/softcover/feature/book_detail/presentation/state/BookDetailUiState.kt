@@ -21,8 +21,6 @@ data class BookDetailUiState(
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
-    val settingEditionOwned: Boolean = false,
-
     val deadline: BookDeadline? = null,
     val deadlineProgress: DeadlineProgress? = null,
     val showDeadlinePicker: Boolean = false,

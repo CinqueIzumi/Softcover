@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -118,7 +117,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe true
-            coVerify(exactly = 0) { updateBookProgress(any(), any(), any(), any()) }
+            coVerify(exactly = 0) { updateBookProgress(any(), any(), any()) }
         }
 
         @Test
@@ -136,7 +135,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 100, setLoading = any())
+                updateBookProgress(book = book, newPage = 100)
             }
         }
 
@@ -155,7 +154,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 100, setLoading = any())
+                updateBookProgress(book = book, newPage = 100)
             }
         }
 
@@ -173,7 +172,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0, setLoading = any())
+                updateBookProgress(book = book, newPage = 0)
             }
         }
 
@@ -191,7 +190,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0, setLoading = any())
+                updateBookProgress(book = book, newPage = 0)
             }
         }
 
@@ -209,7 +208,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0, setLoading = any())
+                updateBookProgress(book = book, newPage = 0)
             }
         }
 
@@ -228,25 +227,8 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 33, setLoading = any())
+                updateBookProgress(book = book, newPage = 33)
             }
-        }
-
-        @Test
-        fun `passes a setLoading lambda that toggles loadingBookDetails state`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(currentEditionPages = 100)
-            stateFlow.value = BookDetailUiState(book = book, loadingBookDetails = false)
-            dependencies = stubDependencies(this)
-
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
-
-            // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
-
-            // ----- Assert -----
-            // After UpdateBookProgress completes (relaxed mock), loadingBookDetails stays false
-            stateFlow.value.loadingBookDetails shouldBe false
         }
 
         @Test
@@ -263,7 +245,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0, newSeconds = null, setLoading = any())
+                updateBookProgress(book = book, newPage = 0, newSeconds = null)
             }
         }
 
@@ -281,37 +263,8 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 200, newSeconds = null, setLoading = any())
+                updateBookProgress(book = book, newPage = 200, newSeconds = null)
             }
-        }
-
-        @Test
-        fun `setLoading lambda passed to updateBookProgress sets loadingBookDetails true then false`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(currentEditionPages = 100)
-            stateFlow.value = BookDetailUiState(book = book, loadingBookDetails = false)
-            dependencies = stubDependencies(this)
-
-            val loadingStates = mutableListOf<Boolean>()
-
-            coEvery {
-                updateBookProgress(book = book, newPage = 50, newSeconds = null, setLoading = any())
-            } coAnswers {
-                val setLoading = arg<(Boolean) -> Unit>(3)
-                setLoading(true)
-                loadingStates.add(stateFlow.value.loadingBookDetails)
-                setLoading(false)
-                loadingStates.add(stateFlow.value.loadingBookDetails)
-                Result.success(Unit)
-            }
-
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
-
-            // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
-
-            // ----- Assert -----
-            loadingStates shouldBe listOf(true, false)
         }
 
         @Test
@@ -328,7 +281,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 1800, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 1800)
             }
         }
 
@@ -346,7 +299,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = null, newSeconds = 900, setLoading = any())
+                updateBookProgress(book = book, newPage = null, newSeconds = 900)
             }
         }
 
@@ -364,7 +317,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 3600)
             }
         }
 
@@ -382,7 +335,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 0, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 0)
             }
         }
 
@@ -400,7 +353,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 0, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 0)
             }
         }
 
