@@ -10,8 +10,10 @@ val LocalSharedTransitionScope = compositionLocalOf<SharedTransitionScope?> { nu
 
 val LocalNavAnimatedVisibilityScope = compositionLocalOf<AnimatedVisibilityScope?> { null }
 
+// Prefer bookId so the key stays stable across a navigation when the destination
+// resolves a different currentEdition than the source row was using.
 fun bookCoverTransitionKey(editionId: Int?, bookId: Int?): String? = when {
-    editionId != null -> "book-cover-edition-$editionId"
     bookId != null -> "book-cover-book-$bookId"
+    editionId != null -> "book-cover-edition-$editionId"
     else -> null
 }
