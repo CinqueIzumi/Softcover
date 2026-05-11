@@ -15,4 +15,6 @@ data class ReadingScreenUiState(
 
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+
+    val failedMutationBookIds: Set<Int> = emptySet(),
 ) : UiState

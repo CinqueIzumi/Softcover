@@ -35,6 +35,7 @@ class UpdateBookProgressTest {
             every { e.pages } returns pages
             every { e.audioSeconds } returns null
         }
+
         every { book.currentEdition } returns edition
     }
 
@@ -43,6 +44,7 @@ class UpdateBookProgressTest {
             val edition = mockk<BookEdition>().also { e ->
                 every { e.audioSeconds } returns audioSeconds
             }
+
             every { book.currentEdition } returns edition
         }
 
@@ -494,6 +496,88 @@ class UpdateBookProgressTest {
 
             // ----- Assert -----
             loadingStates.last() shouldBe false
+        }
+
+        @Test
+        fun `returns success when updateBookProgressUseCase succeeds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionPages(pages = 200)
+
+            coEvery {
+                updateBookProgressUseCase(book = book, newPage = 50)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = updateBookProgress(
+                book = book,
+                newPage = 50,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+        }
+
+        @Test
+        fun `returns failure when updateBookProgressUseCase fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionPages(pages = 200)
+            val error = RuntimeException("network error")
+
+            coEvery {
+                updateBookProgressUseCase(book = book, newPage = 50)
+            } returns Result.failure(error)
+
+            // ----- Act -----
+            val result = updateBookProgress(
+                book = book,
+                newPage = 50,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+        }
+
+        @Test
+        fun `returns success when markBookAsReadUseCase succeeds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionPages(pages = 300)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = updateBookProgress(
+                book = book,
+                newPage = 300,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+        }
+
+        @Test
+        fun `returns failure when markBookAsReadUseCase fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionPages(pages = 300)
+            val error = RuntimeException("api error")
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.failure(error)
+
+            // ----- Act -----
+            val result = updateBookProgress(
+                book = book,
+                newPage = 300,
+                setLoading = {},
+            )
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
         }
     }
 }

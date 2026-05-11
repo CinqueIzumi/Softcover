@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEven
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import timber.log.Timber
 
 data class OnUpdateTimeProgressClickAction(
     val hours: String,
@@ -25,16 +26,23 @@ data class OnUpdateTimeProgressClickAction(
         val total = bookToUpdate.currentEdition?.audioSeconds ?: 0
         val newSeconds = (h * 3600 + m * 60 + s).coerceIn(0, total)
 
-        dependencies.launch {
+        scope.currentLocalVariables.bookMutationJobs[bookToUpdate.id]?.cancel()
+
+        val job = dependencies.launch {
             dependencies.updateBookProgress(
                 book = bookToUpdate,
                 newSeconds = newSeconds,
-                setLoading = { newValue ->
-                    scope.setState {
-                        it.copy(isLoading = newValue)
-                    }
+            ).onFailure { error ->
+                Timber.e("-=- $error")
+
+                scope.setState {
+                    it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)
                 }
-            )
+            }
+        }
+
+        scope.setLocalVariables {
+            it.copy(bookMutationJobs = it.bookMutationJobs + (bookToUpdate.id to job))
         }
 
         scope.setState {

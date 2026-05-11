@@ -302,6 +302,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 loadingStates.add(stateFlow.value.loadingBookDetails)
                 setLoading(false)
                 loadingStates.add(stateFlow.value.loadingBookDetails)
+                Result.success(Unit)
             }
 
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")

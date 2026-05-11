@@ -244,6 +244,7 @@ class OnUpdatePageProgressClickActionTest {
                 loadingStates.add(stateFlow.value.loadingBookDetails)
                 setLoading(false)
                 loadingStates.add(stateFlow.value.loadingBookDetails)
+                Result.success(Unit)
             }
 
             val action = OnUpdatePageProgressClickAction(newPage = "100")
