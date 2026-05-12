@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.domain.model
 
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import java.time.LocalDate
 
 data class Book(
     val id: Int,
@@ -11,6 +12,7 @@ data class Book(
     val rating: Double,
     val description: String,
     val releaseYear: Int,
+    val releaseDate: LocalDate? = null,
     val coverUrl: String,
     val authors: List<Author>,
     val usersCount: Int,
@@ -24,6 +26,12 @@ data class Book(
 ) {
     val status: BookStatus
         get() = userBook?.status ?: BookStatus.None
+
+    val effectiveReleaseDate: LocalDate?
+        get() = currentEdition?.releaseDate ?: defaultEdition?.releaseDate ?: releaseDate
+
+    val isUnreleased: Boolean
+        get() = effectiveReleaseDate?.isAfter(LocalDate.now()) == true
 
     val currentEdition: BookEdition?
         get() {

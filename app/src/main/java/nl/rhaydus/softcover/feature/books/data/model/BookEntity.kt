@@ -13,6 +13,7 @@ data class BookEntity(
     val rating: Double,
     val description: String,
     val releaseYear: Int,
+    val releaseDate: String?,
     val coverUrl: String,
     val usersCount: Int,
     val ratingsCount: Int,

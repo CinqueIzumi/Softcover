@@ -272,6 +272,7 @@ class BooksRemoteDataSourceImpl(
         rating = canonical.rating,
         description = canonical.description,
         releaseYear = canonical.releaseYear,
+        releaseDate = canonical.releaseDate,
         coverUrl = canonical.coverUrl,
         authors = canonical.authors,
         usersCount = canonical.usersCount,

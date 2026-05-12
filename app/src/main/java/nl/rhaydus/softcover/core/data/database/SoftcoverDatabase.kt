@@ -48,7 +48,7 @@ import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesEn
     views = [
         BookEditionView::class
     ],
-    version = 23,
+    version = 24,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -87,6 +87,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_20_21)
                 .addMigrations(MIGRATION_21_22)
                 .addMigrations(MIGRATION_22_23)
+                .addMigrations(MIGRATION_23_24)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -712,6 +713,36 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         CREATE TABLE IF NOT EXISTS dismissed_continue_series (
                             seriesId INTEGER NOT NULL PRIMARY KEY
                         )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_23_24 = object : Migration(23, 24) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE books ADD COLUMN releaseDate TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE book_editions ADD COLUMN releaseDate TEXT DEFAULT NULL")
+
+                db.execSQL("DROP VIEW IF EXISTS book_edition_view")
+                db.execSQL(
+                    """
+                        CREATE VIEW `book_edition_view` AS SELECT
+                                edition.*,
+                                EXISTS(
+                                    SELECT 1
+                                    FROM list_books lb
+                                    JOIN book_lists bl ON bl.id = lb.listId
+                                    WHERE bl.slug = 'owned'
+                                    AND (
+                                        lb.editionId = edition.id
+                                        OR lb.editionId = edition.canonicalId
+                                        OR lb.editionId IN (
+                                            SELECT sub.id FROM book_editions sub
+                                            WHERE sub.canonicalId = edition.id
+                                        )
+                                    )
+                                ) AS isOwned
+                            FROM book_editions edition
                     """.trimIndent()
                 )
             }

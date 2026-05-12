@@ -89,6 +89,8 @@ import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
+import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.presentation.modifier.grayscale
@@ -311,6 +313,7 @@ class BookDetailScreen(
                             seriesText = state.book?.seriesText,
                             releaseYear = state.book?.currentEdition?.releaseYear.takeIf { it != -1 }
                                 ?: state.book?.releaseYear,
+                            unreleasedDate = state.book?.takeIf { it.isUnreleased }?.effectiveReleaseDate,
                             onCoverClick = onCoverClick,
                         )
                     }
@@ -465,6 +468,7 @@ class BookDetailScreen(
         seriesText: String?,
         rating: Double?,
         releaseYear: Int?,
+        unreleasedDate: LocalDate?,
         isLoading: Boolean,
         fallbackCoverUrl: String?,
         isExpired: Boolean,
@@ -674,7 +678,7 @@ class BookDetailScreen(
                             Spacer(modifier = Modifier.height(4.dp))
 
                             val authorName = edition?.authorString.orEmpty()
-                            val showReleased = releaseYear != null && releaseYear > 0
+                            val showReleased = releaseYear != null && releaseYear > 0 && unreleasedDate == null
                             val bylineText = buildString {
                                 append("By ")
                                 append(authorName)
@@ -692,6 +696,15 @@ class BookDetailScreen(
                                     shadow = secondaryShadow,
                                 ),
                             )
+
+                            if (unreleasedDate != null) {
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                UnreleasedBadge(
+                                    releaseDate = unreleasedDate,
+                                    style = UnreleasedBadgeStyle.Prominent,
+                                )
+                            }
 
                             val isAudiobook = edition?.isAudiobook == true
 

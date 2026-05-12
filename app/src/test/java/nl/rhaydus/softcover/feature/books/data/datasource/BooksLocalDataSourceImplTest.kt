@@ -56,6 +56,7 @@ class BooksLocalDataSourceImplTest {
         rating = 4.0,
         description = "Description",
         releaseYear = 2020,
+        releaseDate = null,
         coverUrl = "https://example.com/cover.jpg",
         usersCount = 100,
         ratingsCount = 0,
@@ -76,6 +77,7 @@ class BooksLocalDataSourceImplTest {
         pages = null,
         audioSeconds = null,
         releaseYear = 2020,
+        releaseDate = null,
         format = "Paperback",
     )
 

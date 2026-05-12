@@ -44,7 +44,21 @@ import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Com
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read.Companion.userBookReadFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 import kotlin.math.roundToInt
+
+private fun String?.toLocalDateOrNull(): LocalDate? {
+    val raw = this?.trim().orEmpty()
+
+    if (raw.isEmpty()) return null
+
+    return try {
+        LocalDate.parse(raw)
+    } catch (_: DateTimeParseException) {
+        null
+    }
+}
 
 // region DTO -> UI mappers
 fun EditionFragment.toBookEdition(
@@ -61,6 +75,7 @@ fun EditionFragment.toBookEdition(
     authors = authors,
     isbn10 = isbn_10,
     releaseYear = release_year ?: -1,
+    releaseDate = release_date.toLocalDateOrNull(),
     format = edition_format ?: "",
     bookId = book_id,
     owned = false,
@@ -222,6 +237,7 @@ fun UserBookFragment.toBook(): Book? {
         rating = listFragment.roundedRating(),
         description = listFragment.description ?: "",
         releaseYear = listFragment.release_year ?: -1,
+        releaseDate = listFragment.release_date.toLocalDateOrNull(),
         coverUrl = listFragment.image?.url ?: "",
         authors = bookAuthors,
         usersCount = listFragment.users_count ?: 0,
@@ -253,6 +269,7 @@ fun BookDetailFragment.toBook(): Book? {
         rating = listFragment.roundedRating(),
         description = description ?: "",
         releaseYear = listFragment.release_year ?: -1,
+        releaseDate = listFragment.release_date.toLocalDateOrNull(),
         coverUrl = listFragment.image?.url ?: "",
         authors = bookAuthors,
         usersCount = users_count,
@@ -303,6 +320,7 @@ fun Book.toEntity(): BookEntity = BookEntity(
     rating = rating,
     description = description,
     releaseYear = releaseYear,
+    releaseDate = releaseDate?.toString(),
     coverUrl = coverUrl,
     defaultEditionId = defaultEdition?.id,
     usersCount = usersCount,
@@ -356,6 +374,7 @@ fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     pages = pages,
     audioSeconds = audioSeconds,
     releaseYear = releaseYear,
+    releaseDate = releaseDate?.toString(),
     format = format,
 )
 
@@ -394,6 +413,7 @@ fun BookEditionEntity.toModel(
     pages = pages,
     audioSeconds = audioSeconds,
     releaseYear = releaseYear,
+    releaseDate = releaseDate.toLocalDateOrNull(),
     authors = authors.map { it.toModel() },
     format = format,
     bookId = bookId,
@@ -481,6 +501,7 @@ fun BookFullEntity.toModel(): Book {
         rating = book.rating,
         description = book.description,
         releaseYear = book.releaseYear,
+        releaseDate = book.releaseDate.toLocalDateOrNull(),
         coverUrl = book.coverUrl,
         authors = bookAuthors.map { it.toModel() },
         usersCount = book.usersCount,

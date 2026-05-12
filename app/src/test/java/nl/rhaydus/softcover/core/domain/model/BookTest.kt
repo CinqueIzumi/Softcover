@@ -7,6 +7,7 @@ import io.mockk.mockk
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class BookTest {
 
@@ -15,6 +16,7 @@ class BookTest {
     private fun buildEdition(
         id: Int,
         owned: Boolean = false,
+        releaseDate: LocalDate? = null,
     ): BookEdition = BookEdition(
         id = id,
         canonicalId = null,
@@ -28,6 +30,7 @@ class BookTest {
         audioSeconds = null,
         authors = emptyList(),
         releaseYear = 2020,
+        releaseDate = releaseDate,
         format = "paperback",
         owned = owned,
     )
@@ -36,6 +39,7 @@ class BookTest {
         editions: List<BookEdition>,
         defaultEdition: BookEdition? = null,
         userBook: UserBook? = null,
+        releaseDate: LocalDate? = null,
     ): Book = Book(
         id = 1,
         canonicalId = null,
@@ -45,6 +49,7 @@ class BookTest {
         rating = 4.0,
         description = "",
         releaseYear = 2020,
+        releaseDate = releaseDate,
         coverUrl = "",
         authors = emptyList(),
         usersCount = 0,
@@ -439,6 +444,150 @@ class BookTest {
 
             // ----- Assert -----
             result shouldBe "1-3"
+        }
+    }
+
+    // ----- effectiveReleaseDate / isUnreleased -----
+
+    @Nested
+    inner class ReleaseInfo {
+
+        @Test
+        fun `effectiveReleaseDate prefers currentEdition release date when present`() {
+            // ----- Arrange -----
+            val editionDate = LocalDate.of(2025, 1, 1)
+            val defaultDate = LocalDate.of(2020, 6, 1)
+            val bookDate = LocalDate.of(2015, 3, 15)
+
+            val currentEdition = buildEdition(id = 10, owned = true, releaseDate = editionDate)
+            val defaultEdition = buildEdition(id = 20, releaseDate = defaultDate)
+            val book = buildBook(
+                editions = listOf(currentEdition),
+                defaultEdition = defaultEdition,
+                releaseDate = bookDate,
+            )
+
+            // ----- Act -----
+            val result = book.effectiveReleaseDate
+
+            // ----- Assert -----
+            result shouldBe editionDate
+        }
+
+        @Test
+        fun `effectiveReleaseDate falls back to defaultEdition release date when currentEdition has none`() {
+            // ----- Arrange -----
+            val defaultDate = LocalDate.of(2020, 6, 1)
+            val bookDate = LocalDate.of(2015, 3, 15)
+
+            val currentEdition = buildEdition(id = 10, owned = true, releaseDate = null)
+            val defaultEdition = buildEdition(id = 20, releaseDate = defaultDate)
+            val book = buildBook(
+                editions = listOf(currentEdition),
+                defaultEdition = defaultEdition,
+                releaseDate = bookDate,
+            )
+
+            // ----- Act -----
+            val result = book.effectiveReleaseDate
+
+            // ----- Assert -----
+            result shouldBe defaultDate
+        }
+
+        @Test
+        fun `effectiveReleaseDate falls back to book releaseDate when neither edition supplies one`() {
+            // ----- Arrange -----
+            val bookDate = LocalDate.of(2015, 3, 15)
+
+            val currentEdition = buildEdition(id = 10, owned = true, releaseDate = null)
+            val defaultEdition = buildEdition(id = 20, releaseDate = null)
+            val book = buildBook(
+                editions = listOf(currentEdition),
+                defaultEdition = defaultEdition,
+                releaseDate = bookDate,
+            )
+
+            // ----- Act -----
+            val result = book.effectiveReleaseDate
+
+            // ----- Assert -----
+            result shouldBe bookDate
+        }
+
+        @Test
+        fun `effectiveReleaseDate is null when no source supplies one`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 10, releaseDate = null)),
+                releaseDate = null,
+            )
+
+            // ----- Act -----
+            val result = book.effectiveReleaseDate
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `isUnreleased is true for a future effectiveReleaseDate`() {
+            // ----- Arrange -----
+            val futureDate = LocalDate.now().plusDays(7)
+
+            val edition = buildEdition(id = 10, releaseDate = futureDate)
+            val book = buildBook(editions = listOf(edition))
+
+            // ----- Act -----
+            val result = book.isUnreleased
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `isUnreleased is false for today's effectiveReleaseDate`() {
+            // ----- Arrange -----
+            val today = LocalDate.now()
+
+            val edition = buildEdition(id = 10, releaseDate = today)
+            val book = buildBook(editions = listOf(edition))
+
+            // ----- Act -----
+            val result = book.isUnreleased
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `isUnreleased is false for a past effectiveReleaseDate`() {
+            // ----- Arrange -----
+            val pastDate = LocalDate.of(2020, 1, 1)
+
+            val edition = buildEdition(id = 10, releaseDate = pastDate)
+            val book = buildBook(editions = listOf(edition))
+
+            // ----- Act -----
+            val result = book.isUnreleased
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `isUnreleased is false when effectiveReleaseDate is null`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 10, releaseDate = null)),
+                releaseDate = null,
+            )
+
+            // ----- Act -----
+            val result = book.isUnreleased
+
+            // ----- Assert -----
+            result shouldBe false
         }
     }
 }

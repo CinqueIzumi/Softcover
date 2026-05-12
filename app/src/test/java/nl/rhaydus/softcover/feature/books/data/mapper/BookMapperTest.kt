@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import nl.rhaydus.softcover.core.domain.model.Author
+import java.time.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -80,6 +81,7 @@ class BookMapperTest {
         audioSeconds: Int? = null,
         authors: List<Author> = emptyList(),
         releaseYear: Int = 2020,
+        releaseDate: LocalDate? = null,
         format: String = "Paperback",
         owned: Boolean = false,
     ): BookEdition = mockk {
@@ -130,6 +132,10 @@ class BookMapperTest {
         every {
             this@mockk.releaseYear
         } returns releaseYear
+
+        every {
+            this@mockk.releaseDate
+        } returns releaseDate
 
         every {
             this@mockk.format
@@ -341,6 +347,7 @@ class BookMapperTest {
         rating: Double = 4.2,
         description: String = "A great book.",
         releaseYear: Int = 2019,
+        releaseDate: LocalDate? = null,
         coverUrl: String = "https://example.com/book.jpg",
         authors: List<Author> = emptyList(),
         usersCount: Int = 100,
@@ -378,6 +385,10 @@ class BookMapperTest {
         every {
             this@mockk.releaseYear
         } returns releaseYear
+
+        every {
+            this@mockk.releaseDate
+        } returns releaseDate
 
         every {
             this@mockk.coverUrl
@@ -437,6 +448,7 @@ class BookMapperTest {
         pages: Int? = 300,
         audioSeconds: Int? = null,
         releaseYear: Int = 2020,
+        releaseDate: String? = null,
         format: String = "Paperback",
     ): BookEditionEntity = BookEditionEntity(
         id = id,
@@ -450,6 +462,7 @@ class BookMapperTest {
         pages = pages,
         audioSeconds = audioSeconds,
         releaseYear = releaseYear,
+        releaseDate = releaseDate,
         format = format,
     )
 
@@ -476,6 +489,7 @@ class BookMapperTest {
         rating: Double = 4.2,
         description: String = "A great book.",
         releaseYear: Int = 2019,
+        releaseDate: String? = null,
         coverUrl: String = "https://example.com/book.jpg",
         usersCount: Int = 100,
         ratingsCount: Int = 0,
@@ -489,6 +503,7 @@ class BookMapperTest {
         rating = rating,
         description = description,
         releaseYear = releaseYear,
+        releaseDate = releaseDate,
         coverUrl = coverUrl,
         usersCount = usersCount,
         ratingsCount = ratingsCount,
@@ -2472,6 +2487,7 @@ class BookMapperTest {
                 every { this@mockk.publisher } returns publisher
                 every { this@mockk.image } returns image
                 every { release_year } returns 2020
+                every { release_date } returns null
                 every { edition_format } returns "Paperback"
                 every { audio_seconds } returns null
             }
@@ -2508,6 +2524,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2535,6 +2552,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2563,6 +2581,7 @@ class BookMapperTest {
                 every { publisher } returns null
                 every { this@mockk.image } returns image
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2592,6 +2611,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns listOf(fallback)
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2617,6 +2637,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2646,6 +2667,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns listOf(fallback)
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2671,6 +2693,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2696,6 +2719,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2721,6 +2745,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2746,6 +2771,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2771,6 +2797,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2796,6 +2823,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns 3600
             }
@@ -2821,6 +2849,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -2830,6 +2859,84 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.audioSeconds shouldBe null
+        }
+
+        @Test
+        fun `release_date in EditionFragment is parsed into BookEdition releaseDate`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { release_date } returns "2026-05-05"
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.releaseDate shouldBe LocalDate.of(2026, 5, 5)
+        }
+
+        @Test
+        fun `null release_date maps to null releaseDate`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { release_date } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.releaseDate shouldBe null
+        }
+
+        @Test
+        fun `malformed release_date maps to null releaseDate`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { release_date } returns "not-a-date"
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.releaseDate shouldBe null
         }
     }
 
@@ -2859,6 +2966,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns 1945
+                every { release_date } returns null
                 every { edition_format } returns "Hardcover"
                 every { audio_seconds } returns null
                 every { contributions } returns listOf(contribution)
@@ -2891,6 +2999,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
                 every { contributions } returns listOf(contribution)
@@ -2917,6 +3026,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
                 every { contributions } returns emptyList()
@@ -2943,6 +3053,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns 1949
+                every { release_date } returns null
                 every { edition_format } returns "Paperback"
                 every { audio_seconds } returns null
                 every { contributions } returns emptyList()
@@ -2975,6 +3086,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns 7200
                 every { contributions } returns emptyList()
@@ -3001,6 +3113,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -3161,6 +3274,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3193,6 +3307,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -3204,6 +3319,7 @@ class BookMapperTest {
                 every { rating } returns 4.0
                 every { image } returns null
                 every { release_year } returns 2020
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3275,6 +3391,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -3286,6 +3403,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3351,6 +3469,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -3362,6 +3481,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3431,6 +3551,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -3442,6 +3563,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3511,6 +3633,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -3522,6 +3645,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3590,6 +3714,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -3601,6 +3726,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3669,6 +3795,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -3679,6 +3806,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3907,6 +4035,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3939,6 +4068,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns 2021
+                every { release_date } returns null
                 every { edition_format } returns "Hardcover"
                 every { audio_seconds } returns null
             }
@@ -3950,6 +4080,7 @@ class BookMapperTest {
                 every { rating } returns 4.5
                 every { image } returns null
                 every { release_year } returns 2021
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -3997,6 +4128,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -4008,6 +4140,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -4051,6 +4184,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -4062,6 +4196,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -4105,6 +4240,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -4116,6 +4252,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -4158,6 +4295,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -4169,6 +4307,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -4209,6 +4348,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -4220,6 +4360,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
@@ -4340,6 +4481,7 @@ class BookMapperTest {
                 every { image } returns null
                 every { fallbackImages } returns emptyList()
                 every { release_year } returns null
+                every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
             }
@@ -4353,6 +4495,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { image } returns null
                 every { release_year } returns null
+                every { release_date } returns null
                 every { book_series } returns seriesList
                 every { compilation } returns false
                 every { contributions } returns emptyList()

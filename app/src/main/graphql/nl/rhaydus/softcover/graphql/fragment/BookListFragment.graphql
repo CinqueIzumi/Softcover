@@ -10,6 +10,7 @@ fragment BookListFragment on books {
         url
     }
     release_year
+    release_date
     users_count
     ratings_count
     compilation

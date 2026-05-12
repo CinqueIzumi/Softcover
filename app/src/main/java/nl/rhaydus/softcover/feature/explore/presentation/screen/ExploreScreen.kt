@@ -66,6 +66,7 @@ import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimated
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
+import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
@@ -598,20 +599,33 @@ object ExploreScreen : Screen {
                 .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            EditionImage(
-                edition = book.currentEdition,
-                defaultEdition = book.defaultEdition,
-                isLoading = false,
-                fallbackCoverUrl = book.coverUrl,
-                modifier = Modifier.fillMaxWidth(),
-                elevation = 6.dp,
-                cornerRadius = 6.dp,
-                sharedTransitionKey = bookCoverTransitionKey(
-                    editionId = book.currentEdition?.id,
-                    bookId = book.id,
-                    surface = SURFACE_TRENDING,
-                ),
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                EditionImage(
+                    edition = book.currentEdition,
+                    defaultEdition = book.defaultEdition,
+                    isLoading = false,
+                    fallbackCoverUrl = book.coverUrl,
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = 6.dp,
+                    cornerRadius = 6.dp,
+                    sharedTransitionKey = bookCoverTransitionKey(
+                        editionId = book.currentEdition?.id,
+                        bookId = book.id,
+                        surface = SURFACE_TRENDING,
+                    ),
+                )
+
+                if (book.isUnreleased) {
+                    book.effectiveReleaseDate?.let { date ->
+                        UnreleasedBadge(
+                            releaseDate = date,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(all = 6.dp),
+                        )
+                    }
+                }
+            }
 
             Text(
                 text = book.title,
@@ -702,6 +716,17 @@ object ExploreScreen : Screen {
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(14.dp),
                     )
+                }
+
+                if (book.isUnreleased) {
+                    book.effectiveReleaseDate?.let { date ->
+                        UnreleasedBadge(
+                            releaseDate = date,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(all = 6.dp),
+                        )
+                    }
                 }
             }
 

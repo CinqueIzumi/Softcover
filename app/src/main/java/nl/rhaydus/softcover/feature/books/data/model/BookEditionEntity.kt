@@ -18,5 +18,6 @@ data class BookEditionEntity(
     val pages: Int?,
     val audioSeconds: Int?,
     val releaseYear: Int,
+    val releaseDate: String?,
     val format: String,
 )
