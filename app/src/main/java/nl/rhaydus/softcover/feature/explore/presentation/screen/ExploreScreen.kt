@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -97,6 +97,11 @@ import kotlin.time.Duration.Companion.seconds
 private const val TRENDING_SKELETON_COUNT = 4
 private const val CONTINUE_SERIES_SKELETON_COUNT = 4
 
+// Distinct shared-element surfaces so the same book showing up in both rows
+// registers two unique keys in the SharedTransitionScope.
+private const val SURFACE_TRENDING = "explore-trending"
+private const val SURFACE_UP_NEXT = "explore-up-next"
+
 object ExploreScreen : Screen {
     private val editorialScrollState = ScrollState(initial = 0)
     private val trendingListState = LazyListState()
@@ -118,11 +123,12 @@ object ExploreScreen : Screen {
             Screen(
                 state = state,
                 runAction = screenModel::runAction,
-                onBookClick = {
+                onBookClick = { book, surface ->
                     navigator.parent?.push(
                         item = BookDetailScreen(
-                            id = it.id,
-                            initialCover = BookInitialCover.fromBook(book = it),
+                            id = book.id,
+                            initialCover = BookInitialCover.fromBook(book = book),
+                            transitionSurface = surface,
                         ),
                     )
                 },
@@ -136,7 +142,7 @@ object ExploreScreen : Screen {
     fun Screen(
         state: ExploreScreenUiState,
         runAction: (ExploreAction) -> Unit,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         isOnline: Boolean,
     ) {
         Scaffold(
@@ -179,7 +185,7 @@ object ExploreScreen : Screen {
     private fun EditorialContent(
         state: ExploreScreenUiState,
         runAction: (ExploreAction) -> Unit,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         contentPadding: PaddingValues,
     ) {
         Column(
@@ -217,7 +223,7 @@ object ExploreScreen : Screen {
     private fun TrendingSection(
         books: List<Book>,
         isLoading: Boolean,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
     ) {
         if (isLoading.not() && books.isEmpty()) return
 
@@ -249,7 +255,7 @@ object ExploreScreen : Screen {
                         items(books, key = { it.id }) { book ->
                             TrendingCard(
                                 book = book,
-                                onClick = { onBookClick(book) },
+                                onClick = { onBookClick(book, SURFACE_TRENDING) },
                             )
                         }
                     }
@@ -295,7 +301,7 @@ object ExploreScreen : Screen {
     private fun ContinueSeriesSection(
         books: List<Book>,
         isLoading: Boolean,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         runAction: (ExploreAction) -> Unit,
     ) {
         if (isLoading.not() && books.isEmpty()) return
@@ -334,7 +340,7 @@ object ExploreScreen : Screen {
                         items(books, key = { it.id }) { book ->
                             SeriesCard(
                                 book = book,
-                                onClick = { onBookClick(book) },
+                                onClick = { onBookClick(book, SURFACE_UP_NEXT) },
                                 onMenuClick = { sheetBook = book },
                             )
                         }
@@ -614,6 +620,7 @@ object ExploreScreen : Screen {
                 sharedTransitionKey = bookCoverTransitionKey(
                     editionId = book.currentEdition?.id,
                     bookId = book.id,
+                    surface = SURFACE_TRENDING,
                 ),
             )
 
@@ -684,6 +691,7 @@ object ExploreScreen : Screen {
                     sharedTransitionKey = bookCoverTransitionKey(
                         editionId = book.currentEdition?.id,
                         bookId = book.id,
+                        surface = SURFACE_UP_NEXT,
                     ),
                 )
 
@@ -740,7 +748,7 @@ object ExploreScreen : Screen {
     private fun ActiveSearchContent(
         state: ExploreScreenUiState,
         runAction: (ExploreAction) -> Unit,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         contentPadding: PaddingValues,
     ) {
         Column(
@@ -785,7 +793,7 @@ object ExploreScreen : Screen {
     @Composable
     private fun SearchResultRow(
         book: Book,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         runAction: (ExploreAction) -> Unit,
     ) {
         PrefetchBookDetailOnVisible(bookId = book.id)
@@ -793,7 +801,7 @@ object ExploreScreen : Screen {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .pressScaleClickable(onClick = { onBookClick(book) }),
+                .pressScaleClickable(onClick = { onBookClick(book, null) }),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             EditionImage(
@@ -919,7 +927,7 @@ private fun ExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = previewMockState,
         )
@@ -932,7 +940,7 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
@@ -951,7 +959,7 @@ private fun LoadingTrendingExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = emptyList(),
@@ -970,7 +978,7 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
@@ -989,7 +997,7 @@ private fun OfflineExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = false,
             state = previewMockState,
         )
@@ -1002,7 +1010,7 @@ private fun ActiveExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "Last to leave",
@@ -1054,7 +1062,7 @@ private fun LoadingActiveExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "Piranesi",
@@ -1071,7 +1079,7 @@ private fun NoResultsActiveExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "qwertyuiop",

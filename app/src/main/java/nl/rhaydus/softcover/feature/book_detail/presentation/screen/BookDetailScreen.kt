@@ -154,6 +154,7 @@ private const val REVIEW_COLLAPSED_LINES = 8
 class BookDetailScreen(
     val id: Int,
     private val initialCover: BookInitialCover? = null,
+    private val transitionSurface: String? = null,
 ) : Screen {
     @Composable
     override fun Content() {
@@ -537,6 +538,7 @@ class BookDetailScreen(
                         sharedTransitionKey = bookCoverTransitionKey(
                             editionId = edition?.id,
                             bookId = id,
+                            surface = transitionSurface,
                         ),
                     )
 
