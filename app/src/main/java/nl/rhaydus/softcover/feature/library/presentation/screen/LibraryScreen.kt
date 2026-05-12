@@ -695,7 +695,7 @@ object LibraryScreen : Screen {
 
         val animator = rememberLazyItemMutationAnimator(keys = visibleEditions.map { it.id })
 
-        val entry = rememberStaggeredEntryCoordinator()
+        val entry = rememberStaggeredEntryCoordinator(key = "library:editions:${tab.id}")
 
         LayoutGrid(
             layout = state.gridLayout,
@@ -743,7 +743,7 @@ object LibraryScreen : Screen {
 
         val animator = rememberLazyItemMutationAnimator(keys = visibleBooks.map { it.id })
 
-        val entry = rememberStaggeredEntryCoordinator()
+        val entry = rememberStaggeredEntryCoordinator(key = "library:books:${tab.id}")
 
         LayoutGrid(
             layout = state.gridLayout,

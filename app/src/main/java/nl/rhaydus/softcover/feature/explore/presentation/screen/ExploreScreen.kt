@@ -252,7 +252,7 @@ object ExploreScreen : Screen {
                         }
                     }
                 } else {
-                    val entry = rememberStaggeredEntryCoordinator()
+                    val entry = rememberStaggeredEntryCoordinator(key = "explore:trending")
 
                     LazyRow(
                         state = trendingListState,
@@ -341,7 +341,7 @@ object ExploreScreen : Screen {
                         }
                     }
                 } else {
-                    val entry = rememberStaggeredEntryCoordinator()
+                    val entry = rememberStaggeredEntryCoordinator(key = "explore:continue_series")
 
                     LazyRow(
                         state = continueSeriesListState,

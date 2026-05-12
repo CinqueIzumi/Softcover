@@ -277,7 +277,7 @@ object ReadingScreen : Screen {
 
         val animator = rememberLazyItemMutationAnimator(keys = rest.map { it.id })
 
-        val entry = rememberStaggeredEntryCoordinator()
+        val entry = rememberStaggeredEntryCoordinator(key = "reading:rest")
 
         val prefetcher = rememberBookDetailPrefetcher()
 

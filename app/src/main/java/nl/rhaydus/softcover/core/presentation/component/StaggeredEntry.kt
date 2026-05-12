@@ -21,12 +21,20 @@ private val DEFAULT_TRANSLATE = 8.dp
 
 /**
  * Plays a brief upward-translate + fade-in for items appearing in a lazy carousel or list
- * on first screen entry. Items composed within [windowMillis] of the coordinator's creation
- * stagger by [stepMillis] per index; items composed later (scrolled into view, mutated in
- * after a network update, etc.) render statically.
+ * on the screen's *first* entry only. Subsequent re-entries (push-to-detail-and-back, tab
+ * swap, config change) render statically — the stagger is an introduction, not a transition.
+ *
+ * "First entry" is tracked per-[key] in a process-wide registry. Callers pass a stable
+ * identifier (a Voyager `Screen` object is ideal — it's a singleton with reference
+ * equality). State clears only on process death, which matches the intent ("introduce
+ * once per app lifetime").
+ *
+ * Items composed within [windowMillis] of the first-entry timestamp stagger by [stepMillis]
+ * per index; items composed later (scrolled into view, mutated in after a network update,
+ * etc.) render statically.
  *
  * The roadmap explicitly rules out "animate everything on scroll" — this is a one-shot,
- * once-per-screen-entry effect. Pair the coordinator with [staggeredEntry] on each item.
+ * once-per-screen-lifetime effect. Pair the coordinator with [staggeredEntry] on each item.
  *
  * Gated by [playDecorativeMotion]: when system animations are disabled the modifier is a
  * no-op.
@@ -45,19 +53,24 @@ class StaggeredEntryCoordinator internal constructor(
     internal val startMillis: Long,
 )
 
+private val firstEntryTimestamps = mutableMapOf<Any, Long>()
+
 @Composable
 fun rememberStaggeredEntryCoordinator(
+    key: Any,
     stepMillis: Int = DEFAULT_STEP_MS,
     windowMillis: Int = DEFAULT_WINDOW_MS,
 ): StaggeredEntryCoordinator {
     val playMotion = playDecorativeMotion()
 
-    return remember(playMotion, stepMillis, windowMillis) {
+    return remember(key, playMotion, stepMillis, windowMillis) {
+        val startMillis = firstEntryTimestamps.getOrPut(key) { System.currentTimeMillis() }
+
         StaggeredEntryCoordinator(
             stepMillis = stepMillis,
             windowMillis = windowMillis,
             playMotion = playMotion,
-            startMillis = System.currentTimeMillis(),
+            startMillis = startMillis,
         )
     }
 }
