@@ -26,6 +26,7 @@ mockkVersion = "1.13.17"
 coroutinesTestVersion = "1.10.2"
 turbineVersion = "1.2.0"
 appUpdateVersion = "2.1.0"
+workVersion = "2.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -69,6 +70,7 @@ coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbineVersion" }
 play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "appUpdateVersion" }
 play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "appUpdateVersion" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

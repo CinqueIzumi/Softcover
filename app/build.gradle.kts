@@ -108,6 +108,9 @@ dependencies {
     implementation(libs.play.app.update)
     implementation(libs.play.app.update.ktx)
 
+    // WorkManager for scheduled notifications
+    implementation(libs.androidx.work.runtime.ktx)
+
     // Unit test dependencies
     testImplementation(libs.junit.params)
     testImplementation(libs.junit.engine)

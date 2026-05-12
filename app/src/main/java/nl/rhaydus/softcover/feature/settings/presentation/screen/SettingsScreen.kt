@@ -37,12 +37,12 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.BuildConfig
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesSection
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
@@ -59,6 +59,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreen
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+import kotlinx.coroutines.launch
 
 object SettingsScreen : Screen {
 
@@ -86,7 +87,11 @@ object SettingsScreen : Screen {
             },
             appUpdateState = appUpdateState,
             onStartAppUpdate = onStartAppUpdate,
-            debugSection = { AppUpdateSimulatorSection(simulator = koinInject()) },
+            debugSection = {
+                DebugRoutesSection()
+
+                AppUpdateSimulatorSection(simulator = koinInject())
+            },
         )
     }
 
