@@ -107,6 +107,7 @@ import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimated
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
@@ -1269,7 +1270,9 @@ object LibraryScreen : Screen {
                 text = "“",
                 style = MaterialTheme.editorialTypography.quoteGlyph,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = quoteAlpha),
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .quoteGlyphSway(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))

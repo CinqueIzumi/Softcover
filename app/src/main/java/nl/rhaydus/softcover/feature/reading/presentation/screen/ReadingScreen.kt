@@ -90,6 +90,7 @@ import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.pressScale
+import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -908,7 +909,9 @@ object ReadingScreen : Screen {
                     fontSize = 140.sp,
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .quoteGlyphSway(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))

@@ -24,9 +24,6 @@ Add the domain + data layer for user-generated content: personal rating, persona
 
 Small motion/visual tweaks that lift the perceived quality of every surface without new screens or data. Most are 1–2 file changes.
 
-### Step 1.7 — Empty-state quote sway (S)
-Slow infinite ±2° drift on the decorative `quoteGlyph` in empty states. Respect reduced motion. *(A.1.8)*
-
 ### Step 1.8 — Cover shadow edge tinting (S)
 Pull dominant edge colour from the cover into the `EditionImage` shadow. *(A.3.1)*
 
