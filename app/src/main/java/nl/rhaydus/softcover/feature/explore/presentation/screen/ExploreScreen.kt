@@ -231,9 +231,10 @@ object ExploreScreen : Screen {
         if (isLoading.not() && books.isEmpty()) return
 
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            SectionHeader(
-                eyebrow = "THIS WEEK",
-                title = "Trending",
+            EditorialSectionHeader(
+                eyebrow = "This week",
+                headline = "Trending",
+                modifier = Modifier.padding(horizontal = 24.dp),
             )
 
             SkeletonCrossfade(
@@ -319,9 +320,10 @@ object ExploreScreen : Screen {
         val coroutineScope = rememberCoroutineScope()
 
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            SectionHeader(
-                eyebrow = "PICK UP WHERE YOU LEFT OFF",
-                title = "Up next in your series",
+            EditorialSectionHeader(
+                eyebrow = "Pick up where you left off",
+                headline = "Up next in your series",
+                modifier = Modifier.padding(horizontal = 24.dp),
             )
 
             SkeletonCrossfade(
@@ -579,29 +581,6 @@ object ExploreScreen : Screen {
                     },
                 )
             }
-        }
-    }
-
-    @Composable
-    private fun SectionHeader(
-        eyebrow: String,
-        title: String,
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text(
-                text = eyebrow,
-                style = MaterialTheme.editorialTypography.eyebrow,
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            Text(
-                text = title,
-                style = MaterialTheme.editorialTypography.display,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
         }
     }
 
