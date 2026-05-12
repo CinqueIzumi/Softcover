@@ -24,12 +24,6 @@ Add the domain + data layer for user-generated content: personal rating, persona
 
 Small motion/visual tweaks that lift the perceived quality of every surface without new screens or data. Most are 1–2 file changes.
 
-### Step 1.8 — Cover shadow edge tinting (S)
-Pull dominant edge colour from the cover into the `EditionImage` shadow. *(A.3.1)*
-
-### Step 1.9 — Drop-cap on book descriptions (S)
-First letter of the description on book detail rendered as a 3-line Fraunces drop-cap, primary-tinted. *(A.3.2)*
-
 ### Step 1.10 — Folio on stat tiles + folio footer (S)
 Add "—01—" folio numbering to hero stat tiles, and a "Softcover · No. 12" footer above the bottom nav on root screens. *(A.3.3, A.4.4)*
 

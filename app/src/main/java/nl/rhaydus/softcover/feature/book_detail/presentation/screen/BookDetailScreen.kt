@@ -86,6 +86,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
+import nl.rhaydus.softcover.core.presentation.component.DropCapText
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
@@ -1595,12 +1596,13 @@ class BookDetailScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
-                    Text(
+                    DropCapText(
                         text = htmlToAnnotatedString(html = description),
-                        style = MaterialTheme.typography.bodyLarge.copy(
+                        bodyStyle = MaterialTheme.typography.bodyLarge.copy(
                             lineHeight = 26.sp,
                         ),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        bodyColor = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
