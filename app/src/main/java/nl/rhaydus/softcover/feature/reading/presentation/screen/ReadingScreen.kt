@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -58,15 +59,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
+import coil.compose.AsyncImage
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -75,6 +77,7 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
+import nl.rhaydus.softcover.core.presentation.component.PullToRefreshEyebrow
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
@@ -104,6 +107,7 @@ import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDeta
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
@@ -116,8 +120,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
-import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.LocalTime
 import kotlin.math.roundToInt
@@ -147,7 +149,7 @@ object ReadingScreen : Screen {
             },
             onNavigateToSearch = {
                 tabNavigator.current = ExploreTab
-            }
+            },
         )
     }
 
@@ -206,6 +208,7 @@ object ReadingScreen : Screen {
                                     onBookClick = onBookClick,
                                     onNavigateToSearch = onNavigateToSearch,
                                     onMarkAsRead = onMarkAsRead,
+                                    pullToRefreshState = pullToRefreshState,
                                 )
                             }
 
@@ -264,6 +267,7 @@ object ReadingScreen : Screen {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BooksDisplay(
         state: ReadingScreenUiState,
@@ -271,6 +275,7 @@ object ReadingScreen : Screen {
         onBookClick: (Book) -> Unit,
         onNavigateToSearch: () -> Unit,
         onMarkAsRead: (Book) -> Unit,
+        pullToRefreshState: PullToRefreshState,
     ) {
         val featured = state.books.first()
         val rest = state.books.drop(1)
@@ -291,6 +296,8 @@ object ReadingScreen : Screen {
                     EditorialHeader(
                         bookCount = state.books.size,
                         averageProgress = state.books.averageProgress(),
+                        pullToRefreshState = pullToRefreshState,
+                        isRefreshing = state.isLoading,
                     )
                 }
 
@@ -335,10 +342,13 @@ object ReadingScreen : Screen {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun EditorialHeader(
         bookCount: Int,
         averageProgress: Float?,
+        pullToRefreshState: PullToRefreshState,
+        isRefreshing: Boolean,
     ) {
         val greeting = remember { greetingForNow() }
 
@@ -347,7 +357,12 @@ object ReadingScreen : Screen {
                 .fillMaxWidth()
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp),
         ) {
-            SectionLabel(text = "Now reading")
+            PullToRefreshEyebrow(
+                pullToRefreshState = pullToRefreshState,
+                isRefreshing = isRefreshing,
+                baseText = "Now reading",
+                refreshingText = "Catching up on your reading…",
+            )
 
             Spacer(modifier = Modifier.height(4.dp))
 

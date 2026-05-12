@@ -24,9 +24,6 @@ Add the domain + data layer for user-generated content: personal rating, persona
 
 Small motion/visual tweaks that lift the perceived quality of every surface without new screens or data. Most are 1–2 file changes.
 
-### Step 1.2 — Pull-to-refresh editorial swap (S)
-Swap the page eyebrow to a contextual refresh copy while pulling, then flash back. Add `threshold` haptic at the trigger point. *(A.1.9, A.2.2)*
-
 ### Step 1.3 — Tab-root cross-fade with drift (S)
 Replace `EnterTransition.None` between root tabs with a 200ms cross-fade + 12dp vertical drift. *(A.1.3)*
 

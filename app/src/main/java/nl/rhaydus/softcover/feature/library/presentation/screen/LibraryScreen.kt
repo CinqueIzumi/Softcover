@@ -52,9 +52,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -99,6 +101,7 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.presentation.component.PullToRefreshEyebrow
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
@@ -176,7 +179,7 @@ object LibraryScreen : Screen {
         onBookClick: (Book) -> Unit,
         onEditionClick: (BookEdition) -> Unit,
         gridStateFor: (String) -> LazyGridState = { LazyGridState() },
-        topAppBarState: androidx.compose.material3.TopAppBarState = rememberTopAppBarState(),
+        topAppBarState: TopAppBarState = rememberTopAppBarState(),
     ) {
         val tabs = state.visibleTabs
         val scope = rememberCoroutineScope()
@@ -249,6 +252,8 @@ object LibraryScreen : Screen {
                             runAction = runAction,
                         )
                     },
+                    pullToRefreshState = pullToRefreshState,
+                    isRefreshing = state.isLoading,
                     collapseFraction = collapseFraction,
                     onCollapsibleSized = { measured ->
                         val newLimit = -measured.toFloat()
@@ -351,6 +356,7 @@ object LibraryScreen : Screen {
 
     // region Editorial header
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun EditorialHeader(
         tabLabel: String?,
@@ -358,6 +364,8 @@ object LibraryScreen : Screen {
         isSearchActive: Boolean,
         onToggleSearchClick: () -> Unit,
         layoutMenu: @Composable () -> Unit,
+        pullToRefreshState: PullToRefreshState,
+        isRefreshing: Boolean,
         collapseFraction: Float,
         onCollapsibleSized: (Int) -> Unit,
     ) {
@@ -370,9 +378,13 @@ object LibraryScreen : Screen {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    SectionLabel(text = "Your collection")
-                }
+                PullToRefreshEyebrow(
+                    pullToRefreshState = pullToRefreshState,
+                    isRefreshing = isRefreshing,
+                    baseText = "Your collection",
+                    refreshingText = "Refreshing your shelf…",
+                    modifier = Modifier.weight(1f),
+                )
 
                 IconButton(onClick = onToggleSearchClick) {
                     Icon(
@@ -433,26 +445,6 @@ object LibraryScreen : Screen {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-        }
-    }
-
-    @Composable
-    private fun SectionLabel(text: String) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .height(1.dp)
-                    .width(20.dp)
-                    .background(MaterialTheme.colorScheme.primary),
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = text.uppercase(),
-                style = MaterialTheme.editorialTypography.eyebrow,
-                color = MaterialTheme.colorScheme.primary,
-            )
         }
     }
 
