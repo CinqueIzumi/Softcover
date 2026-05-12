@@ -53,6 +53,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -940,6 +941,7 @@ class BookDetailScreen(
                                     selected = status == BookStatus.Reading,
                                     onClick = { runAction(OnMarkBookAsReadingClickAction(book = book)) },
                                     modifier = Modifier.weight(1f),
+                                    enabled = status != BookStatus.None,
                                 )
 
                                 ShelfChip(
@@ -971,6 +973,7 @@ class BookDetailScreen(
         onClick: () -> Unit,
         modifier: Modifier = Modifier,
         celebrationKey: Int = 0,
+        enabled: Boolean = true,
     ) {
         val container = if (selected) {
             MaterialTheme.colorScheme.secondaryContainer
@@ -1012,11 +1015,14 @@ class BookDetailScreen(
         )
 
         Surface(
-            modifier = modifier.height(72.dp),
+            modifier = modifier
+                .height(72.dp)
+                .alpha(if (enabled) 1f else 0.4f),
             color = container,
             contentColor = content,
             shape = RoundedCornerShape(20.dp),
             onClick = onClick,
+            enabled = enabled && selected.not(),
         ) {
             Column(
                 modifier = Modifier
