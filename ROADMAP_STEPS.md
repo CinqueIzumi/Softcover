@@ -24,9 +24,6 @@ Add the domain + data layer for user-generated content: personal rating, persona
 
 Small motion/visual tweaks that lift the perceived quality of every surface without new screens or data. Most are 1–2 file changes.
 
-### Step 1.5 — Carousel page-edge hint (S)
-On first composition of any carousel, paint a 2dp accent bar under the rightmost partially-visible card; fade out after 1s. *(A.1.10)*
-
 ### Step 1.6 — Stat number micro-tick (S)
 Add a hairline pulse under `AnimatedStatNumber` on each integer crossing during the tween. *(A.1.12)*
 
