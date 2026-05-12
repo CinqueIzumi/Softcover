@@ -129,7 +129,7 @@ class MainActivity() : ComponentActivity() {
                     }
             }
 
-            SoftcoverTheme {
+            SoftcoverTheme(dynamicColor = themeConfig.useDynamicColor) {
                 ClearFocusOnTapScreen {
                     CompositionLocalProvider(
                         LocalThemeConfiguration provides themeConfig,

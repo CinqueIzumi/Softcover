@@ -61,6 +61,12 @@ class SettingsLocalDataSourceImpl(
         }
     }
 
+    override suspend fun setDynamicColorEnabled(enabled: Boolean) {
+        appSettingsDataStore.store.updateData { appSettingsEntity: AppSettingsEntity ->
+            appSettingsEntity.copy(themeConfig = appSettingsEntity.themeConfig.copy(useDynamicColor = enabled))
+        }
+    }
+
     override val enabledStatusCodes: Flow<Set<Int>> = appSettingsDataStore.store.data
         .map { it.enabledStatusCodes }
         .distinctUntilChanged()

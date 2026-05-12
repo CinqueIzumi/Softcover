@@ -112,3 +112,7 @@ Domain models are plain nouns (`Book`, `Author`). Suffixes indicate layer/role: 
 ## Dependency Management
 
 All versions are centralized in `gradle/libs.versions.toml`. Reference via version catalog (`libs.<alias>`) in `build.gradle.kts`.
+
+## Roadmap
+
+The redesign roadmap lives in [ROADMAP.md](ROADMAP.md); the sequenced pickup order lives in [ROADMAP_STEPS.md](ROADMAP_STEPS.md). When a step in `ROADMAP_STEPS.md` is finished, **delete it from the file in the same commit** — do not renumber the remaining steps (gaps are intentional so references in commits and docs stay valid). The deletion is part of the step, not a follow-up.

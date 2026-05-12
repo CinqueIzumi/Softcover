@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.feature.settings.data.datastore.appSettings
 import nl.rhaydus.softcover.feature.settings.data.repository.SettingsRepositoryImpl
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdAsFlowUseCase
@@ -19,15 +21,14 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdAndB
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.flows.DateStyleCollector
-import nl.rhaydus.softcover.feature.settings.presentation.flows.PersistedLibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilityInitializer
+import nl.rhaydus.softcover.feature.settings.presentation.flows.PersistedLibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.flows.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.flows.UserListsCollector
@@ -43,6 +44,7 @@ val settingsModule = module {
             appDispatchers = get(),
             flows = getAll(),
             setBottomBarStyleUseCase = get(),
+            setDynamicColorUseCase = get(),
             getThemeConfigurationUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
             setDateStyleUseCase = get(),
@@ -112,6 +114,10 @@ val settingsModule = module {
 
     factory {
         SetBottomBarStyleUseCase(settingsRepository = get())
+    }
+
+    factory {
+        SetDynamicColorUseCase(settingsRepository = get())
     }
 
     factory {

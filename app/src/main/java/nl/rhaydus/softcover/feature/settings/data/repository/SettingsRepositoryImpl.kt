@@ -45,6 +45,10 @@ class SettingsRepositoryImpl(
         settingsLocalDataSource.setBottomBarStyle(style = style)
     }
 
+    override suspend fun setDynamicColorEnabled(enabled: Boolean) {
+        settingsLocalDataSource.setDynamicColorEnabled(enabled = enabled)
+    }
+
     override suspend fun getUserIdFromBackend(): Int {
         return settingsRemoteDataSource.getUserIdFromBackend()
     }

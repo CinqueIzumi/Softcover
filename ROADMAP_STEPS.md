@@ -24,12 +24,6 @@ Add the domain + data layer for user-generated content: personal rating, persona
 
 Small motion/visual tweaks that lift the perceived quality of every surface without new screens or data. Most are 1–2 file changes.
 
-### Step 1.1 — Expose the Material You toggle in Appearance (S)
-A switch in Appearance settings that flips the existing `dynamicColor` parameter (already wired in `Theme.kt:97`, dead since the theme was written — no call site sets it) from `false` to user-controlled. **Default stays off** — the editorial scheme remains canonical per DS §2.1.
-
-- **Why at the top of changes:** The wiring already exists; this step is purely surfacing a switch. Shipping it first signals Android-native polish without adding any new design system surface area, and dynamic colour is platform table-stakes — withholding it past Phase 1 would read as deliberately stingy. The more opinionated, brand-protective answer is the curated *Spine colour* palette work (Step 8.2); these are the two halves of one personalisation story, but they don't have to ship together. Material You is free here (one toggle, one preference), so it lands first; Spine colour follows when the broader Settings restructure happens.
-- **Design system note:** No new tokens or roles — the existing `dynamicLightColorScheme` / `dynamicDarkColorScheme` paths take care of the swap. Verify that the editorial *roles* (eyebrow tint, hero stat-card fill, accent bars, wavy progress) still read correctly under a handful of common dynamic palettes; document any cover/chrome collisions and either tweak role mapping or note the limitation in Appearance. Update DS §2.1 only if the implementation differs from "supported, off by default".
-
 ### Step 1.2 — Pull-to-refresh editorial swap (S)
 Swap the page eyebrow to a contextual refresh copy while pulling, then flash back. Add `threshold` haptic at the trigger point. *(A.1.9, A.2.2)*
 
