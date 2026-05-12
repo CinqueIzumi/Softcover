@@ -24,9 +24,6 @@ Add the domain + data layer for user-generated content: personal rating, persona
 
 Small motion/visual tweaks that lift the perceived quality of every surface without new screens or data. Most are 1–2 file changes.
 
-### Step 1.3 — Tab-root cross-fade with drift (S)
-Replace `EnterTransition.None` between root tabs with a 200ms cross-fade + 12dp vertical drift. *(A.1.3)*
-
 ### Step 1.4 — Shelf-chip ink-fill on book detail (S)
 Replace the immediate fill on shelf-chip selection with a 180ms ink-wipe. Add `select` haptic on non-Read chips. *(A.1.5, A.2.1)*
 
