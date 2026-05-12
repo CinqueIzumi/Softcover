@@ -56,6 +56,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -107,6 +108,9 @@ import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
@@ -133,28 +137,32 @@ object LibraryScreen : Screen {
         val state by screenModel.state.collectAsStateWithLifecycle()
         val localState by screenModel.localState.collectAsStateWithLifecycle()
 
-        Screen(
-            state = state,
-            runAction = screenModel::runAction,
-            gridStateFor = { id -> localState.gridStates[id] ?: LazyGridState() },
-            topAppBarState = screenModel.headerScrollState,
-            onBookClick = {
-                navigator.parent?.push(
-                    item = BookDetailScreen(
-                        id = it.id,
-                        initialCover = BookInitialCover.fromBook(book = it),
-                    ),
-                )
-            },
-            onEditionClick = {
-                navigator.parent?.push(
-                    item = BookDetailScreen(
-                        id = it.bookId,
-                        initialCover = BookInitialCover.fromEdition(edition = it),
-                    ),
-                )
-            },
-        )
+        val prefetcher = rememberBookDetailPrefetcher()
+
+        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
+            Screen(
+                state = state,
+                runAction = screenModel::runAction,
+                gridStateFor = { id -> localState.gridStates[id] ?: LazyGridState() },
+                topAppBarState = screenModel.headerScrollState,
+                onBookClick = {
+                    navigator.parent?.push(
+                        item = BookDetailScreen(
+                            id = it.id,
+                            initialCover = BookInitialCover.fromBook(book = it),
+                        ),
+                    )
+                },
+                onEditionClick = {
+                    navigator.parent?.push(
+                        item = BookDetailScreen(
+                            id = it.bookId,
+                            initialCover = BookInitialCover.fromEdition(edition = it),
+                        ),
+                    )
+                },
+            )
+        }
     }
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -802,6 +810,8 @@ object LibraryScreen : Screen {
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
         modifier: Modifier = Modifier,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         val authorName = book.authors.map { it.name }.firstOrNull().orEmpty()
 
         val currentEdition = book.currentEdition
@@ -926,6 +936,8 @@ object LibraryScreen : Screen {
         onEditionClick: (BookEdition) -> Unit,
         modifier: Modifier = Modifier,
     ) {
+        PrefetchBookDetailOnVisible(bookId = edition.bookId)
+
         val title = edition.title.orEmpty()
         val authorName = edition.authors.map { it.name }.firstOrNull().orEmpty()
 

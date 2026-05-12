@@ -39,6 +39,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -96,6 +97,9 @@ import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
@@ -271,55 +275,58 @@ object ReadingScreen : Screen {
 
         val animator = rememberLazyItemMutationAnimator(keys = rest.map { it.id })
 
-        LazyColumn(
-            state = booksListState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-        ) {
-            item(key = "header") {
-                EditorialHeader(
-                    bookCount = state.books.size,
-                    averageProgress = state.books.averageProgress(),
-                )
-            }
+        val prefetcher = rememberBookDetailPrefetcher()
 
-            item(key = "featured-${featured.id}") {
-                FeaturedBookCard(
-                    book = featured,
-                    deadlineProgress = featured.deadlineProgressFrom(state),
-                    dateStyle = state.dateStyle,
-                    mutationFailed = featured.id in state.failedMutationBookIds,
-                    runAction = runAction,
-                    onBookClick = onBookClick,
-                    onMarkAsRead = onMarkAsRead,
-                )
-            }
-
-            if (rest.isNotEmpty()) {
-                item(key = "also-reading-label") {
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                        SectionLabel(text = "Also between your fingers")
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
+        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
+            LazyColumn(
+                state = booksListState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+            ) {
+                item(key = "header") {
+                    EditorialHeader(
+                        bookCount = state.books.size,
+                        averageProgress = state.books.averageProgress(),
+                    )
                 }
 
-                items(rest, key = { it.id }) { book ->
-                    CompactBookEntry(
-                        modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id),
-                        book = book,
-                        deadlineProgress = book.deadlineProgressFrom(state),
+                item(key = "featured-${featured.id}") {
+                    FeaturedBookCard(
+                        book = featured,
+                        deadlineProgress = featured.deadlineProgressFrom(state),
                         dateStyle = state.dateStyle,
-                        mutationFailed = book.id in state.failedMutationBookIds,
+                        mutationFailed = featured.id in state.failedMutationBookIds,
                         runAction = runAction,
                         onBookClick = onBookClick,
                         onMarkAsRead = onMarkAsRead,
                     )
                 }
-            }
 
+                if (rest.isNotEmpty()) {
+                    item(key = "also-reading-label") {
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                            SectionLabel(text = "Also between your fingers")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    items(rest, key = { it.id }) { book ->
+                        CompactBookEntry(
+                            modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id),
+                            book = book,
+                            deadlineProgress = book.deadlineProgressFrom(state),
+                            dateStyle = state.dateStyle,
+                            mutationFailed = book.id in state.failedMutationBookIds,
+                            runAction = runAction,
+                            onBookClick = onBookClick,
+                            onMarkAsRead = onMarkAsRead,
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -377,6 +384,8 @@ object ReadingScreen : Screen {
         onBookClick: (Book) -> Unit,
         onMarkAsRead: (Book) -> Unit,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         var dropdownActive by remember { mutableStateOf(false) }
         val shape = RoundedCornerShape(28.dp)
         val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
@@ -639,6 +648,8 @@ object ReadingScreen : Screen {
         onMarkAsRead: (Book) -> Unit,
         modifier: Modifier = Modifier,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         var dropdownActive by remember { mutableStateOf(false) }
         val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
 

@@ -35,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,6 +76,9 @@ import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
@@ -108,19 +112,23 @@ object ExploreScreen : Screen {
 
         val isOnline = rememberIsOnline()
 
-        Screen(
-            state = state,
-            runAction = screenModel::runAction,
-            onBookClick = {
-                navigator.parent?.push(
-                    item = BookDetailScreen(
-                        id = it.id,
-                        initialCover = BookInitialCover.fromBook(book = it),
-                    ),
-                )
-            },
-            isOnline = isOnline,
-        )
+        val prefetcher = rememberBookDetailPrefetcher()
+
+        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
+            Screen(
+                state = state,
+                runAction = screenModel::runAction,
+                onBookClick = {
+                    navigator.parent?.push(
+                        item = BookDetailScreen(
+                            id = it.id,
+                            initialCover = BookInitialCover.fromBook(book = it),
+                        ),
+                    )
+                },
+                isOnline = isOnline,
+            )
+        }
     }
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
@@ -587,6 +595,8 @@ object ExploreScreen : Screen {
         book: Book,
         onClick: () -> Unit,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         Column(
             modifier = Modifier
                 .width(150.dp)
@@ -654,6 +664,8 @@ object ExploreScreen : Screen {
         onClick: () -> Unit,
         onMenuClick: () -> Unit,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         Column(
             modifier = Modifier
                 .width(120.dp)
@@ -776,6 +788,8 @@ object ExploreScreen : Screen {
         onBookClick: (Book) -> Unit,
         runAction: (ExploreAction) -> Unit,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
