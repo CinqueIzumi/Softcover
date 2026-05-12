@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -938,7 +939,10 @@ class BookDetailScreen(
                                     label = "Want to read",
                                     iconRes = R.drawable.ic_bookmark_add,
                                     selected = status == BookStatus.WantToRead,
-                                    onClick = { runAction(OnMarkBookAsWantToReadClickAction(book = book)) },
+                                    onClick = {
+                                        haptics.select()
+                                        runAction(OnMarkBookAsWantToReadClickAction(book = book))
+                                    },
                                     modifier = Modifier.weight(1f),
                                 )
 
@@ -946,7 +950,10 @@ class BookDetailScreen(
                                     label = "Reading",
                                     iconRes = R.drawable.ic_reading,
                                     selected = status == BookStatus.Reading,
-                                    onClick = { runAction(OnMarkBookAsReadingClickAction(book = book)) },
+                                    onClick = {
+                                        haptics.select()
+                                        runAction(OnMarkBookAsReadingClickAction(book = book))
+                                    },
                                     modifier = Modifier.weight(1f),
                                     enabled = status != BookStatus.None,
                                 )
@@ -982,19 +989,43 @@ class BookDetailScreen(
         celebrationKey: Int = 0,
         enabled: Boolean = true,
     ) {
-        val container = if (selected) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceContainer
-        }
-
-        val content = if (selected) {
-            MaterialTheme.colorScheme.onSecondaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        }
+        val selectedContainer = MaterialTheme.colorScheme.secondaryContainer
+        val unselectedContainer = MaterialTheme.colorScheme.surfaceContainer
+        val selectedContent = MaterialTheme.colorScheme.onSecondaryContainer
+        val unselectedContent = MaterialTheme.colorScheme.onSurface
 
         val playMotion = playDecorativeMotion()
+
+        var settledSelected by remember { mutableStateOf(selected) }
+        val wipe = remember { Animatable(initialValue = 1f) }
+
+        LaunchedEffect(selected) {
+            if (selected == settledSelected) return@LaunchedEffect
+
+            if (playMotion.not()) {
+                wipe.snapTo(targetValue = 1f)
+                settledSelected = selected
+                return@LaunchedEffect
+            }
+
+            wipe.snapTo(targetValue = 0f)
+            wipe.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 180),
+            )
+            settledSelected = selected
+        }
+
+        val fromContainer = if (settledSelected) selectedContainer else unselectedContainer
+        val toContainer = if (selected) selectedContainer else unselectedContainer
+
+        val contentColor by animateColorAsState(
+            targetValue = if (selected) selectedContent else unselectedContent,
+            animationSpec = tween(durationMillis = 180),
+            label = "ShelfChipContent",
+        )
+
+        val wipeProgress = wipe.value
 
         val celebration = remember { Animatable(initialValue = 1f) }
 
@@ -1024,9 +1055,16 @@ class BookDetailScreen(
         Surface(
             modifier = modifier
                 .height(72.dp)
-                .alpha(if (enabled) 1f else 0.4f),
-            color = container,
-            contentColor = content,
+                .alpha(if (enabled) 1f else 0.4f)
+                .clip(RoundedCornerShape(20.dp))
+                .drawBehind {
+                    drawRect(color = fromContainer)
+                    clipRect(right = size.width * wipeProgress) {
+                        drawRect(color = toContainer)
+                    }
+                },
+            color = Color.Transparent,
+            contentColor = contentColor,
             shape = RoundedCornerShape(20.dp),
             onClick = onClick,
             enabled = enabled && selected.not(),

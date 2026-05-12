@@ -24,9 +24,6 @@ Add the domain + data layer for user-generated content: personal rating, persona
 
 Small motion/visual tweaks that lift the perceived quality of every surface without new screens or data. Most are 1–2 file changes.
 
-### Step 1.4 — Shelf-chip ink-fill on book detail (S)
-Replace the immediate fill on shelf-chip selection with a 180ms ink-wipe. Add `select` haptic on non-Read chips. *(A.1.5, A.2.1)*
-
 ### Step 1.5 — Carousel page-edge hint (S)
 On first composition of any carousel, paint a 2dp accent bar under the rightmost partially-visible card; fade out after 1s. *(A.1.10)*
 
