@@ -15,7 +15,10 @@ class ThemeConfigurationCollector : SettingsInitializer {
     ) {
         dependencies.getThemeConfigurationUseCase().collectLatest { configuration ->
             scope.setState {
-                it.copy(useFloatingBarChecked = configuration.bottomBarStyle == BottomBarStyle.FLOATING)
+                it.copy(
+                    useFloatingBarChecked = configuration.bottomBarStyle == BottomBarStyle.FLOATING,
+                    useDynamicColorChecked = configuration.useDynamicColor,
+                )
             }
         }
     }

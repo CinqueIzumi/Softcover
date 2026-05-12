@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.books.data.datasource
 
 import app.cash.turbine.test
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -57,6 +56,7 @@ class BooksLocalDataSourceImplTest {
         rating = 4.0,
         description = "Description",
         releaseYear = 2020,
+        releaseDate = null,
         coverUrl = "https://example.com/cover.jpg",
         usersCount = 100,
         ratingsCount = 0,
@@ -77,6 +77,7 @@ class BooksLocalDataSourceImplTest {
         pages = null,
         audioSeconds = null,
         releaseYear = 2020,
+        releaseDate = null,
         format = "Paperback",
     )
 
@@ -901,7 +902,7 @@ class BooksLocalDataSourceImplTest {
     }
 
     @Nested
-    inner class GetOwnedListBookByEditionId {
+    inner class FindOwnedListBookByEditionId {
 
         @Test
         fun `returns mapped domain model when DAO returns a result`() = runTest {
@@ -919,14 +920,14 @@ class BooksLocalDataSourceImplTest {
             } returns entity
 
             // ----- Act -----
-            val result = dataSource.getOwnedListBookByEditionId(editionId = editionId)
+            val result = dataSource.findOwnedListBookByEditionId(editionId = editionId)
 
             // ----- Assert -----
             result shouldBe entity.toModel()
         }
 
         @Test
-        fun `throws Exception when DAO returns null`() = runTest {
+        fun `returns null when DAO returns null`() = runTest {
             // ----- Arrange -----
             val editionId = 99
 
@@ -934,30 +935,52 @@ class BooksLocalDataSourceImplTest {
                 dao.getOwnedListBookByEditionId(editionId = editionId)
             } returns null
 
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
-                dataSource.getOwnedListBookByEditionId(editionId = editionId)
-            }
+            // ----- Act -----
+            val result = dataSource.findOwnedListBookByEditionId(editionId = editionId)
+
+            // ----- Assert -----
+            result shouldBe null
         }
+    }
+
+    @Nested
+    inner class GetOwnedListId {
 
         @Test
-        fun `forwards the editionId argument to the DAO`() = runTest {
+        fun `delegates to dao getOwnedListId and returns its result`() = runTest {
             // ----- Arrange -----
-            val editionId = 7
-            val entity = stubListBookFull(
-                editionId = editionId,
-            )
+            val expectedId = 7
 
             coEvery {
-                dao.getOwnedListBookByEditionId(editionId = editionId)
-            } returns entity
+                dao.getOwnedListId()
+            } returns expectedId
 
             // ----- Act -----
-            dataSource.getOwnedListBookByEditionId(editionId = editionId)
+            val result = dataSource.getOwnedListId()
+
+            // ----- Assert -----
+            result shouldBe expectedId
+
+            coVerify {
+                dao.getOwnedListId()
+            }
+        }
+    }
+
+    @Nested
+    inner class RemoveOwnedListBookByEditionId {
+
+        @Test
+        fun `delegates to dao deleteOwnedListBookByEditionId with correct editionId`() = runTest {
+            // ----- Arrange -----
+            val editionId = 55
+
+            // ----- Act -----
+            dataSource.removeOwnedListBookByEditionId(editionId = editionId)
 
             // ----- Assert -----
             coVerify {
-                dao.getOwnedListBookByEditionId(editionId = editionId)
+                dao.deleteOwnedListBookByEditionId(editionId = editionId)
             }
         }
     }

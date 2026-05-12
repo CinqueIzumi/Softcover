@@ -4,6 +4,7 @@ import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,7 @@ import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
+import timber.log.Timber
 
 private const val OWNED_LIST_SLUG: String = "owned"
 
@@ -190,19 +192,57 @@ class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchEditionsByIds(ids = ids)
     }
 
-    override suspend fun markBookAsWantToRead(bookId: Int): Book {
-        return booksRemoteDataSource.markBookAsWantToRead(bookId = bookId)
+    override suspend fun markBookAsWantToRead(book: Book): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val optimistic = book.withMarkedAsWantToRead()
+
+        if (optimistic !== book) {
+            booksLocalDataSource.cacheBook(book = optimistic)
+        }
+
+        return runCatching {
+            booksRemoteDataSource.markBookAsWantToRead(bookId = book.id)
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            restoreOptimisticWrite(snapshot = snapshot)
+            throw error
+        }.also { updated ->
+            booksLocalDataSource.cacheBook(book = updated)
+        }
     }
 
     override suspend fun markBookAsReading(book: Book): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsReading()
         booksLocalDataSource.cacheBook(book = optimistic)
 
-        return booksRemoteDataSource.markBookAsReading(book)
+        return runCatching {
+            booksRemoteDataSource.markBookAsReading(book)
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            restoreOptimisticWrite(snapshot = snapshot)
+            throw error
+        }
     }
 
     override suspend fun removeBookFromLibrary(book: Book) {
-        return booksRemoteDataSource.removeBookFromLibrary(book = book)
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val userBookId: Int? = book.userBook?.id
+
+        if (userBookId != null) {
+            booksLocalDataSource.removeUserBooksById(ids = listOf(userBookId))
+        }
+
+        runCatching {
+            booksRemoteDataSource.removeBookFromLibrary(book = book)
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            restoreOptimisticWrite(snapshot = snapshot)
+            throw error
+        }
     }
 
     override suspend fun updateBookProgress(
@@ -210,6 +250,7 @@ class BooksRepositoryImpl(
         newPage: Int?,
         newSeconds: Int?,
     ): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withProgress(
             newPage = newPage,
             newSeconds = newSeconds,
@@ -224,15 +265,22 @@ class BooksRepositoryImpl(
                     newSeconds = newSeconds,
                 )
             }.getOrElse { error ->
-                if (error is OfflineException) {
-                    enqueueProgressUpdate(
-                        book = optimistic,
-                        newPage = newPage,
-                        newSeconds = newSeconds,
-                    )
-                    optimistic
-                } else {
-                    throw error
+                when (error) {
+                    is CancellationException -> throw error
+
+                    is OfflineException -> {
+                        enqueueProgressUpdate(
+                            book = optimistic,
+                            newPage = newPage,
+                            newSeconds = newSeconds,
+                        )
+                        optimistic
+                    }
+
+                    else -> {
+                        restoreOptimisticWrite(snapshot = snapshot)
+                        throw error
+                    }
                 }
             }
         }
@@ -246,6 +294,7 @@ class BooksRepositoryImpl(
     }
 
     override suspend fun markBookAsRead(book: Book): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsRead()
         booksLocalDataSource.cacheBook(book = optimistic)
 
@@ -253,11 +302,18 @@ class BooksRepositoryImpl(
             return runCatching {
                 booksRemoteDataSource.markBookAsRead(book = book)
             }.getOrElse { error ->
-                if (error is OfflineException) {
-                    enqueueMarkAsRead(book = optimistic)
-                    optimistic
-                } else {
-                    throw error
+                when (error) {
+                    is CancellationException -> throw error
+
+                    is OfflineException -> {
+                        enqueueMarkAsRead(book = optimistic)
+                        optimistic
+                    }
+
+                    else -> {
+                        restoreOptimisticWrite(snapshot = snapshot)
+                        throw error
+                    }
                 }
             }
         }
@@ -308,6 +364,15 @@ class BooksRepositoryImpl(
                 enqueuedAt = Instant.now().toString(),
             )
         )
+    }
+
+    private suspend fun restoreOptimisticWrite(snapshot: Book?) {
+        if (snapshot == null) {
+            Timber.w("-=- Optimistic rollback skipped: no prior snapshot in cache")
+            return
+        }
+
+        booksLocalDataSource.cacheBook(book = snapshot)
     }
 
     private suspend fun preserveSyncedProgress(
@@ -376,6 +441,16 @@ class BooksRepositoryImpl(
         )
     }
 
+    private fun Book.withMarkedAsWantToRead(): Book {
+        val existingUserBook = userBook ?: return this
+
+        if (existingUserBook.status == BookStatus.WantToRead) return this
+
+        val updatedUserBook: UserBook = existingUserBook.copy(status = BookStatus.WantToRead)
+
+        return copy(userBook = updatedUserBook)
+    }
+
     private fun Book.withMarkedAsReading(): Book {
         val existingUserBook = userBook ?: return this
 
@@ -424,22 +499,67 @@ class BooksRepositoryImpl(
         )
     }
 
-    override suspend fun markEditionAsOwned(edition: BookEdition): ListBook {
-        return booksRemoteDataSource.markEditionAsOwned(edition = edition)
+    override suspend fun markEditionAsOwned(edition: BookEdition) {
+        val snapshot: ListBook? = booksLocalDataSource.findOwnedListBookByEditionId(
+            editionId = edition.id,
+        )
+        val ownedListId: Int? = booksLocalDataSource.getOwnedListId()
+
+        if (ownedListId != null) {
+            booksLocalDataSource.cacheListBook(
+                book = ListBook(
+                    listBookId = OPTIMISTIC_LIST_BOOK_ID,
+                    listId = ownedListId,
+                    bookId = edition.bookId,
+                    editionId = edition.id,
+                ),
+            )
+        }
+
+        val real: ListBook = runCatching {
+            booksRemoteDataSource.markEditionAsOwned(edition = edition)
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            restoreOwnedListBook(
+                editionId = edition.id,
+                snapshot = snapshot,
+            )
+            throw error
+        }
+
+        booksLocalDataSource.removeOwnedListBookByEditionId(editionId = edition.id)
+        booksLocalDataSource.cacheListBook(book = real)
     }
 
-    override suspend fun getListBookByEditionId(editionId: Int): ListBook {
-        return booksLocalDataSource.getOwnedListBookByEditionId(editionId = editionId)
-    }
+    override suspend fun removeOwnedEdition(editionId: Int) {
+        val snapshot: ListBook = booksLocalDataSource.findOwnedListBookByEditionId(
+            editionId = editionId,
+        ) ?: return
 
-    override suspend fun removeListBook(book: ListBook) {
-        val updatedList = booksRemoteDataSource.removeListBook(book = book)
+        booksLocalDataSource.removeOwnedListBookByEditionId(editionId = editionId)
+
+        val updatedList: BookList = runCatching {
+            booksRemoteDataSource.removeListBook(book = snapshot)
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            booksLocalDataSource.cacheListBook(book = snapshot)
+            throw error
+        }
 
         booksLocalDataSource.cacheUserBookLists(lists = listOf(updatedList))
     }
 
-    override suspend fun cacheListBook(book: ListBook) {
-        booksLocalDataSource.cacheListBook(book = book)
+    private suspend fun restoreOwnedListBook(
+        editionId: Int,
+        snapshot: ListBook?,
+    ) {
+        booksLocalDataSource.removeOwnedListBookByEditionId(editionId = editionId)
+
+        if (snapshot != null && snapshot.listBookId != OPTIMISTIC_LIST_BOOK_ID) {
+            booksLocalDataSource.cacheListBook(book = snapshot)
+        }
     }
 
     override suspend fun persistEditionImage(
@@ -447,5 +567,9 @@ class BooksRepositoryImpl(
         source: File,
     ) {
         booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
+    }
+
+    private companion object {
+        const val OPTIMISTIC_LIST_BOOK_ID = 0
     }
 }

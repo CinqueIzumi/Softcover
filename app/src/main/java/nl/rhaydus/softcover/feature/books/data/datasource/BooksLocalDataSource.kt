@@ -49,7 +49,11 @@ interface BooksLocalDataSource {
 
     suspend fun removeAllBooks()
 
-    suspend fun getOwnedListBookByEditionId(editionId: Int): ListBook
+    suspend fun findOwnedListBookByEditionId(editionId: Int): ListBook?
+
+    suspend fun getOwnedListId(): Int?
+
+    suspend fun removeOwnedListBookByEditionId(editionId: Int)
 
     suspend fun syncBookListMetadata(serverListIds: Set<Int>)
 
@@ -170,11 +174,16 @@ class BooksLocalDataSourceImpl(
         pathsToDelete.forEach { editionImageStorage.delete(path = it) }
     }
 
-    override suspend fun getOwnedListBookByEditionId(editionId: Int): ListBook {
-        val book = dao.getOwnedListBookByEditionId(editionId = editionId)
-            ?: throw Exception("List book was not found!")
+    override suspend fun findOwnedListBookByEditionId(editionId: Int): ListBook? {
+        return dao.getOwnedListBookByEditionId(editionId = editionId)?.toModel()
+    }
 
-        return book.toModel()
+    override suspend fun getOwnedListId(): Int? {
+        return dao.getOwnedListId()
+    }
+
+    override suspend fun removeOwnedListBookByEditionId(editionId: Int) {
+        dao.deleteOwnedListBookByEditionId(editionId = editionId)
     }
 
     override suspend fun syncBookListMetadata(serverListIds: Set<Int>) {

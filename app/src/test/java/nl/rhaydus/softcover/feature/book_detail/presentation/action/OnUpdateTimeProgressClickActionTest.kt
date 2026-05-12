@@ -98,7 +98,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe true
-            coVerify(exactly = 0) { updateBookProgress(any(), any(), any(), any()) }
+            coVerify(exactly = 0) { updateBookProgress(any(), any(), any()) }
         }
 
         @Test
@@ -116,7 +116,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3723, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 3723)
             }
         }
 
@@ -135,7 +135,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 30, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 30)
             }
         }
 
@@ -154,7 +154,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 3600)
             }
         }
 
@@ -173,7 +173,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 3600)
             }
         }
 
@@ -191,7 +191,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 0, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 0)
             }
         }
 
@@ -210,7 +210,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3540, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 3540)
             }
         }
 
@@ -229,7 +229,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 59, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 59)
             }
         }
 
@@ -248,7 +248,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 1800, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 1800)
             }
         }
 
@@ -267,7 +267,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 3600)
             }
         }
 
@@ -286,7 +286,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 0, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 0)
             }
         }
 
@@ -305,7 +305,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 3600)
             }
         }
 
@@ -324,24 +324,8 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600, setLoading = any())
+                updateBookProgress(book = book, newSeconds = 3600)
             }
-        }
-
-        @Test
-        fun `passes a setLoading lambda that toggles loadingBookDetails state`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = BookDetailUiState(book = book, loadingBookDetails = false)
-            dependencies = stubDependencies(this)
-
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
-
-            // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
-
-            // ----- Assert -----
-            stateFlow.value.loadingBookDetails shouldBe false
         }
     }
 }

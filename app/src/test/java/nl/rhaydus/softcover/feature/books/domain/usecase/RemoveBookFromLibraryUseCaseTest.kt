@@ -27,7 +27,7 @@ class RemoveBookFromLibraryUseCaseTest {
     inner class Invoke {
 
         @Test
-        fun `removes book from library then removes local cache`() = runTest {
+        fun `removes book from library and returns success`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>()
 
@@ -35,17 +35,13 @@ class RemoveBookFromLibraryUseCaseTest {
                 booksRepository.removeBookFromLibrary(book = book)
             }
 
-            coJustRun {
-                booksRepository.removeBook(book = book)
-            }
-
             // ----- Act -----
             val result = useCase(book)
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) { booksRepository.removeBookFromLibrary(book = book) }
-            coVerify(exactly = 1) { booksRepository.removeBook(book = book) }
         }
 
         @Test
@@ -56,29 +52,6 @@ class RemoveBookFromLibraryUseCaseTest {
 
             coEvery {
                 booksRepository.removeBookFromLibrary(book = book)
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(book)
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-            coVerify(exactly = 0) { booksRepository.removeBook(book = any()) }
-        }
-
-        @Test
-        fun `returns failure when removeBook throws`() = runTest {
-            // ----- Arrange -----
-            val book = mockk<Book>()
-            val expectedError = RuntimeException("db error")
-
-            coJustRun {
-                booksRepository.removeBookFromLibrary(book = book)
-            }
-
-            coEvery {
-                booksRepository.removeBook(book = book)
             } throws expectedError
 
             // ----- Act -----

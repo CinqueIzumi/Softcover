@@ -69,14 +69,13 @@ class OnAddBookToLibraryClickActionTest {
     inner class Execute {
 
         @Test
-        fun `invokes markBookAsWantToReadUseCase with the book id`() = runTest {
+        fun `invokes markBookAsWantToReadUseCase with the book`() = runTest {
             // ----- Arrange -----
-            val bookId = 42
-            val book = stubBook(id = bookId)
+            val book = stubBook(id = 42)
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsWantToReadUseCase(bookId = bookId)
+                markBookAsWantToReadUseCase(book = book)
             } returns Result.success(Unit)
 
             val action = OnAddBookToLibraryClickAction(book = book)
@@ -89,7 +88,7 @@ class OnAddBookToLibraryClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                markBookAsWantToReadUseCase(bookId = bookId)
+                markBookAsWantToReadUseCase(book = book)
             }
         }
 
@@ -100,7 +99,7 @@ class OnAddBookToLibraryClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsWantToReadUseCase(bookId = 7)
+                markBookAsWantToReadUseCase(book = book)
             } returns Result.success(Unit)
 
             val action = OnAddBookToLibraryClickAction(book = book)
@@ -123,7 +122,7 @@ class OnAddBookToLibraryClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsWantToReadUseCase(bookId = 3)
+                markBookAsWantToReadUseCase(book = book)
             } returns Result.failure(RuntimeException("network error"))
 
             val action = OnAddBookToLibraryClickAction(book = book)

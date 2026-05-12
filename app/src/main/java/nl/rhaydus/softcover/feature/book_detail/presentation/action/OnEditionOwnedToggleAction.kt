@@ -15,16 +15,23 @@ class OnEditionOwnedToggleAction(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(settingEditionOwned = true) }
+        scope.currentLocalVariables.editionMutationJobs[edition.id]?.cancel()
 
-        dependencies.setEditionAsOwnedUseCase(
-            edition = edition,
-            owned = edition.owned.not(),
-        )
-            .onFailure {
-                Timber.e("-=- $it")
+        val job = dependencies.launch {
+            dependencies.setEditionAsOwnedUseCase(
+                edition = edition,
+                owned = edition.owned.not(),
+            ).onFailure { error ->
+                Timber.e("-=- $error")
+
+                scope.setState {
+                    it.copy(failedMutationEditionIds = it.failedMutationEditionIds + edition.id)
+                }
             }
+        }
 
-        scope.setState { it.copy(settingEditionOwned = false) }
+        scope.setLocalVariables {
+            it.copy(editionMutationJobs = it.editionMutationJobs + (edition.id to job))
+        }
     }
 }

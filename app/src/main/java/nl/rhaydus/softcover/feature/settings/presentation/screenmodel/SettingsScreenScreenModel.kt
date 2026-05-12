@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUs
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
@@ -17,6 +18,7 @@ class SettingsScreenScreenModel(
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val setDateStyleUseCase: SetDateStyleUseCase,
     private val setBottomBarStyleUseCase: SetBottomBarStyleUseCase,
+    private val setDynamicColorUseCase: SetDynamicColorUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     appDispatchers: AppDispatchers,
     flows: List<SettingsInitializer>,
@@ -28,6 +30,7 @@ class SettingsScreenScreenModel(
     override val dependencies = SettingsScreenDependencies(
         getThemeConfigurationUseCase = getThemeConfigurationUseCase,
         setBottomBarStyleUseCase = setBottomBarStyleUseCase,
+        setDynamicColorUseCase = setDynamicColorUseCase,
         setDateStyleUseCase = setDateStyleUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         coroutineScope = screenModelScope,

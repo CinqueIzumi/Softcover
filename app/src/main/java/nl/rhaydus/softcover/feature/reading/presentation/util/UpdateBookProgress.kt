@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.reading.presentation.util
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
-import timber.log.Timber
 
 class UpdateBookProgress(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
@@ -13,10 +12,7 @@ class UpdateBookProgress(
         book: Book,
         newPage: Int? = null,
         newSeconds: Int? = null,
-        setLoading: (Boolean) -> Unit,
-    ) {
-        setLoading(true)
-
+    ): Result<Unit> {
         val edition = book.currentEdition
         val finished = when {
             edition == null -> false
@@ -25,20 +21,14 @@ class UpdateBookProgress(
             else -> false
         }
 
-        if (finished) {
-            markBookAsReadUseCase(book = book).onFailure {
-                Timber.e("Something went wrong marking book as read! $it")
-            }
+        return if (finished) {
+            markBookAsReadUseCase(book = book)
         } else {
             updateBookProgressUseCase(
                 book = book,
                 newPage = newPage,
                 newSeconds = newSeconds,
-            ).onFailure {
-                Timber.e("Something went wrong updating book progress! $it")
-            }
+            )
         }
-
-        setLoading(false)
     }
 }

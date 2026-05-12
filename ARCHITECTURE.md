@@ -236,7 +236,8 @@ Navigator(screen = if (authenticated) RootScreen else OnboardingScreen)
 ## Network Layer
 
 - **Apollo GraphQL** communicates with the Hardcover API.
-- `safeQuery()` and `safeMutation()` extension functions wrap Apollo calls with error handling.
+- `safeQuery()` and `safeMutation()` extension functions wrap Apollo calls with error handling. `safeQuery` takes an optional `FetchPolicy` (defaults to `NetworkOnly`); a `safeQueryFlow` variant exists for `CacheAndNetwork` rendering.
+- An in-memory normalized cache is configured on `ApolloClient` (10 MiB), keyed by `@typePolicy` declarations on entity types in `app/src/main/graphql/extra.graphqls`. Session-stable queries (book detail, editions, reviews, series lookups, books-by-ids hydration) are served `CacheFirst` for instant revisits. Lists that should refresh on screen entry stay on `NetworkOnly`. Mutations write through the cache automatically — Room remains the source of truth for user-book state, so Apollo cache writes on `user_books` rows are currently inert observers.
 - Network interceptors handle authentication headers.
 - Apollo errors are wrapped in `RuntimeException` with descriptive messages.
 

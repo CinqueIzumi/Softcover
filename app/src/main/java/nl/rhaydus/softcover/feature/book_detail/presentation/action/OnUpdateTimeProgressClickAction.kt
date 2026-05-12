@@ -29,11 +29,6 @@ data class OnUpdateTimeProgressClickAction(
             dependencies.updateBookProgress(
                 book = bookToUpdate,
                 newSeconds = newSeconds,
-                setLoading = { newValue ->
-                    scope.setState {
-                        it.copy(loadingBookDetails = newValue)
-                    }
-                }
             )
         }
 

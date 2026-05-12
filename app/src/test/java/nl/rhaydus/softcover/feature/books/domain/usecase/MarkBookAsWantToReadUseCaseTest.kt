@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.books.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -27,64 +26,36 @@ class MarkBookAsWantToReadUseCaseTest {
     inner class Invoke {
 
         @Test
-        fun `marks book as want to read then caches the updated book`() = runTest {
+        fun `marks book as want to read and returns success`() = runTest {
             // ----- Arrange -----
-            val bookId = 77
+            val book = mockk<Book>()
             val updatedBook = mockk<Book>()
 
             coEvery {
-                booksRepository.markBookAsWantToRead(bookId = bookId)
+                booksRepository.markBookAsWantToRead(book = book)
             } returns updatedBook
 
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
-            val result = useCase(bookId)
+            val result = useCase(book)
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 1) { booksRepository.markBookAsWantToRead(bookId = bookId) }
-            coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
+
+            coVerify(exactly = 1) { booksRepository.markBookAsWantToRead(book = book) }
         }
 
         @Test
         fun `returns failure when markBookAsWantToRead throws`() = runTest {
             // ----- Arrange -----
-            val bookId = 77
+            val book = mockk<Book>()
             val expectedError = RuntimeException("network error")
 
             coEvery {
-                booksRepository.markBookAsWantToRead(bookId = bookId)
+                booksRepository.markBookAsWantToRead(book = book)
             } throws expectedError
 
             // ----- Act -----
-            val result = useCase(bookId)
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-            coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
-        }
-
-        @Test
-        fun `returns failure when cacheBook throws`() = runTest {
-            // ----- Arrange -----
-            val bookId = 77
-            val updatedBook = mockk<Book>()
-            val expectedError = RuntimeException("cache error")
-
-            coEvery {
-                booksRepository.markBookAsWantToRead(bookId = bookId)
-            } returns updatedBook
-
-            coEvery {
-                booksRepository.cacheBook(book = updatedBook)
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(bookId)
+            val result = useCase(book)
 
             // ----- Assert -----
             result.isFailure shouldBe true

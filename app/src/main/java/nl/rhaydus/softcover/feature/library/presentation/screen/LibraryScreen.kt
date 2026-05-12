@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,11 +52,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -97,12 +101,23 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.presentation.component.PullToRefreshEyebrow
+import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
+import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
+import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
+import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
@@ -129,18 +144,32 @@ object LibraryScreen : Screen {
         val state by screenModel.state.collectAsStateWithLifecycle()
         val localState by screenModel.localState.collectAsStateWithLifecycle()
 
-        Screen(
-            state = state,
-            runAction = screenModel::runAction,
-            gridStateFor = { id -> localState.gridStates[id] ?: LazyGridState() },
-            topAppBarState = screenModel.headerScrollState,
-            onBookClick = {
-                navigator.parent?.push(item = BookDetailScreen(id = it.id))
-            },
-            onEditionClick = {
-                navigator.parent?.push(item = BookDetailScreen(id = it.bookId))
-            },
-        )
+        val prefetcher = rememberBookDetailPrefetcher()
+
+        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
+            Screen(
+                state = state,
+                runAction = screenModel::runAction,
+                gridStateFor = { id -> localState.gridStates[id] ?: LazyGridState() },
+                topAppBarState = screenModel.headerScrollState,
+                onBookClick = {
+                    navigator.parent?.push(
+                        item = BookDetailScreen(
+                            id = it.id,
+                            initialCover = BookInitialCover.fromBook(book = it),
+                        ),
+                    )
+                },
+                onEditionClick = {
+                    navigator.parent?.push(
+                        item = BookDetailScreen(
+                            id = it.bookId,
+                            initialCover = BookInitialCover.fromEdition(edition = it),
+                        ),
+                    )
+                },
+            )
+        }
     }
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -151,7 +180,7 @@ object LibraryScreen : Screen {
         onBookClick: (Book) -> Unit,
         onEditionClick: (BookEdition) -> Unit,
         gridStateFor: (String) -> LazyGridState = { LazyGridState() },
-        topAppBarState: androidx.compose.material3.TopAppBarState = rememberTopAppBarState(),
+        topAppBarState: TopAppBarState = rememberTopAppBarState(),
     ) {
         val tabs = state.visibleTabs
         val scope = rememberCoroutineScope()
@@ -224,6 +253,8 @@ object LibraryScreen : Screen {
                             runAction = runAction,
                         )
                     },
+                    pullToRefreshState = pullToRefreshState,
+                    isRefreshing = state.isLoading,
                     collapseFraction = collapseFraction,
                     onCollapsibleSized = { measured ->
                         val newLimit = -measured.toFloat()
@@ -326,6 +357,7 @@ object LibraryScreen : Screen {
 
     // region Editorial header
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun EditorialHeader(
         tabLabel: String?,
@@ -333,6 +365,8 @@ object LibraryScreen : Screen {
         isSearchActive: Boolean,
         onToggleSearchClick: () -> Unit,
         layoutMenu: @Composable () -> Unit,
+        pullToRefreshState: PullToRefreshState,
+        isRefreshing: Boolean,
         collapseFraction: Float,
         onCollapsibleSized: (Int) -> Unit,
     ) {
@@ -345,9 +379,13 @@ object LibraryScreen : Screen {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    SectionLabel(text = "Your collection")
-                }
+                PullToRefreshEyebrow(
+                    pullToRefreshState = pullToRefreshState,
+                    isRefreshing = isRefreshing,
+                    baseText = "Your collection",
+                    refreshingText = "Refreshing your shelf…",
+                    modifier = Modifier.weight(1f),
+                )
 
                 IconButton(onClick = onToggleSearchClick) {
                     Icon(
@@ -408,26 +446,6 @@ object LibraryScreen : Screen {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-        }
-    }
-
-    @Composable
-    private fun SectionLabel(text: String) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .height(1.dp)
-                    .width(20.dp)
-                    .background(MaterialTheme.colorScheme.primary),
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = text.uppercase(),
-                style = MaterialTheme.editorialTypography.eyebrow,
-                color = MaterialTheme.colorScheme.primary,
-            )
         }
     }
 
@@ -668,12 +686,18 @@ object LibraryScreen : Screen {
             }
         }
 
+        val animator = rememberLazyItemMutationAnimator(keys = visibleEditions.map { it.id })
+
+        val entry = rememberStaggeredEntryCoordinator(key = "library:editions:${tab.id}")
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            items(visibleEditions) { edition ->
+            itemsIndexed(visibleEditions, key = { _, edition -> edition.id }) { index, edition ->
                 LayoutEditionEntry(
+                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = edition.id)
+                        .staggeredEntry(coordinator = entry, index = index),
                     edition = edition,
                     layout = state.gridLayout,
                     onEditionClick = onEditionClick,
@@ -710,12 +734,18 @@ object LibraryScreen : Screen {
             }
         }
 
+        val animator = rememberLazyItemMutationAnimator(keys = visibleBooks.map { it.id })
+
+        val entry = rememberStaggeredEntryCoordinator(key = "library:books:${tab.id}")
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            items(visibleBooks) { book ->
+            itemsIndexed(visibleBooks, key = { _, book -> book.id }) { index, book ->
                 LayoutBookEntry(
+                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
+                        .staggeredEntry(coordinator = entry, index = index),
                     book = book,
                     layout = state.gridLayout,
                     onBookClick = onBookClick,
@@ -780,7 +810,10 @@ object LibraryScreen : Screen {
         onBookClick: (Book) -> Unit,
         deadline: BookDeadline? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+        modifier: Modifier = Modifier,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         val authorName = book.authors.map { it.name }.firstOrNull().orEmpty()
 
         val currentEdition = book.currentEdition
@@ -807,19 +840,24 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS,
                 -> {
                 GridBookCell(
+                    modifier = modifier,
                     title = book.title,
                     authorName = authorName,
                     onClick = { onBookClick(book) },
-                ) { modifier ->
+                ) { coverModifier ->
                     DeadlineCoverOverlay(progress = deadlineProgress) {
                         EditionImage(
                             edition = currentEdition,
-                            modifier = modifier,
+                            modifier = coverModifier,
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
                             fallbackCoverUrl = book.coverUrl,
                             elevation = 6.dp,
                             cornerRadius = 10.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = currentEdition?.id,
+                                bookId = book.id,
+                            ),
                         )
                     }
                 }
@@ -829,17 +867,22 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
                 -> {
                 CoverOnlyCell(
+                    modifier = modifier,
                     onClick = { onBookClick(book) },
-                ) { modifier ->
+                ) { coverModifier ->
                     DeadlineCoverOverlay(progress = deadlineProgress) {
                         EditionImage(
                             edition = currentEdition,
-                            modifier = modifier,
+                            modifier = coverModifier,
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
                             fallbackCoverUrl = book.coverUrl,
                             elevation = 6.dp,
                             cornerRadius = 10.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = currentEdition?.id,
+                                bookId = book.id,
+                            ),
                         )
                     }
                 }
@@ -847,6 +890,7 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_COMPACT -> {
                 CompactRow(
+                    modifier = modifier,
                     title = book.title,
                     authorName = authorName,
                     onClick = { onBookClick(book) },
@@ -856,6 +900,7 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_LARGE -> {
                 LargeRow(
+                    modifier = modifier,
                     title = book.title,
                     authorName = currentEdition?.authorString.orEmpty(),
                     onClick = { onBookClick(book) },
@@ -865,16 +910,20 @@ object LibraryScreen : Screen {
                     rating = book.rating,
                     deadlineProgress = deadlineProgress,
                     dateStyle = dateStyle,
-                ) { modifier ->
+                ) { coverModifier ->
                     DeadlineCoverOverlay(progress = deadlineProgress) {
                         EditionImage(
                             edition = currentEdition,
-                            modifier = modifier,
+                            modifier = coverModifier,
                             isLoading = false,
                             defaultEdition = book.defaultEdition,
                             fallbackCoverUrl = book.coverUrl,
                             elevation = 6.dp,
                             cornerRadius = 10.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = currentEdition?.id,
+                                bookId = book.id,
+                            ),
                         )
                     }
                 }
@@ -887,7 +936,10 @@ object LibraryScreen : Screen {
         edition: BookEdition,
         layout: LibraryGridLayout,
         onEditionClick: (BookEdition) -> Unit,
+        modifier: Modifier = Modifier,
     ) {
+        PrefetchBookDetailOnVisible(bookId = edition.bookId)
+
         val title = edition.title.orEmpty()
         val authorName = edition.authors.map { it.name }.firstOrNull().orEmpty()
 
@@ -896,17 +948,22 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS,
                 -> {
                 GridBookCell(
+                    modifier = modifier,
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
-                ) { modifier ->
+                ) { coverModifier ->
                     EditionImage(
                         edition = edition,
-                        modifier = modifier,
+                        modifier = coverModifier,
                         isLoading = false,
                         defaultEdition = edition,
                         elevation = 6.dp,
                         cornerRadius = 10.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = edition.id,
+                            bookId = edition.bookId,
+                        ),
                     )
                 }
             }
@@ -915,21 +972,27 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
                 -> {
                 CoverOnlyCell(
+                    modifier = modifier,
                     onClick = { onEditionClick(edition) },
-                ) { modifier ->
+                ) { coverModifier ->
                     EditionImage(
                         edition = edition,
-                        modifier = modifier,
+                        modifier = coverModifier,
                         isLoading = false,
                         defaultEdition = edition,
                         elevation = 6.dp,
                         cornerRadius = 10.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = edition.id,
+                            bookId = edition.bookId,
+                        ),
                     )
                 }
             }
 
             LibraryGridLayout.LIST_COMPACT -> {
                 CompactRow(
+                    modifier = modifier,
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
@@ -938,17 +1001,22 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_LARGE -> {
                 LargeRow(
+                    modifier = modifier,
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
-                ) { modifier ->
+                ) { coverModifier ->
                     EditionImage(
                         edition = edition,
-                        modifier = modifier,
+                        modifier = coverModifier,
                         isLoading = false,
                         defaultEdition = edition,
                         elevation = 6.dp,
                         cornerRadius = 10.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = edition.id,
+                            bookId = edition.bookId,
+                        ),
                     )
                 }
             }
@@ -958,13 +1026,14 @@ object LibraryScreen : Screen {
     @Composable
     private fun CoverOnlyCell(
         onClick: () -> Unit,
+        modifier: Modifier = Modifier,
         cover: @Composable (Modifier) -> Unit,
     ) {
         cover(
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .aspectRatio(ratio = 2f / 3f)
-                .noRippleClickable(onClick = onClick)
+                .pressScaleClickable(onClick = onClick)
         )
     }
 
@@ -973,10 +1042,11 @@ object LibraryScreen : Screen {
         title: String,
         authorName: String,
         onClick: () -> Unit,
+        modifier: Modifier = Modifier,
         cover: @Composable (Modifier) -> Unit,
     ) {
         Column(
-            modifier = Modifier.noRippleClickable(onClick = onClick)
+            modifier = modifier.pressScaleClickable(onClick = onClick)
         ) {
             cover(
                 Modifier
@@ -1016,11 +1086,12 @@ object LibraryScreen : Screen {
         authorName: String,
         onClick: () -> Unit,
         deadlineProgress: DeadlineProgress? = null,
+        modifier: Modifier = Modifier,
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
-                .noRippleClickable(onClick = onClick),
+                .pressScaleClickable(onClick = onClick),
         ) {
             Row(
                 modifier = Modifier
@@ -1074,12 +1145,13 @@ object LibraryScreen : Screen {
         rating: Double? = null,
         deadlineProgress: DeadlineProgress? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+        modifier: Modifier = Modifier,
         cover: @Composable (Modifier) -> Unit,
     ) {
         Surface(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
-                .noRippleClickable(onClick = onClick),
+                .pressScaleClickable(onClick = onClick),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
         ) {
@@ -1198,7 +1270,9 @@ object LibraryScreen : Screen {
                 text = "“",
                 style = MaterialTheme.editorialTypography.quoteGlyph,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = quoteAlpha),
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .quoteGlyphSway(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))

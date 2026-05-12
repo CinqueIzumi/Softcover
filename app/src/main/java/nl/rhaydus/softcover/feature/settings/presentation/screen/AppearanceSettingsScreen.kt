@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -39,6 +40,7 @@ import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDateStyleClickAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnDynamicColorToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnFloatingBarToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
@@ -84,6 +86,15 @@ class AppearanceSettingsScreen : Screen {
                         vertical = 16.dp,
                     ),
             ) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    DynamicColorSection(
+                        state = state,
+                        runAction = runAction,
+                    )
+
+                    Spacer(modifier = Modifier.height(40.dp))
+                }
+
                 BottomBarSection(
                     state = state,
                     runAction = runAction,
@@ -100,6 +111,76 @@ class AppearanceSettingsScreen : Screen {
             }
         }
     }
+
+    // region Dynamic color section
+
+    @Composable
+    private fun DynamicColorSection(
+        state: SettingsScreenUiState,
+        runAction: (SettingsAction) -> Unit,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            EditorialSectionHeader(
+                eyebrow = "Material You",
+                headline = "Tint to your wallpaper",
+                description = "Recolour Softcover with the system palette from your wallpaper.",
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = RoundedCornerShape(20.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            horizontal = 20.dp,
+                            vertical = 18.dp,
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Dynamic colour",
+                            style = MaterialTheme.editorialTypography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = if (state.useDynamicColorChecked) "On" else "Off",
+                            style = MaterialTheme.editorialTypography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Switch(
+                        checked = state.useDynamicColorChecked,
+                        onCheckedChange = {
+                            runAction(OnDynamicColorToggledAction(newValue = it))
+                        },
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "The source palette is picked in the system Wallpaper & style settings.",
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp),
+            )
+        }
+    }
+
+    // endregion
 
     // region Bottom bar section
 

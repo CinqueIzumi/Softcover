@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -42,17 +43,24 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -78,26 +86,37 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
+import nl.rhaydus.softcover.core.presentation.component.DropCapText
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
+import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.presentation.modifier.grayscale
+import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
+import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
+import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
@@ -121,6 +140,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBo
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
@@ -129,6 +149,7 @@ import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 private val GoldStar = Color(0xFFFBBF23)
@@ -137,13 +158,15 @@ private const val REVIEW_COLLAPSED_LINES = 8
 
 class BookDetailScreen(
     val id: Int,
+    private val initialCover: BookInitialCover? = null,
+    private val transitionSurface: String? = null,
 ) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
         val screenModel: BookDetailScreenScreenModel =
-            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(id) }
+            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(id, initialCover) }
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
@@ -264,19 +287,38 @@ class BookDetailScreen(
                 state = lazyListState,
             ) {
                 item {
-                    GeneralBookInfoSection(
-                        edition = state.book?.currentEdition,
-                        isLoading = state.loadingBookDetails,
-                        fallBackEdition = state.book?.defaultEdition,
-                        fallbackCoverUrl = state.book?.coverUrl,
-                        isExpired = state.deadlineProgress?.isExpired == true,
-                        rating = state.book?.rating,
-                        title = state.book?.title,
-                        seriesText = state.book?.seriesText,
-                        releaseYear = state.book?.currentEdition?.releaseYear.takeIf { it != -1 }
-                            ?: state.book?.releaseYear,
-                        onCoverClick = onCoverClick,
-                    )
+                    val currentEditionId = state.book?.currentEdition?.id
+
+                    val editionMutationFailed =
+                        currentEditionId != null && currentEditionId in state.failedMutationEditionIds
+
+                    Box(
+                        modifier = Modifier.shakeOnError(
+                            trigger = editionMutationFailed,
+                            onShakeEnd = {
+                                if (currentEditionId != null) {
+                                    runAction(
+                                        OnClearMutationFailureAction(editionId = currentEditionId)
+                                    )
+                                }
+                            },
+                        ),
+                    ) {
+                        GeneralBookInfoSection(
+                            edition = state.book?.currentEdition ?: state.initialCover?.currentEdition,
+                            isLoading = state.loadingBookDetails && state.book == null,
+                            fallBackEdition = state.book?.defaultEdition ?: state.initialCover?.defaultEdition,
+                            fallbackCoverUrl = state.book?.coverUrl ?: state.initialCover?.fallbackCoverUrl,
+                            isExpired = state.deadlineProgress?.isExpired == true,
+                            rating = state.book?.rating,
+                            title = state.book?.title,
+                            seriesText = state.book?.seriesText,
+                            releaseYear = state.book?.currentEdition?.releaseYear.takeIf { it != -1 }
+                                ?: state.book?.releaseYear,
+                            unreleasedDate = state.book?.takeIf { it.isUnreleased }?.effectiveReleaseDate,
+                            onCoverClick = onCoverClick,
+                        )
+                    }
                 }
 
                 item { Spacer(modifier = Modifier.height(20.dp)) }
@@ -288,16 +330,24 @@ class BookDetailScreen(
                     )
                 }
 
-                item { Spacer(modifier = Modifier.height(20.dp)) }
+                val shelfPanelStatus = state.book?.status
+                val shelfPanelWillRender = shelfPanelStatus == BookStatus.Reading ||
+                    shelfPanelStatus == BookStatus.DidNotFinish
 
-                item {
-                    ShelfStatusPanel(
-                        state = state,
-                        runAction = runAction,
-                    )
+                if (shelfPanelWillRender) {
+                    item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                    item {
+                        ShelfStatusPanel(
+                            state = state,
+                            runAction = runAction,
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(28.dp)) }
+                } else {
+                    item { Spacer(modifier = Modifier.height(28.dp)) }
                 }
-
-                item { Spacer(modifier = Modifier.height(28.dp)) }
 
                 item { AboutSection(state = state) }
 
@@ -420,6 +470,7 @@ class BookDetailScreen(
         seriesText: String?,
         rating: Double?,
         releaseYear: Int?,
+        unreleasedDate: LocalDate?,
         isLoading: Boolean,
         fallbackCoverUrl: String?,
         isExpired: Boolean,
@@ -428,6 +479,9 @@ class BookDetailScreen(
         val imageHeight = with(LocalDensity.current) {
             (LocalWindowInfo.current.containerSize.height * 0.3f).toDp()
         }
+
+        val coverHasContent = edition != null || fallBackEdition != null || fallbackCoverUrl != null
+        val coverIsLoading = isLoading && coverHasContent.not()
 
         Box(
             modifier = Modifier
@@ -441,7 +495,7 @@ class BookDetailScreen(
                 edition = edition,
                 defaultEdition = fallBackEdition,
                 fallbackCoverUrl = fallbackCoverUrl,
-                isLoading = isLoading,
+                isLoading = coverIsLoading,
                 modifier = Modifier
                     .matchParentSize()
                     .blur(8.dp)
@@ -475,21 +529,24 @@ class BookDetailScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    modifier = Modifier.clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        enabled = isLoading.not(),
-                        onClick = onCoverClick,
-                    ),
+                    modifier = if (isLoading.not()) {
+                        Modifier.pressScaleClickable(onClick = onCoverClick)
+                    } else {
+                        Modifier
+                    },
                 ) {
                     EditionImage(
                         edition = edition,
                         defaultEdition = fallBackEdition,
                         fallbackCoverUrl = fallbackCoverUrl,
-                        isLoading = isLoading,
-                        modifier = Modifier
-                            .height(imageHeight * 0.8f)
-                            .clip(shape = RoundedCornerShape(16.dp)),
+                        isLoading = coverIsLoading,
+                        modifier = Modifier.height(imageHeight * 0.8f),
+                        cornerRadius = 16.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = edition?.id,
+                            bookId = id,
+                            surface = transitionSurface,
+                        ),
                     )
 
                     if (edition?.owned == true) {
@@ -520,208 +577,219 @@ class BookDetailScreen(
                     shadow = secondaryShadow,
                 )
 
-                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .height(12.dp)
-                                .width(120.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmer(isLoading = true),
-                        )
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .height(22.dp)
-                                .fillMaxWidth(0.85f)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmer(isLoading = true),
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .height(12.dp)
-                                .width(140.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmer(isLoading = true),
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            repeat(3) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .height(10.dp)
-                                            .width(48.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .shimmer(isLoading = true),
-                                    )
-
-                                    Spacer(modifier = Modifier.height(6.dp))
-
-                                    Box(
-                                        modifier = Modifier
-                                            .height(12.dp)
-                                            .width(36.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .shimmer(isLoading = true),
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        seriesText?.takeIf { it.isNotBlank() }?.let { series ->
-                            Text(
-                                text = series,
-                                color = Color.White.copy(alpha = textSecondaryAlpha),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.6.sp,
-                                    shadow = secondaryShadow,
-                                ),
+                SkeletonCrossfade(
+                    isLoading = isLoading,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    label = "BookDetailTitleBlock",
+                ) { loading ->
+                    if (loading) {
+                        Column {
+                            Box(
+                                modifier = Modifier
+                                    .height(12.dp)
+                                    .width(120.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmer(isLoading = true),
                             )
 
-                            Spacer(modifier = Modifier.height(2.dp))
-                        }
+                            Spacer(modifier = Modifier.height(6.dp))
 
-                        Text(
-                            text = title ?: "",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                shadow = Shadow(
-                                    color = Color.Black.copy(alpha = 0.75f),
-                                    offset = Offset(x = 0f, y = 1f),
-                                    blurRadius = 8f,
-                                ),
-                            ),
-                        )
+                            Box(
+                                modifier = Modifier
+                                    .height(22.dp)
+                                    .fillMaxWidth(0.85f)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmer(isLoading = true),
+                            )
 
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Text(
-                            text = "By ${edition?.authorString ?: ""}",
-                            color = Color.White.copy(alpha = textSecondaryAlpha),
-                            style = MaterialTheme.editorialTypography.bodySmall.copy(
-                                shadow = secondaryShadow,
-                            ),
-                        )
-
-                        val isAudiobook = edition?.isAudiobook == true
-
-                        val showRating = rating != null && rating > 0.0
-                        val showLength = if (isAudiobook) {
-                            (edition.audioSeconds ?: 0) > 0
-                        } else {
-                            (edition?.pages ?: 0) > 0
-                        }
-                        val showReleased = releaseYear != null && releaseYear > 0
-
-                        if (showRating || showLength || showReleased) {
                             Spacer(modifier = Modifier.height(8.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .height(12.dp)
+                                    .width(140.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmer(isLoading = true),
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
-                                if (showRating) {
+                                repeat(2) {
                                     Column(
                                         modifier = Modifier.weight(1f),
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
-                                        Text(
-                                            text = "Rating",
-                                            style = labelSmall,
+                                        Box(
+                                            modifier = Modifier
+                                                .height(10.dp)
+                                                .width(48.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .shimmer(isLoading = true),
                                         )
 
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(
-                                                text = "%.1f".format(rating),
-                                                style = bodySmall,
-                                            )
+                                        Spacer(modifier = Modifier.height(6.dp))
 
-                                            Spacer(modifier = Modifier.width(4.dp))
-
-                                            Icon(
-                                                painter = painterResource(R.drawable.ic_star_filled),
-                                                contentDescription = "",
-                                                tint = GoldStar,
-                                                modifier = Modifier.size(16.dp),
-                                            )
-                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .height(12.dp)
+                                                .width(36.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .shimmer(isLoading = true),
+                                        )
                                     }
                                 }
+                            }
+                        }
+                    } else {
+                        Column {
+                            seriesText?.takeIf { it.isNotBlank() }?.let { series ->
+                                Text(
+                                    text = series,
+                                    color = Color.White.copy(alpha = textSecondaryAlpha),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = 0.6.sp,
+                                        shadow = secondaryShadow,
+                                    ),
+                                )
 
-                                if (showLength) {
-                                    Column(
-                                        modifier = Modifier.weight(1f),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ) {
-                                        Text(
-                                            text = "Length",
-                                            style = labelSmall,
-                                        )
+                                Spacer(modifier = Modifier.height(2.dp))
+                            }
 
-                                        Row {
-                                            val lengthText = if (isAudiobook) {
-                                                secondsToHm(seconds = edition?.audioSeconds ?: 0)
-                                            } else {
-                                                "${edition?.pages ?: ""}"
-                                            }
+                            Text(
+                                text = title ?: "",
+                                color = Color.White,
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    shadow = Shadow(
+                                        color = Color.Black.copy(alpha = 0.75f),
+                                        offset = Offset(x = 0f, y = 1f),
+                                        blurRadius = 8f,
+                                    ),
+                                ),
+                            )
 
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            val authorName = edition?.authorString.orEmpty()
+                            val showReleased = releaseYear != null && releaseYear > 0 && unreleasedDate == null
+                            val bylineText = buildString {
+                                append("By ")
+                                append(authorName)
+
+                                if (showReleased) {
+                                    append(" · ")
+                                    append(releaseYear)
+                                }
+                            }
+
+                            Text(
+                                text = bylineText,
+                                color = Color.White.copy(alpha = textSecondaryAlpha),
+                                style = MaterialTheme.editorialTypography.bodySmall.copy(
+                                    shadow = secondaryShadow,
+                                ),
+                            )
+
+                            if (unreleasedDate != null) {
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                UnreleasedBadge(
+                                    releaseDate = unreleasedDate,
+                                    style = UnreleasedBadgeStyle.Prominent,
+                                )
+                            }
+
+                            val isAudiobook = edition?.isAudiobook == true
+
+                            val showRating = rating != null && rating > 0.0
+                            val showLength = if (isAudiobook) {
+                                (edition.audioSeconds ?: 0) > 0
+                            } else {
+                                (edition?.pages ?: 0) > 0
+                            }
+
+                            if (showRating || showLength) {
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    if (showRating) {
+                                        Column(
+                                            modifier = Modifier.weight(1f),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                        ) {
                                             Text(
-                                                text = lengthText,
-                                                style = bodySmall,
-                                                modifier = Modifier.alignByBaseline(),
+                                                text = "Rating",
+                                                style = labelSmall,
                                             )
 
-                                            if (isAudiobook.not()) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = "%.1f".format(rating),
+                                                    style = bodySmall,
+                                                )
+
                                                 Spacer(modifier = Modifier.width(4.dp))
 
-                                                Text(
-                                                    text = "pgs",
-                                                    style = labelSmall,
-                                                    modifier = Modifier.alignByBaseline(),
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_star_filled),
+                                                    contentDescription = "",
+                                                    tint = GoldStar,
+                                                    modifier = Modifier.size(16.dp),
                                                 )
                                             }
                                         }
                                     }
-                                }
 
-                                if (showReleased) {
-                                    Column(
-                                        modifier = Modifier.weight(1f),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ) {
-                                        Text(
-                                            text = "Released",
-                                            style = labelSmall,
-                                        )
+                                    if (showLength) {
+                                        Column(
+                                            modifier = Modifier.weight(1f),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                        ) {
+                                            Text(
+                                                text = "Length",
+                                                style = labelSmall,
+                                            )
 
-                                        Text(
-                                            text = "$releaseYear",
-                                            style = bodySmall,
-                                        )
+                                            Row {
+                                                val lengthText = if (isAudiobook) {
+                                                    secondsToHm(seconds = edition?.audioSeconds ?: 0)
+                                                } else {
+                                                    "${edition?.pages ?: ""}"
+                                                }
+
+                                                Text(
+                                                    text = lengthText,
+                                                    style = bodySmall,
+                                                    modifier = Modifier.alignByBaseline(),
+                                                )
+
+                                                if (isAudiobook.not()) {
+                                                    Spacer(modifier = Modifier.width(4.dp))
+
+                                                    Text(
+                                                        text = "pgs",
+                                                        style = labelSmall,
+                                                        modifier = Modifier.alignByBaseline(),
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -786,74 +854,128 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        if (state.loadingBookDetails) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-            ) {
-                SectionLabel(text = "Your shelf")
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+        SkeletonCrossfade(
+            isLoading = state.loadingBookDetails && state.book == null,
+            label = "ShelfActionBar",
+        ) { loading ->
+            if (loading) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                 ) {
-                    repeat(3) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(72.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .shimmer(isLoading = true),
+                    SectionLabel(text = "Your shelf")
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        repeat(3) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(72.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .shimmer(isLoading = true),
+                            )
+                        }
+                    }
+                }
+            } else {
+                val book = state.book
+
+                if (book != null) {
+                    val status = book.status
+
+                    val mutationFailed = book.id in state.failedMutationBookIds
+
+                    val haptics = rememberHaptics()
+
+                    var celebrationKey by remember { mutableIntStateOf(0) }
+                    var prevStatus by remember { mutableStateOf(status) }
+
+                    LaunchedEffect(status) {
+                        if (status == BookStatus.Read && prevStatus != BookStatus.Read) {
+                            haptics.commit()
+                            celebrationKey++
+                        }
+
+                        prevStatus = status
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            if (mutationFailed) {
+                                SectionLabel(
+                                    text = "Couldn't save — tap to retry",
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            } else {
+                                SectionLabel(
+                                    text = "Your shelf",
+                                    pulseKey = celebrationKey,
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shakeOnError(
+                                        trigger = mutationFailed,
+                                        onShakeEnd = {
+                                            runAction(OnClearMutationFailureAction(bookId = book.id))
+                                        },
+                                    ),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                ShelfChip(
+                                    label = "Want to read",
+                                    iconRes = R.drawable.ic_bookmark_add,
+                                    selected = status == BookStatus.WantToRead,
+                                    onClick = {
+                                        haptics.select()
+                                        runAction(OnMarkBookAsWantToReadClickAction(book = book))
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+
+                                ShelfChip(
+                                    label = "Reading",
+                                    iconRes = R.drawable.ic_reading,
+                                    selected = status == BookStatus.Reading,
+                                    onClick = {
+                                        haptics.select()
+                                        runAction(OnMarkBookAsReadingClickAction(book = book))
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    enabled = status != BookStatus.None,
+                                )
+
+                                ShelfChip(
+                                    label = "Read",
+                                    iconRes = R.drawable.ic_bookmark_check,
+                                    selected = status == BookStatus.Read,
+                                    onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
+                                    modifier = Modifier.weight(1f),
+                                    celebrationKey = celebrationKey,
+                                )
+                            }
+                        }
+
+                        MarkAsReadBurst(
+                            triggerKey = celebrationKey,
+                            modifier = Modifier.matchParentSize(),
                         )
                     }
                 }
-            }
-
-            return
-        }
-
-        val book = state.book ?: return
-        val status = book.status
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        ) {
-            SectionLabel(text = "Your shelf")
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                ShelfChip(
-                    label = "Want to read",
-                    iconRes = R.drawable.ic_bookmark_add,
-                    selected = status == BookStatus.WantToRead,
-                    onClick = { runAction(OnMarkBookAsWantToReadClickAction(book = book)) },
-                    modifier = Modifier.weight(1f),
-                )
-
-                ShelfChip(
-                    label = "Reading",
-                    iconRes = R.drawable.ic_reading,
-                    selected = status == BookStatus.Reading,
-                    onClick = { runAction(OnMarkBookAsReadingClickAction(book = book)) },
-                    modifier = Modifier.weight(1f),
-                )
-
-                ShelfChip(
-                    label = "Read",
-                    iconRes = R.drawable.ic_bookmark_check,
-                    selected = status == BookStatus.Read,
-                    onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
-                    modifier = Modifier.weight(1f),
-                )
             }
         }
     }
@@ -865,25 +987,88 @@ class BookDetailScreen(
         selected: Boolean,
         onClick: () -> Unit,
         modifier: Modifier = Modifier,
+        celebrationKey: Int = 0,
+        enabled: Boolean = true,
     ) {
-        val container = if (selected) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceContainer
+        val selectedContainer = MaterialTheme.colorScheme.secondaryContainer
+        val unselectedContainer = MaterialTheme.colorScheme.surfaceContainer
+        val selectedContent = MaterialTheme.colorScheme.onSecondaryContainer
+        val unselectedContent = MaterialTheme.colorScheme.onSurface
+
+        val playMotion = playDecorativeMotion()
+
+        var settledSelected by remember { mutableStateOf(selected) }
+        val wipe = remember { Animatable(initialValue = 1f) }
+
+        LaunchedEffect(selected) {
+            if (selected == settledSelected) return@LaunchedEffect
+
+            if (playMotion.not()) {
+                wipe.snapTo(targetValue = 1f)
+                settledSelected = selected
+                return@LaunchedEffect
+            }
+
+            wipe.snapTo(targetValue = 0f)
+            wipe.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 180),
+            )
+            settledSelected = selected
         }
 
-        val content = if (selected) {
-            MaterialTheme.colorScheme.onSecondaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurface
+        val fromContainer = if (settledSelected) selectedContainer else unselectedContainer
+        val toContainer = if (selected) selectedContainer else unselectedContainer
+
+        val contentColor by animateColorAsState(
+            targetValue = if (selected) selectedContent else unselectedContent,
+            animationSpec = tween(durationMillis = 180),
+            label = "ShelfChipContent",
+        )
+
+        val wipeProgress = wipe.value
+
+        val celebration = remember { Animatable(initialValue = 1f) }
+
+        LaunchedEffect(celebrationKey) {
+            if (celebrationKey == 0 || playMotion.not()) return@LaunchedEffect
+
+            celebration.snapTo(targetValue = 0f)
+            celebration.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 400),
+            )
         }
+
+        val progress = celebration.value
+
+        val iconScale = if (progress < 0.5f) {
+            1f + progress * 2f * 0.25f
+        } else {
+            1.25f - (progress - 0.5f) * 2f * 0.25f
+        }
+
+        val iconReveal = (progress / 0.6f).coerceIn(
+            minimumValue = 0f,
+            maximumValue = 1f,
+        )
 
         Surface(
-            modifier = modifier.height(72.dp),
-            color = container,
-            contentColor = content,
+            modifier = modifier
+                .height(72.dp)
+                .alpha(if (enabled) 1f else 0.4f)
+                .clip(RoundedCornerShape(20.dp))
+                .drawBehind {
+                    drawRect(color = fromContainer)
+                    clipRect(right = size.width * wipeProgress) {
+                        drawRect(color = toContainer)
+                    }
+                },
+            color = Color.Transparent,
+            contentColor = contentColor,
             shape = RoundedCornerShape(20.dp),
             onClick = onClick,
+            enabled = enabled && selected.not(),
         ) {
             Column(
                 modifier = Modifier
@@ -895,7 +1080,17 @@ class BookDetailScreen(
                 Icon(
                     painter = painterResource(iconRes),
                     contentDescription = null,
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier
+                        .size(22.dp)
+                        .graphicsLayer {
+                            scaleX = iconScale
+                            scaleY = iconScale
+                        }
+                        .drawWithContent {
+                            clipRect(right = size.width * iconReveal) {
+                                this@drawWithContent.drawContent()
+                            }
+                        },
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -919,8 +1114,7 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
         isOnline: Boolean,
-        iconColors: androidx.compose.material3.IconButtonColors =
-            IconButtonDefaults.iconButtonColors(),
+        iconColors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     ) {
         if (state.loadingBookDetails) return
 
@@ -975,7 +1169,6 @@ class BookDetailScreen(
                                     contentDescription = null,
                                 )
                             },
-                            enabled = state.settingEditionOwned.not(),
                             onClick = {
                                 dismiss()
                                 runAction(OnEditionOwnedToggleAction(edition = currentEdition))
@@ -1052,32 +1245,37 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        if (state.loadingBookDetails) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .shimmer(isLoading = true),
-            )
+        SkeletonCrossfade(
+            isLoading = state.loadingBookDetails && state.book == null,
+            label = "ShelfStatusPanel",
+        ) { loading ->
+            if (loading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .shimmer(isLoading = true),
+                )
+            } else {
+                val book = state.book
 
-            return
-        }
+                if (book != null) {
+                    when (book.status) {
+                        BookStatus.Reading -> ReadingProgressCard(
+                            state = state,
+                            runAction = runAction,
+                        )
 
-        val book = state.book ?: return
-
-        when (book.status) {
-            BookStatus.Reading -> ReadingProgressCard(
-                state = state,
-                runAction = runAction,
-            )
-
-            BookStatus.DidNotFinish -> DnfInfoCallout(state = state)
-            BookStatus.Read,
-            BookStatus.WantToRead,
-            BookStatus.None,
-                -> Unit
+                        BookStatus.DidNotFinish -> DnfInfoCallout(state = state)
+                        BookStatus.Read,
+                        BookStatus.WantToRead,
+                        BookStatus.None,
+                            -> Unit
+                    }
+                }
+            }
         }
     }
 
@@ -1379,35 +1577,35 @@ class BookDetailScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (state.loadingBookDetails) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .shimmer(isLoading = true),
-                )
-
-                return
+            SkeletonCrossfade(
+                isLoading = state.loadingBookDetails && description.isBlank(),
+                label = "AboutSection",
+            ) { loading ->
+                if (loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .shimmer(isLoading = true),
+                    )
+                } else if (description.isBlank()) {
+                    Text(
+                        text = "No description for this book yet.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    DropCapText(
+                        text = htmlToAnnotatedString(html = description),
+                        bodyStyle = MaterialTheme.typography.bodyLarge.copy(
+                            lineHeight = 26.sp,
+                        ),
+                        bodyColor = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
-
-            if (description.isBlank()) {
-                Text(
-                    text = "No description for this book yet.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                return
-            }
-
-            Text(
-                text = htmlToAnnotatedString(html = description),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    lineHeight = 26.sp,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
         }
     }
 
@@ -1628,14 +1826,42 @@ class BookDetailScreen(
     // region Section Label
 
     @Composable
-    private fun SectionLabel(text: String) {
+    private fun SectionLabel(
+        text: String,
+        color: Color = MaterialTheme.colorScheme.primary,
+        pulseKey: Int = 0,
+    ) {
+        val playMotion = playDecorativeMotion()
+
+        val pulse = remember { Animatable(initialValue = 0f) }
+
+        LaunchedEffect(pulseKey) {
+            if (pulseKey == 0 || playMotion.not()) return@LaunchedEffect
+
+            pulse.snapTo(targetValue = 0f)
+            pulse.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 400),
+            )
+        }
+
+        val envelope = (1f - abs(pulse.value * 2f - 1f)).coerceIn(
+            minimumValue = 0f,
+            maximumValue = 1f,
+        )
+
+        val barWidth = 32.dp + (16.dp * envelope)
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .height(4.dp)
-                    .width(32.dp)
+                    .width(barWidth)
+                    .graphicsLayer {
+                        scaleY = 1f + envelope * 0.5f
+                    }
                     .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.primary),
+                    .background(color),
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -1643,7 +1869,7 @@ class BookDetailScreen(
             Text(
                 text = text.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrow,
-                color = MaterialTheme.colorScheme.primary,
+                color = color,
             )
         }
     }

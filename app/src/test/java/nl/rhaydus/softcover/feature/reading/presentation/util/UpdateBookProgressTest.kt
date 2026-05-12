@@ -35,6 +35,7 @@ class UpdateBookProgressTest {
             every { e.pages } returns pages
             every { e.audioSeconds } returns null
         }
+
         every { book.currentEdition } returns edition
     }
 
@@ -43,32 +44,12 @@ class UpdateBookProgressTest {
             val edition = mockk<BookEdition>().also { e ->
                 every { e.audioSeconds } returns audioSeconds
             }
+
             every { book.currentEdition } returns edition
         }
 
     @Nested
     inner class Invoke {
-
-        @Test
-        fun `calls setLoading with true then false`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 200)
-            val loadingStates = mutableListOf<Boolean>()
-
-            coEvery {
-                updateBookProgressUseCase(book = book, newPage = 50)
-            } returns Result.success(Unit)
-
-            // ----- Act -----
-            updateBookProgress(
-                book = book,
-                newPage = 50,
-                setLoading = { loadingStates.add(it) },
-            )
-
-            // ----- Assert -----
-            loadingStates shouldBe listOf(true, false)
-        }
 
         @Test
         fun `invokes markBookAsReadUseCase when newPage equals currentEdition pages`() = runTest {
@@ -83,7 +64,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newPage = 300,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -105,7 +85,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newPage = 300,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -127,7 +106,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newPage = 150,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -149,7 +127,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newPage = 100,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -171,55 +148,12 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newPage = 50,
-                setLoading = {},
             )
 
             // ----- Assert -----
             coVerify {
                 updateBookProgressUseCase(book = book, newPage = 50)
             }
-        }
-
-        @Test
-        fun `calls setLoading false even when markBookAsReadUseCase fails`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 300)
-            val loadingStates = mutableListOf<Boolean>()
-
-            coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.failure(RuntimeException("network error"))
-
-            // ----- Act -----
-            updateBookProgress(
-                book = book,
-                newPage = 300,
-                setLoading = { loadingStates.add(it) },
-            )
-
-            // ----- Assert -----
-            loadingStates.last() shouldBe false
-        }
-
-        @Test
-        fun `calls setLoading false even when updateBookProgressUseCase fails`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 300)
-            val loadingStates = mutableListOf<Boolean>()
-
-            coEvery {
-                updateBookProgressUseCase(book = book, newPage = 100)
-            } returns Result.failure(RuntimeException("network error"))
-
-            // ----- Act -----
-            updateBookProgress(
-                book = book,
-                newPage = 100,
-                setLoading = { loadingStates.add(it) },
-            )
-
-            // ----- Assert -----
-            loadingStates.last() shouldBe false
         }
 
         @Test
@@ -235,7 +169,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newPage = 300,
-                setLoading = {},
             )
         }
 
@@ -252,7 +185,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newPage = 50,
-                setLoading = {},
             )
         }
 
@@ -269,7 +201,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newPage = 350,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -291,7 +222,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newPage = 350,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -313,7 +243,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newSeconds = 3600,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -335,7 +264,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newSeconds = 4000,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -357,7 +285,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newSeconds = 3600,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -379,7 +306,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newSeconds = 1800,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -401,7 +327,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newSeconds = 1800,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -423,7 +348,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newSeconds = 1800,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -445,7 +369,6 @@ class UpdateBookProgressTest {
             updateBookProgress(
                 book = book,
                 newSeconds = 1800,
-                setLoading = {},
             )
 
             // ----- Assert -----
@@ -455,45 +378,81 @@ class UpdateBookProgressTest {
         }
 
         @Test
-        fun `calls setLoading true then false for audiobook progress update`() = runTest {
+        fun `returns success when updateBookProgressUseCase succeeds`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = 3600)
-            val loadingStates = mutableListOf<Boolean>()
+            val book = stubBookWithCurrentEditionPages(pages = 200)
 
             coEvery {
-                updateBookProgressUseCase(book = book, newPage = null, newSeconds = 1800)
+                updateBookProgressUseCase(book = book, newPage = 50)
             } returns Result.success(Unit)
 
             // ----- Act -----
-            updateBookProgress(
+            val result = updateBookProgress(
                 book = book,
-                newSeconds = 1800,
-                setLoading = { loadingStates.add(it) },
+                newPage = 50,
             )
 
             // ----- Assert -----
-            loadingStates shouldBe listOf(true, false)
+            result.isSuccess shouldBe true
         }
 
         @Test
-        fun `calls setLoading false even when marking audiobook as read fails`() = runTest {
+        fun `returns failure when updateBookProgressUseCase fails`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithCurrentEditionAudioSeconds(audioSeconds = 3600)
-            val loadingStates = mutableListOf<Boolean>()
+            val book = stubBookWithCurrentEditionPages(pages = 200)
+            val error = RuntimeException("network error")
 
             coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.failure(RuntimeException("network error"))
+                updateBookProgressUseCase(book = book, newPage = 50)
+            } returns Result.failure(error)
 
             // ----- Act -----
-            updateBookProgress(
+            val result = updateBookProgress(
                 book = book,
-                newSeconds = 3600,
-                setLoading = { loadingStates.add(it) },
+                newPage = 50,
             )
 
             // ----- Assert -----
-            loadingStates.last() shouldBe false
+            result.isFailure shouldBe true
+        }
+
+        @Test
+        fun `returns success when markBookAsReadUseCase succeeds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionPages(pages = 300)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = updateBookProgress(
+                book = book,
+                newPage = 300,
+            )
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+        }
+
+        @Test
+        fun `returns failure when markBookAsReadUseCase fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithCurrentEditionPages(pages = 300)
+            val error = RuntimeException("api error")
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.failure(error)
+
+            // ----- Act -----
+            val result = updateBookProgress(
+                book = book,
+                newPage = 300,
+            )
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
         }
     }
 }

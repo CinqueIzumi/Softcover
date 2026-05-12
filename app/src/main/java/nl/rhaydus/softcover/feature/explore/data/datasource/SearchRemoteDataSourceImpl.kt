@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.data.datasource
 
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.cache.normalized.FetchPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +35,8 @@ class SearchRemoteDataSourceImpl(
 
         val books = apolloClient
             .safeQuery(
-                query = GetBooksByIdsQuery(ids = matchingIds)
+                query = GetBooksByIdsQuery(ids = matchingIds),
+                fetchPolicy = FetchPolicy.CacheFirst,
             )
             .books
             .mapNotNull { it.bookDetailFragment()?.toBook() }
@@ -67,7 +69,10 @@ class SearchRemoteDataSourceImpl(
         val idOrdered = trendingIds.withIndex().associate { it.value to it.index }
 
         return apolloClient
-            .safeQuery(query = GetBooksByIdsQuery(ids = trendingIds))
+            .safeQuery(
+                query = GetBooksByIdsQuery(ids = trendingIds),
+                fetchPolicy = FetchPolicy.CacheFirst,
+            )
             .books
             .mapNotNull { it.bookDetailFragment()?.toBook() }
             .sortedBy { book -> idOrdered[book.id] }
@@ -81,7 +86,8 @@ class SearchRemoteDataSourceImpl(
             query = GetNextBookInSeriesQuery(
                 seriesId = seriesId,
                 afterPosition = afterPosition,
-            )
+            ),
+            fetchPolicy = FetchPolicy.CacheFirst,
         )
 
         val book = response.book_series.firstOrNull()?.book ?: return null

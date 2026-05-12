@@ -8,7 +8,5 @@ class RemoveBookFromLibraryUseCase(
 ) {
     suspend operator fun invoke(book: Book): Result<Unit> = runCatching {
         booksRepository.removeBookFromLibrary(book = book)
-
-        booksRepository.removeBook(book = book)
     }
 }

@@ -25,6 +25,8 @@ interface SettingsRepository {
 
     suspend fun setBottomBarStyle(style: BottomBarStyle)
 
+    suspend fun setDynamicColorEnabled(enabled: Boolean)
+
     suspend fun getUserIdFromBackend(): Int
 
     val enabledStatusCodes: Flow<Set<Int>>

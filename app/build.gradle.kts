@@ -17,8 +17,8 @@ android {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
         targetSdk = 36
-        versionCode = 23
-        versionName = "2.0.0"
+        versionCode = 24
+        versionName = "2.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -69,6 +69,7 @@ dependencies {
 
     // Apollo (graph ql communication)
     implementation(libs.apollo)
+    implementation(libs.apollo.normalized.cache)
 
     // Datastore
     implementation(libs.dataStore)
@@ -84,6 +85,7 @@ dependencies {
     implementation(libs.voyager.koin)
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.tabNavigator)
+    implementation(libs.voyager.transitions)
 
     // Image loading
     implementation(libs.coil)
@@ -105,6 +107,9 @@ dependencies {
     // Google Play in-app updates
     implementation(libs.play.app.update)
     implementation(libs.play.app.update.ktx)
+
+    // WorkManager for scheduled notifications
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Unit test dependencies
     testImplementation(libs.junit.params)

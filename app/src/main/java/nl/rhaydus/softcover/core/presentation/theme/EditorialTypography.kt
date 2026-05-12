@@ -48,8 +48,8 @@ val DefaultEditorialTypography: EditorialTypography = EditorialTypography(
 
     pageTitle = AppTypography.displaySmall.copy(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 38.sp,
-        lineHeight = 44.sp,
+        fontSize = 30.sp,
+        lineHeight = 36.sp,
     ),
     display = AppTypography.displayMedium.copy(
         fontStyle = FontStyle.Italic,

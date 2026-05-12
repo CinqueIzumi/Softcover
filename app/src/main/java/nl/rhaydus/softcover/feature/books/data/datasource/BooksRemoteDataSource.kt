@@ -31,6 +31,7 @@ import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book.Companion.userBookFragment
+import com.apollographql.apollo.cache.normalized.FetchPolicy
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -127,7 +128,10 @@ class BooksRemoteDataSourceImpl(
     }
 
     private suspend fun fetchBookByIdRaw(id: Int): Book {
-        val result = apolloClient.safeQuery(query = GetBookByIdQuery(id = id))
+        val result = apolloClient.safeQuery(
+            query = GetBookByIdQuery(id = id),
+            fetchPolicy = FetchPolicy.CacheFirst,
+        )
 
         return result
             .books
@@ -139,13 +143,19 @@ class BooksRemoteDataSourceImpl(
     override suspend fun fetchBooksByIds(ids: List<Int>): List<Book> {
         if (ids.isEmpty()) return emptyList()
 
-        val result = apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = ids))
+        val result = apolloClient.safeQuery(
+            query = GetBooksByIdsQuery(ids = ids),
+            fetchPolicy = FetchPolicy.CacheFirst,
+        )
 
         return result.books.mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
     }
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
-        val result = apolloClient.safeQuery(query = GetEditionsByBookIdQuery(bookId = bookId))
+        val result = apolloClient.safeQuery(
+            query = GetEditionsByBookIdQuery(bookId = bookId),
+            fetchPolicy = FetchPolicy.CacheFirst,
+        )
 
         return result.editions.mapNotNull { it.editionDetailFragment()?.toBookEdition() }
     }
@@ -153,7 +163,10 @@ class BooksRemoteDataSourceImpl(
     override suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition> {
         if (ids.isEmpty()) return emptyList()
 
-        val result = apolloClient.safeQuery(query = GetEditionsByIdsQuery(ids = ids))
+        val result = apolloClient.safeQuery(
+            query = GetEditionsByIdsQuery(ids = ids),
+            fetchPolicy = FetchPolicy.CacheFirst,
+        )
 
         return result.editions.mapNotNull { it.editionsByIdsDetailFragment()?.toBookEdition() }
     }
@@ -259,6 +272,7 @@ class BooksRemoteDataSourceImpl(
         rating = canonical.rating,
         description = canonical.description,
         releaseYear = canonical.releaseYear,
+        releaseDate = canonical.releaseDate,
         coverUrl = canonical.coverUrl,
         authors = canonical.authors,
         usersCount = canonical.usersCount,

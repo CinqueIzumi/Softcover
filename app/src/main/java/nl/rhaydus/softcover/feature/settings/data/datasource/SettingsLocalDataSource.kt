@@ -25,6 +25,8 @@ interface SettingsLocalDataSource {
 
     suspend fun setBottomBarStyle(style: BottomBarStyle)
 
+    suspend fun setDynamicColorEnabled(enabled: Boolean)
+
     val enabledStatusCodes: Flow<Set<Int>>
 
     val enabledListIds: Flow<Set<Int>>

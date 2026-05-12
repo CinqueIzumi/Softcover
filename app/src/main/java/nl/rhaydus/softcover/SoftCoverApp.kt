@@ -4,10 +4,12 @@ import android.app.Application
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
+import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
 import nl.rhaydus.softcover.di.apolloModule
 import nl.rhaydus.softcover.di.coreModule
 import nl.rhaydus.softcover.di.databaseModule
 import nl.rhaydus.softcover.di.dispatcherModule
+import nl.rhaydus.softcover.di.notificationModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
 import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingProgressSyncer
@@ -60,11 +62,13 @@ class SoftCoverApp : Application() {
                 appUpdateVariantModule,
                 deadlinesModule,
                 connectivityModule,
+                notificationModule,
             )
         }
 
         val koin = GlobalContext.get()
         NetworkAvailability.install(koin.get<NetworkAvailabilityProvider>())
         koin.get<PendingProgressSyncer>().start(koin.get<ApplicationScope>().scope)
+        koin.get<NotificationChannelInitializer>().initialize()
     }
 }

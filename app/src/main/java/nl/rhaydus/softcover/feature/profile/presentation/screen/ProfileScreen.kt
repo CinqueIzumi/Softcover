@@ -40,12 +40,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.text.NumberFormat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.softcover.core.presentation.component.AnimatedStatNumber
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
@@ -63,6 +63,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import org.koin.androidx.compose.koinViewModel
+import java.text.NumberFormat
 
 class ProfileScreen : Screen {
     @Composable
@@ -133,7 +134,8 @@ class ProfileScreen : Screen {
 
                     HeroStatCard(
                         eyebrow = "Total pages read",
-                        value = integerFormat.format(state.userProfileData?.totalPagesRead ?: 0),
+                        value = state.userProfileData?.totalPagesRead ?: 0,
+                        formatter = { integerFormat.format(it.toLong()) },
                         caption = "Every page a step further into the story.",
                         isLoading = state.isLoading,
                     )
@@ -151,7 +153,8 @@ class ProfileScreen : Screen {
                                 .weight(1f)
                                 .fillMaxHeight(),
                             eyebrow = "Volumes",
-                            value = integerFormat.format(state.userProfileData?.booksRead ?: 0),
+                            value = state.userProfileData?.booksRead ?: 0,
+                            formatter = { integerFormat.format(it.toLong()) },
                             caption = "books read",
                             isLoading = state.isLoading,
                         )
@@ -162,14 +165,16 @@ class ProfileScreen : Screen {
                         ) {
                             SmallStatTile(
                                 eyebrow = "Avg. rating",
-                                value = ratingFormat.format(state.userProfileData?.averageRating ?: 0.0),
+                                value = (state.userProfileData?.averageRating ?: 0.0).toFloat(),
+                                formatter = { ratingFormat.format(it.toDouble()) },
                                 trailing = "★",
                                 isLoading = state.isLoading,
                             )
 
                             SmallStatTile(
                                 eyebrow = "Streak",
-                                value = "${state.userProfileData?.readingStreak ?: 0}",
+                                value = (state.userProfileData?.readingStreak ?: 0).toFloat(),
+                                formatter = { it.toInt().toString() },
                                 trailing = "days",
                                 isLoading = state.isLoading,
                             )
@@ -288,7 +293,8 @@ class ProfileScreen : Screen {
     @Composable
     private fun HeroStatCard(
         eyebrow: String,
-        value: String,
+        value: Int,
+        formatter: (Int) -> String,
         caption: String,
         isLoading: Boolean,
     ) {
@@ -317,10 +323,10 @@ class ProfileScreen : Screen {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = value,
+                AnimatedStatNumber(
+                    value = value,
+                    formatter = formatter,
                     style = MaterialTheme.editorialTypography.statHero,
-                    maxLines = 1,
                     autoSize = TextAutoSize.StepBased(
                         minFontSize = 44.sp,
                         maxFontSize = 72.sp,
@@ -349,7 +355,8 @@ class ProfileScreen : Screen {
     @Composable
     private fun StatTile(
         eyebrow: String,
-        value: String,
+        value: Int,
+        formatter: (Int) -> String,
         caption: String,
         isLoading: Boolean,
         modifier: Modifier = Modifier,
@@ -375,8 +382,9 @@ class ProfileScreen : Screen {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Text(
-                    text = value,
+                AnimatedStatNumber(
+                    value = value,
+                    formatter = formatter,
                     style = MaterialTheme.editorialTypography.statLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -393,7 +401,8 @@ class ProfileScreen : Screen {
     @Composable
     private fun SmallStatTile(
         eyebrow: String,
-        value: String,
+        value: Float,
+        formatter: (Float) -> String,
         trailing: String,
         isLoading: Boolean,
         modifier: Modifier = Modifier,
@@ -421,8 +430,9 @@ class ProfileScreen : Screen {
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(
-                        text = value,
+                    AnimatedStatNumber(
+                        value = value,
+                        formatter = formatter,
                         style = MaterialTheme.editorialTypography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )

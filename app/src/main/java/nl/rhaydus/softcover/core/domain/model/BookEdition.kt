@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.domain.model
 
+import java.time.LocalDate
+
 data class BookEdition(
     val id: Int,
     val canonicalId: Int?,
@@ -13,6 +15,7 @@ data class BookEdition(
     val audioSeconds: Int?,
     val authors: List<Author>,
     val releaseYear: Int,
+    val releaseDate: LocalDate? = null,
     val format: String,
     val owned: Boolean,
 ) {

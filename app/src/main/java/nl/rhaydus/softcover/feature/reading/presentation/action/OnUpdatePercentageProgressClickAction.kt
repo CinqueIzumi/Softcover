@@ -3,9 +3,10 @@ package nl.rhaydus.softcover.feature.reading.presentation.action
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
+import timber.log.Timber
 
 data class OnUpdatePercentageProgressClickAction(
     val newPercentage: String,
@@ -44,17 +45,24 @@ data class OnUpdatePercentageProgressClickAction(
             null
         }
 
-        dependencies.launch {
+        scope.currentLocalVariables.bookMutationJobs[bookToUpdate.id]?.cancel()
+
+        val job = dependencies.launch {
             dependencies.updateBookProgress(
                 book = bookToUpdate,
                 newPage = newPage,
                 newSeconds = newSeconds,
-                setLoading = { newLoading ->
-                    scope.setState {
-                        it.copy(isLoading = newLoading)
-                    }
-                },
-            )
+            ).onFailure { error ->
+                Timber.e("-=- $error")
+
+                scope.setState {
+                    it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)
+                }
+            }
+        }
+
+        scope.setLocalVariables {
+            it.copy(bookMutationJobs = it.bookMutationJobs + (bookToUpdate.id to job))
         }
 
         scope.setState {

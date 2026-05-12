@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 data class BookDetailUiState(
     val loadingBookDetails: Boolean = true,
     val book: Book? = null,
+    val initialCover: BookInitialCover? = null,
     val fabMenuExpanded: Boolean = false,
     val showEditEditionSheet: Boolean = false,
     val editions: List<BookEdition> = emptyList(),
@@ -21,8 +22,6 @@ data class BookDetailUiState(
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
-    val settingEditionOwned: Boolean = false,
-
     val deadline: BookDeadline? = null,
     val deadlineProgress: DeadlineProgress? = null,
     val showDeadlinePicker: Boolean = false,
@@ -30,6 +29,9 @@ data class BookDetailUiState(
     val reviews: List<BookReview> = emptyList(),
     val loadingReviews: Boolean = false,
     val revealedSpoilerReviewIds: Set<Int> = emptySet(),
+
+    val failedMutationBookIds: Set<Int> = emptySet(),
+    val failedMutationEditionIds: Set<Int> = emptySet(),
 ) : UiState {
     val filteredEditions: List<BookEdition>
         get() {

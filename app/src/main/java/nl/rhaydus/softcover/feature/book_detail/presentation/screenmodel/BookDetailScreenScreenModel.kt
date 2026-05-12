@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailInitializer
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
@@ -28,6 +29,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUs
 
 class BookDetailScreenScreenModel(
     private val bookId: Int,
+    initialCover: BookInitialCover?,
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
     private val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
@@ -46,7 +48,7 @@ class BookDetailScreenScreenModel(
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
-    initialState = BookDetailUiState(),
+    initialState = BookDetailUiState(initialCover = initialCover),
     initialLocalVariables = BookDetailLocalVariables(),
     initializers = flows,
 ) {

@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -24,21 +26,24 @@ class OnUpdateTimeProgressClickActionTest {
 
     private lateinit var updateBookProgress: UpdateBookProgress
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
+    private lateinit var localVariablesFlow: MutableStateFlow<ReadingLocalVariables>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
 
     @BeforeEach
     fun setUp() {
         updateBookProgress = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+        localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
+            localVariablesFlow = localVariablesFlow,
             eventChannel = Channel(Channel.BUFFERED),
         )
     }
 
     private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): ReadingScreenDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
             every {
                 mock.updateBookProgress
@@ -58,12 +63,15 @@ class OnUpdateTimeProgressClickActionTest {
         }
     }
 
-    private fun stubBookWithAudioSeconds(audioSeconds: Int?): Book = mockk<Book>().also { book ->
-        val edition = mockk<BookEdition>().also { e ->
-            every { e.audioSeconds } returns audioSeconds
+    private fun stubBookWithAudioSeconds(audioSeconds: Int?, id: Int = 99): Book =
+        mockk<Book>().also { book ->
+            val edition = mockk<BookEdition>().also { e ->
+                every { e.audioSeconds } returns audioSeconds
+            }
+
+            every { book.id } returns id
+            every { book.currentEdition } returns edition
         }
-        every { book.currentEdition } returns edition
-    }
 
     @Nested
     inner class Execute {
@@ -122,7 +130,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                updateBookProgress(any(), any(), any(), any())
+                updateBookProgress(any(), any(), any())
             }
         }
 
@@ -167,7 +175,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3723,
-                    setLoading = any(),
                 )
             }
         }
@@ -192,7 +199,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 30,
-                    setLoading = any(),
                 )
             }
         }
@@ -217,7 +223,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3600,
-                    setLoading = any(),
                 )
             }
         }
@@ -242,7 +247,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3600,
-                    setLoading = any(),
                 )
             }
         }
@@ -266,7 +270,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 0,
-                    setLoading = any(),
                 )
             }
         }
@@ -291,7 +294,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3540,
-                    setLoading = any(),
                 )
             }
         }
@@ -316,7 +318,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 59,
-                    setLoading = any(),
                 )
             }
         }
@@ -341,7 +342,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 1800,
-                    setLoading = any(),
                 )
             }
         }
@@ -367,7 +367,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3600,
-                    setLoading = any(),
                 )
             }
         }
@@ -392,7 +391,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 0,
-                    setLoading = any(),
                 )
             }
         }
@@ -417,7 +415,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3600,
-                    setLoading = any(),
                 )
             }
         }
@@ -442,9 +439,128 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3600,
-                    setLoading = any(),
                 )
             }
+        }
+
+        @Test
+        fun `adds book id to failedMutationBookIds when updateBookProgress fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200, id = 5)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = any(),
+                )
+            } returns Result.failure(RuntimeException("network error"))
+
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.failedMutationBookIds.contains(5) shouldBe true
+        }
+
+        @Test
+        fun `does not add book id to failedMutationBookIds when updateBookProgress succeeds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200, id = 5)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = any(),
+                )
+            } returns Result.success(Unit)
+
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.failedMutationBookIds.contains(5) shouldBe false
+        }
+
+        @Test
+        fun `stores job in bookMutationJobs after execute returns`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200, id = 5)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = any(),
+                )
+            } returns Result.success(Unit)
+
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.bookMutationJobs.containsKey(5) shouldBe true
+        }
+
+        @Test
+        fun `cancels prior job for same book id and replaces it with a new one`() = runTest {
+            // ----- Arrange -----
+            val bookId = 5
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200, id = bookId)
+            val priorJob = Job()
+
+            localVariablesFlow.value = ReadingLocalVariables(
+                bookMutationJobs = mapOf(bookId to priorJob),
+            )
+
+            scope = ActionScope(
+                stateFlow = stateFlow,
+                localVariablesFlow = localVariablesFlow,
+                eventChannel = Channel(Channel.BUFFERED),
+            )
+
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = any(),
+                )
+            } returns Result.success(Unit)
+
+            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            priorJob.isCancelled shouldBe true
+
+            localVariablesFlow.value.bookMutationJobs.containsKey(bookId) shouldBe true
         }
     }
 }

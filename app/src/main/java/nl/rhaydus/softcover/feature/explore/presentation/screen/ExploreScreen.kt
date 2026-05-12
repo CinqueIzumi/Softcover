@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +16,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -35,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,16 +61,29 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
+import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
+import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
+import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.presentation.modifier.carouselPageEdgeHint
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
@@ -87,6 +102,11 @@ import kotlin.time.Duration.Companion.seconds
 private const val TRENDING_SKELETON_COUNT = 4
 private const val CONTINUE_SERIES_SKELETON_COUNT = 4
 
+// Distinct shared-element surfaces so the same book showing up in both rows
+// registers two unique keys in the SharedTransitionScope.
+private const val SURFACE_TRENDING = "explore-trending"
+private const val SURFACE_UP_NEXT = "explore-up-next"
+
 object ExploreScreen : Screen {
     private val editorialScrollState = ScrollState(initial = 0)
     private val trendingListState = LazyListState()
@@ -102,14 +122,24 @@ object ExploreScreen : Screen {
 
         val isOnline = rememberIsOnline()
 
-        Screen(
-            state = state,
-            runAction = screenModel::runAction,
-            onBookClick = {
-                navigator.parent?.push(item = BookDetailScreen(id = it.id))
-            },
-            isOnline = isOnline,
-        )
+        val prefetcher = rememberBookDetailPrefetcher()
+
+        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
+            Screen(
+                state = state,
+                runAction = screenModel::runAction,
+                onBookClick = { book, surface ->
+                    navigator.parent?.push(
+                        item = BookDetailScreen(
+                            id = book.id,
+                            initialCover = BookInitialCover.fromBook(book = book),
+                            transitionSurface = surface,
+                        ),
+                    )
+                },
+                isOnline = isOnline,
+            )
+        }
     }
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
@@ -117,7 +147,7 @@ object ExploreScreen : Screen {
     fun Screen(
         state: ExploreScreenUiState,
         runAction: (ExploreAction) -> Unit,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         isOnline: Boolean,
     ) {
         Scaffold(
@@ -160,7 +190,7 @@ object ExploreScreen : Screen {
     private fun EditorialContent(
         state: ExploreScreenUiState,
         runAction: (ExploreAction) -> Unit,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         contentPadding: PaddingValues,
     ) {
         Column(
@@ -174,13 +204,13 @@ object ExploreScreen : Screen {
 
             TrendingSection(
                 books = state.trendingBooks,
-                isLoading = state.loadingTrendingBooks,
+                isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
                 onBookClick = onBookClick,
             )
 
             ContinueSeriesSection(
                 books = state.continueSeriesBooks,
-                isLoading = state.loadingContinueSeriesBooks,
+                isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
@@ -198,31 +228,49 @@ object ExploreScreen : Screen {
     private fun TrendingSection(
         books: List<Book>,
         isLoading: Boolean,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
     ) {
         if (isLoading.not() && books.isEmpty()) return
 
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            SectionHeader(
-                eyebrow = "THIS WEEK",
-                title = "Trending",
+            EditorialSectionHeader(
+                eyebrow = "This week",
+                headline = "Trending",
+                modifier = Modifier.padding(horizontal = 24.dp),
             )
 
-            LazyRow(
-                state = trendingListState,
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                if (isLoading) {
-                    items(TRENDING_SKELETON_COUNT) {
-                        TrendingCardSkeleton()
+            SkeletonCrossfade(
+                isLoading = isLoading,
+                label = "TrendingRow",
+            ) { loading ->
+                if (loading) {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        items(TRENDING_SKELETON_COUNT) {
+                            TrendingCardSkeleton()
+                        }
                     }
                 } else {
-                    items(books) { book ->
-                        TrendingCard(
-                            book = book,
-                            onClick = { onBookClick(book) },
-                        )
+                    val entry = rememberStaggeredEntryCoordinator(key = "explore:trending")
+
+                    LazyRow(
+                        modifier = Modifier.carouselPageEdgeHint(
+                            state = trendingListState,
+                            key = "explore:trending",
+                        ),
+                        state = trendingListState,
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
+                            TrendingCard(
+                                modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
+                                book = book,
+                                onClick = { onBookClick(book, SURFACE_TRENDING) },
+                            )
+                        }
                     }
                 }
             }
@@ -266,7 +314,7 @@ object ExploreScreen : Screen {
     private fun ContinueSeriesSection(
         books: List<Book>,
         isLoading: Boolean,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         runAction: (ExploreAction) -> Unit,
     ) {
         if (isLoading.not() && books.isEmpty()) return
@@ -278,27 +326,45 @@ object ExploreScreen : Screen {
         val coroutineScope = rememberCoroutineScope()
 
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            SectionHeader(
-                eyebrow = "PICK UP WHERE YOU LEFT OFF",
-                title = "Up next in your series",
+            EditorialSectionHeader(
+                eyebrow = "Pick up where you left off",
+                headline = "Up next in your series",
+                modifier = Modifier.padding(horizontal = 24.dp),
             )
 
-            LazyRow(
-                state = continueSeriesListState,
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                if (isLoading) {
-                    items(CONTINUE_SERIES_SKELETON_COUNT) {
-                        SeriesCardSkeleton()
+            SkeletonCrossfade(
+                isLoading = isLoading,
+                label = "ContinueSeriesRow",
+            ) { loading ->
+                if (loading) {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        items(CONTINUE_SERIES_SKELETON_COUNT) {
+                            SeriesCardSkeleton()
+                        }
                     }
                 } else {
-                    items(books) { book ->
-                        SeriesCard(
-                            book = book,
-                            onClick = { onBookClick(book) },
-                            onMenuClick = { sheetBook = book },
-                        )
+                    val entry = rememberStaggeredEntryCoordinator(key = "explore:continue_series")
+
+                    LazyRow(
+                        modifier = Modifier.carouselPageEdgeHint(
+                            state = continueSeriesListState,
+                            key = "explore:continue_series",
+                        ),
+                        state = continueSeriesListState,
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
+                            SeriesCard(
+                                modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
+                                book = book,
+                                onClick = { onBookClick(book, SURFACE_UP_NEXT) },
+                                onMenuClick = { sheetBook = book },
+                            )
+                        }
                     }
                 }
             }
@@ -494,11 +560,14 @@ object ExploreScreen : Screen {
         queries: List<String>,
         runAction: (ExploreAction) -> Unit,
     ) {
+        val animator = rememberLazyItemMutationAnimator(keys = queries)
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(queries) { query ->
+            items(queries, key = { it }) { query ->
                 FilterChip(
+                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = query),
                     selected = false,
                     onClick = {
                         runAction(
@@ -526,48 +595,46 @@ object ExploreScreen : Screen {
     }
 
     @Composable
-    private fun SectionHeader(
-        eyebrow: String,
-        title: String,
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text(
-                text = eyebrow,
-                style = MaterialTheme.editorialTypography.eyebrow,
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            Text(
-                text = title,
-                style = MaterialTheme.editorialTypography.display,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    }
-
-    @Composable
     private fun TrendingCard(
         book: Book,
         onClick: () -> Unit,
+        modifier: Modifier = Modifier,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .width(150.dp)
-                .clickable(onClick = onClick),
+                .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            EditionImage(
-                edition = book.currentEdition,
-                defaultEdition = book.defaultEdition,
-                isLoading = false,
-                fallbackCoverUrl = book.coverUrl,
-                modifier = Modifier.fillMaxWidth(),
-                elevation = 6.dp,
-                cornerRadius = 6.dp,
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                EditionImage(
+                    edition = book.currentEdition,
+                    defaultEdition = book.defaultEdition,
+                    isLoading = false,
+                    fallbackCoverUrl = book.coverUrl,
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = 6.dp,
+                    cornerRadius = 6.dp,
+                    sharedTransitionKey = bookCoverTransitionKey(
+                        editionId = book.currentEdition?.id,
+                        bookId = book.id,
+                        surface = SURFACE_TRENDING,
+                    ),
+                )
+
+                if (book.isUnreleased) {
+                    book.effectiveReleaseDate?.let { date ->
+                        UnreleasedBadge(
+                            releaseDate = date,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(all = 6.dp),
+                        )
+                    }
+                }
+            }
 
             Text(
                 text = book.title,
@@ -615,11 +682,14 @@ object ExploreScreen : Screen {
         book: Book,
         onClick: () -> Unit,
         onMenuClick: () -> Unit,
+        modifier: Modifier = Modifier,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .width(120.dp)
-                .clickable(onClick = onClick),
+                .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -631,6 +701,11 @@ object ExploreScreen : Screen {
                     modifier = Modifier.fillMaxWidth(),
                     elevation = 4.dp,
                     cornerRadius = 6.dp,
+                    sharedTransitionKey = bookCoverTransitionKey(
+                        editionId = book.currentEdition?.id,
+                        bookId = book.id,
+                        surface = SURFACE_UP_NEXT,
+                    ),
                 )
 
                 IconButton(
@@ -650,6 +725,17 @@ object ExploreScreen : Screen {
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(14.dp),
                     )
+                }
+
+                if (book.isUnreleased) {
+                    book.effectiveReleaseDate?.let { date ->
+                        UnreleasedBadge(
+                            releaseDate = date,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(all = 6.dp),
+                        )
+                    }
                 }
             }
 
@@ -686,7 +772,7 @@ object ExploreScreen : Screen {
     private fun ActiveSearchContent(
         state: ExploreScreenUiState,
         runAction: (ExploreAction) -> Unit,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         contentPadding: PaddingValues,
     ) {
         Column(
@@ -717,7 +803,7 @@ object ExploreScreen : Screen {
                     .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                items(state.queriedBooks) { book ->
+                items(state.queriedBooks, key = { it.id }) { book ->
                     SearchResultRow(
                         book = book,
                         onBookClick = onBookClick,
@@ -731,13 +817,15 @@ object ExploreScreen : Screen {
     @Composable
     private fun SearchResultRow(
         book: Book,
-        onBookClick: (Book) -> Unit,
+        onBookClick: (Book, String?) -> Unit,
         runAction: (ExploreAction) -> Unit,
     ) {
+        PrefetchBookDetailOnVisible(bookId = book.id)
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onBookClick(book) },
+                .pressScaleClickable(onClick = { onBookClick(book, null) }),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             EditionImage(
@@ -746,6 +834,10 @@ object ExploreScreen : Screen {
                 isLoading = false,
                 defaultEdition = book.defaultEdition,
                 fallbackCoverUrl = book.coverUrl,
+                sharedTransitionKey = bookCoverTransitionKey(
+                    editionId = book.currentEdition?.id,
+                    bookId = book.id,
+                ),
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -859,7 +951,7 @@ private fun ExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = previewMockState,
         )
@@ -872,7 +964,7 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
@@ -891,7 +983,7 @@ private fun LoadingTrendingExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = emptyList(),
@@ -910,7 +1002,7 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
@@ -929,7 +1021,7 @@ private fun OfflineExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = false,
             state = previewMockState,
         )
@@ -942,7 +1034,7 @@ private fun ActiveExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "Last to leave",
@@ -994,7 +1086,7 @@ private fun LoadingActiveExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "Piranesi",
@@ -1011,7 +1103,7 @@ private fun NoResultsActiveExploreScreenPreview() {
     SoftcoverTheme {
         ExploreScreen.Screen(
             runAction = {},
-            onBookClick = {},
+            onBookClick = { _, _ -> },
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "qwertyuiop",
