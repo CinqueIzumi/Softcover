@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -62,8 +63,10 @@ import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
+import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
+import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
@@ -247,13 +250,16 @@ object ExploreScreen : Screen {
                         }
                     }
                 } else {
+                    val entry = rememberStaggeredEntryCoordinator()
+
                     LazyRow(
                         state = trendingListState,
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        items(books, key = { it.id }) { book ->
+                        itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
                             TrendingCard(
+                                modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
                                 book = book,
                                 onClick = { onBookClick(book, SURFACE_TRENDING) },
                             )
@@ -332,13 +338,16 @@ object ExploreScreen : Screen {
                         }
                     }
                 } else {
+                    val entry = rememberStaggeredEntryCoordinator()
+
                     LazyRow(
                         state = continueSeriesListState,
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        items(books, key = { it.id }) { book ->
+                        itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
                             SeriesCard(
+                                modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
                                 book = book,
                                 onClick = { onBookClick(book, SURFACE_UP_NEXT) },
                                 onMenuClick = { sheetBook = book },
@@ -600,11 +609,12 @@ object ExploreScreen : Screen {
     private fun TrendingCard(
         book: Book,
         onClick: () -> Unit,
+        modifier: Modifier = Modifier,
     ) {
         PrefetchBookDetailOnVisible(bookId = book.id)
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .width(150.dp)
                 .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -670,11 +680,12 @@ object ExploreScreen : Screen {
         book: Book,
         onClick: () -> Unit,
         onMenuClick: () -> Unit,
+        modifier: Modifier = Modifier,
     ) {
         PrefetchBookDetailOnVisible(bookId = book.id)
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .width(120.dp)
                 .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),

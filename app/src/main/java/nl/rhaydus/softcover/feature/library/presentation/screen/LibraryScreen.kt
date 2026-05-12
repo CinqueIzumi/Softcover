@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -100,6 +101,8 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
+import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
+import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -692,13 +695,16 @@ object LibraryScreen : Screen {
 
         val animator = rememberLazyItemMutationAnimator(keys = visibleEditions.map { it.id })
 
+        val entry = rememberStaggeredEntryCoordinator()
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            items(visibleEditions, key = { it.id }) { edition ->
+            itemsIndexed(visibleEditions, key = { _, edition -> edition.id }) { index, edition ->
                 LayoutEditionEntry(
-                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = edition.id),
+                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = edition.id)
+                        .staggeredEntry(coordinator = entry, index = index),
                     edition = edition,
                     layout = state.gridLayout,
                     onEditionClick = onEditionClick,
@@ -737,13 +743,16 @@ object LibraryScreen : Screen {
 
         val animator = rememberLazyItemMutationAnimator(keys = visibleBooks.map { it.id })
 
+        val entry = rememberStaggeredEntryCoordinator()
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            items(visibleBooks, key = { it.id }) { book ->
+            itemsIndexed(visibleBooks, key = { _, book -> book.id }) { index, book ->
                 LayoutBookEntry(
-                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id),
+                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
+                        .staggeredEntry(coordinator = entry, index = index),
                     book = book,
                     layout = state.gridLayout,
                     onBookClick = onBookClick,

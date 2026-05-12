@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -79,6 +79,8 @@ import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberEditionImageRequest
+import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
+import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
@@ -275,6 +277,8 @@ object ReadingScreen : Screen {
 
         val animator = rememberLazyItemMutationAnimator(keys = rest.map { it.id })
 
+        val entry = rememberStaggeredEntryCoordinator()
+
         val prefetcher = rememberBookDetailPrefetcher()
 
         CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
@@ -313,9 +317,10 @@ object ReadingScreen : Screen {
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    items(rest, key = { it.id }) { book ->
+                    itemsIndexed(rest, key = { _, book -> book.id }) { index, book ->
                         CompactBookEntry(
-                            modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id),
+                            modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
+                                .staggeredEntry(coordinator = entry, index = index),
                             book = book,
                             deadlineProgress = book.deadlineProgressFrom(state),
                             dateStyle = state.dateStyle,
