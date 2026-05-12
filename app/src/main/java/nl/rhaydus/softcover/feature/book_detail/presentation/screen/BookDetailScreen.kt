@@ -616,7 +616,7 @@ class BookDetailScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
-                                repeat(3) {
+                                repeat(2) {
                                     Column(
                                         modifier = Modifier.weight(1f),
                                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -673,8 +673,20 @@ class BookDetailScreen(
 
                             Spacer(modifier = Modifier.height(4.dp))
 
+                            val authorName = edition?.authorString.orEmpty()
+                            val showReleased = releaseYear != null && releaseYear > 0
+                            val bylineText = buildString {
+                                append("By ")
+                                append(authorName)
+
+                                if (showReleased) {
+                                    append(" · ")
+                                    append(releaseYear)
+                                }
+                            }
+
                             Text(
-                                text = "By ${edition?.authorString ?: ""}",
+                                text = bylineText,
                                 color = Color.White.copy(alpha = textSecondaryAlpha),
                                 style = MaterialTheme.editorialTypography.bodySmall.copy(
                                     shadow = secondaryShadow,
@@ -689,9 +701,8 @@ class BookDetailScreen(
                             } else {
                                 (edition?.pages ?: 0) > 0
                             }
-                            val showReleased = releaseYear != null && releaseYear > 0
 
-                            if (showRating || showLength || showReleased) {
+                            if (showRating || showLength) {
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
@@ -763,23 +774,6 @@ class BookDetailScreen(
                                                     )
                                                 }
                                             }
-                                        }
-                                    }
-
-                                    if (showReleased) {
-                                        Column(
-                                            modifier = Modifier.weight(1f),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                        ) {
-                                            Text(
-                                                text = "Released",
-                                                style = labelSmall,
-                                            )
-
-                                            Text(
-                                                text = "$releaseYear",
-                                                style = bodySmall,
-                                            )
                                         }
                                     }
                                 }
