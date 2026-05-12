@@ -1,5 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -41,6 +44,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,11 +58,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -98,6 +104,8 @@ import nl.rhaydus.softcover.core.presentation.theme.bodyFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.presentation.util.BottomBarPulseManager
+import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
@@ -166,12 +174,45 @@ object ReadingScreen : Screen {
 
         val haptics = rememberHaptics()
 
+        val playMotion = playDecorativeMotion()
+
         var celebrationKey by remember { mutableIntStateOf(0) }
 
+        var slidingBookId by remember { mutableStateOf<Int?>(null) }
+        val slideProgress = remember { Animatable(initialValue = 0f) }
+
         val onMarkAsRead: (Book) -> Unit = { book ->
-            haptics.commit()
-            celebrationKey++
-            runAction(OnMarkBookAsReadClickAction(book = book))
+            if (slidingBookId == null) {
+                haptics.commit()
+                celebrationKey++
+                BottomBarPulseManager.pulseLibrary()
+
+                if (playMotion) {
+                    slidingBookId = book.id
+                } else {
+                    runAction(OnMarkBookAsReadClickAction(book = book))
+                }
+            }
+        }
+
+        LaunchedEffect(slidingBookId) {
+            val targetId = slidingBookId ?: return@LaunchedEffect
+
+            slideProgress.snapTo(targetValue = 0f)
+            slideProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = 320,
+                    easing = FastOutLinearInEasing,
+                ),
+            )
+
+            state.books.firstOrNull { it.id == targetId }?.let { book ->
+                runAction(OnMarkBookAsReadClickAction(book = book))
+            }
+
+            slideProgress.snapTo(targetValue = 0f)
+            slidingBookId = null
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -210,6 +251,8 @@ object ReadingScreen : Screen {
                                     onNavigateToSearch = onNavigateToSearch,
                                     onMarkAsRead = onMarkAsRead,
                                     pullToRefreshState = pullToRefreshState,
+                                    slidingBookId = slidingBookId,
+                                    slideProgress = slideProgress.value,
                                 )
                             }
 
@@ -277,6 +320,8 @@ object ReadingScreen : Screen {
         onNavigateToSearch: () -> Unit,
         onMarkAsRead: (Book) -> Unit,
         pullToRefreshState: PullToRefreshState,
+        slidingBookId: Int?,
+        slideProgress: Float,
     ) {
         val featured = state.books.first()
         val rest = state.books.drop(1)
@@ -286,6 +331,20 @@ object ReadingScreen : Screen {
         val entry = rememberStaggeredEntryCoordinator(key = "reading:rest")
 
         val prefetcher = rememberBookDetailPrefetcher()
+
+        val density = LocalDensity.current
+        val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
+
+        val slideModifier: (Int) -> Modifier = { bookId ->
+            if (bookId == slidingBookId) {
+                Modifier.graphicsLayer {
+                    translationY = slideProgress * slideDistancePx
+                    alpha = 1f - slideProgress
+                }
+            } else {
+                Modifier
+            }
+        }
 
         CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
             LazyColumn(
@@ -311,6 +370,7 @@ object ReadingScreen : Screen {
                         runAction = runAction,
                         onBookClick = onBookClick,
                         onMarkAsRead = onMarkAsRead,
+                        modifier = slideModifier(featured.id),
                     )
                 }
 
@@ -328,7 +388,8 @@ object ReadingScreen : Screen {
                     itemsIndexed(rest, key = { _, book -> book.id }) { index, book ->
                         CompactBookEntry(
                             modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
-                                .staggeredEntry(coordinator = entry, index = index),
+                                .staggeredEntry(coordinator = entry, index = index)
+                                .then(slideModifier(book.id)),
                             book = book,
                             deadlineProgress = book.deadlineProgressFrom(state),
                             dateStyle = state.dateStyle,
@@ -404,6 +465,7 @@ object ReadingScreen : Screen {
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
         onMarkAsRead: (Book) -> Unit,
+        modifier: Modifier = Modifier,
     ) {
         PrefetchBookDetailOnVisible(bookId = book.id)
 
@@ -421,7 +483,7 @@ object ReadingScreen : Screen {
         val interactionSource = remember { MutableInteractionSource() }
 
         Surface(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .pressScale(interactionSource)

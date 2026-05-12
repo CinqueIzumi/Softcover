@@ -24,12 +24,6 @@ Add the domain + data layer for user-generated content: personal rating, persona
 
 Small motion/visual tweaks that lift the perceived quality of every surface without new screens or data. Most are 1–2 file changes.
 
-### Step 1.10 — Folio on stat tiles + folio footer (S)
-Add "—01—" folio numbering to hero stat tiles, and a "Softcover · No. 12" footer above the bottom nav on root screens. *(A.3.3, A.4.4)*
-
-### Step 1.11 — Mark-as-read "slide to shelf" (S)
-After the existing burst on the Reading screen, animate the row sliding down/out and pulse the Library tab icon once. *(A.1.6)*
-
 > **End of Phase 1:** The app should already feel meaningfully more crafted on every surface without any new data or screens, and the Material You toggle is live for Android users who want it.
 
 ---
