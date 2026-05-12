@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.presentation.screen
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -82,6 +84,8 @@ object BottomBarScreen : Screen {
                     }
 
                     if (themeConfig.bottomBarStyle == BottomBarStyle.FLOATING) {
+                        val shieldInteractionSource = remember { MutableInteractionSource() }
+
                         Column(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
@@ -89,8 +93,13 @@ object BottomBarScreen : Screen {
                                 .onSizeChanged {
                                     bottomBarHeight = with(localDensity) { it.height.toDp() }
                                 }
+                                .clickable(
+                                    interactionSource = shieldInteractionSource,
+                                    indication = null,
+                                    onClick = {},
+                                )
                         ) {
-                            BottomFloatingBar()
+                            BottomFloatingBar(modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp))
 
                             Spacer(modifier = Modifier.height(16.dp))
                         }
