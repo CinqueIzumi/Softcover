@@ -18,8 +18,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -36,6 +36,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsTab
+import kotlinx.coroutines.flow.drop
 
 private val bottomBarScreens = listOf(
     ReadingTab,
@@ -51,22 +52,24 @@ private const val PULSE_PEAK_SCALE = 1.22f
 @Composable
 private fun rememberLibraryPulseScale(): Float {
     val playMotion = playDecorativeMotion()
-    val pulseKey by BottomBarPulseManager.libraryPulseKey
     val scale = remember { Animatable(initialValue = 1f) }
 
-    LaunchedEffect(pulseKey, playMotion) {
-        if (pulseKey == 0) return@LaunchedEffect
+    LaunchedEffect(playMotion) {
         if (playMotion.not()) return@LaunchedEffect
 
-        scale.snapTo(targetValue = 1f)
-        scale.animateTo(
-            targetValue = PULSE_PEAK_SCALE,
-            animationSpec = tween(durationMillis = PULSE_PEAK_MS),
-        )
-        scale.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = PULSE_SETTLE_MS),
-        )
+        snapshotFlow { BottomBarPulseManager.libraryPulseKey.intValue }
+            .drop(count = 1)
+            .collect {
+                scale.snapTo(targetValue = 1f)
+                scale.animateTo(
+                    targetValue = PULSE_PEAK_SCALE,
+                    animationSpec = tween(durationMillis = PULSE_PEAK_MS),
+                )
+                scale.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = PULSE_SETTLE_MS),
+                )
+            }
     }
 
     return scale.value
