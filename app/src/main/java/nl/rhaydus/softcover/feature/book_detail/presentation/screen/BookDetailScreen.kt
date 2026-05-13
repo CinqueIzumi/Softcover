@@ -159,7 +159,7 @@ private const val REVIEW_COLLAPSED_LINES = 8
 
 class BookDetailScreen(
     val id: Int,
-    private val initialCover: BookInitialCover? = null,
+    @Transient private val initialCover: BookInitialCover? = null,
     private val transitionSurface: String? = null,
 ) : Screen {
     @Composable
