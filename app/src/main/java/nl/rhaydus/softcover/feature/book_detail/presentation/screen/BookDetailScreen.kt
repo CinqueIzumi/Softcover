@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -103,6 +105,7 @@ import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
@@ -562,11 +565,22 @@ class BookDetailScreen(
                         ),
                     )
 
+                    val navScope = LocalNavAnimatedVisibilityScope.current
+
+                    val enterSettled = navScope == null ||
+                        navScope.transition.currentState == EnterExitState.Visible
+
                     if (edition?.owned == true) {
+                        val badgeAlpha by animateFloatAsState(
+                            targetValue = if (enterSettled) 1f else 0f,
+                            label = "OwnedCoverBadgeAlpha",
+                        )
+
                         OwnedCoverBadge(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(8.dp),
+                                .padding(8.dp)
+                                .alpha(badgeAlpha),
                         )
                     }
                 }
