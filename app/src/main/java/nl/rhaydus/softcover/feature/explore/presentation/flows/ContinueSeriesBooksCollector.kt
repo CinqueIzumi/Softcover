@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.flows
 
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -14,19 +15,25 @@ class ContinueSeriesBooksCollector : ExploreInitializer {
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
         dependencies: ExploreDependencies,
     ) {
-        dependencies.getContinueSeriesBooksUseCase()
+        val continueSeriesFlow = dependencies.getContinueSeriesBooksUseCase()
             .catch { error ->
                 Timber.e(error, "Failed to fetch continue-series books")
 
                 emit(emptyList())
             }
-            .collectLatest { books ->
-                scope.setState {
-                    it.copy(
-                        continueSeriesBooks = books,
-                        loadingContinueSeriesBooks = false,
-                    )
-                }
+
+        combine(
+            continueSeriesFlow,
+            dependencies.getAllUserBooksUseCase(),
+        ) { books, allUserBooks ->
+            books.map { book -> allUserBooks.find { it.id == book.id } ?: book }
+        }.collectLatest { books ->
+            scope.setState {
+                it.copy(
+                    continueSeriesBooks = books,
+                    loadingContinueSeriesBooks = false,
+                )
             }
+        }
     }
 }
