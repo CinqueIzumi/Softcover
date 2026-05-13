@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.flows
 
+import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -12,19 +14,25 @@ class TrendingBooksCollector : ExploreInitializer {
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
         dependencies: ExploreDependencies,
     ) {
-        dependencies.getTrendingBooksUseCase()
-            .onSuccess { books ->
-                scope.setState {
-                    it.copy(
-                        trendingBooks = books,
-                        loadingTrendingBooks = false,
-                    )
-                }
-            }
+        val trendingBooks: List<Book> = dependencies.getTrendingBooksUseCase()
             .onFailure { error ->
                 Timber.e(error, "Failed to fetch trending books")
 
                 scope.setState { it.copy(loadingTrendingBooks = false) }
             }
+            .getOrNull() ?: return
+
+        dependencies.getAllUserBooksUseCase().collectLatest { allUserBooks ->
+            val overlaid = trendingBooks.map { trending ->
+                allUserBooks.find { it.id == trending.id } ?: trending
+            }
+
+            scope.setState {
+                it.copy(
+                    trendingBooks = overlaid,
+                    loadingTrendingBooks = false,
+                )
+            }
+        }
     }
 }

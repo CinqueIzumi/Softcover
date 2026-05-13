@@ -39,8 +39,8 @@ private const val MAX_SCALE = 5f
 private const val DOUBLE_TAP_SCALE = 2.5f
 
 class FullScreenCoverScreen(
-    private val edition: BookEdition?,
-    private val defaultEdition: BookEdition?,
+    @Transient private val edition: BookEdition?,
+    @Transient private val defaultEdition: BookEdition?,
     private val fallbackCoverUrl: String?,
 ) : Screen {
     @Composable

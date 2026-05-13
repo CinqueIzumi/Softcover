@@ -89,6 +89,9 @@ Reverse-chronological timeline of all sessions. Reached from Profile. *(C.8)*
 ### Step 3.7 — Reading log (multiple read-throughs) on book detail (M)
 Replace single-status display with a log of read-throughs (start, end, rating, optional note). Detail summary becomes "Read 2× — 2023, 2026". *(B.4.4)*
 
+### Step 3.8 — Streak strip on Reading screen header (S, depends on 3.5)
+A small 21-day heatmap-style strip rendered near the greeting on the Reading screen: one dot per day, today highlighted, dot intensity keyed to that day's session activity. Tap the strip to expand into the full Reading Activity Calendar (Step 7.12) once that lands; until then, expansion goes to a transient bottom sheet listing the last 21 days' sessions inline. Uses `select` haptic on dot tap. *(B.2.3)*
+
 > **End of Phase 3:** The app has personal voice — the user's ratings, words, and highlights become a corpus the rest of the app can draw from.
 
 ---
@@ -139,6 +142,15 @@ User's custom lists + curated/community lists. Create, rename, reorder, share. B
 ### Step 5.4 — Series-completion cascade (S, depends on 5.2)
 When the last book of a series is marked Read, all covers in that series cascade through a fade-to-monochrome-then-back, ending with a "Complete" stamp. *(A.1.15)*
 
+### Step 5.5 — Add-to-list write path + action sheet (M, depends on 5.3)
+The data layer today supports reading user lists (`GetUserBookLists`) and removing books from them (`RemoveListBook`), but there is no add-to-list mutation — so custom lists are read-only from the app's perspective and "Owned" is added via the separate `MarkEditionAsOwned` mutation. This step ships:
+- A new `AddListBook` GraphQL mutation and the matching repository/use-case wiring.
+- An "Add to list" action sheet reached from book detail (replaces the planned B.4.13 affordance) and from the bulk-select bar in Library (Step 2.5).
+- Each row in the sheet renders a list name + spine-count + a current-membership indicator; selecting toggles membership with the ink-fill chip animation (A.1.5) and a `commit` haptic.
+- A "Create new list…" entry at the bottom of the sheet flows into the existing Lists screen creation form (Step 5.3) and returns the user to the sheet with the new list pre-selected.
+- "Owned" stays special-cased and continues to route through `MarkEditionAsOwned` so the rest of the surface is uniform.
+- **Why here:** unblocks B.1.12 + B.4.13 properly, and is the foundation for tagging (Step 10.10) and any list-driven discovery (Step 6.4). *(B.4.18, B.4.13, B.1.12)*
+
 ---
 
 ## Phase 6 — Discovery
@@ -178,6 +190,12 @@ Camera scan from the search bar, drops result into search. Permission gate + off
 ### Step 6.11 — Continue-series nudges (S)
 Stalled-series re-engagement cards in the existing series row. *(B.3.11)*
 
+### Step 6.12 — New Releases calendar (M, depends on 6.2)
+*Rough plan — design phase before build.* A calendar surface (month grid + 12-month zoom) plotting future-dated book releases. **First cut: Want-to-Read shelf only.** Curated "Most anticipated" is shown as a secondary low-intensity tint when the data is already at hand from Step 6.2. Tap a day → editorial sheet listing releases with quick-actions (set release-day reminder via D.1 / Step 9.1, jump to book detail, external pre-order link via Step 4.5). Reached from a new "Coming up" tile on Explore (next to Step 6.2's carousels) and from the Want-to-Read tab in Library. Open design questions to settle before building: whether the year-overview view collapses to a sparkline strip or a 12-cell mini-grid, and how to handle days with >3 releases (overflow chip vs. stacked spines). *(C.15, B.3.3)*
+
+### Step 6.13 — New Releases calendar: author/series follow tints (S, depends on 6.12 + follow infra)
+Extends the calendar with two additional tint intensities for releases from authors and series the user follows. Lands after the follow graph is wired (depends on whatever step first reads/writes follows — likely Step 9.10 or earlier if author-follow lands standalone). Each tint is distinct enough from Want-to-Read full-intensity and "Most anticipated" low-intensity to read cleanly in a single cell that combines two or more reasons. *(C.15)*
+
 ---
 
 ## Phase 7 — Profile depth & stats
@@ -216,6 +234,9 @@ Toggleable timeline of finishes/ratings/highlights. Privacy controls (B.6.9) gat
 
 ### Step 7.11 — Year in Books recap (M, seasonal)
 Time-limited screen surfaced in December via notification. 8–10 editorial slides, each shareable via Step 0.2. *(C.4, B.5.12)*
+
+### Step 7.12 — Reading Activity calendar (M, depends on 3.5 + 3.7 + 7.7)
+*Rough plan — design phase before build, and subsumes the streak heatmap once shipped.* A full-screen calendar with month grid + 12-month zoom-out where each day cell shows what the user did that day: pages read, time read, finishes, ratings published, highlights saved. Day cells render editorial-style — tiny stacked spine row of covers touched, dominant cover tinting the cell background. Tap a day → editorial sheet with per-day breakdown and deep links into book detail, the Sessions log (Step 3.6), and the Notes & Highlights inbox (Step 3.4). The 12-month overview replaces the standalone streak heatmap (Step 7.7); when this step ships, fold 7.7's surface into this screen rather than maintaining both. Reached from Profile, from the Reading screen's streak strip (Step 3.8), and from the Stats Atlas (Step 7.9). Out of scope for first cut: forward-looking "planned reading" entries. *(C.14, B.5.3)*
 
 ---
 
@@ -288,6 +309,9 @@ Single-archive export of all UGC; restore in Settings. *(D.8)*
 
 ### Step 9.9 — Voice & TalkBack polish (M)
 Custom TalkBack announcements for the editorial-styled screens; Assistant intents for "+pages" and "start session". *(D.6)*
+
+### Step 9.10 — Friend Feed (L, depends on 5.1 + 5.3)
+A new root-level surface as **the fifth bottom-nav tab** (preferred; fallback host is a segmented switcher at the top of Profile if the 5-tab dock proves too crowded). Streams friend activity chronologically — each row an editorial entry (eyebrow "FRIEND NAME · 2H AGO", italic verb phrase, leading cover, optional pull-quote for reviews/highlights). Event types: status changes, progress updates, reviews & ratings, highlights shared, list activity, goal milestones. Interactions: pull-to-refresh (with eyebrow swap A.1.9), long-press cover peek (A.1.1), `milestone` haptic when a goal-completion event scrolls into view. **Out of scope for first cut:** per-friend event-type muting (the social feed will not support muting specific people in this iteration). Routes detail interactions into existing surfaces (book detail, Author detail Step 5.1, Lists Step 5.3) — the feed itself stays a *surface*, not a destination. Stays separate from C.10 (Notifications inbox): that is the user's own nudges; the feed is other people's reading. Hardcover's API exposes the follow graph + activity events directly, so the feed reads from a real source. The 5-tab dock will need a follow-up pass on bottom-bar collapse timing (Step 10.3) and icon-weight balance — note this as a known-coming polish item when shipping. *(C.16, B.5.13, C.10)*
 
 ---
 

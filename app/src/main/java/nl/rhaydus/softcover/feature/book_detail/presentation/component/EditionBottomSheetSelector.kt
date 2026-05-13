@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -96,6 +97,7 @@ private fun EditionBottomSheetContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .fillMaxHeight()
             .padding(horizontal = 24.dp)
             .padding(bottom = 16.dp),
     ) {
@@ -139,7 +141,7 @@ private fun EditionBottomSheetContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 32.dp),
+                    .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
@@ -148,7 +150,7 @@ private fun EditionBottomSheetContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 32.dp),
+                    .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -158,7 +160,10 @@ private fun EditionBottomSheetContent(
                 )
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 items(editions, key = { it.id }) { edition ->
                     EditionItem(
                         edition = edition,
