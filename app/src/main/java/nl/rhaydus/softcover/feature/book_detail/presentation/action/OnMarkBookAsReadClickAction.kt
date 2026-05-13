@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -18,11 +19,13 @@ class OnMarkBookAsReadClickAction(
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
         val job = dependencies.launch {
-            dependencies.markBookAsReadUseCase(book = book).onFailure { error ->
-                Timber.e("-=- $error")
+            dependencies.markBookAsReadUseCase(book = book)
+                .onSuccess { scope.sendEvent(BookMarkedAsReadEvent()) }
+                .onFailure { error ->
+                    Timber.e("-=- $error")
 
-                scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
-            }
+                    scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
+                }
         }
 
         scope.setLocalVariables {

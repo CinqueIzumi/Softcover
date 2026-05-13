@@ -137,6 +137,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePage
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -170,6 +171,10 @@ class BookDetailScreen(
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
+        val haptics = rememberHaptics()
+
+        var celebrationKey by remember { mutableIntStateOf(0) }
+
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
                 is RefreshDetailBookEvent -> {
@@ -180,6 +185,11 @@ class BookDetailScreen(
                     screenModel.runAction(
                         action = FetchBookReviewsAction(bookId = id)
                     )
+                }
+
+                is BookMarkedAsReadEvent -> {
+                    haptics.commit()
+                    celebrationKey++
                 }
             }
         }
@@ -202,6 +212,7 @@ class BookDetailScreen(
                 )
             },
             isOnline = isOnline,
+            celebrationKey = celebrationKey,
         )
     }
 
@@ -213,6 +224,7 @@ class BookDetailScreen(
         onNavigateBack: () -> Unit,
         onCoverClick: () -> Unit,
         isOnline: Boolean,
+        celebrationKey: Int = 0,
     ) {
         val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
         val lazyListState = rememberLazyListState()
@@ -327,6 +339,7 @@ class BookDetailScreen(
                     ShelfActionBar(
                         state = state,
                         runAction = runAction,
+                        celebrationKey = celebrationKey,
                     )
                 }
 
@@ -853,6 +866,7 @@ class BookDetailScreen(
     private fun ShelfActionBar(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
+        celebrationKey: Int,
     ) {
         SkeletonCrossfade(
             isLoading = state.loadingBookDetails && state.book == null,
@@ -892,18 +906,6 @@ class BookDetailScreen(
                     val mutationFailed = book.id in state.failedMutationBookIds
 
                     val haptics = rememberHaptics()
-
-                    var celebrationKey by remember { mutableIntStateOf(0) }
-                    var prevStatus by remember { mutableStateOf(status) }
-
-                    LaunchedEffect(status) {
-                        if (status == BookStatus.Read && prevStatus != BookStatus.Read) {
-                            haptics.commit()
-                            celebrationKey++
-                        }
-
-                        prevStatus = status
-                    }
 
                     Box(
                         modifier = Modifier
