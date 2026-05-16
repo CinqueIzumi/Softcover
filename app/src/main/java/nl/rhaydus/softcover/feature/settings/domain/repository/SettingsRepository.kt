@@ -4,12 +4,20 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 
 interface SettingsRepository {
     val dateStyle: Flow<DateStyle>
 
     val libraryGridLayout: Flow<LibraryGridLayout>
+
+    val librarySortModeByTab: Flow<Map<String, LibrarySortMode>>
+
+    suspend fun setLibrarySortModeForTab(
+        tabId: String,
+        mode: LibrarySortMode,
+    )
 
     suspend fun setDateStyle(style: DateStyle)
 

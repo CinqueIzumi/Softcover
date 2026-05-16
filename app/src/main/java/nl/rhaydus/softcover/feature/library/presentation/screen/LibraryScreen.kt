@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.relocation.BringIntoViewRequester
@@ -97,6 +99,7 @@ import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
@@ -108,6 +111,8 @@ import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCo
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
+import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
+import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
@@ -122,16 +127,28 @@ import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnClearSwipeFailureAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnGridLayoutChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpandedChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnReadYearSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnSortMenuExpandedChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnSwipeMarkAsReadAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnSwipeRemoveAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAction
+import nl.rhaydus.softcover.feature.library.presentation.component.SwipeRowActions
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen
+import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
+import nl.rhaydus.softcover.feature.library.presentation.util.formatPageCount
+import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab as LibraryContentTab
 
 object LibraryScreen : Screen {
@@ -168,6 +185,9 @@ object LibraryScreen : Screen {
                         ),
                     )
                 },
+                onTabLongPress = {
+                    navigator.parent?.push(item = LibraryVisibilitySettingsScreen())
+                },
             )
         }
     }
@@ -179,6 +199,7 @@ object LibraryScreen : Screen {
         runAction: (LibraryAction) -> Unit,
         onBookClick: (Book) -> Unit,
         onEditionClick: (BookEdition) -> Unit,
+        onTabLongPress: () -> Unit = {},
         gridStateFor: (String) -> LazyGridState = { LazyGridState() },
         topAppBarState: TopAppBarState = rememberTopAppBarState(),
     ) {
@@ -219,14 +240,30 @@ object LibraryScreen : Screen {
 
         val currentTabIndex = pagerState.currentPage.coerceAtMost(tabs.lastIndex.coerceAtLeast(0))
         val currentTab = tabs.getOrNull(currentTabIndex)
-        val currentTabBookCount = currentTab?.let { tab ->
+        val isReadTab = currentTab is LibraryContentTab.Status &&
+                currentTab.status == UserBookStatus.READ
+
+        val currentTabBooks: List<Book>? = currentTab?.let { tab ->
             when (tab) {
-                is LibraryContentTab.CustomList -> state.editionsByTab[tab.id]?.size
+                is LibraryContentTab.CustomList -> null
                 is LibraryContentTab.All,
                 is LibraryContentTab.Status,
-                    -> state.booksByTab[tab.id]?.size
+                    -> state.displayBooksFor(tabId = tab.id)
             }
         }
+
+        val currentTabEditions: List<BookEdition>? = currentTab?.let { tab ->
+            when (tab) {
+                is LibraryContentTab.CustomList -> state.displayEditionsFor(tabId = tab.id)
+                else -> null
+            }
+        }
+
+        val currentTabBookCount = currentTabBooks?.size ?: currentTabEditions?.size
+
+        val currentTabPageCount = currentTabBooks?.totalPages() ?: 0
+
+        val availableReadYears = if (isReadTab) state.availableReadYears else emptyList()
 
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = topAppBarState)
 
@@ -245,9 +282,17 @@ object LibraryScreen : Screen {
                 EditorialHeader(
                     tabLabel = currentTab?.label,
                     bookCount = currentTabBookCount,
+                    totalPages = currentTabPageCount,
+                    tab = currentTab,
                     isSearchActive = state.isSearchActive,
                     onToggleSearchClick = { runAction(OnToggleSearchAction()) },
                     layoutMenu = {
+                        SortMenuAction(
+                            state = state,
+                            tabId = currentTab?.id,
+                            runAction = runAction,
+                        )
+
                         LayoutMenuAction(
                             state = state,
                             runAction = runAction,
@@ -303,7 +348,26 @@ object LibraryScreen : Screen {
                             pagerState.animateScrollToPage(index)
                         }
                     },
+                    onTabLongPress = onTabLongPress,
                 )
+
+                AnimatedVisibility(
+                    visible = isReadTab && availableReadYears.isNotEmpty(),
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        ReadYearChipRow(
+                            years = availableReadYears,
+                            selectedYear = state.selectedReadYear,
+                            onYearClick = { year ->
+                                runAction(OnReadYearSelectedAction(year = year))
+                            },
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -347,6 +411,7 @@ object LibraryScreen : Screen {
                                     state = state,
                                     gridState = gridStateFor(tab.id),
                                     onBookClick = onBookClick,
+                                    runAction = runAction,
                                 )
                         }
                     }
@@ -362,6 +427,8 @@ object LibraryScreen : Screen {
     private fun EditorialHeader(
         tabLabel: String?,
         bookCount: Int?,
+        totalPages: Int,
+        tab: LibraryContentTab?,
         isSearchActive: Boolean,
         onToggleSearchClick: () -> Unit,
         layoutMenu: @Composable () -> Unit,
@@ -429,12 +496,11 @@ object LibraryScreen : Screen {
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    val subtitle = when {
-                        bookCount == null -> "Loading your shelf…"
-                        bookCount == 0 -> "No titles yet — your story starts here."
-                        bookCount == 1 -> "1 title resting on this shelf."
-                        else -> "$bookCount titles resting on this shelf."
-                    }
+                    val subtitle = subtitleFor(
+                        tab = tab,
+                        bookCount = bookCount,
+                        totalPages = totalPages,
+                    )
 
                     Text(
                         text = subtitle,
@@ -534,6 +600,7 @@ object LibraryScreen : Screen {
         currentPage: Int,
         maxLabelWidth: Dp,
         onTabClick: (Int) -> Unit,
+        onTabLongPress: () -> Unit,
     ) {
         val density = LocalDensity.current
         val peekPx = with(density) { 48.dp.toPx() }
@@ -569,6 +636,7 @@ object LibraryScreen : Screen {
                     selected = selected,
                     maxLabelWidth = maxLabelWidth,
                     onClick = { onTabClick(index) },
+                    onLongClick = onTabLongPress,
                     modifier = Modifier
                         .bringIntoViewRequester(requester)
                         .onSizeChanged { pillSize = it },
@@ -577,12 +645,14 @@ object LibraryScreen : Screen {
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun ShelfTabPill(
         label: String,
         selected: Boolean,
         maxLabelWidth: Dp,
         onClick: () -> Unit,
+        onLongClick: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
         val container = if (selected) {
@@ -597,12 +667,23 @@ object LibraryScreen : Screen {
             MaterialTheme.colorScheme.onSurfaceVariant
         }
 
+        val haptics = LocalHaptics.current
+        val interactionSource = remember { MutableInteractionSource() }
+
         Surface(
-            modifier = modifier,
+            modifier = modifier.combinedClickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick,
+                onLongClick = {
+                    haptics.threshold()
+
+                    onLongClick()
+                },
+            ),
             color = container,
             contentColor = content,
             shape = RoundedCornerShape(percent = 50),
-            onClick = onClick,
         ) {
             Text(
                 text = label,
@@ -619,6 +700,159 @@ object LibraryScreen : Screen {
     }
 
     // endregion
+
+    @Composable
+    private fun ReadYearChipRow(
+        years: List<Int>,
+        selectedYear: Int?,
+        onYearClick: (Int?) -> Unit,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            YearChip(
+                label = "All years",
+                selected = selectedYear == null,
+                onClick = { onYearClick(null) },
+            )
+
+            years.forEach { year ->
+                YearChip(
+                    label = year.toString(),
+                    selected = selectedYear == year,
+                    onClick = { onYearClick(year) },
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun YearChip(
+        label: String,
+        selected: Boolean,
+        onClick: () -> Unit,
+    ) {
+        val container = if (selected) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        }
+
+        val content = if (selected) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
+        Surface(
+            color = container,
+            contentColor = content,
+            shape = RoundedCornerShape(percent = 50),
+            onClick = onClick,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                ),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            )
+        }
+    }
+
+    private fun subtitleFor(
+        tab: LibraryContentTab?,
+        bookCount: Int?,
+        totalPages: Int,
+    ): String {
+        if (bookCount == null) return "Loading your shelf…"
+        if (bookCount == 0) {
+            return when {
+                tab is LibraryContentTab.Status && tab.status == UserBookStatus.READ ->
+                    "Nothing finished yet — the page is still open."
+                tab is LibraryContentTab.Status && tab.status == UserBookStatus.WANT_TO_READ ->
+                    "No titles set aside — discover one next."
+                tab is LibraryContentTab.Status && tab.status == UserBookStatus.CURRENTLY_READING ->
+                    "No book open — pick one up."
+                else -> "No titles yet — your story starts here."
+            }
+        }
+
+        val titlesPart = formatBookCount(count = bookCount)
+        val pagesPart = formatPageCount(pages = totalPages)
+
+        return if (pagesPart != null) "$titlesPart · $pagesPart" else titlesPart
+    }
+
+    @Composable
+    private fun SortMenuAction(
+        state: LibraryUiState,
+        tabId: String?,
+        runAction: (LibraryAction) -> Unit,
+    ) {
+        val currentTabId = tabId ?: return
+        val currentMode = state.sortModeFor(tabId = currentTabId)
+
+        val supportedModes = remember(currentTabId) {
+            val isCustomList = currentTabId.startsWith("list-")
+
+            if (isCustomList) {
+                listOf(
+                    LibrarySortMode.TITLE,
+                    LibrarySortMode.AUTHOR,
+                    LibrarySortMode.PAGE_COUNT,
+                )
+            } else {
+                LibrarySortMode.entries
+            }
+        }
+
+        Box {
+            IconButton(
+                onClick = {
+                    runAction(OnSortMenuExpandedChangeAction(expanded = true))
+                },
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_sort),
+                    contentDescription = "Change library sort",
+                )
+            }
+
+            DropdownMenu(
+                expanded = state.isSortMenuExpanded,
+                onDismissRequest = {
+                    runAction(OnSortMenuExpandedChangeAction(expanded = false))
+                },
+            ) {
+                supportedModes.forEach { mode ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = mode.label,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = if (mode == currentMode) FontWeight.SemiBold else FontWeight.Normal,
+                                ),
+                            )
+                        },
+                        onClick = {
+                            runAction(
+                                OnSortModeChangeAction(
+                                    tabId = currentTabId,
+                                    mode = mode,
+                                ),
+                            )
+                        },
+                    )
+                }
+            }
+        }
+    }
 
     @Composable
     private fun LayoutMenuAction(
@@ -667,28 +901,25 @@ object LibraryScreen : Screen {
         gridState: LazyGridState,
         onEditionClick: (BookEdition) -> Unit,
     ) {
-        val editions = state.editionsByTab[tab.id] ?: return
+        val rawEditions = state.editionsByTab[tab.id] ?: return
 
-        if (editions.isEmpty() && state.isLoading.not()) {
+        if (rawEditions.isEmpty() && state.isLoading.not()) {
             EmptyListScreen(tab = tab)
 
             return
         }
 
-        val query = state.searchQuery.trim()
-
-        val visibleEditions = if (query.isEmpty()) {
-            editions
-        } else {
-            editions.filter { edition ->
-                edition.title.orEmpty().contains(query, ignoreCase = true) ||
-                        edition.authors.any { it.name.contains(query, ignoreCase = true) }
-            }
-        }
+        val visibleEditions = state.displayEditionsFor(tabId = tab.id).orEmpty()
 
         val animator = rememberLazyItemMutationAnimator(keys = visibleEditions.map { it.id })
 
         val entry = rememberStaggeredEntryCoordinator(key = "library:editions:${tab.id}")
+
+        ScrollToTopOnSortChange(
+            tabId = tab.id,
+            sortMode = state.sortModeFor(tabId = tab.id),
+            gridState = gridState,
+        )
 
         LayoutGrid(
             layout = state.gridLayout,
@@ -712,31 +943,29 @@ object LibraryScreen : Screen {
         state: LibraryUiState,
         gridState: LazyGridState,
         onBookClick: (Book) -> Unit,
+        runAction: (LibraryAction) -> Unit,
     ) {
-        val books = state.booksByTab[tab.id]
+        val rawBooks = state.booksByTab[tab.id]
 
-        if (books == null) return
+        if (rawBooks == null) return
 
-        if (books.isEmpty() && state.isLoading.not()) {
+        if (rawBooks.isEmpty() && state.isLoading.not()) {
             EmptyListScreen(tab = tab)
 
             return
         }
 
-        val query = state.searchQuery.trim()
-
-        val visibleBooks = if (query.isEmpty()) {
-            books
-        } else {
-            books.filter { book ->
-                book.title.contains(query, ignoreCase = true) ||
-                        book.authors.any { it.name.contains(query, ignoreCase = true) }
-            }
-        }
+        val visibleBooks = state.displayBooksFor(tabId = tab.id).orEmpty()
 
         val animator = rememberLazyItemMutationAnimator(keys = visibleBooks.map { it.id })
 
         val entry = rememberStaggeredEntryCoordinator(key = "library:books:${tab.id}")
+
+        ScrollToTopOnSortChange(
+            tabId = tab.id,
+            sortMode = state.sortModeFor(tabId = tab.id),
+            gridState = gridState,
+        )
 
         LayoutGrid(
             layout = state.gridLayout,
@@ -751,8 +980,31 @@ object LibraryScreen : Screen {
                     onBookClick = onBookClick,
                     deadline = state.deadlines[book.id],
                     dateStyle = state.dateStyle,
+                    onSwipeMarkAsRead = { runAction(OnSwipeMarkAsReadAction(book = book)) },
+                    onSwipeRemove = { runAction(OnSwipeRemoveAction(book = book)) },
+                    swipeFailed = book.id in state.failedSwipeBookIds,
+                    onSwipeShakeEnd = { runAction(OnClearSwipeFailureAction(bookId = book.id)) },
                 )
             }
+        }
+    }
+
+    @Composable
+    private fun ScrollToTopOnSortChange(
+        tabId: String,
+        sortMode: LibrarySortMode,
+        gridState: LazyGridState,
+    ) {
+        var previousSortMode by remember(tabId) { mutableStateOf<LibrarySortMode?>(null) }
+
+        LaunchedEffect(tabId, sortMode) {
+            val prior = previousSortMode
+
+            if (prior != null && prior != sortMode) {
+                gridState.scrollToItem(index = 0)
+            }
+
+            previousSortMode = sortMode
         }
     }
 
@@ -810,6 +1062,10 @@ object LibraryScreen : Screen {
         onBookClick: (Book) -> Unit,
         deadline: BookDeadline? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+        onSwipeMarkAsRead: () -> Unit = {},
+        onSwipeRemove: () -> Unit = {},
+        swipeFailed: Boolean = false,
+        onSwipeShakeEnd: () -> Unit = {},
         modifier: Modifier = Modifier,
     ) {
         PrefetchBookDetailOnVisible(bookId = book.id)
@@ -889,42 +1145,65 @@ object LibraryScreen : Screen {
             }
 
             LibraryGridLayout.LIST_COMPACT -> {
-                CompactRow(
-                    modifier = modifier,
-                    title = book.title,
-                    authorName = authorName,
-                    onClick = { onBookClick(book) },
-                    deadlineProgress = deadlineProgress,
-                )
+                val isRead = book.status == BookStatus.Read
+
+                SwipeRowActions(
+                    modifier = modifier.shakeOnError(
+                        trigger = swipeFailed,
+                        onShakeEnd = onSwipeShakeEnd,
+                    ),
+                    onMarkAsRead = onSwipeMarkAsRead,
+                    onRemove = onSwipeRemove,
+                    allowMarkAsRead = isRead.not(),
+                ) {
+                    CompactRow(
+                        title = book.title,
+                        authorName = authorName,
+                        onClick = { onBookClick(book) },
+                        deadlineProgress = deadlineProgress,
+                    )
+                }
             }
 
             LibraryGridLayout.LIST_LARGE -> {
-                LargeRow(
-                    modifier = modifier,
-                    title = book.title,
-                    authorName = currentEdition?.authorString.orEmpty(),
-                    onClick = { onBookClick(book) },
-                    seriesText = book.seriesText,
-                    releaseYear = book.releaseYear,
-                    usersCount = book.usersCount,
-                    rating = book.rating,
-                    deadlineProgress = deadlineProgress,
-                    dateStyle = dateStyle,
-                ) { coverModifier ->
-                    DeadlineCoverOverlay(progress = deadlineProgress) {
-                        EditionImage(
-                            edition = currentEdition,
-                            modifier = coverModifier,
-                            isLoading = false,
-                            defaultEdition = book.defaultEdition,
-                            fallbackCoverUrl = book.coverUrl,
-                            elevation = 6.dp,
-                            cornerRadius = 10.dp,
-                            sharedTransitionKey = bookCoverTransitionKey(
-                                editionId = currentEdition?.id,
-                                bookId = book.id,
-                            ),
-                        )
+                val isRead = book.status == BookStatus.Read
+
+                SwipeRowActions(
+                    modifier = modifier.shakeOnError(
+                        trigger = swipeFailed,
+                        onShakeEnd = onSwipeShakeEnd,
+                    ),
+                    onMarkAsRead = onSwipeMarkAsRead,
+                    onRemove = onSwipeRemove,
+                    allowMarkAsRead = isRead.not(),
+                    backgroundShape = RoundedCornerShape(20.dp),
+                ) {
+                    LargeRow(
+                        title = book.title,
+                        authorName = currentEdition?.authorString.orEmpty(),
+                        onClick = { onBookClick(book) },
+                        seriesText = book.seriesText,
+                        releaseYear = book.releaseYear,
+                        usersCount = book.usersCount,
+                        rating = book.rating,
+                        deadlineProgress = deadlineProgress,
+                        dateStyle = dateStyle,
+                    ) { coverModifier ->
+                        DeadlineCoverOverlay(progress = deadlineProgress) {
+                            EditionImage(
+                                edition = currentEdition,
+                                modifier = coverModifier,
+                                isLoading = false,
+                                defaultEdition = book.defaultEdition,
+                                fallbackCoverUrl = book.coverUrl,
+                                elevation = 6.dp,
+                                cornerRadius = 10.dp,
+                                sharedTransitionKey = bookCoverTransitionKey(
+                                    editionId = currentEdition?.id,
+                                    bookId = book.id,
+                                ),
+                            )
+                        }
                     }
                 }
             }

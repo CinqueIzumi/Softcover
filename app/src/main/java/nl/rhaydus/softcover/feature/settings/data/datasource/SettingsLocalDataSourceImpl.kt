@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.settings.data.model.toModel
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 
 class SettingsLocalDataSourceImpl(
@@ -32,6 +33,20 @@ class SettingsLocalDataSourceImpl(
     override suspend fun setLibraryGridLayout(layout: LibraryGridLayout) {
         appSettingsDataStore.store.updateData {
             it.copy(libraryGridLayout = layout)
+        }
+    }
+
+    override val librarySortModeByTab: Flow<Map<String, LibrarySortMode>> =
+        appSettingsDataStore.store.data
+            .map { it.librarySortModeByTab }
+            .distinctUntilChanged()
+
+    override suspend fun setLibrarySortModeForTab(
+        tabId: String,
+        mode: LibrarySortMode,
+    ) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(librarySortModeByTab = entity.librarySortModeByTab + (tabId to mode))
         }
     }
 

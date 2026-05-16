@@ -11,7 +11,9 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUser
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -22,7 +24,9 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUs
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortModesAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortModeUseCase
 
 class LibraryScreenScreenModel(
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
@@ -34,6 +38,10 @@ class LibraryScreenScreenModel(
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
     private val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
     private val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
+    private val getLibrarySortModesAsFlowUseCase: GetLibrarySortModesAsFlowUseCase,
+    private val setLibrarySortModeUseCase: SetLibrarySortModeUseCase,
+    private val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     private val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
@@ -55,6 +63,10 @@ class LibraryScreenScreenModel(
         getAllUserListsUseCase = getAllUserListsUseCase,
         getLibraryGridLayoutAsFlowUseCase = getLibraryGridLayoutAsFlowUseCase,
         setLibraryGridLayoutUseCase = setLibraryGridLayoutUseCase,
+        getLibrarySortModesAsFlowUseCase = getLibrarySortModesAsFlowUseCase,
+        setLibrarySortModeUseCase = setLibrarySortModeUseCase,
+        markBookAsReadUseCase = markBookAsReadUseCase,
+        removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
         observeAllBookDeadlinesUseCase = observeAllBookDeadlinesUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         getEnabledStatusCodesAsFlowUseCase = getEnabledStatusCodesAsFlowUseCase,

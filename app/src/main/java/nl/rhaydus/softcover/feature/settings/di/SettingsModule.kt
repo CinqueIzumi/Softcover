@@ -22,9 +22,11 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortModesAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortModeUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.flows.DateStyleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilityInitializer
@@ -135,6 +137,10 @@ val settingsModule = module {
     factory {
         SetLibraryGridLayoutUseCase(settingsRepository = get())
     }
+
+    factory { GetLibrarySortModesAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetLibrarySortModeUseCase(settingsRepository = get()) }
 
     single<GetThemeConfigurationUseCase> {
         GetThemeConfigurationUseCase(settingsRepository = get())
