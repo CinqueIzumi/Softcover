@@ -123,7 +123,18 @@ class SettingsLocalDataSourceImpl(
                 enabledStatusCodes = defaults.enabledStatusCodes,
                 enabledListIds = defaults.enabledListIds,
                 listDefaultsSeeded = defaults.listDefaultsSeeded,
+                libraryTabOrder = defaults.libraryTabOrder,
             )
+        }
+    }
+
+    override val libraryTabOrder: Flow<List<String>> = appSettingsDataStore.store.data
+        .map { it.libraryTabOrder }
+        .distinctUntilChanged()
+
+    override suspend fun setLibraryTabOrder(order: List<String>) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(libraryTabOrder = order)
         }
     }
 }

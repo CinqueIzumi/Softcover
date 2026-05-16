@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
@@ -24,18 +25,22 @@ class PersistedLibraryVisibilityCollectorTest {
 
     private lateinit var getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase
     private lateinit var getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase
+    private lateinit var getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase
     private lateinit var dependencies: LibraryVisibilitySettingsDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
     private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
     private lateinit var statusCodesFlow: MutableSharedFlow<Set<Int>>
     private lateinit var listIdsFlow: MutableSharedFlow<Set<Int>>
+    private lateinit var tabOrderFlow: MutableSharedFlow<List<String>>
 
     @BeforeEach
     fun setUp() {
         statusCodesFlow = MutableSharedFlow(replay = 1)
         listIdsFlow = MutableSharedFlow(replay = 1)
+        tabOrderFlow = MutableSharedFlow(replay = 1)
         getEnabledStatusCodesAsFlowUseCase = mockk()
         getEnabledListIdsAsFlowUseCase = mockk()
+        getLibraryTabOrderAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -51,6 +56,10 @@ class PersistedLibraryVisibilityCollectorTest {
             getEnabledListIdsAsFlowUseCase()
         } returns listIdsFlow
 
+        every {
+            getLibraryTabOrderAsFlowUseCase()
+        } returns tabOrderFlow
+
         dependencies = mockk<LibraryVisibilitySettingsDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getEnabledStatusCodesAsFlowUseCase
@@ -59,6 +68,10 @@ class PersistedLibraryVisibilityCollectorTest {
             every {
                 mock.getEnabledListIdsAsFlowUseCase
             } returns getEnabledListIdsAsFlowUseCase
+
+            every {
+                mock.getLibraryTabOrderAsFlowUseCase
+            } returns getLibraryTabOrderAsFlowUseCase
         }
     }
 
@@ -74,6 +87,7 @@ class PersistedLibraryVisibilityCollectorTest {
             // ----- Act -----
             statusCodesFlow.emit(setOf(1, 3))
             listIdsFlow.emit(setOf(10))
+            tabOrderFlow.emit(emptyList())
 
             // ----- Assert -----
             stateFlow.value.persistedEnabledStatusCodes shouldBe setOf(1, 3)
@@ -92,6 +106,7 @@ class PersistedLibraryVisibilityCollectorTest {
 
             statusCodesFlow.emit(setOf(1, 3))
             listIdsFlow.emit(setOf(10))
+            tabOrderFlow.emit(emptyList())
 
             // Simulate user toggling the draft before the persisted store updates again
             stateFlow.value = stateFlow.value.copy(
@@ -102,6 +117,7 @@ class PersistedLibraryVisibilityCollectorTest {
             // ----- Act -----
             statusCodesFlow.emit(setOf(1, 3, 5))
             listIdsFlow.emit(setOf(10, 30))
+            tabOrderFlow.emit(emptyList())
 
             // ----- Assert -----
             stateFlow.value.persistedEnabledStatusCodes shouldBe setOf(1, 3, 5)
@@ -131,6 +147,7 @@ class PersistedLibraryVisibilityCollectorTest {
             val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
             statusCodesFlow.emit(setOf(3, 5))
             listIdsFlow.emit(setOf(7))
+            tabOrderFlow.emit(emptyList())
             job.cancel()
 
             // ----- Act & Assert -----
@@ -152,6 +169,7 @@ class PersistedLibraryVisibilityCollectorTest {
             // ----- Act -----
             statusCodesFlow.emit(setOf(1))
             listIdsFlow.emit(emptySet())
+            tabOrderFlow.emit(emptyList())
 
             // ----- Assert -----
             stateFlow.value.availableLists.size shouldBe 1

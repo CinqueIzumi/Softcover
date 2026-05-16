@@ -28,7 +28,8 @@ class VisibleTabsCollector : LibraryInitializer {
             dependencies.getEnabledStatusCodesAsFlowUseCase(),
             dependencies.getEnabledListIdsAsFlowUseCase(),
             dependencies.getAllUserListsUseCase(),
-        ) { enabledStatuses: Set<Int>, enabledListIds: Set<Int>, lists: List<BookList> ->
+            dependencies.getLibraryTabOrderAsFlowUseCase(),
+        ) { enabledStatuses: Set<Int>, enabledListIds: Set<Int>, lists: List<BookList>, persistedOrder: List<String> ->
             val active = UserBookStatus.activeLibraryCodes(enabledCodes = enabledStatuses)
 
             val statusTabs = statusOrder
@@ -40,11 +41,16 @@ class VisibleTabsCollector : LibraryInitializer {
                 .sortedBy { it.name.lowercase() }
                 .map { LibraryTab.CustomList(listId = it.id, listName = it.name) }
 
-            buildList<LibraryTab> {
+            val defaultOrdered = buildList<LibraryTab> {
                 add(LibraryTab.All)
                 addAll(statusTabs)
                 addAll(listTabs)
             }
+
+            applyTabOrder(
+                tabs = defaultOrdered,
+                persistedOrder = persistedOrder,
+            )
         }.collectLatest { tabs ->
             val tabIds = tabs.map { it.id }.toSet()
 
@@ -68,4 +74,24 @@ class VisibleTabsCollector : LibraryInitializer {
             }
         }
     }
+}
+
+private fun applyTabOrder(
+    tabs: List<LibraryTab>,
+    persistedOrder: List<String>,
+): List<LibraryTab> {
+    if (persistedOrder.isEmpty()) return tabs
+
+    val pinned = tabs.firstOrNull { it is LibraryTab.All }
+    val reorderable = tabs.filter { it !is LibraryTab.All }
+
+    val byId = reorderable.associateBy { it.id }
+
+    val ordered = persistedOrder.mapNotNull { byId[it] }
+
+    val orderedIds = ordered.map { it.id }.toSet()
+
+    val appended = reorderable.filter { it.id !in orderedIds }
+
+    return listOfNotNull(pinned) + ordered + appended
 }

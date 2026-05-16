@@ -88,4 +88,10 @@ class SettingsRepositoryImpl(
     override suspend fun setEnabledListIds(ids: Set<Int>) {
         settingsLocalDataSource.setEnabledListIds(ids = ids)
     }
+
+    override val libraryTabOrder: Flow<List<String>> = settingsLocalDataSource.libraryTabOrder
+
+    override suspend fun setLibraryTabOrder(order: List<String>) {
+        settingsLocalDataSource.setLibraryTabOrder(order = order)
+    }
 }

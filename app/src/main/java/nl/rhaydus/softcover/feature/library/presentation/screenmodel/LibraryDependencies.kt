@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsF
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortModesAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortModeUseCase
 
@@ -39,6 +40,7 @@ class LibraryDependencies(
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
+    val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

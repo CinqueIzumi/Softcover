@@ -8,8 +8,10 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilityInitializer
@@ -19,8 +21,10 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilit
 class LibraryVisibilitySettingsScreenModel(
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     private val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
+    private val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
     private val setEnabledStatusCodesUseCase: SetEnabledStatusCodesUseCase,
     private val setEnabledListIdsUseCase: SetEnabledListIdsUseCase,
+    private val setLibraryTabOrderUseCase: SetLibraryTabOrderUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
     private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     private val applicationScope: ApplicationScope,
@@ -40,8 +44,10 @@ class LibraryVisibilitySettingsScreenModel(
     override val dependencies = LibraryVisibilitySettingsDependencies(
         getEnabledStatusCodesAsFlowUseCase = getEnabledStatusCodesAsFlowUseCase,
         getEnabledListIdsAsFlowUseCase = getEnabledListIdsAsFlowUseCase,
+        getLibraryTabOrderAsFlowUseCase = getLibraryTabOrderAsFlowUseCase,
         setEnabledStatusCodesUseCase = setEnabledStatusCodesUseCase,
         setEnabledListIdsUseCase = setEnabledListIdsUseCase,
+        setLibraryTabOrderUseCase = setLibraryTabOrderUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
         refreshUserBooksUseCase = refreshUserBooksUseCase,
         applicationScope = applicationScope,

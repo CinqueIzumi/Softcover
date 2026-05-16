@@ -17,4 +17,5 @@ data class AppSettingsEntity(
     val enabledStatusCodes: Set<Int> = setOf(1, 3, 5),
     val enabledListIds: Set<Int> = emptySet(),
     val listDefaultsSeeded: Boolean = false,
+    val libraryTabOrder: List<String> = emptyList(),
 )

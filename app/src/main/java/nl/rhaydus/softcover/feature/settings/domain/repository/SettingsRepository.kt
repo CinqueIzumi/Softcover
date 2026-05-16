@@ -50,4 +50,8 @@ interface SettingsRepository {
     suspend fun setEnabledStatusCodes(codes: Set<Int>)
 
     suspend fun setEnabledListIds(ids: Set<Int>)
+
+    val libraryTabOrder: Flow<List<String>>
+
+    suspend fun setLibraryTabOrder(order: List<String>)
 }

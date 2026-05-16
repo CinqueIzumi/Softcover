@@ -51,6 +51,7 @@ val libraryModule = module {
             getDateStyleAsFlowUseCase = get(),
             getEnabledStatusCodesAsFlowUseCase = get(),
             getEnabledListIdsAsFlowUseCase = get(),
+            getLibraryTabOrderAsFlowUseCase = get(),
         )
     }
 }

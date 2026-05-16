@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsF
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortModesAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortModeUseCase
 
@@ -46,6 +47,7 @@ class LibraryScreenScreenModel(
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     private val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
+    private val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryInitializer>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
@@ -71,6 +73,7 @@ class LibraryScreenScreenModel(
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         getEnabledStatusCodesAsFlowUseCase = getEnabledStatusCodesAsFlowUseCase,
         getEnabledListIdsAsFlowUseCase = getEnabledListIdsAsFlowUseCase,
+        getLibraryTabOrderAsFlowUseCase = getLibraryTabOrderAsFlowUseCase,
         mainDispatcher = appDispatchers.main,
         coroutineScope = screenModelScope,
     )

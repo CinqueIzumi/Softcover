@@ -23,9 +23,15 @@ class OnSaveLibraryVisibilityAction : LibraryVisibilityAction {
             dependencies.setEnabledStatusCodesUseCase(codes = current.draftEnabledStatusCodes).onFailure {
                 Timber.e("-=- $it")
             }
+
             dependencies.setEnabledListIdsUseCase(ids = current.draftEnabledListIds).onFailure {
                 Timber.e("-=- $it")
             }
+
+            dependencies.setLibraryTabOrderUseCase(order = current.draftTabOrder).onFailure {
+                Timber.e("-=- $it")
+            }
+
             dependencies.refreshUserBooksUseCase().onFailure { Timber.e("-=- $it") }
 
             scope.setState { it.copy(isSaving = false) }
