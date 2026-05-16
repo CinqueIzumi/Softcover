@@ -1,0 +1,30 @@
+package nl.rhaydus.softcover.feature.personal.domain.repository
+
+import kotlinx.coroutines.flow.Flow
+import nl.rhaydus.softcover.feature.personal.domain.model.ReadingSession
+
+interface ReadingSessionRepository {
+    fun observeByBookId(bookId: Int): Flow<List<ReadingSession>>
+
+    fun observeAll(): Flow<List<ReadingSession>>
+
+    fun observeActive(): Flow<ReadingSession?>
+
+    fun observeById(id: Long): Flow<ReadingSession?>
+
+    suspend fun start(
+        bookId: Int,
+        startPage: Int?,
+        startSeconds: Int?,
+    ): Long
+
+    suspend fun stop(
+        id: Long,
+        endPage: Int?,
+        endSeconds: Int?,
+    )
+
+    suspend fun update(session: ReadingSession)
+
+    suspend fun delete(id: Long)
+}
