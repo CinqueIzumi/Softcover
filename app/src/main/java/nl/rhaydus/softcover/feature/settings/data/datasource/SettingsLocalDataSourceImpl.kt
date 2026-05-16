@@ -50,6 +50,20 @@ class SettingsLocalDataSourceImpl(
         }
     }
 
+    override val dismissedPlanTodayByBook: Flow<Map<Int, String>> =
+        appSettingsDataStore.store.data
+            .map { it.dismissedPlanTodayByBook }
+            .distinctUntilChanged()
+
+    override suspend fun setPlanTodayDismissed(
+        bookId: Int,
+        isoDate: String,
+    ) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(dismissedPlanTodayByBook = entity.dismissedPlanTodayByBook + (bookId to isoDate))
+        }
+    }
+
     override suspend fun updateApiKey(key: String) {
         apiKeyLocalDataSource.updateApiKey(key = key)
     }

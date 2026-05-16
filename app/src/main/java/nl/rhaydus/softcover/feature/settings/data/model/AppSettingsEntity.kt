@@ -14,6 +14,7 @@ data class AppSettingsEntity(
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val libraryGridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
     val librarySortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
+    val dismissedPlanTodayByBook: Map<Int, String> = emptyMap(),
     val enabledStatusCodes: Set<Int> = setOf(1, 3, 5),
     val enabledListIds: Set<Int> = emptySet(),
     val listDefaultsSeeded: Boolean = false,

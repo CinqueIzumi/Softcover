@@ -4,13 +4,17 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
+import nl.rhaydus.softcover.feature.settings.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingInitializer
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -26,6 +30,10 @@ class ReadingScreenScreenModel(
     private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
     private val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
+    private val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
+    private val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
+    private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
+    private val getTrendingBooksUseCase: GetTrendingBooksUseCase,
     appDispatchers: AppDispatchers,
     flows: List<ReadingInitializer>,
 ) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingInitializer, ReadingLocalVariables>(
@@ -44,6 +52,10 @@ class ReadingScreenScreenModel(
         initializeUserBooksUseCase = initializeUserBooksUseCase,
         observeAllBookDeadlinesUseCase = observeAllBookDeadlinesUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
+        observePlanTodayDismissalsUseCase = observePlanTodayDismissalsUseCase,
+        dismissPlanTodayUseCase = dismissPlanTodayUseCase,
+        getWantToReadUserBooksUseCase = getWantToReadUserBooksUseCase,
+        getTrendingBooksUseCase = getTrendingBooksUseCase,
     )
 
     init {

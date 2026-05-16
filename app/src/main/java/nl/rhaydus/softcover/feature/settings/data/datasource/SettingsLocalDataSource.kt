@@ -19,6 +19,13 @@ interface SettingsLocalDataSource {
         mode: LibrarySortMode,
     )
 
+    val dismissedPlanTodayByBook: Flow<Map<Int, String>>
+
+    suspend fun setPlanTodayDismissed(
+        bookId: Int,
+        isoDate: String,
+    )
+
     suspend fun setDateStyle(style: DateStyle)
 
     suspend fun setLibraryGridLayout(layout: LibraryGridLayout)

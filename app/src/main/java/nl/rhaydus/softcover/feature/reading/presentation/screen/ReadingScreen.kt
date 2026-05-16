@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -119,6 +120,7 @@ import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
@@ -130,6 +132,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.math.roundToInt
 
@@ -258,6 +261,9 @@ object ReadingScreen : Screen {
 
                             state.isLoading -> Unit
                             else -> EmptyCurrentlyReadingScreen(
+                                wantToReadBooks = state.wantToReadBooks,
+                                trendingBooks = state.trendingBooks,
+                                onBookClick = onBookClick,
                                 onNavigateToSearch = onNavigateToSearch,
                             )
                         }
@@ -335,6 +341,8 @@ object ReadingScreen : Screen {
         val density = LocalDensity.current
         val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
 
+        val today = remember { LocalDate.now().toString() }
+
         val slideModifier: (Int) -> Modifier = { bookId ->
             if (bookId == slidingBookId) {
                 Modifier.graphicsLayer {
@@ -361,10 +369,25 @@ object ReadingScreen : Screen {
                     )
                 }
 
+                val featuredDeadlineProgress = featured.deadlineProgressFrom(state)
+                val planTodayMessage = planTodayNudgeFor(progress = featuredDeadlineProgress)
+                val isPlanTodayDismissed = state.dismissedPlanTodayByBook[featured.id] == today
+
+                if (planTodayMessage != null && isPlanTodayDismissed.not()) {
+                    item(key = "plan-today-${featured.id}") {
+                        PlanTodayNudge(
+                            text = planTodayMessage,
+                            onDismiss = {
+                                runAction(OnDismissPlanTodayAction(bookId = featured.id))
+                            },
+                        )
+                    }
+                }
+
                 item(key = "featured-${featured.id}") {
                     FeaturedBookCard(
                         book = featured,
-                        deadlineProgress = featured.deadlineProgressFrom(state),
+                        deadlineProgress = featuredDeadlineProgress,
                         dateStyle = state.dateStyle,
                         mutationFailed = featured.id in state.failedMutationBookIds,
                         runAction = runAction,
@@ -387,7 +410,10 @@ object ReadingScreen : Screen {
 
                     itemsIndexed(rest, key = { _, book -> book.id }) { index, book ->
                         CompactBookEntry(
-                            modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
+                            modifier = rememberMutationAnimatedModifier(
+                                animator = animator,
+                                itemKey = book.id,
+                            )
                                 .staggeredEntry(coordinator = entry, index = index)
                                 .then(slideModifier(book.id)),
                             book = book,
@@ -953,16 +979,24 @@ object ReadingScreen : Screen {
 
     @Composable
     private fun EmptyCurrentlyReadingScreen(
+        wantToReadBooks: List<Book> = emptyList(),
+        trendingBooks: List<Book> = emptyList(),
+        onBookClick: (Book) -> Unit = {},
         onNavigateToSearch: () -> Unit,
     ) {
+        val pickUpNext = wantToReadBooks.take(3)
+        val trendingTile = trendingBooks.firstOrNull()
+        val showAdaptive = pickUpNext.isNotEmpty() || trendingTile != null
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 32.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = if (showAdaptive) Arrangement.Top else Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            if (showAdaptive) Spacer(modifier = Modifier.height(40.dp))
             val quoteAlpha = if (isSystemInDarkTheme()) 0.15f else 0.3f
 
             Text(
@@ -1022,6 +1056,171 @@ object ReadingScreen : Screen {
                     )
                 }
             }
+
+            if (pickUpNext.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(40.dp))
+
+                PickUpNextSection(
+                    books = pickUpNext,
+                    onBookClick = onBookClick,
+                )
+            } else if (trendingTile != null) {
+                Spacer(modifier = Modifier.height(40.dp))
+
+                TrendingTileSection(
+                    book = trendingTile,
+                    onBookClick = onBookClick,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun PickUpNextSection(
+        books: List<Book>,
+        onBookClick: (Book) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            SectionLabel(text = "Pick up next")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+            ) {
+                books.forEach { book ->
+                    PickUpNextTile(
+                        book = book,
+                        onClick = { onBookClick(book) },
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun PickUpNextTile(
+        book: Book,
+        onClick: () -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .width(96.dp)
+                .pressScale(remember { MutableInteractionSource() }),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Surface(
+                onClick = onClick,
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+            ) {
+                EditionImage(
+                    edition = book.currentEdition,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(ratio = 2f / 3f),
+                    isLoading = false,
+                    defaultEdition = book.defaultEdition,
+                    fallbackCoverUrl = book.coverUrl,
+                    elevation = 4.dp,
+                    cornerRadius = 10.dp,
+                    sharedTransitionKey = bookCoverTransitionKey(
+                        editionId = book.currentEdition?.id,
+                        bookId = book.id,
+                    ),
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = book.title,
+                style = MaterialTheme.editorialTypography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+
+    @Composable
+    private fun TrendingTileSection(
+        book: Book,
+        onBookClick: (Book) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            SectionLabel(text = "Trending now")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Surface(
+                onClick = { onBookClick(book) },
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    EditionImage(
+                        edition = book.currentEdition,
+                        modifier = Modifier
+                            .width(80.dp)
+                            .aspectRatio(ratio = 2f / 3f),
+                        isLoading = false,
+                        defaultEdition = book.defaultEdition,
+                        fallbackCoverUrl = book.coverUrl,
+                        elevation = 4.dp,
+                        cornerRadius = 8.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = book.currentEdition?.id,
+                            bookId = book.id,
+                        ),
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = "Trending".uppercase(),
+                            style = MaterialTheme.editorialTypography.eyebrowSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+
+                        Text(
+                            text = book.title,
+                            style = MaterialTheme.editorialTypography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        val author = book.authors.firstOrNull()?.name.orEmpty()
+
+                        if (author.isNotBlank()) {
+                            Text(
+                                text = "By $author",
+                                style = MaterialTheme.editorialTypography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -1053,6 +1252,40 @@ private fun List<Book>.averageProgress(): Float? {
     return values.average().toFloat()
 }
 
+@Composable
+private fun PlanTodayNudge(
+    text: String,
+    onDismiss: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.editorialTypography.bodySmall.copy(
+                fontStyle = FontStyle.Italic,
+            ),
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f),
+        )
+
+        IconButton(
+            onClick = onDismiss,
+            modifier = Modifier.size(32.dp),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_close),
+                contentDescription = "Dismiss",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
+}
+
 private fun greetingForNow(): String {
     val hour = LocalTime.now().hour
     return when (hour) {
@@ -1063,7 +1296,10 @@ private fun greetingForNow(): String {
     }
 }
 
-private fun buildSubtitle(bookCount: Int, averageProgress: Float?): String {
+private fun buildSubtitle(
+    bookCount: Int,
+    averageProgress: Float?,
+): String {
     val countPart = when (bookCount) {
         1 -> "One title in motion"
         else -> "$bookCount titles in motion"
@@ -1203,7 +1439,10 @@ private fun ReadingScreenPreview() {
 
     SoftcoverTheme {
         ReadingScreen.Screen(
-            state = ReadingScreenUiState(books = books, isLoading = false),
+            state = ReadingScreenUiState(
+                books = books,
+                isLoading = false,
+            ),
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},

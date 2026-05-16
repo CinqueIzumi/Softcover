@@ -17,4 +17,8 @@ data class ReadingScreenUiState(
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
     val failedMutationBookIds: Set<Int> = emptySet(),
+    val dismissedPlanTodayByBook: Map<Int, String> = emptyMap(),
+
+    val wantToReadBooks: List<Book> = emptyList(),
+    val trendingBooks: List<Book> = emptyList(),
 ) : UiState

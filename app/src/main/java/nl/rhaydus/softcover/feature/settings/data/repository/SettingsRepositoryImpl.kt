@@ -39,6 +39,19 @@ class SettingsRepositoryImpl(
         )
     }
 
+    override val dismissedPlanTodayByBook: Flow<Map<Int, String>> =
+        settingsLocalDataSource.dismissedPlanTodayByBook
+
+    override suspend fun setPlanTodayDismissed(
+        bookId: Int,
+        isoDate: String,
+    ) {
+        settingsLocalDataSource.setPlanTodayDismissed(
+            bookId = bookId,
+            isoDate = isoDate,
+        )
+    }
+
     override suspend fun updateApiKey(key: String) {
         settingsLocalDataSource.updateApiKey(key = key)
     }
