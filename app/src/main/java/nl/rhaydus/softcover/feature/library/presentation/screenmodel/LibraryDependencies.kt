@@ -9,9 +9,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUser
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
@@ -34,8 +32,6 @@ class LibraryDependencies(
     val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
     val getLibrarySortModesAsFlowUseCase: GetLibrarySortModesAsFlowUseCase,
     val setLibrarySortModeUseCase: SetLibrarySortModeUseCase,
-    val markBookAsReadUseCase: MarkBookAsReadUseCase,
-    val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,

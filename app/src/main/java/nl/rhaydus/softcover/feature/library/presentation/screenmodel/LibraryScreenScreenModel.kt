@@ -11,9 +11,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUser
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -41,8 +39,6 @@ class LibraryScreenScreenModel(
     private val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
     private val getLibrarySortModesAsFlowUseCase: GetLibrarySortModesAsFlowUseCase,
     private val setLibrarySortModeUseCase: SetLibrarySortModeUseCase,
-    private val markBookAsReadUseCase: MarkBookAsReadUseCase,
-    private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     private val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
@@ -67,8 +63,6 @@ class LibraryScreenScreenModel(
         setLibraryGridLayoutUseCase = setLibraryGridLayoutUseCase,
         getLibrarySortModesAsFlowUseCase = getLibrarySortModesAsFlowUseCase,
         setLibrarySortModeUseCase = setLibrarySortModeUseCase,
-        markBookAsReadUseCase = markBookAsReadUseCase,
-        removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
         observeAllBookDeadlinesUseCase = observeAllBookDeadlinesUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         getEnabledStatusCodesAsFlowUseCase = getEnabledStatusCodesAsFlowUseCase,

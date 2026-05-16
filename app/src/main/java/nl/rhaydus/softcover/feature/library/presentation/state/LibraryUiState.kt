@@ -35,7 +35,6 @@ data class LibraryUiState(
     val isSearchActive: Boolean = false,
     val searchQuery: String = "",
     val selectedReadYear: Int? = null,
-    val failedSwipeBookIds: Set<Int> = emptySet(),
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
         sortModeByTab[tabId] ?: LibrarySortMode.Default

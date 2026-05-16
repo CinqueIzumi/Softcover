@@ -99,7 +99,6 @@ import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
@@ -111,7 +110,6 @@ import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCo
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
-import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -127,7 +125,6 @@ import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnClearSwipeFailureAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnGridLayoutChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReadYearSelectedAction
@@ -135,11 +132,8 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnSwipeMarkAsReadAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnSwipeRemoveAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAction
-import nl.rhaydus.softcover.feature.library.presentation.component.SwipeRowActions
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen
@@ -980,10 +974,6 @@ object LibraryScreen : Screen {
                     onBookClick = onBookClick,
                     deadline = state.deadlines[book.id],
                     dateStyle = state.dateStyle,
-                    onSwipeMarkAsRead = { runAction(OnSwipeMarkAsReadAction(book = book)) },
-                    onSwipeRemove = { runAction(OnSwipeRemoveAction(book = book)) },
-                    swipeFailed = book.id in state.failedSwipeBookIds,
-                    onSwipeShakeEnd = { runAction(OnClearSwipeFailureAction(bookId = book.id)) },
                 )
             }
         }
@@ -1062,10 +1052,6 @@ object LibraryScreen : Screen {
         onBookClick: (Book) -> Unit,
         deadline: BookDeadline? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
-        onSwipeMarkAsRead: () -> Unit = {},
-        onSwipeRemove: () -> Unit = {},
-        swipeFailed: Boolean = false,
-        onSwipeShakeEnd: () -> Unit = {},
         modifier: Modifier = Modifier,
     ) {
         PrefetchBookDetailOnVisible(bookId = book.id)
@@ -1145,65 +1131,42 @@ object LibraryScreen : Screen {
             }
 
             LibraryGridLayout.LIST_COMPACT -> {
-                val isRead = book.status == BookStatus.Read
-
-                SwipeRowActions(
-                    modifier = modifier.shakeOnError(
-                        trigger = swipeFailed,
-                        onShakeEnd = onSwipeShakeEnd,
-                    ),
-                    onMarkAsRead = onSwipeMarkAsRead,
-                    onRemove = onSwipeRemove,
-                    allowMarkAsRead = isRead.not(),
-                ) {
-                    CompactRow(
-                        title = book.title,
-                        authorName = authorName,
-                        onClick = { onBookClick(book) },
-                        deadlineProgress = deadlineProgress,
-                    )
-                }
+                CompactRow(
+                    modifier = modifier,
+                    title = book.title,
+                    authorName = authorName,
+                    onClick = { onBookClick(book) },
+                    deadlineProgress = deadlineProgress,
+                )
             }
 
             LibraryGridLayout.LIST_LARGE -> {
-                val isRead = book.status == BookStatus.Read
-
-                SwipeRowActions(
-                    modifier = modifier.shakeOnError(
-                        trigger = swipeFailed,
-                        onShakeEnd = onSwipeShakeEnd,
-                    ),
-                    onMarkAsRead = onSwipeMarkAsRead,
-                    onRemove = onSwipeRemove,
-                    allowMarkAsRead = isRead.not(),
-                    backgroundShape = RoundedCornerShape(20.dp),
-                ) {
-                    LargeRow(
-                        title = book.title,
-                        authorName = currentEdition?.authorString.orEmpty(),
-                        onClick = { onBookClick(book) },
-                        seriesText = book.seriesText,
-                        releaseYear = book.releaseYear,
-                        usersCount = book.usersCount,
-                        rating = book.rating,
-                        deadlineProgress = deadlineProgress,
-                        dateStyle = dateStyle,
-                    ) { coverModifier ->
-                        DeadlineCoverOverlay(progress = deadlineProgress) {
-                            EditionImage(
-                                edition = currentEdition,
-                                modifier = coverModifier,
-                                isLoading = false,
-                                defaultEdition = book.defaultEdition,
-                                fallbackCoverUrl = book.coverUrl,
-                                elevation = 6.dp,
-                                cornerRadius = 10.dp,
-                                sharedTransitionKey = bookCoverTransitionKey(
-                                    editionId = currentEdition?.id,
-                                    bookId = book.id,
-                                ),
-                            )
-                        }
+                LargeRow(
+                    modifier = modifier,
+                    title = book.title,
+                    authorName = currentEdition?.authorString.orEmpty(),
+                    onClick = { onBookClick(book) },
+                    seriesText = book.seriesText,
+                    releaseYear = book.releaseYear,
+                    usersCount = book.usersCount,
+                    rating = book.rating,
+                    deadlineProgress = deadlineProgress,
+                    dateStyle = dateStyle,
+                ) { coverModifier ->
+                    DeadlineCoverOverlay(progress = deadlineProgress) {
+                        EditionImage(
+                            edition = currentEdition,
+                            modifier = coverModifier,
+                            isLoading = false,
+                            defaultEdition = book.defaultEdition,
+                            fallbackCoverUrl = book.coverUrl,
+                            elevation = 6.dp,
+                            cornerRadius = 10.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = currentEdition?.id,
+                                bookId = book.id,
+                            ),
+                        )
                     }
                 }
             }
