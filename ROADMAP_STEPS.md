@@ -50,8 +50,8 @@ Long-press cover enters selection mode; top bar swaps to count + bulk actions (m
 ### Step 2.6 — Swipe row actions (S)
 On list-layout rows: swipe-right mark-as-read, swipe-left remove. Reuses existing shake-on-error. *(B.1.5)*
 
-### Step 2.7 — Drag-to-reorder Want-to-Read + Currently Reading (M)
-Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to Want-to-Read in Library and the active-reading order on the Reading screen. *(B.1.6, B.2.4, A.1.13, A.2.4)*
+### Step 2.7 — Drag-to-reorder books within any library list (M)
+Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to every library tab — Want-to-Read, Currently Reading, Read, and any custom list — plus the active-reading order on the Reading screen. Persisted as a manual sort mode per tab that coexists with Step 2.1's sort options (selecting any non-manual sort hides the drag affordance until manual is re-selected). *(B.1.6, B.2.4, A.1.13, A.2.4)*
 
 ### Step 2.8 — "Plan today" nudge on Reading (S)
 Editorial one-liner above the featured card using deadline pacing maths already present. Dismissible per book per day. *(B.2.2)*
