@@ -32,6 +32,8 @@ data class BookDetailUiState(
 
     val failedMutationBookIds: Set<Int> = emptySet(),
     val failedMutationEditionIds: Set<Int> = emptySet(),
+
+    val isShareSheetVisible: Boolean = false,
 ) : UiState {
     val filteredEditions: List<BookEdition>
         get() {

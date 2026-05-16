@@ -90,6 +90,8 @@ object ShareCardDebugScreen : Screen {
                         is SaveOutcome.Saved -> {
                             snackbarHostState.showSnackbar("Saved to gallery → ${outcome.displayPath}")
                         }
+
+                        is SaveOutcome.Cached -> Unit
                     }
                 } catch (throwable: Throwable) {
                     Timber.e(throwable, "Failed to save share card $filenameHint to gallery")
@@ -211,7 +213,11 @@ object ShareCardDebugScreen : Screen {
         coverUrl = null,
         title = "Lonesome Dove",
         author = "Larry McMurtry",
+        communityRating = 4.6,
         userRating = 9,
+        releaseYear = 1985,
+        pageCount = 945,
+        description = "A sprawling cattle drive from the dust of Texas to the high grass of Montana, told as one of the great American friendships and one of the longest goodbyes in the genre.",
         quote = "It's a fine world, though rich in hardships at times.",
     )
 

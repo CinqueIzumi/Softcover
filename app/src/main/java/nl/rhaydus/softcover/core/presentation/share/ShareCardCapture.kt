@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -28,9 +29,7 @@ class ShareCardCapture internal constructor(
     // TODO: inject AppDispatchers when this class moves out of scaffolding; the literal Dispatchers.IO is a temporary expedient.
     suspend fun saveToGallery(displayName: String): SaveOutcome {
         val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
-
-        val sanitized = displayName.replace(Regex("[^A-Za-z0-9-_]"), "-")
-        val filename = "softcover-$sanitized-${System.currentTimeMillis()}.png"
+        val filename = buildFilename(displayName = displayName)
 
         return withContext(Dispatchers.IO) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -39,6 +38,36 @@ class ShareCardCapture internal constructor(
                 saveViaLegacyStorage(bitmap, filename)
             }
         }
+    }
+
+    suspend fun saveToCache(displayName: String): SaveOutcome.Cached {
+        val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
+        val filename = buildFilename(displayName = displayName)
+
+        return withContext(Dispatchers.IO) {
+            val shareDir = File(context.cacheDir, SHARE_CACHE_FOLDER).apply { mkdirs() }
+
+            shareDir.listFiles()?.forEach { it.delete() }
+
+            val file = File(shareDir, filename)
+            file.outputStream().use { stream ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, /* quality = */ 100, stream)
+            }
+
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.shareprovider",
+                file,
+            )
+
+            SaveOutcome.Cached(uri = uri)
+        }
+    }
+
+    private fun buildFilename(displayName: String): String {
+        val sanitized = displayName.replace(Regex("[^A-Za-z0-9-_]"), "-")
+
+        return "softcover-$sanitized-${System.currentTimeMillis()}.png"
     }
 
     private fun saveViaScopedStorage(bitmap: Bitmap, filename: String): SaveOutcome {
@@ -102,6 +131,7 @@ class ShareCardCapture internal constructor(
 
     private companion object {
         const val GALLERY_FOLDER = "Softcover"
+        const val SHARE_CACHE_FOLDER = "share"
 
         val RELATIVE_PICTURES_PATH: String = Environment.DIRECTORY_PICTURES
     }
