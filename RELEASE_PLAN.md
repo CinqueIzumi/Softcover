@@ -29,6 +29,7 @@ The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; th
 - **Step 2.10** — Adaptive empty Reading state (S)
 - **Step 4.8 (image-only first cut)** — Share book as generated image (S) — overflow "Share" on book detail renders a `ShareContent.Book` via `ShareCard`, captures it as a PNG, and hands the result to an `ACTION_SEND` chooser. Link and deep-link modes are deferred to the full Step 4.8 in 2.9.0.
 - **Fix** — Prefer the user's library edition for list-book covers (S) — list rows now resolve their cover from the user's own userBook edition first, then the book's `default_cover_edition`, then the raw `list_books.edition_id`. The owned list still preserves the original edition. All user lists are now cached locally (not just enabled tabs) so the resolver sees the user's edition across every list.
+- **Fix** — Fall back to the book's default cover for list editions with no cover URL (XS) — `BookListsCollector` now substitutes the parent book's `coverUrl` into editions whose own `url` and `localImagePath` are both null, so owned-list (and any custom-list) cells render the book cover instead of an empty tile.
 - **Fix** — Refresh list editions and book metadata on user-books refresh (S) — list-only books had their edition rows (covers) and book rows (descriptions) cached only once on first hydration; the user-books refresh path now re-fetches all referenced book + edition IDs with a network-forced fetch policy and batched id chunking, so manual refresh actually updates them.
 
 ---

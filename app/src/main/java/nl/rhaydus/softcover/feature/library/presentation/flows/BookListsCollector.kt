@@ -23,7 +23,15 @@ class BookListsCollector : LibraryInitializer {
                 .filter { it.id in enabledIds }
                 .associate { list ->
                     val tabId = LibraryTab.CustomList(listId = list.id, listName = list.name).id
-                    tabId to list.books.mapNotNull { it.edition }
+                    tabId to list.books.mapNotNull { listBook ->
+                        val edition = listBook.edition ?: return@mapNotNull null
+
+                        if (edition.url == null && edition.localImagePath == null) {
+                            edition.copy(url = listBook.book?.coverUrl)
+                        } else {
+                            edition
+                        }
+                    }
                 }
         }.collectLatest { editionsPerList ->
             scope.setState { state ->
