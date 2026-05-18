@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
@@ -34,6 +35,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -91,6 +95,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibra
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnDismissContinueSeriesAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnDismissContinueSeriesBookAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveAllSearchQueriesClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQueryClickedAction
@@ -185,6 +190,7 @@ object ExploreScreen : Screen {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     private fun EditorialContent(
         state: ExploreScreenUiState,
@@ -192,34 +198,53 @@ object ExploreScreen : Screen {
         onBookClick: (Book, String?) -> Unit,
         contentPadding: PaddingValues,
     ) {
-        Column(
+        val pullToRefreshState = rememberPullToRefreshState()
+
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { runAction(OnRefreshAction) },
             modifier = Modifier
                 .padding(contentPadding)
-                .fillMaxSize()
-                .verticalScroll(editorialScrollState),
-            verticalArrangement = Arrangement.spacedBy(40.dp),
+                .fillMaxSize(),
+            state = pullToRefreshState,
+            indicator = {
+                IndicatorBox(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    state = pullToRefreshState,
+                    isRefreshing = state.isRefreshing,
+                ) {
+                    ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
+                }
+            },
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(editorialScrollState),
+                verticalArrangement = Arrangement.spacedBy(40.dp),
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
 
-            TrendingSection(
-                books = state.trendingBooks,
-                isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
-                onBookClick = onBookClick,
-            )
+                TrendingSection(
+                    books = state.trendingBooks,
+                    isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
+                    onBookClick = onBookClick,
+                )
 
-            ContinueSeriesSection(
-                books = state.continueSeriesBooks,
-                isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
-                onBookClick = onBookClick,
-                runAction = runAction,
-            )
+                ContinueSeriesSection(
+                    books = state.continueSeriesBooks,
+                    isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
+                    onBookClick = onBookClick,
+                    runAction = runAction,
+                )
 
-            RecentSearchesSection(
-                queries = state.previousSearchQueries,
-                runAction = runAction,
-            )
+                RecentSearchesSection(
+                    queries = state.previousSearchQueries,
+                    runAction = runAction,
+                )
 
-            Spacer(modifier = Modifier.height(rememberBottomBarPadding()))
+                Spacer(modifier = Modifier.height(rememberBottomBarPadding()))
+            }
         }
     }
 

@@ -12,4 +12,5 @@ data class ExploreScreenUiState(
     val loadingContinueSeriesBooks: Boolean = true,
     val searchText: String = "",
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
 ) : UiState

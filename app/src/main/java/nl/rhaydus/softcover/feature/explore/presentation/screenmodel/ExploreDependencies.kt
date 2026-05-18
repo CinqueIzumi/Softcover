@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
@@ -33,6 +34,9 @@ data class ExploreDependencies(
     val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
     val undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase,
     val undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase,
+    // Bumping this re-subscribes the continue-series flow in its collector, forcing
+    // the `fetchNextInSeries` network calls to run again on user-triggered refresh.
+    val continueSeriesRefreshTrigger: MutableStateFlow<Long> = MutableStateFlow(0L),
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()
