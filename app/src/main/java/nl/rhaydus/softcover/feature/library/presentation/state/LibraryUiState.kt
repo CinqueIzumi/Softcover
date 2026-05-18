@@ -19,6 +19,7 @@ data class LibraryUiState(
         LibraryTab.All,
         LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING),
     ),
+    val tabsLoaded: Boolean = false,
     val selectedTabId: String = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id,
     val booksByTab: Map<String, List<Book>> = emptyMap(),
     val editionsByTab: Map<String, List<BookEdition>> = emptyMap(),

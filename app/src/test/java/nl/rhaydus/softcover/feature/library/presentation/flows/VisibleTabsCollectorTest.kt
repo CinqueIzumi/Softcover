@@ -259,6 +259,25 @@ class VisibleTabsCollectorTest {
         }
 
         @Test
+        fun `tabsLoaded is false before any flows emit and true after first combined emission`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = VisibleTabsCollector()
+            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+
+            // ----- Act & Assert (before emission) -----
+            stateFlow.value.tabsLoaded shouldBe false
+
+            statusCodesFlow.emit(emptySet())
+            enabledListIdsFlow.emit(emptySet())
+            listsFlow.emit(emptyList())
+            tabOrderFlow.emit(emptyList())
+
+            // ----- Assert (after emission) -----
+            stateFlow.value.tabsLoaded shouldBe true
+            job.cancel()
+        }
+
+        @Test
         fun `reacts to updated status codes flow`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()

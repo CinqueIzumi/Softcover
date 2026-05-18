@@ -60,6 +60,7 @@ class VisibleTabsCollector : LibraryInitializer {
 
                 state.copy(
                     visibleTabs = tabs,
+                    tabsLoaded = true,
                     selectedTabId = if (stillVisible) state.selectedTabId else fallback,
                 )
             }

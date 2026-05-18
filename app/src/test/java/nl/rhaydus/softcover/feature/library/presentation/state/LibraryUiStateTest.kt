@@ -112,6 +112,19 @@ class LibraryUiStateTest {
     // endregion
 
     @Nested
+    inner class Defaults {
+
+        @Test
+        fun `tabsLoaded is false in the initial state before any flows emit`() {
+            // ----- Arrange & Act -----
+            val state = LibraryUiState()
+
+            // ----- Assert -----
+            state.tabsLoaded shouldBe false
+        }
+    }
+
+    @Nested
     inner class DisplayBooksFor {
 
         @Test

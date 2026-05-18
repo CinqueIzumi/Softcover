@@ -64,9 +64,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -93,6 +95,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
@@ -206,14 +210,16 @@ object LibraryScreen : Screen {
         val screenWidthDp = LocalConfiguration.current.screenWidthDp.dp
         val maxTabLabelWidth = (screenWidthDp - 168.dp).coerceAtLeast(120.dp)
 
-        val initialPage = remember {
+        val initialPage = remember(state.tabsLoaded) {
             tabs.indexOfFirst { it.id == state.selectedTabId }.coerceAtLeast(0)
         }
 
-        val pagerState = rememberPagerState(
-            initialPage = initialPage,
-            pageCount = { tabs.size },
-        )
+        val pagerState = key(state.tabsLoaded) {
+            rememberPagerState(
+                initialPage = initialPage,
+                pageCount = { tabs.size },
+            )
+        }
 
         LaunchedEffect(tabs, state.selectedTabId) {
             val targetIndex = tabs.indexOfFirst { it.id == state.selectedTabId }
@@ -223,14 +229,20 @@ object LibraryScreen : Screen {
             }
         }
 
-        LaunchedEffect(pagerState, tabs) {
-            snapshotFlow { pagerState.settledPage }.collect { page ->
-                tabs.getOrNull(page)?.id?.let { id ->
-                    if (id != state.selectedTabId) {
-                        runAction(OnTabSelectedAction(tabId = id))
+        val currentTabs by rememberUpdatedState(tabs)
+        val currentSelectedTabId by rememberUpdatedState(state.selectedTabId)
+
+        LaunchedEffect(pagerState) {
+            snapshotFlow { pagerState.settledPage }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { page ->
+                    currentTabs.getOrNull(page)?.id?.let { id ->
+                        if (id != currentSelectedTabId) {
+                            runAction(OnTabSelectedAction(tabId = id))
+                        }
                     }
                 }
-            }
         }
 
         val currentTabIndex = pagerState.currentPage.coerceAtMost(tabs.lastIndex.coerceAtLeast(0))
