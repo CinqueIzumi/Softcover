@@ -177,7 +177,7 @@ class BooksLocalDataSourceImpl(
     }
 
     override suspend fun findOwnedListBookByEditionId(editionId: Int): ListBook? {
-        return dao.getOwnedListBookByEditionId(editionId = editionId)?.toModel()
+        return dao.getOwnedListBookByEditionId(editionId = editionId)?.toModel(isOwnedList = true)
     }
 
     override suspend fun getOwnedListId(): Int? {

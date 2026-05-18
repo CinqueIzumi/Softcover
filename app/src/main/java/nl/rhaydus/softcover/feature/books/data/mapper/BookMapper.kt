@@ -25,7 +25,7 @@ import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
 import nl.rhaydus.softcover.fragment.BookDetailFragment
-import nl.rhaydus.softcover.fragment.BookDetailFragment.Default_physical_edition.Companion.editionFragment
+import nl.rhaydus.softcover.fragment.BookDetailFragment.Default_cover_edition.Companion.editionFragment
 import nl.rhaydus.softcover.fragment.BookListFragment
 import nl.rhaydus.softcover.fragment.BookListFragment.Book_series.Companion.bookSeriesFragment
 import nl.rhaydus.softcover.fragment.BookSeriesFragment
@@ -253,7 +253,7 @@ fun UserBookFragment.toBook(): Book? {
 fun BookDetailFragment.toBook(): Book? {
     val listFragment: BookListFragment = this
     val bookAuthors = listFragment.authors()
-    val defaultEdition = default_physical_edition?.editionFragment()
+    val defaultEdition = default_cover_edition?.editionFragment()
         ?.toBookEdition(authors = bookAuthors)
         ?.copy(bookId = listFragment.id)
     val editions = listOfNotNull(defaultEdition)
@@ -450,33 +450,54 @@ fun ReadingJournalEntity.toModel(): ReadingJournal = ReadingJournal(
     event = event,
 )
 
-fun ListBookFull.toModel(): ListBook = ListBook(
-    listBookId = listBook.listBookId,
-    listId = listBook.listId,
-    bookId = listBook.bookId,
-    editionId = listBook.editionId,
-    addedAt = listBook.addedAt,
-    book = book?.toModel(),
-    edition = edition?.let { editionWithAuthors ->
-        editionWithAuthors.edition.edition.toModel(
-            authors = editionWithAuthors.authors,
-            owned = editionWithAuthors.edition.isOwned,
-        )
-    },
-)
+fun ListBookFull.toModel(isOwnedList: Boolean): ListBook {
+    val cachedBook = book
 
-fun BookListWithBooks.toModel(): BookList = BookList(
-    id = bookList.id,
-    name = bookList.name,
-    slug = bookList.slug,
-    books = listBooks
-        .filter { it.book != null && it.edition != null }
-        .sortedWith(
-            compareBy<ListBookFull, String?>(nullsLast(reverseOrder())) { it.listBook.addedAt }
-                .thenByDescending { it.listBook.listBookId }
-        )
-        .map { it.toModel() }
-)
+    val preferredEdition = if (isOwnedList) {
+        null
+    } else {
+        val preferredEditionId = cachedBook?.userBookWithJournals?.userBook?.editionId
+            ?: cachedBook?.book?.defaultEditionId
+
+        preferredEditionId?.let { id ->
+            cachedBook?.editions?.firstOrNull { it.edition.edition.id == id }
+        }
+    }
+
+    val resolvedEdition = preferredEdition ?: edition
+
+    return ListBook(
+        listBookId = listBook.listBookId,
+        listId = listBook.listId,
+        bookId = listBook.bookId,
+        editionId = resolvedEdition?.edition?.edition?.id ?: listBook.editionId,
+        addedAt = listBook.addedAt,
+        book = book?.toModel(),
+        edition = resolvedEdition?.let { editionWithAuthors ->
+            editionWithAuthors.edition.edition.toModel(
+                authors = editionWithAuthors.authors,
+                owned = editionWithAuthors.edition.isOwned,
+            )
+        },
+    )
+}
+
+fun BookListWithBooks.toModel(): BookList {
+    val isOwnedList = bookList.slug == "owned"
+
+    return BookList(
+        id = bookList.id,
+        name = bookList.name,
+        slug = bookList.slug,
+        books = listBooks
+            .filter { it.book != null && it.edition != null }
+            .sortedWith(
+                compareBy<ListBookFull, String?>(nullsLast(reverseOrder())) { it.listBook.addedAt }
+                    .thenByDescending { it.listBook.listBookId }
+            )
+            .map { it.toModel(isOwnedList = isOwnedList) },
+    )
+}
 
 fun BookFullEntity.toModel(): Book {
     val uiEditions = editions.map { editionWithAuthors ->

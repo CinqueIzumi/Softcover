@@ -923,7 +923,7 @@ class BooksLocalDataSourceImplTest {
             val result = dataSource.findOwnedListBookByEditionId(editionId = editionId)
 
             // ----- Assert -----
-            result shouldBe entity.toModel()
+            result shouldBe entity.toModel(isOwnedList = true)
         }
 
         @Test
