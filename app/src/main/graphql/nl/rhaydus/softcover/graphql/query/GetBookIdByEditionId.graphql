@@ -1,0 +1,14 @@
+query GetBookIdByEditionId(
+    $editionId: Int!,
+) {
+    editions(
+        where: {
+            id: {
+                _eq: $editionId
+            }
+        }
+        limit: 1
+    ) {
+        book_id
+    }
+}

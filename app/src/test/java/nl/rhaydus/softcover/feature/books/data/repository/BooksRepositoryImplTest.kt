@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.feature.books.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
@@ -1247,6 +1248,241 @@ class BooksRepositoryImplTest {
             }
             coVerify(exactly = 0) {
                 booksRemoteDataSource.fetchBookById(id = any())
+            }
+        }
+
+        @Test
+        fun `recovery happy path — resolves canonical via userBook editionId and returns refetched book`() = runTest {
+            // ----- Arrange -----
+            val missingId = 10
+            val editionId = 55
+            val canonicalId = 99
+
+            val userBook = mockk<UserBook>(relaxed = true) {
+                every { this@mockk.editionId } returns editionId
+            }
+
+            val localBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns userBook
+            }
+
+            val canonicalBook = stubBook(userBookId = null)
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = missingId)
+            } throws BookNotFoundException(bookId = missingId)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = missingId)
+            } returns localBook
+
+            coEvery {
+                booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
+            } returns canonicalId
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = canonicalId)
+            } returns canonicalBook
+
+            // ----- Act -----
+            val result = repository.fetchBookById(id = missingId)
+
+            // ----- Assert -----
+            result shouldBe canonicalBook
+        }
+
+        @Test
+        fun `recovery falls back to currentEdition id when userBook is null`() = runTest {
+            // ----- Arrange -----
+            val missingId = 10
+            val editionId = 66
+            val canonicalId = 100
+
+            val currentEdition = mockk<BookEdition>(relaxed = true) {
+                every { this@mockk.id } returns editionId
+            }
+
+            val localBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns null
+                every { this@mockk.currentEdition } returns currentEdition
+            }
+
+            val canonicalBook = stubBook(userBookId = null)
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = missingId)
+            } throws BookNotFoundException(bookId = missingId)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = missingId)
+            } returns localBook
+
+            coEvery {
+                booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
+            } returns canonicalId
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = canonicalId)
+            } returns canonicalBook
+
+            // ----- Act -----
+            val result = repository.fetchBookById(id = missingId)
+
+            // ----- Assert -----
+            result shouldBe canonicalBook
+        }
+
+        @Test
+        fun `recovery falls back to first edition id when userBook and currentEdition are both null`() = runTest {
+            // ----- Arrange -----
+            val missingId = 10
+            val editionId = 77
+            val canonicalId = 101
+
+            val firstEdition = mockk<BookEdition>(relaxed = true) {
+                every { this@mockk.id } returns editionId
+            }
+
+            val localBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns null
+                every { this@mockk.currentEdition } returns null
+                every { this@mockk.editions } returns listOf(firstEdition)
+            }
+
+            val canonicalBook = stubBook(userBookId = null)
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = missingId)
+            } throws BookNotFoundException(bookId = missingId)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = missingId)
+            } returns localBook
+
+            coEvery {
+                booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
+            } returns canonicalId
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = canonicalId)
+            } returns canonicalBook
+
+            // ----- Act -----
+            val result = repository.fetchBookById(id = missingId)
+
+            // ----- Assert -----
+            result shouldBe canonicalBook
+        }
+
+        @Test
+        fun `recovery rethrows BookNotFoundException when local cache has no entry`() = runTest {
+            // ----- Arrange -----
+            val missingId = 10
+            val notFound = BookNotFoundException(bookId = missingId)
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = missingId)
+            } throws notFound
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = missingId)
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<BookNotFoundException> {
+                repository.fetchBookById(id = missingId)
+            }
+        }
+
+        @Test
+        fun `recovery rethrows BookNotFoundException when local book has no resolvable edition id`() = runTest {
+            // ----- Arrange -----
+            val missingId = 10
+            val notFound = BookNotFoundException(bookId = missingId)
+
+            val localBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns null
+                every { this@mockk.currentEdition } returns null
+                every { this@mockk.editions } returns emptyList()
+            }
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = missingId)
+            } throws notFound
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = missingId)
+            } returns localBook
+
+            // ----- Act & Assert -----
+            shouldThrow<BookNotFoundException> {
+                repository.fetchBookById(id = missingId)
+            }
+        }
+
+        @Test
+        fun `recovery rethrows BookNotFoundException when remote fetchBookIdForEdition returns null`() = runTest {
+            // ----- Arrange -----
+            val missingId = 10
+            val editionId = 55
+            val notFound = BookNotFoundException(bookId = missingId)
+
+            val userBook = mockk<UserBook>(relaxed = true) {
+                every { this@mockk.editionId } returns editionId
+            }
+
+            val localBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns userBook
+            }
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = missingId)
+            } throws notFound
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = missingId)
+            } returns localBook
+
+            coEvery {
+                booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<BookNotFoundException> {
+                repository.fetchBookById(id = missingId)
+            }
+        }
+
+        @Test
+        fun `recovery rethrows BookNotFoundException when remote returns the same id as the missing book`() = runTest {
+            // ----- Arrange -----
+            val missingId = 10
+            val editionId = 55
+            val notFound = BookNotFoundException(bookId = missingId)
+
+            val userBook = mockk<UserBook>(relaxed = true) {
+                every { this@mockk.editionId } returns editionId
+            }
+
+            val localBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns userBook
+            }
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = missingId)
+            } throws notFound
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = missingId)
+            } returns localBook
+
+            coEvery {
+                booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
+            } returns missingId
+
+            // ----- Act & Assert -----
+            shouldThrow<BookNotFoundException> {
+                repository.fetchBookById(id = missingId)
             }
         }
     }

@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.books.data.datasource
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.Query
+import com.apollographql.apollo.cache.normalized.FetchPolicy
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -15,6 +16,7 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.GetBookByIdQuery
+import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
@@ -345,8 +347,9 @@ class BooksRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `throws when books list is empty`() = runTest {
+        fun `throws BookNotFoundException when books list is empty`() = runTest {
             // ----- Arrange -----
+            val bookId = 1
             val queryData = mockk<GetBookByIdQuery.Data>()
 
             coEvery {
@@ -358,9 +361,77 @@ class BooksRemoteDataSourceImplTest {
             } returns emptyList()
 
             // ----- Act & Assert -----
-            shouldThrow<Exception> {
-                dataSource.fetchBookById(id = 1)
+            val thrown = shouldThrow<BookNotFoundException> {
+                dataSource.fetchBookById(id = bookId)
             }
+
+            thrown.bookId shouldBe bookId
+        }
+    }
+
+    @Nested
+    inner class FetchBookIdForEdition {
+
+        @Test
+        fun `returns book_id from the first edition row`() = runTest {
+            // ----- Arrange -----
+            val editionId = 42
+            val expectedBookId = 7
+
+            val queryData = mockk<GetBookIdByEditionIdQuery.Data>()
+            val editionRow = mockk<GetBookIdByEditionIdQuery.Data.Edition>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetBookIdByEditionIdQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.editions
+            } returns listOf(editionRow)
+
+            every {
+                editionRow.book_id
+            } returns expectedBookId
+
+            // ----- Act -----
+            val result = dataSource.fetchBookIdForEdition(editionId = editionId)
+
+            // ----- Assert -----
+            result shouldBe expectedBookId
+
+            coVerify(exactly = 1) {
+                apolloClient.safeQuery(
+                    query = any<GetBookIdByEditionIdQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            }
+        }
+
+        @Test
+        fun `returns null when the editions list is empty`() = runTest {
+            // ----- Arrange -----
+            val editionId = 42
+            val queryData = mockk<GetBookIdByEditionIdQuery.Data>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetBookIdByEditionIdQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.editions
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = dataSource.fetchBookIdForEdition(editionId = editionId)
+
+            // ----- Assert -----
+            result shouldBe null
         }
     }
 

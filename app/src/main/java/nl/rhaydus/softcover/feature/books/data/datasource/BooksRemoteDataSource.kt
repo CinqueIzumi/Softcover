@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragment
+import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment as booksByIdsBookDetailFragment
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
@@ -56,6 +57,8 @@ import java.time.format.DateTimeFormatter
 
 interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
+
+    suspend fun fetchBookIdForEdition(editionId: Int): Int?
 
     suspend fun fetchBooksByIds(
         ids: List<Int>,
@@ -141,11 +144,19 @@ class BooksRemoteDataSourceImpl(
             fetchPolicy = FetchPolicy.CacheFirst,
         )
 
-        return result
-            .books
-            .firstOrNull()
-            ?.bookDetailFragment()
-            ?.toBook() ?: throw Exception("Book could not be mapped")
+        val raw = result.books.firstOrNull() ?: throw BookNotFoundException(bookId = id)
+
+        return raw.bookDetailFragment()?.toBook()
+            ?: throw Exception("Book $id could not be mapped")
+    }
+
+    override suspend fun fetchBookIdForEdition(editionId: Int): Int? {
+        val result = apolloClient.safeQuery(
+            query = GetBookIdByEditionIdQuery(editionId = editionId),
+            fetchPolicy = FetchPolicy.NetworkFirst,
+        )
+
+        return result.editions.firstOrNull()?.book_id
     }
 
     override suspend fun fetchBooksByIds(

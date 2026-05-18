@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
+import nl.rhaydus.softcover.feature.books.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
@@ -196,7 +197,35 @@ class BooksRepositoryImpl(
                 ?: throw OfflineException()
         }
 
-        return booksRemoteDataSource.fetchBookById(id = id)
+        return try {
+            booksRemoteDataSource.fetchBookById(id = id)
+        } catch (notFound: BookNotFoundException) {
+            recoverBookByEdition(missingBookId = id) ?: throw notFound
+        }
+    }
+
+    private suspend fun recoverBookByEdition(missingBookId: Int): Book? {
+        val localBook: Book = booksLocalDataSource.getBookById(id = missingBookId) ?: return null
+
+        val editionId: Int = localBook.userBook?.editionId
+            ?: localBook.currentEdition?.id
+            ?: localBook.editions.firstOrNull()?.id
+            ?: return null
+
+        val canonicalBookId: Int = booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
+            ?: return null
+
+        if (canonicalBookId == missingBookId) return null
+
+        Timber.w("-=- Book $missingBookId missing remotely; recovered canonical $canonicalBookId via edition $editionId")
+
+        return try {
+            booksRemoteDataSource.fetchBookById(id = canonicalBookId)
+        } catch (canonicalMissing: BookNotFoundException) {
+            Timber.w("-=- Canonical $canonicalBookId also missing while recovering $missingBookId")
+
+            throw BookNotFoundException(bookId = missingBookId)
+        }
     }
 
     override suspend fun fetchBooksByIds(ids: List<Int>): List<Book> {
