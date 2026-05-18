@@ -31,6 +31,7 @@ The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; th
 - **Fix** — Prefer the user's library edition for list-book covers (S) — list rows now resolve their cover from the user's own userBook edition first, then the book's `default_cover_edition`, then the raw `list_books.edition_id`. The owned list still preserves the original edition. All user lists are now cached locally (not just enabled tabs) so the resolver sees the user's edition across every list.
 - **Fix** — Fall back to the book's default cover for list editions with no cover URL (XS) — `BookListsCollector` now substitutes the parent book's `coverUrl` into editions whose own `url` and `localImagePath` are both null, so owned-list (and any custom-list) cells render the book cover instead of an empty tile.
 - **Fix** — Refresh list editions and book metadata on user-books refresh (S) — list-only books had their edition rows (covers) and book rows (descriptions) cached only once on first hydration; the user-books refresh path now re-fetches all referenced book + edition IDs with a network-forced fetch policy and batched id chunking, so manual refresh actually updates them.
+- **Fix** — Make bottom sheets scrollable and IME-aware (XS) — `UpdateProgressBottomSheet`, `ShareBookBottomSheet`, the edition selector, and the continue-series dismiss sheet now lift their content above the keyboard and scroll when needed, so the primary action (e.g. "Update progress") stays reachable without first dismissing the IME.
 
 ---
 
