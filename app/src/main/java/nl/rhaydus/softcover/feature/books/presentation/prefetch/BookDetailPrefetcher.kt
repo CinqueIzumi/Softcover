@@ -5,13 +5,13 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.input.pointer.pointerInput
 import java.util.Collections
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
 import org.koin.compose.koinInject
 import timber.log.Timber
@@ -44,12 +44,12 @@ val LocalBookDetailPrefetcher = compositionLocalOf<BookDetailPrefetcher?> { null
 @Composable
 fun rememberBookDetailPrefetcher(): BookDetailPrefetcher {
     val useCase = koinInject<FetchBookByIdUseCase>()
-    val scope = rememberCoroutineScope()
+    val applicationScope = koinInject<ApplicationScope>()
 
-    return remember(useCase, scope) {
+    return remember(useCase, applicationScope) {
         BookDetailPrefetcher(
             fetchBookByIdUseCase = useCase,
-            scope = scope,
+            scope = applicationScope.scope,
         )
     }
 }
