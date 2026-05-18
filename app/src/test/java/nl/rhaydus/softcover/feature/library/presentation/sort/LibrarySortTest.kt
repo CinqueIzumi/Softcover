@@ -362,46 +362,21 @@ class LibrarySortTest {
         inner class Rating {
 
             @Test
-            fun `sorts by userBook rating descending when available`() {
+            fun `sorts by book rating descending, ignoring userBook rating`() {
                 // ----- Arrange -----
-                val highRated = buildBook(
+                val highBookRating = buildBook(
                     id = 1,
-                    rating = 3.0,
+                    rating = 4.8,
+                    userBook = buildUserBook(rating = 1.0),
+                )
+
+                val lowBookRating = buildBook(
+                    id = 2,
+                    rating = 2.1,
                     userBook = buildUserBook(rating = 5.0),
                 )
 
-                val lowRated = buildBook(
-                    id = 2,
-                    rating = 4.5,
-                    userBook = buildUserBook(rating = 2.0),
-                )
-
-                val books = listOf(lowRated, highRated)
-
-                // ----- Act -----
-                val result = books.applySort(mode = LibrarySortMode.RATING)
-
-                // ----- Assert -----
-                result[0].id shouldBe 1
-                result[1].id shouldBe 2
-            }
-
-            @Test
-            fun `falls back to book rating when userBook rating is null`() {
-                // ----- Arrange -----
-                val higherBook = buildBook(
-                    id = 1,
-                    rating = 4.8,
-                    userBook = buildUserBook(rating = null),
-                )
-
-                val lowerBook = buildBook(
-                    id = 2,
-                    rating = 3.2,
-                    userBook = buildUserBook(rating = null),
-                )
-
-                val books = listOf(lowerBook, higherBook)
+                val books = listOf(lowBookRating, highBookRating)
 
                 // ----- Act -----
                 val result = books.applySort(mode = LibrarySortMode.RATING)

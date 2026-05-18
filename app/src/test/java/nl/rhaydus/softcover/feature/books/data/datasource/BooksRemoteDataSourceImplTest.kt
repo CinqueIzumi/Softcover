@@ -132,6 +132,7 @@ class BooksRemoteDataSourceImplTest {
         rating: Double = 4.5,
         description: String = "Canonical description",
         releaseYear: Int = 2020,
+        releaseDate: java.time.LocalDate? = null,
         coverUrl: String = "https://covers.example.com/canonical.jpg",
         usersCount: Int = 500,
         ratingsCount: Int = 200,
@@ -159,6 +160,10 @@ class BooksRemoteDataSourceImplTest {
         every {
             this@mockk.releaseYear
         } returns releaseYear
+
+        every {
+            this@mockk.releaseDate
+        } returns releaseDate
 
         every {
             this@mockk.coverUrl
@@ -215,7 +220,7 @@ class BooksRemoteDataSourceImplTest {
             val dataBook = mockk<GetBookByIdQuery.Data.Book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>())
+                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -248,11 +253,11 @@ class BooksRemoteDataSourceImplTest {
             val canonicalDataBook = mockk<GetBookByIdQuery.Data.Book>()
 
             coEvery {
-                apolloClient.safeQuery(query = GetBookByIdQuery(id = bookId))
+                apolloClient.safeQuery(query = GetBookByIdQuery(id = bookId), fetchPolicy = any())
             } returns firstQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = GetBookByIdQuery(id = canonicalId))
+                apolloClient.safeQuery(query = GetBookByIdQuery(id = canonicalId), fetchPolicy = any())
             } returns canonicalQueryData
 
             every {
@@ -281,7 +286,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe canonicalBookCleared
             coVerify {
-                apolloClient.safeQuery(query = GetBookByIdQuery(id = canonicalId))
+                apolloClient.safeQuery(query = GetBookByIdQuery(id = canonicalId), fetchPolicy = any())
             }
         }
 
@@ -294,7 +299,7 @@ class BooksRemoteDataSourceImplTest {
             val dataBook = mockk<GetBookByIdQuery.Data.Book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>())
+                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -311,7 +316,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe book
             coVerify(exactly = 1) {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>())
+                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
             }
         }
 
@@ -322,7 +327,7 @@ class BooksRemoteDataSourceImplTest {
             val dataBook = mockk<GetBookByIdQuery.Data.Book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>())
+                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -345,7 +350,7 @@ class BooksRemoteDataSourceImplTest {
             val queryData = mockk<GetBookByIdQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>())
+                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -373,7 +378,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe emptyList()
             coVerify(exactly = 0) {
-                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>())
+                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>(), fetchPolicy = any())
             }
         }
 
@@ -390,7 +395,7 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>())
+                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -430,7 +435,7 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>())
+                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -460,7 +465,7 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>())
+                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -505,7 +510,7 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetEditionsByBookIdQuery.Data.Edition.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByBookIdQuery>())
+                apolloClient.safeQuery(query = any<GetEditionsByBookIdQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -536,7 +541,7 @@ class BooksRemoteDataSourceImplTest {
             val queryData = mockk<GetEditionsByBookIdQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByBookIdQuery>())
+                apolloClient.safeQuery(query = any<GetEditionsByBookIdQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -560,7 +565,7 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetEditionsByBookIdQuery.Data.Edition.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByBookIdQuery>())
+                apolloClient.safeQuery(query = any<GetEditionsByBookIdQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -595,7 +600,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe emptyList()
             coVerify(exactly = 0) {
-                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>())
+                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>(), fetchPolicy = any())
             }
         }
 
@@ -612,7 +617,7 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetEditionsByIdsQuery.Data.Edition.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>())
+                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -653,7 +658,7 @@ class BooksRemoteDataSourceImplTest {
             val queryData = mockk<GetEditionsByIdsQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>())
+                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -677,7 +682,7 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetEditionsByIdsQuery.Data.Edition.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>())
+                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -943,7 +948,7 @@ class BooksRemoteDataSourceImplTest {
             val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBooksQuery>())
+                apolloClient.safeQuery(query = any<GetUserBooksQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -971,7 +976,7 @@ class BooksRemoteDataSourceImplTest {
             val queryData = mockk<GetUserBooksQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBooksQuery>())
+                apolloClient.safeQuery(query = any<GetUserBooksQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -993,7 +998,7 @@ class BooksRemoteDataSourceImplTest {
             val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBooksQuery>())
+                apolloClient.safeQuery(query = any<GetUserBooksQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -1025,7 +1030,7 @@ class BooksRemoteDataSourceImplTest {
             val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBooksQuery>())
+                apolloClient.safeQuery(query = any<GetUserBooksQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -1046,7 +1051,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe listOf(bookWithoutCanonical)
             coVerify(exactly = 0) {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             }
         }
 
@@ -1067,11 +1072,11 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery })
+                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             } returns booksQueryData
 
             every {
@@ -1103,6 +1108,7 @@ class BooksRemoteDataSourceImplTest {
             val canonicalBookRating = canonicalBook.rating
             val canonicalBookDescription = canonicalBook.description
             val canonicalBookReleaseYear = canonicalBook.releaseYear
+            val canonicalBookReleaseDate = canonicalBook.releaseDate
             val canonicalBookCoverUrl = canonicalBook.coverUrl
             val canonicalBookAuthors = canonicalBook.authors
             val canonicalBookUsersCount = canonicalBook.usersCount
@@ -1119,6 +1125,7 @@ class BooksRemoteDataSourceImplTest {
                     rating = canonicalBookRating,
                     description = canonicalBookDescription,
                     releaseYear = canonicalBookReleaseYear,
+                    releaseDate = canonicalBookReleaseDate,
                     coverUrl = canonicalBookCoverUrl,
                     authors = canonicalBookAuthors,
                     usersCount = canonicalBookUsersCount,
@@ -1135,7 +1142,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe listOf(mergedBook)
             coVerify(exactly = 1) {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             }
         }
 
@@ -1162,11 +1169,11 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery })
+                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             } returns booksQueryData
 
             every {
@@ -1210,6 +1217,7 @@ class BooksRemoteDataSourceImplTest {
             val canonical1Rating = canonicalBook1.rating
             val canonical1Description = canonicalBook1.description
             val canonical1ReleaseYear = canonicalBook1.releaseYear
+            val canonical1ReleaseDate = canonicalBook1.releaseDate
             val canonical1CoverUrl = canonicalBook1.coverUrl
             val canonical1Authors = canonicalBook1.authors
             val canonical1UsersCount = canonicalBook1.usersCount
@@ -1223,6 +1231,7 @@ class BooksRemoteDataSourceImplTest {
             val canonical2Rating = canonicalBook2.rating
             val canonical2Description = canonicalBook2.description
             val canonical2ReleaseYear = canonicalBook2.releaseYear
+            val canonical2ReleaseDate = canonicalBook2.releaseDate
             val canonical2CoverUrl = canonicalBook2.coverUrl
             val canonical2Authors = canonicalBook2.authors
             val canonical2UsersCount = canonicalBook2.usersCount
@@ -1239,6 +1248,7 @@ class BooksRemoteDataSourceImplTest {
                     rating = canonical1Rating,
                     description = canonical1Description,
                     releaseYear = canonical1ReleaseYear,
+                    releaseDate = canonical1ReleaseDate,
                     coverUrl = canonical1CoverUrl,
                     authors = canonical1Authors,
                     usersCount = canonical1UsersCount,
@@ -1257,6 +1267,7 @@ class BooksRemoteDataSourceImplTest {
                     rating = canonical2Rating,
                     description = canonical2Description,
                     releaseYear = canonical2ReleaseYear,
+                    releaseDate = canonical2ReleaseDate,
                     coverUrl = canonical2CoverUrl,
                     authors = canonical2Authors,
                     usersCount = canonical2UsersCount,
@@ -1273,7 +1284,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe listOf(mergedBook1, mergedBook2)
             coVerify(exactly = 1) {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             }
         }
 
@@ -1297,11 +1308,11 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery })
+                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             } returns booksQueryData
 
             every {
@@ -1337,6 +1348,7 @@ class BooksRemoteDataSourceImplTest {
             val sharedRating = canonicalBook.rating
             val sharedDescription = canonicalBook.description
             val sharedReleaseYear = canonicalBook.releaseYear
+            val sharedReleaseDate = canonicalBook.releaseDate
             val sharedCoverUrl = canonicalBook.coverUrl
             val sharedAuthors = canonicalBook.authors
             val sharedUsersCount = canonicalBook.usersCount
@@ -1353,6 +1365,7 @@ class BooksRemoteDataSourceImplTest {
                     rating = sharedRating,
                     description = sharedDescription,
                     releaseYear = sharedReleaseYear,
+                    releaseDate = sharedReleaseDate,
                     coverUrl = sharedCoverUrl,
                     authors = sharedAuthors,
                     usersCount = sharedUsersCount,
@@ -1371,6 +1384,7 @@ class BooksRemoteDataSourceImplTest {
                     rating = sharedRating,
                     description = sharedDescription,
                     releaseYear = sharedReleaseYear,
+                    releaseDate = sharedReleaseDate,
                     coverUrl = sharedCoverUrl,
                     authors = sharedAuthors,
                     usersCount = sharedUsersCount,
@@ -1386,7 +1400,7 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             }
         }
 
@@ -1409,11 +1423,11 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery })
+                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             } returns booksQueryData
 
             every {
@@ -1449,6 +1463,7 @@ class BooksRemoteDataSourceImplTest {
             val mergeTargetRating = canonicalBook.rating
             val mergeTargetDescription = canonicalBook.description
             val mergeTargetReleaseYear = canonicalBook.releaseYear
+            val mergeTargetReleaseDate = canonicalBook.releaseDate
             val mergeTargetCoverUrl = canonicalBook.coverUrl
             val mergeTargetAuthors = canonicalBook.authors
             val mergeTargetUsersCount = canonicalBook.usersCount
@@ -1465,6 +1480,7 @@ class BooksRemoteDataSourceImplTest {
                     rating = mergeTargetRating,
                     description = mergeTargetDescription,
                     releaseYear = mergeTargetReleaseYear,
+                    releaseDate = mergeTargetReleaseDate,
                     coverUrl = mergeTargetCoverUrl,
                     authors = mergeTargetAuthors,
                     usersCount = mergeTargetUsersCount,
@@ -1495,11 +1511,11 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery })
+                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             } returns booksQueryData
 
             every {
@@ -1542,11 +1558,11 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery })
+                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery })
+                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
             } returns booksQueryData
 
             every {
@@ -1578,6 +1594,7 @@ class BooksRemoteDataSourceImplTest {
             val canonicalBookRating = canonicalBook.rating
             val canonicalBookDescription = canonicalBook.description
             val canonicalBookReleaseYear = canonicalBook.releaseYear
+            val canonicalBookReleaseDate = canonicalBook.releaseDate
             val canonicalBookCoverUrl = canonicalBook.coverUrl
             val canonicalBookAuthors = canonicalBook.authors
             val canonicalBookUsersCount = canonicalBook.usersCount
@@ -1594,6 +1611,7 @@ class BooksRemoteDataSourceImplTest {
                     rating = canonicalBookRating,
                     description = canonicalBookDescription,
                     releaseYear = canonicalBookReleaseYear,
+                    releaseDate = canonicalBookReleaseDate,
                     coverUrl = canonicalBookCoverUrl,
                     authors = canonicalBookAuthors,
                     usersCount = canonicalBookUsersCount,
@@ -1620,6 +1638,7 @@ class BooksRemoteDataSourceImplTest {
                     rating = canonicalBookRating,
                     description = canonicalBookDescription,
                     releaseYear = canonicalBookReleaseYear,
+                    releaseDate = canonicalBookReleaseDate,
                     coverUrl = canonicalBookCoverUrl,
                     authors = canonicalBookAuthors,
                     usersCount = canonicalBookUsersCount,
@@ -1645,7 +1664,7 @@ class BooksRemoteDataSourceImplTest {
             val listEntry = mockk<GetUserBookListsQuery.Data.Me.List>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBookListsQuery>())
+                apolloClient.safeQuery(query = any<GetUserBookListsQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -1673,7 +1692,7 @@ class BooksRemoteDataSourceImplTest {
             val queryData = mockk<GetUserBookListsQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBookListsQuery>())
+                apolloClient.safeQuery(query = any<GetUserBookListsQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {
@@ -1694,7 +1713,7 @@ class BooksRemoteDataSourceImplTest {
             val meEntry = mockk<GetUserBookListsQuery.Data.Me>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBookListsQuery>())
+                apolloClient.safeQuery(query = any<GetUserBookListsQuery>(), fetchPolicy = any())
             } returns queryData
 
             every {

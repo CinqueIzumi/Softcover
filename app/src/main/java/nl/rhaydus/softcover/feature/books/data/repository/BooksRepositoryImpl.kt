@@ -61,10 +61,13 @@ class BooksRepositoryImpl(
     }
 
     override suspend fun refreshUserBooks(userId: Int) {
-        fetchAndCacheBooks(userId = userId)
+        fetchAndCacheBooks(userId = userId, forceRefreshReferences = true)
     }
 
-    private suspend fun fetchAndCacheBooks(userId: Int) = withContext(Dispatchers.IO) {
+    private suspend fun fetchAndCacheBooks(
+        userId: Int,
+        forceRefreshReferences: Boolean = false,
+    ) = withContext(Dispatchers.IO) {
         val syncedUserBookIds: Set<Int> = pendingProgressDrainer.drainPendingUpdates()
 
         val fetchStatusCodes = UserBookStatus.activeLibraryCodes(
@@ -114,39 +117,59 @@ class BooksRepositoryImpl(
 
         booksLocalDataSource.syncBookListMetadata(serverListIds = fetchedLists.map { it.id }.toSet())
 
-        hydrateOrphanOwnedBooks(lists = listsToCache.filter { it.id in listIdsToHydrate })
+        hydrateOrphanOwnedBooks(
+            lists = listsToCache.filter { it.id in listIdsToHydrate },
+            forceRefreshAll = forceRefreshReferences,
+        )
 
         booksLocalDataSource.cacheUserBookLists(lists = listsToCache)
 
         booksLocalDataSource.deleteOrphanBooks()
     }
 
-    private suspend fun hydrateOrphanOwnedBooks(lists: List<BookList>) {
+    private suspend fun hydrateOrphanOwnedBooks(
+        lists: List<BookList>,
+        forceRefreshAll: Boolean,
+    ) {
         val referenced = lists.flatMap { list -> list.books.map { it.bookId to it.editionId } }
 
         if (referenced.isEmpty()) return
 
         val referencedBookIds = referenced.map { it.first }.distinct()
-        val cachedBookIds = booksLocalDataSource.getExistingBookIds(ids = referencedBookIds).toSet()
-        val missingBookIds = referencedBookIds.filterNot { it in cachedBookIds }
+        val bookIdsToFetch: List<Int> = if (forceRefreshAll) {
+            referencedBookIds
+        } else {
+            val cachedBookIds = booksLocalDataSource.getExistingBookIds(ids = referencedBookIds).toSet()
+            referencedBookIds.filterNot { it in cachedBookIds }
+        }
 
-        if (missingBookIds.isNotEmpty()) {
-            val orphanBooks = booksRemoteDataSource.fetchBooksByIds(ids = missingBookIds)
+        if (bookIdsToFetch.isNotEmpty()) {
+            val fetchedBooks = booksRemoteDataSource.fetchBooksByIds(
+                ids = bookIdsToFetch,
+                forceNetwork = forceRefreshAll,
+            )
 
-            if (orphanBooks.isNotEmpty()) {
-                booksLocalDataSource.cacheBooks(books = orphanBooks)
+            if (fetchedBooks.isNotEmpty()) {
+                booksLocalDataSource.cacheBooks(books = fetchedBooks)
             }
         }
 
         val referencedEditionIds = referenced.map { it.second }.distinct()
-        val cachedEditionIds = booksLocalDataSource.getExistingEditionIds(ids = referencedEditionIds).toSet()
-        val missingEditionIds = referencedEditionIds.filterNot { it in cachedEditionIds }
+        val editionIdsToFetch: List<Int> = if (forceRefreshAll) {
+            referencedEditionIds
+        } else {
+            val cachedEditionIds = booksLocalDataSource.getExistingEditionIds(ids = referencedEditionIds).toSet()
+            referencedEditionIds.filterNot { it in cachedEditionIds }
+        }
 
-        if (missingEditionIds.isNotEmpty()) {
-            val orphanEditions = booksRemoteDataSource.fetchEditionsByIds(ids = missingEditionIds)
+        if (editionIdsToFetch.isNotEmpty()) {
+            val fetchedEditions = booksRemoteDataSource.fetchEditionsByIds(
+                ids = editionIdsToFetch,
+                forceNetwork = forceRefreshAll,
+            )
 
-            if (orphanEditions.isNotEmpty()) {
-                booksLocalDataSource.cacheEditions(editions = orphanEditions)
+            if (fetchedEditions.isNotEmpty()) {
+                booksLocalDataSource.cacheEditions(editions = fetchedEditions)
             }
         }
     }
