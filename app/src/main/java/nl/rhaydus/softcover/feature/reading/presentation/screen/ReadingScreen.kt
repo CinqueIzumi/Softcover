@@ -113,7 +113,7 @@ import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
@@ -495,8 +495,6 @@ object ReadingScreen : Screen {
         onMarkAsRead: (Book) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         var dropdownActive by remember { mutableStateOf(false) }
         val shape = RoundedCornerShape(28.dp)
         val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
@@ -514,6 +512,7 @@ object ReadingScreen : Screen {
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+                .prefetchBookDetailOnPress(book.id)
                 .pressScale(interactionSource)
                 .shakeOnError(
                     trigger = mutationFailed,
@@ -759,8 +758,6 @@ object ReadingScreen : Screen {
         onMarkAsRead: (Book) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         var dropdownActive by remember { mutableStateOf(false) }
         val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
 
@@ -770,6 +767,7 @@ object ReadingScreen : Screen {
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 6.dp)
+                .prefetchBookDetailOnPress(book.id)
                 .pressScale(interactionSource)
                 .shakeOnError(
                     trigger = mutationFailed,

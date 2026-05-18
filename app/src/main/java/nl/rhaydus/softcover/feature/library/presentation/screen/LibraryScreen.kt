@@ -123,7 +123,7 @@ import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
@@ -1067,7 +1067,7 @@ object LibraryScreen : Screen {
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
+        val entryModifier = modifier.prefetchBookDetailOnPress(book.id)
 
         val authorName = book.authors.map { it.name }.firstOrNull().orEmpty()
 
@@ -1095,7 +1095,7 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS,
                 -> {
                 GridBookCell(
-                    modifier = modifier,
+                    modifier = entryModifier,
                     title = book.title,
                     authorName = authorName,
                     onClick = { onBookClick(book) },
@@ -1122,7 +1122,7 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
                 -> {
                 CoverOnlyCell(
-                    modifier = modifier,
+                    modifier = entryModifier,
                     onClick = { onBookClick(book) },
                 ) { coverModifier ->
                     DeadlineCoverOverlay(progress = deadlineProgress) {
@@ -1145,7 +1145,7 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_COMPACT -> {
                 CompactRow(
-                    modifier = modifier,
+                    modifier = entryModifier,
                     title = book.title,
                     authorName = authorName,
                     onClick = { onBookClick(book) },
@@ -1155,7 +1155,7 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_LARGE -> {
                 LargeRow(
-                    modifier = modifier,
+                    modifier = entryModifier,
                     title = book.title,
                     authorName = currentEdition?.authorString.orEmpty(),
                     onClick = { onBookClick(book) },
@@ -1193,7 +1193,7 @@ object LibraryScreen : Screen {
         onEditionClick: (BookEdition) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = edition.bookId)
+        val entryModifier = modifier.prefetchBookDetailOnPress(edition.bookId)
 
         val title = edition.title.orEmpty()
         val authorName = edition.authors.map { it.name }.firstOrNull().orEmpty()
@@ -1203,7 +1203,7 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS,
                 -> {
                 GridBookCell(
-                    modifier = modifier,
+                    modifier = entryModifier,
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
@@ -1228,7 +1228,7 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
                 -> {
                 CoverOnlyCell(
-                    modifier = modifier,
+                    modifier = entryModifier,
                     onClick = { onEditionClick(edition) },
                 ) { coverModifier ->
                     EditionImage(
@@ -1249,7 +1249,7 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_COMPACT -> {
                 CompactRow(
-                    modifier = modifier,
+                    modifier = entryModifier,
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
@@ -1258,7 +1258,7 @@ object LibraryScreen : Screen {
 
             LibraryGridLayout.LIST_LARGE -> {
                 LargeRow(
-                    modifier = modifier,
+                    modifier = entryModifier,
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },

@@ -81,7 +81,7 @@ import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
@@ -591,11 +591,10 @@ object ExploreScreen : Screen {
         onClick: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         Column(
             modifier = modifier
                 .width(150.dp)
+                .prefetchBookDetailOnPress(book.id)
                 .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -675,11 +674,10 @@ object ExploreScreen : Screen {
         onMenuClick: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         Column(
             modifier = modifier
                 .width(120.dp)
+                .prefetchBookDetailOnPress(book.id)
                 .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -811,11 +809,10 @@ object ExploreScreen : Screen {
         onBookClick: (Book, String?) -> Unit,
         runAction: (ExploreAction) -> Unit,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .prefetchBookDetailOnPress(book.id)
                 .pressScaleClickable(onClick = { onBookClick(book, null) }),
             verticalAlignment = Alignment.CenterVertically,
         ) {
