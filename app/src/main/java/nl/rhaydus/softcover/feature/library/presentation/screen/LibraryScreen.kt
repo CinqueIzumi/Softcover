@@ -176,6 +176,7 @@ object LibraryScreen : Screen {
                         item = BookDetailScreen(
                             id = it.bookId,
                             initialCover = BookInitialCover.fromEdition(edition = it),
+                            transitionSurface = "edition-${it.id}",
                         ),
                     )
                 },
@@ -1205,6 +1206,7 @@ object LibraryScreen : Screen {
                         sharedTransitionKey = bookCoverTransitionKey(
                             editionId = edition.id,
                             bookId = edition.bookId,
+                            surface = "edition-${edition.id}",
                         ),
                     )
                 }
@@ -1227,6 +1229,7 @@ object LibraryScreen : Screen {
                         sharedTransitionKey = bookCoverTransitionKey(
                             editionId = edition.id,
                             bookId = edition.bookId,
+                            surface = "edition-${edition.id}",
                         ),
                     )
                 }
@@ -1258,6 +1261,7 @@ object LibraryScreen : Screen {
                         sharedTransitionKey = bookCoverTransitionKey(
                             editionId = edition.id,
                             bookId = edition.bookId,
+                            surface = "edition-${edition.id}",
                         ),
                     )
                 }
