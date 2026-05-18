@@ -19,7 +19,7 @@ Dependencies are noted only where they cross a release boundary; same-release de
 The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; the rest of the release gives users visible Library/Reading polish so the version still feels like a real drop.
 
 > **Release notes (Google Play):**
-> Library tabs now sort by date, title, author, rating, progress, deadline or page count — and remember your choice per tab. The Read tab gains a year filter. Reorder the library tabs themselves from Settings (or long-press a tab) so your favourite shelf is always first. The Reading screen suggests how many pages to read today to stay on pace, and adapts its empty state to surface your top Want-to-Read picks. Share any book as an editorial card image straight from its detail page. Covers and book details across your library lists now refresh properly when you pull to refresh.
+> Library tabs now sort by date, title, author, rating, progress, deadline or page count — and remember your choice per tab. The Read tab gains a year filter. Reorder the library tabs themselves from Settings (or long-press a tab) so your favourite shelf is always first. The Reading screen suggests how many pages to read today to stay on pace, and adapts its empty state to surface your top Want-to-Read picks. Share any book as an editorial card image straight from its detail page. Covers and book details across your library lists now refresh properly when you pull to refresh. Plus a handful of bug fixes and stability improvements under the hood.
 
 - **Step 0.3** — Personal-data layer (M) — schema + repos for ratings, reviews, highlights, sessions, reading log. No UI.
 - **Step 2.1** — Sort within Library tabs (M)
