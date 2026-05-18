@@ -24,8 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,7 +53,6 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction
@@ -77,13 +74,10 @@ object OnboardingScreen : Screen {
 
         val clipboardManager = LocalClipboard.current
 
-        val snackBarState by SnackBarManager.snackBarState.collectAsStateWithLifecycle()
-
         Screen(
             state = state,
             runAction = screenModel::runAction,
             openUrl = uriHandler::openUri,
-            snackbarHostState = snackBarState,
             onInitializingComplete = {
                 mainVm.setUserAuthenticated(authenticated = true)
             },
@@ -108,7 +102,6 @@ object OnboardingScreen : Screen {
     @Composable
     fun Screen(
         state: OnboardingUiState,
-        snackbarHostState: SnackbarHostState,
         runAction: (action: OnboardingAction) -> Unit,
         openUrl: (String) -> Unit,
         getCopiedText: () -> String,
@@ -119,11 +112,7 @@ object OnboardingScreen : Screen {
 
         val scope = rememberCoroutineScope()
 
-        Scaffold(
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState)
-            },
-        ) { innerPadding ->
+        Scaffold { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -404,7 +393,6 @@ private fun FirstIntroScreenPreview() {
             runAction = {},
             getCopiedText = { "" },
             openUrl = {},
-            snackbarHostState = SnackbarHostState(),
             onInitializingComplete = {},
         )
     }
@@ -422,7 +410,6 @@ private fun LoadingDialogIntroScreenPreview() {
             runAction = {},
             getCopiedText = { "" },
             openUrl = {},
-            snackbarHostState = SnackbarHostState(),
             onInitializingComplete = {},
         )
     }

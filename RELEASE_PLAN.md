@@ -32,6 +32,7 @@ The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; th
 - **Fix** — Fall back to the book's default cover for list editions with no cover URL (XS) — `BookListsCollector` now substitutes the parent book's `coverUrl` into editions whose own `url` and `localImagePath` are both null, so owned-list (and any custom-list) cells render the book cover instead of an empty tile.
 - **Fix** — Refresh list editions and book metadata on user-books refresh (S) — list-only books had their edition rows (covers) and book rows (descriptions) cached only once on first hydration; the user-books refresh path now re-fetches all referenced book + edition IDs with a network-forced fetch policy and batched id chunking, so manual refresh actually updates them.
 - **Fix** — Make bottom sheets scrollable and IME-aware (XS) — `UpdateProgressBottomSheet`, `ShareBookBottomSheet`, the edition selector, and the continue-series dismiss sheet now lift their content above the keyboard and scroll when needed, so the primary action (e.g. "Update progress") stays reachable without first dismissing the IME.
+- **Fix** — Global "Something went wrong" snackbar on Apollo failures (S) — Apollo network errors, GraphQL errors and empty-data responses now surface a single transient snackbar across every screen (hosted once at the root of `MainActivity`, not only inside `BottomBarScreen`/`OnboardingScreen`), and `SnackBarManager` drops new toasts while one is already on screen so errors no longer queue up.
 
 ---
 

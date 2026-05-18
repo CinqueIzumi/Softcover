@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.presentation.util
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,16 +16,23 @@ object SnackBarManager {
     val snackBarState = _snackBarState.asStateFlow()
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val isShowing = AtomicBoolean(false)
 
     fun showSnackbar(
         title: String,
         duration: SnackbarDuration = SnackbarDuration.Short,
     ) {
+        if (isShowing.compareAndSet(false, true).not()) return
+
         scope.launch {
-            snackBarState.value.showSnackbar(
-                message = title,
-                duration = duration
-            )
+            try {
+                snackBarState.value.showSnackbar(
+                    message = title,
+                    duration = duration,
+                )
+            } finally {
+                isShowing.set(false)
+            }
         }
     }
 
@@ -35,17 +43,23 @@ object SnackBarManager {
         onActionClick: () -> Unit,
         onDismiss: () -> Unit = {},
     ) {
-        scope.launch {
-            val result = snackBarState.value.showSnackbar(
-                message = title,
-                actionLabel = actionLabel,
-                duration = duration,
-                withDismissAction = true,
-            )
+        if (isShowing.compareAndSet(false, true).not()) return
 
-            when (result) {
-                SnackbarResult.Dismissed -> onDismiss()
-                SnackbarResult.ActionPerformed -> onActionClick()
+        scope.launch {
+            try {
+                val result = snackBarState.value.showSnackbar(
+                    message = title,
+                    actionLabel = actionLabel,
+                    duration = duration,
+                    withDismissAction = true,
+                )
+
+                when (result) {
+                    SnackbarResult.Dismissed -> onDismiss()
+                    SnackbarResult.ActionPerformed -> onActionClick()
+                }
+            } finally {
+                isShowing.set(false)
             }
         }
     }

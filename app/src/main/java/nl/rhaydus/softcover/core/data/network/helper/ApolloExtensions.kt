@@ -13,12 +13,21 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+
+private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
+
+private fun notifyGenericError() {
+    SnackBarManager.showSnackbar(title = GENERIC_ERROR_MESSAGE)
+}
 
 private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
     response.exception?.let { exception ->
         if (exception is ApolloNetworkException && NetworkAvailability.isOnline().not()) {
             throw OfflineException()
         }
+
+        notifyGenericError()
 
         throw RuntimeException(
             "Apollo network error: ${exception.message}",
@@ -39,10 +48,16 @@ private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
             }
         } ?: ""
 
+        notifyGenericError()
+
         throw RuntimeException("Apollo GraphQL error(s): \n$message")
     }
 
-    return response.data ?: throw RuntimeException("Apollo response had no data and no errors")
+    return response.data ?: run {
+        notifyGenericError()
+
+        throw RuntimeException("Apollo response had no data and no errors")
+    }
 }
 
 private suspend fun <T : Operation.Data> executeCall(
@@ -94,6 +109,8 @@ fun <T : Query.Data> ApolloClient.safeQueryFlow(
         if (failure is ApolloNetworkException && NetworkAvailability.isOnline().not()) {
             throw OfflineException()
         }
+
+        notifyGenericError()
 
         throw failure ?: RuntimeException("Apollo flow completed with no data")
     }
