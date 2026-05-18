@@ -60,6 +60,8 @@ interface BooksLocalDataSource {
     suspend fun deleteOrphanBooks()
 
     suspend fun getBookById(id: Int): Book?
+
+    suspend fun redirectBookId(oldId: Int, newId: Int)
 }
 
 class BooksLocalDataSourceImpl(
@@ -192,5 +194,9 @@ class BooksLocalDataSourceImpl(
 
     override suspend fun deleteOrphanBooks() {
         dao.deleteOrphanBooks()
+    }
+
+    override suspend fun redirectBookId(oldId: Int, newId: Int) {
+        dao.redirectBookId(oldId = oldId, newId = newId)
     }
 }

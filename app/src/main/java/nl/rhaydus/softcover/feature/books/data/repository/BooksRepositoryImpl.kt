@@ -219,13 +219,28 @@ class BooksRepositoryImpl(
 
         Timber.w("-=- Book $missingBookId missing remotely; recovered canonical $canonicalBookId via edition $editionId")
 
-        return try {
+        val canonical: Book = try {
             booksRemoteDataSource.fetchBookById(id = canonicalBookId)
         } catch (canonicalMissing: BookNotFoundException) {
             Timber.w("-=- Canonical $canonicalBookId also missing while recovering $missingBookId")
 
             throw BookNotFoundException(bookId = missingBookId)
         }
+
+        persistCanonicalRedirect(oldId = missingBookId, canonical = canonical)
+
+        return canonical
+    }
+
+    private suspend fun persistCanonicalRedirect(
+        oldId: Int,
+        canonical: Book,
+    ) {
+        booksLocalDataSource.cacheBook(book = canonical)
+
+        booksLocalDataSource.redirectBookId(oldId = oldId, newId = canonical.id)
+
+        booksLocalDataSource.deleteOrphanBooks()
     }
 
     override suspend fun fetchBooksByIds(ids: List<Int>): List<Book> {

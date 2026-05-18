@@ -466,6 +466,21 @@ interface BookDao {
         deleteBookListsByIds(ids = toRemove)
     }
 
+    @Query("UPDATE user_books SET bookId = :newId WHERE bookId = :oldId")
+    suspend fun redirectUserBooksBookId(oldId: Int, newId: Int)
+
+    @Query("UPDATE OR REPLACE list_books SET bookId = :newId WHERE bookId = :oldId")
+    suspend fun redirectListBooksBookId(oldId: Int, newId: Int)
+
+    @Transaction
+    suspend fun redirectBookId(oldId: Int, newId: Int) {
+        if (oldId == newId) return
+
+        redirectUserBooksBookId(oldId = oldId, newId = newId)
+
+        redirectListBooksBookId(oldId = oldId, newId = newId)
+    }
+
     @Transaction
     suspend fun deleteOrphanBooks() {
         val orphanIds = getOrphanBookIds()

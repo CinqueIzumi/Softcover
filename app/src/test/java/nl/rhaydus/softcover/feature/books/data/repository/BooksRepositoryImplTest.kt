@@ -1266,7 +1266,10 @@ class BooksRepositoryImplTest {
                 every { this@mockk.userBook } returns userBook
             }
 
-            val canonicalBook = stubBook(userBookId = null)
+            val canonicalBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns null
+                every { this@mockk.id } returns canonicalId
+            }
 
             coEvery {
                 booksRemoteDataSource.fetchBookById(id = missingId)
@@ -1289,6 +1292,102 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe canonicalBook
+        }
+
+        @Test
+        fun `recovery happy path — persist sequence cacheBook then redirectBookId then deleteOrphanBooks is called in order`() = runTest {
+            // ----- Arrange -----
+            val missingId = 10
+            val editionId = 55
+            val canonicalId = 99
+
+            val userBook = mockk<UserBook>(relaxed = true) {
+                every { this@mockk.editionId } returns editionId
+            }
+
+            val localBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns userBook
+            }
+
+            val canonicalBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns null
+                every { this@mockk.id } returns canonicalId
+            }
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = missingId)
+            } throws BookNotFoundException(bookId = missingId)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = missingId)
+            } returns localBook
+
+            coEvery {
+                booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
+            } returns canonicalId
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = canonicalId)
+            } returns canonicalBook
+
+            // ----- Act -----
+            repository.fetchBookById(id = missingId)
+
+            // ----- Assert -----
+            coVerifyOrder {
+                booksLocalDataSource.cacheBook(book = canonicalBook)
+                booksLocalDataSource.redirectBookId(oldId = missingId, newId = canonicalId)
+                booksLocalDataSource.deleteOrphanBooks()
+            }
+        }
+
+        @Test
+        fun `recovery canonical also missing — no persist calls are made`() = runTest {
+            // ----- Arrange -----
+            val missingId = 10
+            val editionId = 55
+            val canonicalId = 99
+
+            val userBook = mockk<UserBook>(relaxed = true) {
+                every { this@mockk.editionId } returns editionId
+            }
+
+            val localBook = mockk<Book>(relaxed = true) {
+                every { this@mockk.userBook } returns userBook
+            }
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = missingId)
+            } throws BookNotFoundException(bookId = missingId)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = missingId)
+            } returns localBook
+
+            coEvery {
+                booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
+            } returns canonicalId
+
+            coEvery {
+                booksRemoteDataSource.fetchBookById(id = canonicalId)
+            } throws BookNotFoundException(bookId = canonicalId)
+
+            // ----- Act & Assert -----
+            shouldThrow<BookNotFoundException> {
+                repository.fetchBookById(id = missingId)
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.redirectBookId(oldId = any(), newId = any())
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.deleteOrphanBooks()
+            }
         }
 
         @Test
@@ -1391,6 +1490,10 @@ class BooksRepositoryImplTest {
             // ----- Act & Assert -----
             shouldThrow<BookNotFoundException> {
                 repository.fetchBookById(id = missingId)
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.redirectBookId(oldId = any(), newId = any())
             }
         }
 
