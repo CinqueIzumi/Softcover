@@ -19,6 +19,8 @@ interface BooksLocalDataSource {
 
     suspend fun getAllUserBookIds(): List<Int>
 
+    suspend fun getUserBookIdsByStatus(status: UserBookStatus): List<Int>
+
     suspend fun getExistingBookIds(ids: List<Int>): List<Int>
 
     suspend fun getExistingEditionIds(ids: List<Int>): List<Int>
@@ -82,6 +84,10 @@ class BooksLocalDataSourceImpl(
 
     override suspend fun getAllUserBookIds(): List<Int> {
         return dao.getAllUserBookIds()
+    }
+
+    override suspend fun getUserBookIdsByStatus(status: UserBookStatus): List<Int> {
+        return dao.getUserBookIdsByStatus(statusCode = status.code)
     }
 
     override suspend fun getExistingBookIds(ids: List<Int>): List<Int> {

@@ -17,13 +17,5 @@ enum class UserBookStatus(val code: Int) {
             val alwaysOn = entries.filter { it.isAlwaysVisibleInLibrary }.map { it.code }
             return enabledCodes + alwaysOn
         }
-
-        val alwaysCachedCodes: Set<Int>
-            get() = setOf(
-                WANT_TO_READ.code,
-                CURRENTLY_READING.code,
-                READ.code,
-                DID_NOT_FINISH.code,
-            )
     }
 }

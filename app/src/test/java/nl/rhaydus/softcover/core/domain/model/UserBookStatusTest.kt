@@ -108,34 +108,6 @@ class UserBookStatusTest {
     }
 
     @Nested
-    inner class AlwaysCachedCodes {
-
-        @Test
-        fun `alwaysCachedCodes equals exactly the set of codes 1, 2, 3, and 5`() {
-            // ----- Arrange & Act -----
-            val result = UserBookStatus.alwaysCachedCodes
-
-            // ----- Assert -----
-            result shouldBe setOf(
-                UserBookStatus.WANT_TO_READ.code,
-                UserBookStatus.CURRENTLY_READING.code,
-                UserBookStatus.READ.code,
-                UserBookStatus.DID_NOT_FINISH.code,
-            )
-        }
-
-        @Test
-        fun `alwaysCachedCodes contains exactly four entries`() {
-            // ----- Arrange & Act -----
-            val result = UserBookStatus.alwaysCachedCodes
-
-            // ----- Assert -----
-            result.size shouldBe 4
-        }
-
-    }
-
-    @Nested
     inner class ActiveLibraryCodes {
 
         @Test

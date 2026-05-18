@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 
@@ -16,7 +17,10 @@ interface BooksRepository {
 
     suspend fun initializeBooks(userId: Int)
 
-    suspend fun refreshUserBooks(userId: Int)
+    suspend fun refreshUserBooks(
+        userId: Int,
+        scope: RefreshScope = RefreshScope.All,
+    )
 
     suspend fun cacheBook(book: Book)
 

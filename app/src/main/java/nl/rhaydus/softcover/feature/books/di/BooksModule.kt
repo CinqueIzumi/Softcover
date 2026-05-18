@@ -41,6 +41,7 @@ val booksModule = module {
             networkAvailability = get(),
             offlineProgressQueue = get(),
             pendingProgressDrainer = get(),
+            applicationScope = get(),
         )
     }
 

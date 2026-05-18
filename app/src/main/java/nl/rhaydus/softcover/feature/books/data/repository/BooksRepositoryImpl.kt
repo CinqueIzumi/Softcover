@@ -5,10 +5,14 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.OfflineProgressQueue
@@ -16,11 +20,13 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdate
 import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdateKind
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
@@ -41,43 +47,94 @@ class BooksRepositoryImpl(
     private val networkAvailability: NetworkAvailabilityProvider,
     private val offlineProgressQueue: OfflineProgressQueue,
     private val pendingProgressDrainer: PendingProgressDrainer,
+    private val applicationScope: ApplicationScope,
 ) : BooksRepository {
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
     override val allUserLists: Flow<List<BookList>> = booksLocalDataSource.allUserLists
 
-    private var initializedBooksThisSession: Boolean = false
+    @Volatile
+    private var currentlyReadingInitializedThisSession: Boolean = false
+
+    @Volatile
+    private var libraryInitializedThisSession: Boolean = false
+
+    private val inflightMutex = Mutex()
+    private val inflightRefreshes = mutableMapOf<RefreshScope, Deferred<Unit>>()
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return booksLocalDataSource.getBooksFlowByStatus(status = status)
     }
 
     override suspend fun initializeBooks(userId: Int) {
-        if (initializedBooksThisSession) {
-            throw Exception("User already initialized books this session")
+        if (currentlyReadingInitializedThisSession.not()) {
+            refreshUserBooks(
+                userId = userId,
+                scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
+            )
+
+            currentlyReadingInitializedThisSession = true
         }
 
-        fetchAndCacheBooks(userId = userId)
+        if (libraryInitializedThisSession.not()) {
+            libraryInitializedThisSession = true
 
-        initializedBooksThisSession = true
+            applicationScope.scope.launch {
+                runCatching {
+                    refreshUserBooks(userId = userId, scope = RefreshScope.All)
+                }.onFailure { error ->
+                    if (error is CancellationException) throw error
+
+                    Timber.e("-=- Background library refresh failed: $error")
+                }
+            }
+        }
     }
 
-    override suspend fun refreshUserBooks(userId: Int) {
-        fetchAndCacheBooks(userId = userId, forceRefreshReferences = true)
-    }
-
-    private suspend fun fetchAndCacheBooks(
+    override suspend fun refreshUserBooks(
         userId: Int,
-        forceRefreshReferences: Boolean = false,
-    ) = withContext(Dispatchers.IO) {
-        val syncedUserBookIds: Set<Int> = pendingProgressDrainer.drainPendingUpdates()
+        scope: RefreshScope,
+    ) {
+        runOrJoin(scope = scope) {
+            when (scope) {
+                RefreshScope.All -> refreshAll(userId = userId)
+                is RefreshScope.ByStatus -> refreshByStatus(userId = userId, status = scope.status)
+                is RefreshScope.ByList -> refreshByList(userId = userId, listId = scope.listId)
+            }
+        }
+    }
 
-        val fetchStatusCodes = UserBookStatus.activeLibraryCodes(
-            enabledCodes = settingsRepository.enabledStatusCodes.first(),
-        ) + UserBookStatus.alwaysCachedCodes
+    private suspend fun runOrJoin(
+        scope: RefreshScope,
+        work: suspend () -> Unit,
+    ) {
+        val deferred: Deferred<Unit> = inflightMutex.withLock {
+            inflightRefreshes[scope]?.let { return@withLock it }
+
+            val started: Deferred<Unit> = applicationScope.scope.async {
+                try {
+                    work()
+                } finally {
+                    inflightMutex.withLock { inflightRefreshes.remove(scope) }
+                }
+            }
+
+            inflightRefreshes[scope] = started
+
+            started
+        }
+
+        deferred.await()
+    }
+
+    private suspend fun refreshAll(userId: Int) = withContext(Dispatchers.IO) {
+        val syncedUserBookIds: Set<Int> = pendingProgressDrainer.drainPendingUpdates()
         val seeded = settingsRepository.listDefaultsSeeded.first()
 
         val booksDeferred = async {
-            booksRemoteDataSource.initializeBooks(userId = userId, statusIds = fetchStatusCodes)
+            booksRemoteDataSource.initializeBooks(
+                userId = userId,
+                statusIds = UserBookStatus.entries.map { it.code }.toSet(),
+            )
         }
         val listsDeferred = async {
             booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
@@ -99,9 +156,7 @@ class BooksRepositoryImpl(
         booksLocalDataSource.cacheBooks(books = booksToCache)
 
         val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }.toSet()
-
         val locallyStoredUserBookIds = booksLocalDataSource.getAllUserBookIds()
-
         val userBookIdsToRemove: List<Int> = locallyStoredUserBookIds
             .filterNot { it in fetchedBookUserBookIds }
 
@@ -111,12 +166,55 @@ class BooksRepositoryImpl(
 
         hydrateOrphanOwnedBooks(
             lists = fetchedLists,
-            forceRefreshAll = forceRefreshReferences,
+            forceRefreshAll = true,
         )
 
         booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
 
         booksLocalDataSource.deleteOrphanBooks()
+    }
+
+    private suspend fun refreshByStatus(
+        userId: Int,
+        status: UserBookStatus,
+    ) = withContext(Dispatchers.IO) {
+        val syncedUserBookIds: Set<Int> = pendingProgressDrainer.drainPendingUpdates()
+
+        val fetchedBooks = booksRemoteDataSource.initializeBooks(
+            userId = userId,
+            statusIds = setOf(status.code),
+        )
+
+        val booksToCache: List<Book> = preserveSyncedProgress(
+            fetchedBooks = fetchedBooks,
+            syncedUserBookIds = syncedUserBookIds,
+        )
+
+        booksLocalDataSource.cacheBooks(books = booksToCache)
+
+        val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }.toSet()
+        val localUserBookIdsForStatus = booksLocalDataSource.getUserBookIdsByStatus(status = status)
+        val userBookIdsToRemove: List<Int> = localUserBookIdsForStatus
+            .filterNot { it in fetchedBookUserBookIds }
+
+        booksLocalDataSource.removeUserBooksById(ids = userBookIdsToRemove)
+    }
+
+    private suspend fun refreshByList(
+        userId: Int,
+        listId: Int,
+    ) = withContext(Dispatchers.IO) {
+        val fetchedLists = booksRemoteDataSource.fetchUserLists(
+            userId = userId,
+            listIds = setOf(listId),
+        )
+
+        hydrateOrphanOwnedBooks(
+            lists = fetchedLists,
+            forceRefreshAll = true,
+        )
+
+        booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
     }
 
     private suspend fun hydrateOrphanOwnedBooks(
@@ -179,7 +277,8 @@ class BooksRepositoryImpl(
     override suspend fun removeAllBooks() {
         booksLocalDataSource.removeAllBooks()
 
-        initializedBooksThisSession = false
+        currentlyReadingInitializedThisSession = false
+        libraryInitializedThisSession = false
     }
 
     override suspend fun fetchBookById(id: Int): Book {
