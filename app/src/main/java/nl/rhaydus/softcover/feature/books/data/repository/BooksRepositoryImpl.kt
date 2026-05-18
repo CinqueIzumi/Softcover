@@ -91,15 +91,6 @@ class BooksRepositoryImpl(
             settingsRepository.seedEnabledListIds(ids = setOfNotNull(ownedListId))
         }
 
-        val enabledListIds = settingsRepository.enabledListIds.first()
-        val ownedListId = fetchedLists.firstOrNull { it.slug == OWNED_LIST_SLUG }?.id
-        val alwaysCachedListIds = setOfNotNull(ownedListId)
-        val listIdsToHydrate = enabledListIds + alwaysCachedListIds
-
-        val listsToCache = fetchedLists.map { list ->
-            if (list.id in listIdsToHydrate) list else list.copy(books = emptyList())
-        }
-
         val booksToCache: List<Book> = preserveSyncedProgress(
             fetchedBooks = fetchedBooks,
             syncedUserBookIds = syncedUserBookIds,
@@ -119,11 +110,11 @@ class BooksRepositoryImpl(
         booksLocalDataSource.syncBookListMetadata(serverListIds = fetchedLists.map { it.id }.toSet())
 
         hydrateOrphanOwnedBooks(
-            lists = listsToCache.filter { it.id in listIdsToHydrate },
+            lists = fetchedLists,
             forceRefreshAll = forceRefreshReferences,
         )
 
-        booksLocalDataSource.cacheUserBookLists(lists = listsToCache)
+        booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
 
         booksLocalDataSource.deleteOrphanBooks()
     }

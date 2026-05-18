@@ -234,13 +234,15 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `initializeBooks caches all fetched lists with disabled ones having empty books`() = runTest {
+        fun `initializeBooks caches all fetched lists unmodified regardless of enabled status`() = runTest {
             // ----- Arrange -----
             val userId = 10
             val enabledListId = 1
             val disabledListId = 2
-            val enabledList = stubBookList(id = enabledListId, slug = "owned")
-            val disabledList = stubBookList(id = disabledListId, slug = "favorites")
+            val enabledListBook = stubListBook(bookId = 1, editionId = 10)
+            val disabledListBook = stubListBook(bookId = 2, editionId = 20)
+            val enabledList = stubBookList(id = enabledListId, slug = "owned", listBooks = listOf(enabledListBook))
+            val disabledList = stubBookList(id = disabledListId, slug = "favorites", listBooks = listOf(disabledListBook))
 
             every {
                 settingsRepository.enabledListIds
@@ -258,15 +260,32 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
+            coEvery {
+                booksLocalDataSource.getExistingBookIds(ids = any())
+            } returns emptyList()
+
+            coEvery {
+                booksLocalDataSource.getExistingEditionIds(ids = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any(), forceNetwork = false)
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(ids = any(), forceNetwork = false)
+            } returns emptyList()
+
             // ----- Act -----
             repository.initializeBooks(userId = userId)
 
             // ----- Assert -----
+            // Both lists are cached with their books intact — no stripping
             coVerify {
                 booksLocalDataSource.cacheUserBookLists(
                     lists = match { lists ->
-                        lists.any { it.id == enabledListId } &&
-                            lists.any { it.id == disabledListId && it.books.isEmpty() }
+                        lists.any { it.id == enabledListId && it.books.isNotEmpty() } &&
+                            lists.any { it.id == disabledListId && it.books.isNotEmpty() }
                     },
                 )
             }
@@ -649,7 +668,6 @@ class BooksRepositoryImplTest {
                 settingsRepository.listDefaultsSeeded
             } returns flowOf(false)
 
-            // After seeding, enabledListIds returns {ownedListId}
             every {
                 settingsRepository.enabledListIds
             } returns flowOf(setOf(ownedListId))
@@ -670,7 +688,7 @@ class BooksRepositoryImplTest {
             repository.initializeBooks(userId = userId)
 
             // ----- Assert -----
-            // Both lists are cached — the non-enabled one with empty books
+            // Both lists are cached
             coVerify {
                 booksLocalDataSource.cacheUserBookLists(
                     lists = match { lists -> lists.size == 2 },
@@ -679,7 +697,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `initializeBooks caches owned list with its books even when owned id is not in enabledListIds`() = runTest {
+        fun `initializeBooks caches all lists with their books even when they are not in enabledListIds`() = runTest {
             // ----- Arrange -----
             val userId = 10
             val ownedListId = 55
@@ -689,7 +707,7 @@ class BooksRepositoryImplTest {
             val ownedList = stubBookList(id = ownedListId, slug = "owned", listBooks = listOf(ownedListBook))
             val disabledCustomList = stubBookList(id = disabledCustomListId, slug = "favorites", listBooks = listOf(disabledListBook))
 
-            // Neither the owned list nor the custom list is in enabledListIds
+            // Neither list is in enabledListIds
             every {
                 settingsRepository.enabledListIds
             } returns flowOf(emptySet())
@@ -708,21 +726,30 @@ class BooksRepositoryImplTest {
 
             coEvery {
                 booksLocalDataSource.getExistingBookIds(ids = any())
-            } returns listOf(ownedListBook.bookId)
+            } returns emptyList()
 
             coEvery {
                 booksLocalDataSource.getExistingEditionIds(ids = any())
-            } returns listOf(ownedListBook.editionId)
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any(), forceNetwork = false)
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(ids = any(), forceNetwork = false)
+            } returns emptyList()
 
             // ----- Act -----
             repository.initializeBooks(userId = userId)
 
             // ----- Assert -----
+            // Both lists are cached with their books intact — no stripping based on enabledListIds
             coVerify {
                 booksLocalDataSource.cacheUserBookLists(
                     lists = match { lists ->
                         lists.any { it.id == ownedListId && it.books.isNotEmpty() } &&
-                            lists.any { it.id == disabledCustomListId && it.books.isEmpty() }
+                            lists.any { it.id == disabledCustomListId && it.books.isNotEmpty() }
                     },
                 )
             }
@@ -2824,8 +2851,7 @@ class BooksRepositoryImplTest {
     @Nested
     inner class HydrateOrphanOwnedBooks {
 
-        // The default stubBookList id is 1. We set enabledListIds = {1} so the list is
-        // treated as enabled and its books are passed into hydrateOrphanOwnedBooks.
+        // The default stubBookList id is 1.
         private fun setupFetchAndCache(
             fetchedBooks: List<Book> = emptyList(),
             fetchedLists: List<BookList> = emptyList(),
@@ -3141,7 +3167,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `hydrateOrphanOwnedBooks still runs for the owned list even when it is not in enabledListIds`() = runTest {
+        fun `hydrateOrphanOwnedBooks runs for all fetched lists regardless of enabledListIds`() = runTest {
             // ----- Arrange -----
             val ownedListId = 77
             val ownedBookId = 200
@@ -3150,7 +3176,7 @@ class BooksRepositoryImplTest {
             val ownedList = stubBookList(id = ownedListId, slug = "owned", listBooks = listOf(ownedListBook))
             val orphanBook = stubBook(userBookId = null)
 
-            // Owned list is NOT in enabledListIds
+            // List is NOT in enabledListIds — should still be hydrated
             every {
                 settingsRepository.enabledListIds
             } returns flowOf(emptySet())
@@ -3293,7 +3319,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `books from non-hydrated lists do not contribute to orphan resolution`() = runTest {
+        fun `books from all lists contribute to orphan resolution regardless of enabled status`() = runTest {
             // ----- Arrange -----
             val enabledListId = 1
             val disabledListId = 2
@@ -3319,23 +3345,30 @@ class BooksRepositoryImplTest {
             } returns emptyList()
 
             coEvery {
-                booksRemoteDataSource.fetchBooksByIds(ids = listOf(10), forceNetwork = true)
+                booksRemoteDataSource.fetchBooksByIds(ids = match { it.containsAll(listOf(10, 20)) }, forceNetwork = true)
             } returns emptyList()
 
             coEvery {
-                booksRemoteDataSource.fetchEditionsByIds(ids = listOf(100), forceNetwork = true)
+                booksRemoteDataSource.fetchEditionsByIds(ids = match { it.containsAll(listOf(100, 200)) }, forceNetwork = true)
             } returns emptyList()
 
             // ----- Act -----
             repository.refreshUserBooks(userId = 1)
 
             // ----- Assert -----
-            // The disabled list's bookId (20) must never be fetched
-            coVerify(exactly = 0) {
-                booksRemoteDataSource.fetchBooksByIds(ids = match { it.contains(20) }, forceNetwork = any())
+            // Both lists' ids are fetched — no filtering at the cache layer
+            coVerify {
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = match { it.containsAll(listOf(10, 20)) },
+                    forceNetwork = true,
+                )
             }
-            coVerify(exactly = 0) {
-                booksRemoteDataSource.fetchEditionsByIds(ids = match { it.contains(200) }, forceNetwork = any())
+
+            coVerify {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = match { it.containsAll(listOf(100, 200)) },
+                    forceNetwork = true,
+                )
             }
         }
     }
