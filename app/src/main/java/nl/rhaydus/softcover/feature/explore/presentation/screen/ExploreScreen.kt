@@ -69,7 +69,6 @@ import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.modifier.carouselPageEdgeHint
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
@@ -256,10 +255,6 @@ object ExploreScreen : Screen {
                     val entry = rememberStaggeredEntryCoordinator(key = "explore:trending")
 
                     LazyRow(
-                        modifier = Modifier.carouselPageEdgeHint(
-                            state = trendingListState,
-                            key = "explore:trending",
-                        ),
                         state = trendingListState,
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -349,10 +344,6 @@ object ExploreScreen : Screen {
                     val entry = rememberStaggeredEntryCoordinator(key = "explore:continue_series")
 
                     LazyRow(
-                        modifier = Modifier.carouselPageEdgeHint(
-                            state = continueSeriesListState,
-                            key = "explore:continue_series",
-                        ),
                         state = continueSeriesListState,
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),

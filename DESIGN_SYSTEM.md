@@ -130,7 +130,7 @@ A hero region opens a screen with a single dominant element: a stat, a quote, or
 
 Horizontal carousels are the default for collections of books. Cards inside a carousel are fixed-width and fixed-height. Optional rows inside a card (rating, badge, secondary line) reserve their height even when empty so cards do not jump as data resolves.
 
-On first non-empty composition, every book carousel paints a 2dp primary-coloured page-edge hint under the rightmost partially-visible card — held for 1s, then fades out over ~400ms. The hint is a one-shot affordance ("there's more this way") and plays at most once per surface per app lifetime, tracked in a process-wide registry keyed by a stable string (`"explore:trending"`, etc.) — re-entries (push-and-back, tab swap, config change) render statically, matching the staggered-entry policy. Wire it via `Modifier.carouselPageEdgeHint(state, key)` on the `LazyRow`; do not hand-roll the bar or the timing at call sites. Suppressed under reduced motion (§2.5 gate); the key is not marked shown when motion is off, so the user still gets it on a later launch with animations re-enabled. Apply it to book carousels — not to chip-strip rows, which already render their full content inline.
+Horizontal carousels do not paint an explicit overflow affordance (no edge bar, no chevron, no fade). The rightmost card sitting partially clipped against the screen edge — paired with the standard 24dp content padding so it never butts flush — is itself the "there's more" cue. Do not reintroduce a page-edge hint, scrollbar, or page indicator on book carousels.
 
 Card anatomy (top-to-bottom):
 
