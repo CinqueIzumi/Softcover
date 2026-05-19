@@ -11,7 +11,7 @@ val coreModule = module {
     single<MainActivityViewModel> {
         MainActivityViewModel(
             getUserIdUseCase = get(),
-            initializeUserBooksUseCase = get(),
+            refreshUserBooksUseCase = get(),
             getThemeConfigurationUseCase = get(),
             refreshUserProfileDataUseCase = get(),
         )

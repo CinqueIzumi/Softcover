@@ -1,0 +1,11 @@
+package nl.rhaydus.softcover.feature.settings.domain.usecase
+
+import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
+
+class SetLibraryTabOrderUseCase(
+    private val settingsRepository: SettingsRepository,
+) {
+    suspend operator fun invoke(order: List<String>): Result<Unit> = runCatching {
+        settingsRepository.setLibraryTabOrder(order = order)
+    }
+}

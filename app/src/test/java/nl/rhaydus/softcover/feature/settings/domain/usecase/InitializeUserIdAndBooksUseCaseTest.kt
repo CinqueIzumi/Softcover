@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
@@ -47,7 +48,7 @@ class InitializeUserIdAndBooksUseCaseTest {
         }
 
         @Test
-        fun `calls initializeBooks with the userId returned from the backend`() = runTest {
+        fun `calls refreshUserBooks with the userId returned from the backend`() = runTest {
             // ----- Arrange -----
             val userId = 7
 
@@ -60,7 +61,7 @@ class InitializeUserIdAndBooksUseCaseTest {
 
             // ----- Assert -----
             coVerify {
-                booksRepository.initializeBooks(userId = userId)
+                booksRepository.refreshUserBooks(userId = userId, scope = RefreshScope.All)
             }
         }
 
@@ -100,7 +101,7 @@ class InitializeUserIdAndBooksUseCaseTest {
         }
 
         @Test
-        fun `returns failure when initializeBooks throws`() = runTest {
+        fun `returns failure when refreshUserBooks throws`() = runTest {
             // ----- Arrange -----
             val userId = 3
             val expectedError = RuntimeException("books init error")
@@ -110,7 +111,7 @@ class InitializeUserIdAndBooksUseCaseTest {
             } returns userId
 
             coEvery {
-                booksRepository.initializeBooks(userId = userId)
+                booksRepository.refreshUserBooks(userId = userId, scope = RefreshScope.All)
             } throws expectedError
 
             // ----- Act -----

@@ -158,6 +158,9 @@ interface BookDao {
     @Query("SELECT id FROM user_books")
     suspend fun getAllUserBookIds(): List<Int>
 
+    @Query("SELECT id FROM user_books WHERE statusCode = :statusCode")
+    suspend fun getUserBookIdsByStatus(statusCode: Int): List<Int>
+
     @Query("SELECT id FROM books WHERE id IN (:bookIds)")
     suspend fun getExistingBookIds(bookIds: List<Int>): List<Int>
 
@@ -464,6 +467,21 @@ interface BookDao {
 
         deleteListBooksByListIds(listIds = toRemove)
         deleteBookListsByIds(ids = toRemove)
+    }
+
+    @Query("UPDATE user_books SET bookId = :newId WHERE bookId = :oldId")
+    suspend fun redirectUserBooksBookId(oldId: Int, newId: Int)
+
+    @Query("UPDATE OR REPLACE list_books SET bookId = :newId WHERE bookId = :oldId")
+    suspend fun redirectListBooksBookId(oldId: Int, newId: Int)
+
+    @Transaction
+    suspend fun redirectBookId(oldId: Int, newId: Int) {
+        if (oldId == newId) return
+
+        redirectUserBooksBookId(oldId = oldId, newId = newId)
+
+        redirectListBooksBookId(oldId = oldId, newId = newId)
     }
 
     @Transaction

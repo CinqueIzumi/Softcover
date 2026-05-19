@@ -16,17 +16,21 @@ class PersistedLibraryVisibilityCollector : LibraryVisibilityInitializer {
         combine(
             dependencies.getEnabledStatusCodesAsFlowUseCase(),
             dependencies.getEnabledListIdsAsFlowUseCase(),
-        ) { codes: Set<Int>, ids: Set<Int> -> codes to ids }
-            .collectLatest { (codes, ids) ->
-                scope.setState { state ->
-                    state.copy(
-                        persistedEnabledStatusCodes = codes,
-                        persistedEnabledListIds = ids,
-                        draftEnabledStatusCodes = if (state.initialized) state.draftEnabledStatusCodes else codes,
-                        draftEnabledListIds = if (state.initialized) state.draftEnabledListIds else ids,
-                        initialized = true,
-                    )
-                }
+            dependencies.getLibraryTabOrderAsFlowUseCase(),
+        ) { codes: Set<Int>, ids: Set<Int>, order: List<String> ->
+            Triple(codes, ids, order)
+        }.collectLatest { (codes, ids, order) ->
+            scope.setState { state ->
+                state.copy(
+                    persistedEnabledStatusCodes = codes,
+                    persistedEnabledListIds = ids,
+                    persistedTabOrder = order,
+                    draftEnabledStatusCodes = if (state.initialized) state.draftEnabledStatusCodes else codes,
+                    draftEnabledListIds = if (state.initialized) state.draftEnabledListIds else ids,
+                    draftTabOrder = if (state.initialized) state.draftTabOrder else order,
+                    initialized = true,
+                )
             }
+        }
     }
 }

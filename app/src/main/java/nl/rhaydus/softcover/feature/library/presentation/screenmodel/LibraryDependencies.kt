@@ -15,7 +15,10 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUs
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortModesAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortModeUseCase
 
 class LibraryDependencies(
     val getAllUserBooksUseCase: GetAllUserBooksUseCase,
@@ -27,10 +30,13 @@ class LibraryDependencies(
     val getAllUserListsUseCase: GetAllUserListsUseCase,
     val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
     val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
+    val getLibrarySortModesAsFlowUseCase: GetLibrarySortModesAsFlowUseCase,
+    val setLibrarySortModeUseCase: SetLibrarySortModeUseCase,
     val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
+    val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,6 +26,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
@@ -34,6 +37,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -69,7 +75,6 @@ import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.modifier.carouselPageEdgeHint
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
@@ -82,7 +87,7 @@ import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
@@ -92,6 +97,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibra
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnDismissContinueSeriesAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnDismissContinueSeriesBookAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveAllSearchQueriesClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQueryClickedAction
@@ -186,6 +192,7 @@ object ExploreScreen : Screen {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     private fun EditorialContent(
         state: ExploreScreenUiState,
@@ -193,34 +200,53 @@ object ExploreScreen : Screen {
         onBookClick: (Book, String?) -> Unit,
         contentPadding: PaddingValues,
     ) {
-        Column(
+        val pullToRefreshState = rememberPullToRefreshState()
+
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { runAction(OnRefreshAction) },
             modifier = Modifier
                 .padding(contentPadding)
-                .fillMaxSize()
-                .verticalScroll(editorialScrollState),
-            verticalArrangement = Arrangement.spacedBy(40.dp),
+                .fillMaxSize(),
+            state = pullToRefreshState,
+            indicator = {
+                IndicatorBox(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    state = pullToRefreshState,
+                    isRefreshing = state.isRefreshing,
+                ) {
+                    ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
+                }
+            },
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(editorialScrollState),
+                verticalArrangement = Arrangement.spacedBy(40.dp),
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
 
-            TrendingSection(
-                books = state.trendingBooks,
-                isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
-                onBookClick = onBookClick,
-            )
+                TrendingSection(
+                    books = state.trendingBooks,
+                    isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
+                    onBookClick = onBookClick,
+                )
 
-            ContinueSeriesSection(
-                books = state.continueSeriesBooks,
-                isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
-                onBookClick = onBookClick,
-                runAction = runAction,
-            )
+                ContinueSeriesSection(
+                    books = state.continueSeriesBooks,
+                    isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
+                    onBookClick = onBookClick,
+                    runAction = runAction,
+                )
 
-            RecentSearchesSection(
-                queries = state.previousSearchQueries,
-                runAction = runAction,
-            )
+                RecentSearchesSection(
+                    queries = state.previousSearchQueries,
+                    runAction = runAction,
+                )
 
-            Spacer(modifier = Modifier.height(rememberBottomBarPadding()))
+                Spacer(modifier = Modifier.height(rememberBottomBarPadding()))
+            }
         }
     }
 
@@ -256,10 +282,6 @@ object ExploreScreen : Screen {
                     val entry = rememberStaggeredEntryCoordinator(key = "explore:trending")
 
                     LazyRow(
-                        modifier = Modifier.carouselPageEdgeHint(
-                            state = trendingListState,
-                            key = "explore:trending",
-                        ),
                         state = trendingListState,
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -349,10 +371,6 @@ object ExploreScreen : Screen {
                     val entry = rememberStaggeredEntryCoordinator(key = "explore:continue_series")
 
                     LazyRow(
-                        modifier = Modifier.carouselPageEdgeHint(
-                            state = continueSeriesListState,
-                            key = "explore:continue_series",
-                        ),
                         state = continueSeriesListState,
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -422,6 +440,8 @@ object ExploreScreen : Screen {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(state = rememberScrollState())
+                .imePadding()
                 .padding(bottom = 24.dp),
         ) {
             EditorialSectionHeader(
@@ -600,11 +620,10 @@ object ExploreScreen : Screen {
         onClick: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         Column(
             modifier = modifier
                 .width(150.dp)
+                .prefetchBookDetailOnPress(book.id)
                 .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -684,11 +703,10 @@ object ExploreScreen : Screen {
         onMenuClick: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         Column(
             modifier = modifier
                 .width(120.dp)
+                .prefetchBookDetailOnPress(book.id)
                 .pressScaleClickable(onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -820,11 +838,10 @@ object ExploreScreen : Screen {
         onBookClick: (Book, String?) -> Unit,
         runAction: (ExploreAction) -> Unit,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .prefetchBookDetailOnPress(book.id)
                 .pressScaleClickable(onClick = { onBookClick(book, null) }),
             verticalAlignment = Alignment.CenterVertically,
         ) {

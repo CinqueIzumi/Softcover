@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -112,13 +113,15 @@ import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.feature.books.presentation.prefetch.PrefetchBookDetailOnVisible
+import nl.rhaydus.softcover.feature.books.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
+import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
@@ -130,6 +133,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.math.roundToInt
 
@@ -207,7 +211,7 @@ object ReadingScreen : Screen {
                 ),
             )
 
-            state.books.firstOrNull { it.id == targetId }?.let { book ->
+            state.books?.firstOrNull { it.id == targetId }?.let { book ->
                 runAction(OnMarkBookAsReadClickAction(book = book))
             }
 
@@ -243,9 +247,11 @@ object ReadingScreen : Screen {
                         }
                     ) {
                         when {
+                            state.books == null -> Unit
                             state.books.isNotEmpty() -> {
                                 BooksDisplay(
                                     state = state,
+                                    books = state.books,
                                     runAction = runAction,
                                     onBookClick = onBookClick,
                                     onNavigateToSearch = onNavigateToSearch,
@@ -256,8 +262,10 @@ object ReadingScreen : Screen {
                                 )
                             }
 
-                            state.isLoading -> Unit
                             else -> EmptyCurrentlyReadingScreen(
+                                wantToReadBooks = state.wantToReadBooks,
+                                trendingBooks = state.trendingBooks,
+                                onBookClick = onBookClick,
                                 onNavigateToSearch = onNavigateToSearch,
                             )
                         }
@@ -315,6 +323,7 @@ object ReadingScreen : Screen {
     @Composable
     private fun BooksDisplay(
         state: ReadingScreenUiState,
+        books: List<Book>,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
         onNavigateToSearch: () -> Unit,
@@ -323,17 +332,20 @@ object ReadingScreen : Screen {
         slidingBookId: Int?,
         slideProgress: Float,
     ) {
-        val featured = state.books.first()
-        val rest = state.books.drop(1)
+        val featured = books.first()
+        val rest = books.drop(1)
 
         val animator = rememberLazyItemMutationAnimator(keys = rest.map { it.id })
 
         val entry = rememberStaggeredEntryCoordinator(key = "reading:rest")
 
-        val prefetcher = rememberBookDetailPrefetcher()
+        val isInspection = LocalInspectionMode.current
+        val prefetcher = if (isInspection) null else rememberBookDetailPrefetcher()
 
         val density = LocalDensity.current
         val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
+
+        val today = remember { LocalDate.now().toString() }
 
         val slideModifier: (Int) -> Modifier = { bookId ->
             if (bookId == slidingBookId) {
@@ -354,17 +366,32 @@ object ReadingScreen : Screen {
             ) {
                 item(key = "header") {
                     EditorialHeader(
-                        bookCount = state.books.size,
-                        averageProgress = state.books.averageProgress(),
+                        bookCount = books.size,
+                        averageProgress = books.averageProgress(),
                         pullToRefreshState = pullToRefreshState,
                         isRefreshing = state.isLoading,
                     )
                 }
 
+                val featuredDeadlineProgress = featured.deadlineProgressFrom(state)
+                val planTodayMessage = planTodayNudgeFor(progress = featuredDeadlineProgress)
+                val isPlanTodayDismissed = state.dismissedPlanTodayByBook[featured.id] == today
+
+                if (planTodayMessage != null && isPlanTodayDismissed.not()) {
+                    item(key = "plan-today-${featured.id}") {
+                        PlanTodayNudge(
+                            text = planTodayMessage,
+                            onDismiss = {
+                                runAction(OnDismissPlanTodayAction(bookId = featured.id))
+                            },
+                        )
+                    }
+                }
+
                 item(key = "featured-${featured.id}") {
                     FeaturedBookCard(
                         book = featured,
-                        deadlineProgress = featured.deadlineProgressFrom(state),
+                        deadlineProgress = featuredDeadlineProgress,
                         dateStyle = state.dateStyle,
                         mutationFailed = featured.id in state.failedMutationBookIds,
                         runAction = runAction,
@@ -387,7 +414,10 @@ object ReadingScreen : Screen {
 
                     itemsIndexed(rest, key = { _, book -> book.id }) { index, book ->
                         CompactBookEntry(
-                            modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
+                            modifier = rememberMutationAnimatedModifier(
+                                animator = animator,
+                                itemKey = book.id,
+                            )
                                 .staggeredEntry(coordinator = entry, index = index)
                                 .then(slideModifier(book.id)),
                             book = book,
@@ -467,8 +497,6 @@ object ReadingScreen : Screen {
         onMarkAsRead: (Book) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         var dropdownActive by remember { mutableStateOf(false) }
         val shape = RoundedCornerShape(28.dp)
         val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
@@ -486,6 +514,7 @@ object ReadingScreen : Screen {
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+                .prefetchBookDetailOnPress(book.id)
                 .pressScale(interactionSource)
                 .shakeOnError(
                     trigger = mutationFailed,
@@ -731,8 +760,6 @@ object ReadingScreen : Screen {
         onMarkAsRead: (Book) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        PrefetchBookDetailOnVisible(bookId = book.id)
-
         var dropdownActive by remember { mutableStateOf(false) }
         val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
 
@@ -742,6 +769,7 @@ object ReadingScreen : Screen {
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 6.dp)
+                .prefetchBookDetailOnPress(book.id)
                 .pressScale(interactionSource)
                 .shakeOnError(
                     trigger = mutationFailed,
@@ -953,16 +981,24 @@ object ReadingScreen : Screen {
 
     @Composable
     private fun EmptyCurrentlyReadingScreen(
+        wantToReadBooks: List<Book> = emptyList(),
+        trendingBooks: List<Book> = emptyList(),
+        onBookClick: (Book) -> Unit = {},
         onNavigateToSearch: () -> Unit,
     ) {
+        val pickUpNext = wantToReadBooks.take(3)
+        val trendingTile = trendingBooks.firstOrNull()
+        val showAdaptive = pickUpNext.isNotEmpty() || trendingTile != null
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 32.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = if (showAdaptive) Arrangement.Top else Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            if (showAdaptive) Spacer(modifier = Modifier.height(40.dp))
             val quoteAlpha = if (isSystemInDarkTheme()) 0.15f else 0.3f
 
             Text(
@@ -1022,6 +1058,171 @@ object ReadingScreen : Screen {
                     )
                 }
             }
+
+            if (pickUpNext.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(40.dp))
+
+                PickUpNextSection(
+                    books = pickUpNext,
+                    onBookClick = onBookClick,
+                )
+            } else if (trendingTile != null) {
+                Spacer(modifier = Modifier.height(40.dp))
+
+                TrendingTileSection(
+                    book = trendingTile,
+                    onBookClick = onBookClick,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun PickUpNextSection(
+        books: List<Book>,
+        onBookClick: (Book) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            SectionLabel(text = "Pick up next")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+            ) {
+                books.forEach { book ->
+                    PickUpNextTile(
+                        book = book,
+                        onClick = { onBookClick(book) },
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun PickUpNextTile(
+        book: Book,
+        onClick: () -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .width(96.dp)
+                .pressScale(remember { MutableInteractionSource() }),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Surface(
+                onClick = onClick,
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+            ) {
+                EditionImage(
+                    edition = book.currentEdition,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(ratio = 2f / 3f),
+                    isLoading = false,
+                    defaultEdition = book.defaultEdition,
+                    fallbackCoverUrl = book.coverUrl,
+                    elevation = 4.dp,
+                    cornerRadius = 10.dp,
+                    sharedTransitionKey = bookCoverTransitionKey(
+                        editionId = book.currentEdition?.id,
+                        bookId = book.id,
+                    ),
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = book.title,
+                style = MaterialTheme.editorialTypography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+
+    @Composable
+    private fun TrendingTileSection(
+        book: Book,
+        onBookClick: (Book) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            SectionLabel(text = "Trending now")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Surface(
+                onClick = { onBookClick(book) },
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    EditionImage(
+                        edition = book.currentEdition,
+                        modifier = Modifier
+                            .width(80.dp)
+                            .aspectRatio(ratio = 2f / 3f),
+                        isLoading = false,
+                        defaultEdition = book.defaultEdition,
+                        fallbackCoverUrl = book.coverUrl,
+                        elevation = 4.dp,
+                        cornerRadius = 8.dp,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = book.currentEdition?.id,
+                            bookId = book.id,
+                        ),
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = "Trending".uppercase(),
+                            style = MaterialTheme.editorialTypography.eyebrowSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+
+                        Text(
+                            text = book.title,
+                            style = MaterialTheme.editorialTypography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        val author = book.authors.firstOrNull()?.name.orEmpty()
+
+                        if (author.isNotBlank()) {
+                            Text(
+                                text = "By $author",
+                                style = MaterialTheme.editorialTypography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -1053,6 +1254,40 @@ private fun List<Book>.averageProgress(): Float? {
     return values.average().toFloat()
 }
 
+@Composable
+private fun PlanTodayNudge(
+    text: String,
+    onDismiss: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.editorialTypography.bodySmall.copy(
+                fontStyle = FontStyle.Italic,
+            ),
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f),
+        )
+
+        IconButton(
+            onClick = onDismiss,
+            modifier = Modifier.size(32.dp),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_close),
+                contentDescription = "Dismiss",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
+}
+
 private fun greetingForNow(): String {
     val hour = LocalTime.now().hour
     return when (hour) {
@@ -1063,7 +1298,10 @@ private fun greetingForNow(): String {
     }
 }
 
-private fun buildSubtitle(bookCount: Int, averageProgress: Float?): String {
+private fun buildSubtitle(
+    bookCount: Int,
+    averageProgress: Float?,
+): String {
     val countPart = when (bookCount) {
         1 -> "One title in motion"
         else -> "$bookCount titles in motion"
@@ -1087,12 +1325,156 @@ private fun progressLabel(book: Book): String {
     }
 }
 
+private fun previewBook(
+    id: Int,
+    title: String,
+    authorNames: List<String>,
+    pages: Int,
+    currentPage: Int,
+    progress: Float,
+    series: BookSeries? = null,
+    positionsInSeries: List<Double> = emptyList(),
+    audioSeconds: Int? = null,
+    currentSeconds: Int? = null,
+): Book {
+    val editionId = id * 10
+    val edition = PreviewData.baseEdition.copy(
+        id = editionId,
+        pages = pages,
+        audioSeconds = audioSeconds,
+        authors = authorNames.map { PreviewData.baseAuthor.copy(name = it) },
+    )
+
+    return PreviewData.baseBook.copy(
+        id = id,
+        title = title,
+        editions = listOf(edition),
+        defaultEdition = edition,
+        authors = edition.authors,
+        userBookRead = PreviewData.baseBook.userBookRead?.copy(
+            currentPage = currentPage,
+            currentSeconds = currentSeconds,
+            progress = progress,
+        ),
+        userBook = PreviewData.baseBook.userBook?.copy(editionId = editionId),
+        bookSeries = series,
+        positionsInSeries = positionsInSeries,
+    )
+}
+
+private val previewBooks: List<Book> = listOf(
+    previewBook(
+        id = 1,
+        title = "The Dungeon Anarchist's Cookbook",
+        authorNames = listOf("Matt Dinniman"),
+        pages = 534,
+        currentPage = 470,
+        progress = 88.014984f,
+        series = BookSeries(id = 1, name = "Dungeon Crawler Carl", amountOfBooks = 20),
+    ),
+    previewBook(
+        id = 2,
+        title = "Last to Leave the Room",
+        authorNames = listOf("Caitlin Starling"),
+        pages = 320,
+        currentPage = 262,
+        progress = 81.875f,
+        series = BookSeries(id = 1, name = "Dungeon Crawler Carl", amountOfBooks = 20),
+        positionsInSeries = listOf(3.0),
+    ),
+    previewBook(
+        id = 3,
+        title = "Cursed Bunny",
+        authorNames = listOf("Bora Chung", "Anton Hur"),
+        pages = 534,
+        currentPage = 49,
+        progress = 19.140625f,
+    ),
+    previewBook(
+        id = 4,
+        title = "Sherlock Holmes: The complete illustrated novels",
+        authorNames = listOf("Arthur Conan Doyle"),
+        pages = 534,
+        currentPage = 200,
+        progress = 40.322582f,
+    ),
+    previewBook(
+        id = 5,
+        title = "The Complete Fiction",
+        authorNames = listOf("H.P. Lovecraft", "S.T. Joshi"),
+        pages = 1098,
+        currentPage = 110,
+        progress = 10.018215f,
+    ),
+)
+
 @StandardPreview
 @Composable
 private fun ReadingScreenEmptyPreview() {
     SoftcoverTheme {
         ReadingScreen.Screen(
-            state = ReadingScreenUiState(isLoading = false),
+            state = ReadingScreenUiState(books = emptyList()),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenEmptyWithPickUpNextPreview() {
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(
+                books = emptyList(),
+                wantToReadBooks = previewBooks.take(3),
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenEmptyWithTrendingPreview() {
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(
+                books = emptyList(),
+                trendingBooks = listOf(previewBooks.first()),
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenLoadingPreview() {
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(books = null),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenSingleBookPreview() {
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(
+                books = previewBooks.take(1),
+                isLoading = false,
+            ),
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},
@@ -1103,110 +1485,141 @@ private fun ReadingScreenEmptyPreview() {
 @StandardPreview
 @Composable
 private fun ReadingScreenPreview() {
-    val books = listOf(
-        PreviewData.baseBook.copy(
-            title = "The Dungeon Anarchist's Cookbook",
-            editions = listOf(
-                PreviewData.baseEdition.copy(
-                    pages = 534,
-                    id = 20,
-                    authors = listOf(
-                        PreviewData.baseAuthor.copy(name = "Matt Dinniman")
-                    )
-                )
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(
+                books = previewBooks,
+                isLoading = false,
             ),
-            userBookRead = PreviewData.baseBook.userBookRead?.copy(
-                currentPage = 470,
-                progress = 88.014984f,
-            ),
-            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
-            bookSeries = BookSeries(
-                id = 1,
-                name = "Dungeon Crawler Carl",
-                amountOfBooks = 20
-            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenWithDeadlineAndNudgePreview() {
+    val today = LocalDate.now()
+    val featured = previewBooks.first()
+    val behindBook = previewBooks[2]
+
+    val deadlines = mapOf(
+        featured.id to BookDeadline(
+            bookId = featured.id,
+            deadlineDate = today.plusDays(5),
+            setAt = today.minusDays(10),
+            initialPerDay = 30f,
+            unit = DeadlineUnit.PAGES,
         ),
-        PreviewData.baseBook.copy(
-            title = "Last to Leave the Room",
-            editions = listOf(
-                PreviewData.baseEdition.copy(
-                    pages = 320,
-                    id = 20,
-                )
-            ),
-            userBookRead = PreviewData.baseBook.userBookRead?.copy(
-                currentPage = 262,
-                progress = 81.875f,
-            ),
-            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
-            bookSeries = BookSeries(
-                id = 1,
-                name = "Dungeon Crawler Carl",
-                amountOfBooks = 20
-            ),
-            positionsInSeries = listOf(3.0),
-        ),
-        PreviewData.baseBook.copy(
-            title = "Cursed Bunny",
-            editions = listOf(
-                PreviewData.baseEdition.copy(
-                    pages = 534,
-                    id = 20,
-                    authors = listOf(
-                        PreviewData.baseAuthor.copy(name = "Bora Chung"),
-                        PreviewData.baseAuthor.copy(name = "Anton Hur"),
-                    )
-                )
-            ),
-            userBookRead = PreviewData.baseBook.userBookRead?.copy(
-                currentPage = 49,
-                progress = 19.140625f,
-            ),
-            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
-        ),
-        PreviewData.baseBook.copy(
-            title = "Sherlock Holmes: The complete illustrated novels",
-            editions = listOf(
-                PreviewData.baseEdition.copy(
-                    pages = 534,
-                    id = 20,
-                    authors = listOf(
-                        PreviewData.baseAuthor.copy(name = "Arthur Conan Doyle")
-                    )
-                )
-            ),
-            userBookRead = PreviewData.baseBook.userBookRead?.copy(
-                currentPage = 200,
-                progress = 40.322582f,
-            ),
-            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
-        ),
-        PreviewData.baseBook.copy(
-            title = "The Complete Fiction",
-            editions = listOf(
-                PreviewData.baseEdition.copy(
-                    pages = 1098,
-                    id = 20,
-                    authors = listOf(
-                        PreviewData.baseAuthor.copy(name = "H.P. Lovecraft"),
-                        PreviewData.baseAuthor.copy(name = "S.T. Joshi"),
-                    )
-                )
-            ),
-            userBookRead = PreviewData.baseBook.userBookRead?.copy(
-                currentPage = 110,
-                progress = 10.018215f,
-            ),
-            userBook = PreviewData.baseBook.userBook?.copy(editionId = 20),
+        behindBook.id to BookDeadline(
+            bookId = behindBook.id,
+            deadlineDate = today.plusDays(3),
+            setAt = today.minusDays(20),
+            initialPerDay = 15f,
+            unit = DeadlineUnit.PAGES,
         ),
     )
 
     SoftcoverTheme {
         ReadingScreen.Screen(
-            state = ReadingScreenUiState(books = books, isLoading = false),
+            state = ReadingScreenUiState(
+                books = previewBooks,
+                isLoading = false,
+                deadlines = deadlines,
+            ),
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenExpiredDeadlinePreview() {
+    val today = LocalDate.now()
+    val featured = previewBooks.first()
+
+    val deadlines = mapOf(
+        featured.id to BookDeadline(
+            bookId = featured.id,
+            deadlineDate = today.minusDays(2),
+            setAt = today.minusDays(30),
+            initialPerDay = 20f,
+            unit = DeadlineUnit.PAGES,
+        ),
+    )
+
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(
+                books = previewBooks.take(3),
+                isLoading = false,
+                deadlines = deadlines,
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenMutationFailedPreview() {
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(
+                books = previewBooks,
+                isLoading = false,
+                failedMutationBookIds = setOf(previewBooks[0].id, previewBooks[2].id),
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenAudiobookPreview() {
+    val audioBook = previewBook(
+        id = 6,
+        title = "Project Hail Mary",
+        authorNames = listOf("Andy Weir"),
+        pages = 0,
+        currentPage = 0,
+        progress = 42.5f,
+        audioSeconds = 58_000,
+        currentSeconds = 24_650,
+    ).let {
+        val edition = it.editions.first().copy(format = "Audiobook")
+        it.copy(editions = listOf(edition), defaultEdition = edition)
+    }
+
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(
+                books = listOf(audioBook) + previewBooks.take(2),
+                isLoading = false,
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun PlanTodayNudgePreview() {
+    SoftcoverTheme {
+        PlanTodayNudge(
+            text = "Read 24 pages today to stay on pace.",
+            onDismiss = {},
         )
     }
 }

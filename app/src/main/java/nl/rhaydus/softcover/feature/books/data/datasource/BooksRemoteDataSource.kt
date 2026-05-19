@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragment
+import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment as booksByIdsBookDetailFragment
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
@@ -57,7 +58,12 @@ import java.time.format.DateTimeFormatter
 interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
 
-    suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
+    suspend fun fetchBookIdForEdition(editionId: Int): Int?
+
+    suspend fun fetchBooksByIds(
+        ids: List<Int>,
+        forceNetwork: Boolean = false,
+    ): List<Book>
 
     suspend fun markBookAsWantToRead(bookId: Int): Book
 
@@ -77,7 +83,10 @@ interface BooksRemoteDataSource {
 
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
 
-    suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition>
+    suspend fun fetchEditionsByIds(
+        ids: List<Int>,
+        forceNetwork: Boolean = false,
+    ): List<BookEdition>
 
     suspend fun updateBookProgress(
         book: Book,
@@ -111,6 +120,8 @@ interface BooksRemoteDataSource {
     )
 }
 
+private const val BATCH_ID_LIMIT: Int = 200
+
 class BooksRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : BooksRemoteDataSource {
@@ -133,22 +144,37 @@ class BooksRemoteDataSourceImpl(
             fetchPolicy = FetchPolicy.CacheFirst,
         )
 
-        return result
-            .books
-            .firstOrNull()
-            ?.bookDetailFragment()
-            ?.toBook() ?: throw Exception("Book could not be mapped")
+        val raw = result.books.firstOrNull() ?: throw BookNotFoundException(bookId = id)
+
+        return raw.bookDetailFragment()?.toBook()
+            ?: throw Exception("Book $id could not be mapped")
     }
 
-    override suspend fun fetchBooksByIds(ids: List<Int>): List<Book> {
-        if (ids.isEmpty()) return emptyList()
-
+    override suspend fun fetchBookIdForEdition(editionId: Int): Int? {
         val result = apolloClient.safeQuery(
-            query = GetBooksByIdsQuery(ids = ids),
-            fetchPolicy = FetchPolicy.CacheFirst,
+            query = GetBookIdByEditionIdQuery(editionId = editionId),
+            fetchPolicy = FetchPolicy.NetworkFirst,
         )
 
-        return result.books.mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
+        return result.editions.firstOrNull()?.book_id
+    }
+
+    override suspend fun fetchBooksByIds(
+        ids: List<Int>,
+        forceNetwork: Boolean,
+    ): List<Book> {
+        if (ids.isEmpty()) return emptyList()
+
+        val policy = if (forceNetwork) FetchPolicy.NetworkFirst else FetchPolicy.CacheFirst
+
+        return ids.chunked(BATCH_ID_LIMIT).flatMap { chunk ->
+            val result = apolloClient.safeQuery(
+                query = GetBooksByIdsQuery(ids = chunk),
+                fetchPolicy = policy,
+            )
+
+            result.books.mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
+        }
     }
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
@@ -160,15 +186,22 @@ class BooksRemoteDataSourceImpl(
         return result.editions.mapNotNull { it.editionDetailFragment()?.toBookEdition() }
     }
 
-    override suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition> {
+    override suspend fun fetchEditionsByIds(
+        ids: List<Int>,
+        forceNetwork: Boolean,
+    ): List<BookEdition> {
         if (ids.isEmpty()) return emptyList()
 
-        val result = apolloClient.safeQuery(
-            query = GetEditionsByIdsQuery(ids = ids),
-            fetchPolicy = FetchPolicy.CacheFirst,
-        )
+        val policy = if (forceNetwork) FetchPolicy.NetworkFirst else FetchPolicy.CacheFirst
 
-        return result.editions.mapNotNull { it.editionsByIdsDetailFragment()?.toBookEdition() }
+        return ids.chunked(BATCH_ID_LIMIT).flatMap { chunk ->
+            val result = apolloClient.safeQuery(
+                query = GetEditionsByIdsQuery(ids = chunk),
+                fetchPolicy = policy,
+            )
+
+            result.editions.mapNotNull { it.editionsByIdsDetailFragment()?.toBookEdition() }
+        }
     }
 
     override suspend fun markBookAsWantToRead(bookId: Int): Book {

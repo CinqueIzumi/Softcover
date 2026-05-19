@@ -124,6 +124,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePi
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
@@ -134,12 +135,14 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadli
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
@@ -416,6 +419,13 @@ class BookDetailScreen(
                     containerColor = containerColor,
                 ),
             )
+
+            if (state.isShareSheetVisible && state.book != null) {
+                ShareBookBottomSheet(
+                    book = state.book,
+                    onDismissRequest = { runAction(OnDismissShareSheetAction()) },
+                )
+            }
 
             val currentEditionForSheet = state.book?.currentEdition
             if (state.showEditEditionSheet && state.book != null && currentEditionForSheet != null) {
@@ -1136,7 +1146,7 @@ class BookDetailScreen(
 
         val book = state.book ?: return
 
-        if (book.status == BookStatus.None) return
+        val isOnShelf = book.status != BookStatus.None
 
         var menuOpen by remember { mutableStateOf(false) }
         val dismiss = { menuOpen = false }
@@ -1156,6 +1166,22 @@ class BookDetailScreen(
                 expanded = menuOpen,
                 onDismissRequest = dismiss,
             ) {
+                DropdownMenuItem(
+                    text = { Text(text = "Share") },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_share),
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = {
+                        dismiss()
+                        runAction(OnShareBookClickAction())
+                    },
+                )
+
+                if (isOnShelf.not()) return@DropdownMenu
+
                 if (isOnline) {
                     DropdownMenuItem(
                         text = { Text(text = "Change edition") },
@@ -1484,12 +1510,18 @@ class BookDetailScreen(
 
     @Composable
     private fun ReadInfoCallout(state: BookDetailUiState) {
-        val userBook = state.book?.userBook ?: return
+        val book = state.book ?: return
+        val userBook = book.userBook ?: return
 
         StatusCallout(
             eyebrow = "Finished",
             iconRes = R.drawable.ic_bookmark_check,
-            body = when (val readDate = userBook.getReadDateString(style = state.dateStyle)) {
+            body = when (
+                val readDate = userBook.getReadDateString(
+                    style = state.dateStyle,
+                    finishedAt = book.userBookRead?.finishedAt,
+                )
+            ) {
                 null -> "This book has been in your library since ${
                     userBook.getFallbackDateString(
                         style = state.dateStyle

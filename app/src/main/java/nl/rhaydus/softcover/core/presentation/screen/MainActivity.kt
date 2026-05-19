@@ -9,8 +9,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +22,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -76,6 +79,7 @@ class MainActivity() : ComponentActivity() {
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
             val themeConfig by viewModel.themeState.collectAsStateWithLifecycle()
+            val snackBarState by SnackBarManager.snackBarState.collectAsStateWithLifecycle()
 
             val updateLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.StartIntentSenderForResult(),
@@ -136,9 +140,18 @@ class MainActivity() : ComponentActivity() {
                         LocalAppUpdateState provides appUpdateState,
                         LocalStartAppUpdate provides onStartAppUpdate,
                     ) {
-                        key(state.authenticated) {
-                            Navigator(
-                                screen = if (state.authenticated) RootScreen else OnboardingScreen,
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            key(state.authenticated) {
+                                Navigator(
+                                    screen = if (state.authenticated) RootScreen else OnboardingScreen,
+                                )
+                            }
+
+                            SnackbarHost(
+                                hostState = snackBarState,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .navigationBarsPadding(),
                             )
                         }
                     }

@@ -1870,7 +1870,7 @@ class BookMapperTest {
             )
 
             // ----- Act -----
-            val result = listBookFull.toModel()
+            val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
             result.listId shouldBe 20
@@ -1897,7 +1897,7 @@ class BookMapperTest {
             )
 
             // ----- Act -----
-            val result = listBookFull.toModel()
+            val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
             result.book shouldBe bookFullEntity.toModel()
@@ -1916,7 +1916,7 @@ class BookMapperTest {
             val listBookFull = stubListBookFull(edition = editionWithAuthors)
 
             // ----- Act -----
-            val result = listBookFull.toModel()
+            val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
             result.edition?.owned shouldBe true
@@ -1934,7 +1934,7 @@ class BookMapperTest {
             val listBookFull = stubListBookFull(edition = editionWithAuthors)
 
             // ----- Act -----
-            val result = listBookFull.toModel()
+            val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
             result.edition?.owned shouldBe false
@@ -1947,7 +1947,7 @@ class BookMapperTest {
             val listBookFull = stubListBookFull(listBook = listBookEntity)
 
             // ----- Act -----
-            val result = listBookFull.toModel()
+            val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
             result.addedAt shouldBe "2024-07-20"
@@ -1960,7 +1960,7 @@ class BookMapperTest {
             val listBookFull = stubListBookFull(listBook = listBookEntity)
 
             // ----- Act -----
-            val result = listBookFull.toModel()
+            val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
             result.addedAt shouldBe null
@@ -1976,7 +1976,7 @@ class BookMapperTest {
             )
 
             // ----- Act -----
-            val result = listBookFull.toModel()
+            val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
             result.book shouldBe null
@@ -1993,11 +1993,194 @@ class BookMapperTest {
             )
 
             // ----- Act -----
-            val result = listBookFull.toModel()
+            val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
             result.edition shouldBe null
             result.listBookId shouldBe 43
+        }
+
+        @Test
+        fun `prefers userBook editionId over defaultEditionId when edition exists in book editions`() {
+            // ----- Arrange -----
+            val userBookEditionId = 55
+            val defaultEditionId = 99
+            val topLevelEditionId = 10
+
+            val userBookEditionEntity = stubBookEditionEntity(id = userBookEditionId, bookId = 1)
+            val userBookEditionView = stubBookEditionView(entity = userBookEditionEntity, isOwned = false)
+            val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
+
+            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
+            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
+
+            val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
+            val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
+
+            val bookEntity = stubBookEntity(id = 1, defaultEditionId = defaultEditionId)
+            val bookFullEntity = stubBookFullEntity(
+                book = bookEntity,
+                editions = listOf(userBookEditionWithAuthors),
+                userBookWithJournals = userBookWithJournals,
+            )
+
+            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookFull = stubListBookFull(
+                listBook = listBookEntity,
+                book = bookFullEntity,
+                edition = topLevelEditionWithAuthors,
+            )
+
+            // ----- Act -----
+            val result = listBookFull.toModel(isOwnedList = false)
+
+            // ----- Assert -----
+            result.edition?.id shouldBe userBookEditionId
+            result.editionId shouldBe userBookEditionId
+        }
+
+        @Test
+        fun `falls back to defaultEditionId when no userBook editionId but matching edition exists`() {
+            // ----- Arrange -----
+            val defaultEditionId = 77
+            val topLevelEditionId = 10
+
+            val defaultEditionEntity = stubBookEditionEntity(id = defaultEditionId, bookId = 1)
+            val defaultEditionView = stubBookEditionView(entity = defaultEditionEntity, isOwned = false)
+            val defaultEditionWithAuthors = stubBookEditionWithAuthors(editionView = defaultEditionView)
+
+            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
+            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
+
+            val bookEntity = stubBookEntity(id = 1, defaultEditionId = defaultEditionId)
+            val bookFullEntity = stubBookFullEntity(
+                book = bookEntity,
+                editions = listOf(defaultEditionWithAuthors),
+                userBookWithJournals = null,
+            )
+
+            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookFull = stubListBookFull(
+                listBook = listBookEntity,
+                book = bookFullEntity,
+                edition = topLevelEditionWithAuthors,
+            )
+
+            // ----- Act -----
+            val result = listBookFull.toModel(isOwnedList = false)
+
+            // ----- Assert -----
+            result.edition?.id shouldBe defaultEditionId
+            result.editionId shouldBe defaultEditionId
+        }
+
+        @Test
+        fun `falls back to top-level edition when preferred id has no matching entry in book editions`() {
+            // ----- Arrange -----
+            val topLevelEditionId = 10
+
+            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
+            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
+
+            // defaultEditionId 99 is not present in the editions list, triggering fallback
+            val bookEntity = stubBookEntity(id = 1, defaultEditionId = 99)
+            val bookFullEntity = stubBookFullEntity(
+                book = bookEntity,
+                editions = emptyList(),
+                userBookWithJournals = null,
+            )
+
+            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookFull = stubListBookFull(
+                listBook = listBookEntity,
+                book = bookFullEntity,
+                edition = topLevelEditionWithAuthors,
+            )
+
+            // ----- Act -----
+            val result = listBookFull.toModel(isOwnedList = false)
+
+            // ----- Assert -----
+            result.edition?.id shouldBe topLevelEditionId
+            result.editionId shouldBe topLevelEditionId
+        }
+
+        @Test
+        fun `uses list_books edition_id when isOwnedList is true even if userBook has a different edition`() {
+            // ----- Arrange -----
+            val topLevelEditionId = 10
+            val userBookEditionId = 55
+
+            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
+            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
+
+            val userBookEditionEntity = stubBookEditionEntity(id = userBookEditionId, bookId = 1)
+            val userBookEditionView = stubBookEditionView(entity = userBookEditionEntity, isOwned = false)
+            val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
+
+            val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
+            val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
+
+            val bookEntity = stubBookEntity(id = 1, defaultEditionId = userBookEditionId)
+            val bookFullEntity = stubBookFullEntity(
+                book = bookEntity,
+                editions = listOf(topLevelEditionWithAuthors, userBookEditionWithAuthors),
+                userBookWithJournals = userBookWithJournals,
+            )
+
+            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookFull = stubListBookFull(
+                listBook = listBookEntity,
+                book = bookFullEntity,
+                edition = topLevelEditionWithAuthors,
+            )
+
+            // ----- Act -----
+            val result = listBookFull.toModel(isOwnedList = true)
+
+            // ----- Assert -----
+            result.edition?.id shouldBe topLevelEditionId
+            result.editionId shouldBe topLevelEditionId
+        }
+
+        @Test
+        fun `uses list_books edition_id when isOwnedList is true even if defaultEditionId differs`() {
+            // ----- Arrange -----
+            val topLevelEditionId = 10
+            val defaultEditionId = 77
+
+            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
+            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
+
+            val defaultEditionEntity = stubBookEditionEntity(id = defaultEditionId, bookId = 1)
+            val defaultEditionView = stubBookEditionView(entity = defaultEditionEntity, isOwned = false)
+            val defaultEditionWithAuthors = stubBookEditionWithAuthors(editionView = defaultEditionView)
+
+            val bookEntity = stubBookEntity(id = 1, defaultEditionId = defaultEditionId)
+            val bookFullEntity = stubBookFullEntity(
+                book = bookEntity,
+                editions = listOf(topLevelEditionWithAuthors, defaultEditionWithAuthors),
+                userBookWithJournals = null,
+            )
+
+            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookFull = stubListBookFull(
+                listBook = listBookEntity,
+                book = bookFullEntity,
+                edition = topLevelEditionWithAuthors,
+            )
+
+            // ----- Act -----
+            val result = listBookFull.toModel(isOwnedList = true)
+
+            // ----- Assert -----
+            result.edition?.id shouldBe topLevelEditionId
+            result.editionId shouldBe topLevelEditionId
         }
     }
 
@@ -2139,6 +2322,50 @@ class BookMapperTest {
             // ----- Assert -----
             result.books.size shouldBe 1
             result.books[0].listBookId shouldBe 1
+        }
+
+        @Test
+        fun `preserves list_books edition_id for owned slug even when userBook edition differs`() {
+            // ----- Arrange -----
+            val topLevelEditionId = 10
+            val userBookEditionId = 55
+
+            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
+            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
+
+            val userBookEditionEntity = stubBookEditionEntity(id = userBookEditionId, bookId = 1)
+            val userBookEditionView = stubBookEditionView(entity = userBookEditionEntity, isOwned = false)
+            val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
+
+            val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
+            val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
+
+            val bookEntity = stubBookEntity(id = 1, defaultEditionId = userBookEditionId)
+            val bookFullEntity = stubBookFullEntity(
+                book = bookEntity,
+                editions = listOf(topLevelEditionWithAuthors, userBookEditionWithAuthors),
+                userBookWithJournals = userBookWithJournals,
+            )
+
+            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookFull = stubListBookFull(
+                listBook = listBookEntity,
+                book = bookFullEntity,
+                edition = topLevelEditionWithAuthors,
+            )
+
+            val bookListEntity = stubBookListEntity(slug = "owned")
+            val wrapper = stubBookListWithBooks(
+                bookList = bookListEntity,
+                listBooks = listOf(listBookFull),
+            )
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.books[0].editionId shouldBe topLevelEditionId
         }
     }
 
@@ -4024,9 +4251,9 @@ class BookMapperTest {
     inner class BookDetailFragmentToBook {
 
         @Test
-        fun `returns null when default_physical_edition is null`() {
+        fun `returns null when default_cover_edition is null`() {
             // ----- Arrange -----
-            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+            mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
             val fragment = mockk<BookDetailFragment> {
                 every { id } returns 1
@@ -4041,7 +4268,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
-                every { default_physical_edition } returns null
+                every { default_cover_edition } returns null
             }
 
             // ----- Act -----
@@ -4052,11 +4279,11 @@ class BookMapperTest {
         }
 
         @Test
-        fun `returns non-null Book when default_physical_edition is present`() {
+        fun `returns non-null Book when default_cover_edition is present`() {
             // ----- Arrange -----
-            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+            mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
-            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
                 every { id } returns 10
                 every { canonical_id } returns null
@@ -4087,11 +4314,11 @@ class BookMapperTest {
                 every { description } returns "A great book."
                 every { users_count } returns 500
                 every { ratings_count } returns 0
-                every { default_physical_edition } returns defaultEditionInner
+                every { default_cover_edition } returns defaultEditionInner
             }
 
             every {
-                with(BookDetailFragment.Default_physical_edition.Companion) {
+                with(BookDetailFragment.Default_cover_edition.Companion) {
                     defaultEditionInner.editionFragment()
                 }
             } returns editionFragment
@@ -4114,9 +4341,9 @@ class BookMapperTest {
         @Test
         fun `maps description as empty string when null`() {
             // ----- Arrange -----
-            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+            mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
-            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
                 every { id } returns 10
                 every { canonical_id } returns null
@@ -4147,11 +4374,11 @@ class BookMapperTest {
                 every { description } returns null
                 every { users_count } returns 0
                 every { ratings_count } returns 0
-                every { default_physical_edition } returns defaultEditionInner
+                every { default_cover_edition } returns defaultEditionInner
             }
 
             every {
-                with(BookDetailFragment.Default_physical_edition.Companion) {
+                with(BookDetailFragment.Default_cover_edition.Companion) {
                     defaultEditionInner.editionFragment()
                 }
             } returns editionFragment
@@ -4166,13 +4393,13 @@ class BookMapperTest {
         @Test
         fun `sets canonicalId when canonical id differs from book id`() {
             // ----- Arrange -----
-            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+            mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
             val canonical = mockk<BookDetailFragment.Canonical> {
                 every { id } returns 999
             }
 
-            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
                 every { id } returns 10
                 every { canonical_id } returns null
@@ -4203,11 +4430,11 @@ class BookMapperTest {
                 every { description } returns null
                 every { users_count } returns 0
                 every { ratings_count } returns 0
-                every { default_physical_edition } returns defaultEditionInner
+                every { default_cover_edition } returns defaultEditionInner
             }
 
             every {
-                with(BookDetailFragment.Default_physical_edition.Companion) {
+                with(BookDetailFragment.Default_cover_edition.Companion) {
                     defaultEditionInner.editionFragment()
                 }
             } returns editionFragment
@@ -4222,13 +4449,13 @@ class BookMapperTest {
         @Test
         fun `sets canonicalId to null when canonical id equals book id`() {
             // ----- Arrange -----
-            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+            mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
             val canonical = mockk<BookDetailFragment.Canonical> {
                 every { id } returns 1
             }
 
-            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
                 every { id } returns 10
                 every { canonical_id } returns null
@@ -4259,11 +4486,11 @@ class BookMapperTest {
                 every { description } returns null
                 every { users_count } returns 0
                 every { ratings_count } returns 0
-                every { default_physical_edition } returns defaultEditionInner
+                every { default_cover_edition } returns defaultEditionInner
             }
 
             every {
-                with(BookDetailFragment.Default_physical_edition.Companion) {
+                with(BookDetailFragment.Default_cover_edition.Companion) {
                     defaultEditionInner.editionFragment()
                 }
             } returns editionFragment
@@ -4281,9 +4508,9 @@ class BookMapperTest {
             // Canonicalized editions can have a book_id that points to a different book than the
             // parent list entry. The mapper must copy the parent's id so that Room's @Relation join
             // on book_editions.bookId = books.id keeps the edition attached to the correct book.
-            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+            mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
-            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
                 every { id } returns 10
                 every { canonical_id } returns null
@@ -4314,11 +4541,11 @@ class BookMapperTest {
                 every { description } returns null
                 every { users_count } returns 0
                 every { ratings_count } returns 0
-                every { default_physical_edition } returns defaultEditionInner
+                every { default_cover_edition } returns defaultEditionInner
             }
 
             every {
-                with(BookDetailFragment.Default_physical_edition.Companion) {
+                with(BookDetailFragment.Default_cover_edition.Companion) {
                     defaultEditionInner.editionFragment()
                 }
             } returns editionFragment
@@ -4334,9 +4561,9 @@ class BookMapperTest {
         @Test
         fun `maps ratings_count from BookDetailFragment to ratingsCount`() {
             // ----- Arrange -----
-            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+            mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
-            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
                 every { id } returns 10
                 every { canonical_id } returns null
@@ -4367,11 +4594,11 @@ class BookMapperTest {
                 every { description } returns null
                 every { users_count } returns 0
                 every { ratings_count } returns 312
-                every { default_physical_edition } returns defaultEditionInner
+                every { default_cover_edition } returns defaultEditionInner
             }
 
             every {
-                with(BookDetailFragment.Default_physical_edition.Companion) {
+                with(BookDetailFragment.Default_cover_edition.Companion) {
                     defaultEditionInner.editionFragment()
                 }
             } returns editionFragment
@@ -4466,9 +4693,9 @@ class BookMapperTest {
         private fun buildBookDetailFragment(
             bookSeriesEntry: BookDetailFragment.Book_series?,
         ): BookDetailFragment {
-            mockkObject(BookDetailFragment.Default_physical_edition.Companion)
+            mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
-            val defaultEditionInner = mockk<BookDetailFragment.Default_physical_edition>()
+            val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
 
             val editionFragment = mockk<EditionFragment> {
                 every { id } returns 10
@@ -4502,11 +4729,11 @@ class BookMapperTest {
                 every { description } returns null
                 every { users_count } returns 0
                 every { ratings_count } returns 0
-                every { default_physical_edition } returns defaultEditionInner
+                every { default_cover_edition } returns defaultEditionInner
             }
 
             every {
-                with(BookDetailFragment.Default_physical_edition.Companion) {
+                with(BookDetailFragment.Default_cover_edition.Companion) {
                     defaultEditionInner.editionFragment()
                 }
             } returns editionFragment

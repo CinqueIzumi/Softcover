@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.settings.data.model.toModel
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 
 class SettingsLocalDataSourceImpl(
@@ -32,6 +33,34 @@ class SettingsLocalDataSourceImpl(
     override suspend fun setLibraryGridLayout(layout: LibraryGridLayout) {
         appSettingsDataStore.store.updateData {
             it.copy(libraryGridLayout = layout)
+        }
+    }
+
+    override val librarySortModeByTab: Flow<Map<String, LibrarySortMode>> =
+        appSettingsDataStore.store.data
+            .map { it.librarySortModeByTab }
+            .distinctUntilChanged()
+
+    override suspend fun setLibrarySortModeForTab(
+        tabId: String,
+        mode: LibrarySortMode,
+    ) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(librarySortModeByTab = entity.librarySortModeByTab + (tabId to mode))
+        }
+    }
+
+    override val dismissedPlanTodayByBook: Flow<Map<Int, String>> =
+        appSettingsDataStore.store.data
+            .map { it.dismissedPlanTodayByBook }
+            .distinctUntilChanged()
+
+    override suspend fun setPlanTodayDismissed(
+        bookId: Int,
+        isoDate: String,
+    ) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(dismissedPlanTodayByBook = entity.dismissedPlanTodayByBook + (bookId to isoDate))
         }
     }
 
@@ -108,7 +137,18 @@ class SettingsLocalDataSourceImpl(
                 enabledStatusCodes = defaults.enabledStatusCodes,
                 enabledListIds = defaults.enabledListIds,
                 listDefaultsSeeded = defaults.listDefaultsSeeded,
+                libraryTabOrder = defaults.libraryTabOrder,
             )
+        }
+    }
+
+    override val libraryTabOrder: Flow<List<String>> = appSettingsDataStore.store.data
+        .map { it.libraryTabOrder }
+        .distinctUntilChanged()
+
+    override suspend fun setLibraryTabOrder(order: List<String>) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(libraryTabOrder = order)
         }
     }
 }

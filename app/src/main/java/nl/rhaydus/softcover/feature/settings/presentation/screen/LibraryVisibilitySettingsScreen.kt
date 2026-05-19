@@ -1,6 +1,11 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -23,27 +30,38 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnListToggleAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnReorderLibraryTabsAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnStatusToggleAction
+import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
@@ -96,27 +114,21 @@ class LibraryVisibilitySettingsScreen : Screen {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 EditorialSectionHeader(
-                    eyebrow = "Statuses",
+                    eyebrow = "Library tabs",
                     headline = "Shelves on your library",
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                StatusesGroup(
-                    state = state,
-                    runAction = runAction,
-                )
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                EditorialSectionHeader(
-                    eyebrow = "Lists",
-                    headline = "Custom collections",
+                Text(
+                    text = "Long-press a row to drag it into a new order. Toggle a row to hide or show that shelf.",
+                    style = MaterialTheme.editorialTypography.body,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                ListsGroup(
+                ReorderableTabsGroup(
                     state = state,
                     runAction = runAction,
                 )
@@ -127,77 +139,234 @@ class LibraryVisibilitySettingsScreen : Screen {
     }
 
     @Composable
-    private fun StatusesGroup(
+    private fun ReorderableTabsGroup(
         state: LibraryVisibilitySettingsUiState,
         runAction: (LibraryVisibilityAction) -> Unit,
     ) {
-        SettingsGroup {
-            AlwaysOnRow(
-                title = LibraryTab.Status.labelFor(UserBookStatus.CURRENTLY_READING),
-                subtitle = "Always visible",
-            )
+        val entries = state.orderedEntries
 
-            state.togglableStatuses.forEach { status ->
-                SettingsRowDivider()
-
-                ToggleRow(
-                    title = LibraryTab.Status.labelFor(status),
-                    checked = status.code in state.draftEnabledStatusCodes,
-                    onCheckedChange = { enabled ->
-                        runAction(
-                            OnStatusToggleAction(
-                                code = status.code,
-                                enabled = enabled,
-                            ),
-                        )
-                    },
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun ListsGroup(
-        state: LibraryVisibilitySettingsUiState,
-        runAction: (LibraryVisibilityAction) -> Unit,
-    ) {
-        if (state.availableLists.isEmpty()) {
-            EmptyListsCard()
+        if (entries.isEmpty()) {
+            EmptyEntriesCard()
 
             return
         }
 
+        val haptics = LocalHaptics.current
+
+        var workingOrder by remember(state.initialized) { mutableStateOf(entries) }
+
+        var draggingId by remember { mutableStateOf<String?>(null) }
+        var dragOffsetY by remember { mutableStateOf(0f) }
+        val itemHeightsPx = remember { mutableStateMapOf<String, Int>() }
+
+        LaunchedEffect(entries) {
+            if (draggingId == null) {
+                workingOrder = entries
+            }
+        }
+
+        LaunchedEffect(workingOrder) {
+            val liveIds = workingOrder.map { it.id }.toSet()
+
+            itemHeightsPx.keys.retainAll(liveIds)
+        }
+
+        val draggedFromIndex = draggingId?.let { id -> workingOrder.indexOfFirst { it.id == id } } ?: -1
+
+        val draggedItemHeightPx = (draggingId?.let { itemHeightsPx[it] } ?: 0).toFloat()
+
+        val hoverTargetIndex = if (draggingId != null && draggedFromIndex >= 0) {
+            targetIndexFor(
+                currentIdx = draggedFromIndex,
+                dragOffsetY = dragOffsetY,
+                order = workingOrder,
+                heightsPx = itemHeightsPx,
+            )
+        } else {
+            -1
+        }
+
         SettingsGroup {
-            state.availableLists.forEachIndexed { index, list ->
+            workingOrder.forEachIndexed { index, entry ->
                 if (index > 0) {
                     SettingsRowDivider()
                 }
 
-                ToggleRow(
-                    title = list.name,
-                    checked = list.id in state.draftEnabledListIds,
-                    onCheckedChange = { enabled ->
-                        runAction(
-                            OnListToggleAction(
-                                id = list.id,
-                                enabled = enabled,
-                            ),
-                        )
-                    },
+                val isDragging = entry.id == draggingId
+
+                val slotShiftTarget = when {
+                    isDragging -> 0f
+
+                    draggedFromIndex < 0 -> 0f
+
+                    draggedFromIndex < hoverTargetIndex &&
+                        index > draggedFromIndex &&
+                        index <= hoverTargetIndex -> -draggedItemHeightPx
+
+                    draggedFromIndex > hoverTargetIndex &&
+                        index >= hoverTargetIndex &&
+                        index < draggedFromIndex -> draggedItemHeightPx
+
+                    else -> 0f
+                }
+
+                val animatedSlotShift by animateFloatAsState(
+                    targetValue = slotShiftTarget,
+                    label = "library-tab-slot-shift",
                 )
+
+                val isDragInProgress = draggingId != null
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .zIndex(zIndex = if (isDragging) 1f else 0f)
+                        .graphicsLayer {
+                            translationY = when {
+                                isDragging -> dragOffsetY
+                                isDragInProgress -> animatedSlotShift
+                                else -> 0f
+                            }
+                            alpha = if (isDragging) 0.95f else 1f
+                        }
+                        .onSizeChanged { size -> itemHeightsPx[entry.id] = size.height },
+                ) {
+                    ReorderableRow(
+                        entry = entry,
+                        checked = entry.isEnabled(state = state),
+                        isDragging = isDragging,
+                        onCheckedChange = { enabled ->
+                            entry.dispatchToggle(
+                                enabled = enabled,
+                                runAction = runAction,
+                            )
+                        },
+                        dragHandleModifier = run {
+                            val draggableState = rememberDraggableState { delta ->
+                                dragOffsetY += delta
+                            }
+
+                            Modifier.draggable(
+                                state = draggableState,
+                                orientation = Orientation.Vertical,
+                                startDragImmediately = true,
+                                onDragStarted = {
+                                    draggingId = entry.id
+                                    dragOffsetY = 0f
+                                    haptics.lift()
+                                },
+                                onDragStopped = {
+                                    val currentIdx = workingOrder.indexOfFirst { it.id == entry.id }
+
+                                    if (currentIdx >= 0) {
+                                        val targetIdx = targetIndexFor(
+                                            currentIdx = currentIdx,
+                                            dragOffsetY = dragOffsetY,
+                                            order = workingOrder,
+                                            heightsPx = itemHeightsPx,
+                                        )
+
+                                        if (targetIdx != currentIdx) {
+                                            workingOrder = workingOrder.toMutableList().also { list ->
+                                                val moving = list.removeAt(currentIdx)
+                                                list.add(targetIdx, moving)
+                                            }
+
+                                            runAction(
+                                                OnReorderLibraryTabsAction(
+                                                    newOrderedIds = workingOrder.map { it.id },
+                                                ),
+                                            )
+                                        }
+                                    }
+
+                                    draggingId = null
+                                    dragOffsetY = 0f
+
+                                    haptics.drop()
+                                },
+                            )
+                        },
+                    )
+                }
             }
         }
     }
 
     @Composable
-    private fun EmptyListsCard() {
+    private fun ReorderableRow(
+        entry: LibraryTabEntry,
+        checked: Boolean,
+        isDragging: Boolean,
+        onCheckedChange: (Boolean) -> Unit,
+        dragHandleModifier: Modifier,
+    ) {
+        val isAlwaysOn = entry is LibraryTabEntry.Status && entry.isAlwaysOn
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 12.dp,
+                    vertical = 12.dp,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = dragHandleModifier
+                    .size(40.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_drag_handle),
+                    contentDescription = "Reorder ${entry.label}",
+                    tint = if (isDragging) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(weight = 1f)
+                    .padding(horizontal = 8.dp),
+            ) {
+                Text(
+                    text = entry.label,
+                    style = MaterialTheme.editorialTypography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+
+                if (isAlwaysOn) {
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = "Always visible",
+                        style = MaterialTheme.editorialTypography.eyebrowSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+
+            Switch(
+                checked = checked,
+                enabled = isAlwaysOn.not(),
+                onCheckedChange = onCheckedChange,
+            )
+        }
+    }
+
+    @Composable
+    private fun EmptyEntriesCard() {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
         ) {
             Text(
-                text = "You don't have any lists yet.",
+                text = "No shelves to configure yet.",
                 style = MaterialTheme.editorialTypography.body,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(
@@ -263,79 +432,76 @@ class LibraryVisibilitySettingsScreen : Screen {
             color = MaterialTheme.colorScheme.outlineVariant,
         )
     }
+}
 
-    @Composable
-    private fun ToggleRow(
-        title: String,
-        checked: Boolean,
-        onCheckedChange: (Boolean) -> Unit,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 12.dp,
-                ),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.editorialTypography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .weight(weight = 1f)
-                    .padding(end = 16.dp),
-            )
+private fun LibraryTabEntry.isEnabled(state: LibraryVisibilitySettingsUiState): Boolean = when (this) {
+    is LibraryTabEntry.Status -> isAlwaysOn || status.code in state.draftEnabledStatusCodes
+    is LibraryTabEntry.CustomList -> listId in state.draftEnabledListIds
+}
 
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-            )
+private fun LibraryTabEntry.dispatchToggle(
+    enabled: Boolean,
+    runAction: (LibraryVisibilityAction) -> Unit,
+) {
+    when (this) {
+        is LibraryTabEntry.Status -> if (isAlwaysOn.not()) {
+            runAction(OnStatusToggleAction(code = status.code, enabled = enabled))
         }
+
+        is LibraryTabEntry.CustomList -> runAction(
+            OnListToggleAction(id = listId, enabled = enabled),
+        )
     }
+}
 
-    @Composable
-    private fun AlwaysOnRow(
-        title: String,
-        subtitle: String,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 12.dp,
-                ),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(weight = 1f)
-                    .padding(end = 16.dp),
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.editorialTypography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+private fun targetIndexFor(
+    currentIdx: Int,
+    dragOffsetY: Float,
+    order: List<LibraryTabEntry>,
+    heightsPx: Map<String, Int>,
+): Int {
+    if (dragOffsetY == 0f) return currentIdx
 
-                Spacer(modifier = Modifier.height(2.dp))
+    var target = currentIdx
+    var consumed = 0f
 
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.editorialTypography.eyebrowSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+    if (dragOffsetY > 0f) {
+        var i = currentIdx + 1
+
+        while (i <= order.lastIndex) {
+            val nextHeight = heightsPx[order[i].id] ?: 0
+
+            if (nextHeight <= 0) break
+
+            if (dragOffsetY - consumed > nextHeight / 2f) {
+                target = i
+
+                consumed += nextHeight
+
+                i += 1
+            } else {
+                break
             }
+        }
+    } else {
+        var i = currentIdx - 1
 
-            Switch(
-                checked = true,
-                enabled = false,
-                onCheckedChange = {},
-            )
+        while (i >= 0) {
+            val prevHeight = heightsPx[order[i].id] ?: 0
+
+            if (prevHeight <= 0) break
+
+            if (-dragOffsetY - consumed > prevHeight / 2f) {
+                target = i
+
+                consumed += prevHeight
+
+                i -= 1
+            } else {
+                break
+            }
         }
     }
+
+    return target
 }

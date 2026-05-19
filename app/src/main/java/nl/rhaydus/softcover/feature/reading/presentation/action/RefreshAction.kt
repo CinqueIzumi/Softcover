@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -16,9 +18,13 @@ data object RefreshAction : ReadingAction {
             it.copy(isLoading = true)
         }
 
-        dependencies.refreshUserBooksUseCase().onFailure {
-            Timber.e("-=- Something went wrong refreshing currently reading books! $it")
-        }
+        dependencies
+            .refreshUserBooksUseCase(
+                scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
+            )
+            .onFailure {
+                Timber.e("-=- Something went wrong refreshing currently reading books! $it")
+            }
 
         scope.setState {
             it.copy(isLoading = false)

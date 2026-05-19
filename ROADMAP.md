@@ -73,7 +73,6 @@ The system has `commit` and `reject`. Two states is intentional, but a few exten
 - **B.1.2 Filter chips above the grid.** Inline chip row showing the active filters (genre, format, year, owned, rating range) with mutation animations. Tap a chip to remove.
 - **B.1.3 Smart shelves.** Auto-computed tabs alongside user statuses: "Owned & unread", "Started but stalled" (Currently Reading with no progress in 30d), "Finished this year", "Highest rated", "Quick wins" (<200pp), "Long hauls" (>500pp).
 - **B.1.4 Bulk select mode.** Long-press a cover → enter selection mode with a top-bar swap (count + actions). Bulk actions: move shelf, mark as read, add to list, remove. Pairs with `select` haptic on each toggle.
-- **B.1.5 Swipe row actions.** On list-layout rows, swipe right → "Mark as read" (primary), swipe left → "Remove" with confirm. Uses the existing shake-on-error treatment for failures.
 - **B.1.6 Drag-to-reorder Want-to-Read.** The Want-to-Read tab supports manual ordering — a user-defined priority queue. Reorder uses A.1.13 + A.2.4 haptics.
 - **B.1.7 Deadline urgency pinned section.** When any book on the active tab has a deadline within 14 days, render an "Up against the clock" editorial section at the top, separate from the grid.
 - **B.1.8 Year filter on Read.** A horizontal year chip row over the Read tab (2026 · 2025 · 2024 · …). Tapping a year filters; combines with smart shelves.

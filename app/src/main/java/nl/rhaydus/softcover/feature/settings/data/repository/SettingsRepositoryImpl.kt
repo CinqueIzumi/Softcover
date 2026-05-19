@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataS
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 
@@ -23,6 +24,32 @@ class SettingsRepositoryImpl(
 
     override suspend fun setLibraryGridLayout(layout: LibraryGridLayout) {
         settingsLocalDataSource.setLibraryGridLayout(layout = layout)
+    }
+
+    override val librarySortModeByTab: Flow<Map<String, LibrarySortMode>> =
+        settingsLocalDataSource.librarySortModeByTab
+
+    override suspend fun setLibrarySortModeForTab(
+        tabId: String,
+        mode: LibrarySortMode,
+    ) {
+        settingsLocalDataSource.setLibrarySortModeForTab(
+            tabId = tabId,
+            mode = mode,
+        )
+    }
+
+    override val dismissedPlanTodayByBook: Flow<Map<Int, String>> =
+        settingsLocalDataSource.dismissedPlanTodayByBook
+
+    override suspend fun setPlanTodayDismissed(
+        bookId: Int,
+        isoDate: String,
+    ) {
+        settingsLocalDataSource.setPlanTodayDismissed(
+            bookId = bookId,
+            isoDate = isoDate,
+        )
     }
 
     override suspend fun updateApiKey(key: String) {
@@ -73,5 +100,11 @@ class SettingsRepositoryImpl(
 
     override suspend fun setEnabledListIds(ids: Set<Int>) {
         settingsLocalDataSource.setEnabledListIds(ids = ids)
+    }
+
+    override val libraryTabOrder: Flow<List<String>> = settingsLocalDataSource.libraryTabOrder
+
+    override suspend fun setLibraryTabOrder(order: List<String>) {
+        settingsLocalDataSource.setLibraryTabOrder(order = order)
     }
 }

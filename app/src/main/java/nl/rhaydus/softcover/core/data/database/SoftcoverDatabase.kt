@@ -26,6 +26,14 @@ import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
 import nl.rhaydus.softcover.feature.explore.data.dao.DismissedContinueSeriesDao
 import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesBookEntity
 import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesEntity
+import nl.rhaydus.softcover.feature.personal.data.dao.HighlightDao
+import nl.rhaydus.softcover.feature.personal.data.dao.PersonalReviewDao
+import nl.rhaydus.softcover.feature.personal.data.dao.ReadingLogDao
+import nl.rhaydus.softcover.feature.personal.data.dao.ReadingSessionDao
+import nl.rhaydus.softcover.feature.personal.data.model.HighlightEntity
+import nl.rhaydus.softcover.feature.personal.data.model.PersonalReviewEntity
+import nl.rhaydus.softcover.feature.personal.data.model.ReadingLogEntryEntity
+import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
 
 @Database(
     entities = [
@@ -44,11 +52,15 @@ import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesEn
         PendingProgressUpdateEntity::class,
         DismissedContinueSeriesBookEntity::class,
         DismissedContinueSeriesEntity::class,
+        PersonalReviewEntity::class,
+        HighlightEntity::class,
+        ReadingSessionEntity::class,
+        ReadingLogEntryEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 24,
+    version = 25,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -58,6 +70,14 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun pendingProgressUpdateDao(): PendingProgressUpdateDao
 
     abstract fun dismissedContinueSeriesDao(): DismissedContinueSeriesDao
+
+    abstract fun personalReviewDao(): PersonalReviewDao
+
+    abstract fun highlightDao(): HighlightDao
+
+    abstract fun readingSessionDao(): ReadingSessionDao
+
+    abstract fun readingLogDao(): ReadingLogDao
 
     companion object {
         fun buildDatabase(context: Context): SoftcoverDatabase {
@@ -88,6 +108,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_21_22)
                 .addMigrations(MIGRATION_22_23)
                 .addMigrations(MIGRATION_23_24)
+                .addMigrations(MIGRATION_24_25)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -745,6 +766,67 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             FROM book_editions edition
                     """.trimIndent()
                 )
+            }
+        }
+
+        private val MIGRATION_24_25 = object : Migration(24, 25) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS personal_reviews (
+                            bookId INTEGER NOT NULL PRIMARY KEY,
+                            body TEXT NOT NULL,
+                            hasSpoilers INTEGER NOT NULL,
+                            isDraft INTEGER NOT NULL,
+                            updatedAt TEXT NOT NULL
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_highlights (
+                            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            bookId INTEGER NOT NULL,
+                            quote TEXT NOT NULL,
+                            page INTEGER,
+                            note TEXT,
+                            createdAt TEXT NOT NULL
+                        )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_book_highlights_bookId ON book_highlights(bookId)")
+
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS reading_sessions (
+                            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            bookId INTEGER NOT NULL,
+                            startedAt TEXT NOT NULL,
+                            endedAt TEXT,
+                            startPage INTEGER,
+                            endPage INTEGER,
+                            startSeconds INTEGER,
+                            endSeconds INTEGER
+                        )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_reading_sessions_bookId ON reading_sessions(bookId)")
+
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS reading_log_entries (
+                            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            bookId INTEGER NOT NULL,
+                            startedAt TEXT,
+                            finishedAt TEXT,
+                            rating REAL,
+                            note TEXT,
+                            createdAt TEXT NOT NULL
+                        )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_reading_log_entries_bookId ON reading_log_entries(bookId)")
             }
         }
 

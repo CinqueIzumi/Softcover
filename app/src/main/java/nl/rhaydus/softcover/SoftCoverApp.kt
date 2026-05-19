@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.feature.books.di.booksModule
 import nl.rhaydus.softcover.feature.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.feature.library.di.libraryModule
 import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
+import nl.rhaydus.softcover.feature.personal.di.personalModule
 import nl.rhaydus.softcover.feature.profile.di.profileModule
 import nl.rhaydus.softcover.feature.explore.di.exploreModule
 import org.koin.android.ext.koin.androidContext
@@ -63,6 +64,7 @@ class SoftCoverApp : Application() {
                 deadlinesModule,
                 connectivityModule,
                 notificationModule,
+                personalModule,
             )
         }
 

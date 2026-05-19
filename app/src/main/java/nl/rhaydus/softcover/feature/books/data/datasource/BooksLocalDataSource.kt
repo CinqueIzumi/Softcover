@@ -19,6 +19,8 @@ interface BooksLocalDataSource {
 
     suspend fun getAllUserBookIds(): List<Int>
 
+    suspend fun getUserBookIdsByStatus(status: UserBookStatus): List<Int>
+
     suspend fun getExistingBookIds(ids: List<Int>): List<Int>
 
     suspend fun getExistingEditionIds(ids: List<Int>): List<Int>
@@ -60,6 +62,8 @@ interface BooksLocalDataSource {
     suspend fun deleteOrphanBooks()
 
     suspend fun getBookById(id: Int): Book?
+
+    suspend fun redirectBookId(oldId: Int, newId: Int)
 }
 
 class BooksLocalDataSourceImpl(
@@ -80,6 +84,10 @@ class BooksLocalDataSourceImpl(
 
     override suspend fun getAllUserBookIds(): List<Int> {
         return dao.getAllUserBookIds()
+    }
+
+    override suspend fun getUserBookIdsByStatus(status: UserBookStatus): List<Int> {
+        return dao.getUserBookIdsByStatus(statusCode = status.code)
     }
 
     override suspend fun getExistingBookIds(ids: List<Int>): List<Int> {
@@ -175,7 +183,7 @@ class BooksLocalDataSourceImpl(
     }
 
     override suspend fun findOwnedListBookByEditionId(editionId: Int): ListBook? {
-        return dao.getOwnedListBookByEditionId(editionId = editionId)?.toModel()
+        return dao.getOwnedListBookByEditionId(editionId = editionId)?.toModel(isOwnedList = true)
     }
 
     override suspend fun getOwnedListId(): Int? {
@@ -192,5 +200,9 @@ class BooksLocalDataSourceImpl(
 
     override suspend fun deleteOrphanBooks() {
         dao.deleteOrphanBooks()
+    }
+
+    override suspend fun redirectBookId(oldId: Int, newId: Int) {
+        dao.redirectBookId(oldId = oldId, newId = newId)
     }
 }

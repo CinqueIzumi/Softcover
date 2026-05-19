@@ -22,9 +22,15 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.DismissPlanTodayUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortModesAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortModeUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.flows.DateStyleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilityInitializer
@@ -136,6 +142,14 @@ val settingsModule = module {
         SetLibraryGridLayoutUseCase(settingsRepository = get())
     }
 
+    factory { GetLibrarySortModesAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetLibrarySortModeUseCase(settingsRepository = get()) }
+
+    factory { ObservePlanTodayDismissalsUseCase(settingsRepository = get()) }
+
+    factory { DismissPlanTodayUseCase(settingsRepository = get()) }
+
     single<GetThemeConfigurationUseCase> {
         GetThemeConfigurationUseCase(settingsRepository = get())
     }
@@ -148,6 +162,10 @@ val settingsModule = module {
 
     factory { SetEnabledListIdsUseCase(settingsRepository = get()) }
 
+    factory { GetLibraryTabOrderAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetLibraryTabOrderUseCase(settingsRepository = get()) }
+
     factory { PersistedLibraryVisibilityCollector() } bind LibraryVisibilityInitializer::class
 
     factory { UserListsCollector() } bind LibraryVisibilityInitializer::class
@@ -156,8 +174,10 @@ val settingsModule = module {
         LibraryVisibilitySettingsScreenModel(
             getEnabledStatusCodesAsFlowUseCase = get(),
             getEnabledListIdsAsFlowUseCase = get(),
+            getLibraryTabOrderAsFlowUseCase = get(),
             setEnabledStatusCodesUseCase = get(),
             setEnabledListIdsUseCase = get(),
+            setLibraryTabOrderUseCase = get(),
             getAllUserListsUseCase = get(),
             refreshUserBooksUseCase = get(),
             applicationScope = get(),

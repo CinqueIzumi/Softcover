@@ -19,25 +19,33 @@ Dependencies are noted only where they cross a release boundary; same-release de
 The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; the rest of the release gives users visible Library/Reading polish so the version still feels like a real drop.
 
 > **Release notes (Google Play):**
-> Library tabs now sort by date, title, author, rating, progress, deadline or page count — and remember your choice per tab. The Read tab gains a year filter. Swipe a list-layout row to mark a book read or remove it. The Reading screen suggests how many pages to read today to stay on pace, and adapts its empty state to surface your top Want-to-Read picks. Plus quiet groundwork for personal ratings, reviews and reading sessions — coming soon.
+> Currently Reading now lands instantly on launch — the rest of your library catches up in the background. Per-tab sorting (date, title, author, rating, progress, deadline, page count) with a year filter on Read. Reorder tabs from Settings or by long-press. Reading suggests today's pages and surfaces Want-to-Read picks when you're idle. Share any book as an editorial card. List covers prefer the edition you've added. Plus pull-to-refresh on Explore, IME-aware bottom sheets, and bug fixes.
 
 - **Step 0.3** — Personal-data layer (M) — schema + repos for ratings, reviews, highlights, sessions, reading log. No UI.
 - **Step 2.1** — Sort within Library tabs (M)
 - **Step 2.4** — Per-tab stats subtitle + year filter on Read (S)
-- **Step 2.6** — Swipe row actions on list layout (S)
+- **Step 2.7b** — Reorder library tabs/shelves (S) — drag-to-reorder list in Settings → Library is the canonical entry; long-press on a tab in the Library strip is a shortcut into the same reorder mode. Order is persisted per user.
 - **Step 2.8** — "Plan today" nudge on Reading (S)
 - **Step 2.10** — Adaptive empty Reading state (S)
+- **Step 4.8 (image-only first cut)** — Share book as generated image (S) — overflow "Share" on book detail renders a `ShareContent.Book` via `ShareCard`, captures it as a PNG, and hands the result to an `ACTION_SEND` chooser. Link and deep-link modes are deferred to the full Step 4.8 in 2.9.0.
+- **Improvement** — Two-phase startup + per-tab pull-to-refresh (S) — `BooksRepository.refreshUserBooks` is now dispatched by a `RefreshScope` sealed type (`All` / `ByStatus` / `ByList`) with per-scope in-flight coalescing on `ApplicationScope`. `initializeBooks` awaits a currently-reading refresh, then launches the full library + lists refresh on the application scope, so the home screen lands ahead of the long tail of Want-to-Read / Read entries. Pull-to-refresh now scopes per surface: Reading refreshes only currently-reading; Library refreshes only the active tab's status or list. Visibility toggles are now display-only — the library always fetches all four statuses regardless of which tabs are shown (the old fetch-time gating via `enabledStatusCodes` / `alwaysCachedCodes` is gone).
+- **Fix** — Prefer the user's library edition for list-book covers (S) — list rows now resolve their cover from the user's own userBook edition first, then the book's `default_cover_edition`, then the raw `list_books.edition_id`. The owned list still preserves the original edition. All user lists are now cached locally (not just enabled tabs) so the resolver sees the user's edition across every list.
+- **Fix** — Fall back to the book's default cover for list editions with no cover URL (XS) — `BookListsCollector` now substitutes the parent book's `coverUrl` into editions whose own `url` and `localImagePath` are both null, so owned-list (and any custom-list) cells render the book cover instead of an empty tile.
+- **Fix** — Refresh list editions and book metadata on user-books refresh (S) — list-only books had their edition rows (covers) and book rows (descriptions) cached only once on first hydration; the user-books refresh path now re-fetches all referenced book + edition IDs with a network-forced fetch policy and batched id chunking, so manual refresh actually updates them.
+- **Fix** — Make bottom sheets scrollable and IME-aware (XS) — `UpdateProgressBottomSheet`, `ShareBookBottomSheet`, the edition selector, and the continue-series dismiss sheet now lift their content above the keyboard and scroll when needed, so the primary action (e.g. "Update progress") stays reachable without first dismissing the IME.
+- **Fix** — Global "Something went wrong" snackbar on Apollo failures (S) — Apollo network errors, GraphQL errors and empty-data responses now surface a single transient snackbar across every screen (hosted once at the root of `MainActivity`, not only inside `BottomBarScreen`/`OnboardingScreen`), and `SnackBarManager` drops new toasts while one is already on screen so errors no longer queue up.
 
 ---
 
 ## 2.3.0 — Library filtering + book-detail metadata
 
 > **Release notes (Google Play):**
-> Filter your library by genre, format, year, ownership or rating — active chips show what's narrowing the view. Smart shelves surface "Owned & unread", "Started but stalled", "Quick wins" and more alongside your normal tabs. Long-press a cover to enter bulk-select mode and move books in batches. Reading rows briefly show your progress since last open. Book detail now lists publisher, imprint and ISBN, with quick links out to Bookshop.org, Amazon, library.org and author sites.
+> Filter your library by genre, format, year, ownership or rating — active chips show what's narrowing the view. Smart shelves surface "Owned & unread", "Started but stalled", "Quick wins" and more alongside your normal tabs. Drag any book to reorder it within any list — Want-to-Read, Currently Reading, Read, or any custom list. Long-press a cover to enter bulk-select mode and move books in batches. Reading rows briefly show your progress since last open. Book detail now lists publisher, imprint and ISBN, with quick links out to Bookshop.org, Amazon, library.org and author sites.
 
 - **Step 2.2** — Library filter chips (M)
 - **Step 2.3** — Smart shelves as virtual tabs (M)
 - **Step 2.5** — Bulk select mode (M)
+- **Step 2.7** — Drag-to-reorder books within any library list (M) — long-press + drag on a row in any tab (Want-to-Read, Currently Reading, Read, custom lists). Persisted as a manual sort mode per tab that coexists with Step 2.1's sort options.
 - **Step 2.9** — "Since last read" delta on Reading rows (S)
 - **Step 4.4** — Publisher / imprint / ISBN inline (S)
 - **Step 4.5** — External links strip (S)
@@ -49,13 +57,12 @@ The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; th
 The first release where the corpus from 0.3 surfaces to the user. Pair big personal-data steps with smaller drag/reorder polish.
 
 > **Release notes (Google Play):**
-> Your reading becomes personal. Rate any book on its detail page and draft your own review. Start a reading session straight from the Reading screen — the timer captures duration and page deltas, and a 21-day streak strip sits above your greeting. Drag to reorder your Want-to-Read and Currently Reading lists. Book detail surfaces literary awards and accolades when relevant.
+> Your reading becomes personal. Rate any book on its detail page and draft your own review. Start a reading session straight from the Reading screen — the timer captures duration and page deltas, and a 21-day streak strip sits above your greeting. Book detail surfaces literary awards and accolades when relevant.
 
 - **Step 3.1** — Personal rating control on book detail (S) — *deps: 0.3*
 - **Step 3.2** — Personal review drafting (M) — *deps: 0.3*
 - **Step 3.5** — Reading session timer (M) — *deps: 0.3*
 - **Step 3.8** — Streak strip on Reading screen header (S) — *deps: 3.5 (same release, ship in order)*
-- **Step 2.7** — Drag-to-reorder Want-to-Read + Currently Reading (M)
 - **Step 4.2** — Awards & accolades (S)
 
 ---
@@ -132,7 +139,7 @@ Explore gets richer. Each step here is fundamentally a new section on an existin
 - **Step 7.5** — Reading seasons (S)
 - **Step 7.6** — Author top-list + format split + records (S)
 - **Step 6.8** — ISBN/barcode scan (M)
-- **Step 4.8** — Share book sheet (S)
+- **Step 4.8 (remaining modes)** — Share book sheet: link + deep-link modes (S) — *image mode shipped in 2.2.0; this release adds the three-mode sheet on top.*
 
 ---
 

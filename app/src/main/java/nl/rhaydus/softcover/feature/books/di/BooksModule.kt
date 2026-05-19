@@ -16,7 +16,6 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUser
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
@@ -41,6 +40,7 @@ val booksModule = module {
             networkAvailability = get(),
             offlineProgressQueue = get(),
             pendingProgressDrainer = get(),
+            applicationScope = get(),
         )
     }
 
@@ -53,13 +53,6 @@ val booksModule = module {
 
     single<BookDao> {
         get<SoftcoverDatabase>().bookDao()
-    }
-
-    factory {
-        InitializeUserBooksUseCase(
-            booksRepository = get(),
-            getUserIdUseCase = get()
-        )
     }
 
     factory {

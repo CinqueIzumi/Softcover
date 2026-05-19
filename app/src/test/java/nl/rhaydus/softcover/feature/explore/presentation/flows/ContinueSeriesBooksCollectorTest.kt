@@ -57,6 +57,10 @@ class ContinueSeriesBooksCollectorTest {
                 getContinueSeriesBooksUseCase()
             } returns flowOf(listOf(book))
 
+            every {
+                dependencies.getAllUserBooksUseCase()
+            } returns flowOf(emptyList())
+
             val collector = ContinueSeriesBooksCollector()
 
             // ----- Act -----
@@ -73,6 +77,10 @@ class ContinueSeriesBooksCollectorTest {
             every {
                 getContinueSeriesBooksUseCase()
             } returns flow { throw RuntimeException("use case error") }
+
+            every {
+                dependencies.getAllUserBooksUseCase()
+            } returns flowOf(emptyList())
 
             val collector = ContinueSeriesBooksCollector()
 

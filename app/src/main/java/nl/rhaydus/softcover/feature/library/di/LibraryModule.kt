@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.feature.library.presentation.flows.BooksByStatusColl
 import nl.rhaydus.softcover.feature.library.presentation.flows.DateStyleCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
+import nl.rhaydus.softcover.feature.library.presentation.flows.SortModeCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.VisibleTabsCollector
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import org.koin.dsl.bind
@@ -22,6 +23,8 @@ val libraryModule = module {
     factory { VisibleTabsCollector() } bind LibraryInitializer::class
 
     factory { GridLayoutCollector() } bind LibraryInitializer::class
+
+    factory { SortModeCollector() } bind LibraryInitializer::class
 
     factory { BookDeadlinesCollector() } bind LibraryInitializer::class
 
@@ -40,10 +43,13 @@ val libraryModule = module {
             getAllUserListsUseCase = get(),
             getLibraryGridLayoutAsFlowUseCase = get(),
             setLibraryGridLayoutUseCase = get(),
+            getLibrarySortModesAsFlowUseCase = get(),
+            setLibrarySortModeUseCase = get(),
             observeAllBookDeadlinesUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
             getEnabledStatusCodesAsFlowUseCase = get(),
             getEnabledListIdsAsFlowUseCase = get(),
+            getLibraryTabOrderAsFlowUseCase = get(),
         )
     }
 }

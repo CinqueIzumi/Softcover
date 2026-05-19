@@ -29,7 +29,13 @@ data class UserBook(
         )
     }
 
-    fun getReadDateString(style: DateStyle): String? {
+    fun getReadDateString(style: DateStyle, finishedAt: String? = null): String? {
+        finishedAt?.let {
+            runCatching { LocalDate.parse(it).format(style.formatter) }
+                .getOrNull()
+                ?.let { formatted -> return formatted }
+        }
+
         return getUpdatedDateForEventType(
             type = JournalEventType.StatusFinished,
             style = style,

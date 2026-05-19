@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.apollographql.apollo.ApolloClient
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import com.apollographql.apollo.cache.normalized.FetchPolicy
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -112,7 +113,10 @@ class SearchRemoteDataSourceImplTest {
             val booksQueryData = mockk<GetBooksByIdsQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = idsList))
+                apolloClient.safeQuery(
+                    query = GetBooksByIdsQuery(ids = idsList),
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {
@@ -172,7 +176,10 @@ class SearchRemoteDataSourceImplTest {
             val booksQueryData = mockk<GetBooksByIdsQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = matchingIds))
+                apolloClient.safeQuery(
+                    query = GetBooksByIdsQuery(ids = matchingIds),
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {
@@ -218,7 +225,10 @@ class SearchRemoteDataSourceImplTest {
             val booksQueryData = mockk<GetBooksByIdsQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = nonNullIds))
+                apolloClient.safeQuery(
+                    query = GetBooksByIdsQuery(ids = nonNullIds),
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {
@@ -264,7 +274,10 @@ class SearchRemoteDataSourceImplTest {
             val booksQueryData = mockk<GetBooksByIdsQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = GetBooksByIdsQuery(ids = matchingIds))
+                apolloClient.safeQuery(
+                    query = GetBooksByIdsQuery(ids = matchingIds),
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {

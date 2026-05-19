@@ -11,8 +11,16 @@ import com.apollographql.apollo.exception.ApolloNetworkException
 import com.apollographql.apollo.exception.CacheMissException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+
+private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
+
+private fun notifyGenericError() {
+    SnackBarManager.showSnackbar(title = GENERIC_ERROR_MESSAGE)
+}
 
 private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
     response.exception?.let { exception ->
@@ -20,8 +28,10 @@ private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
             throw OfflineException()
         }
 
+        notifyGenericError()
+
         throw RuntimeException(
-            "Apollo network error: ${exception.message}",
+            "Apollo error: ${exception.message}",
             exception,
         )
     }
@@ -39,10 +49,16 @@ private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
             }
         } ?: ""
 
+        notifyGenericError()
+
         throw RuntimeException("Apollo GraphQL error(s): \n$message")
     }
 
-    return response.data ?: throw RuntimeException("Apollo response had no data and no errors")
+    return response.data ?: run {
+        notifyGenericError()
+
+        throw RuntimeException("Apollo response had no data and no errors")
+    }
 }
 
 private suspend fun <T : Operation.Data> executeCall(
@@ -63,7 +79,16 @@ suspend fun <T : Query.Data> ApolloClient.safeQuery(
     query: Query<T>,
     fetchPolicy: FetchPolicy = FetchPolicy.NetworkOnly,
 ): T = executeCall(requireNetwork = fetchPolicy == FetchPolicy.NetworkOnly) {
-    this.query(query).fetchPolicy(fetchPolicy).execute()
+    // Apollo Kotlin v4's CacheFirst/NetworkFirst interceptors emit TWO responses
+    // on the failure path (the failed-stage response, then the fallback). Calling
+    // .execute() surfaces the first emission, so a cache miss reaches us as a
+    // CacheMissException even though the network leg would have succeeded.
+    // Consume the flow and pick the last data-bearing response; fall back to the
+    // last emission so genuine errors (offline, GraphQL errors) still propagate.
+    val responses = this.query(query).fetchPolicy(fetchPolicy).toFlow().toList()
+
+    responses.lastOrNull { it.data != null && it.errors.isNullOrEmpty() }
+        ?: responses.last()
 }
 
 fun <T : Query.Data> ApolloClient.safeQueryFlow(
@@ -94,6 +119,8 @@ fun <T : Query.Data> ApolloClient.safeQueryFlow(
         if (failure is ApolloNetworkException && NetworkAvailability.isOnline().not()) {
             throw OfflineException()
         }
+
+        notifyGenericError()
 
         throw failure ?: RuntimeException("Apollo flow completed with no data")
     }
