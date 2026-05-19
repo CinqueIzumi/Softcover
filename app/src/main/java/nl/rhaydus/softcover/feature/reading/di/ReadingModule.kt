@@ -20,7 +20,6 @@ val readingModule = module {
             markBookAsReadUseCase = get(),
             refreshUserBooksUseCase = get(),
             updateBookProgress = get(),
-            initializeUserBooksUseCase = get(),
             observeAllBookDeadlinesUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
             observePlanTodayDismissalsUseCase = get(),

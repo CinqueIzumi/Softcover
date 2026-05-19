@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 
 data class ReadingScreenUiState(
-    val books: List<Book> = emptyList(),
-    val isLoading: Boolean = true,
+    val books: List<Book>? = null,
+    val isLoading: Boolean = false,
     val bookToUpdate: Book? = null,
     val progressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val showProgressSheet: Boolean = false,

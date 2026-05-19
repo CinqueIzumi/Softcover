@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
@@ -22,7 +21,6 @@ data class ReadingScreenDependencies(
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     val updateBookProgress: UpdateBookProgress,
-    val initializeUserBooksUseCase: InitializeUserBooksUseCase,
     val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,

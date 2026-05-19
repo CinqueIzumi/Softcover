@@ -8,8 +8,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.state.SplashState
-import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
+import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
@@ -18,7 +21,7 @@ import timber.log.Timber
 
 class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
-    private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
+    private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
 ) : ViewModel() {
@@ -60,8 +63,24 @@ class MainActivityViewModel(
             return
         }
 
+        viewModelScope.launch {
+            refreshUserBooksUseCase(
+                scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
+            ).onFailure { error ->
+                Timber.e("-=- $error")
+                SnackBarManager.showSnackbar(title = "Something went wrong")
+            }
+
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    authenticated = true,
+                )
+            }
+        }
+
         MainScope().launch {
-            initializeUserBooksUseCase().onFailure {
+            refreshUserBooksUseCase(scope = RefreshScope.All).onFailure {
                 Timber.e("-=- $it")
             }
         }
@@ -70,13 +89,6 @@ class MainActivityViewModel(
             refreshUserProfileDataUseCase().onFailure {
                 Timber.e("-=- $it")
             }
-        }
-
-        _state.update {
-            it.copy(
-                isLoading = false,
-                authenticated = true,
-            )
         }
     }
 }

@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.InitializeUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
@@ -27,7 +26,6 @@ class ReadingScreenScreenModel(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
     private val updateBookProgress: UpdateBookProgress,
-    private val initializeUserBooksUseCase: InitializeUserBooksUseCase,
     private val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
@@ -49,7 +47,6 @@ class ReadingScreenScreenModel(
         markBookAsReadUseCase = markBookAsReadUseCase,
         refreshUserBooksUseCase = refreshUserBooksUseCase,
         updateBookProgress = updateBookProgress,
-        initializeUserBooksUseCase = initializeUserBooksUseCase,
         observeAllBookDeadlinesUseCase = observeAllBookDeadlinesUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         observePlanTodayDismissalsUseCase = observePlanTodayDismissalsUseCase,

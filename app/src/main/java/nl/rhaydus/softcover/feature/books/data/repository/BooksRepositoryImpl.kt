@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -52,42 +51,11 @@ class BooksRepositoryImpl(
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
     override val allUserLists: Flow<List<BookList>> = booksLocalDataSource.allUserLists
 
-    @Volatile
-    private var currentlyReadingInitializedThisSession: Boolean = false
-
-    @Volatile
-    private var libraryInitializedThisSession: Boolean = false
-
     private val inflightMutex = Mutex()
     private val inflightRefreshes = mutableMapOf<RefreshScope, Deferred<Unit>>()
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return booksLocalDataSource.getBooksFlowByStatus(status = status)
-    }
-
-    override suspend fun initializeBooks(userId: Int) {
-        if (currentlyReadingInitializedThisSession.not()) {
-            refreshUserBooks(
-                userId = userId,
-                scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
-            )
-
-            currentlyReadingInitializedThisSession = true
-        }
-
-        if (libraryInitializedThisSession.not()) {
-            libraryInitializedThisSession = true
-
-            applicationScope.scope.launch {
-                runCatching {
-                    refreshUserBooks(userId = userId, scope = RefreshScope.All)
-                }.onFailure { error ->
-                    if (error is CancellationException) throw error
-
-                    Timber.e("-=- Background library refresh failed: $error")
-                }
-            }
-        }
     }
 
     override suspend fun refreshUserBooks(
@@ -276,9 +244,6 @@ class BooksRepositoryImpl(
 
     override suspend fun removeAllBooks() {
         booksLocalDataSource.removeAllBooks()
-
-        currentlyReadingInitializedThisSession = false
-        libraryInitializedThisSession = false
     }
 
     override suspend fun fetchBookById(id: Int): Book {

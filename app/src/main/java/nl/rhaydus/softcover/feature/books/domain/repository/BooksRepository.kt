@@ -15,8 +15,6 @@ interface BooksRepository {
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
-    suspend fun initializeBooks(userId: Int)
-
     suspend fun refreshUserBooks(
         userId: Int,
         scope: RefreshScope = RefreshScope.All,
