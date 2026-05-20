@@ -147,6 +147,7 @@ import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab as LibraryContentTab
 
 object LibraryScreen : Screen {
@@ -250,6 +251,7 @@ object LibraryScreen : Screen {
         val isReadTab = currentTab is LibraryContentTab.Status &&
                 currentTab.status == UserBookStatus.READ
 
+        // Books are pre-sorted by the DAO (SQL ORDER BY), so this is just a filter pass.
         val currentTabBooks: List<Book>? = currentTab?.let { tab ->
             when (tab) {
                 is LibraryContentTab.CustomList -> null
@@ -804,6 +806,7 @@ object LibraryScreen : Screen {
     ) {
         val currentTabId = tabId ?: return
         val currentMode = state.sortModeFor(tabId = currentTabId)
+        val currentDirection = state.sortDirectionFor(tabId = currentTabId)
 
         val supportedModes = remember(currentTabId) {
             val isCustomList = currentTabId.startsWith("list-")
@@ -813,6 +816,7 @@ object LibraryScreen : Screen {
                     LibrarySortMode.TITLE,
                     LibrarySortMode.AUTHOR,
                     LibrarySortMode.PAGE_COUNT,
+                    LibrarySortMode.RELEASE_DATE,
                 )
             } else {
                 LibrarySortMode.entries
@@ -838,14 +842,32 @@ object LibraryScreen : Screen {
                 },
             ) {
                 supportedModes.forEach { mode ->
+                    val isActive = mode == currentMode
+
                     DropdownMenuItem(
                         text = {
                             Text(
                                 text = mode.label,
                                 style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = if (mode == currentMode) FontWeight.SemiBold else FontWeight.Normal,
+                                    fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
                                 ),
                             )
+                        },
+                        trailingIcon = if (isActive) {
+                            {
+                                val arrow = if (currentDirection == SortDirection.ASCENDING) {
+                                    R.drawable.ic_arrow_drop_up
+                                } else {
+                                    R.drawable.ic_arrow_drop_down
+                                }
+
+                                Icon(
+                                    painter = painterResource(arrow),
+                                    contentDescription = "Sorted ${currentDirection.label} — tap to reverse",
+                                )
+                            }
+                        } else {
+                            null
                         },
                         onClick = {
                             runAction(
@@ -916,15 +938,21 @@ object LibraryScreen : Screen {
             return
         }
 
+        // Custom-list editions still sort in memory — the dataset is small (dozens, not
+        // thousands) so the sort is cheap and the SQL-sort refactor is books-only.
         val visibleEditions = state.displayEditionsFor(tabId = tab.id).orEmpty()
 
-        val animator = rememberLazyItemMutationAnimator(keys = visibleEditions.map { it.id })
+        val visibleEditionIds = remember(visibleEditions) { visibleEditions.map { it.id } }
+
+        val animator = rememberLazyItemMutationAnimator(keys = visibleEditionIds)
 
         val entry = rememberStaggeredEntryCoordinator(key = "library:editions:${tab.id}")
 
         ScrollToTopOnSortChange(
             tabId = tab.id,
             sortMode = state.sortModeFor(tabId = tab.id),
+            sortDirection = state.sortDirectionFor(tabId = tab.id),
+            visibleItemsKey = visibleEditionIds.firstOrNull() ?: 0,
             gridState = gridState,
         )
 
@@ -962,15 +990,22 @@ object LibraryScreen : Screen {
             return
         }
 
+        // Books arrive pre-sorted from the DAO via SQL ORDER BY. The displayBooksFor call here
+        // only applies the in-memory search + Read-tab year filter, which is cheap (one pass
+        // over the list, no allocation when no filter is active).
         val visibleBooks = state.displayBooksFor(tabId = tab.id).orEmpty()
 
-        val animator = rememberLazyItemMutationAnimator(keys = visibleBooks.map { it.id })
+        val visibleBookIds = remember(visibleBooks) { visibleBooks.map { it.id } }
+
+        val animator = rememberLazyItemMutationAnimator(keys = visibleBookIds)
 
         val entry = rememberStaggeredEntryCoordinator(key = "library:books:${tab.id}")
 
         ScrollToTopOnSortChange(
             tabId = tab.id,
             sortMode = state.sortModeFor(tabId = tab.id),
+            sortDirection = state.sortDirectionFor(tabId = tab.id),
+            visibleItemsKey = visibleBookIds.firstOrNull() ?: 0,
             gridState = gridState,
         )
 
@@ -996,18 +1031,37 @@ object LibraryScreen : Screen {
     private fun ScrollToTopOnSortChange(
         tabId: String,
         sortMode: LibrarySortMode,
+        sortDirection: SortDirection,
+        visibleItemsKey: Any,
         gridState: LazyGridState,
     ) {
-        var previousSortMode by remember(tabId) { mutableStateOf<LibrarySortMode?>(null) }
+        var previousSort by remember(tabId) {
+            mutableStateOf<Pair<LibrarySortMode, SortDirection>?>(null)
+        }
+        var pendingScrollToTop by remember(tabId) { mutableStateOf(false) }
 
-        LaunchedEffect(tabId, sortMode) {
-            val prior = previousSortMode
+        // Sort change just marks intent. We don't scroll here because the visible books haven't
+        // updated yet — scrolling now would race with LazyGrid's "follow the focused item by key"
+        // behavior once the new sorted list lands and silently undo the scroll.
+        LaunchedEffect(tabId, sortMode, sortDirection) {
+            val current = sortMode to sortDirection
+            val prior = previousSort
 
-            if (prior != null && prior != sortMode) {
-                gridState.scrollToItem(index = 0)
+            if (prior != null && prior != current) {
+                pendingScrollToTop = true
             }
 
-            previousSortMode = sortMode
+            previousSort = current
+        }
+
+        // After the new sorted list arrives ([visibleItemsKey] flips), perform the actual scroll.
+        // Snap (not animated) so it doesn't compete with the per-item placement animation.
+        LaunchedEffect(visibleItemsKey) {
+            if (pendingScrollToTop) {
+                pendingScrollToTop = false
+
+                gridState.scrollToItem(index = 0)
+            }
         }
     }
 

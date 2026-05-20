@@ -23,13 +23,13 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUse
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.DismissPlanTodayUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortModesAsFlowUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortModeUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.flows.DateStyleCollector
@@ -142,9 +142,9 @@ val settingsModule = module {
         SetLibraryGridLayoutUseCase(settingsRepository = get())
     }
 
-    factory { GetLibrarySortModesAsFlowUseCase(settingsRepository = get()) }
+    factory { GetLibrarySortSettingsAsFlowUseCase(settingsRepository = get()) }
 
-    factory { SetLibrarySortModeUseCase(settingsRepository = get()) }
+    factory { SetLibrarySortUseCase(settingsRepository = get()) }
 
     factory { ObservePlanTodayDismissalsUseCase(settingsRepository = get()) }
 

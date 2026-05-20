@@ -8,12 +8,24 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
 interface BooksRepository {
     val books: Flow<List<Book>>
     val allUserLists: Flow<List<BookList>>
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
+
+    /** Library-screen path: all user books sorted via SQL `ORDER BY`. */
+    fun getSortedAllUserBooks(mode: LibrarySortMode, direction: SortDirection): Flow<List<Book>>
+
+    /** Library-screen path: user books for [status], sorted via SQL `ORDER BY`. */
+    fun getSortedBooksByStatus(
+        status: UserBookStatus,
+        mode: LibrarySortMode,
+        direction: SortDirection,
+    ): Flow<List<Book>>
 
     suspend fun refreshUserBooks(
         userId: Int,

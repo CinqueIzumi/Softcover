@@ -1,7 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.flows
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -11,14 +15,30 @@ import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortSettings
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AllBooksCollector : LibraryInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,
     ) {
+        // SQL ORDER BY does the sorting — flatMapLatest re-subscribes whenever the persisted
+        // sort settings for the All tab change, so the DAO emits an already-sorted list and the
+        // UI has no main-thread work to do.
+        val sortedBooksFlow = dependencies.getLibrarySortSettingsAsFlowUseCase()
+            .map { settings -> settings[LibraryTab.All.id] ?: defaultSortSettings }
+            .distinctUntilChanged()
+            .flatMapLatest { sort ->
+                dependencies.getSortedAllUserBooksUseCase(
+                    mode = sort.mode,
+                    direction = sort.direction,
+                )
+            }
+
         combine(
-            dependencies.getAllUserBooksUseCase(),
+            sortedBooksFlow,
             dependencies.getAllUserListsUseCase(),
             dependencies.getEnabledStatusCodesAsFlowUseCase(),
             dependencies.getEnabledListIdsAsFlowUseCase(),
@@ -42,5 +62,12 @@ class AllBooksCollector : LibraryInitializer {
                 )
             }
         }
+    }
+
+    private companion object {
+        val defaultSortSettings = LibrarySortSettings(
+            mode = LibrarySortMode.Default,
+            direction = LibrarySortMode.Default.defaultDirection,
+        )
     }
 }

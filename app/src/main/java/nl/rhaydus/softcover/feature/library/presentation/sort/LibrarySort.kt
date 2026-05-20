@@ -1,82 +1,64 @@
 package nl.rhaydus.softcover.feature.library.presentation.sort
 
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
-import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
-private val DATE_ADDED_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+/**
+ * Decorate-sort-undecorate: extract the comparable key once per item (O(n)), then sort by the
+ * cached keys. Reserved for in-memory edition lists (custom-list tabs); book sorting happens at
+ * the DAO via SQL `ORDER BY`.
+ */
+private inline fun <T, K : Comparable<K>> List<T>.sortedByCachedKey(
+    selector: (T) -> K,
+): List<T> {
+    if (size <= 1) return this
 
-private fun Book.dateAddedOrMin(): LocalDate = runCatching {
-    LocalDate.parse(userBook?.dateAdded.orEmpty(), DATE_ADDED_FORMATTER)
-}.getOrDefault(LocalDate.MIN)
+    val n = size
+    val items = arrayOfNulls<Any?>(n)
+    @Suppress("UNCHECKED_CAST")
+    val keys = arrayOfNulls<Comparable<Any>>(n) as Array<K?>
 
-private fun Book.dateFinishedOrMin(): LocalDateTime {
-    userBookRead?.finishedAt?.let { finishedAt ->
-        runCatching { LocalDate.parse(finishedAt).atStartOfDay() }
-            .getOrNull()
-            ?.let { return it }
+    for (i in 0 until n) {
+        val item = this[i]
+        items[i] = item
+        keys[i] = selector(item)
     }
 
-    val journals = userBook?.journals ?: return LocalDateTime.MIN
-    val mostRecent = journals
-        .filter { it.event == JournalEventType.StatusFinished.eventName }
-        .maxByOrNull { it.updatedAt }
-        ?.updatedAt ?: return LocalDateTime.MIN
+    val indices = IntArray(n) { it }.toTypedArray()
+    indices.sortWith(Comparator { a, b -> keys[a]!!.compareTo(keys[b]!!) })
 
-    return runCatching { LocalDateTime.parse(mostRecent) }.getOrDefault(LocalDateTime.MIN)
-}
+    val result = ArrayList<T>(n)
+    for (index in indices) {
+        @Suppress("UNCHECKED_CAST")
+        result.add(items[index] as T)
+    }
 
-private fun Book.firstAuthor(): String =
-    authors.firstOrNull()?.name?.lowercase().orEmpty()
-
-private fun Book.progressFraction(): Float =
-    userBookRead?.progress ?: 0f
-
-private fun Book.pageCount(): Int =
-    currentEdition?.pages ?: defaultEdition?.pages ?: 0
-
-// Expired deadlines yield negative days, which intentionally sort *before* future deadlines so
-// overdue books float to the top of the urgency-sorted shelf.
-private fun deadlineUrgency(
-    deadline: BookDeadline?,
-    today: LocalDate = LocalDate.now(),
-): Long {
-    deadline ?: return Long.MAX_VALUE
-
-    return ChronoUnit.DAYS.between(today, deadline.deadlineDate)
-}
-
-fun List<Book>.applySort(
-    mode: LibrarySortMode,
-    deadlines: Map<Int, BookDeadline> = emptyMap(),
-): List<Book> = when (mode) {
-    LibrarySortMode.DATE_ADDED -> sortedByDescending { it.dateAddedOrMin() }
-    LibrarySortMode.DATE_FINISHED -> sortedByDescending { it.dateFinishedOrMin() }
-    LibrarySortMode.TITLE -> sortedBy { it.title.lowercase() }
-    LibrarySortMode.AUTHOR -> sortedBy { it.firstAuthor() }
-    LibrarySortMode.RATING -> sortedByDescending { it.rating }
-    LibrarySortMode.PROGRESS -> sortedByDescending { it.progressFraction() }
-    LibrarySortMode.PAGE_COUNT -> sortedByDescending { it.pageCount() }
-    LibrarySortMode.DEADLINE_URGENCY -> sortedBy { deadlineUrgency(deadlines[it.id]) }
+    return result
 }
 
 private fun BookEdition.firstAuthor(): String =
     authors.firstOrNull()?.name?.lowercase().orEmpty()
 
-fun List<BookEdition>.applyEditionSort(mode: LibrarySortMode): List<BookEdition> = when (mode) {
-    LibrarySortMode.TITLE -> sortedBy { it.title.orEmpty().lowercase() }
-    LibrarySortMode.AUTHOR -> sortedBy { it.firstAuthor() }
-    LibrarySortMode.PAGE_COUNT -> sortedByDescending { it.pages ?: 0 }
-    LibrarySortMode.DATE_ADDED,
-    LibrarySortMode.DATE_FINISHED,
-    LibrarySortMode.RATING,
-    LibrarySortMode.PROGRESS,
-    LibrarySortMode.DEADLINE_URGENCY,
-        -> this
+fun List<BookEdition>.applyEditionSort(
+    mode: LibrarySortMode,
+    direction: SortDirection = mode.defaultDirection,
+): List<BookEdition> {
+    if (size <= 1) return this
+
+    val ascending = when (mode) {
+        LibrarySortMode.TITLE -> sortedByCachedKey { it.title.orEmpty().lowercase() }
+        LibrarySortMode.AUTHOR -> sortedByCachedKey { it.firstAuthor() }
+        LibrarySortMode.PAGE_COUNT -> sortedByCachedKey { it.pages ?: 0 }
+        LibrarySortMode.RELEASE_DATE -> sortedByCachedKey { it.releaseDate ?: LocalDate.MAX }
+        LibrarySortMode.DATE_ADDED,
+        LibrarySortMode.DATE_FINISHED,
+        LibrarySortMode.RATING,
+        LibrarySortMode.PROGRESS,
+        LibrarySortMode.DEADLINE_URGENCY,
+            -> return this
+    }
+
+    return if (direction == SortDirection.ASCENDING) ascending else ascending.asReversed()
 }

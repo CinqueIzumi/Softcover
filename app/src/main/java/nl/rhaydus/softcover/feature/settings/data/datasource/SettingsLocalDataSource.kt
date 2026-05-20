@@ -5,6 +5,8 @@ import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 
 interface SettingsLocalDataSource {
@@ -12,11 +14,12 @@ interface SettingsLocalDataSource {
 
     val libraryGridLayout: Flow<LibraryGridLayout>
 
-    val librarySortModeByTab: Flow<Map<String, LibrarySortMode>>
+    val librarySortSettingsByTab: Flow<Map<String, LibrarySortSettings>>
 
-    suspend fun setLibrarySortModeForTab(
+    suspend fun setLibrarySortForTab(
         tabId: String,
         mode: LibrarySortMode,
+        direction: SortDirection,
     )
 
     val dismissedPlanTodayByBook: Flow<Map<Int, String>>

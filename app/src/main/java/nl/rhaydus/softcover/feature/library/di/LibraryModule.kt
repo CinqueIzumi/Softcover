@@ -32,19 +32,16 @@ val libraryModule = module {
 
     factory {
         LibraryScreenScreenModel(
-            getAllUserBooksUseCase = get(),
-            getCurrentlyReadingUserBooksUseCase = get(),
-            getWantToReadUserBooksUseCase = get(),
-            getReadUserBooksUseCase = get(),
-            getDidNotFinishUserBooksUseCase = get(),
+            getSortedAllUserBooksUseCase = get(),
+            getSortedBooksByStatusUseCase = get(),
             refreshUserBooksUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
             getAllUserListsUseCase = get(),
             getLibraryGridLayoutAsFlowUseCase = get(),
             setLibraryGridLayoutUseCase = get(),
-            getLibrarySortModesAsFlowUseCase = get(),
-            setLibrarySortModeUseCase = get(),
+            getLibrarySortSettingsAsFlowUseCase = get(),
+            setLibrarySortUseCase = get(),
             observeAllBookDeadlinesUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
             getEnabledStatusCodesAsFlowUseCase = get(),

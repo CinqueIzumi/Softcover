@@ -10,12 +10,36 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
+import androidx.sqlite.db.SimpleSQLiteQuery
 import nl.rhaydus.softcover.feature.books.data.dao.BookDao
 import nl.rhaydus.softcover.feature.books.data.mapper.toModel
+import nl.rhaydus.softcover.feature.books.data.sort.toOrderByFragment
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
 interface BooksLocalDataSource {
     val allUserBooks: Flow<List<Book>>
     val allUserLists: Flow<List<BookList>>
+
+    /**
+     * Library-screen path: returns ALL user books sorted by [mode] + [direction], performed
+     * by the database via `ORDER BY`. The flow re-emits whenever the underlying tables change
+     * — and whenever the caller passes new sort params (rebuilt query, fresh subscription).
+     */
+    fun getSortedAllUserBooks(
+        mode: LibrarySortMode,
+        direction: SortDirection,
+    ): Flow<List<Book>>
+
+    /**
+     * Library-screen path: returns user books in [status] sorted by [mode] + [direction]. See
+     * [getSortedAllUserBooks] for semantics.
+     */
+    fun getSortedBooksByStatus(
+        status: UserBookStatus,
+        mode: LibrarySortMode,
+        direction: SortDirection,
+    ): Flow<List<Book>>
 
     suspend fun getAllUserBookIds(): List<Int>
 
@@ -139,6 +163,44 @@ class BooksLocalDataSourceImpl(
                 events = listOf("status_stopped"),
             )
         }
+            .distinctUntilChanged()
+            .map { list -> list.map { it.toModel() } }
+    }
+
+    override fun getSortedAllUserBooks(
+        mode: LibrarySortMode,
+        direction: SortDirection,
+    ): Flow<List<Book>> {
+        val orderBy = mode.toOrderByFragment(direction = direction)
+        val sql = """
+            SELECT b.*
+            FROM books b
+            LEFT JOIN user_books ub ON ub.bookId = b.id
+            ORDER BY $orderBy, b.id DESC
+        """.trimIndent()
+
+        return dao.observeBooksRaw(query = SimpleSQLiteQuery(sql))
+            .distinctUntilChanged()
+            .map { list -> list.map { it.toModel() } }
+    }
+
+    override fun getSortedBooksByStatus(
+        status: UserBookStatus,
+        mode: LibrarySortMode,
+        direction: SortDirection,
+    ): Flow<List<Book>> {
+        val orderBy = mode.toOrderByFragment(direction = direction)
+        val sql = """
+            SELECT b.*
+            FROM books b
+            INNER JOIN user_books ub ON ub.bookId = b.id
+            WHERE ub.statusCode = ?
+            ORDER BY $orderBy, ub.id DESC
+        """.trimIndent()
+
+        return dao.observeBooksRaw(
+            query = SimpleSQLiteQuery(sql, arrayOf<Any>(status.code)),
+        )
             .distinctUntilChanged()
             .map { list -> list.map { it.toModel() } }
     }

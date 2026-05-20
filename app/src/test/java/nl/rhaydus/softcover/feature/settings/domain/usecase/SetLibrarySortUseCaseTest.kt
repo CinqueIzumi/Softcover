@@ -6,41 +6,46 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class SetLibrarySortModeUseCaseTest {
+class SetLibrarySortUseCaseTest {
 
     private lateinit var settingsRepository: SettingsRepository
-    private lateinit var useCase: SetLibrarySortModeUseCase
+    private lateinit var useCase: SetLibrarySortUseCase
 
     @BeforeEach
     fun setUp() {
         settingsRepository = mockk(relaxed = true)
-        useCase = SetLibrarySortModeUseCase(settingsRepository = settingsRepository)
+        useCase = SetLibrarySortUseCase(settingsRepository = settingsRepository)
     }
 
     @Nested
     inner class Invoke {
 
         @Test
-        fun `delegates to repository and returns success`() = runTest {
+        fun `delegates to repository setLibrarySortForTab and returns success`() = runTest {
             // ----- Arrange -----
+            // (repository is relaxed)
 
             // ----- Act -----
             val result = useCase(
                 tabId = "reading",
-                mode = LibrarySortMode.AUTHOR,
+                mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
             )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify {
-                settingsRepository.setLibrarySortModeForTab(
+                settingsRepository.setLibrarySortForTab(
                     tabId = "reading",
-                    mode = LibrarySortMode.AUTHOR,
+                    mode = LibrarySortMode.TITLE,
+                    direction = SortDirection.ASCENDING,
                 )
             }
         }
@@ -48,21 +53,26 @@ class SetLibrarySortModeUseCaseTest {
         @Test
         fun `wraps repository exception in Result failure`() = runTest {
             // ----- Arrange -----
-            val error = RuntimeException("storage failure")
+            val expectedError = RuntimeException("storage error")
 
             coEvery {
-                settingsRepository.setLibrarySortModeForTab(any(), any())
-            } throws error
+                settingsRepository.setLibrarySortForTab(
+                    tabId = any(),
+                    mode = any(),
+                    direction = any(),
+                )
+            } throws expectedError
 
             // ----- Act -----
             val result = useCase(
                 tabId = "reading",
                 mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
             )
 
             // ----- Assert -----
             result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe error
+            result.exceptionOrNull() shouldBe expectedError
         }
     }
 }

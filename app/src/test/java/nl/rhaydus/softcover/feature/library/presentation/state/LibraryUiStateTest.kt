@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -101,12 +102,14 @@ class LibraryUiStateTest {
         searchQuery: String = "",
         selectedReadYear: Int? = null,
         sortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
+        sortDirectionByTab: Map<String, SortDirection> = emptyMap(),
     ) = LibraryUiState(
         booksByTab = booksByTab,
         editionsByTab = editionsByTab,
         searchQuery = searchQuery,
         selectedReadYear = selectedReadYear,
         sortModeByTab = sortModeByTab,
+        sortDirectionByTab = sortDirectionByTab,
     )
 
     // endregion
@@ -121,6 +124,40 @@ class LibraryUiStateTest {
 
             // ----- Assert -----
             state.tabsLoaded shouldBe false
+        }
+    }
+
+    @Nested
+    inner class SortDirectionFor {
+
+        @Test
+        fun `falls back to the mode's defaultDirection when not set explicitly`() {
+            // ----- Arrange -----
+            val state = buildState(
+                sortModeByTab = mapOf(otherTabId to LibrarySortMode.DATE_ADDED),
+                sortDirectionByTab = emptyMap(),
+            )
+
+            // ----- Act -----
+            val result = state.sortDirectionFor(otherTabId)
+
+            // ----- Assert -----
+            result shouldBe SortDirection.DESCENDING
+        }
+
+        @Test
+        fun `returns the persisted direction when set explicitly`() {
+            // ----- Arrange -----
+            val state = buildState(
+                sortModeByTab = mapOf(otherTabId to LibrarySortMode.DATE_ADDED),
+                sortDirectionByTab = mapOf(otherTabId to SortDirection.ASCENDING),
+            )
+
+            // ----- Act -----
+            val result = state.sortDirectionFor(otherTabId)
+
+            // ----- Assert -----
+            result shouldBe SortDirection.ASCENDING
         }
     }
 
@@ -140,7 +177,10 @@ class LibraryUiStateTest {
         }
 
         @Test
-        fun `returns sort-applied list when search query is blank`() {
+        fun `returns booksByTab list in DAO-provided order when search query is blank`() {
+            // Book sort moved to SQL ORDER BY at the DAO layer, so displayBooksFor no longer
+            // re-sorts — it just passes the pre-sorted list through (after applying search +
+            // year filters). The list arrives in whatever order the DAO emitted it.
             // ----- Arrange -----
             val newer = buildBook(
                 id = 1,
@@ -152,7 +192,7 @@ class LibraryUiStateTest {
             )
 
             val state = buildState(
-                booksByTab = mapOf(otherTabId to listOf(older, newer)),
+                booksByTab = mapOf(otherTabId to listOf(newer, older)),
                 sortModeByTab = mapOf(otherTabId to LibrarySortMode.DATE_ADDED),
             )
 
@@ -303,7 +343,10 @@ class LibraryUiStateTest {
         }
 
         @Test
-        fun `sort applies after filters — TITLE sort returns alphabetical order`() {
+        fun `sortModeByTab does not affect displayBooksFor output order`() {
+            // Sort is applied by the DAO (SQL ORDER BY); the in-memory state's sortModeByTab is
+            // only used by the screen to look up the persisted sort to flow back into the DAO
+            // subscription. The render-time pass is filter-only.
             // ----- Arrange -----
             val bookZ = buildBook(id = 1, title = "Zebra")
             val bookA = buildBook(id = 2, title = "Apple")
@@ -312,13 +355,15 @@ class LibraryUiStateTest {
             val state = buildState(
                 booksByTab = mapOf(otherTabId to listOf(bookZ, bookA, bookM)),
                 sortModeByTab = mapOf(otherTabId to LibrarySortMode.TITLE),
+                sortDirectionByTab = mapOf(otherTabId to SortDirection.DESCENDING),
             )
 
             // ----- Act -----
             val result = state.displayBooksFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.title } shouldBe listOf("Apple", "Mango", "Zebra")
+            // Output mirrors booksByTab input order regardless of sort settings.
+            result!!.map { it.title } shouldBe listOf("Zebra", "Apple", "Mango")
         }
     }
 
@@ -364,6 +409,25 @@ class LibraryUiStateTest {
             val state = buildState(
                 editionsByTab = mapOf(otherTabId to listOf(editionZ, editionA)),
                 sortModeByTab = mapOf(otherTabId to LibrarySortMode.TITLE),
+            )
+
+            // ----- Act -----
+            val result = state.displayEditionsFor(otherTabId)
+
+            // ----- Assert -----
+            result!!.map { it.id } shouldBe listOf(2, 1)
+        }
+
+        @Test
+        fun `displayEditionsFor reverses ordering when direction is the opposite of default`() {
+            // ----- Arrange -----
+            val editionA = buildEdition(id = 1, title = "Alpha Edition")
+            val editionZ = buildEdition(id = 2, title = "Zebra Edition")
+
+            val state = buildState(
+                editionsByTab = mapOf(otherTabId to listOf(editionA, editionZ)),
+                sortModeByTab = mapOf(otherTabId to LibrarySortMode.TITLE),
+                sortDirectionByTab = mapOf(otherTabId to SortDirection.DESCENDING),
             )
 
             // ----- Act -----

@@ -211,7 +211,7 @@ object ReadingScreen : Screen {
                 ),
             )
 
-            state.books?.firstOrNull { it.id == targetId }?.let { book ->
+            state.books.firstOrNull { it.id == targetId }?.let { book ->
                 runAction(OnMarkBookAsReadClickAction(book = book))
             }
 
@@ -247,11 +247,9 @@ object ReadingScreen : Screen {
                         }
                     ) {
                         when {
-                            state.books == null -> Unit
                             state.books.isNotEmpty() -> {
                                 BooksDisplay(
                                     state = state,
-                                    books = state.books,
                                     runAction = runAction,
                                     onBookClick = onBookClick,
                                     onNavigateToSearch = onNavigateToSearch,
@@ -262,6 +260,7 @@ object ReadingScreen : Screen {
                                 )
                             }
 
+                            state.isLoading -> Unit
                             else -> EmptyCurrentlyReadingScreen(
                                 wantToReadBooks = state.wantToReadBooks,
                                 trendingBooks = state.trendingBooks,
@@ -323,7 +322,6 @@ object ReadingScreen : Screen {
     @Composable
     private fun BooksDisplay(
         state: ReadingScreenUiState,
-        books: List<Book>,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
         onNavigateToSearch: () -> Unit,
@@ -332,8 +330,8 @@ object ReadingScreen : Screen {
         slidingBookId: Int?,
         slideProgress: Float,
     ) {
-        val featured = books.first()
-        val rest = books.drop(1)
+        val featured = state.books.first()
+        val rest = state.books.drop(1)
 
         val animator = rememberLazyItemMutationAnimator(keys = rest.map { it.id })
 
@@ -366,8 +364,8 @@ object ReadingScreen : Screen {
             ) {
                 item(key = "header") {
                     EditorialHeader(
-                        bookCount = books.size,
-                        averageProgress = books.averageProgress(),
+                        bookCount = state.books.size,
+                        averageProgress = state.books.averageProgress(),
                         pullToRefreshState = pullToRefreshState,
                         isRefreshing = state.isLoading,
                     )
@@ -1413,7 +1411,7 @@ private val previewBooks: List<Book> = listOf(
 private fun ReadingScreenEmptyPreview() {
     SoftcoverTheme {
         ReadingScreen.Screen(
-            state = ReadingScreenUiState(books = emptyList()),
+            state = ReadingScreenUiState(isLoading = false),
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},
@@ -1427,7 +1425,7 @@ private fun ReadingScreenEmptyWithPickUpNextPreview() {
     SoftcoverTheme {
         ReadingScreen.Screen(
             state = ReadingScreenUiState(
-                books = emptyList(),
+                isLoading = false,
                 wantToReadBooks = previewBooks.take(3),
             ),
             runAction = {},
@@ -1443,7 +1441,7 @@ private fun ReadingScreenEmptyWithTrendingPreview() {
     SoftcoverTheme {
         ReadingScreen.Screen(
             state = ReadingScreenUiState(
-                books = emptyList(),
+                isLoading = false,
                 trendingBooks = listOf(previewBooks.first()),
             ),
             runAction = {},
@@ -1458,7 +1456,7 @@ private fun ReadingScreenEmptyWithTrendingPreview() {
 private fun ReadingScreenLoadingPreview() {
     SoftcoverTheme {
         ReadingScreen.Screen(
-            state = ReadingScreenUiState(books = null),
+            state = ReadingScreenUiState(isLoading = true),
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},

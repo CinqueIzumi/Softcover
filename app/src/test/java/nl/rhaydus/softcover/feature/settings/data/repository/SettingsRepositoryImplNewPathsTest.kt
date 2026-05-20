@@ -10,6 +10,8 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -31,15 +33,20 @@ class SettingsRepositoryImplNewPathsTest {
     }
 
     @Nested
-    inner class LibrarySortModeByTab {
+    inner class LibrarySortSettingsByTab {
 
         @Test
-        fun `librarySortModeByTab is wired to local data source flow`() = runTest {
+        fun `librarySortSettingsByTab is wired to local data source flow`() = runTest {
             // ----- Arrange -----
-            val expected = mapOf("reading" to LibrarySortMode.TITLE)
+            val expected = mapOf(
+                "reading" to LibrarySortSettings(
+                    mode = LibrarySortMode.TITLE,
+                    direction = SortDirection.ASCENDING,
+                ),
+            )
 
             every {
-                settingsLocalDataSource.librarySortModeByTab
+                settingsLocalDataSource.librarySortSettingsByTab
             } returns flowOf(expected)
 
             val freshRepository = SettingsRepositoryImpl(
@@ -48,17 +55,17 @@ class SettingsRepositoryImplNewPathsTest {
             )
 
             // ----- Act & Assert -----
-            freshRepository.librarySortModeByTab.test {
+            freshRepository.librarySortSettingsByTab.test {
                 awaitItem() shouldBe expected
                 awaitComplete()
             }
         }
 
         @Test
-        fun `librarySortModeByTab emits empty map when no overrides set`() = runTest {
+        fun `librarySortSettingsByTab emits empty map when no overrides set`() = runTest {
             // ----- Arrange -----
             every {
-                settingsLocalDataSource.librarySortModeByTab
+                settingsLocalDataSource.librarySortSettingsByTab
             } returns flowOf(emptyMap())
 
             val freshRepository = SettingsRepositoryImpl(
@@ -67,7 +74,7 @@ class SettingsRepositoryImplNewPathsTest {
             )
 
             // ----- Act & Assert -----
-            freshRepository.librarySortModeByTab.test {
+            freshRepository.librarySortSettingsByTab.test {
                 awaitItem() shouldBe emptyMap()
                 awaitComplete()
             }
@@ -75,23 +82,25 @@ class SettingsRepositoryImplNewPathsTest {
     }
 
     @Nested
-    inner class SetLibrarySortModeForTab {
+    inner class SetLibrarySortForTab {
 
         @Test
-        fun `delegates to local data source with given tab id and mode`() = runTest {
+        fun `delegates to local data source with given tab id, mode, and direction`() = runTest {
             // ----- Arrange -----
 
             // ----- Act -----
-            repository.setLibrarySortModeForTab(
+            repository.setLibrarySortForTab(
                 tabId = "want_to_read",
                 mode = LibrarySortMode.RATING,
+                direction = SortDirection.DESCENDING,
             )
 
             // ----- Assert -----
             coVerify {
-                settingsLocalDataSource.setLibrarySortModeForTab(
+                settingsLocalDataSource.setLibrarySortForTab(
                     tabId = "want_to_read",
                     mode = LibrarySortMode.RATING,
+                    direction = SortDirection.DESCENDING,
                 )
             }
         }

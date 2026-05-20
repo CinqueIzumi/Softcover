@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
 @Serializable
 data class AppSettingsEntity(
@@ -14,6 +15,7 @@ data class AppSettingsEntity(
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val libraryGridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
     val librarySortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
+    val librarySortDirectionByTab: Map<String, SortDirection> = emptyMap(),
     val dismissedPlanTodayByBook: Map<Int, String> = emptyMap(),
     val enabledStatusCodes: Set<Int> = setOf(1, 3, 5),
     val enabledListIds: Set<Int> = emptySet(),
