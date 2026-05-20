@@ -34,6 +34,8 @@ import nl.rhaydus.softcover.feature.books.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import timber.log.Timber
 
@@ -57,6 +59,24 @@ class BooksRepositoryImpl(
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return booksLocalDataSource.getBooksFlowByStatus(status = status)
     }
+
+    override fun getSortedAllUserBooks(
+        mode: LibrarySortMode,
+        direction: SortDirection,
+    ): Flow<List<Book>> = booksLocalDataSource.getSortedAllUserBooks(
+        mode = mode,
+        direction = direction,
+    )
+
+    override fun getSortedBooksByStatus(
+        status: UserBookStatus,
+        mode: LibrarySortMode,
+        direction: SortDirection,
+    ): Flow<List<Book>> = booksLocalDataSource.getSortedBooksByStatus(
+        status = status,
+        mode = mode,
+        direction = direction,
+    )
 
     override suspend fun refreshUserBooks(
         userId: Int,

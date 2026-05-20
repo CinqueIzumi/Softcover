@@ -7,6 +7,8 @@ import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 
@@ -26,16 +28,18 @@ class SettingsRepositoryImpl(
         settingsLocalDataSource.setLibraryGridLayout(layout = layout)
     }
 
-    override val librarySortModeByTab: Flow<Map<String, LibrarySortMode>> =
-        settingsLocalDataSource.librarySortModeByTab
+    override val librarySortSettingsByTab: Flow<Map<String, LibrarySortSettings>> =
+        settingsLocalDataSource.librarySortSettingsByTab
 
-    override suspend fun setLibrarySortModeForTab(
+    override suspend fun setLibrarySortForTab(
         tabId: String,
         mode: LibrarySortMode,
+        direction: SortDirection,
     ) {
-        settingsLocalDataSource.setLibrarySortModeForTab(
+        settingsLocalDataSource.setLibrarySortForTab(
             tabId = tabId,
             mode = mode,
+            direction = direction,
         )
     }
 

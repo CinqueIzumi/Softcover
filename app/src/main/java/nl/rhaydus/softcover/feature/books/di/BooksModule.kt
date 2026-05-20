@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedAllUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedBooksByStatusUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetDidNotFinishUserBooksUseCase
@@ -57,6 +59,14 @@ val booksModule = module {
 
     factory {
         GetAllUserBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        GetSortedAllUserBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        GetSortedBooksByStatusUseCase(booksRepository = get())
     }
 
     factory {

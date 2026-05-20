@@ -16,11 +16,28 @@ class OnSortModeChangeAction(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
+        val state = scope.currentState
+        val currentMode = state.sortModeFor(tabId = tabId)
+        val currentDirection = state.sortDirectionFor(tabId = tabId)
+
+        // Tapping the active mode toggles direction; tapping a new mode resets to that mode's default.
+        val nextDirection = if (mode == currentMode) {
+            currentDirection.flipped()
+        } else {
+            mode.defaultDirection
+        }
+
+        // Close the menu first and let the persistence + collector roundtrip be the trigger for
+        // the actual reorder. The menu close animation (~150 ms) gives the atomic DataStore write
+        // and single-flow collector emission time to land, so the user perceives "tap → menu
+        // closes → reveals sorted list" instead of seeing the grid reorganize behind the still-
+        // open dropdown.
         scope.setState { it.copy(isSortMenuExpanded = false) }
 
-        dependencies.setLibrarySortModeUseCase(
+        dependencies.setLibrarySortUseCase(
             tabId = tabId,
             mode = mode,
+            direction = nextDirection,
         ).onFailure {
             Timber.e("-=- $it")
         }

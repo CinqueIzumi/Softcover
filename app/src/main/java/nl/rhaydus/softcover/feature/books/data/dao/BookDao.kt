@@ -2,8 +2,10 @@ package nl.rhaydus.softcover.feature.books.data.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Upsert
+import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -27,6 +29,7 @@ import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
 import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
 import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
+import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
 import timber.log.Timber
 
 @Dao
@@ -52,6 +55,30 @@ interface BookDao {
             """
     )
     fun observeBooks(): Flow<List<BookFullEntity>>
+
+    /**
+     * Dynamic-sort variant used by the library screen. The caller composes a SELECT against
+     * `books` (and joins `user_books`) and supplies the ORDER BY fragment — see
+     * `nl.rhaydus.softcover.feature.books.data.sort.toOrderByFragment`. The observedEntities
+     * list covers every table the supported ORDER BY fragments reach into via subquery so
+     * Room re-emits whenever any of them changes.
+     */
+    @Transaction
+    @RawQuery(
+        observedEntities = [
+            BookEntity::class,
+            UserBookEntity::class,
+            UserBookReadEntity::class,
+            ReadingJournalEntity::class,
+            BookEditionEntity::class,
+            AuthorEntity::class,
+            BookAuthorCrossRef::class,
+            EditionAuthorCrossRef::class,
+            BookSeriesEntity::class,
+            BookDeadlineEntity::class,
+        ],
+    )
+    fun observeBooksRaw(query: SupportSQLiteQuery): Flow<List<BookFullEntity>>
 
     @Transaction
     @Query("SELECT * FROM books WHERE id = :id LIMIT 1")

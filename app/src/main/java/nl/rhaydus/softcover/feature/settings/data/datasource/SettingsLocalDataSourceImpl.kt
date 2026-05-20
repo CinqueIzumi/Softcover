@@ -10,6 +10,8 @@ import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 
 class SettingsLocalDataSourceImpl(
@@ -36,17 +38,35 @@ class SettingsLocalDataSourceImpl(
         }
     }
 
-    override val librarySortModeByTab: Flow<Map<String, LibrarySortMode>> =
+    // Reading mode + direction from the same upstream entity emission collapses to a single flow
+    // emission per write, which is what lets the library screen avoid a transient (newMode, oldDir)
+    // intermediate state during a sort change.
+    override val librarySortSettingsByTab: Flow<Map<String, LibrarySortSettings>> =
         appSettingsDataStore.store.data
-            .map { it.librarySortModeByTab }
+            .map { entity ->
+                val tabIds = entity.librarySortModeByTab.keys + entity.librarySortDirectionByTab.keys
+
+                tabIds.associateWith { tabId ->
+                    val mode = entity.librarySortModeByTab[tabId] ?: LibrarySortMode.Default
+
+                    LibrarySortSettings(
+                        mode = mode,
+                        direction = entity.librarySortDirectionByTab[tabId] ?: mode.defaultDirection,
+                    )
+                }
+            }
             .distinctUntilChanged()
 
-    override suspend fun setLibrarySortModeForTab(
+    override suspend fun setLibrarySortForTab(
         tabId: String,
         mode: LibrarySortMode,
+        direction: SortDirection,
     ) {
         appSettingsDataStore.store.updateData { entity ->
-            entity.copy(librarySortModeByTab = entity.librarySortModeByTab + (tabId to mode))
+            entity.copy(
+                librarySortModeByTab = entity.librarySortModeByTab + (tabId to mode),
+                librarySortDirectionByTab = entity.librarySortDirectionByTab + (tabId to direction),
+            )
         }
     }
 

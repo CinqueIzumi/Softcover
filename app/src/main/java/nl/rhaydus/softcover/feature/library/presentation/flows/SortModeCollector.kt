@@ -12,8 +12,13 @@ class SortModeCollector : LibraryInitializer {
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,
     ) {
-        dependencies.getLibrarySortModesAsFlowUseCase().collectLatest { modes ->
-            scope.setState { it.copy(sortModeByTab = modes) }
+        dependencies.getLibrarySortSettingsAsFlowUseCase().collectLatest { settings ->
+            scope.setState {
+                it.copy(
+                    sortModeByTab = settings.mapValues { (_, s) -> s.mode },
+                    sortDirectionByTab = settings.mapValues { (_, s) -> s.direction },
+                )
+            }
         }
     }
 }

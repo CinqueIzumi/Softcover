@@ -7,12 +7,12 @@ import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.sort.applyEditionSort
-import nl.rhaydus.softcover.feature.library.presentation.sort.applySort
 import nl.rhaydus.softcover.feature.library.presentation.util.availableFinishedYears
 import nl.rhaydus.softcover.feature.library.presentation.util.finishedYear
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
 data class LibraryUiState(
     val visibleTabs: List<LibraryTab> = listOf(
@@ -28,6 +28,7 @@ data class LibraryUiState(
     val gridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
     val isLayoutMenuExpanded: Boolean = false,
     val sortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
+    val sortDirectionByTab: Map<String, SortDirection> = emptyMap(),
     val isSortMenuExpanded: Boolean = false,
 
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
@@ -40,11 +41,16 @@ data class LibraryUiState(
     fun sortModeFor(tabId: String): LibrarySortMode =
         sortModeByTab[tabId] ?: LibrarySortMode.Default
 
+    fun sortDirectionFor(tabId: String): SortDirection =
+        sortDirectionByTab[tabId] ?: sortModeFor(tabId = tabId).defaultDirection
+
     /**
-     * Books to render for [tabId], with the active search query, the Read-tab year chip, and the
-     * per-tab sort already applied. Returns `null` when the source list hasn't been collected yet
-     * (use this to distinguish "loading" from "empty"); returns an empty list when the source is
-     * loaded but filters narrowed it to nothing.
+     * Books to render for [tabId]. The list in [booksByTab] is already sorted by the DAO via
+     * SQL `ORDER BY` (see `BooksLocalDataSource.getSortedAllUserBooks` and friends), so this
+     * pass only needs to apply the in-memory search and Read-tab year filters.
+     *
+     * Returns `null` when the source list hasn't been collected yet (so callers can distinguish
+     * "loading" from "loaded but empty"); returns an empty list when filters narrowed it to nothing.
      */
     fun displayBooksFor(tabId: String): List<Book>? {
         val raw = booksByTab[tabId] ?: return null
@@ -62,21 +68,17 @@ data class LibraryUiState(
 
         val isReadTab = tabId == LibraryTab.Status.of(UserBookStatus.READ).id
 
-        val yearFiltered = if (isReadTab && selectedReadYear != null) {
+        return if (isReadTab && selectedReadYear != null) {
             searchFiltered.filter { it.finishedYear() == selectedReadYear }
         } else {
             searchFiltered
         }
-
-        return yearFiltered.applySort(
-            mode = sortModeFor(tabId = tabId),
-            deadlines = deadlines,
-        )
     }
 
     /**
-     * Editions to render for [tabId] (custom lists only), with search + sort applied. Returns
-     * `null` when the source list hasn't been collected yet.
+     * Editions to render for [tabId] (custom lists only), with search + sort applied in memory.
+     * Custom-list edition counts are small enough that the in-memory sort is fine — the SQL
+     * sort path is books-only. Returns `null` when the source list hasn't been collected yet.
      */
     fun displayEditionsFor(tabId: String): List<BookEdition>? {
         val raw = editionsByTab[tabId] ?: return null
@@ -92,7 +94,10 @@ data class LibraryUiState(
             }
         }
 
-        return searchFiltered.applyEditionSort(mode = sortModeFor(tabId = tabId))
+        return searchFiltered.applyEditionSort(
+            mode = sortModeFor(tabId = tabId),
+            direction = sortDirectionFor(tabId = tabId),
+        )
     }
 
     /** Years that the Read tab can be filtered to, computed from raw (unfiltered) Read books. */
