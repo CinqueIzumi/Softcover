@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortSettings
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -65,9 +64,8 @@ class AllBooksCollector : LibraryInitializer {
     }
 
     private companion object {
-        val defaultSortSettings = LibrarySortSettings(
-            mode = LibrarySortMode.Default,
-            direction = LibrarySortMode.Default.defaultDirection,
+        val defaultSortSettings = LibrarySortSettings.defaultFor(
+            mode = LibraryTab.defaultSortMode(tabId = LibraryTab.All.id),
         )
     }
 }

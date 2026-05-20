@@ -39,7 +39,7 @@ data class LibraryUiState(
     val selectedReadYear: Int? = null,
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
-        sortModeByTab[tabId] ?: LibrarySortMode.Default
+        sortModeByTab[tabId] ?: LibraryTab.defaultSortMode(tabId = tabId)
 
     fun sortDirectionFor(tabId: String): SortDirection =
         sortDirectionByTab[tabId] ?: sortModeFor(tabId = tabId).defaultDirection

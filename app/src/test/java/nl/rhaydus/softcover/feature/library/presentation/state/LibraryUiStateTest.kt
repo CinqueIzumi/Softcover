@@ -162,6 +162,34 @@ class LibraryUiStateTest {
     }
 
     @Nested
+    inner class SortModeFor {
+
+        @Test
+        fun `returns DATE_FINISHED for the Read tab when sortModeByTab is empty`() {
+            // ----- Arrange -----
+            val state = buildState(sortModeByTab = emptyMap())
+
+            // ----- Act -----
+            val result = state.sortModeFor(readTabId)
+
+            // ----- Assert -----
+            result shouldBe LibrarySortMode.DATE_FINISHED
+        }
+
+        @Test
+        fun `returns DATE_ADDED for a non-Read tab when sortModeByTab is empty`() {
+            // ----- Arrange -----
+            val state = buildState(sortModeByTab = emptyMap())
+
+            // ----- Act -----
+            val result = state.sortModeFor(otherTabId)
+
+            // ----- Assert -----
+            result shouldBe LibrarySortMode.Default
+        }
+    }
+
+    @Nested
     inner class DisplayBooksFor {
 
         @Test
