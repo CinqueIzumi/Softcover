@@ -13,7 +13,7 @@ class OnDynamicColorToggledAction(val newValue: Boolean) : SettingsAction {
         scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent, SettingsLocalVariables>,
     ) {
         dependencies.setDynamicColorUseCase(enabled = newValue).onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
     }
 }

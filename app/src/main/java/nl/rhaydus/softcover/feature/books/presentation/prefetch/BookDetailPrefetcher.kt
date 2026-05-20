@@ -31,7 +31,7 @@ class BookDetailPrefetcher(
 
         scope.launch {
             fetchBookByIdUseCase(id = bookId).onFailure { error ->
-                Timber.w("-=- Book-detail prefetch failed for $bookId: $error")
+                Timber.w("Book-detail prefetch failed for $bookId: $error")
 
                 prefetched.remove(bookId)
             }

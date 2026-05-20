@@ -292,12 +292,12 @@ class BooksRepositoryImpl(
 
         if (canonicalBookId == missingBookId) return null
 
-        Timber.w("-=- Book $missingBookId missing remotely; recovered canonical $canonicalBookId via edition $editionId")
+        Timber.w("Book $missingBookId missing remotely; recovered canonical $canonicalBookId via edition $editionId")
 
         val canonical: Book = try {
             booksRemoteDataSource.fetchBookById(id = canonicalBookId)
         } catch (canonicalMissing: BookNotFoundException) {
-            Timber.w("-=- Canonical $canonicalBookId also missing while recovering $missingBookId")
+            Timber.w("Canonical $canonicalBookId also missing while recovering $missingBookId")
 
             throw BookNotFoundException(bookId = missingBookId)
         }
@@ -510,7 +510,7 @@ class BooksRepositoryImpl(
 
     private suspend fun restoreOptimisticWrite(snapshot: Book?) {
         if (snapshot == null) {
-            Timber.w("-=- Optimistic rollback skipped: no prior snapshot in cache")
+            Timber.w("Optimistic rollback skipped: no prior snapshot in cache")
             return
         }
 

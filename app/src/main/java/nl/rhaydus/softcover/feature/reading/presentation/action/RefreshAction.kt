@@ -23,7 +23,7 @@ data object RefreshAction : ReadingAction {
                 scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
             )
             .onFailure {
-                Timber.e("-=- Something went wrong refreshing currently reading books! $it")
+                Timber.e("Something went wrong refreshing currently reading books! $it")
             }
 
         scope.setState {

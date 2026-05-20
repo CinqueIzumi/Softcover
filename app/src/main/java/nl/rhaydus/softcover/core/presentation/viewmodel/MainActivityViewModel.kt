@@ -75,19 +75,19 @@ class MainActivityViewModel(
             refreshUserBooksUseCase(
                 scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
             ).onFailure {
-                Timber.e("-=- $it")
+                Timber.e("$it")
             }
         }
 
         backgroundScope.launch {
             refreshUserBooksUseCase(scope = RefreshScope.All).onFailure {
-                Timber.e("-=- $it")
+                Timber.e("$it")
             }
         }
 
         backgroundScope.launch {
             refreshUserProfileDataUseCase().onFailure {
-                Timber.e("-=- $it")
+                Timber.e("$it")
             }
         }
     }

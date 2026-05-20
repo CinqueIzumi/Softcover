@@ -58,7 +58,7 @@ class PendingProgressSyncer(
                     recentlySyncedUserBookIds.add(entity.userBookId)
                 }
                 .onFailure { error ->
-                    Timber.w(error, "-=- Pending progress update ${entity.localId} failed; halting drain")
+                    Timber.w(error, "Pending progress update ${entity.localId} failed; halting drain")
                     dao.incrementAttempts(entity.localId)
                     return
                 }
@@ -81,7 +81,7 @@ class PendingProgressSyncer(
                 userDate = entity.enqueuedAt.substringBefore('T'),
             )
 
-            else -> Timber.w("-=- Unknown pending progress update kind: ${entity.kind}")
+            else -> Timber.w("Unknown pending progress update kind: ${entity.kind}")
         }
     }
 }

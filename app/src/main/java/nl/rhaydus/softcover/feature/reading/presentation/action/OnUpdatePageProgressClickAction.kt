@@ -25,7 +25,7 @@ data class OnUpdatePageProgressClickAction(val newPage: String) : ReadingAction 
                 newPage = newPageValue,
                 newSeconds = null,
             ).onFailure { error ->
-                Timber.e("-=- $error")
+                Timber.e("$error")
 
                 scope.setState {
                     it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)

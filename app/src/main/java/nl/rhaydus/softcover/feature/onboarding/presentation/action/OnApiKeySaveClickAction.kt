@@ -30,7 +30,7 @@ class OnApiKeySaveClickAction() : OnboardingAction {
 
         dependencies.launch {
             val resetDateSuccessFully = dependencies.resetUserDataUseCase()
-                .onFailure { Timber.e("-=- Resetting failed $it") }
+                .onFailure { Timber.e("Resetting failed $it") }
                 .isSuccess
 
             if (resetDateSuccessFully.not()) {
@@ -41,7 +41,7 @@ class OnApiKeySaveClickAction() : OnboardingAction {
             scope.setState { it.copy(progress = 0.1f) }
 
             val updatedApiKeySuccessfully = dependencies.updateApiKeyUseCase(key = updatedKey)
-                .onFailure { Timber.e("-=- $it") }
+                .onFailure { Timber.e("$it") }
                 .isSuccess
 
             if (updatedApiKeySuccessfully.not()) {
@@ -53,7 +53,7 @@ class OnApiKeySaveClickAction() : OnboardingAction {
 
             val initializedUserDataSuccessfully = dependencies.initializeUserIdAndBooksUseCase()
                 .onFailure {
-                    Timber.e("-=- Initialize user id use case $it")
+                    Timber.e("Initialize user id use case $it")
                     // TODO: Snack bar message is no longer shown when modal loader is active...
                     SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
                 }

@@ -13,7 +13,7 @@ class OnRemoveAllSearchQueriesClickedAction() : ExploreAction {
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
         dependencies.removeAllSearchQueriesUseCase().onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
     }
 }

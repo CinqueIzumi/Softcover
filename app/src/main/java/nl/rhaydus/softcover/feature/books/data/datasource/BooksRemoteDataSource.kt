@@ -131,7 +131,7 @@ class BooksRemoteDataSourceImpl(
         val canonicalId = book.canonicalId
 
         if (canonicalId != null && canonicalId != book.id) {
-            Timber.i("-=- Book $id has canonical $canonicalId; refetching canonical.")
+            Timber.i("Book $id has canonical $canonicalId; refetching canonical.")
             return fetchBookByIdRaw(canonicalId).copy(canonicalId = null)
         }
 
@@ -281,7 +281,7 @@ class BooksRemoteDataSourceImpl(
 
         if (canonicalIds.isEmpty()) return books
 
-        Timber.i("-=- Resolving ${canonicalIds.size} canonical merge(s): $canonicalIds")
+        Timber.i("Resolving ${canonicalIds.size} canonical merge(s): $canonicalIds")
 
         val canonicalBooks = fetchBooksByIds(ids = canonicalIds).associateBy { it.id }
 
@@ -291,7 +291,7 @@ class BooksRemoteDataSourceImpl(
             val canonical = canonicalBooks[canonicalId]
 
             if (canonical == null) {
-                Timber.w("-=- Canonical $canonicalId for book ${book.id} not returned; keeping pre-merge metadata.")
+                Timber.w("Canonical $canonicalId for book ${book.id} not returned; keeping pre-merge metadata.")
                 return@map book
             }
             book.withCanonicalMetadata(canonical = canonical)

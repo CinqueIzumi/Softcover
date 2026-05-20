@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
+import nl.rhaydus.softcover.core.logging.PrefixedDebugTree
 import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.di.apolloModule
@@ -43,7 +44,7 @@ class SoftCoverApp : Application() {
         super.onCreate()
 
         if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
+            Timber.plant(PrefixedDebugTree(prefix = "-=-"))
         }
 
         startKoin {

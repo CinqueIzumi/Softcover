@@ -16,7 +16,7 @@ class OnDateStyleClickAction(
         scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent, SettingsLocalVariables>,
     ) {
         dependencies.setDateStyleUseCase(newStyle = style).onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
 
         scope.setState {

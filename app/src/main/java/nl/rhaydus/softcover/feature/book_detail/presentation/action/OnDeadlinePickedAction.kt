@@ -38,7 +38,7 @@ class OnDeadlinePickedAction(
             total = total,
             unit = unit,
         ).onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
 
         scope.setState { it.copy(showDeadlinePicker = false) }
