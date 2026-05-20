@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.state.SplashState
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
@@ -63,29 +62,30 @@ class MainActivityViewModel(
             return
         }
 
-        viewModelScope.launch {
+        _state.update {
+            it.copy(
+                isLoading = false,
+                authenticated = true,
+            )
+        }
+
+        val backgroundScope = MainScope()
+
+        backgroundScope.launch {
             refreshUserBooksUseCase(
                 scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
-            ).onFailure { error ->
-                Timber.e("-=- $error")
-                SnackBarManager.showSnackbar(title = "Something went wrong")
-            }
-
-            _state.update {
-                it.copy(
-                    isLoading = false,
-                    authenticated = true,
-                )
+            ).onFailure {
+                Timber.e("-=- $it")
             }
         }
 
-        MainScope().launch {
+        backgroundScope.launch {
             refreshUserBooksUseCase(scope = RefreshScope.All).onFailure {
                 Timber.e("-=- $it")
             }
         }
 
-        MainScope().launch {
+        backgroundScope.launch {
             refreshUserProfileDataUseCase().onFailure {
                 Timber.e("-=- $it")
             }

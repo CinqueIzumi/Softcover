@@ -1,10 +1,13 @@
 package nl.rhaydus.softcover
 
 import android.app.Application
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
+import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.di.apolloModule
 import nl.rhaydus.softcover.di.coreModule
 import nl.rhaydus.softcover.di.databaseModule
@@ -72,5 +75,9 @@ class SoftCoverApp : Application() {
         NetworkAvailability.install(koin.get<NetworkAvailabilityProvider>())
         koin.get<PendingProgressSyncer>().start(koin.get<ApplicationScope>().scope)
         koin.get<NotificationChannelInitializer>().initialize()
+
+        koin.get<ApplicationScope>().scope.launch {
+            runCatching { koin.get<GetUserIdAsFlowUseCase>().invoke().first() }
+        }
     }
 }
