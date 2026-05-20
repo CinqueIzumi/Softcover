@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortSettings
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -62,6 +61,10 @@ class BooksByStatusCollector : LibraryInitializer {
     ): Flow<List<Book>> {
         val tabId = LibraryTab.Status.of(status).id
 
+        val defaultSortSettings = LibrarySortSettings.defaultFor(
+            mode = LibraryTab.defaultSortMode(tabId = tabId),
+        )
+
         return dependencies.getLibrarySortSettingsAsFlowUseCase()
             .map { settings -> settings[tabId] ?: defaultSortSettings }
             .distinctUntilChanged()
@@ -72,12 +75,5 @@ class BooksByStatusCollector : LibraryInitializer {
                     direction = sort.direction,
                 )
             }
-    }
-
-    private companion object {
-        val defaultSortSettings = LibrarySortSettings(
-            mode = LibrarySortMode.Default,
-            direction = LibrarySortMode.Default.defaultDirection,
-        )
     }
 }

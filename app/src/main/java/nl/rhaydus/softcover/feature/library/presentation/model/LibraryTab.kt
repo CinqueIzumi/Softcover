@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.model
 
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 
 sealed class LibraryTab(
     val id: String,
@@ -50,4 +51,14 @@ sealed class LibraryTab(
         id = "list-$listId",
         label = listName,
     )
+
+    companion object {
+        // The Read tab is the only library surface where "when did I finish this?" is the obvious
+        // ordering question — every other tab is about active or upcoming reading, so date-added
+        // remains the right default there.
+        fun defaultSortMode(tabId: String): LibrarySortMode = when (tabId) {
+            Status.of(UserBookStatus.READ).id -> LibrarySortMode.DATE_FINISHED
+            else -> LibrarySortMode.Default
+        }
+    }
 }
