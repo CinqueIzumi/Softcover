@@ -15,6 +15,9 @@ enum class LibrarySortMode(
     // Defaults to ASCENDING so a "waiting for publication" list surfaces the soonest upcoming
     // release first; users who want newest-released first can toggle to DESCENDING.
     RELEASE_DATE(label = "Release date", defaultDirection = SortDirection.ASCENDING),
+    // The user-defined drag-to-reorder mode for built-in shelves. Direction is fixed (ASC) — the
+    // stored position itself encodes the order, so flipping ASC/DESC would only mirror the shelf.
+    MANUAL(label = "Manual", defaultDirection = SortDirection.ASCENDING),
     ;
 
     companion object {

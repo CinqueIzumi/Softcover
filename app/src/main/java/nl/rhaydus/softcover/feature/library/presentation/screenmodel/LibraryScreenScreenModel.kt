@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
@@ -48,6 +49,7 @@ class LibraryScreenScreenModel(
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    private val reorderShelfBooksUseCase: ReorderShelfBooksUseCase,
     private val addBookToListUseCase: AddBookToListUseCase,
     private val removeBookFromListUseCase: RemoveBookFromListUseCase,
     appDispatchers: AppDispatchers,
@@ -75,6 +77,7 @@ class LibraryScreenScreenModel(
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
         removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
+        reorderShelfBooksUseCase = reorderShelfBooksUseCase,
         addBookToListUseCase = addBookToListUseCase,
         removeBookFromListUseCase = removeBookFromListUseCase,
         mainDispatcher = appDispatchers.main,

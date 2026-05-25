@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.PersistEditionImageUseC
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
 import org.koin.dsl.module
@@ -117,5 +118,9 @@ val booksModule = module {
 
     factory {
         PersistEditionImageUseCase(booksRepository = get())
+    }
+
+    factory {
+        ReorderShelfBooksUseCase(booksRepository = get())
     }
 }

@@ -70,6 +70,16 @@ class BooksRepositoryImpl(
         direction = direction,
     )
 
+    override suspend fun applyShelfManualOrderPrefix(
+        status: UserBookStatus,
+        prefixBookIds: List<Int>,
+    ) {
+        booksLocalDataSource.applyShelfManualOrderPrefix(
+            status = status,
+            prefixBookIds = prefixBookIds,
+        )
+    }
+
     override suspend fun refreshUserBooks(
         userId: Int,
         statusFilter: UserBookStatus?,

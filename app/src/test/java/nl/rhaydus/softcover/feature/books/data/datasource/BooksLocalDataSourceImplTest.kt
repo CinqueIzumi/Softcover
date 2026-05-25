@@ -2,30 +2,34 @@ package nl.rhaydus.softcover.feature.books.data.datasource
 
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import java.io.File
-import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.core.data.database.dao.BookDao
-import nl.rhaydus.softcover.core.data.database.model.EditionLocalImagePath
-import nl.rhaydus.softcover.feature.books.data.mapper.toModel
-import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEditionView
 import nl.rhaydus.softcover.core.data.database.model.BookEditionWithAuthors
 import nl.rhaydus.softcover.core.data.database.model.BookEntity
 import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
+import nl.rhaydus.softcover.core.data.database.model.EditionLocalImagePath
+import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.feature.books.data.mapper.toModel
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.io.File
 
 class BooksLocalDataSourceImplTest {
 
@@ -764,6 +768,145 @@ class BooksLocalDataSourceImplTest {
             coVerify {
                 dao.updateEditionLocalImagePath(editionId = editionId, path = storedPath)
             }
+        }
+    }
+
+    @Nested
+    inner class ReplaceShelfManualOrder {
+
+        @Test
+        fun `forwards status code and bookIds to the DAO`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.READ
+            val bookIds = listOf(3, 1, 2)
+
+            // ----- Act -----
+            dataSource.applyShelfManualOrderPrefix(status = status, prefixBookIds = bookIds)
+
+            // ----- Assert -----
+            coVerify {
+                dao.applyShelfManualOrderPrefix(
+                    statusCode = status.code,
+                    prefixBookIds = bookIds,
+                )
+            }
+        }
+
+        @Test
+        fun `forwards status code for a different status`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.WANT_TO_READ
+            val bookIds = emptyList<Int>()
+
+            // ----- Act -----
+            dataSource.applyShelfManualOrderPrefix(status = status, prefixBookIds = bookIds)
+
+            // ----- Assert -----
+            coVerify {
+                dao.applyShelfManualOrderPrefix(
+                    statusCode = status.code,
+                    prefixBookIds = bookIds,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class RemoveUserBooksByIdWithManualOrder {
+
+        @Test
+        fun `calls deleteShelfManualOrderForBookIds with resolved bookIds when bookIds is non-empty`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 5
+            val bookId = 100
+
+            coEvery {
+                dao.getBookIdByUserBookId(userBookId = userBookId)
+            } returns bookId
+
+            coEvery {
+                dao.getLocalImagePathsByBookId(bookId = bookId)
+            } returns emptyList()
+
+            // ----- Act -----
+            dataSource.removeUserBooksById(ids = listOf(userBookId))
+
+            // ----- Assert -----
+            coVerify {
+                dao.deleteShelfManualOrderForBookIds(bookIds = listOf(bookId))
+            }
+        }
+
+        @Test
+        fun `does not call deleteShelfManualOrderForBookIds when all userBookId lookups return null`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 9
+
+            coEvery {
+                dao.getBookIdByUserBookId(userBookId = userBookId)
+            } returns null
+
+            // ----- Act -----
+            dataSource.removeUserBooksById(ids = listOf(userBookId))
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                dao.deleteShelfManualOrderForBookIds(bookIds = any())
+            }
+        }
+    }
+
+    @Nested
+    inner class GetSortedBooksByStatus {
+
+        @Test
+        fun `MANUAL mode builds SQL containing shelf_manual_order and binds statusCode twice`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.READ
+            val querySlot = slot<androidx.sqlite.db.SupportSQLiteQuery>()
+
+            every {
+                dao.observeBooksRaw(query = capture(querySlot))
+            } returns flowOf(emptyList())
+
+            // ----- Act -----
+            dataSource.getSortedBooksByStatus(
+                status = status,
+                mode = LibrarySortMode.MANUAL,
+                direction = SortDirection.ASCENDING,
+            ).test {
+                awaitItem()
+                awaitComplete()
+            }
+
+            // ----- Assert -----
+            val sql = querySlot.captured.sql
+            sql shouldContain "shelf_manual_order"
+        }
+
+        @Test
+        fun `non-MANUAL mode builds SQL without shelf_manual_order and binds statusCode once`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.READ
+            val querySlot = slot<androidx.sqlite.db.SupportSQLiteQuery>()
+
+            every {
+                dao.observeBooksRaw(query = capture(querySlot))
+            } returns flowOf(emptyList())
+
+            // ----- Act -----
+            dataSource.getSortedBooksByStatus(
+                status = status,
+                mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
+            ).test {
+                awaitItem()
+                awaitComplete()
+            }
+
+            // ----- Assert -----
+            val sql = querySlot.captured.sql
+            sql shouldNotContain "shelf_manual_order"
         }
     }
 

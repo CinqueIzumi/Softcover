@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.data.database.model.EditionLocalImagePath
 import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.data.database.model.ListBookFull
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
@@ -81,6 +82,7 @@ interface BookDao {
             BookDeadlineEntity::class,
             TagEntity::class,
             BookTagCrossRef::class,
+            ShelfManualOrderEntity::class,
         ],
     )
     fun observeBooksRaw(query: SupportSQLiteQuery): Flow<List<BookFullEntity>>
@@ -612,6 +614,7 @@ interface BookDao {
         deleteAllBookAuthorCrossRefs()
         deleteAllEditionAuthorCrossRefs()
         deleteAllBookTagCrossRefs()
+        deleteAllShelfManualOrder()
 
         deleteAllUserBooks()
         deleteAllBookEditions()
@@ -646,5 +649,55 @@ interface BookDao {
 
     @Query("DELETE FROM tags")
     suspend fun deleteAllTags()
+    // endregion
+
+    // region Shelf manual order
+    @Query("SELECT * FROM shelf_manual_order WHERE statusCode = :statusCode ORDER BY position ASC")
+    fun observeShelfManualOrder(statusCode: Int): Flow<List<ShelfManualOrderEntity>>
+
+    @Upsert
+    suspend fun upsertShelfManualOrder(rows: List<ShelfManualOrderEntity>)
+
+    @Query("DELETE FROM shelf_manual_order WHERE statusCode = :statusCode AND position < :positionUpperBound")
+    suspend fun deleteShelfManualOrderPrefix(statusCode: Int, positionUpperBound: Int)
+
+    @Query("DELETE FROM shelf_manual_order WHERE bookId IN (:bookIds)")
+    suspend fun deleteShelfManualOrderForBookIds(bookIds: List<Int>)
+
+    @Query("DELETE FROM shelf_manual_order")
+    suspend fun deleteAllShelfManualOrder()
+
+    /**
+     * Atomically rewrite the **prefix** of the shelf's manual ordering with [prefixBookIds] —
+     * positions `0..prefixBookIds.size - 1`. Positions beyond that range are left untouched, so a
+     * shallow drag at the top of the shelf doesn't pin books the user never touched.
+     *
+     * The prefix is delete-then-upsert: any book that previously occupied a position in the
+     * prefix range and is no longer present drops out (its position row is gone); any book in
+     * [prefixBookIds] that previously had a position elsewhere is moved into the prefix range by
+     * the upsert (PK is `statusCode, bookId`, so the old row is overwritten).
+     */
+    @Transaction
+    suspend fun applyShelfManualOrderPrefix(
+        statusCode: Int,
+        prefixBookIds: List<Int>,
+    ) {
+        deleteShelfManualOrderPrefix(
+            statusCode = statusCode,
+            positionUpperBound = prefixBookIds.size,
+        )
+
+        if (prefixBookIds.isEmpty()) return
+
+        upsertShelfManualOrder(
+            rows = prefixBookIds.mapIndexed { index, bookId ->
+                ShelfManualOrderEntity(
+                    statusCode = statusCode,
+                    bookId = bookId,
+                    position = index,
+                )
+            },
+        )
+    }
     // endregion
 }

@@ -57,6 +57,7 @@ fun List<BookEdition>.applyEditionSort(
         LibrarySortMode.RATING,
         LibrarySortMode.PROGRESS,
         LibrarySortMode.DEADLINE_URGENCY,
+        LibrarySortMode.MANUAL,
             -> return this
     }
 

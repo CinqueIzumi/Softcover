@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.data.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.data.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
@@ -60,11 +61,12 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
         ReadingLogEntryEntity::class,
         TagEntity::class,
         BookTagCrossRef::class,
+        ShelfManualOrderEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 26,
+    version = 27,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -114,6 +116,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_23_24)
                 .addMigrations(MIGRATION_24_25)
                 .addMigrations(MIGRATION_25_26)
+                .addMigrations(MIGRATION_26_27)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -858,6 +861,24 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_progress_updates_userBookId_kind ON pending_progress_updates(userBookId, kind)"
                 )
+            }
+        }
+
+        private val MIGRATION_26_27 = object : Migration(26, 27) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS shelf_manual_order (
+                            statusCode INTEGER NOT NULL,
+                            bookId INTEGER NOT NULL,
+                            position INTEGER NOT NULL,
+                            PRIMARY KEY(statusCode, bookId)
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_shelf_manual_order_statusCode ON shelf_manual_order(statusCode)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_shelf_manual_order_bookId ON shelf_manual_order(bookId)")
             }
         }
 

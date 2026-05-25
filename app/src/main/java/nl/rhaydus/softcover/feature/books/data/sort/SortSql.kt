@@ -82,6 +82,12 @@ internal fun LibrarySortMode.toOrderByFragment(direction: SortDirection): String
                 '9999-12-31'
             ) $dir
         """.trimIndent()
+
+        // MANUAL needs an extra JOIN against shelf_manual_order, which the fragment shape can't
+        // express. BooksLocalDataSource.getSortedBooksByStatus branches on MANUAL and builds the
+        // full statement itself; this fragment path is unreachable for MANUAL.
+        LibrarySortMode.MANUAL ->
+            error("MANUAL sort cannot be expressed as a stand-alone ORDER BY fragment; the caller must build the full statement.")
     }
 }
 

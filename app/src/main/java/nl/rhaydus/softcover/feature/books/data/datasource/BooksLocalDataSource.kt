@@ -1,22 +1,33 @@
 package nl.rhaydus.softcover.feature.books.data.datasource
 
-import java.io.File
+import androidx.sqlite.db.SimpleSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.data.database.dao.BookDao
+import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
-import androidx.sqlite.db.SimpleSQLiteQuery
-import nl.rhaydus.softcover.core.data.database.dao.BookDao
 import nl.rhaydus.softcover.feature.books.data.mapper.toModel
 import nl.rhaydus.softcover.feature.books.data.sort.toOrderByFragment
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
+import java.io.File
 
 interface BooksLocalDataSource {
     val allUserBooks: Flow<List<Book>>
+
+    /**
+     * Rewrite the **prefix** of the manual ordering for [status] with [prefixBookIds]
+     * (position = index). Positions beyond `prefixBookIds.size` are intentionally left intact so
+     * that a shallow drag at the top of the shelf doesn't pin books the user never touched. An
+     * empty list clears positions `0` (i.e. no-op).
+     */
+    suspend fun applyShelfManualOrderPrefix(
+        status: UserBookStatus,
+        prefixBookIds: List<Int>,
+    )
 
     /**
      * Library-screen path: returns ALL user books sorted by [mode] + [direction], performed
@@ -150,6 +161,17 @@ class BooksLocalDataSourceImpl(
         mode: LibrarySortMode,
         direction: SortDirection,
     ): Flow<List<Book>> {
+        // MANUAL is a per-shelf concept (positions are keyed by statusCode), so it has no
+        // meaning on the All tab. The sort dropdown excludes MANUAL on All; this fallback
+        // protects the path against a stale persisted setting reaching here from a future code
+        // change and crashing the collector via toOrderByFragment.
+        if (mode == LibrarySortMode.MANUAL) {
+            return getSortedAllUserBooks(
+                mode = LibrarySortMode.Default,
+                direction = LibrarySortMode.Default.defaultDirection,
+            )
+        }
+
         val orderBy = mode.toOrderByFragment(direction = direction)
         val sql = """
             SELECT b.*
@@ -168,20 +190,53 @@ class BooksLocalDataSourceImpl(
         mode: LibrarySortMode,
         direction: SortDirection,
     ): Flow<List<Book>> {
-        val orderBy = mode.toOrderByFragment(direction = direction)
-        val sql = """
-            SELECT b.*
-            FROM books b
-            INNER JOIN user_books ub ON ub.bookId = b.id
-            WHERE ub.statusCode = ?
-            ORDER BY $orderBy, ub.id DESC
-        """.trimIndent()
+        // MANUAL needs a LEFT JOIN against shelf_manual_order keyed by the same statusCode the
+        // shelf is filtered on; books without a row sort last (and tie-break on ub.id DESC, so
+        // newcomers appear at the bottom in the order they were shelved). Direction is ignored
+        // because position itself is the order — flipping would just mirror the shelf.
+        val sql = if (mode == LibrarySortMode.MANUAL) {
+            """
+                SELECT b.*
+                FROM books b
+                INNER JOIN user_books ub ON ub.bookId = b.id
+                LEFT JOIN shelf_manual_order smo
+                    ON smo.bookId = b.id AND smo.statusCode = ?
+                WHERE ub.statusCode = ?
+                ORDER BY
+                    (smo.position IS NULL) ASC,
+                    smo.position ASC,
+                    ub.id DESC
+            """.trimIndent()
+        } else {
+            val orderBy = mode.toOrderByFragment(direction = direction)
+            """
+                SELECT b.*
+                FROM books b
+                INNER JOIN user_books ub ON ub.bookId = b.id
+                WHERE ub.statusCode = ?
+                ORDER BY $orderBy, ub.id DESC
+            """.trimIndent()
+        }
 
-        return dao.observeBooksRaw(
-            query = SimpleSQLiteQuery(sql, arrayOf<Any>(status.code)),
-        )
+        val args: Array<Any> = if (mode == LibrarySortMode.MANUAL) {
+            arrayOf(status.code, status.code)
+        } else {
+            arrayOf(status.code)
+        }
+
+        return dao.observeBooksRaw(query = SimpleSQLiteQuery(sql, args))
             .distinctUntilChanged()
             .map { list -> list.map { it.toModel() } }
+    }
+
+    override suspend fun applyShelfManualOrderPrefix(
+        status: UserBookStatus,
+        prefixBookIds: List<Int>,
+    ) {
+        dao.applyShelfManualOrderPrefix(
+            statusCode = status.code,
+            prefixBookIds = prefixBookIds,
+        )
     }
 
     override suspend fun cacheBook(book: Book) {
@@ -203,6 +258,10 @@ class BooksLocalDataSourceImpl(
         }
 
         dao.deleteUserBooksByIds(ids)
+
+        if (bookIds.isNotEmpty()) {
+            dao.deleteShelfManualOrderForBookIds(bookIds = bookIds)
+        }
 
         pathsToDelete.forEach { editionImageStorage.delete(path = it) }
     }

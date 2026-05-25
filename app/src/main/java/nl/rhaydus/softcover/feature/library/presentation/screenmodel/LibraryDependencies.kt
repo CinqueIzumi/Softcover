@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
@@ -41,6 +42,7 @@ class LibraryDependencies(
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    val reorderShelfBooksUseCase: ReorderShelfBooksUseCase,
     val addBookToListUseCase: AddBookToListUseCase,
     val removeBookFromListUseCase: RemoveBookFromListUseCase,
     override val coroutineScope: CoroutineScope,

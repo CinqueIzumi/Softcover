@@ -111,6 +111,9 @@ dependencies {
     // WorkManager for scheduled notifications
     implementation(libs.androidx.work.runtime.ktx)
 
+    // Drag-to-reorder for LazyGrid / LazyColumn
+    implementation(libs.reorderable)
+
     // Unit test dependencies
     testImplementation(libs.junit.params)
     testImplementation(libs.junit.engine)

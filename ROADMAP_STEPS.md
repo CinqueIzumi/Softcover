@@ -41,10 +41,10 @@ Sort affordance paired with the layout switcher (date added/finished, title, aut
 ### Step 2.4 — Per-tab stats subtitle + year filter on Read (S)
 Subtitle copy changes per tab ("24 titles · 8,402 pages"); the Read tab gains a year chip row. *(B.1.8, B.1.9)*
 
-### Step 2.7 — Drag-to-reorder books within any library list (M)
-Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to every library tab — Want-to-Read, Currently Reading, Read, and any custom list — plus the active-reading order on the Reading screen. Persisted as a manual sort mode per tab that coexists with Step 2.1's sort options (selecting any non-manual sort hides the drag affordance until manual is re-selected).
+### Step 2.7 — Drag-to-reorder books within a custom list (M)
+Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to any custom list surface — both the custom-list tab in Library and any dedicated list detail screen. Persisted as a manual sort mode per list that coexists with Step 2.1's sort options (selecting any non-manual sort hides the drag affordance until manual is re-selected).
 
-**Persistence split.** Custom lists are first-class Hardcover entities with a server-owned book order, so any reorder inside a custom list MUST be persisted back to Hardcover (the appropriate `list_books` / list-position mutation) in addition to the local cache — otherwise the manual order silently diverges from web/iOS. The built-in shelves (Want-to-Read, Currently Reading, Read) and the Reading-screen active order are local-only: Hardcover does not model a user-defined position on these, so the manual sort is stored in Room/DataStore against the local user and never round-tripped. Treat the local manual order as authoritative for built-in shelves; treat Hardcover as authoritative for custom lists (optimistic local update, reconcile on the next list refresh, surface a non-blocking error toast if the mutation fails). *(B.1.6, B.2.4, A.1.13, A.2.4)*
+**Persistence.** Custom lists are first-class Hardcover entities with a server-owned book order, so any reorder MUST be persisted back to Hardcover (the appropriate `list_books` / list-position mutation) in addition to the local cache — otherwise the manual order silently diverges from web/iOS. Treat Hardcover as authoritative (optimistic local update, reconcile on the next list refresh, surface a non-blocking error toast if the mutation fails). *(B.1.6, A.2.4)*
 
 ### Step 2.8 — "Plan today" nudge on Reading (S)
 Editorial one-liner above the featured card using deadline pacing maths already present. Dismissible per book per day. *(B.2.2)*
@@ -79,6 +79,13 @@ The new write paths in [[2.11]] and the custom-list reorder in [[2.7]] all push 
 **Out of scope (owned by full 9.7):** shake-on-conflict UI, conflict resolution beyond last-write-wins, queueing for non-list mutations (progress, sessions, ratings, reviews, highlights), surfaced "pending sync" indicator, manual retry affordance. A failed drain stays silent on the surface in 2.3.0 — the toast from 2.11 already fires on the original failure; the queue is purely the background reconciliation path.
 
 **Why pulled forward:** without it, the optimistic updates in [[2.11]] and [[2.7]] are a lie under intermittent connectivity. Building the queue once, scoped to four mutation types, is cheaper than retrofitting it across each list affordance later. *(D.7)*
+
+### Step 2.13 — Drag-to-reorder books within built-in shelves (S)
+Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to the built-in library shelves — Want-to-Read, Currently Reading, Read. Persisted as a manual sort mode per shelf that coexists with Step 2.1's sort options (selecting any non-manual sort hides the drag affordance until manual is re-selected).
+
+**Persistence.** Hardcover does not model a user-defined position on built-in shelves, so the manual sort is stored in Room against the local user and never round-tripped. Treat the local manual order as authoritative; no server mutation, no retry-queue entry.
+
+**Out of scope:** the active-reading order on the Reading screen. Reading-screen ordering can be revisited in a later release once shelf manual-sort patterns have settled. *(B.1.6, A.1.13)*
 
 ---
 

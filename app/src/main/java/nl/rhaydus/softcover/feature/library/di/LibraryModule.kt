@@ -65,6 +65,7 @@ val libraryModule = module {
             markBookAsReadingUseCase = get(),
             markBookAsWantToReadUseCase = get(),
             removeBookFromLibraryUseCase = get(),
+            reorderShelfBooksUseCase = get(),
             addBookToListUseCase = get(),
             removeBookFromListUseCase = get(),
         )

@@ -68,6 +68,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -101,6 +103,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -111,6 +115,7 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.PullToRefreshEyebrow
+import nl.rhaydus.softcover.core.presentation.component.StaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
@@ -146,6 +151,7 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnGridLayoutChan
 import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReadYearSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderShelfBooksAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChangeAction
@@ -1003,16 +1009,23 @@ object LibraryScreen : Screen {
 
         val supportedModes = remember(currentTabId) {
             val isCustomList = currentTabId.startsWith("list-")
+            val isAllTab = currentTabId == LibraryContentTab.All.id
+            val isDidNotFinishTab = currentTabId == LibraryContentTab.Status.of(UserBookStatus.DID_NOT_FINISH).id
 
-            if (isCustomList) {
-                listOf(
+            when {
+                isCustomList -> listOf(
                     LibrarySortMode.TITLE,
                     LibrarySortMode.AUTHOR,
                     LibrarySortMode.PAGE_COUNT,
                     LibrarySortMode.RELEASE_DATE,
                 )
-            } else {
-                LibrarySortMode.entries
+                // MANUAL only makes sense on the three built-in reading-state shelves where the
+                // user actively rearranges (Want to Read, Currently Reading, Read). The All tab
+                // has no single shelf to attach a position to, and DID_NOT_FINISH is an archive
+                // shelf where curating order isn't part of the workflow.
+                isAllTab || isDidNotFinishTab ->
+                    LibrarySortMode.entries.filter { it != LibrarySortMode.MANUAL }
+                else -> LibrarySortMode.entries
             }
         }
 
@@ -1046,7 +1059,7 @@ object LibraryScreen : Screen {
                                 ),
                             )
                         },
-                        trailingIcon = if (isActive) {
+                        trailingIcon = if (isActive && mode != LibrarySortMode.MANUAL) {
                             {
                                 val arrow = if (currentDirection == SortDirection.ASCENDING) {
                                     R.drawable.ic_arrow_drop_up
@@ -1191,21 +1204,49 @@ object LibraryScreen : Screen {
 
         val visibleBookIds = remember(visibleBooks) { visibleBooks.map { it.id } }
 
+        val sortMode = state.sortModeFor(tabId = tab.id)
+        val selectionMode = state.selectionMode
+
+        val manualReorderStatus: UserBookStatus? = if (
+            sortMode == LibrarySortMode.MANUAL &&
+            tab is LibraryContentTab.Status &&
+            tab.status != UserBookStatus.DID_NOT_FINISH &&
+            selectionMode.not()
+        ) {
+            tab.status
+        } else {
+            null
+        }
+
         val animator = rememberLazyItemMutationAnimator(keys = visibleBookIds)
 
         val entry = rememberStaggeredEntryCoordinator(key = "library:books:${tab.id}")
 
         ScrollToTopOnVisibleSetChange(
             tabId = tab.id,
-            sortMode = state.sortModeFor(tabId = tab.id),
+            sortMode = sortMode,
             sortDirection = state.sortDirectionFor(tabId = tab.id),
             filters = state.filtersFor(tabId = tab.id),
             visibleItemsKey = visibleBookIds.firstOrNull() ?: 0,
             gridState = gridState,
         )
 
+        if (manualReorderStatus != null) {
+            ReorderableBookGrid(
+                status = manualReorderStatus,
+                visibleBooks = visibleBooks,
+                visibleBookIds = visibleBookIds,
+                state = state,
+                gridState = gridState,
+                entry = entry,
+                onBookClick = onBookClick,
+                runAction = runAction,
+            )
+
+            return
+        }
+
         val haptics = LocalHaptics.current
-        val selectionMode = state.selectionMode
 
         LayoutGrid(
             layout = state.gridLayout,
@@ -1247,6 +1288,138 @@ object LibraryScreen : Screen {
                     dateStyle = state.dateStyle,
                 )
             }
+        }
+    }
+
+    /**
+     * MANUAL-sort path. Maintains a local shadow of book ids that the reorder library updates
+     * during drag so the grid reflects the move immediately; on drop we dispatch the action and
+     * the DAO re-emission becomes the source of truth. The shadow re-syncs whenever the canonical
+     * (DB-sorted) list changes — e.g. a book is shelved or unshelved from elsewhere.
+     *
+     * Long-press still enters bulk-select (parent gating then re-routes to the non-MANUAL path so
+     * drag handles disappear while a selection is active). Drag is initiated only from the
+     * dedicated handle overlaid on each card.
+     */
+    @Composable
+    private fun ReorderableBookGrid(
+        status: UserBookStatus,
+        visibleBooks: List<Book>,
+        visibleBookIds: List<Int>,
+        state: LibraryUiState,
+        gridState: LazyGridState,
+        entry: StaggeredEntryCoordinator,
+        onBookClick: (Book) -> Unit,
+        runAction: (LibraryAction) -> Unit,
+    ) {
+        val haptics = LocalHaptics.current
+
+        val orderedIds = remember { mutableStateListOf<Int>() }
+
+        LaunchedEffect(visibleBookIds) {
+            if (orderedIds.toList() != visibleBookIds) {
+                orderedIds.clear()
+                orderedIds.addAll(visibleBookIds)
+            }
+        }
+
+        val booksById = remember(visibleBooks) { visibleBooks.associateBy { it.id } }
+
+        // Highest visual index touched during the current drag — defines the prefix the user is
+        // re-arranging. Reset on drag start, read on drop. Books beyond this index are NOT
+        // persisted, so a shallow drag at the top of the shelf leaves the rest of the shelf in
+        // its natural order (and newcomers from the API still slot in just below the prefix).
+        val maxTouchedIndex = remember { mutableIntStateOf(-1) }
+
+        val reorderableState = rememberReorderableLazyGridState(lazyGridState = gridState) { from, to ->
+            val fromIndex = orderedIds.indexOf(from.key as Int)
+            val toIndex = orderedIds.indexOf(to.key as Int)
+
+            if (fromIndex == -1 || toIndex == -1) return@rememberReorderableLazyGridState
+
+            orderedIds.add(toIndex, orderedIds.removeAt(fromIndex))
+
+            maxTouchedIndex.intValue = maxOf(maxTouchedIndex.intValue, fromIndex, toIndex)
+        }
+
+        LayoutGrid(
+            layout = state.gridLayout,
+            gridState = gridState,
+        ) {
+            itemsIndexed(orderedIds, key = { _, id -> id }) { index, id ->
+                val book = booksById[id] ?: return@itemsIndexed
+
+                ReorderableItem(state = reorderableState, key = id) {
+                    Box {
+                        LayoutBookEntry(
+                            modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
+                            book = book,
+                            layout = state.gridLayout,
+                            onClick = { onBookClick(book) },
+                            onLongClick = {
+                                haptics.threshold()
+
+                                runAction(OnEnterSelectionModeAction(bookId = book.id))
+                            },
+                            isSelectionMode = false,
+                            isSelected = false,
+                            deadline = state.deadlines[book.id],
+                            dateStyle = state.dateStyle,
+                        )
+
+                        DragHandle(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .draggableHandle(
+                                    onDragStarted = {
+                                        maxTouchedIndex.intValue = -1
+
+                                        haptics.lift()
+                                    },
+                                    onDragStopped = {
+                                        haptics.drop()
+
+                                        val touchedDepth = maxTouchedIndex.intValue
+
+                                        if (touchedDepth >= 0 && touchedDepth < orderedIds.size) {
+                                            runAction(
+                                                OnReorderShelfBooksAction(
+                                                    status = status,
+                                                    prefixOrderedBookIds = orderedIds
+                                                        .take(touchedDepth + 1),
+                                                ),
+                                            )
+                                        }
+                                    },
+                                ),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Small grab affordance shown only while a shelf is in MANUAL sort. The icon itself is the
+     * drag handle — the caller attaches `Modifier.draggableHandle(...)` from the reorder library's
+     * item scope.
+     */
+    @Composable
+    private fun DragHandle(modifier: Modifier = Modifier) {
+        Surface(
+            modifier = modifier,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            shape = RoundedCornerShape(percent = 50),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_drag_handle),
+                contentDescription = "Drag to reorder",
+                modifier = Modifier
+                    .size(28.dp)
+                    .padding(4.dp),
+            )
         }
     }
 
