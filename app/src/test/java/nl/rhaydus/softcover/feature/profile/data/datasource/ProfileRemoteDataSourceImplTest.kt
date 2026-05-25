@@ -326,7 +326,6 @@ class ProfileRemoteDataSourceImplTest {
 
             val parseable1 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
             val parseable2 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-            val nullEntry = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
             val unparseable = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
             val duplicate = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
 
@@ -339,13 +338,11 @@ class ProfileRemoteDataSourceImplTest {
             every { queryData.streak_journals } returns listOf(
                 parseable1,
                 parseable2,
-                nullEntry,
                 unparseable,
                 duplicate,
             )
             every { parseable1.action_at } returns "2026-05-04"
             every { parseable2.action_at } returns "2026-05-03"
-            every { nullEntry.action_at } returns null
             every { unparseable.action_at } returns "not-a-date"
             every { duplicate.action_at } returns "2026-05-04"
             every { meEntry.name } returns ""

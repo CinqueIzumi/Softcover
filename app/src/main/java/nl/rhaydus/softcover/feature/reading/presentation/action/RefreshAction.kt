@@ -19,7 +19,7 @@ data object RefreshAction : ReadingAction {
         }
 
         dependencies
-            .refreshUserBooksUseCase(
+            .refreshLibraryUseCase(
                 scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
             )
             .onFailure {

@@ -20,13 +20,10 @@ import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
-import nl.rhaydus.softcover.GetUserBookListsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.MarkBookAsReadingMutation
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
-import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
-import nl.rhaydus.softcover.RemoveListBookMutation
 import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
@@ -34,15 +31,11 @@ import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
-import nl.rhaydus.softcover.feature.books.data.mapper.toBookList
-import nl.rhaydus.softcover.feature.books.data.mapper.toListBook
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion.userBookReadFragment
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -61,6 +54,7 @@ class BooksRemoteDataSourceImplTest {
 
         mockkStatic("nl.rhaydus.softcover.core.data.network.helper.ApolloExtensionsKt")
         mockkStatic("nl.rhaydus.softcover.feature.books.data.mapper.BookMapperKt")
+        mockkStatic("nl.rhaydus.softcover.feature.lists.data.mapper.ListMapperKt")
         mockkObject(UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion)
     }
 
@@ -201,14 +195,6 @@ class BooksRemoteDataSourceImplTest {
             this@mockk.id
         } returns id
     }
-
-    private fun stubListBook(listBookId: Int = 1): ListBook = mockk {
-        every {
-            this@mockk.listBookId
-        } returns listBookId
-    }
-
-    private fun stubBookList(): BookList = mockk()
 
     @Nested
     inner class FetchBookById {
@@ -1723,87 +1709,6 @@ class BooksRemoteDataSourceImplTest {
     }
 
     @Nested
-    inner class FetchUserLists {
-
-        @Test
-        fun `returns mapped book lists for each list entry returned by the query`() = runTest {
-            // ----- Arrange -----
-            val userId = 1
-            val expectedBookList = stubBookList()
-            val queryData = mockk<GetUserBookListsQuery.Data>()
-            val meEntry = mockk<GetUserBookListsQuery.Data.Me>()
-            val listEntry = mockk<GetUserBookListsQuery.Data.Me.List>()
-
-            coEvery {
-                apolloClient.safeQuery(query = any<GetUserBookListsQuery>(), fetchPolicy = any())
-            } returns queryData
-
-            every {
-                queryData.me
-            } returns listOf(meEntry)
-
-            every {
-                meEntry.lists
-            } returns listOf(listEntry)
-
-            every {
-                listEntry.toBookList()
-            } returns expectedBookList
-
-            // ----- Act -----
-            val result = dataSource.fetchUserLists(userId = userId)
-
-            // ----- Assert -----
-            result shouldBe listOf(expectedBookList)
-        }
-
-        @Test
-        fun `throws when me list is empty`() = runTest {
-            // ----- Arrange -----
-            val queryData = mockk<GetUserBookListsQuery.Data>()
-
-            coEvery {
-                apolloClient.safeQuery(query = any<GetUserBookListsQuery>(), fetchPolicy = any())
-            } returns queryData
-
-            every {
-                queryData.me
-            } returns emptyList()
-
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
-                dataSource.fetchUserLists(userId = 1)
-            }
-        }
-
-        @Test
-        fun `returns empty list when me has no lists`() = runTest {
-            // ----- Arrange -----
-            val userId = 1
-            val queryData = mockk<GetUserBookListsQuery.Data>()
-            val meEntry = mockk<GetUserBookListsQuery.Data.Me>()
-
-            coEvery {
-                apolloClient.safeQuery(query = any<GetUserBookListsQuery>(), fetchPolicy = any())
-            } returns queryData
-
-            every {
-                queryData.me
-            } returns listOf(meEntry)
-
-            every {
-                meEntry.lists
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = dataSource.fetchUserLists(userId = userId)
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-        }
-    }
-
-    @Nested
     inner class UpdateBookProgress {
 
         @Test
@@ -2380,195 +2285,4 @@ class BooksRemoteDataSourceImplTest {
         }
     }
 
-    @Nested
-    inner class MarkEditionAsOwned {
-
-        @Test
-        fun `throws when mutation returns null edition_owned wrapper`() = runTest {
-            // ----- Arrange -----
-            val edition = stubBookEdition(id = 55)
-            val mutationData = mockk<MarkEditionAsOwnedMutation.Data>()
-
-            coEvery {
-                apolloClient.safeMutation(mutation = any<MarkEditionAsOwnedMutation>())
-            } returns mutationData
-
-            every {
-                mutationData.edition_owned
-            } returns null
-
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
-                dataSource.markEditionAsOwned(edition = edition)
-            }
-        }
-
-        @Test
-        fun `returns mapped list book when mutation succeeds`() = runTest {
-            // ----- Arrange -----
-            val edition = stubBookEdition(id = 55)
-            val expectedListBook = stubListBook()
-            val mutationData = mockk<MarkEditionAsOwnedMutation.Data>()
-            val editionOwned = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned>()
-            val listBookEntry = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned.List_book>()
-
-            coEvery {
-                apolloClient.safeMutation(mutation = any<MarkEditionAsOwnedMutation>())
-            } returns mutationData
-
-            every {
-                mutationData.edition_owned
-            } returns editionOwned
-
-            every {
-                editionOwned.list_book
-            } returns listBookEntry
-
-            every {
-                listBookEntry.toListBook()
-            } returns expectedListBook
-
-            // ----- Act -----
-            val result = dataSource.markEditionAsOwned(edition = edition)
-
-            // ----- Assert -----
-            result shouldBe expectedListBook
-        }
-
-        @Test
-        fun `throws when mutation returns null list_book`() = runTest {
-            // ----- Arrange -----
-            val edition = stubBookEdition(id = 55)
-            val mutationData = mockk<MarkEditionAsOwnedMutation.Data>()
-            val editionOwned = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned>()
-
-            coEvery {
-                apolloClient.safeMutation(mutation = any<MarkEditionAsOwnedMutation>())
-            } returns mutationData
-
-            every {
-                mutationData.edition_owned
-            } returns editionOwned
-
-            every {
-                editionOwned.list_book
-            } returns null
-
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
-                dataSource.markEditionAsOwned(edition = edition)
-            }
-        }
-
-        @Test
-        fun `throws when toListBook maps the fragment to null`() = runTest {
-            // ----- Arrange -----
-            val edition = stubBookEdition(id = 55)
-            val mutationData = mockk<MarkEditionAsOwnedMutation.Data>()
-            val editionOwned = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned>()
-            val listBookEntry = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned.List_book>()
-
-            coEvery {
-                apolloClient.safeMutation(mutation = any<MarkEditionAsOwnedMutation>())
-            } returns mutationData
-
-            every {
-                mutationData.edition_owned
-            } returns editionOwned
-
-            every {
-                editionOwned.list_book
-            } returns listBookEntry
-
-            every {
-                listBookEntry.toListBook()
-            } returns null
-
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
-                dataSource.markEditionAsOwned(edition = edition)
-            }
-        }
-    }
-
-    @Nested
-    inner class RemoveListBook {
-
-        @Test
-        fun `throws when mutation returns null delete_list_book wrapper`() = runTest {
-            // ----- Arrange -----
-            val listBook = stubListBook(listBookId = 22)
-            val mutationData = mockk<RemoveListBookMutation.Data>()
-
-            coEvery {
-                apolloClient.safeMutation(mutation = any<RemoveListBookMutation>())
-            } returns mutationData
-
-            every {
-                mutationData.delete_list_book
-            } returns null
-
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
-                dataSource.removeListBook(book = listBook)
-            }
-        }
-
-        @Test
-        fun `returns mapped book list when mutation succeeds`() = runTest {
-            // ----- Arrange -----
-            val listBook = stubListBook(listBookId = 22)
-            val expectedBookList = stubBookList()
-            val mutationData = mockk<RemoveListBookMutation.Data>()
-            val deleteListBook = mockk<RemoveListBookMutation.Data.Delete_list_book>()
-            val listEntry = mockk<RemoveListBookMutation.Data.Delete_list_book.List>()
-
-            coEvery {
-                apolloClient.safeMutation(mutation = any<RemoveListBookMutation>())
-            } returns mutationData
-
-            every {
-                mutationData.delete_list_book
-            } returns deleteListBook
-
-            every {
-                deleteListBook.list
-            } returns listEntry
-
-            every {
-                listEntry.toBookList()
-            } returns expectedBookList
-
-            // ----- Act -----
-            val result = dataSource.removeListBook(book = listBook)
-
-            // ----- Assert -----
-            result shouldBe expectedBookList
-        }
-
-        @Test
-        fun `throws when mutation returns null list fragment`() = runTest {
-            // ----- Arrange -----
-            val listBook = stubListBook(listBookId = 22)
-            val mutationData = mockk<RemoveListBookMutation.Data>()
-            val deleteListBook = mockk<RemoveListBookMutation.Data.Delete_list_book>()
-
-            coEvery {
-                apolloClient.safeMutation(mutation = any<RemoveListBookMutation>())
-            } returns mutationData
-
-            every {
-                mutationData.delete_list_book
-            } returns deleteListBook
-
-            every {
-                deleteListBook.list
-            } returns null
-
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
-                dataSource.removeListBook(book = listBook)
-            }
-        }
-    }
 }

@@ -20,7 +20,7 @@ class OnRefreshAction : LibraryAction {
 
         scope.setState { it.copy(isLoading = true) }
 
-        dependencies.refreshUserBooksUseCase(scope = refreshScope).onFailure {
+        dependencies.refreshLibraryUseCase(scope = refreshScope).onFailure {
             Timber.e("$it")
         }
 

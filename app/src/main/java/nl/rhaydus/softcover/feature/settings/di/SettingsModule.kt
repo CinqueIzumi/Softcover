@@ -102,7 +102,7 @@ val settingsModule = module {
     factory {
         InitializeUserIdAndBooksUseCase(
             settingsRepository = get(),
-            booksRepository = get(),
+            refreshLibraryUseCase = get(),
         )
     }
 
@@ -179,7 +179,7 @@ val settingsModule = module {
             setEnabledListIdsUseCase = get(),
             setLibraryTabOrderUseCase = get(),
             getAllUserListsUseCase = get(),
-            refreshUserBooksUseCase = get(),
+            refreshLibraryUseCase = get(),
             applicationScope = get(),
             appDispatchers = get(),
             flows = getAll(),

@@ -6,12 +6,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
 import androidx.sqlite.db.SimpleSQLiteQuery
-import nl.rhaydus.softcover.feature.books.data.dao.BookDao
+import nl.rhaydus.softcover.core.data.database.dao.BookDao
 import nl.rhaydus.softcover.feature.books.data.mapper.toModel
 import nl.rhaydus.softcover.feature.books.data.sort.toOrderByFragment
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
@@ -19,7 +17,6 @@ import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
 interface BooksLocalDataSource {
     val allUserBooks: Flow<List<Book>>
-    val allUserLists: Flow<List<BookList>>
 
     /**
      * Library-screen path: returns ALL user books sorted by [mode] + [direction], performed
@@ -69,19 +66,7 @@ interface BooksLocalDataSource {
 
     suspend fun removeUserBooksById(ids: List<Int>)
 
-    suspend fun cacheUserBookLists(lists: List<BookList>)
-
-    suspend fun cacheListBook(book: ListBook)
-
     suspend fun removeAllBooks()
-
-    suspend fun findOwnedListBookByEditionId(editionId: Int): ListBook?
-
-    suspend fun getOwnedListId(): Int?
-
-    suspend fun removeOwnedListBookByEditionId(editionId: Int)
-
-    suspend fun syncBookListMetadata(serverListIds: Set<Int>)
 
     suspend fun deleteOrphanBooks()
 
@@ -99,12 +84,6 @@ class BooksLocalDataSourceImpl(
             .observeBooks()
             .distinctUntilChanged()
             .map { list -> list.map { it.toModel() } }
-
-    override val allUserLists: Flow<List<BookList>>
-        get() = dao
-            .observeBookLists()
-            .distinctUntilChanged()
-            .map { lists -> lists.map { it.toModel() } }
 
     override suspend fun getAllUserBookIds(): List<Int> {
         return dao.getAllUserBookIds()
@@ -228,36 +207,12 @@ class BooksLocalDataSourceImpl(
         pathsToDelete.forEach { editionImageStorage.delete(path = it) }
     }
 
-    override suspend fun cacheUserBookLists(lists: List<BookList>) {
-        dao.cacheBookLists(lists = lists)
-    }
-
-    override suspend fun cacheListBook(book: ListBook) {
-        dao.cacheListBook(listBook = book)
-    }
-
     override suspend fun removeAllBooks() {
         val pathsToDelete = dao.getAllLocalImagePaths().mapNotNull { it.localImagePath }
 
         dao.deleteAllUserBooksAndData()
 
         pathsToDelete.forEach { editionImageStorage.delete(path = it) }
-    }
-
-    override suspend fun findOwnedListBookByEditionId(editionId: Int): ListBook? {
-        return dao.getOwnedListBookByEditionId(editionId = editionId)?.toModel(isOwnedList = true)
-    }
-
-    override suspend fun getOwnedListId(): Int? {
-        return dao.getOwnedListId()
-    }
-
-    override suspend fun removeOwnedListBookByEditionId(editionId: Int) {
-        dao.deleteOwnedListBookByEditionId(editionId = editionId)
-    }
-
-    override suspend fun syncBookListMetadata(serverListIds: Set<Int>) {
-        dao.syncBookListMetadata(serverListIds = serverListIds)
     }
 
     override suspend fun deleteOrphanBooks() {

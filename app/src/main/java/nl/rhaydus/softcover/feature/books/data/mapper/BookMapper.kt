@@ -3,27 +3,21 @@ package nl.rhaydus.softcover.feature.books.data.mapper
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.BookSeries
-import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
-import nl.rhaydus.softcover.feature.books.data.model.AuthorEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
-import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
-import nl.rhaydus.softcover.feature.books.data.model.BookSeriesEntity
-import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
-import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
-import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
-import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
-import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
-import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
+import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
+import nl.rhaydus.softcover.core.data.database.model.BookAuthorCrossRef
+import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
+import nl.rhaydus.softcover.core.data.database.model.BookEntity
+import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
+import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
+import nl.rhaydus.softcover.core.data.database.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
+import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import nl.rhaydus.softcover.fragment.BookDetailFragment.Default_cover_edition.Companion.editionFragment
 import nl.rhaydus.softcover.fragment.BookListFragment
@@ -31,9 +25,6 @@ import nl.rhaydus.softcover.fragment.BookListFragment.Book_series.Companion.book
 import nl.rhaydus.softcover.fragment.BookSeriesFragment
 import nl.rhaydus.softcover.fragment.EditionDetailFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
-import nl.rhaydus.softcover.fragment.ListBookFragment
-import nl.rhaydus.softcover.fragment.ListFragment
-import nl.rhaydus.softcover.fragment.ListFragment.List_book.Companion.listBookFragment
 import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Book.Companion.bookListFragment
@@ -88,29 +79,6 @@ fun EditionDetailFragment.toBookEdition(): BookEdition {
         Author(name = author.name, id = author.id)
     }
     return (this as EditionFragment).toBookEdition(authors = authors)
-}
-
-fun ListFragment.toBookList(): BookList {
-    val listBooks = list_books.mapNotNull { it.listBookFragment()?.toListBook() }
-
-    return BookList(
-        id = id,
-        name = name,
-        slug = slug ?: "",
-        books = listBooks
-    )
-}
-
-fun ListBookFragment.toListBook(): ListBook? {
-    val editionId = edition_id ?: return null
-
-    return ListBook(
-        listBookId = id,
-        listId = list_id,
-        bookId = book_id,
-        editionId = editionId,
-        addedAt = created_at,
-    )
 }
 
 fun ReadingJournalFragment.toReadingJournal(): ReadingJournal = ReadingJournal(
@@ -294,24 +262,10 @@ private fun BookSeriesFragment.toBookSeries(): BookSeries? {
 // endregion
 
 // region UI -> Entity mappers
-fun BookList.toEntity(): BookListEntity = BookListEntity(
-    id = id,
-    name = name,
-    slug = slug,
-)
-
 fun BookSeries.toEntity(): BookSeriesEntity = BookSeriesEntity(
     id = id,
     name = name,
     amountOfBooks = amountOfBooks,
-)
-
-fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
-    listId = listId,
-    bookId = bookId,
-    editionId = editionId,
-    listBookId = listBookId,
-    addedAt = addedAt,
 )
 
 fun Book.toEntity(): BookEntity = BookEntity(
@@ -449,55 +403,6 @@ fun ReadingJournalEntity.toModel(): ReadingJournal = ReadingJournal(
     updatedAt = updatedAt,
     event = event,
 )
-
-fun ListBookFull.toModel(isOwnedList: Boolean): ListBook {
-    val cachedBook = book
-
-    val preferredEdition = if (isOwnedList) {
-        null
-    } else {
-        val preferredEditionId = cachedBook?.userBookWithJournals?.userBook?.editionId
-            ?: cachedBook?.book?.defaultEditionId
-
-        preferredEditionId?.let { id ->
-            cachedBook?.editions?.firstOrNull { it.edition.edition.id == id }
-        }
-    }
-
-    val resolvedEdition = preferredEdition ?: edition
-
-    return ListBook(
-        listBookId = listBook.listBookId,
-        listId = listBook.listId,
-        bookId = listBook.bookId,
-        editionId = resolvedEdition?.edition?.edition?.id ?: listBook.editionId,
-        addedAt = listBook.addedAt,
-        book = book?.toModel(),
-        edition = resolvedEdition?.let { editionWithAuthors ->
-            editionWithAuthors.edition.edition.toModel(
-                authors = editionWithAuthors.authors,
-                owned = editionWithAuthors.edition.isOwned,
-            )
-        },
-    )
-}
-
-fun BookListWithBooks.toModel(): BookList {
-    val isOwnedList = bookList.slug == "owned"
-
-    return BookList(
-        id = bookList.id,
-        name = bookList.name,
-        slug = bookList.slug,
-        books = listBooks
-            .filter { it.book != null && it.edition != null }
-            .sortedWith(
-                compareBy<ListBookFull, String?>(nullsLast(reverseOrder())) { it.listBook.addedAt }
-                    .thenByDescending { it.listBook.listBookId }
-            )
-            .map { it.toModel(isOwnedList = isOwnedList) },
-    )
-}
 
 fun BookFullEntity.toModel(): Book {
     val uiEditions = editions.map { editionWithAuthors ->

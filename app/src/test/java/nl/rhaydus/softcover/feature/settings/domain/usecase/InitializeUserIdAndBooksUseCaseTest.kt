@@ -3,10 +3,10 @@ package nl.rhaydus.softcover.feature.settings.domain.usecase
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.RefreshScope
-import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -15,16 +15,17 @@ import org.junit.jupiter.api.Test
 class InitializeUserIdAndBooksUseCaseTest {
 
     private lateinit var settingsRepository: SettingsRepository
-    private lateinit var booksRepository: BooksRepository
+    private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var useCase: InitializeUserIdAndBooksUseCase
 
     @BeforeEach
     fun setUp() {
         settingsRepository = mockk(relaxed = true)
-        booksRepository = mockk(relaxed = true)
+        refreshLibraryUseCase = mockk()
+
         useCase = InitializeUserIdAndBooksUseCase(
             settingsRepository = settingsRepository,
-            booksRepository = booksRepository,
+            refreshLibraryUseCase = refreshLibraryUseCase,
         )
     }
 
@@ -32,13 +33,17 @@ class InitializeUserIdAndBooksUseCaseTest {
     inner class Invoke {
 
         @Test
-        fun `returns success when all repository calls succeed`() = runTest {
+        fun `returns success when all calls succeed`() = runTest {
             // ----- Arrange -----
             val userId = 7
 
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } returns userId
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
 
             // ----- Act -----
             val result = useCase()
@@ -48,7 +53,7 @@ class InitializeUserIdAndBooksUseCaseTest {
         }
 
         @Test
-        fun `calls refreshUserBooks with the userId returned from the backend`() = runTest {
+        fun `updateUserId is called before refreshLibraryUseCase`() = runTest {
             // ----- Arrange -----
             val userId = 7
 
@@ -56,12 +61,17 @@ class InitializeUserIdAndBooksUseCaseTest {
                 settingsRepository.getUserIdFromBackend()
             } returns userId
 
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
             // ----- Act -----
             useCase()
 
             // ----- Assert -----
-            coVerify {
-                booksRepository.refreshUserBooks(userId = userId, scope = RefreshScope.All)
+            coVerifyOrder {
+                settingsRepository.updateUserId(id = userId)
+                refreshLibraryUseCase()
             }
         }
 
@@ -74,6 +84,10 @@ class InitializeUserIdAndBooksUseCaseTest {
                 settingsRepository.getUserIdFromBackend()
             } returns userId
 
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
             // ----- Act -----
             useCase()
 
@@ -84,34 +98,34 @@ class InitializeUserIdAndBooksUseCaseTest {
         }
 
         @Test
-        fun `returns failure when getUserIdFromBackend throws`() = runTest {
+        fun `calls refreshLibraryUseCase after updateUserId`() = runTest {
             // ----- Arrange -----
-            val expectedError = RuntimeException("backend error")
-
-            coEvery {
-                settingsRepository.getUserIdFromBackend()
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `returns failure when refreshUserBooks throws`() = runTest {
-            // ----- Arrange -----
-            val userId = 3
-            val expectedError = RuntimeException("books init error")
+            val userId = 7
 
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } returns userId
 
             coEvery {
-                booksRepository.refreshUserBooks(userId = userId, scope = RefreshScope.All)
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                refreshLibraryUseCase()
+            }
+        }
+
+        @Test
+        fun `returns failure when getUserIdFromBackend throws`() = runTest {
+            // ----- Arrange -----
+            val expectedError = RuntimeException("backend error")
+
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
             } throws expectedError
 
             // ----- Act -----
@@ -135,6 +149,28 @@ class InitializeUserIdAndBooksUseCaseTest {
             coEvery {
                 settingsRepository.updateUserId(id = userId)
             } throws expectedError
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            result.exceptionOrNull() shouldBe expectedError
+        }
+
+        @Test
+        fun `returns failure when refreshLibraryUseCase returns failure`() = runTest {
+            // ----- Arrange -----
+            val userId = 3
+            val expectedError = RuntimeException("refresh error")
+
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns userId
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.failure(expectedError)
 
             // ----- Act -----
             val result = useCase()

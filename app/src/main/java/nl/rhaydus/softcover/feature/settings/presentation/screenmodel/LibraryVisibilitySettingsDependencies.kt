@@ -4,8 +4,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
@@ -21,7 +21,7 @@ class LibraryVisibilitySettingsDependencies(
     val setEnabledListIdsUseCase: SetEnabledListIdsUseCase,
     val setLibraryTabOrderUseCase: SetLibraryTabOrderUseCase,
     val getAllUserListsUseCase: GetAllUserListsUseCase,
-    val refreshUserBooksUseCase: RefreshUserBooksUseCase,
+    val refreshLibraryUseCase: RefreshLibraryUseCase,
     val applicationScope: ApplicationScope,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,

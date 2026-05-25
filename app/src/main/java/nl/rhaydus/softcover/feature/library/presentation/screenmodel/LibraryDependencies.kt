@@ -3,10 +3,10 @@ package nl.rhaydus.softcover.feature.library.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedBooksByStatusUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
@@ -20,7 +20,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortUseCas
 class LibraryDependencies(
     val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,
     val getSortedBooksByStatusUseCase: GetSortedBooksByStatusUseCase,
-    val refreshUserBooksUseCase: RefreshUserBooksUseCase,
+    val refreshLibraryUseCase: RefreshLibraryUseCase,
     val getAllUserListsUseCase: GetAllUserListsUseCase,
     val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
     val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,

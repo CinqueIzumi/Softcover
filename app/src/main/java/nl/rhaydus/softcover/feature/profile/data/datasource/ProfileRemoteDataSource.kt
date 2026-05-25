@@ -25,7 +25,7 @@ class ProfileRemoteDataSourceImpl(
             ?: throw Exception("User could not be initialized")
 
         val activeReadingDates = data.streak_journals
-            .mapNotNull { it.action_at?.let(::parseDateOrNull) }
+            .mapNotNull { parseDateOrNull(it.action_at) }
             .toSet()
 
         return UserProfileSnapshot(

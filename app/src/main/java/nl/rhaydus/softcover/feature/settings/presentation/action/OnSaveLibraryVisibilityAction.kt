@@ -32,7 +32,7 @@ class OnSaveLibraryVisibilityAction : LibraryVisibilityAction {
                 Timber.e("$it")
             }
 
-            dependencies.refreshUserBooksUseCase().onFailure { Timber.e("$it") }
+            dependencies.refreshLibraryUseCase().onFailure { Timber.e("$it") }
 
             scope.setState { it.copy(isSaving = false) }
         }

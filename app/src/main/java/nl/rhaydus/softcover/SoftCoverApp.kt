@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.feature.book_detail.di.bookDetailModule
 import nl.rhaydus.softcover.feature.books.di.booksModule
 import nl.rhaydus.softcover.feature.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.feature.library.di.libraryModule
+import nl.rhaydus.softcover.feature.lists.di.listsModule
 import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
 import nl.rhaydus.softcover.feature.personal.di.personalModule
 import nl.rhaydus.softcover.feature.profile.di.profileModule
@@ -58,6 +59,7 @@ class SoftCoverApp : Application() {
                 databaseModule,
                 bookDetailModule,
                 libraryModule,
+                listsModule,
                 onboardingModule,
                 readingModule,
                 exploreModule,

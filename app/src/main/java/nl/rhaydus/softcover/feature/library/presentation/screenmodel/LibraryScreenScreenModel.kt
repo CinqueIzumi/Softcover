@@ -5,10 +5,10 @@ import androidx.compose.material3.TopAppBarState
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedBooksByStatusUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -27,7 +27,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortUseCas
 class LibraryScreenScreenModel(
     private val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,
     private val getSortedBooksByStatusUseCase: GetSortedBooksByStatusUseCase,
-    private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
+    private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
     private val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
     private val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
@@ -48,7 +48,7 @@ class LibraryScreenScreenModel(
     override val dependencies = LibraryDependencies(
         getSortedAllUserBooksUseCase = getSortedAllUserBooksUseCase,
         getSortedBooksByStatusUseCase = getSortedBooksByStatusUseCase,
-        refreshUserBooksUseCase = refreshUserBooksUseCase,
+        refreshLibraryUseCase = refreshLibraryUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
         getLibraryGridLayoutAsFlowUseCase = getLibraryGridLayoutAsFlowUseCase,
         setLibraryGridLayoutUseCase = setLibraryGridLayoutUseCase,

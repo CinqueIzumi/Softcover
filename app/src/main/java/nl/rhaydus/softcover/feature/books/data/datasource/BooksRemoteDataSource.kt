@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.books.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
+import com.apollographql.apollo.cache.normalized.FetchPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.GetBookByIdQuery
@@ -13,8 +14,6 @@ import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery.Data.Edition.Companion.editionDetailFragment
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.editionDetailFragment as editionsByIdsDetailFragment
-import nl.rhaydus.softcover.GetUserBookListsQuery
-import nl.rhaydus.softcover.GetUserBookListsQuery.Data.Me.List.Companion.listFragment
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.MarkBookAsReadMutation
@@ -23,32 +22,21 @@ import nl.rhaydus.softcover.MarkBookAsReadingMutation
 import nl.rhaydus.softcover.MarkBookAsReadingMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
-import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
-import nl.rhaydus.softcover.MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion.listBookFragment
-import nl.rhaydus.softcover.RemoveListBookMutation
-import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Companion.listFragment
 import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book.Companion.userBookFragment
-import com.apollographql.apollo.cache.normalized.FetchPolicy
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
-import nl.rhaydus.softcover.feature.books.data.mapper.toBookList
-import nl.rhaydus.softcover.feature.books.data.mapper.toListBook
 import nl.rhaydus.softcover.type.DatesReadInput
-import nl.rhaydus.softcover.type.Int_comparison_exp
-import nl.rhaydus.softcover.type.Lists_bool_exp
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
 import timber.log.Timber
@@ -76,11 +64,6 @@ interface BooksRemoteDataSource {
         statusIds: Set<Int>? = null,
     ): List<Book>
 
-    suspend fun fetchUserLists(
-        userId: Int,
-        listIds: Set<Int>? = null,
-    ): List<BookList>
-
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
 
     suspend fun fetchEditionsByIds(
@@ -100,10 +83,6 @@ interface BooksRemoteDataSource {
         userBook: UserBook,
         newEditionId: Int,
     ): Book
-
-    suspend fun markEditionAsOwned(edition: BookEdition): ListBook
-
-    suspend fun removeListBook(book: ListBook): BookList
 
     suspend fun replayUpdateBookProgress(
         userBookReadId: Int,
@@ -315,32 +294,6 @@ class BooksRemoteDataSourceImpl(
         isCompilation = canonical.isCompilation,
     )
 
-    override suspend fun fetchUserLists(
-        userId: Int,
-        listIds: Set<Int>?,
-    ): List<BookList> = withContext(Dispatchers.IO) {
-        val whereFilter: Optional<Lists_bool_exp?> = if (listIds == null) {
-            Optional.Absent
-        } else {
-            Optional.Present(
-                Lists_bool_exp(
-                    id = Optional.Present(Int_comparison_exp(_in = Optional.Present(listIds.toList()))),
-                ),
-            )
-        }
-
-        val result = apolloClient.safeQuery(
-            GetUserBookListsQuery(where = whereFilter),
-        )
-
-        val lists = result.me.firstOrNull()?.lists
-            ?: throw Exception("No lists were found")
-
-        lists.mapNotNull { list ->
-            list.listFragment()?.toBookList()
-        }
-    }
-
     override suspend fun updateBookProgress(
         book: Book,
         newPage: Int?,
@@ -427,33 +380,6 @@ class BooksRemoteDataSourceImpl(
             ?: throw Exception("Did not receive a new user book fragment")
 
         return userBookFragment.toBook() ?: throw Exception("Book was not mapped successfully")
-    }
-
-    override suspend fun markEditionAsOwned(edition: BookEdition): ListBook {
-        val mutation = MarkEditionAsOwnedMutation(id = edition.id)
-
-        val listBookFragment = apolloClient
-            .safeMutation(mutation = mutation)
-            .edition_owned
-            ?.list_book
-            ?.listBookFragment()
-            ?: throw Exception("Did not receive a list book fragment")
-
-        return listBookFragment.toListBook()
-            ?: throw Exception("List book mapping resulted in null")
-    }
-
-    override suspend fun removeListBook(book: ListBook): BookList {
-        val mutation = RemoveListBookMutation(id = book.listBookId)
-
-        val listFragment = apolloClient
-            .safeMutation(mutation = mutation)
-            .delete_list_book
-            ?.list
-            ?.listFragment()
-            ?: throw Exception("Did not receive a list fragment")
-
-        return listFragment.toBookList()
     }
 
     override suspend fun replayUpdateBookProgress(

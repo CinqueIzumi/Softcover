@@ -4,8 +4,6 @@ import java.io.File
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
@@ -13,7 +11,6 @@ import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
 interface BooksRepository {
     val books: Flow<List<Book>>
-    val allUserLists: Flow<List<BookList>>
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
@@ -27,10 +24,22 @@ interface BooksRepository {
         direction: SortDirection,
     ): Flow<List<Book>>
 
+    /**
+     * Re-fetches the user's books from the remote and reconciles them with the local cache.
+     * When [statusFilter] is null, refreshes every status; otherwise refreshes only that status's
+     * books. This is a books-only operation — list refresh is owned by [nl.rhaydus.softcover.feature.lists.domain.repository.ListsRepository].
+     */
     suspend fun refreshUserBooks(
         userId: Int,
-        scope: RefreshScope = RefreshScope.All,
+        statusFilter: UserBookStatus? = null,
     )
+
+    /**
+     * Deletes locally-cached books that have no user-book row and no list-book references.
+     * Callers should invoke this after lists have been re-cached so list_book references are
+     * accounted for when determining orphans.
+     */
+    suspend fun deleteOrphanBooks()
 
     suspend fun cacheBook(book: Book)
 
@@ -45,6 +54,20 @@ interface BooksRepository {
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
 
     suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition>
+
+    /**
+     * Ensures the given books and editions exist in the local cache, fetching any missing ones
+     * (or all of them when [forceNetwork] is true) from the remote in batches.
+     *
+     * This is the cross-feature hydration entry point: other features (e.g. lists) call it to
+     * pre-populate the local books cache for the items they reference, so their own cache writes
+     * resolve cleanly against the books table.
+     */
+    suspend fun hydrateReferencedBooks(
+        bookIds: List<Int>,
+        editionIds: List<Int>,
+        forceNetwork: Boolean,
+    )
 
     suspend fun markBookAsWantToRead(book: Book): Book
 
@@ -64,10 +87,6 @@ interface BooksRepository {
         userBook: UserBook,
         newEditionId: Int,
     ): Book
-
-    suspend fun markEditionAsOwned(edition: BookEdition)
-
-    suspend fun removeOwnedEdition(editionId: Int)
 
     suspend fun persistEditionImage(
         editionId: Int,

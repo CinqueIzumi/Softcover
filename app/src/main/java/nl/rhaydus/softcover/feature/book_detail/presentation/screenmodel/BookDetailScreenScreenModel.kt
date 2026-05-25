@@ -19,7 +19,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseC
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.SetEditionAsOwnedUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
