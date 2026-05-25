@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
@@ -16,6 +17,7 @@ import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
 import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.data.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.fragment.BookDetailFragment
@@ -182,6 +184,16 @@ private fun BookListFragment.canonicalIdOrNull(): Int? {
 private fun BookListFragment.roundedRating(): Double =
     ((rating ?: 0.0) * 10).roundToInt() / 10.0
 
+private fun BookListFragment.tags(): List<Tag> =
+    taggable_counts.mapNotNull { count ->
+        val tag = count.tag ?: return@mapNotNull null
+
+        Tag(
+            id = tag.id.toInt(),
+            name = tag.tag,
+        )
+    }
+
 fun UserBookFragment.toBook(): Book? {
     val listFragment = book.bookListFragment() ?: return null
 
@@ -213,6 +225,7 @@ fun UserBookFragment.toBook(): Book? {
         bookSeries = listFragment.bookSeries(),
         positionsInSeries = listFragment.positionsInSeries(),
         isCompilation = listFragment.compilation,
+        tags = listFragment.tags(),
         userBook = toUserBook(),
         userBookRead = userBookReadFragment?.toUserBookRead(),
     )
@@ -245,6 +258,7 @@ fun BookDetailFragment.toBook(): Book? {
         bookSeries = listFragment.bookSeries(),
         positionsInSeries = listFragment.positionsInSeries(),
         isCompilation = listFragment.compilation,
+        tags = listFragment.tags(),
         userBook = null,
         userBookRead = null,
     )
@@ -353,6 +367,8 @@ fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<Edi
 // region Entity -> UI mappers
 fun AuthorEntity.toModel(): Author = Author(name = name, id = id)
 
+fun TagEntity.toModel(): Tag = Tag(id = id, name = name)
+
 fun BookEditionEntity.toModel(
     authors: List<AuthorEntity>,
     owned: Boolean,
@@ -439,6 +455,7 @@ fun BookFullEntity.toModel(): Book {
             .filter { it.isNotBlank() }
             .mapNotNull { it.toDoubleOrNull() },
         isCompilation = book.isCompilation,
+        tags = tags.map { it.toModel() },
         bookSeries = series?.toModel()
     )
 }

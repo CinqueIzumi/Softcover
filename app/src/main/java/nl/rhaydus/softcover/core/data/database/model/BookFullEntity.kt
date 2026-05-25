@@ -38,4 +38,15 @@ data class BookFullEntity(
         entityColumn = "bookId"
     )
     val userBookWithJournals: UserBookWithJournals?,
+
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "id",
+        associateBy = Junction(
+            value = BookTagCrossRef::class,
+            parentColumn = "bookId",
+            entityColumn = "tagId",
+        ),
+    )
+    val tags: List<TagEntity>,
 )

@@ -95,6 +95,7 @@ class BooksLocalDataSourceImplTest {
         series = null,
         editions = listOf(stubEditionWithAuthors(bookId = id)),
         userBookWithJournals = null,
+        tags = emptyList(),
     )
 
     @Nested

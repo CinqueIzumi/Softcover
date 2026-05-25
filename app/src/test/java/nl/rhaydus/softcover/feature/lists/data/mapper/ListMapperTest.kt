@@ -193,6 +193,7 @@ class ListMapperTest {
         series = series,
         editions = editions,
         userBookWithJournals = userBookWithJournals,
+        tags = emptyList(),
     )
 
     private fun stubListBookEntity(

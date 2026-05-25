@@ -23,11 +23,13 @@ import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
 import nl.rhaydus.softcover.core.data.database.model.BookListEntity
 import nl.rhaydus.softcover.core.data.database.model.BookListWithBooks
 import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
+import nl.rhaydus.softcover.core.data.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.data.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.data.database.model.EditionLocalImagePath
 import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.data.database.model.ListBookFull
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
@@ -77,6 +79,8 @@ interface BookDao {
             EditionAuthorCrossRef::class,
             BookSeriesEntity::class,
             BookDeadlineEntity::class,
+            TagEntity::class,
+            BookTagCrossRef::class,
         ],
     )
     fun observeBooksRaw(query: SupportSQLiteQuery): Flow<List<BookFullEntity>>
@@ -301,6 +305,16 @@ interface BookDao {
 
         clearEditionAuthorsByEditionIds(editionIds = book.editions.map { it.id })
         insertEditionAuthors(book.toEditionAuthorRefs(authorIdsByName))
+
+        if (book.tags.isNotEmpty()) {
+            insertTags(book.tags.map { TagEntity(id = it.id, name = it.name) })
+        }
+
+        clearBookTags(bookId = book.id)
+
+        if (book.tags.isNotEmpty()) {
+            insertBookTags(book.tags.map { BookTagCrossRef(bookId = book.id, tagId = it.id) })
+        }
     }
 
     @Transaction
@@ -422,6 +436,12 @@ interface BookDao {
 
     @Upsert
     suspend fun insertEditionAuthors(refs: List<EditionAuthorCrossRef>)
+
+    @Upsert
+    suspend fun insertTags(tags: List<TagEntity>)
+
+    @Upsert
+    suspend fun insertBookTags(refs: List<BookTagCrossRef>)
     // endregion
 
     // region Data removers
@@ -548,6 +568,7 @@ interface BookDao {
         orphanIds.forEach { bookId ->
             clearBookAuthors(bookId)
             clearEditionAuthors(bookId)
+            clearBookTags(bookId = bookId)
             deleteEditions(bookId)
             deleteBook(bookId)
         }
@@ -578,6 +599,7 @@ interface BookDao {
 
         clearBookAuthors(bookId)
         clearEditionAuthors(bookId)
+        clearBookTags(bookId = bookId)
         deleteEditions(bookId)
         deleteBook(bookId)
     }
@@ -589,6 +611,7 @@ interface BookDao {
         deleteAllReadingJournals()
         deleteAllBookAuthorCrossRefs()
         deleteAllEditionAuthorCrossRefs()
+        deleteAllBookTagCrossRefs()
 
         deleteAllUserBooks()
         deleteAllBookEditions()
@@ -596,6 +619,7 @@ interface BookDao {
         deleteAllBooks()
         deleteAllBookLists()
         deleteAllAuthors()
+        deleteAllTags()
     }
 
     @Query("DELETE FROM book_author_cross_ref WHERE bookId = :bookId")
@@ -613,5 +637,14 @@ interface BookDao {
 
     @Query("DELETE FROM edition_author_cross_ref WHERE editionId IN (:editionIds)")
     suspend fun clearEditionAuthorsByEditionIds(editionIds: List<Int>)
+
+    @Query("DELETE FROM book_tag_cross_ref WHERE bookId = :bookId")
+    suspend fun clearBookTags(bookId: Int)
+
+    @Query("DELETE FROM book_tag_cross_ref")
+    suspend fun deleteAllBookTagCrossRefs()
+
+    @Query("DELETE FROM tags")
+    suspend fun deleteAllTags()
     // endregion
 }

@@ -20,6 +20,7 @@ data class Book(
     val bookSeries: BookSeries?,
     val positionsInSeries: List<Double>,
     val isCompilation: Boolean,
+    val tags: List<Tag> = emptyList(),
 
     val userBook: UserBook?,
     val userBookRead: UserBookRead?,

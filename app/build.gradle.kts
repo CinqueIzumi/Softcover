@@ -138,6 +138,7 @@ apollo {
         mapScalar("timestamp", "kotlin.String")
         mapScalar("timestamptz", "kotlin.String")
         mapScalar("smallint", "kotlin.Int")
+        mapScalar("bigint", "kotlin.Long")
 
         codegenModels.set("responseBased")
         generateMethods.set(listOf("dataClass"))

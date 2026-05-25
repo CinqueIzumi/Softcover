@@ -1,0 +1,6 @@
+fragment BookTagFragment on taggable_counts {
+    tag {
+        id
+        tag
+    }
+}

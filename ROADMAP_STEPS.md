@@ -35,9 +35,6 @@ The two most-used surfaces gain shelf management depth and reading-flow nudges. 
 ### Step 2.1 — Sort within Library tabs (M)
 Sort affordance paired with the layout switcher (date added/finished, title, author, rating, progress, deadline urgency, page count). Persist per tab. *(B.1.1)*
 
-### Step 2.2 — Library filter chips (M)
-Inline chip row above the grid (genre, format, year, owned, rating range). Uses the existing mutation animator on chip add/remove. *(B.1.2)*
-
 ### Step 2.3 — Smart shelves as virtual tabs (M)
 "Owned & unread", "Started but stalled", "Finished this year", "Quick wins", "Long hauls". Computed in domain; reuse the existing tab UI. *(B.1.3)*
 

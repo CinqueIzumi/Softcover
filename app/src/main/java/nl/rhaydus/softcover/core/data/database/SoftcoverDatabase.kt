@@ -14,9 +14,11 @@ import nl.rhaydus.softcover.core.data.database.model.BookEditionView
 import nl.rhaydus.softcover.core.data.database.model.BookEntity
 import nl.rhaydus.softcover.core.data.database.model.BookListEntity
 import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
+import nl.rhaydus.softcover.core.data.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.data.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingProgressUpdateDao
@@ -56,11 +58,13 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
         HighlightEntity::class,
         ReadingSessionEntity::class,
         ReadingLogEntryEntity::class,
+        TagEntity::class,
+        BookTagCrossRef::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 25,
+    version = 26,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -109,6 +113,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_22_23)
                 .addMigrations(MIGRATION_23_24)
                 .addMigrations(MIGRATION_24_25)
+                .addMigrations(MIGRATION_25_26)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -853,6 +858,31 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_progress_updates_userBookId_kind ON pending_progress_updates(userBookId, kind)"
                 )
+            }
+        }
+
+        private val MIGRATION_25_26 = object : Migration(25, 26) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS tags (
+                            id INTEGER NOT NULL PRIMARY KEY,
+                            name TEXT NOT NULL
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_tag_cross_ref (
+                            bookId INTEGER NOT NULL,
+                            tagId INTEGER NOT NULL,
+                            PRIMARY KEY(bookId, tagId)
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_book_tag_cross_ref_tagId ON book_tag_cross_ref(tagId)")
             }
         }
     }

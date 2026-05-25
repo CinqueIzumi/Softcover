@@ -33,4 +33,5 @@ class LibraryDependencies(
     val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
+    val defaultDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

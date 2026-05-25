@@ -129,6 +129,8 @@ import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnClearFiltersAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnGridLayoutChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReadYearSelectedAction
@@ -137,7 +139,11 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryCha
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleFilterValueAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAction
+import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
+import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen
@@ -296,6 +302,12 @@ object LibraryScreen : Screen {
                     isSearchActive = state.isSearchActive,
                     onToggleSearchClick = { runAction(OnToggleSearchAction()) },
                     layoutMenu = {
+                        FilterMenuAction(
+                            state = state,
+                            tabId = currentTab?.id,
+                            runAction = runAction,
+                        )
+
                         SortMenuAction(
                             state = state,
                             tabId = currentTab?.id,
@@ -378,6 +390,38 @@ object LibraryScreen : Screen {
                     }
                 }
 
+                val activeFilters = currentTab?.id?.let { state.filtersFor(tabId = it) }
+
+                AnimatedVisibility(
+                    visible = activeFilters != null && activeFilters.isEmpty.not(),
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    val tabId = currentTab?.id
+                    val filters = activeFilters
+
+                    if (tabId != null && filters != null) {
+                        Column {
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            LibraryFilterChipRow(
+                                filters = filters,
+                                onRemove = { value ->
+                                    runAction(
+                                        OnToggleFilterValueAction(
+                                            tabId = tabId,
+                                            value = value,
+                                        ),
+                                    )
+                                },
+                                onClearAll = {
+                                    runAction(OnClearFiltersAction(tabId = tabId))
+                                },
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 PullToRefreshBox(
@@ -426,6 +470,25 @@ object LibraryScreen : Screen {
                     }
                 }
             }
+        }
+
+        if (state.isFilterSheetExpanded && currentTab != null) {
+            LibraryFilterSheet(
+                filters = state.filtersFor(tabId = currentTab.id),
+                options = state.availableFilterOptionsFor(tabId = currentTab.id),
+                onToggle = { value ->
+                    runAction(
+                        OnToggleFilterValueAction(
+                            tabId = currentTab.id,
+                            value = value,
+                        ),
+                    )
+                },
+                onClearAll = { runAction(OnClearFiltersAction(tabId = currentTab.id)) },
+                onDismissRequest = {
+                    runAction(OnFilterSheetExpandedChangeAction(expanded = false))
+                },
+            )
         }
     }
 
@@ -799,6 +862,42 @@ object LibraryScreen : Screen {
     }
 
     @Composable
+    private fun FilterMenuAction(
+        state: LibraryUiState,
+        tabId: String?,
+        runAction: (LibraryAction) -> Unit,
+    ) {
+        val currentTabId = tabId ?: return
+        val isActive = state.filtersFor(tabId = currentTabId).isEmpty.not()
+
+        Box {
+            IconButton(
+                onClick = {
+                    runAction(OnFilterSheetExpandedChangeAction(expanded = true))
+                },
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_filter_list),
+                    contentDescription = if (isActive) "Edit library filters (filters active)" else "Add library filters",
+                )
+            }
+
+            if (isActive) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 10.dp, end = 10.dp)
+                        .size(8.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.inversePrimary,
+                            shape = RoundedCornerShape(percent = 50),
+                        ),
+                )
+            }
+        }
+    }
+
+    @Composable
     private fun SortMenuAction(
         state: LibraryUiState,
         tabId: String?,
@@ -948,10 +1047,11 @@ object LibraryScreen : Screen {
 
         val entry = rememberStaggeredEntryCoordinator(key = "library:editions:${tab.id}")
 
-        ScrollToTopOnSortChange(
+        ScrollToTopOnVisibleSetChange(
             tabId = tab.id,
             sortMode = state.sortModeFor(tabId = tab.id),
             sortDirection = state.sortDirectionFor(tabId = tab.id),
+            filters = state.filtersFor(tabId = tab.id),
             visibleItemsKey = visibleEditionIds.firstOrNull() ?: 0,
             gridState = gridState,
         )
@@ -1001,10 +1101,11 @@ object LibraryScreen : Screen {
 
         val entry = rememberStaggeredEntryCoordinator(key = "library:books:${tab.id}")
 
-        ScrollToTopOnSortChange(
+        ScrollToTopOnVisibleSetChange(
             tabId = tab.id,
             sortMode = state.sortModeFor(tabId = tab.id),
             sortDirection = state.sortDirectionFor(tabId = tab.id),
+            filters = state.filtersFor(tabId = tab.id),
             visibleItemsKey = visibleBookIds.firstOrNull() ?: 0,
             gridState = gridState,
         )
@@ -1028,30 +1129,31 @@ object LibraryScreen : Screen {
     }
 
     @Composable
-    private fun ScrollToTopOnSortChange(
+    private fun ScrollToTopOnVisibleSetChange(
         tabId: String,
         sortMode: LibrarySortMode,
         sortDirection: SortDirection,
+        filters: LibraryFilters,
         visibleItemsKey: Any,
         gridState: LazyGridState,
     ) {
-        var previousSort by remember(tabId) {
-            mutableStateOf<Pair<LibrarySortMode, SortDirection>?>(null)
+        var previousKey by remember(tabId) {
+            mutableStateOf<Triple<LibrarySortMode, SortDirection, LibraryFilters>?>(null)
         }
         var pendingScrollToTop by remember(tabId) { mutableStateOf(false) }
 
-        // Sort change just marks intent. We don't scroll here because the visible books haven't
-        // updated yet — scrolling now would race with LazyGrid's "follow the focused item by key"
-        // behavior once the new sorted list lands and silently undo the scroll.
-        LaunchedEffect(tabId, sortMode, sortDirection) {
-            val current = sortMode to sortDirection
-            val prior = previousSort
+        // Sort or filter change just marks intent. We don't scroll here because the visible books
+        // haven't updated yet — scrolling now would race with LazyGrid's "follow the focused item
+        // by key" behavior once the new visible list lands and silently undo the scroll.
+        LaunchedEffect(tabId, sortMode, sortDirection, filters) {
+            val current = Triple(sortMode, sortDirection, filters)
+            val prior = previousKey
 
             if (prior != null && prior != current) {
                 pendingScrollToTop = true
             }
 
-            previousSort = current
+            previousKey = current
         }
 
         // After the new sorted list arrives ([visibleItemsKey] flips), perform the actual scroll.

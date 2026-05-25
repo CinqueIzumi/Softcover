@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.flows
 
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -19,25 +20,34 @@ class BookListsCollector : LibraryInitializer {
             dependencies.getAllUserListsUseCase(),
             dependencies.getEnabledListIdsAsFlowUseCase(),
         ) { lists: List<BookList>, enabledIds: Set<Int> ->
-            lists
-                .filter { it.id in enabledIds }
-                .associate { list ->
-                    val tabId = LibraryTab.CustomList(listId = list.id, listName = list.name).id
-                    tabId to list.books.mapNotNull { listBook ->
-                        val edition = listBook.edition ?: return@mapNotNull null
+            val enabledLists = lists.filter { it.id in enabledIds }
 
-                        if (edition.url == null && edition.localImagePath == null) {
-                            edition.copy(url = listBook.book?.coverUrl)
-                        } else {
-                            edition
-                        }
+            val editionsPerList = enabledLists.associate { list ->
+                val tabId = LibraryTab.CustomList(listId = list.id, listName = list.name).id
+                tabId to list.books.mapNotNull { listBook ->
+                    val edition = listBook.edition ?: return@mapNotNull null
+
+                    if (edition.url == null && edition.localImagePath == null) {
+                        edition.copy(url = listBook.book?.coverUrl)
+                    } else {
+                        edition
                     }
                 }
-        }.collectLatest { editionsPerList ->
+            }
+
+            val booksById = enabledLists
+                .flatMap { list -> list.books.mapNotNull { it.book } }
+                .associateBy(Book::id)
+
+            editionsPerList to booksById
+        }.collectLatest { (editionsPerList, booksById) ->
             scope.setState { state ->
                 val retainedKeys = editionsPerList.keys
                 val stripped = state.editionsByTab.filterKeys { key -> key in retainedKeys }
-                state.copy(editionsByTab = stripped + editionsPerList)
+                state.copy(
+                    editionsByTab = stripped + editionsPerList,
+                    bookByBookId = booksById,
+                )
             }
         }
     }

@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.feature.library.presentation.flows.BookDeadlinesColl
 import nl.rhaydus.softcover.feature.library.presentation.flows.BookListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.BooksByStatusCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.DateStyleCollector
+import nl.rhaydus.softcover.feature.library.presentation.flows.FilterOptionsCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
 import nl.rhaydus.softcover.feature.library.presentation.flows.SortModeCollector
@@ -30,6 +31,8 @@ val libraryModule = module {
     factory { BookDeadlinesCollector() } bind LibraryInitializer::class
 
     factory { DateStyleCollector() } bind LibraryInitializer::class
+
+    factory { FilterOptionsCollector() } bind LibraryInitializer::class
 
     factory {
         RefreshLibraryUseCase(

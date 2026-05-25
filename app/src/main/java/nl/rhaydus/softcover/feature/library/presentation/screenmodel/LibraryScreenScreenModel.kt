@@ -60,6 +60,7 @@ class LibraryScreenScreenModel(
         getEnabledListIdsAsFlowUseCase = getEnabledListIdsAsFlowUseCase,
         getLibraryTabOrderAsFlowUseCase = getLibraryTabOrderAsFlowUseCase,
         mainDispatcher = appDispatchers.main,
+        defaultDispatcher = appDispatchers.default,
         coroutineScope = screenModelScope,
     )
 

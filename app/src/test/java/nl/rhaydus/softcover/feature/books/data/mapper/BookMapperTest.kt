@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.data.database.model.ListBookFull
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookWithJournals
@@ -596,12 +597,14 @@ class BookMapperTest {
         series: BookSeriesEntity? = null,
         editions: List<BookEditionWithAuthors> = emptyList(),
         userBookWithJournals: UserBookWithJournals? = null,
+        tags: List<TagEntity> = emptyList(),
     ): BookFullEntity = BookFullEntity(
         book = book,
         bookAuthors = bookAuthors,
         series = series,
         editions = editions,
         userBookWithJournals = userBookWithJournals,
+        tags = tags,
     )
 
     private fun stubListBookEntity(
@@ -2082,6 +2085,38 @@ class BookMapperTest {
             result.editions.size shouldBe 1
             result.editions[0].id shouldBe 10
             result.editions[0].owned shouldBe true
+        }
+
+        @Test
+        fun `tags are mapped from TagEntity rows to Tag domain objects`() {
+            // ----- Arrange -----
+            val tagEntities = listOf(
+                TagEntity(id = 1, name = "Fiction"),
+                TagEntity(id = 2, name = "Sci-Fi"),
+            )
+            val entity = stubBookFullEntity(tags = tagEntities)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.tags.size shouldBe 2
+            result.tags[0].id shouldBe 1
+            result.tags[0].name shouldBe "Fiction"
+            result.tags[1].id shouldBe 2
+            result.tags[1].name shouldBe "Sci-Fi"
+        }
+
+        @Test
+        fun `tags is empty when no TagEntity rows are present`() {
+            // ----- Arrange -----
+            val entity = stubBookFullEntity(tags = emptyList())
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.tags shouldBe emptyList()
         }
     }
 

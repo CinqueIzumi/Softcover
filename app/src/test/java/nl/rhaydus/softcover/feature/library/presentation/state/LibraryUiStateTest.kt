@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
@@ -74,16 +75,20 @@ class LibraryUiStateTest {
         id: Int = 1,
         title: String = "A Book",
         authors: List<Author> = emptyList(),
+        editions: List<BookEdition> = emptyList(),
+        tags: List<Tag> = emptyList(),
+        rating: Double = 0.0,
+        releaseYear: Int = 2020,
         userBook: UserBook? = null,
     ) = Book(
         id = id,
         canonicalId = null,
         title = title,
-        editions = emptyList(),
+        editions = editions,
         defaultEdition = null,
-        rating = 0.0,
+        rating = rating,
         description = "",
-        releaseYear = 2020,
+        releaseYear = releaseYear,
         releaseDate = null,
         coverUrl = "",
         authors = authors,
@@ -92,24 +97,55 @@ class LibraryUiStateTest {
         bookSeries = null,
         positionsInSeries = emptyList(),
         isCompilation = false,
+        tags = tags,
         userBook = userBook,
         userBookRead = null,
+    )
+
+    private fun buildEditionFull(
+        id: Int = 1,
+        bookId: Int = 1,
+        format: String = "paperback",
+        owned: Boolean = false,
+        releaseYear: Int = 2020,
+    ) = BookEdition(
+        id = id,
+        canonicalId = null,
+        bookId = bookId,
+        publisher = null,
+        title = null,
+        url = null,
+        localImagePath = null,
+        isbn10 = null,
+        pages = null,
+        audioSeconds = null,
+        authors = emptyList(),
+        releaseYear = releaseYear,
+        releaseDate = null,
+        format = format,
+        owned = owned,
     )
 
     private fun buildState(
         booksByTab: Map<String, List<Book>> = emptyMap(),
         editionsByTab: Map<String, List<BookEdition>> = emptyMap(),
+        bookByBookId: Map<Int, Book> = emptyMap(),
         searchQuery: String = "",
         selectedReadYear: Int? = null,
         sortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
         sortDirectionByTab: Map<String, SortDirection> = emptyMap(),
+        filtersByTab: Map<String, LibraryFilters> = emptyMap(),
+        filterOptionsByTab: Map<String, LibraryFilterOptions> = emptyMap(),
     ) = LibraryUiState(
         booksByTab = booksByTab,
         editionsByTab = editionsByTab,
+        bookByBookId = bookByBookId,
         searchQuery = searchQuery,
         selectedReadYear = selectedReadYear,
         sortModeByTab = sortModeByTab,
         sortDirectionByTab = sortDirectionByTab,
+        filtersByTab = filtersByTab,
+        filterOptionsByTab = filterOptionsByTab,
     )
 
     // endregion
@@ -512,6 +548,204 @@ class LibraryUiStateTest {
 
             // ----- Assert -----
             result shouldBe listOf(2023, 2021)
+        }
+    }
+
+    @Nested
+    inner class DisplayBooksForFilters {
+
+        private val tagFiction = Tag(id = 1, name = "Fiction")
+
+        @Test
+        fun `applies filter chips after search and year filters`() {
+            // ----- Arrange -----
+            val matchAll = buildBook(
+                id = 1,
+                title = "Foundation",
+                editions = listOf(buildEditionFull(format = "ebook")),
+                tags = listOf(tagFiction),
+                rating = 4.5,
+                releaseYear = 2021,
+            )
+            val matchSearchNotFilter = buildBook(
+                id = 2,
+                title = "Foundation's Edge",
+                editions = listOf(buildEditionFull(format = "paperback")),
+                tags = listOf(tagFiction),
+                rating = 3.0,
+                releaseYear = 2021,
+            )
+
+            val filters = LibraryFilters(ratingMin = 4.0)
+
+            val state = buildState(
+                booksByTab = mapOf(otherTabId to listOf(matchAll, matchSearchNotFilter)),
+                searchQuery = "foundation",
+                filtersByTab = mapOf(otherTabId to filters),
+            )
+
+            // ----- Act -----
+            val result = state.displayBooksFor(otherTabId)
+
+            // ----- Assert -----
+            result!!.map { it.id } shouldBe listOf(1)
+        }
+
+        @Test
+        fun `returns empty list when all books are excluded by the active filter`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                id = 1,
+                editions = listOf(buildEditionFull(format = "paperback")),
+            )
+
+            val filters = LibraryFilters(formats = setOf("ebook"))
+
+            val state = buildState(
+                booksByTab = mapOf(otherTabId to listOf(book)),
+                filtersByTab = mapOf(otherTabId to filters),
+            )
+
+            // ----- Act -----
+            val result = state.displayBooksFor(otherTabId)
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+        }
+
+        @Test
+        fun `skips filter pass entirely when filters for tab are empty`() {
+            // ----- Arrange -----
+            val book1 = buildBook(id = 1)
+            val book2 = buildBook(id = 2)
+
+            val state = buildState(
+                booksByTab = mapOf(otherTabId to listOf(book1, book2)),
+                filtersByTab = emptyMap(),
+            )
+
+            // ----- Act -----
+            val result = state.displayBooksFor(otherTabId)
+
+            // ----- Assert -----
+            result!!.size shouldBe 2
+        }
+    }
+
+    @Nested
+    inner class DisplayEditionsForFilters {
+
+        private val tagFiction = Tag(id = 1, name = "Fiction")
+
+        @Test
+        fun `applies filter chips after sort`() {
+            // ----- Arrange -----
+            val ownedEdition = buildEditionFull(id = 1, bookId = 10, format = "ebook", owned = true)
+            val unownedEdition = buildEditionFull(id = 2, bookId = 10, format = "ebook", owned = false)
+
+            val filters = LibraryFilters(owned = true)
+
+            val state = buildState(
+                editionsByTab = mapOf(otherTabId to listOf(ownedEdition, unownedEdition)),
+                filtersByTab = mapOf(otherTabId to filters),
+            )
+
+            // ----- Act -----
+            val result = state.displayEditionsFor(otherTabId)
+
+            // ----- Assert -----
+            result!!.map { it.id } shouldBe listOf(1)
+        }
+
+        @Test
+        fun `resolves parent book via bookByBookId for tag facet`() {
+            // ----- Arrange -----
+            val edition = buildEditionFull(id = 1, bookId = 10)
+            val book = buildBook(id = 10, tags = listOf(tagFiction))
+
+            val filters = LibraryFilters(tags = setOf(tagFiction))
+
+            val state = buildState(
+                editionsByTab = mapOf(otherTabId to listOf(edition)),
+                bookByBookId = mapOf(10 to book),
+                filtersByTab = mapOf(otherTabId to filters),
+            )
+
+            // ----- Act -----
+            val result = state.displayEditionsFor(otherTabId)
+
+            // ----- Assert -----
+            result!!.map { it.id } shouldBe listOf(1)
+        }
+
+        @Test
+        fun `rejects edition when parent book is missing and tag filter is active`() {
+            // ----- Arrange -----
+            val edition = buildEditionFull(id = 1, bookId = 99)
+
+            val filters = LibraryFilters(tags = setOf(tagFiction))
+
+            val state = buildState(
+                editionsByTab = mapOf(otherTabId to listOf(edition)),
+                bookByBookId = emptyMap(),
+                filtersByTab = mapOf(otherTabId to filters),
+            )
+
+            // ----- Act -----
+            val result = state.displayEditionsFor(otherTabId)
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+        }
+    }
+
+    @Nested
+    inner class AvailableFilterOptionsFor {
+
+        private val sampleOptions = LibraryFilterOptions(
+            tags = listOf(Tag(id = 1, name = "Fiction")),
+            formats = listOf("ebook"),
+            releaseYears = listOf(2024),
+            supportsOwnedFilter = true,
+            ratingBuckets = listOf(4.0),
+        )
+
+        @Test
+        fun `returns empty options when the tab has no precomputed entry`() {
+            // ----- Arrange -----
+            val state = buildState(filterOptionsByTab = emptyMap())
+
+            // ----- Act -----
+            val result = state.availableFilterOptionsFor(otherTabId)
+
+            // ----- Assert -----
+            result.isEmpty shouldBe true
+        }
+
+        @Test
+        fun `returns the precomputed options for the tab when present`() {
+            // ----- Arrange -----
+            val state = buildState(filterOptionsByTab = mapOf(otherTabId to sampleOptions))
+
+            // ----- Act -----
+            val result = state.availableFilterOptionsFor(otherTabId)
+
+            // ----- Assert -----
+            result shouldBe sampleOptions
+        }
+
+        @Test
+        fun `returns empty options for a tab that is not in the precomputed map`() {
+            // ----- Arrange -----
+            val state = buildState(
+                filterOptionsByTab = mapOf("some-other-tab" to sampleOptions),
+            )
+
+            // ----- Act -----
+            val result = state.availableFilterOptionsFor(otherTabId)
+
+            // ----- Assert -----
+            result.isEmpty shouldBe true
         }
     }
 }
