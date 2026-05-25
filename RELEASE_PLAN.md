@@ -40,10 +40,9 @@ The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; th
 ## 2.3.0 — Library filtering + book-detail metadata + custom-list MVP
 
 > **Release notes (Google Play):**
-> Filter your library by genre, format, year, ownership or rating — active chips show what's narrowing the view. Smart shelves surface "Owned & unread", "Started but stalled", "Quick wins" and more alongside your normal tabs. Create custom lists with a name and add or remove any book straight from its detail page. Drag any book to reorder it within any list — Want-to-Read, Currently Reading, Read, or any custom list. Long-press a cover to enter bulk-select mode and move books in batches. Reading rows briefly show your progress since last open. Book detail now lists publisher, imprint and ISBN, with quick links out to Bookshop.org, Amazon, library.org and author sites. List changes made while offline or during a Hardcover hiccup now retry automatically the next time the app starts or your connection returns.
+> Filter your library by genre, format, year, ownership or rating — active chips show what's narrowing the view. Create custom lists with a name and add or remove any book straight from its detail page. Drag any book to reorder it within any list — Want-to-Read, Currently Reading, Read, or any custom list. Long-press a cover to enter bulk-select mode and move books in batches. Reading rows briefly show your progress since last open. Book detail now lists publisher, imprint and ISBN, with quick links out to Bookshop.org, Amazon, library.org and author sites. List changes made while offline or during a Hardcover hiccup now retry automatically the next time the app starts or your connection returns.
 
 - **Step 2.2** — Library filter chips (M)
-- **Step 2.3** — Smart shelves as virtual tabs (M)
 - **Step 2.5** — Bulk select mode (M)
 - **Step 2.7** — Drag-to-reorder books within any library list (M) — long-press + drag on a row in any tab (Want-to-Read, Currently Reading, Read, custom lists). Custom-list reorders persist to Hardcover; built-in shelves stay local-only. Persisted as a manual sort mode per tab that coexists with Step 2.1's sort options.
 - **Step 2.9** — "Since last read" delta on Reading rows (S)
@@ -265,6 +264,7 @@ Closing release for the current roadmap horizon. Heavy on small polish; the two 
 
 ## Out-of-band / not scheduled
 
+- **Step 2.3** — Smart shelves as virtual tabs (M). Held back from 2.3.0; value not yet established. Re-evaluate once 2.3.0's filter chips (Step 2.2) have shipped — if users naturally reach for facet filtering to express "owned & unread" / "started but stalled" / "quick wins", smart shelves are redundant; if filtering alone doesn't surface those slices, bring this back into a future release.
 - **Step 11.1** — Book club / group reading (L). Stretch; not on the roadmap horizon. Bring back into the release plan only when there's a deliberate decision to commit to the social arc beyond the friend feed.
 
 ---
