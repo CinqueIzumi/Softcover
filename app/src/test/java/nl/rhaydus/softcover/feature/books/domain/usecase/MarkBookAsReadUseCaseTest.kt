@@ -4,9 +4,11 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -32,6 +34,8 @@ class MarkBookAsReadUseCaseTest {
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
 
+            every { inputBook.status } returns BookStatus.Reading
+
             coEvery {
                 repository.markBookAsRead(book = inputBook)
             } returns updatedBook
@@ -45,6 +49,7 @@ class MarkBookAsReadUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
             coVerify(exactly = 1) { repository.markBookAsRead(book = inputBook) }
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
         }
@@ -54,6 +59,8 @@ class MarkBookAsReadUseCaseTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
             val expectedError = RuntimeException("network error")
+
+            every { inputBook.status } returns BookStatus.Reading
 
             coEvery {
                 repository.markBookAsRead(book = inputBook)
@@ -75,6 +82,8 @@ class MarkBookAsReadUseCaseTest {
             val updatedBook = mockk<Book>()
             val expectedError = RuntimeException("cache error")
 
+            every { inputBook.status } returns BookStatus.Reading
+
             coEvery {
                 repository.markBookAsRead(book = inputBook)
             } returns updatedBook
@@ -89,6 +98,22 @@ class MarkBookAsReadUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
+        }
+
+        @Test
+        fun `returns NoChange and does not touch repository when book is already in target status`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+
+            every { inputBook.status } returns BookStatus.Read
+
+            // ----- Act -----
+            val result = useCase(inputBook)
+
+            // ----- Assert -----
+            result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
+            coVerify(exactly = 0) { repository.markBookAsRead(any()) }
+            coVerify(exactly = 0) { repository.cacheBook(any()) }
         }
     }
 }

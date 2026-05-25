@@ -3,9 +3,11 @@ package nl.rhaydus.softcover.feature.books.domain.usecase
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -31,6 +33,8 @@ class MarkBookAsWantToReadUseCaseTest {
             val book = mockk<Book>()
             val updatedBook = mockk<Book>()
 
+            every { book.status } returns BookStatus.None
+
             coEvery {
                 booksRepository.markBookAsWantToRead(book = book)
             } returns updatedBook
@@ -40,6 +44,7 @@ class MarkBookAsWantToReadUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
             coVerify(exactly = 1) { booksRepository.markBookAsWantToRead(book = book) }
         }
@@ -49,6 +54,8 @@ class MarkBookAsWantToReadUseCaseTest {
             // ----- Arrange -----
             val book = mockk<Book>()
             val expectedError = RuntimeException("network error")
+
+            every { book.status } returns BookStatus.None
 
             coEvery {
                 booksRepository.markBookAsWantToRead(book = book)
@@ -60,6 +67,21 @@ class MarkBookAsWantToReadUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
+        }
+
+        @Test
+        fun `returns NoChange and does not touch repository when book is already in target status`() = runTest {
+            // ----- Arrange -----
+            val book = mockk<Book>()
+
+            every { book.status } returns BookStatus.WantToRead
+
+            // ----- Act -----
+            val result = useCase(book)
+
+            // ----- Assert -----
+            result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
+            coVerify(exactly = 0) { booksRepository.markBookAsWantToRead(any()) }
         }
     }
 }

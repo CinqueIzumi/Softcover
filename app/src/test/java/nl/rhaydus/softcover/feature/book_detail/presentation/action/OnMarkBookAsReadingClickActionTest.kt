@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ShelfMutationOutcome
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -77,7 +78,7 @@ class OnMarkBookAsReadingClickActionTest {
 
             coEvery {
                 markBookAsReadingUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadingClickAction(book = book)
 
@@ -101,7 +102,7 @@ class OnMarkBookAsReadingClickActionTest {
 
             coEvery {
                 markBookAsReadingUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadingClickAction(book = book)
 
@@ -145,7 +146,7 @@ class OnMarkBookAsReadingClickActionTest {
 
             coEvery {
                 markBookAsReadingUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadingClickAction(book = book)
 
@@ -179,7 +180,7 @@ class OnMarkBookAsReadingClickActionTest {
 
             coEvery {
                 markBookAsReadingUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadingClickAction(book = book)
 

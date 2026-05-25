@@ -39,14 +39,15 @@ class BookListsCollector : LibraryInitializer {
                 .flatMap { list -> list.books.mapNotNull { it.book } }
                 .associateBy(Book::id)
 
-            editionsPerList to booksById
-        }.collectLatest { (editionsPerList, booksById) ->
+            Triple(editionsPerList, booksById, lists)
+        }.collectLatest { (editionsPerList, booksById, allLists) ->
             scope.setState { state ->
                 val retainedKeys = editionsPerList.keys
                 val stripped = state.editionsByTab.filterKeys { key -> key in retainedKeys }
                 state.copy(
                     editionsByTab = stripped + editionsPerList,
                     bookByBookId = booksById,
+                    customLists = allLists,
                 )
             }
         }

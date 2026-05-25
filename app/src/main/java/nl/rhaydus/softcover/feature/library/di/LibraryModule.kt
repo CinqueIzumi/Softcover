@@ -61,6 +61,12 @@ val libraryModule = module {
             getEnabledStatusCodesAsFlowUseCase = get(),
             getEnabledListIdsAsFlowUseCase = get(),
             getLibraryTabOrderAsFlowUseCase = get(),
+            markBookAsReadUseCase = get(),
+            markBookAsReadingUseCase = get(),
+            markBookAsWantToReadUseCase = get(),
+            removeBookFromLibraryUseCase = get(),
+            addBookToListUseCase = get(),
+            removeBookFromListUseCase = get(),
         )
     }
 }

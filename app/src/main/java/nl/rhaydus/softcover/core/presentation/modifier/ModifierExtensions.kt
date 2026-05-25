@@ -6,7 +6,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -82,6 +84,31 @@ fun Modifier.pressScaleClickable(onClick: () -> Unit): Modifier {
             interactionSource = interactionSource,
             indication = null,
             onClick = onClick,
+        )
+}
+
+/**
+ * Sibling to [pressScaleClickable] that also accepts an optional long-press handler. Reach for
+ * this when a surface needs the same ripple-less press-scale feedback but also has to react to a
+ * long-press (e.g. long-press to enter library bulk-select mode). The long-press handler must
+ * fire its own haptic — this modifier deliberately does not, so callers can pick the right
+ * semantic (`threshold` for selection entry, `lift` for drag pickup, etc.).
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun Modifier.pressScaleCombinedClickable(
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
+): Modifier {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    return this
+        .pressScale(interactionSource)
+        .combinedClickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = onClick,
+            onLongClick = onLongClick,
         )
 }
 

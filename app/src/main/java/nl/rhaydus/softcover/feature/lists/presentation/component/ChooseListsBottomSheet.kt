@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.book_detail.presentation.component
+package nl.rhaydus.softcover.feature.lists.presentation.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,12 +35,18 @@ import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChooseListsBottomSheet(
-    bookId: Int,
+    bookIds: Set<Int>,
     customLists: List<BookList>,
     listsBeingMutated: Set<Int>,
     onDismissRequest: () -> Unit,
-    onToggleMembership: (listId: Int, isMember: Boolean) -> Unit,
+    onToggleMembership: (listId: Int, membership: ListMembership) -> Unit,
     onCreateNewListClick: () -> Unit,
+    headline: String = if (bookIds.size > 1) "Choose lists for ${bookIds.size} books" else "Choose lists",
+    description: String = if (bookIds.size > 1) {
+        "Pick the lists these books belong in."
+    } else {
+        "Pick the lists this book belongs in."
+    },
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -54,8 +60,8 @@ fun ChooseListsBottomSheet(
         ) {
             EditorialSectionHeader(
                 eyebrow = "Lists",
-                headline = "Choose lists",
-                description = "Pick the lists this book belongs in.",
+                headline = headline,
+                description = description,
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -69,16 +75,16 @@ fun ChooseListsBottomSheet(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(items = customLists, key = { it.id }) { list ->
-                        val isMember = list.books.any { it.bookId == bookId }
+                        val membership = list.membershipFor(bookIds = bookIds)
                         val isPending = list.id in listsBeingMutated
 
                         ListRow(
                             name = list.name,
-                            isMember = isMember,
+                            membership = membership,
                             isPending = isPending,
                             onClick = {
                                 if (isPending.not()) {
-                                    onToggleMembership(list.id, isMember)
+                                    onToggleMembership(list.id, membership)
                                 }
                             },
                         )
@@ -92,6 +98,19 @@ fun ChooseListsBottomSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
         }
+    }
+}
+
+private fun BookList.membershipFor(bookIds: Set<Int>): ListMembership {
+    if (bookIds.isEmpty()) return ListMembership.NONE
+
+    val listBookIds = books.mapTo(mutableSetOf()) { it.bookId }
+    val matching = bookIds.count { it in listBookIds }
+
+    return when (matching) {
+        0 -> ListMembership.NONE
+        bookIds.size -> ListMembership.ALL
+        else -> ListMembership.PARTIAL
     }
 }
 
@@ -127,20 +146,22 @@ private fun EmptyState() {
 @Composable
 private fun ListRow(
     name: String,
-    isMember: Boolean,
+    membership: ListMembership,
     isPending: Boolean,
     onClick: () -> Unit,
 ) {
-    val container = if (isMember) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerHigh
+    val container = when (membership) {
+        ListMembership.ALL,
+        ListMembership.PARTIAL,
+            -> MaterialTheme.colorScheme.secondaryContainer
+        ListMembership.NONE -> MaterialTheme.colorScheme.surfaceContainerHigh
     }
 
-    val content = if (isMember) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurface
+    val content = when (membership) {
+        ListMembership.ALL,
+        ListMembership.PARTIAL,
+            -> MaterialTheme.colorScheme.onSecondaryContainer
+        ListMembership.NONE -> MaterialTheme.colorScheme.onSurface
     }
 
     Surface(
@@ -164,7 +185,7 @@ private fun ListRow(
             )
 
             MembershipIndicator(
-                isMember = isMember,
+                membership = membership,
                 isPending = isPending,
             )
         }
@@ -173,7 +194,7 @@ private fun ListRow(
 
 @Composable
 private fun MembershipIndicator(
-    isMember: Boolean,
+    membership: ListMembership,
     isPending: Boolean,
 ) {
     Box(
@@ -187,12 +208,28 @@ private fun MembershipIndicator(
                 color = MaterialTheme.colorScheme.primary,
             )
 
-            isMember -> Icon(
+            membership == ListMembership.ALL -> Icon(
                 painter = painterResource(R.drawable.ic_check),
-                contentDescription = "On this list",
+                contentDescription = "Every selected book is on this list",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp),
             )
+
+            // Partial → show a "minus" via a thin horizontal bar inside the empty circle to signal
+            // "some but not all"; tapping commits toward ALL (per tristate-checkbox convention).
+            membership == ListMembership.PARTIAL -> Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 10.dp, height = 2.dp)
+                        .background(MaterialTheme.colorScheme.primary),
+                )
+            }
 
             else -> Box(
                 modifier = Modifier

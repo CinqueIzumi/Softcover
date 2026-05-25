@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -8,9 +9,9 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -40,6 +41,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -53,6 +55,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
@@ -112,13 +115,13 @@ import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutation
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
-import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.presentation.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
-import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
@@ -129,7 +132,15 @@ import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveMenuExpandedChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveDialogExpandedChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveFromLibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkToggleListMembershipAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnClearFiltersAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnEnterSelectionModeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnGridLayoutChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpandedChangeAction
@@ -139,21 +150,25 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryCha
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleBookSelectionAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleFilterValueAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen
 import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 import nl.rhaydus.softcover.feature.library.presentation.util.formatPageCount
 import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
+import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.feature.lists.presentation.component.ListMembership
+import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
+import nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen
 import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab as LibraryContentTab
 
 object LibraryScreen : Screen {
@@ -194,6 +209,11 @@ object LibraryScreen : Screen {
                 onTabLongPress = {
                     navigator.parent?.push(item = LibraryVisibilitySettingsScreen())
                 },
+                onCreateNewListClick = {
+                    screenModel.runAction(OnBulkAddToListSheetShownAction(shown = false))
+
+                    navigator.parent?.push(item = CreateListScreen())
+                },
             )
         }
     }
@@ -206,6 +226,7 @@ object LibraryScreen : Screen {
         onBookClick: (Book) -> Unit,
         onEditionClick: (BookEdition) -> Unit,
         onTabLongPress: () -> Unit = {},
+        onCreateNewListClick: () -> Unit = {},
         gridStateFor: (String) -> LazyGridState = { LazyGridState() },
         topAppBarState: TopAppBarState = rememberTopAppBarState(),
     ) {
@@ -288,58 +309,87 @@ object LibraryScreen : Screen {
             0f
         }
 
+        val haptics = LocalHaptics.current
+
+        BackHandler(enabled = state.selectionMode) {
+            runAction(OnExitSelectionModeAction())
+        }
+
         Scaffold(
             contentWindowInsets = WindowInsets.statusBars,
         ) {
             Column(
                 modifier = Modifier.padding(it)
             ) {
-                EditorialHeader(
-                    tabLabel = currentTab?.label,
-                    bookCount = currentTabBookCount,
-                    totalPages = currentTabPageCount,
-                    tab = currentTab,
-                    isSearchActive = state.isSearchActive,
-                    onToggleSearchClick = { runAction(OnToggleSearchAction()) },
-                    layoutMenu = {
-                        FilterMenuAction(
-                            state = state,
-                            tabId = currentTab?.id,
-                            runAction = runAction,
-                        )
+                if (state.selectionMode) {
+                    SelectionHeader(
+                        selectedCount = state.selectedBookIds.size,
+                        bulkActionInProgress = state.bulkActionInProgress,
+                        isMoveMenuExpanded = state.isBulkMoveMenuExpanded,
+                        onExit = { runAction(OnExitSelectionModeAction()) },
+                        onMoveMenuExpandedChange = { expanded ->
+                            runAction(OnBulkMoveMenuExpandedChangeAction(expanded = expanded))
+                        },
+                        onMoveShelf = { status ->
+                            haptics.commit()
 
-                        SortMenuAction(
-                            state = state,
-                            tabId = currentTab?.id,
-                            runAction = runAction,
-                        )
+                            runAction(OnBulkMoveShelfAction(status = status))
+                        },
+                        onAddToListClick = {
+                            runAction(OnBulkAddToListSheetShownAction(shown = true))
+                        },
+                        onRemoveClick = {
+                            runAction(OnBulkRemoveDialogExpandedChangeAction(shown = true))
+                        },
+                    )
+                } else {
+                    EditorialHeader(
+                        tabLabel = currentTab?.label,
+                        bookCount = currentTabBookCount,
+                        totalPages = currentTabPageCount,
+                        tab = currentTab,
+                        isSearchActive = state.isSearchActive,
+                        onToggleSearchClick = { runAction(OnToggleSearchAction()) },
+                        layoutMenu = {
+                            FilterMenuAction(
+                                state = state,
+                                tabId = currentTab?.id,
+                                runAction = runAction,
+                            )
 
-                        LayoutMenuAction(
-                            state = state,
-                            runAction = runAction,
-                        )
-                    },
-                    pullToRefreshState = pullToRefreshState,
-                    isRefreshing = state.isLoading,
-                    collapseFraction = collapseFraction,
-                    onCollapsibleSized = { measured ->
-                        val newLimit = -measured.toFloat()
-                        if (measured > 0 && newLimit != topAppBarState.heightOffsetLimit) {
-                            val previousFraction = if (topAppBarState.heightOffsetLimit < 0f) {
-                                (topAppBarState.heightOffset / topAppBarState.heightOffsetLimit)
-                                    .coerceIn(0f, 1f)
-                            } else {
-                                0f
+                            SortMenuAction(
+                                state = state,
+                                tabId = currentTab?.id,
+                                runAction = runAction,
+                            )
+
+                            LayoutMenuAction(
+                                state = state,
+                                runAction = runAction,
+                            )
+                        },
+                        pullToRefreshState = pullToRefreshState,
+                        isRefreshing = state.isLoading,
+                        collapseFraction = collapseFraction,
+                        onCollapsibleSized = { measured ->
+                            val newLimit = -measured.toFloat()
+                            if (measured > 0 && newLimit != topAppBarState.heightOffsetLimit) {
+                                val previousFraction = if (topAppBarState.heightOffsetLimit < 0f) {
+                                    (topAppBarState.heightOffset / topAppBarState.heightOffsetLimit)
+                                        .coerceIn(0f, 1f)
+                                } else {
+                                    0f
+                                }
+
+                                topAppBarState.heightOffsetLimit = newLimit
+                                topAppBarState.heightOffset = previousFraction * newLimit
                             }
-
-                            topAppBarState.heightOffsetLimit = newLimit
-                            topAppBarState.heightOffset = previousFraction * newLimit
-                        }
-                    },
-                )
+                        },
+                    )
+                }
 
                 AnimatedVisibility(
-                    visible = state.isSearchActive,
+                    visible = state.isSearchActive && state.selectionMode.not(),
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut(),
                 ) {
@@ -360,20 +410,26 @@ object LibraryScreen : Screen {
                     }
                 }
 
-                ShelfTabRow(
-                    tabs = tabs,
-                    currentPage = currentTabIndex,
-                    maxLabelWidth = maxTabLabelWidth,
-                    onTabClick = { index ->
-                        scope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    },
-                    onTabLongPress = onTabLongPress,
-                )
+                AnimatedVisibility(
+                    visible = state.selectionMode.not(),
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    ShelfTabRow(
+                        tabs = tabs,
+                        currentPage = currentTabIndex,
+                        maxLabelWidth = maxTabLabelWidth,
+                        onTabClick = { index ->
+                            scope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
+                        onTabLongPress = onTabLongPress,
+                    )
+                }
 
                 AnimatedVisibility(
-                    visible = isReadTab && availableReadYears.isNotEmpty(),
+                    visible = isReadTab && availableReadYears.isNotEmpty() && state.selectionMode.not(),
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut(),
                 ) {
@@ -393,7 +449,7 @@ object LibraryScreen : Screen {
                 val activeFilters = currentTab?.id?.let { state.filtersFor(tabId = it) }
 
                 AnimatedVisibility(
-                    visible = activeFilters != null && activeFilters.isEmpty.not(),
+                    visible = activeFilters != null && activeFilters.isEmpty.not() && state.selectionMode.not(),
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut(),
                 ) {
@@ -446,6 +502,7 @@ object LibraryScreen : Screen {
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier.fillMaxSize(),
+                        userScrollEnabled = state.selectionMode.not(),
                     ) { page ->
                         val tab = tabs.getOrNull(page) ?: return@HorizontalPager
 
@@ -488,6 +545,43 @@ object LibraryScreen : Screen {
                 onDismissRequest = {
                     runAction(OnFilterSheetExpandedChangeAction(expanded = false))
                 },
+            )
+        }
+
+        if (state.isBulkRemoveDialogShown) {
+            BulkRemoveConfirmationDialog(
+                bookCount = state.selectedBookIds.size,
+                inProgress = state.bulkActionInProgress,
+                onConfirm = {
+                    haptics.commit()
+
+                    runAction(OnBulkRemoveFromLibraryAction())
+                },
+                onDismiss = {
+                    runAction(OnBulkRemoveDialogExpandedChangeAction(shown = false))
+                },
+            )
+        }
+
+        if (state.isBulkAddToListSheetShown && state.selectedBookIds.isNotEmpty()) {
+            ChooseListsBottomSheet(
+                bookIds = state.selectedBookIds,
+                customLists = state.customLists.filter { it.isOwned.not() },
+                listsBeingMutated = state.listsBeingMutated,
+                onDismissRequest = {
+                    runAction(OnBulkAddToListSheetShownAction(shown = false))
+                },
+                onToggleMembership = { listId, membership ->
+                    haptics.commit()
+
+                    runAction(
+                        OnBulkToggleListMembershipAction(
+                            listId = listId,
+                            currentMembership = membership,
+                        ),
+                    )
+                },
+                onCreateNewListClick = onCreateNewListClick,
             )
         }
     }
@@ -1110,17 +1204,45 @@ object LibraryScreen : Screen {
             gridState = gridState,
         )
 
+        val haptics = LocalHaptics.current
+        val selectionMode = state.selectionMode
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
             itemsIndexed(visibleBooks, key = { _, book -> book.id }) { index, book ->
+                val isSelected = selectionMode && book.id in state.selectedBookIds
+
+                val onClick: () -> Unit = if (selectionMode) {
+                    {
+                        haptics.select()
+
+                        runAction(OnToggleBookSelectionAction(bookId = book.id))
+                    }
+                } else {
+                    { onBookClick(book) }
+                }
+
+                val onLongClick: (() -> Unit)? = if (selectionMode) {
+                    null
+                } else {
+                    {
+                        haptics.threshold()
+
+                        runAction(OnEnterSelectionModeAction(bookId = book.id))
+                    }
+                }
+
                 LayoutBookEntry(
                     modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
                         .staggeredEntry(coordinator = entry, index = index),
                     book = book,
                     layout = state.gridLayout,
-                    onBookClick = onBookClick,
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    isSelectionMode = selectionMode,
+                    isSelected = isSelected,
                     deadline = state.deadlines[book.id],
                     dateStyle = state.dateStyle,
                 )
@@ -1218,12 +1340,18 @@ object LibraryScreen : Screen {
     private fun LayoutBookEntry(
         book: Book,
         layout: LibraryGridLayout,
-        onBookClick: (Book) -> Unit,
+        onClick: () -> Unit,
+        onLongClick: (() -> Unit)?,
+        isSelectionMode: Boolean,
+        isSelected: Boolean,
         deadline: BookDeadline? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
         modifier: Modifier = Modifier,
     ) {
-        val entryModifier = modifier.prefetchBookDetailOnPress(book.id)
+        // Prefetch only makes sense when the tap opens book detail. In selection mode the tap
+        // toggles selection, so skip the prefetch to avoid spending bandwidth on a navigation
+        // that won't happen.
+        val entryModifier = if (isSelectionMode) modifier else modifier.prefetchBookDetailOnPress(book.id)
 
         val authorName = book.authors.map { it.name }.firstOrNull().orEmpty()
 
@@ -1254,22 +1382,29 @@ object LibraryScreen : Screen {
                     modifier = entryModifier,
                     title = book.title,
                     authorName = authorName,
-                    onClick = { onBookClick(book) },
+                    onClick = onClick,
+                    onLongClick = onLongClick,
                 ) { coverModifier ->
-                    DeadlineCoverOverlay(progress = deadlineProgress) {
-                        EditionImage(
-                            edition = currentEdition,
-                            modifier = coverModifier,
-                            isLoading = false,
-                            defaultEdition = book.defaultEdition,
-                            fallbackCoverUrl = book.coverUrl,
-                            elevation = 6.dp,
-                            cornerRadius = 10.dp,
-                            sharedTransitionKey = bookCoverTransitionKey(
-                                editionId = currentEdition?.id,
-                                bookId = book.id,
-                            ),
-                        )
+                    SelectableCover(
+                        modifier = coverModifier,
+                        isSelectionMode = isSelectionMode,
+                        isSelected = isSelected,
+                    ) {
+                        DeadlineCoverOverlay(progress = deadlineProgress) {
+                            EditionImage(
+                                edition = currentEdition,
+                                modifier = Modifier.fillMaxSize(),
+                                isLoading = false,
+                                defaultEdition = book.defaultEdition,
+                                fallbackCoverUrl = book.coverUrl,
+                                elevation = 6.dp,
+                                cornerRadius = 10.dp,
+                                sharedTransitionKey = bookCoverTransitionKey(
+                                    editionId = currentEdition?.id,
+                                    bookId = book.id,
+                                ),
+                            )
+                        }
                     }
                 }
             }
@@ -1279,22 +1414,29 @@ object LibraryScreen : Screen {
                 -> {
                 CoverOnlyCell(
                     modifier = entryModifier,
-                    onClick = { onBookClick(book) },
+                    onClick = onClick,
+                    onLongClick = onLongClick,
                 ) { coverModifier ->
-                    DeadlineCoverOverlay(progress = deadlineProgress) {
-                        EditionImage(
-                            edition = currentEdition,
-                            modifier = coverModifier,
-                            isLoading = false,
-                            defaultEdition = book.defaultEdition,
-                            fallbackCoverUrl = book.coverUrl,
-                            elevation = 6.dp,
-                            cornerRadius = 10.dp,
-                            sharedTransitionKey = bookCoverTransitionKey(
-                                editionId = currentEdition?.id,
-                                bookId = book.id,
-                            ),
-                        )
+                    SelectableCover(
+                        modifier = coverModifier,
+                        isSelectionMode = isSelectionMode,
+                        isSelected = isSelected,
+                    ) {
+                        DeadlineCoverOverlay(progress = deadlineProgress) {
+                            EditionImage(
+                                edition = currentEdition,
+                                modifier = Modifier.fillMaxSize(),
+                                isLoading = false,
+                                defaultEdition = book.defaultEdition,
+                                fallbackCoverUrl = book.coverUrl,
+                                elevation = 6.dp,
+                                cornerRadius = 10.dp,
+                                sharedTransitionKey = bookCoverTransitionKey(
+                                    editionId = currentEdition?.id,
+                                    bookId = book.id,
+                                ),
+                            )
+                        }
                     }
                 }
             }
@@ -1304,7 +1446,10 @@ object LibraryScreen : Screen {
                     modifier = entryModifier,
                     title = book.title,
                     authorName = authorName,
-                    onClick = { onBookClick(book) },
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    isSelectionMode = isSelectionMode,
+                    isSelected = isSelected,
                     deadlineProgress = deadlineProgress,
                 )
             }
@@ -1314,7 +1459,8 @@ object LibraryScreen : Screen {
                     modifier = entryModifier,
                     title = book.title,
                     authorName = currentEdition?.authorString.orEmpty(),
-                    onClick = { onBookClick(book) },
+                    onClick = onClick,
+                    onLongClick = onLongClick,
                     seriesText = book.seriesText,
                     releaseYear = book.releaseYear,
                     usersCount = book.usersCount,
@@ -1322,20 +1468,26 @@ object LibraryScreen : Screen {
                     deadlineProgress = deadlineProgress,
                     dateStyle = dateStyle,
                 ) { coverModifier ->
-                    DeadlineCoverOverlay(progress = deadlineProgress) {
-                        EditionImage(
-                            edition = currentEdition,
-                            modifier = coverModifier,
-                            isLoading = false,
-                            defaultEdition = book.defaultEdition,
-                            fallbackCoverUrl = book.coverUrl,
-                            elevation = 6.dp,
-                            cornerRadius = 10.dp,
-                            sharedTransitionKey = bookCoverTransitionKey(
-                                editionId = currentEdition?.id,
-                                bookId = book.id,
-                            ),
-                        )
+                    SelectableCover(
+                        modifier = coverModifier,
+                        isSelectionMode = isSelectionMode,
+                        isSelected = isSelected,
+                    ) {
+                        DeadlineCoverOverlay(progress = deadlineProgress) {
+                            EditionImage(
+                                edition = currentEdition,
+                                modifier = Modifier.fillMaxSize(),
+                                isLoading = false,
+                                defaultEdition = book.defaultEdition,
+                                fallbackCoverUrl = book.coverUrl,
+                                elevation = 6.dp,
+                                cornerRadius = 10.dp,
+                                sharedTransitionKey = bookCoverTransitionKey(
+                                    editionId = currentEdition?.id,
+                                    bookId = book.id,
+                                ),
+                            )
+                        }
                     }
                 }
             }
@@ -1441,13 +1593,14 @@ object LibraryScreen : Screen {
     private fun CoverOnlyCell(
         onClick: () -> Unit,
         modifier: Modifier = Modifier,
+        onLongClick: (() -> Unit)? = null,
         cover: @Composable (Modifier) -> Unit,
     ) {
         cover(
             modifier
                 .fillMaxWidth()
                 .aspectRatio(ratio = 2f / 3f)
-                .pressScaleClickable(onClick = onClick)
+                .pressScaleCombinedClickable(onClick = onClick, onLongClick = onLongClick)
         )
     }
 
@@ -1457,10 +1610,11 @@ object LibraryScreen : Screen {
         authorName: String,
         onClick: () -> Unit,
         modifier: Modifier = Modifier,
+        onLongClick: (() -> Unit)? = null,
         cover: @Composable (Modifier) -> Unit,
     ) {
         Column(
-            modifier = modifier.pressScaleClickable(onClick = onClick)
+            modifier = modifier.pressScaleCombinedClickable(onClick = onClick, onLongClick = onLongClick)
         ) {
             cover(
                 Modifier
@@ -1499,13 +1653,16 @@ object LibraryScreen : Screen {
         title: String,
         authorName: String,
         onClick: () -> Unit,
+        onLongClick: (() -> Unit)? = null,
+        isSelectionMode: Boolean = false,
+        isSelected: Boolean = false,
         deadlineProgress: DeadlineProgress? = null,
         modifier: Modifier = Modifier,
     ) {
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .pressScaleClickable(onClick = onClick),
+                .pressScaleCombinedClickable(onClick = onClick, onLongClick = onLongClick),
         ) {
             Row(
                 modifier = Modifier
@@ -1513,6 +1670,12 @@ object LibraryScreen : Screen {
                     .padding(vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                if (isSelectionMode) {
+                    SelectionLeadingIcon(isSelected = isSelected)
+
+                    Spacer(modifier = Modifier.width(12.dp))
+                }
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = title,
@@ -1553,6 +1716,7 @@ object LibraryScreen : Screen {
         title: String,
         authorName: String,
         onClick: () -> Unit,
+        onLongClick: (() -> Unit)? = null,
         seriesText: String? = null,
         releaseYear: Int? = null,
         usersCount: Int? = null,
@@ -1565,7 +1729,7 @@ object LibraryScreen : Screen {
         Surface(
             modifier = modifier
                 .fillMaxWidth()
-                .pressScaleClickable(onClick = onClick),
+                .pressScaleCombinedClickable(onClick = onClick, onLongClick = onLongClick),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
         ) {
@@ -1658,6 +1822,223 @@ object LibraryScreen : Screen {
             }
         }
     }
+
+    // region Selection mode
+
+    @Composable
+    private fun SelectionHeader(
+        selectedCount: Int,
+        bulkActionInProgress: Boolean,
+        isMoveMenuExpanded: Boolean,
+        onExit: () -> Unit,
+        onMoveMenuExpandedChange: (Boolean) -> Unit,
+        onMoveShelf: (UserBookStatus) -> Unit,
+        onAddToListClick: () -> Unit,
+        onRemoveClick: () -> Unit,
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(
+                    onClick = onExit,
+                    enabled = bulkActionInProgress.not(),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = "Exit selection mode",
+                    )
+                }
+
+                Text(
+                    text = "$selectedCount selected",
+                    style = MaterialTheme.editorialTypography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp),
+                )
+
+                Box {
+                    IconButton(
+                        onClick = { onMoveMenuExpandedChange(true) },
+                        enabled = bulkActionInProgress.not(),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_bookmark),
+                            contentDescription = "Move selected books to another shelf",
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = isMoveMenuExpanded,
+                        onDismissRequest = { onMoveMenuExpandedChange(false) },
+                    ) {
+                        SelectionShelfTargets.forEach { (status, label) ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                },
+                                onClick = { onMoveShelf(status) },
+                            )
+                        }
+                    }
+                }
+
+                IconButton(
+                    onClick = onAddToListClick,
+                    enabled = bulkActionInProgress.not(),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_bookmark_add),
+                        contentDescription = "Add selected books to a list",
+                    )
+                }
+
+                IconButton(
+                    onClick = onRemoveClick,
+                    enabled = bulkActionInProgress.not(),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_delete),
+                        contentDescription = "Remove selected books from library",
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun SelectableCover(
+        isSelectionMode: Boolean,
+        isSelected: Boolean,
+        modifier: Modifier = Modifier,
+        content: @Composable () -> Unit,
+    ) {
+        Box(modifier = modifier) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        alpha = if (isSelectionMode && isSelected.not()) UNSELECTED_COVER_ALPHA else 1f
+                    },
+            ) {
+                content()
+            }
+
+            if (isSelectionMode) {
+                SelectionCircleIndicator(
+                    isSelected = isSelected,
+                    unselectedContainer = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp),
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun SelectionLeadingIcon(isSelected: Boolean) {
+        SelectionCircleIndicator(
+            isSelected = isSelected,
+            unselectedContainer = MaterialTheme.colorScheme.surfaceContainerHigh,
+        )
+    }
+
+    @Composable
+    private fun SelectionCircleIndicator(
+        isSelected: Boolean,
+        unselectedContainer: Color,
+        modifier: Modifier = Modifier,
+    ) {
+        val container = if (isSelected) MaterialTheme.colorScheme.primary else unselectedContainer
+
+        val content = if (isSelected) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
+        Surface(
+            color = container,
+            contentColor = content,
+            shape = RoundedCornerShape(percent = 50),
+            modifier = modifier.size(24.dp),
+        ) {
+            if (isSelected) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(4.dp),
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun BulkRemoveConfirmationDialog(
+        bookCount: Int,
+        inProgress: Boolean,
+        onConfirm: () -> Unit,
+        onDismiss: () -> Unit,
+    ) {
+        val titlePlural = if (bookCount == 1) "book" else "books"
+
+        AlertDialog(
+            onDismissRequest = {
+                if (inProgress.not()) onDismiss()
+            },
+            title = {
+                Text(text = "Remove $bookCount $titlePlural?")
+            },
+            text = {
+                Text(
+                    text = "They'll come off every shelf and out of your Hardcover library. " +
+                        "You can always add them again later.",
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = onConfirm,
+                    enabled = inProgress.not(),
+                ) {
+                    Text(text = "Remove")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onDismiss,
+                    enabled = inProgress.not(),
+                ) {
+                    Text(text = "Keep")
+                }
+            },
+        )
+    }
+
+    private val SelectionShelfTargets: List<Pair<UserBookStatus, String>> = listOf(
+        UserBookStatus.WANT_TO_READ to "Move to Want to Read",
+        UserBookStatus.CURRENTLY_READING to "Move to Currently Reading",
+        UserBookStatus.READ to "Mark as Read",
+    )
+
+    private const val UNSELECTED_COVER_ALPHA = 0.55f
+
+    // endregion
 
     @Composable
     private fun EmptyListScreen(tab: LibraryContentTab) {

@@ -41,9 +41,6 @@ Sort affordance paired with the layout switcher (date added/finished, title, aut
 ### Step 2.4 — Per-tab stats subtitle + year filter on Read (S)
 Subtitle copy changes per tab ("24 titles · 8,402 pages"); the Read tab gains a year chip row. *(B.1.8, B.1.9)*
 
-### Step 2.5 — Bulk select mode (M)
-Long-press cover enters selection mode; top bar swaps to count + bulk actions (move shelf, mark read, add to list, remove). Pairs with `select` haptic per toggle, `commit` on apply. *(B.1.4)*
-
 ### Step 2.7 — Drag-to-reorder books within any library list (M)
 Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to every library tab — Want-to-Read, Currently Reading, Read, and any custom list — plus the active-reading order on the Reading screen. Persisted as a manual sort mode per tab that coexists with Step 2.1's sort options (selecting any non-manual sort hides the drag affordance until manual is re-selected).
 
@@ -163,12 +160,11 @@ User's custom lists + curated/community lists. Books inside use library anatomy.
 ### Step 5.4 — Series-completion cascade (S, depends on 5.2)
 When the last book of a series is marked Read, all covers in that series cascade through a fade-to-monochrome-then-back, ending with a "Complete" stamp. *(A.1.15)*
 
-### Step 5.5 — Add-to-list polish: bulk-select wiring + sheet anatomy (S, depends on [[2.11]] + 2.5)
-The core write path (`AddListBook` mutation, `RemoveListBook` reuse, book-detail action sheet, name-only list creation) shipped in [[2.11]] for 2.3.0. This step finishes the surface:
-- Wire the existing "Add to list" sheet into the bulk-select bar in Library (Step 2.5) so multiple books can be added/removed at once.
-- Upgrade each sheet row's toggle to the ink-fill chip animation (A.1.5) with the `commit` haptic (deferred from 2.11 if needed).
+### Step 5.5 — Add-to-list polish: ink-fill chip animation (S, depends on [[2.11]])
+The core write path (`AddListBook` mutation, `RemoveListBook` reuse, the `ChooseListsBottomSheet` shared between book detail and library bulk-select, name-only list creation) shipped in [[2.11]] for 2.3.0; the bulk-select wiring on top of that sheet shipped with the deleted Step 2.5 in the same release. This step is the remaining polish:
+- Upgrade each sheet row's toggle to the ink-fill chip animation (A.1.5) with the `commit` haptic (deferred from 2.11).
 - "Owned" stays special-cased and continues to route through `MarkEditionAsOwned` so the rest of the surface is uniform.
-- **Why here:** completes the list write-path surface and pairs naturally with bulk-select; full Lists screen polish is owned by 5.3, tag system + library-side creation by 10.10. *(B.4.18, B.4.13, B.1.12)*
+- **Why here:** finishes the list write-path *visual* surface; full Lists screen polish is owned by 5.3, tag system + library-side creation by 10.10. *(B.4.18, B.4.13, B.1.12)*
 
 ---
 

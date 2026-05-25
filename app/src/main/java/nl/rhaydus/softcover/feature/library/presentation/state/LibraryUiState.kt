@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
@@ -54,6 +55,29 @@ data class LibraryUiState(
     val isSearchActive: Boolean = false,
     val searchQuery: String = "",
     val selectedReadYear: Int? = null,
+
+    /**
+     * Bulk-select mode. Entered by long-pressing a cover on a built-in shelf tab (All or Status);
+     * exits when the user taps the close button, presses back, switches tabs, or deselects the
+     * last book. Custom-list tabs do not support selection — their entries are editions, which
+     * don't have shelf semantics.
+     */
+    val selectionMode: Boolean = false,
+    val selectedBookIds: Set<Int> = emptySet(),
+    val bulkActionInProgress: Boolean = false,
+    val isBulkMoveMenuExpanded: Boolean = false,
+    val isBulkRemoveDialogShown: Boolean = false,
+    val isBulkAddToListSheetShown: Boolean = false,
+
+    /**
+     * The user's full set of custom lists (unfiltered by the enabled-tabs setting), populated by
+     * [BookListsCollector] so the bulk "Add to list" sheet can offer every list the user owns —
+     * not just the ones surfaced as Library tabs.
+     */
+    val customLists: List<BookList> = emptyList(),
+
+    /** List ids whose bulk add/remove mutation is in flight; rows render a spinner instead of the indicator. */
+    val listsBeingMutated: Set<Int> = emptySet(),
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
         sortModeByTab[tabId] ?: LibraryTab.defaultSortMode(tabId = tabId)
@@ -144,6 +168,22 @@ data class LibraryUiState(
                 )
             }
         }
+    }
+
+    /**
+     * Resolves [selectedBookIds] to the underlying [Book] domain models so action handlers can hand
+     * them to use cases that operate on [Book] rather than just id. Looks across every collected
+     * shelf list plus the custom-list parent lookup so a selection survives a tab being
+     * recomputed mid-flight.
+     */
+    fun resolveSelectedBooks(): List<Book> {
+        if (selectedBookIds.isEmpty()) return emptyList()
+
+        val byId: Map<Int, Book> = booksByTab.values.asSequence()
+            .flatten()
+            .associateBy { it.id } + bookByBookId
+
+        return selectedBookIds.mapNotNull { byId[it] }
     }
 
     /** Years that the Read tab can be filtered to, computed from raw (unfiltered) Read books. */

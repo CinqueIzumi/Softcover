@@ -144,7 +144,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdate
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.feature.lists.presentation.component.ListMembership
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
@@ -440,15 +441,15 @@ class BookDetailScreen(
 
             if (state.showChooseListsSheet && state.book != null) {
                 ChooseListsBottomSheet(
-                    bookId = state.book.id,
+                    bookIds = setOf(state.book.id),
                     customLists = state.userLists.filter { it.isOwned.not() },
                     listsBeingMutated = state.listsBeingMutated,
                     onDismissRequest = { runAction(OnDismissChooseListsSheetAction()) },
-                    onToggleMembership = { listId, isMember ->
+                    onToggleMembership = { listId, membership ->
                         runAction(
                             OnToggleListMembershipAction(
                                 listId = listId,
-                                isMember = isMember,
+                                isMember = membership == ListMembership.ALL,
                             )
                         )
                     },
