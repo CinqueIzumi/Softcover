@@ -4,6 +4,8 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import nl.rhaydus.softcover.CreateListBookMutation
+import nl.rhaydus.softcover.CreateListBookMutation.Data.Insert_list_book.List_book.Companion.listBookFragment as createListBookListBookFragment
 import nl.rhaydus.softcover.CreateListMutation
 import nl.rhaydus.softcover.CreateListMutation.Data.Insert_list.List.Companion.listFragment as createListListFragment
 import nl.rhaydus.softcover.GetUserBookListsQuery
@@ -22,6 +24,7 @@ import nl.rhaydus.softcover.feature.lists.data.mapper.toBookList
 import nl.rhaydus.softcover.feature.lists.data.mapper.toListBook
 import nl.rhaydus.softcover.feature.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.type.Int_comparison_exp
+import nl.rhaydus.softcover.type.ListBookInput
 import nl.rhaydus.softcover.type.ListInput
 import nl.rhaydus.softcover.type.Lists_bool_exp
 
@@ -34,6 +37,12 @@ interface ListsRemoteDataSource {
     suspend fun createList(name: String): BookList
 
     suspend fun markEditionAsOwned(edition: BookEdition): ListBook
+
+    suspend fun addBookToList(
+        listId: Int,
+        bookId: Int,
+        editionId: Int,
+    ): ListBook
 
     suspend fun removeListBook(book: ListBook): BookList
 }
@@ -111,6 +120,29 @@ class ListsRemoteDataSourceImpl(
             .edition_owned
             ?.list_book
             ?.listBookFragment()
+            ?: throw Exception("Did not receive a list book fragment")
+
+        return listBookFragment.toListBook()
+            ?: throw Exception("List book mapping resulted in null")
+    }
+
+    override suspend fun addBookToList(
+        listId: Int,
+        bookId: Int,
+        editionId: Int,
+    ): ListBook {
+        val input = ListBookInput(
+            book_id = bookId,
+            list_id = listId,
+            edition_id = Optional.Present(editionId),
+            position = Optional.Absent,
+        )
+
+        val listBookFragment = apolloClient
+            .safeMutation(mutation = CreateListBookMutation(listBook = input))
+            .insert_list_book
+            ?.list_book
+            ?.createListBookListBookFragment()
             ?: throw Exception("Did not receive a list book fragment")
 
         return listBookFragment.toListBook()

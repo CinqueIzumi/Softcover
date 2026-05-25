@@ -97,6 +97,87 @@ class ListsRepositoryImpl(
         listsLocalDataSource.cacheListBook(book = real)
     }
 
+    override suspend fun addBookToList(
+        listId: Int,
+        bookId: Int,
+        edition: BookEdition,
+    ) {
+        val snapshot: ListBook? = listsLocalDataSource.findListBookByListAndBook(
+            listId = listId,
+            bookId = bookId,
+        )
+
+        listsLocalDataSource.cacheListBook(
+            book = ListBook(
+                listBookId = OPTIMISTIC_LIST_BOOK_ID,
+                listId = listId,
+                bookId = bookId,
+                editionId = edition.id,
+            ),
+        )
+
+        val real: ListBook = runCatching {
+            listsRemoteDataSource.addBookToList(
+                listId = listId,
+                bookId = bookId,
+                editionId = edition.id,
+            )
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            restoreOptimisticListBook(
+                listId = listId,
+                bookId = bookId,
+                snapshot = snapshot,
+            )
+            throw error
+        }
+
+        listsLocalDataSource.removeOptimisticListBook(
+            listId = listId,
+            bookId = bookId,
+        )
+        listsLocalDataSource.cacheListBook(book = real)
+    }
+
+    override suspend fun removeBookFromList(
+        listId: Int,
+        bookId: Int,
+    ) {
+        val snapshot: ListBook = listsLocalDataSource.findListBookByListAndBook(
+            listId = listId,
+            bookId = bookId,
+        ) ?: return
+
+        listsLocalDataSource.removeListBookById(listBookId = snapshot.listBookId)
+
+        val updatedList: BookList = runCatching {
+            listsRemoteDataSource.removeListBook(book = snapshot)
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            listsLocalDataSource.cacheListBook(book = snapshot)
+            throw error
+        }
+
+        listsLocalDataSource.cacheUserBookLists(lists = listOf(updatedList))
+    }
+
+    private suspend fun restoreOptimisticListBook(
+        listId: Int,
+        bookId: Int,
+        snapshot: ListBook?,
+    ) {
+        listsLocalDataSource.removeOptimisticListBook(
+            listId = listId,
+            bookId = bookId,
+        )
+
+        if (snapshot != null && snapshot.listBookId != OPTIMISTIC_LIST_BOOK_ID) {
+            listsLocalDataSource.cacheListBook(book = snapshot)
+        }
+    }
+
     override suspend fun removeOwnedEdition(editionId: Int) {
         val snapshot: ListBook = listsLocalDataSource.findOwnedListBookByEditionId(
             editionId = editionId,

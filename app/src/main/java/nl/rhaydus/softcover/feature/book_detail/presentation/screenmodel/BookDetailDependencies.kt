@@ -9,6 +9,9 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseC
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
@@ -31,6 +34,9 @@ class BookDetailDependencies(
     val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
+    val getAllUserListsUseCase: GetAllUserListsUseCase,
+    val addBookToListUseCase: AddBookToListUseCase,
+    val removeBookFromListUseCase: RemoveBookFromListUseCase,
     val observeBookDeadlineUseCase: ObserveBookDeadlineUseCase,
     val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,

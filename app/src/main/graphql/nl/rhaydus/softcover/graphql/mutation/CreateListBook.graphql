@@ -1,0 +1,7 @@
+mutation CreateListBook($listBook: ListBookInput!) {
+    insert_list_book(object: $listBook) {
+        list_book {
+            ...ListBookFragment
+        }
+    }
+}

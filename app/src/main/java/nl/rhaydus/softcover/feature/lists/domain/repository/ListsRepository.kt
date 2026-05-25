@@ -29,4 +29,15 @@ interface ListsRepository {
     suspend fun markEditionAsOwned(edition: BookEdition)
 
     suspend fun removeOwnedEdition(editionId: Int)
+
+    suspend fun addBookToList(
+        listId: Int,
+        bookId: Int,
+        edition: BookEdition,
+    )
+
+    suspend fun removeBookFromList(
+        listId: Int,
+        bookId: Int,
+    )
 }

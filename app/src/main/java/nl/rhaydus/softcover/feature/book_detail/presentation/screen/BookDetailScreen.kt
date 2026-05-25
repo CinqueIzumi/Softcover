@@ -122,6 +122,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadl
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
@@ -136,11 +137,14 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTa
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
@@ -152,6 +156,7 @@ import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineS
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.Instant
 import java.time.LocalDate
@@ -217,6 +222,11 @@ class BookDetailScreen(
                     )
                 )
             },
+            onCreateNewListClick = {
+                screenModel.runAction(OnDismissChooseListsSheetAction())
+
+                navigator.push(item = CreateListScreen())
+            },
             isOnline = isOnline,
             celebrationKey = celebrationKey,
         )
@@ -229,6 +239,7 @@ class BookDetailScreen(
         runAction: (BookDetailAction) -> Unit,
         onNavigateBack: () -> Unit,
         onCoverClick: () -> Unit,
+        onCreateNewListClick: () -> Unit,
         isOnline: Boolean,
         celebrationKey: Int = 0,
     ) {
@@ -424,6 +435,24 @@ class BookDetailScreen(
                 ShareBookBottomSheet(
                     book = state.book,
                     onDismissRequest = { runAction(OnDismissShareSheetAction()) },
+                )
+            }
+
+            if (state.showChooseListsSheet && state.book != null) {
+                ChooseListsBottomSheet(
+                    bookId = state.book.id,
+                    customLists = state.userLists.filter { it.isOwned.not() },
+                    listsBeingMutated = state.listsBeingMutated,
+                    onDismissRequest = { runAction(OnDismissChooseListsSheetAction()) },
+                    onToggleMembership = { listId, isMember ->
+                        runAction(
+                            OnToggleListMembershipAction(
+                                listId = listId,
+                                isMember = isMember,
+                            )
+                        )
+                    },
+                    onCreateNewListClick = onCreateNewListClick,
                 )
             }
 
@@ -1179,6 +1208,22 @@ class BookDetailScreen(
                         runAction(OnShareBookClickAction())
                     },
                 )
+
+                if (isOnline) {
+                    DropdownMenuItem(
+                        text = { Text(text = "Choose lists") },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_bookmark_add),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            dismiss()
+                            runAction(OnShowChooseListsSheetAction())
+                        },
+                    )
+                }
 
                 if (isOnShelf.not()) return@DropdownMenu
 
@@ -2048,6 +2093,7 @@ private fun BookDetailScreenReadingPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -2075,6 +2121,7 @@ private fun BookDetailScreenNonePreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -2102,6 +2149,7 @@ private fun BookDetailScreenDnfPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -2129,6 +2177,7 @@ private fun BookDetailScreenWantToReadPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -2156,6 +2205,7 @@ private fun BookDetailScreenReadPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }

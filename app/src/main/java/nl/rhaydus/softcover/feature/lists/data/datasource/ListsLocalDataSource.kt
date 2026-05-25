@@ -3,9 +3,9 @@ package nl.rhaydus.softcover.feature.lists.data.datasource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.data.database.dao.BookDao
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
-import nl.rhaydus.softcover.core.data.database.dao.BookDao
 import nl.rhaydus.softcover.feature.lists.data.mapper.toModel
 
 interface ListsLocalDataSource {
@@ -17,12 +17,26 @@ interface ListsLocalDataSource {
 
     suspend fun findOwnedListBookByEditionId(editionId: Int): ListBook?
 
+    suspend fun findListBookByListAndBook(
+        listId: Int,
+        bookId: Int,
+    ): ListBook?
+
     suspend fun getOwnedListId(): Int?
 
     suspend fun removeOwnedListBookByEditionId(editionId: Int)
 
+    suspend fun removeListBookById(listBookId: Int)
+
+    suspend fun removeOptimisticListBook(
+        listId: Int,
+        bookId: Int,
+    )
+
     suspend fun syncBookListMetadata(serverListIds: Set<Int>)
 }
+
+private const val OPTIMISTIC_LIST_BOOK_ID: Int = 0
 
 class ListsLocalDataSourceImpl(
     private val dao: BookDao,
@@ -45,12 +59,36 @@ class ListsLocalDataSourceImpl(
         return dao.getOwnedListBookByEditionId(editionId = editionId)?.toModel(isOwnedList = true)
     }
 
+    override suspend fun findListBookByListAndBook(
+        listId: Int,
+        bookId: Int,
+    ): ListBook? {
+        return dao
+            .getListBookByListAndBook(listId = listId, bookId = bookId)
+            ?.toModel(isOwnedList = false)
+    }
+
     override suspend fun getOwnedListId(): Int? {
         return dao.getOwnedListId()
     }
 
     override suspend fun removeOwnedListBookByEditionId(editionId: Int) {
         dao.deleteOwnedListBookByEditionId(editionId = editionId)
+    }
+
+    override suspend fun removeListBookById(listBookId: Int) {
+        dao.deleteListBookById(listBookId = listBookId)
+    }
+
+    override suspend fun removeOptimisticListBook(
+        listId: Int,
+        bookId: Int,
+    ) {
+        dao.deleteListBookByComposite(
+            listId = listId,
+            bookId = bookId,
+            listBookId = OPTIMISTIC_LIST_BOOK_ID,
+        )
     }
 
     override suspend fun syncBookListMetadata(serverListIds: Set<Int>) {

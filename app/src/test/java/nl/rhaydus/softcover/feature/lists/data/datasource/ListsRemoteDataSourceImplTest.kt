@@ -12,6 +12,8 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.CreateListBookMutation
+import nl.rhaydus.softcover.CreateListBookMutation.Data.Insert_list_book.List_book.Companion.listBookFragment as createListBookListBookFragment
 import nl.rhaydus.softcover.CreateListMutation
 import nl.rhaydus.softcover.CreateListMutation.Data.Insert_list.List.Companion.listFragment as createListListFragment
 import nl.rhaydus.softcover.GetUserBookListsQuery
@@ -592,6 +594,150 @@ class ListsRemoteDataSourceImplTest {
             // ----- Act & Assert -----
             shouldThrow<Exception> {
                 dataSource.markEditionAsOwned(edition = edition)
+            }
+        }
+    }
+
+    // ----- AddBookToList -----
+
+    @Nested
+    inner class AddBookToList {
+
+        @Test
+        fun `returns mapped ListBook when mutation succeeds`() = runTest {
+            // ----- Arrange -----
+            val listId = 5
+            val bookId = 3
+            val editionId = 10
+            val expectedListBook = stubListBook()
+            val mutationData = mockk<CreateListBookMutation.Data>()
+            val insertListBook = mockk<CreateListBookMutation.Data.Insert_list_book>()
+            val listBookEntry = mockk<CreateListBookMutation.Data.Insert_list_book.List_book>()
+
+            mockkObject(CreateListBookMutation.Data.Insert_list_book.List_book.Companion)
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateListBookMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_list_book
+            } returns insertListBook
+
+            every {
+                insertListBook.list_book
+            } returns listBookEntry
+
+            with(CreateListBookMutation.Data.Insert_list_book.List_book.Companion) {
+                every {
+                    listBookEntry.listBookFragment()
+                } returns mockk {
+                    every {
+                        toListBook()
+                    } returns expectedListBook
+                }
+            }
+
+            // ----- Act -----
+            val result = dataSource.addBookToList(
+                listId = listId,
+                bookId = bookId,
+                editionId = editionId,
+            )
+
+            // ----- Assert -----
+            result shouldBe expectedListBook
+        }
+
+        @Test
+        fun `throws when mutation returns null insert_list_book wrapper`() = runTest {
+            // ----- Arrange -----
+            val mutationData = mockk<CreateListBookMutation.Data>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateListBookMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_list_book
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.addBookToList(
+                    listId = 5,
+                    bookId = 3,
+                    editionId = 10,
+                )
+            }
+        }
+
+        @Test
+        fun `throws when mutation returns null list_book`() = runTest {
+            // ----- Arrange -----
+            val mutationData = mockk<CreateListBookMutation.Data>()
+            val insertListBook = mockk<CreateListBookMutation.Data.Insert_list_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateListBookMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_list_book
+            } returns insertListBook
+
+            every {
+                insertListBook.list_book
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.addBookToList(
+                    listId = 5,
+                    bookId = 3,
+                    editionId = 10,
+                )
+            }
+        }
+
+        @Test
+        fun `throws when toListBook maps the fragment to null`() = runTest {
+            // ----- Arrange -----
+            val mutationData = mockk<CreateListBookMutation.Data>()
+            val insertListBook = mockk<CreateListBookMutation.Data.Insert_list_book>()
+            val listBookEntry = mockk<CreateListBookMutation.Data.Insert_list_book.List_book>()
+
+            mockkObject(CreateListBookMutation.Data.Insert_list_book.List_book.Companion)
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateListBookMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_list_book
+            } returns insertListBook
+
+            every {
+                insertListBook.list_book
+            } returns listBookEntry
+
+            with(CreateListBookMutation.Data.Insert_list_book.List_book.Companion) {
+                every {
+                    listBookEntry.listBookFragment()
+                } returns mockk {
+                    every {
+                        toListBook()
+                    } returns null
+                }
+            }
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.addBookToList(
+                    listId = 5,
+                    bookId = 3,
+                    editionId = 10,
+                )
             }
         }
     }
