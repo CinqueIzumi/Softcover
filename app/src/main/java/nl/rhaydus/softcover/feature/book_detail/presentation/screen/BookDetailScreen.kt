@@ -382,6 +382,8 @@ class BookDetailScreen(
 
                 item { AboutSection(state = state) }
 
+                item { EditionMetadataStrip(state = state) }
+
                 item {
                     BelowDescriptionStatusPanel(
                         state = state,
@@ -1700,6 +1702,31 @@ class BookDetailScreen(
                     )
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun EditionMetadataStrip(state: BookDetailUiState) {
+        val edition = state.book?.currentEdition ?: return
+
+        val publisher = edition.publisher?.takeIf { it.isNotBlank() }
+        val isbn = edition.isbn10?.takeIf { it.isNotBlank() }
+
+        if (publisher == null && isbn == null) return
+
+        val parts = listOfNotNull(
+            publisher,
+            isbn?.let { "ISBN $it" },
+        )
+
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = parts.joinToString(separator = "  ·  "),
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 
