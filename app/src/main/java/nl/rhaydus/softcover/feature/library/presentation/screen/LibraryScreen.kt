@@ -147,20 +147,16 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnClearFiltersAc
 import nl.rhaydus.softcover.feature.library.presentation.action.OnEnterSelectionModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnGridLayoutChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReadYearSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderListBooksAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderShelfBooksAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnSetListRankedAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnSortMenuExpandedChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleBookSelectionAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleFilterValueAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAction
+import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlStrip
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
@@ -170,7 +166,6 @@ import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 import nl.rhaydus.softcover.feature.library.presentation.util.formatPageCount
 import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
 import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
-import nl.rhaydus.softcover.feature.lists.presentation.component.ListMembership
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
@@ -358,24 +353,6 @@ object LibraryScreen : Screen {
                         tab = currentTab,
                         isSearchActive = state.isSearchActive,
                         onToggleSearchClick = { runAction(OnToggleSearchAction()) },
-                        layoutMenu = {
-                            FilterMenuAction(
-                                state = state,
-                                tabId = currentTab?.id,
-                                runAction = runAction,
-                            )
-
-                            SortMenuAction(
-                                state = state,
-                                tab = currentTab,
-                                runAction = runAction,
-                            )
-
-                            LayoutMenuAction(
-                                state = state,
-                                runAction = runAction,
-                            )
-                        },
                         pullToRefreshState = pullToRefreshState,
                         isRefreshing = state.isLoading,
                         collapseFraction = collapseFraction,
@@ -450,6 +427,22 @@ object LibraryScreen : Screen {
                             onYearClick = { year ->
                                 runAction(OnReadYearSelectedAction(year = year))
                             },
+                        )
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = state.selectionMode.not(),
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        LibraryControlStrip(
+                            state = state,
+                            tab = currentTab,
+                            runAction = runAction,
                         )
                     }
                 }
@@ -606,7 +599,6 @@ object LibraryScreen : Screen {
         tab: LibraryContentTab?,
         isSearchActive: Boolean,
         onToggleSearchClick: () -> Unit,
-        layoutMenu: @Composable () -> Unit,
         pullToRefreshState: PullToRefreshState,
         isRefreshing: Boolean,
         collapseFraction: Float,
@@ -637,8 +629,6 @@ object LibraryScreen : Screen {
                         contentDescription = if (isSearchActive) "Close library search" else "Search in library",
                     )
                 }
-
-                layoutMenu()
             }
 
             Box(
@@ -962,208 +952,6 @@ object LibraryScreen : Screen {
         val pagesPart = formatPageCount(pages = totalPages)
 
         return if (pagesPart != null) "$titlesPart · $pagesPart" else titlesPart
-    }
-
-    @Composable
-    private fun FilterMenuAction(
-        state: LibraryUiState,
-        tabId: String?,
-        runAction: (LibraryAction) -> Unit,
-    ) {
-        val currentTabId = tabId ?: return
-        val isActive = state.filtersFor(tabId = currentTabId).isEmpty.not()
-
-        Box {
-            IconButton(
-                onClick = {
-                    runAction(OnFilterSheetExpandedChangeAction(expanded = true))
-                },
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_filter_list),
-                    contentDescription = if (isActive) "Edit library filters (filters active)" else "Add library filters",
-                )
-            }
-
-            if (isActive) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 10.dp, end = 10.dp)
-                        .size(8.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.inversePrimary,
-                            shape = RoundedCornerShape(percent = 50),
-                        ),
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun SortMenuAction(
-        state: LibraryUiState,
-        tab: LibraryContentTab?,
-        runAction: (LibraryAction) -> Unit,
-    ) {
-        val currentTab = tab ?: return
-        val currentTabId = currentTab.id
-        val currentMode = state.sortModeFor(tabId = currentTabId)
-        val currentDirection = state.sortDirectionFor(tabId = currentTabId)
-
-        // A custom-list tab's `ranked` flag is server-owned (the `lists.ranked` column). The
-        // canonical state lives in `state.customLists` (populated by BookListsCollector). We
-        // re-derive it on every recomposition because an in-flight UpdateList mutation flips
-        // the local cache optimistically, and the dropdown layout must follow.
-        val customListRanked: Boolean? = (currentTab as? LibraryContentTab.CustomList)
-            ?.let { customListTab ->
-                state.customLists.firstOrNull { it.id == customListTab.listId }?.ranked
-            }
-
-        val supportedModes = remember(currentTab, customListRanked) {
-            val isAllTab = currentTabId == LibraryContentTab.All.id
-            val isDidNotFinishTab = currentTabId == LibraryContentTab.Status.of(UserBookStatus.DID_NOT_FINISH).id
-
-            when {
-                currentTab is LibraryContentTab.CustomList -> {
-                    val ordered = listOf(
-                        LibrarySortMode.TITLE,
-                        LibrarySortMode.AUTHOR,
-                        LibrarySortMode.PAGE_COUNT,
-                        LibrarySortMode.RELEASE_DATE,
-                    )
-
-                    // ORDER is only meaningful — and only available on the server — when the list
-                    // is `ranked`. The "Make this list ordered" footer item below flips that flag.
-                    if (customListRanked == true) listOf(LibrarySortMode.ORDER) + ordered else ordered
-                }
-                // MANUAL only makes sense on the three built-in reading-state shelves where the
-                // user actively rearranges (Want to Read, Currently Reading, Read). The All tab
-                // has no single shelf to attach a position to, and DID_NOT_FINISH is an archive
-                // shelf where curating order isn't part of the workflow. ORDER is custom-list
-                // only and is never offered on a built-in shelf.
-                isAllTab || isDidNotFinishTab ->
-                    LibrarySortMode.entries.filter { it != LibrarySortMode.MANUAL && it != LibrarySortMode.ORDER }
-                else -> LibrarySortMode.entries.filter { it != LibrarySortMode.ORDER }
-            }
-        }
-
-        Box {
-            IconButton(
-                onClick = {
-                    runAction(OnSortMenuExpandedChangeAction(expanded = true))
-                },
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_sort),
-                    contentDescription = "Change library sort",
-                )
-            }
-
-            DropdownMenu(
-                expanded = state.isSortMenuExpanded,
-                onDismissRequest = {
-                    runAction(OnSortMenuExpandedChangeAction(expanded = false))
-                },
-            ) {
-                supportedModes.forEach { mode ->
-                    val isActive = mode == currentMode
-                    val isPositionalSort = mode == LibrarySortMode.MANUAL || mode == LibrarySortMode.ORDER
-
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = mode.label,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
-                                ),
-                            )
-                        },
-                        trailingIcon = if (isActive && isPositionalSort.not()) {
-                            {
-                                val arrow = if (currentDirection == SortDirection.ASCENDING) {
-                                    R.drawable.ic_arrow_drop_up
-                                } else {
-                                    R.drawable.ic_arrow_drop_down
-                                }
-
-                                Icon(
-                                    painter = painterResource(arrow),
-                                    contentDescription = "Sorted ${currentDirection.label} — tap to reverse",
-                                )
-                            }
-                        } else {
-                            null
-                        },
-                        onClick = {
-                            runAction(
-                                OnSortModeChangeAction(
-                                    tabId = currentTabId,
-                                    mode = mode,
-                                ),
-                            )
-                        },
-                    )
-                }
-
-                if (currentTab is LibraryContentTab.CustomList && customListRanked == false) {
-                    HorizontalDivider()
-
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = "✶ Make this list ordered",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        },
-                        onClick = {
-                            runAction(OnSetListRankedAction(listId = currentTab.listId, ranked = true))
-                        },
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun LayoutMenuAction(
-        state: LibraryUiState,
-        runAction: (LibraryAction) -> Unit,
-    ) {
-        Box {
-            IconButton(
-                onClick = {
-                    runAction(OnLayoutMenuExpandedChangeAction(expanded = true))
-                },
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_view_layout),
-                    contentDescription = "Change library layout",
-                )
-            }
-
-            DropdownMenu(
-                expanded = state.isLayoutMenuExpanded,
-                onDismissRequest = {
-                    runAction(OnLayoutMenuExpandedChangeAction(expanded = false))
-                },
-            ) {
-                LibraryGridLayout.entries.forEach { layout ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = layout.label,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        },
-                        onClick = {
-                            runAction(OnGridLayoutChangeAction(newLayout = layout))
-                        },
-                    )
-                }
-            }
-        }
     }
 
     @Composable
