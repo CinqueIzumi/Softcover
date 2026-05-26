@@ -10,6 +10,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.feature.lists.data.datasource.ListsLocalDataSource
@@ -22,17 +24,23 @@ class ListsRepositoryImplSetListRankedTest {
 
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
+    private lateinit var listWriteQueue: ListWriteQueue
+    private lateinit var listWriteDrainer: ListWriteDrainer
     private lateinit var repository: ListsRepositoryImpl
 
     @BeforeEach
     fun setUp() {
         listsRemoteDataSource = mockk(relaxed = true)
         listsLocalDataSource = mockk(relaxed = true)
+        listWriteQueue = mockk(relaxed = true)
+        listWriteDrainer = mockk(relaxed = true)
 
         repository = ListsRepositoryImpl(
             listsRemoteDataSource = listsRemoteDataSource,
             listsLocalDataSource = listsLocalDataSource,
             applicationScope = ApplicationScope(scope = CoroutineScope(UnconfinedTestDispatcher())),
+            listWriteQueue = listWriteQueue,
+            listWriteDrainer = listWriteDrainer,
         )
     }
 

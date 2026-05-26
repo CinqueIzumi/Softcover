@@ -30,6 +30,8 @@ val listsModule = module {
             listsRemoteDataSource = get(),
             listsLocalDataSource = get(),
             applicationScope = get(),
+            listWriteQueue = get(),
+            listWriteDrainer = get(),
         )
     }
 

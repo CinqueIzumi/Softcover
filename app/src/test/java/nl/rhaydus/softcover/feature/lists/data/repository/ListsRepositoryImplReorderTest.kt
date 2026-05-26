@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.lists.data.repository
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
@@ -9,6 +10,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
+import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
+import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.feature.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.feature.lists.data.datasource.ListsRemoteDataSource
@@ -20,17 +25,23 @@ class ListsRepositoryImplReorderTest {
 
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
+    private lateinit var listWriteQueue: ListWriteQueue
+    private lateinit var listWriteDrainer: ListWriteDrainer
     private lateinit var repository: ListsRepositoryImpl
 
     @BeforeEach
     fun setUp() {
         listsRemoteDataSource = mockk(relaxed = true)
         listsLocalDataSource = mockk(relaxed = true)
+        listWriteQueue = mockk(relaxed = true)
+        listWriteDrainer = mockk(relaxed = true)
 
         repository = ListsRepositoryImpl(
             listsRemoteDataSource = listsRemoteDataSource,
             listsLocalDataSource = listsLocalDataSource,
             applicationScope = ApplicationScope(scope = CoroutineScope(UnconfinedTestDispatcher())),
+            listWriteQueue = listWriteQueue,
+            listWriteDrainer = listWriteDrainer,
         )
     }
 
@@ -153,6 +164,60 @@ class ListsRepositoryImplReorderTest {
                     orderedListBookIds = orderedIds,
                 )
             }
+        }
+
+        @Test
+        fun `on remote failure local positions are not rolled back and REORDER_LIST_BOOKS is enqueued`() = runTest {
+            // ----- Arrange -----
+            val listId = 5
+            val startPosition = 2
+            val orderedIds = listOf(10, 20, 30)
+            val remoteError = RuntimeException("network failure")
+
+            coEvery {
+                listsRemoteDataSource.updateListBookPositions(
+                    listId = any(),
+                    startPosition = any(),
+                    orderedListBookIds = any(),
+                )
+            } throws remoteError
+
+            val slot = mutableListOf<PendingListWrite>()
+
+            coJustRun {
+                listWriteQueue.enqueue(capture(slot))
+            }
+
+            // ----- Act -----
+            val thrown = shouldThrow<RuntimeException> {
+                repository.reorderListBooks(
+                    listId = listId,
+                    startPosition = startPosition,
+                    orderedListBookIds = orderedIds,
+                )
+            }
+
+            // ----- Assert -----
+            thrown shouldBe remoteError
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.applyListBookPositions(
+                    listId = listId,
+                    startPosition = startPosition,
+                    orderedListBookIds = orderedIds,
+                )
+            }
+
+            coVerify(exactly = 1) {
+                listWriteQueue.enqueue(write = any())
+            }
+
+            val enqueued = slot.first()
+
+            enqueued.kind shouldBe PendingListWriteKind.REORDER_LIST_BOOKS
+            enqueued.listId shouldBe listId
+            enqueued.startPosition shouldBe startPosition
+            enqueued.orderedListBookIds shouldBe orderedIds
         }
     }
 }

@@ -11,6 +11,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -25,17 +27,23 @@ class ListsRepositoryImplOwnedEditionTest {
 
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
+    private lateinit var listWriteQueue: ListWriteQueue
+    private lateinit var listWriteDrainer: ListWriteDrainer
     private lateinit var repository: ListsRepositoryImpl
 
     @BeforeEach
     fun setUp() {
         listsRemoteDataSource = mockk()
         listsLocalDataSource = mockk(relaxed = true)
+        listWriteQueue = mockk(relaxed = true)
+        listWriteDrainer = mockk(relaxed = true)
 
         repository = ListsRepositoryImpl(
             listsRemoteDataSource = listsRemoteDataSource,
             listsLocalDataSource = listsLocalDataSource,
             applicationScope = ApplicationScope(scope = CoroutineScope(UnconfinedTestDispatcher())),
+            listWriteQueue = listWriteQueue,
+            listWriteDrainer = listWriteDrainer,
         )
     }
 
@@ -329,7 +337,7 @@ class ListsRepositoryImplOwnedEditionTest {
         }
 
         @Test
-        fun `on failure re-caches snapshot and rethrows`() = runTest {
+        fun `on failure enqueues REMOVE_LIST_BOOK with snapshot fields and rethrows`() = runTest {
             // ----- Arrange -----
             val editionId = 10
             val snapshot = stubListBook(listBookId = 5, editionId = editionId)
@@ -349,8 +357,12 @@ class ListsRepositoryImplOwnedEditionTest {
             // ----- Assert -----
             caught.exceptionOrNull() shouldBe remoteError
 
-            coVerify {
-                listsLocalDataSource.cacheListBook(book = snapshot)
+            coVerify(exactly = 1) {
+                listWriteQueue.enqueue(write = any())
+            }
+
+            coVerify(exactly = 0) {
+                listsLocalDataSource.cacheListBook(book = any())
             }
         }
 

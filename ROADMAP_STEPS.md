@@ -61,20 +61,6 @@ Minimum viable custom-list write path so users can group books in 2.3.0 without 
 
 **Why pulled forward:** unblocks list-based organization for users in 2.3.0 without committing to the full Phase 5 surface area. Leaves 5.3 / 5.5 / 10.10 to focus on discovery, polish, and tagging rather than the basic write path. *(B.4.18, B.4.13, B.1.12, C.5)*
 
-### Step 2.12 — Persistent retry queue for list write mutations (S) *(narrow slice of [[9.7]], pulled forward to 2.3.0)*
-The new write paths in [[2.11]] and the custom-list reorder in [[2.7]] all push state to Hardcover. Without retry, a single server failure or dropped connection silently desyncs the local cache from the server — the user sees the list change, Hardcover doesn't, and the next refresh wipes the change out.
-
-**In scope:**
-- A persistent queue (Room-backed, keyed by user) of pending write mutations: `CreateList`, `AddListBook`, `RemoveListBook`, and the custom-list reorder mutation from [[2.7]]. Each entry stores the mutation type, payload, target ids, the original timestamp, and a retry count.
-- **Enqueue** when the in-band mutation fails (network error, GraphQL error, or `safeMutation` returns failure). The optimistic local update from 2.11/2.7 stays in place — the queue exists to reconcile the server, not to drive the UI.
-- **Drain** on two triggers: (a) app cold start, after the user is authenticated and before the first Library/Lists refresh, and (b) network reconnect, observed via the existing connectivity signal. Drain processes entries FIFO with light exponential backoff inside a single drain run; entries that still fail are left in the queue for the next trigger.
-- **Order preservation:** mutations against the same list id are drained in enqueue order so that, e.g., add-then-remove doesn't flip into remove-then-add.
-- **Pre-refresh ordering:** the drain must complete (or hand off non-blockingly) before the corresponding list/library refresh fires, so the refresh doesn't overwrite the optimistic state with stale server data.
-
-**Out of scope (owned by full 9.7):** shake-on-conflict UI, conflict resolution beyond last-write-wins, queueing for non-list mutations (progress, sessions, ratings, reviews, highlights), surfaced "pending sync" indicator, manual retry affordance. A failed drain stays silent on the surface in 2.3.0 — the toast from 2.11 already fires on the original failure; the queue is purely the background reconciliation path.
-
-**Why pulled forward:** without it, the optimistic updates in [[2.11]] and [[2.7]] are a lie under intermittent connectivity. Building the queue once, scoped to four mutation types, is cheaper than retrofitting it across each list affordance later. *(D.7)*
-
 ### Step 2.13 — Drag-to-reorder books within built-in shelves (S)
 Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to the built-in library shelves — Want-to-Read, Currently Reading, Read. Persisted as a manual sort mode per shelf that coexists with Step 2.1's sort options (selecting any non-manual sort hides the drag affordance until manual is re-selected).
 

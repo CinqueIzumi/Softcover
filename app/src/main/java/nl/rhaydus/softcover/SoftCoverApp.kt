@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.di.dispatcherModule
 import nl.rhaydus.softcover.di.notificationModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
+import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingListWriteSyncer
 import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingProgressSyncer
 import nl.rhaydus.softcover.feature.connectivity.di.connectivityModule
 import nl.rhaydus.softcover.feature.reading.di.readingModule
@@ -77,6 +78,7 @@ class SoftCoverApp : Application() {
         val koin = GlobalContext.get()
         NetworkAvailability.install(koin.get<NetworkAvailabilityProvider>())
         koin.get<PendingProgressSyncer>().start(koin.get<ApplicationScope>().scope)
+        koin.get<PendingListWriteSyncer>().start(koin.get<ApplicationScope>().scope)
         koin.get<NotificationChannelInitializer>().initialize()
 
         koin.get<ApplicationScope>().scope.launch {

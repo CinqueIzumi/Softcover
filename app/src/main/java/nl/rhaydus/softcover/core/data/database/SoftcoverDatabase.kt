@@ -22,7 +22,9 @@ import nl.rhaydus.softcover.core.data.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
+import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingListWriteDao
 import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingProgressUpdateDao
+import nl.rhaydus.softcover.feature.connectivity.data.model.PendingListWriteEntity
 import nl.rhaydus.softcover.feature.connectivity.data.model.PendingProgressUpdateEntity
 import nl.rhaydus.softcover.feature.deadlines.data.dao.BookDeadlineDao
 import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
@@ -53,6 +55,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
         BookSeriesEntity::class,
         BookDeadlineEntity::class,
         PendingProgressUpdateEntity::class,
+        PendingListWriteEntity::class,
         DismissedContinueSeriesBookEntity::class,
         DismissedContinueSeriesEntity::class,
         PersonalReviewEntity::class,
@@ -66,7 +69,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
     views = [
         BookEditionView::class
     ],
-    version = 29,
+    version = 30,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -74,6 +77,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDeadlineDao(): BookDeadlineDao
 
     abstract fun pendingProgressUpdateDao(): PendingProgressUpdateDao
+
+    abstract fun pendingListWriteDao(): PendingListWriteDao
 
     abstract fun dismissedContinueSeriesDao(): DismissedContinueSeriesDao
 
@@ -119,6 +124,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_26_27)
                 .addMigrations(MIGRATION_27_28)
                 .addMigrations(MIGRATION_28_29)
+                .addMigrations(MIGRATION_29_30)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -887,6 +893,28 @@ abstract class SoftcoverDatabase : RoomDatabase() {
         private val MIGRATION_28_29 = object : Migration(28, 29) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE book_lists ADD COLUMN ranked INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_29_30 = object : Migration(29, 30) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS pending_list_writes (
+                            localId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            kind TEXT NOT NULL,
+                            listId INTEGER,
+                            listName TEXT,
+                            bookId INTEGER,
+                            editionId INTEGER,
+                            listBookId INTEGER,
+                            startPosition INTEGER,
+                            orderedListBookIdsCsv TEXT,
+                            enqueuedAt TEXT NOT NULL,
+                            attempts INTEGER NOT NULL DEFAULT 0
+                        )
+                    """.trimIndent()
+                )
             }
         }
 
