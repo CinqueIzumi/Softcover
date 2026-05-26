@@ -1726,13 +1726,15 @@ class BookDetailScreen(
         val edition = state.book?.currentEdition ?: return
 
         val publisher = edition.publisher?.takeIf { it.isNotBlank() }
-        val isbn = edition.isbn10?.takeIf { it.isNotBlank() }
+        val isbn13 = edition.isbn13?.takeIf { it.isNotBlank() }
+        val isbn10 = edition.isbn10?.takeIf { it.isNotBlank() }
 
-        if (publisher == null && isbn == null) return
+        if (publisher == null && isbn13 == null && isbn10 == null) return
 
         val parts = listOfNotNull(
             publisher,
-            isbn?.let { "ISBN $it" },
+            isbn13?.let { "ISBN-13 $it" },
+            isbn10?.let { "ISBN-10 $it" },
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
@@ -1751,7 +1753,11 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        val isbn = state.book?.currentEdition?.isbn10?.takeIf { it.isNotBlank() } ?: return
+        val edition = state.book?.currentEdition ?: return
+
+        val isbn = edition.isbn13?.takeIf { it.isNotBlank() }
+            ?: edition.isbn10?.takeIf { it.isNotBlank() }
+            ?: return
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
             Spacer(modifier = Modifier.height(28.dp))

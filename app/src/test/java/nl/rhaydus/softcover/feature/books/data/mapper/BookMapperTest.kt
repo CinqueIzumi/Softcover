@@ -78,6 +78,7 @@ class BookMapperTest {
         url: String? = "https://example.com/cover.jpg",
         localImagePath: String? = null,
         isbn10: String? = "1234567890",
+        isbn13: String? = null,
         pages: Int? = 300,
         audioSeconds: Int? = null,
         authors: List<Author> = emptyList(),
@@ -117,6 +118,10 @@ class BookMapperTest {
         every {
             this@mockk.isbn10
         } returns isbn10
+
+        every {
+            this@mockk.isbn13
+        } returns isbn13
 
         every {
             this@mockk.pages
@@ -446,6 +451,7 @@ class BookMapperTest {
         url: String? = "https://example.com/cover.jpg",
         localImagePath: String? = null,
         isbn10: String? = "1234567890",
+        isbn13: String? = null,
         pages: Int? = 300,
         audioSeconds: Int? = null,
         releaseYear: Int = 2020,
@@ -460,6 +466,7 @@ class BookMapperTest {
         url = url,
         localImagePath = localImagePath,
         isbn10 = isbn10,
+        isbn13 = isbn13,
         pages = pages,
         audioSeconds = audioSeconds,
         releaseYear = releaseYear,
@@ -1011,6 +1018,7 @@ class BookMapperTest {
                 title = "Edition Title",
                 url = "https://example.com/cover.jpg",
                 isbn10 = "1234567890",
+                isbn13 = null,
                 pages = 300,
                 releaseYear = 2020,
                 format = "Paperback",
@@ -1064,6 +1072,7 @@ class BookMapperTest {
                 title = null,
                 url = null,
                 isbn10 = null,
+                isbn13 = null,
                 pages = null,
             )
 
@@ -1555,6 +1564,21 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.audioSeconds shouldBe null
+        }
+
+        @Test
+        fun `maps non-null isbn13 from BookEditionEntity to BookEdition`() {
+            // ----- Arrange -----
+            val entity = stubBookEditionEntity(isbn13 = "9780451524935")
+
+            // ----- Act -----
+            val result = entity.toModel(
+                authors = emptyList(),
+                owned = false,
+            )
+
+            // ----- Assert -----
+            result.isbn13 shouldBe "9780451524935"
         }
     }
 
@@ -2144,6 +2168,7 @@ class BookMapperTest {
                 every { title } returns "Edition Title"
                 every { book_id } returns 1
                 every { isbn_10 } returns "1234567890"
+                every { isbn_13 } returns null
                 every { pages } returns 300
                 every { this@mockk.publisher } returns publisher
                 every { this@mockk.image } returns image
@@ -2180,6 +2205,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2208,6 +2234,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2238,6 +2265,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { this@mockk.image } returns image
@@ -2267,6 +2295,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2293,6 +2322,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2323,6 +2353,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2349,6 +2380,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2375,6 +2407,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2401,6 +2434,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2427,6 +2461,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2453,6 +2488,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2479,6 +2515,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2505,6 +2542,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2531,6 +2569,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2557,6 +2596,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2583,6 +2623,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2598,6 +2639,33 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.releaseDate shouldBe null
+        }
+
+        @Test
+        fun `maps non-null isbn_13 from EditionFragment to BookEdition`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { isbn_13 } returns "9780451524935"
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { release_date } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.isbn13 shouldBe "9780451524935"
         }
     }
 
@@ -2622,6 +2690,7 @@ class BookMapperTest {
                 every { title } returns "Animal Farm"
                 every { book_id } returns 2
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns 112
                 every { publisher } returns null
                 every { image } returns null
@@ -2655,6 +2724,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 2
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2682,6 +2752,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 2
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2709,6 +2780,7 @@ class BookMapperTest {
                 every { title } returns "1984"
                 every { book_id } returns 3
                 every { isbn_10 } returns "0451524934"
+                every { isbn_13 } returns null
                 every { pages } returns 328
                 every { publisher } returns null
                 every { image } returns null
@@ -2742,6 +2814,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 2
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2769,6 +2842,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2876,6 +2950,7 @@ class BookMapperTest {
                 every { title } returns "My Edition"
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2960,6 +3035,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3038,6 +3114,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3120,6 +3197,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3202,6 +3280,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3283,6 +3362,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 999 // differs from parent book id
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3364,6 +3444,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3637,6 +3718,7 @@ class BookMapperTest {
                 every { title } returns "Hardcover Edition"
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns 400
                 every { publisher } returns null
                 every { image } returns null
@@ -3697,6 +3779,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3753,6 +3836,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3809,6 +3893,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3864,6 +3949,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 999 // differs from parent book id
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3917,6 +4003,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3973,6 +4060,7 @@ class BookMapperTest {
                 url = null,
                 localImagePath = null,
                 isbn10 = null,
+                isbn13 = null,
                 pages = null,
                 audioSeconds = 3600,
                 authors = emptyList(),
@@ -3997,6 +4085,7 @@ class BookMapperTest {
                 url = null,
                 localImagePath = null,
                 isbn10 = null,
+                isbn13 = null,
                 pages = null,
                 audioSeconds = 0,
                 authors = emptyList(),
@@ -4021,6 +4110,7 @@ class BookMapperTest {
                 url = null,
                 localImagePath = null,
                 isbn10 = null,
+                isbn13 = null,
                 pages = null,
                 audioSeconds = null,
                 authors = emptyList(),
@@ -4050,6 +4140,7 @@ class BookMapperTest {
                 every { title } returns "Title"
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null

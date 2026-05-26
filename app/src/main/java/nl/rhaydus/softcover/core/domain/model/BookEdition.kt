@@ -11,6 +11,7 @@ data class BookEdition(
     val url: String?,
     val localImagePath: String?,
     val isbn10: String?,
+    val isbn13: String?,
     val pages: Int?,
     val audioSeconds: Int?,
     val authors: List<Author>,

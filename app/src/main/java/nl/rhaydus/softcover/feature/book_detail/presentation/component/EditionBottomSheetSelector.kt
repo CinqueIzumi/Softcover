@@ -255,9 +255,17 @@ private fun EditionItem(
                     )
                 }
 
-                edition.isbn10?.let { isbn ->
+                edition.isbn13?.takeIf { it.isNotBlank() }?.let { isbn ->
                     Text(
-                        text = "ISBN: $isbn",
+                        text = "ISBN-13: $isbn",
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                edition.isbn10?.takeIf { it.isNotBlank() }?.let { isbn ->
+                    Text(
+                        text = "ISBN-10: $isbn",
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -289,9 +297,29 @@ private fun EditionBottomSheetContentPreview() {
     val baseEdition = PreviewData.baseEdition.copy(title = "Snake-Eater")
 
     val editions = listOf(
-        baseEdition.copy(pages = 271, isbn10 = "123", publisher = "47 north", id = 40),
-        baseEdition.copy(pages = 352, isbn10 = "234", publisher = "Titan Books", id = 20, format = "", owned = true),
-        baseEdition.copy(pages = 267, isbn10 = null, publisher = "47 north", id = 80),
+        baseEdition.copy(
+            pages = 271,
+            isbn10 = "0451524934",
+            isbn13 = "9780451524935",
+            publisher = "47 north",
+            id = 40,
+        ),
+        baseEdition.copy(
+            pages = 352,
+            isbn10 = "1789091349",
+            isbn13 = null,
+            publisher = "Titan Books",
+            id = 20,
+            format = "",
+            owned = true,
+        ),
+        baseEdition.copy(
+            pages = 267,
+            isbn10 = null,
+            isbn13 = "9780062060624",
+            publisher = "47 north",
+            id = 80,
+        ),
     )
 
     SoftcoverTheme {

@@ -19,6 +19,7 @@ internal object ExploreMockData {
         title = title,
         publisher = "",
         isbn10 = "",
+        isbn13 = "",
         pages = 320,
         audioSeconds = null,
         url = "",

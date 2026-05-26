@@ -20,6 +20,7 @@ object PreviewData {
         title = "Last to leave the Room",
         publisher = "",
         isbn10 = "",
+        isbn13 = "",
         pages = 100,
         audioSeconds = null,
         url = "",
