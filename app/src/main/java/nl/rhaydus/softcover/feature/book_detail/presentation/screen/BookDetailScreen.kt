@@ -69,6 +69,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -121,13 +122,14 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBo
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnExternalLinkClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
@@ -138,22 +140,23 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBook
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
-import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
-import nl.rhaydus.softcover.feature.lists.presentation.component.ListMembership
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalLinkEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.feature.lists.presentation.component.ListMembership
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
@@ -185,6 +188,8 @@ class BookDetailScreen(
 
         val haptics = rememberHaptics()
 
+        val uriHandler = LocalUriHandler.current
+
         var celebrationKey by remember { mutableIntStateOf(0) }
 
         ObserveAsEvents(flow = screenModel.events) {
@@ -202,6 +207,10 @@ class BookDetailScreen(
                 is BookMarkedAsReadEvent -> {
                     haptics.commit()
                     celebrationKey++
+                }
+
+                is OpenExternalLinkEvent -> {
+                    uriHandler.openUri(uri = it.url)
                 }
             }
         }
@@ -383,6 +392,13 @@ class BookDetailScreen(
                 item { AboutSection(state = state) }
 
                 item { EditionMetadataStrip(state = state) }
+
+                item {
+                    ExternalLinksStrip(
+                        state = state,
+                        runAction = runAction,
+                    )
+                }
 
                 item {
                     BelowDescriptionStatusPanel(
@@ -1726,6 +1742,75 @@ class BookDetailScreen(
                 text = parts.joinToString(separator = "  ·  "),
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+
+    @Composable
+    private fun ExternalLinksStrip(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        val isbn = state.book?.currentEdition?.isbn10?.takeIf { it.isNotBlank() } ?: return
+
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Spacer(modifier = Modifier.height(28.dp))
+
+            SectionLabel(text = "Find it")
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ExternalLinkButton(
+                    iconRes = R.drawable.ic_storefront,
+                    contentDescription = "Find on Bookshop.org",
+                    onClick = {
+                        runAction(
+                            OnExternalLinkClickAction(
+                                url = "https://bookshop.org/search?keywords=$isbn",
+                            ),
+                        )
+                    },
+                )
+
+                ExternalLinkButton(
+                    iconRes = R.drawable.ic_shopping_bag,
+                    contentDescription = "Find on Amazon",
+                    onClick = {
+                        runAction(
+                            OnExternalLinkClickAction(
+                                url = "https://www.amazon.com/s?k=$isbn",
+                            ),
+                        )
+                    },
+                )
+
+                ExternalLinkButton(
+                    iconRes = R.drawable.ic_library_books,
+                    contentDescription = "Find on OpenLibrary",
+                    onClick = {
+                        runAction(
+                            OnExternalLinkClickAction(
+                                url = "https://openlibrary.org/search?isbn=$isbn",
+                            ),
+                        )
+                    },
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ExternalLinkButton(
+        iconRes: Int,
+        contentDescription: String,
+        onClick: () -> Unit,
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

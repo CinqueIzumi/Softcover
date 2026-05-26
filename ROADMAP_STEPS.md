@@ -134,9 +134,6 @@ Editorial section under metadata with "RECOGNITION" eyebrow + italic display of 
 ### Step 4.3 — Content warnings collapsible (S)
 "Warnings (4)" collapsible near the about block; opt-in reveal. *(B.4.9)*
 
-### Step 4.5 — External links strip (S)
-"FIND IT" eyebrow with icon-only links to Bookshop.org, Amazon, library.org, author site. *(B.4.15)*
-
 ### Step 4.6 — Audiobook predicted finish (S)
 When audiobook + known listening pace exists, deadline summary swaps to a predicted date. *(B.4.14)*
 
