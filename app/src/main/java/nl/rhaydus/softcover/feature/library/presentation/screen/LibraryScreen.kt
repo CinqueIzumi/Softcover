@@ -1103,56 +1103,50 @@ object LibraryScreen : Screen {
                 val edition = editionsById[id] ?: return@itemsIndexed
 
                 ReorderableItem(state = reorderableState, key = id) {
-                    Box {
-                        LayoutEditionEntry(
-                            modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
-                            edition = edition,
-                            layout = state.gridLayout,
-                            onEditionClick = onEditionClick,
-                        )
+                    val handleModifier = Modifier.draggableHandle(
+                        onDragStarted = {
+                            minTouchedIndex.intValue = -1
+                            maxTouchedIndex.intValue = -1
 
-                        DragHandle(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(4.dp)
-                                .draggableHandle(
-                                    onDragStarted = {
-                                        minTouchedIndex.intValue = -1
-                                        maxTouchedIndex.intValue = -1
+                            haptics.lift()
+                        },
+                        onDragStopped = {
+                            haptics.drop()
 
-                                        haptics.lift()
-                                    },
-                                    onDragStopped = {
-                                        haptics.drop()
+                            val min = minTouchedIndex.intValue
+                            val max = maxTouchedIndex.intValue
 
-                                        val min = minTouchedIndex.intValue
-                                        val max = maxTouchedIndex.intValue
+                            if (min < 0 || max < 0 || max >= orderedIds.size) {
+                                return@draggableHandle
+                            }
 
-                                        if (min < 0 || max < 0 || max >= orderedIds.size) {
-                                            return@draggableHandle
-                                        }
+                            val orderedListBookIds = orderedIds
+                                .subList(min, max + 1)
+                                .mapNotNull { editionId -> listBookIdByEditionId[editionId] }
 
-                                        val orderedListBookIds = orderedIds
-                                            .subList(min, max + 1)
-                                            .mapNotNull { editionId -> listBookIdByEditionId[editionId] }
+                            if (orderedListBookIds.size != max - min + 1) {
+                                // A list_books row was missing for one of the dragged
+                                // editions — bail rather than write a partial range.
+                                return@draggableHandle
+                            }
 
-                                        if (orderedListBookIds.size != max - min + 1) {
-                                            // A list_books row was missing for one of the dragged
-                                            // editions — bail rather than write a partial range.
-                                            return@draggableHandle
-                                        }
-
-                                        runAction(
-                                            OnReorderListBooksAction(
-                                                listId = tab.listId,
-                                                startPosition = min,
-                                                orderedListBookIds = orderedListBookIds,
-                                            ),
-                                        )
-                                    },
+                            runAction(
+                                OnReorderListBooksAction(
+                                    listId = tab.listId,
+                                    startPosition = min,
+                                    orderedListBookIds = orderedListBookIds,
                                 ),
-                        )
-                    }
+                            )
+                        },
+                    )
+
+                    LayoutEditionEntry(
+                        modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
+                        edition = edition,
+                        layout = state.gridLayout,
+                        onEditionClick = onEditionClick,
+                        dragHandle = { DragHandle(modifier = handleModifier) },
+                    )
                 }
             }
         }
@@ -1329,51 +1323,45 @@ object LibraryScreen : Screen {
                 val book = booksById[id] ?: return@itemsIndexed
 
                 ReorderableItem(state = reorderableState, key = id) {
-                    Box {
-                        LayoutBookEntry(
-                            modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
-                            book = book,
-                            layout = state.gridLayout,
-                            onClick = { onBookClick(book) },
-                            onLongClick = {
-                                haptics.threshold()
+                    val handleModifier = Modifier.draggableHandle(
+                        onDragStarted = {
+                            maxTouchedIndex.intValue = -1
 
-                                runAction(OnEnterSelectionModeAction(bookId = book.id))
-                            },
-                            isSelectionMode = false,
-                            isSelected = false,
-                            deadline = state.deadlines[book.id],
-                            dateStyle = state.dateStyle,
-                        )
+                            haptics.lift()
+                        },
+                        onDragStopped = {
+                            haptics.drop()
 
-                        DragHandle(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(4.dp)
-                                .draggableHandle(
-                                    onDragStarted = {
-                                        maxTouchedIndex.intValue = -1
+                            val touchedDepth = maxTouchedIndex.intValue
 
-                                        haptics.lift()
-                                    },
-                                    onDragStopped = {
-                                        haptics.drop()
+                            if (touchedDepth >= 0 && touchedDepth < orderedIds.size) {
+                                runAction(
+                                    OnReorderShelfBooksAction(
+                                        status = status,
+                                        prefixOrderedBookIds = orderedIds
+                                            .take(touchedDepth + 1),
+                                    ),
+                                )
+                            }
+                        },
+                    )
 
-                                        val touchedDepth = maxTouchedIndex.intValue
+                    LayoutBookEntry(
+                        modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
+                        book = book,
+                        layout = state.gridLayout,
+                        onClick = { onBookClick(book) },
+                        onLongClick = {
+                            haptics.threshold()
 
-                                        if (touchedDepth >= 0 && touchedDepth < orderedIds.size) {
-                                            runAction(
-                                                OnReorderShelfBooksAction(
-                                                    status = status,
-                                                    prefixOrderedBookIds = orderedIds
-                                                        .take(touchedDepth + 1),
-                                                ),
-                                            )
-                                        }
-                                    },
-                                ),
-                        )
-                    }
+                            runAction(OnEnterSelectionModeAction(bookId = book.id))
+                        },
+                        isSelectionMode = false,
+                        isSelected = false,
+                        deadline = state.deadlines[book.id],
+                        dateStyle = state.dateStyle,
+                        dragHandle = { DragHandle(modifier = handleModifier) },
+                    )
                 }
             }
         }
@@ -1498,6 +1486,7 @@ object LibraryScreen : Screen {
         isSelected: Boolean,
         deadline: BookDeadline? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+        dragHandle: (@Composable () -> Unit)? = null,
         modifier: Modifier = Modifier,
     ) {
         // Prefetch only makes sense when the tap opens book detail. In selection mode the tap
@@ -1530,32 +1519,34 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_TWO_COLUMNS,
             LibraryGridLayout.GRID_THREE_COLUMNS,
                 -> {
-                GridBookCell(
-                    modifier = entryModifier,
-                    title = book.title,
-                    authorName = authorName,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                ) { coverModifier ->
-                    SelectableCover(
-                        modifier = coverModifier,
-                        isSelectionMode = isSelectionMode,
-                        isSelected = isSelected,
-                    ) {
-                        DeadlineCoverOverlay(progress = deadlineProgress) {
-                            EditionImage(
-                                edition = currentEdition,
-                                modifier = Modifier.fillMaxSize(),
-                                isLoading = false,
-                                defaultEdition = book.defaultEdition,
-                                fallbackCoverUrl = book.coverUrl,
-                                elevation = 6.dp,
-                                cornerRadius = 10.dp,
-                                sharedTransitionKey = bookCoverTransitionKey(
-                                    editionId = currentEdition?.id,
-                                    bookId = book.id,
-                                ),
-                            )
+                CoverGridOverlay(dragHandle = dragHandle) {
+                    GridBookCell(
+                        modifier = entryModifier,
+                        title = book.title,
+                        authorName = authorName,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                    ) { coverModifier ->
+                        SelectableCover(
+                            modifier = coverModifier,
+                            isSelectionMode = isSelectionMode,
+                            isSelected = isSelected,
+                        ) {
+                            DeadlineCoverOverlay(progress = deadlineProgress) {
+                                EditionImage(
+                                    edition = currentEdition,
+                                    modifier = Modifier.fillMaxSize(),
+                                    isLoading = false,
+                                    defaultEdition = book.defaultEdition,
+                                    fallbackCoverUrl = book.coverUrl,
+                                    elevation = 6.dp,
+                                    cornerRadius = 10.dp,
+                                    sharedTransitionKey = bookCoverTransitionKey(
+                                        editionId = currentEdition?.id,
+                                        bookId = book.id,
+                                    ),
+                                )
+                            }
                         }
                     }
                 }
@@ -1564,30 +1555,32 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
             LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
                 -> {
-                CoverOnlyCell(
-                    modifier = entryModifier,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                ) { coverModifier ->
-                    SelectableCover(
-                        modifier = coverModifier,
-                        isSelectionMode = isSelectionMode,
-                        isSelected = isSelected,
-                    ) {
-                        DeadlineCoverOverlay(progress = deadlineProgress) {
-                            EditionImage(
-                                edition = currentEdition,
-                                modifier = Modifier.fillMaxSize(),
-                                isLoading = false,
-                                defaultEdition = book.defaultEdition,
-                                fallbackCoverUrl = book.coverUrl,
-                                elevation = 6.dp,
-                                cornerRadius = 10.dp,
-                                sharedTransitionKey = bookCoverTransitionKey(
-                                    editionId = currentEdition?.id,
-                                    bookId = book.id,
-                                ),
-                            )
+                CoverGridOverlay(dragHandle = dragHandle) {
+                    CoverOnlyCell(
+                        modifier = entryModifier,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                    ) { coverModifier ->
+                        SelectableCover(
+                            modifier = coverModifier,
+                            isSelectionMode = isSelectionMode,
+                            isSelected = isSelected,
+                        ) {
+                            DeadlineCoverOverlay(progress = deadlineProgress) {
+                                EditionImage(
+                                    edition = currentEdition,
+                                    modifier = Modifier.fillMaxSize(),
+                                    isLoading = false,
+                                    defaultEdition = book.defaultEdition,
+                                    fallbackCoverUrl = book.coverUrl,
+                                    elevation = 6.dp,
+                                    cornerRadius = 10.dp,
+                                    sharedTransitionKey = bookCoverTransitionKey(
+                                        editionId = currentEdition?.id,
+                                        bookId = book.id,
+                                    ),
+                                )
+                            }
                         }
                     }
                 }
@@ -1603,6 +1596,7 @@ object LibraryScreen : Screen {
                     isSelectionMode = isSelectionMode,
                     isSelected = isSelected,
                     deadlineProgress = deadlineProgress,
+                    trailing = dragHandle,
                 )
             }
 
@@ -1619,6 +1613,7 @@ object LibraryScreen : Screen {
                     rating = book.rating,
                     deadlineProgress = deadlineProgress,
                     dateStyle = dateStyle,
+                    trailing = dragHandle,
                 ) { coverModifier ->
                     SelectableCover(
                         modifier = coverModifier,
@@ -1646,11 +1641,36 @@ object LibraryScreen : Screen {
         }
     }
 
+    /**
+     * Wraps a grid cell in a Box so a [dragHandle] can be overlaid on the top-right corner of the
+     * cover. Used by [LayoutBookEntry] / [LayoutEditionEntry] for the GRID_* layouts where there is
+     * no inline trailing slot; the handle sits visually on the cover. When [dragHandle] is null the
+     * cell renders without an extra wrapping Box.
+     */
+    @Composable
+    private fun CoverGridOverlay(
+        dragHandle: (@Composable () -> Unit)?,
+        cell: @Composable () -> Unit,
+    ) {
+        if (dragHandle == null) {
+            cell()
+        } else {
+            Box {
+                cell()
+
+                Box(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
+                    dragHandle()
+                }
+            }
+        }
+    }
+
     @Composable
     private fun LayoutEditionEntry(
         edition: BookEdition,
         layout: LibraryGridLayout,
         onEditionClick: (BookEdition) -> Unit,
+        dragHandle: (@Composable () -> Unit)? = null,
         modifier: Modifier = Modifier,
     ) {
         val entryModifier = modifier.prefetchBookDetailOnPress(edition.bookId)
@@ -1662,48 +1682,52 @@ object LibraryScreen : Screen {
             LibraryGridLayout.GRID_TWO_COLUMNS,
             LibraryGridLayout.GRID_THREE_COLUMNS,
                 -> {
-                GridBookCell(
-                    modifier = entryModifier,
-                    title = title,
-                    authorName = authorName,
-                    onClick = { onEditionClick(edition) },
-                ) { coverModifier ->
-                    EditionImage(
-                        edition = edition,
-                        modifier = coverModifier,
-                        isLoading = false,
-                        defaultEdition = edition,
-                        elevation = 6.dp,
-                        cornerRadius = 10.dp,
-                        sharedTransitionKey = bookCoverTransitionKey(
-                            editionId = edition.id,
-                            bookId = edition.bookId,
-                            surface = "edition-${edition.id}",
-                        ),
-                    )
+                CoverGridOverlay(dragHandle = dragHandle) {
+                    GridBookCell(
+                        modifier = entryModifier,
+                        title = title,
+                        authorName = authorName,
+                        onClick = { onEditionClick(edition) },
+                    ) { coverModifier ->
+                        EditionImage(
+                            edition = edition,
+                            modifier = coverModifier,
+                            isLoading = false,
+                            defaultEdition = edition,
+                            elevation = 6.dp,
+                            cornerRadius = 10.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = edition.id,
+                                bookId = edition.bookId,
+                                surface = "edition-${edition.id}",
+                            ),
+                        )
+                    }
                 }
             }
 
             LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
             LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
                 -> {
-                CoverOnlyCell(
-                    modifier = entryModifier,
-                    onClick = { onEditionClick(edition) },
-                ) { coverModifier ->
-                    EditionImage(
-                        edition = edition,
-                        modifier = coverModifier,
-                        isLoading = false,
-                        defaultEdition = edition,
-                        elevation = 6.dp,
-                        cornerRadius = 10.dp,
-                        sharedTransitionKey = bookCoverTransitionKey(
-                            editionId = edition.id,
-                            bookId = edition.bookId,
-                            surface = "edition-${edition.id}",
-                        ),
-                    )
+                CoverGridOverlay(dragHandle = dragHandle) {
+                    CoverOnlyCell(
+                        modifier = entryModifier,
+                        onClick = { onEditionClick(edition) },
+                    ) { coverModifier ->
+                        EditionImage(
+                            edition = edition,
+                            modifier = coverModifier,
+                            isLoading = false,
+                            defaultEdition = edition,
+                            elevation = 6.dp,
+                            cornerRadius = 10.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = edition.id,
+                                bookId = edition.bookId,
+                                surface = "edition-${edition.id}",
+                            ),
+                        )
+                    }
                 }
             }
 
@@ -1713,6 +1737,7 @@ object LibraryScreen : Screen {
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
+                    trailing = dragHandle,
                 )
             }
 
@@ -1722,6 +1747,7 @@ object LibraryScreen : Screen {
                     title = title,
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
+                    trailing = dragHandle,
                 ) { coverModifier ->
                     EditionImage(
                         edition = edition,
@@ -1809,6 +1835,7 @@ object LibraryScreen : Screen {
         isSelectionMode: Boolean = false,
         isSelected: Boolean = false,
         deadlineProgress: DeadlineProgress? = null,
+        trailing: (@Composable () -> Unit)? = null,
         modifier: Modifier = Modifier,
     ) {
         Column(
@@ -1855,6 +1882,12 @@ object LibraryScreen : Screen {
 
                     DeadlineBadge(status = deadlineProgress.status)
                 }
+
+                if (trailing != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    trailing()
+                }
             }
 
             HorizontalDivider(
@@ -1875,6 +1908,7 @@ object LibraryScreen : Screen {
         rating: Double? = null,
         deadlineProgress: DeadlineProgress? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+        trailing: (@Composable () -> Unit)? = null,
         modifier: Modifier = Modifier,
         cover: @Composable (Modifier) -> Unit,
     ) {
@@ -1970,6 +2004,12 @@ object LibraryScreen : Screen {
                             dateStyle = dateStyle,
                         )
                     }
+                }
+
+                if (trailing != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    trailing()
                 }
             }
         }
