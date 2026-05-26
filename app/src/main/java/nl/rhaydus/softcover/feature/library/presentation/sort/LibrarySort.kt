@@ -41,9 +41,15 @@ private inline fun <T, K : Comparable<K>> List<T>.sortedByCachedKey(
 private fun BookEdition.firstAuthor(): String =
     authors.firstOrNull()?.name?.lowercase().orEmpty()
 
+// Lexically larger than any ISO-8601 timestamp Hardcover emits, so editions without a stored
+// `list_books.created_at` fall to the bottom of the ASCENDING sort (and to the top of DESCENDING
+// after the asReversed() pass).
+private const val MISSING_ADDED_AT_SENTINEL: String = "￿"
+
 fun List<BookEdition>.applyEditionSort(
     mode: LibrarySortMode,
     direction: SortDirection = mode.defaultDirection,
+    addedAtByEditionId: Map<Int, String?> = emptyMap(),
 ): List<BookEdition> {
     if (size <= 1) return this
 
@@ -52,7 +58,9 @@ fun List<BookEdition>.applyEditionSort(
         LibrarySortMode.AUTHOR -> sortedByCachedKey { it.firstAuthor() }
         LibrarySortMode.PAGE_COUNT -> sortedByCachedKey { it.pages ?: 0 }
         LibrarySortMode.RELEASE_DATE -> sortedByCachedKey { it.releaseDate ?: LocalDate.MAX }
-        LibrarySortMode.DATE_ADDED,
+        LibrarySortMode.DATE_ADDED -> sortedByCachedKey {
+            addedAtByEditionId[it.id] ?: MISSING_ADDED_AT_SENTINEL
+        }
         LibrarySortMode.DATE_FINISHED,
         LibrarySortMode.RATING,
         LibrarySortMode.PROGRESS,

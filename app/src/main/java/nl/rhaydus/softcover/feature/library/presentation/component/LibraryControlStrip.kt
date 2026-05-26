@@ -103,6 +103,7 @@ private fun SortPill(
         when {
             tab is LibraryTab.CustomList -> {
                 val ordered = listOf(
+                    LibrarySortMode.DATE_ADDED,
                     LibrarySortMode.TITLE,
                     LibrarySortMode.AUTHOR,
                     LibrarySortMode.PAGE_COUNT,

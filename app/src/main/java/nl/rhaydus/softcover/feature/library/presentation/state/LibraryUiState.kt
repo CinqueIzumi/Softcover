@@ -26,6 +26,14 @@ data class LibraryUiState(
     val editionsByTab: Map<String, List<BookEdition>> = emptyMap(),
 
     /**
+     * Custom-list `list_books.created_at` keyed by tab id, then edition id. Populated by
+     * [BookListsCollector] so the DATE_ADDED edition sort can resolve a real timestamp instead
+     * of leaning on the data layer's input order — which only happens to be date-added DESC for
+     * non-ranked lists and gets shuffled by position-first ordering on ranked lists.
+     */
+    val addedAtByTab: Map<String, Map<Int, String?>> = emptyMap(),
+
+    /**
      * Parent [Book] lookup for editions rendered in custom-list tabs. Populated by
      * [BookListsCollector] so book-level facets (tags, rating, release year) can resolve
      * even when the surface only renders [BookEdition]s.
@@ -154,6 +162,7 @@ data class LibraryUiState(
         val sorted = searchFiltered.applyEditionSort(
             mode = sortModeFor(tabId = tabId),
             direction = sortDirectionFor(tabId = tabId),
+            addedAtByEditionId = addedAtByTab[tabId].orEmpty(),
         )
 
         val filters = filtersFor(tabId = tabId)
