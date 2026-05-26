@@ -40,4 +40,31 @@ interface ListsRepository {
         listId: Int,
         bookId: Int,
     )
+
+    /**
+     * Persists a user-defined manual order for a contiguous slice of [listId]. [orderedListBookIds]
+     * lists the `list_books` rows the user dragged through, in their new top-down order, starting
+     * at visible index [startPosition]. Books outside the slice are left untouched so a shallow
+     * drag at the top of the list doesn't reassign positions to books the user never moved.
+     *
+     * Optimistically applies the new positions to the local cache, then pushes the same slice to
+     * Hardcover. On server failure the local change stands until the next list refresh reconciles —
+     * matching the spec from Step 2.7 (Hardcover is authoritative, refresh resolves divergence).
+     */
+    suspend fun reorderListBooks(
+        listId: Int,
+        startPosition: Int,
+        orderedListBookIds: List<Int>,
+    )
+
+    /**
+     * Toggles a custom list's `ranked` flag. Optimistically updates the local cache so the UI can
+     * surface the ordered-list affordances immediately, then pushes the change to Hardcover. On
+     * server failure the local flag is rolled back so the next refresh doesn't see two divergent
+     * states racing each other.
+     */
+    suspend fun setListRanked(
+        listId: Int,
+        ranked: Boolean,
+    )
 }

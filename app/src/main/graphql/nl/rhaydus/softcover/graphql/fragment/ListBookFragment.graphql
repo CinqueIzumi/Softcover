@@ -3,5 +3,6 @@ fragment ListBookFragment on list_books {
     list_id
     book_id
     edition_id
+    position
     created_at
 }

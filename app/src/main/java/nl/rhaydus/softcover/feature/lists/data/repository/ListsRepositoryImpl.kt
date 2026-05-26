@@ -208,6 +208,45 @@ class ListsRepositoryImpl(
         }
     }
 
+    override suspend fun reorderListBooks(
+        listId: Int,
+        startPosition: Int,
+        orderedListBookIds: List<Int>,
+    ) {
+        if (orderedListBookIds.isEmpty()) return
+
+        listsLocalDataSource.applyListBookPositions(
+            listId = listId,
+            startPosition = startPosition,
+            orderedListBookIds = orderedListBookIds,
+        )
+
+        listsRemoteDataSource.updateListBookPositions(
+            listId = listId,
+            startPosition = startPosition,
+            orderedListBookIds = orderedListBookIds,
+        )
+    }
+
+    override suspend fun setListRanked(
+        listId: Int,
+        ranked: Boolean,
+    ) {
+        listsLocalDataSource.setListRanked(listId = listId, ranked = ranked)
+
+        val refreshed: BookList = runCatching {
+            listsRemoteDataSource.setListRanked(listId = listId, ranked = ranked)
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+
+            listsLocalDataSource.setListRanked(listId = listId, ranked = ranked.not())
+
+            throw error
+        }
+
+        listsLocalDataSource.cacheUserBookLists(lists = listOf(refreshed))
+    }
+
     private companion object {
         const val OPTIMISTIC_LIST_BOOK_ID = 0
     }

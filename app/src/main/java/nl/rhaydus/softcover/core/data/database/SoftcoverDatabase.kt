@@ -66,7 +66,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
     views = [
         BookEditionView::class
     ],
-    version = 28,
+    version = 29,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -118,6 +118,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_25_26)
                 .addMigrations(MIGRATION_26_27)
                 .addMigrations(MIGRATION_27_28)
+                .addMigrations(MIGRATION_28_29)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -880,6 +881,12 @@ abstract class SoftcoverDatabase : RoomDatabase() {
 
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_shelf_manual_order_statusCode ON shelf_manual_order(statusCode)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_shelf_manual_order_bookId ON shelf_manual_order(bookId)")
+            }
+        }
+
+        private val MIGRATION_28_29 = object : Migration(28, 29) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE book_lists ADD COLUMN ranked INTEGER NOT NULL DEFAULT 0")
             }
         }
 

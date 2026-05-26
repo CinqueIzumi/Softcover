@@ -68,6 +68,8 @@ val libraryModule = module {
             reorderShelfBooksUseCase = get(),
             addBookToListUseCase = get(),
             removeBookFromListUseCase = get(),
+            reorderListBooksUseCase = get(),
+            setListRankedUseCase = get(),
         )
     }
 }

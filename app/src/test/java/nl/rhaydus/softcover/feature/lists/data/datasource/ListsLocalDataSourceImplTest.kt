@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.lists.data.datasource
 
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
+import io.mockk.coJustRun
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
@@ -82,6 +84,67 @@ class ListsLocalDataSourceImplTest {
             dataSource.allUserLists.test {
                 awaitItem() shouldBe listOf(entity.toModel())
                 awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class ApplyListBookPositions {
+
+        @Test
+        fun `forwards to dao applyListBookPositionRange with correct arguments`() = runTest {
+            // ----- Arrange -----
+            val listId = 5
+            val startPosition = 2
+            val orderedIds = listOf(10, 20, 30)
+
+            coJustRun {
+                dao.applyListBookPositionRange(
+                    listId = listId,
+                    startPosition = startPosition,
+                    listBookIds = orderedIds,
+                )
+            }
+
+            // ----- Act -----
+            dataSource.applyListBookPositions(
+                listId = listId,
+                startPosition = startPosition,
+                orderedListBookIds = orderedIds,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                dao.applyListBookPositionRange(
+                    listId = listId,
+                    startPosition = startPosition,
+                    listBookIds = orderedIds,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class SetListRanked {
+
+        @Test
+        fun `forwards to dao setBookListRanked with correct arguments`() = runTest {
+            // ----- Arrange -----
+            val listId = 7
+            val ranked = true
+
+            // ----- Act -----
+            dataSource.setListRanked(
+                listId = listId,
+                ranked = ranked,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                dao.setBookListRanked(
+                    listId = listId,
+                    ranked = ranked,
+                )
             }
         }
     }

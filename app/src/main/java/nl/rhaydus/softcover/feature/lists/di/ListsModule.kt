@@ -10,7 +10,9 @@ import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.CreateListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.ReorderListBooksUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.SetEditionAsOwnedUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.SetListRankedUseCase
 import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListScreenModel
 import org.koin.dsl.module
 
@@ -49,6 +51,14 @@ val listsModule = module {
 
     factory {
         RemoveBookFromListUseCase(listsRepository = get())
+    }
+
+    factory {
+        ReorderListBooksUseCase(listsRepository = get())
+    }
+
+    factory {
+        SetListRankedUseCase(listsRepository = get())
     }
 
     factory {

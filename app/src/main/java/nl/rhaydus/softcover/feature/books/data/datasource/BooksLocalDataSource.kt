@@ -161,11 +161,12 @@ class BooksLocalDataSourceImpl(
         mode: LibrarySortMode,
         direction: SortDirection,
     ): Flow<List<Book>> {
-        // MANUAL is a per-shelf concept (positions are keyed by statusCode), so it has no
-        // meaning on the All tab. The sort dropdown excludes MANUAL on All; this fallback
-        // protects the path against a stale persisted setting reaching here from a future code
-        // change and crashing the collector via toOrderByFragment.
-        if (mode == LibrarySortMode.MANUAL) {
+        // MANUAL is a per-shelf concept (positions are keyed by statusCode); ORDER is custom-list
+        // only (positions live on list_books). Neither has meaning on the All tab — the sort
+        // dropdown excludes both — but the fallback protects this path against a stale persisted
+        // setting reaching here from a future code change and crashing the collector via
+        // toOrderByFragment.
+        if (mode == LibrarySortMode.MANUAL || mode == LibrarySortMode.ORDER) {
             return getSortedAllUserBooks(
                 mode = LibrarySortMode.Default,
                 direction = LibrarySortMode.Default.defaultDirection,
@@ -190,6 +191,17 @@ class BooksLocalDataSourceImpl(
         mode: LibrarySortMode,
         direction: SortDirection,
     ): Flow<List<Book>> {
+        // ORDER is custom-list-only; it has no meaning on a built-in shelf. The dropdown excludes
+        // it, but this fallback protects the path against a stale persisted setting reaching here
+        // and crashing the collector via toOrderByFragment.
+        if (mode == LibrarySortMode.ORDER) {
+            return getSortedBooksByStatus(
+                status = status,
+                mode = LibrarySortMode.Default,
+                direction = LibrarySortMode.Default.defaultDirection,
+            )
+        }
+
         // MANUAL needs a LEFT JOIN against shelf_manual_order keyed by the same statusCode the
         // shelf is filtered on; books without a row sort last (and tie-break on ub.id DESC, so
         // newcomers appear at the bottom in the order they were shelved). Direction is ignored

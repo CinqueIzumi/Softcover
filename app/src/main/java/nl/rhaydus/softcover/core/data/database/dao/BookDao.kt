@@ -651,6 +651,55 @@ interface BookDao {
     suspend fun deleteAllTags()
     // endregion
 
+    @Query("UPDATE book_lists SET ranked = :ranked WHERE id = :listId")
+    suspend fun setBookListRanked(listId: Int, ranked: Boolean)
+
+    // region List book positions
+    @Query(
+        """
+        UPDATE list_books
+        SET position = NULL
+        WHERE listId = :listId AND position IN (:positions)
+        """
+    )
+    suspend fun clearListBookPositions(listId: Int, positions: List<Int>)
+
+    @Query(
+        """
+        UPDATE list_books
+        SET position = :position
+        WHERE listBookId = :listBookId
+        """
+    )
+    suspend fun setListBookPosition(listBookId: Int, position: Int)
+
+    /**
+     * Atomically rewrite a contiguous slice of [listId]'s positions: clears any rows currently
+     * occupying [startPosition..startPosition + listBookIds.size - 1] and assigns the new
+     * positions to [listBookIds] in order. Rows outside the slice are untouched — matching the
+     * Hardcover web client's reorder semantics where only the dragged range is rewritten.
+     */
+    @Transaction
+    suspend fun applyListBookPositionRange(
+        listId: Int,
+        startPosition: Int,
+        listBookIds: List<Int>,
+    ) {
+        if (listBookIds.isEmpty()) return
+
+        val positions = (startPosition until startPosition + listBookIds.size).toList()
+
+        clearListBookPositions(listId = listId, positions = positions)
+
+        listBookIds.forEachIndexed { index, listBookId ->
+            setListBookPosition(
+                listBookId = listBookId,
+                position = startPosition + index,
+            )
+        }
+    }
+    // endregion
+
     // region Shelf manual order
     @Query("SELECT * FROM shelf_manual_order WHERE statusCode = :statusCode ORDER BY position ASC")
     fun observeShelfManualOrder(statusCode: Int): Flow<List<ShelfManualOrderEntity>>

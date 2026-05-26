@@ -10,4 +10,5 @@ data class BookListEntity(
 
     val name: String,
     val slug: String,
+    val ranked: Boolean = false,
 )

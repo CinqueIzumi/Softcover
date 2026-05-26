@@ -41,11 +41,6 @@ Sort affordance paired with the layout switcher (date added/finished, title, aut
 ### Step 2.4 — Per-tab stats subtitle + year filter on Read (S)
 Subtitle copy changes per tab ("24 titles · 8,402 pages"); the Read tab gains a year chip row. *(B.1.8, B.1.9)*
 
-### Step 2.7 — Drag-to-reorder books within a custom list (M)
-Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to any custom list surface — both the custom-list tab in Library and any dedicated list detail screen. Persisted as a manual sort mode per list that coexists with Step 2.1's sort options (selecting any non-manual sort hides the drag affordance until manual is re-selected).
-
-**Persistence.** Custom lists are first-class Hardcover entities with a server-owned book order, so any reorder MUST be persisted back to Hardcover (the appropriate `list_books` / list-position mutation) in addition to the local cache — otherwise the manual order silently diverges from web/iOS. Treat Hardcover as authoritative (optimistic local update, reconcile on the next list refresh, surface a non-blocking error toast if the mutation fails). *(B.1.6, A.2.4)*
-
 ### Step 2.8 — "Plan today" nudge on Reading (S)
 Editorial one-liner above the featured card using deadline pacing maths already present. Dismissible per book per day. *(B.2.2)*
 

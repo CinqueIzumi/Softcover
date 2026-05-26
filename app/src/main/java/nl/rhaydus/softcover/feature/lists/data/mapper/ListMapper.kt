@@ -20,6 +20,7 @@ fun ListFragment.toBookList(): BookList {
         id = id,
         name = name,
         slug = slug ?: "",
+        ranked = ranked == true,
         books = listBooks,
     )
 }
@@ -32,6 +33,7 @@ fun ListBookFragment.toListBook(): ListBook? {
         listId = list_id,
         bookId = book_id,
         editionId = editionId,
+        position = position,
         addedAt = created_at,
     )
 }
@@ -40,6 +42,7 @@ fun BookList.toEntity(): BookListEntity = BookListEntity(
     id = id,
     name = name,
     slug = slug,
+    ranked = ranked,
 )
 
 fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
@@ -47,6 +50,7 @@ fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
     bookId = bookId,
     editionId = editionId,
     listBookId = listBookId,
+    position = position,
     addedAt = addedAt,
 )
 
@@ -71,6 +75,7 @@ fun ListBookFull.toModel(isOwnedList: Boolean): ListBook {
         listId = listBook.listId,
         bookId = listBook.bookId,
         editionId = resolvedEdition?.edition?.edition?.id ?: listBook.editionId,
+        position = listBook.position,
         addedAt = listBook.addedAt,
         book = book?.toModel(),
         edition = resolvedEdition?.let { editionWithAuthors ->
@@ -85,16 +90,25 @@ fun ListBookFull.toModel(isOwnedList: Boolean): ListBook {
 fun BookListWithBooks.toModel(): BookList {
     val isOwnedList = bookList.slug == OWNED_LIST_SLUG
 
+    // Positioned books come first in ascending position order (the manual order the user
+    // dragged into place); unpositioned books fall back to date-added DESC, then listBookId
+    // DESC so newcomers slot at the tail of the unpositioned tail rather than mid-list.
+    val ordered = listBooks
+        .filter { it.book != null && it.edition != null }
+        .sortedWith(
+            compareBy<ListBookFull> { it.listBook.position == null }
+                .thenBy(nullsLast()) { it.listBook.position }
+                .thenComparing(
+                    compareBy<ListBookFull, String?>(nullsLast(reverseOrder())) { it.listBook.addedAt }
+                        .thenByDescending { it.listBook.listBookId },
+                ),
+        )
+
     return BookList(
         id = bookList.id,
         name = bookList.name,
         slug = bookList.slug,
-        books = listBooks
-            .filter { it.book != null && it.edition != null }
-            .sortedWith(
-                compareBy<ListBookFull, String?>(nullsLast(reverseOrder())) { it.listBook.addedAt }
-                    .thenByDescending { it.listBook.listBookId },
-            )
-            .map { it.toModel(isOwnedList = isOwnedList) },
+        ranked = bookList.ranked,
+        books = ordered.map { it.toModel(isOwnedList = isOwnedList) },
     )
 }

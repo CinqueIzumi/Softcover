@@ -15,6 +15,8 @@ import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.ReorderListBooksUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.SetListRankedUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
@@ -45,6 +47,8 @@ class LibraryDependencies(
     val reorderShelfBooksUseCase: ReorderShelfBooksUseCase,
     val addBookToListUseCase: AddBookToListUseCase,
     val removeBookFromListUseCase: RemoveBookFromListUseCase,
+    val reorderListBooksUseCase: ReorderListBooksUseCase,
+    val setListRankedUseCase: SetListRankedUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
     val defaultDispatcher: CoroutineDispatcher,

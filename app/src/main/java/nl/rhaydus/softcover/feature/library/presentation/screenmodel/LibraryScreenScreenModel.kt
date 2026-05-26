@@ -17,6 +17,8 @@ import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.ReorderListBooksUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.SetListRankedUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
@@ -52,6 +54,8 @@ class LibraryScreenScreenModel(
     private val reorderShelfBooksUseCase: ReorderShelfBooksUseCase,
     private val addBookToListUseCase: AddBookToListUseCase,
     private val removeBookFromListUseCase: RemoveBookFromListUseCase,
+    private val reorderListBooksUseCase: ReorderListBooksUseCase,
+    private val setListRankedUseCase: SetListRankedUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryInitializer>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
@@ -80,6 +84,8 @@ class LibraryScreenScreenModel(
         reorderShelfBooksUseCase = reorderShelfBooksUseCase,
         addBookToListUseCase = addBookToListUseCase,
         removeBookFromListUseCase = removeBookFromListUseCase,
+        reorderListBooksUseCase = reorderListBooksUseCase,
+        setListRankedUseCase = setListRankedUseCase,
         mainDispatcher = appDispatchers.main,
         defaultDispatcher = appDispatchers.default,
         coroutineScope = screenModelScope,

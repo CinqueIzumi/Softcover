@@ -151,8 +151,10 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnGridLayoutChan
 import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReadYearSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderListBooksAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderShelfBooksAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnSetListRankedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
@@ -365,7 +367,7 @@ object LibraryScreen : Screen {
 
                             SortMenuAction(
                                 state = state,
-                                tabId = currentTab?.id,
+                                tab = currentTab,
                                 runAction = runAction,
                             )
 
@@ -518,6 +520,7 @@ object LibraryScreen : Screen {
                                 state = state,
                                 gridState = gridStateFor(tab.id),
                                 onEditionClick = onEditionClick,
+                                runAction = runAction,
                             )
 
                             is LibraryContentTab.All,
@@ -1000,32 +1003,48 @@ object LibraryScreen : Screen {
     @Composable
     private fun SortMenuAction(
         state: LibraryUiState,
-        tabId: String?,
+        tab: LibraryContentTab?,
         runAction: (LibraryAction) -> Unit,
     ) {
-        val currentTabId = tabId ?: return
+        val currentTab = tab ?: return
+        val currentTabId = currentTab.id
         val currentMode = state.sortModeFor(tabId = currentTabId)
         val currentDirection = state.sortDirectionFor(tabId = currentTabId)
 
-        val supportedModes = remember(currentTabId) {
-            val isCustomList = currentTabId.startsWith("list-")
+        // A custom-list tab's `ranked` flag is server-owned (the `lists.ranked` column). The
+        // canonical state lives in `state.customLists` (populated by BookListsCollector). We
+        // re-derive it on every recomposition because an in-flight UpdateList mutation flips
+        // the local cache optimistically, and the dropdown layout must follow.
+        val customListRanked: Boolean? = (currentTab as? LibraryContentTab.CustomList)
+            ?.let { customListTab ->
+                state.customLists.firstOrNull { it.id == customListTab.listId }?.ranked
+            }
+
+        val supportedModes = remember(currentTab, customListRanked) {
             val isAllTab = currentTabId == LibraryContentTab.All.id
             val isDidNotFinishTab = currentTabId == LibraryContentTab.Status.of(UserBookStatus.DID_NOT_FINISH).id
 
             when {
-                isCustomList -> listOf(
-                    LibrarySortMode.TITLE,
-                    LibrarySortMode.AUTHOR,
-                    LibrarySortMode.PAGE_COUNT,
-                    LibrarySortMode.RELEASE_DATE,
-                )
+                currentTab is LibraryContentTab.CustomList -> {
+                    val ordered = listOf(
+                        LibrarySortMode.TITLE,
+                        LibrarySortMode.AUTHOR,
+                        LibrarySortMode.PAGE_COUNT,
+                        LibrarySortMode.RELEASE_DATE,
+                    )
+
+                    // ORDER is only meaningful — and only available on the server — when the list
+                    // is `ranked`. The "Make this list ordered" footer item below flips that flag.
+                    if (customListRanked == true) listOf(LibrarySortMode.ORDER) + ordered else ordered
+                }
                 // MANUAL only makes sense on the three built-in reading-state shelves where the
                 // user actively rearranges (Want to Read, Currently Reading, Read). The All tab
                 // has no single shelf to attach a position to, and DID_NOT_FINISH is an archive
-                // shelf where curating order isn't part of the workflow.
+                // shelf where curating order isn't part of the workflow. ORDER is custom-list
+                // only and is never offered on a built-in shelf.
                 isAllTab || isDidNotFinishTab ->
-                    LibrarySortMode.entries.filter { it != LibrarySortMode.MANUAL }
-                else -> LibrarySortMode.entries
+                    LibrarySortMode.entries.filter { it != LibrarySortMode.MANUAL && it != LibrarySortMode.ORDER }
+                else -> LibrarySortMode.entries.filter { it != LibrarySortMode.ORDER }
             }
         }
 
@@ -1049,6 +1068,7 @@ object LibraryScreen : Screen {
             ) {
                 supportedModes.forEach { mode ->
                     val isActive = mode == currentMode
+                    val isPositionalSort = mode == LibrarySortMode.MANUAL || mode == LibrarySortMode.ORDER
 
                     DropdownMenuItem(
                         text = {
@@ -1059,7 +1079,7 @@ object LibraryScreen : Screen {
                                 ),
                             )
                         },
-                        trailingIcon = if (isActive && mode != LibrarySortMode.MANUAL) {
+                        trailingIcon = if (isActive && isPositionalSort.not()) {
                             {
                                 val arrow = if (currentDirection == SortDirection.ASCENDING) {
                                     R.drawable.ic_arrow_drop_up
@@ -1082,6 +1102,23 @@ object LibraryScreen : Screen {
                                     mode = mode,
                                 ),
                             )
+                        },
+                    )
+                }
+
+                if (currentTab is LibraryContentTab.CustomList && customListRanked == false) {
+                    HorizontalDivider()
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "✶ Make this list ordered",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        },
+                        onClick = {
+                            runAction(OnSetListRankedAction(listId = currentTab.listId, ranked = true))
                         },
                     )
                 }
@@ -1135,6 +1172,7 @@ object LibraryScreen : Screen {
         state: LibraryUiState,
         gridState: LazyGridState,
         onEditionClick: (BookEdition) -> Unit,
+        runAction: (LibraryAction) -> Unit,
     ) {
         val rawEditions = state.editionsByTab[tab.id] ?: return
 
@@ -1150,18 +1188,37 @@ object LibraryScreen : Screen {
 
         val visibleEditionIds = remember(visibleEditions) { visibleEditions.map { it.id } }
 
+        val sortMode = state.sortModeFor(tabId = tab.id)
+
         val animator = rememberLazyItemMutationAnimator(keys = visibleEditionIds)
 
         val entry = rememberStaggeredEntryCoordinator(key = "library:editions:${tab.id}")
 
         ScrollToTopOnVisibleSetChange(
             tabId = tab.id,
-            sortMode = state.sortModeFor(tabId = tab.id),
+            sortMode = sortMode,
             sortDirection = state.sortDirectionFor(tabId = tab.id),
             filters = state.filtersFor(tabId = tab.id),
             visibleItemsKey = visibleEditionIds.firstOrNull() ?: 0,
             gridState = gridState,
         )
+
+        val isRanked = state.customLists.firstOrNull { it.id == tab.listId }?.ranked == true
+
+        if (sortMode == LibrarySortMode.ORDER && isRanked) {
+            ReorderableEditionGrid(
+                tab = tab,
+                visibleEditions = visibleEditions,
+                visibleEditionIds = visibleEditionIds,
+                state = state,
+                gridState = gridState,
+                entry = entry,
+                onEditionClick = onEditionClick,
+                runAction = runAction,
+            )
+
+            return
+        }
 
         LayoutGrid(
             layout = state.gridLayout,
@@ -1175,6 +1232,140 @@ object LibraryScreen : Screen {
                     layout = state.gridLayout,
                     onEditionClick = onEditionClick,
                 )
+            }
+        }
+    }
+
+    /**
+     * ORDER-sort path for custom lists with `ranked = true`. Maintains a local shadow of edition
+     * ids that the reorder library updates during drag so the grid reflects the move immediately;
+     * on drop we map the touched `[min, max]` visible range to `list_books.listBookId`s and
+     * dispatch the action. The DAO re-emission becomes the source of truth on the next list
+     * refresh.
+     *
+     * Unlike the built-in shelf path (which writes a prefix `0..maxTouched`), Hardcover's web
+     * client rewrites only the contiguous `[minTouched, maxTouched]` range — confirmed by the
+     * sample mutations users emit when reordering. We mirror that exactly so two clients editing
+     * the same list see consistent server-side semantics.
+     */
+    @Composable
+    private fun ReorderableEditionGrid(
+        tab: LibraryContentTab.CustomList,
+        visibleEditions: List<BookEdition>,
+        visibleEditionIds: List<Int>,
+        state: LibraryUiState,
+        gridState: LazyGridState,
+        entry: StaggeredEntryCoordinator,
+        onEditionClick: (BookEdition) -> Unit,
+        runAction: (LibraryAction) -> Unit,
+    ) {
+        val haptics = LocalHaptics.current
+
+        val orderedIds = remember { mutableStateListOf<Int>() }
+
+        LaunchedEffect(visibleEditionIds) {
+            if (orderedIds.toList() != visibleEditionIds) {
+                orderedIds.clear()
+                orderedIds.addAll(visibleEditionIds)
+            }
+        }
+
+        val editionsById = remember(visibleEditions) { visibleEditions.associateBy { it.id } }
+
+        // Lookup from editionId → listBookId, drawn from the canonical `customLists` snapshot
+        // for this tab. `editionsByTab` only carries `BookEdition`s, so without this map we'd
+        // have no way to identify which `list_books` row each card represents.
+        val listBookIdByEditionId: Map<Int, Int> = remember(
+            state.customLists,
+            tab.listId,
+        ) {
+            state.customLists.firstOrNull { it.id == tab.listId }
+                ?.books
+                ?.associate { it.editionId to it.listBookId }
+                .orEmpty()
+        }
+
+        val minTouchedIndex = remember { mutableIntStateOf(-1) }
+        val maxTouchedIndex = remember { mutableIntStateOf(-1) }
+
+        val reorderableState = rememberReorderableLazyGridState(lazyGridState = gridState) { from, to ->
+            val fromIndex = orderedIds.indexOf(from.key as Int)
+            val toIndex = orderedIds.indexOf(to.key as Int)
+
+            if (fromIndex == -1 || toIndex == -1) return@rememberReorderableLazyGridState
+
+            orderedIds.add(toIndex, orderedIds.removeAt(fromIndex))
+
+            val current = minTouchedIndex.intValue
+
+            minTouchedIndex.intValue = if (current == -1) {
+                minOf(fromIndex, toIndex)
+            } else {
+                minOf(current, fromIndex, toIndex)
+            }
+
+            maxTouchedIndex.intValue = maxOf(maxTouchedIndex.intValue, fromIndex, toIndex)
+        }
+
+        LayoutGrid(
+            layout = state.gridLayout,
+            gridState = gridState,
+        ) {
+            itemsIndexed(orderedIds, key = { _, id -> id }) { index, id ->
+                val edition = editionsById[id] ?: return@itemsIndexed
+
+                ReorderableItem(state = reorderableState, key = id) {
+                    Box {
+                        LayoutEditionEntry(
+                            modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
+                            edition = edition,
+                            layout = state.gridLayout,
+                            onEditionClick = onEditionClick,
+                        )
+
+                        DragHandle(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .draggableHandle(
+                                    onDragStarted = {
+                                        minTouchedIndex.intValue = -1
+                                        maxTouchedIndex.intValue = -1
+
+                                        haptics.lift()
+                                    },
+                                    onDragStopped = {
+                                        haptics.drop()
+
+                                        val min = minTouchedIndex.intValue
+                                        val max = maxTouchedIndex.intValue
+
+                                        if (min < 0 || max < 0 || max >= orderedIds.size) {
+                                            return@draggableHandle
+                                        }
+
+                                        val orderedListBookIds = orderedIds
+                                            .subList(min, max + 1)
+                                            .mapNotNull { editionId -> listBookIdByEditionId[editionId] }
+
+                                        if (orderedListBookIds.size != max - min + 1) {
+                                            // A list_books row was missing for one of the dragged
+                                            // editions — bail rather than write a partial range.
+                                            return@draggableHandle
+                                        }
+
+                                        runAction(
+                                            OnReorderListBooksAction(
+                                                listId = tab.listId,
+                                                startPosition = min,
+                                                orderedListBookIds = orderedListBookIds,
+                                            ),
+                                        )
+                                    },
+                                ),
+                        )
+                    }
+                }
             }
         }
     }

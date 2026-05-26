@@ -18,6 +18,12 @@ enum class LibrarySortMode(
     // The user-defined drag-to-reorder mode for built-in shelves. Direction is fixed (ASC) — the
     // stored position itself encodes the order, so flipping ASC/DESC would only mirror the shelf.
     MANUAL(label = "Manual", defaultDirection = SortDirection.ASCENDING),
+    // The user-defined drag-to-reorder mode for custom (ranked) lists. Distinct from MANUAL
+    // because the underlying semantics differ: positions are server-owned on Hardcover via the
+    // list_books.position column, only available when the list's `ranked` flag is true, and the
+    // sort itself is the canonical view (other sorts are temporary lenses). Direction is fixed
+    // (ASC) — the stored position itself encodes the order.
+    ORDER(label = "Order", defaultDirection = SortDirection.ASCENDING),
     ;
 
     companion object {

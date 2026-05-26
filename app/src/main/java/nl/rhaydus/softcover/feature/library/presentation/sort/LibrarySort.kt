@@ -58,6 +58,7 @@ fun List<BookEdition>.applyEditionSort(
         LibrarySortMode.PROGRESS,
         LibrarySortMode.DEADLINE_URGENCY,
         LibrarySortMode.MANUAL,
+        LibrarySortMode.ORDER,
             -> return this
     }
 

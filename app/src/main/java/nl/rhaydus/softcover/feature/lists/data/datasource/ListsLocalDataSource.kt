@@ -34,6 +34,22 @@ interface ListsLocalDataSource {
     )
 
     suspend fun syncBookListMetadata(serverListIds: Set<Int>)
+
+    /**
+     * Rewrites a contiguous slice of [listId]'s local `list_books.position` column to match
+     * [orderedListBookIds] starting at [startPosition]. Mirrors the server mutation so the local
+     * cache reflects the reorder before the next list refresh round-trips.
+     */
+    suspend fun applyListBookPositions(
+        listId: Int,
+        startPosition: Int,
+        orderedListBookIds: List<Int>,
+    )
+
+    suspend fun setListRanked(
+        listId: Int,
+        ranked: Boolean,
+    )
 }
 
 private const val OPTIMISTIC_LIST_BOOK_ID: Int = 0
@@ -93,5 +109,24 @@ class ListsLocalDataSourceImpl(
 
     override suspend fun syncBookListMetadata(serverListIds: Set<Int>) {
         dao.syncBookListMetadata(serverListIds = serverListIds)
+    }
+
+    override suspend fun applyListBookPositions(
+        listId: Int,
+        startPosition: Int,
+        orderedListBookIds: List<Int>,
+    ) {
+        dao.applyListBookPositionRange(
+            listId = listId,
+            startPosition = startPosition,
+            listBookIds = orderedListBookIds,
+        )
+    }
+
+    override suspend fun setListRanked(
+        listId: Int,
+        ranked: Boolean,
+    ) {
+        dao.setBookListRanked(listId = listId, ranked = ranked)
     }
 }

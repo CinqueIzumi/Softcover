@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.Optional
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -21,6 +22,9 @@ import nl.rhaydus.softcover.GetUserBookListsQuery.Data.Me.List.Companion.listFra
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
 import nl.rhaydus.softcover.RemoveListBookMutation
 import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Companion.listFragment as removeListBookListFragment
+import nl.rhaydus.softcover.UpdateListBookPositionsMutation
+import nl.rhaydus.softcover.UpdateListMutation
+import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -601,6 +605,73 @@ class ListsRemoteDataSourceImplTest {
     // ----- AddBookToList -----
 
     @Nested
+    inner class UpdateListBookPositions {
+
+        @Test
+        fun `returns without calling Apollo when orderedListBookIds is empty`() = runTest {
+            // ----- Arrange -----
+            // No stub for safeMutation — it must not be called.
+
+            // ----- Act -----
+            dataSource.updateListBookPositions(
+                listId = 1,
+                startPosition = 0,
+                orderedListBookIds = emptyList(),
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                apolloClient.safeMutation(mutation = any<UpdateListBookPositionsMutation>())
+            }
+        }
+
+        @Test
+        fun `calls Apollo with clearedPositions equal to startPosition until start plus size`() = runTest {
+            // ----- Arrange -----
+            val capturedMutation = slot<UpdateListBookPositionsMutation>()
+            val mutationData = mockk<UpdateListBookPositionsMutation.Data>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = capture(capturedMutation))
+            } returns mutationData
+
+            // ----- Act -----
+            dataSource.updateListBookPositions(
+                listId = 7,
+                startPosition = 3,
+                orderedListBookIds = listOf(101, 102, 103),
+            )
+
+            // ----- Assert -----
+            capturedMutation.captured.listId shouldBe 7
+            capturedMutation.captured.clearedPositions shouldBe listOf(3, 4, 5)
+        }
+
+        @Test
+        fun `sends one update entry per list book id with ascending positions`() = runTest {
+            // ----- Arrange -----
+            val capturedMutation = slot<UpdateListBookPositionsMutation>()
+            val mutationData = mockk<UpdateListBookPositionsMutation.Data>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = capture(capturedMutation))
+            } returns mutationData
+
+            // ----- Act -----
+            dataSource.updateListBookPositions(
+                listId = 7,
+                startPosition = 0,
+                orderedListBookIds = listOf(10, 20),
+            )
+
+            // ----- Assert -----
+            val updates = capturedMutation.captured.updates
+
+            updates.size shouldBe 2
+        }
+    }
+
+    @Nested
     inner class AddBookToList {
 
         @Test
@@ -737,6 +808,123 @@ class ListsRemoteDataSourceImplTest {
                     listId = 5,
                     bookId = 3,
                     editionId = 10,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class SetListRanked {
+
+        @Test
+        fun `returns mapped BookList and passes correct mutation arguments`() = runTest {
+            // ----- Arrange -----
+            val listId = 42
+            val ranked = true
+            val expectedBookList = stubBookList()
+            val capturedMutation = slot<UpdateListMutation>()
+            val mutationData = mockk<UpdateListMutation.Data>()
+            val listResponse = mockk<UpdateListMutation.Data.ListResponse>()
+            val listEntry = mockk<UpdateListMutation.Data.ListResponse.List>()
+            val listFragment = mockk<ListFragment>()
+
+            mockkObject(UpdateListMutation.Data.ListResponse.List.Companion)
+
+            coEvery {
+                apolloClient.safeMutation(mutation = capture(capturedMutation))
+            } returns mutationData
+
+            every {
+                mutationData.listResponse
+            } returns listResponse
+
+            every {
+                listResponse.errors
+            } returns null
+
+            every {
+                listResponse.list
+            } returns listEntry
+
+            with(UpdateListMutation.Data.ListResponse.List.Companion) {
+                every {
+                    listEntry.listFragment()
+                } returns listFragment
+            }
+
+            every {
+                listFragment.toBookList()
+            } returns expectedBookList
+
+            // ----- Act -----
+            val result = dataSource.setListRanked(
+                listId = listId,
+                ranked = ranked,
+            )
+
+            // ----- Assert -----
+            result shouldBe expectedBookList
+
+            capturedMutation.captured.id shouldBe listId
+            capturedMutation.captured.list.ranked shouldBe Optional.Present(true)
+        }
+
+        @Test
+        fun `throws when response errors field is non-blank`() = runTest {
+            // ----- Arrange -----
+            val mutationData = mockk<UpdateListMutation.Data>()
+            val listResponse = mockk<UpdateListMutation.Data.ListResponse>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateListMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.listResponse
+            } returns listResponse
+
+            every {
+                listResponse.errors
+            } returns "Something went wrong"
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.setListRanked(
+                    listId = 1,
+                    ranked = true,
+                )
+            }
+        }
+
+        @Test
+        fun `throws when response list is null`() = runTest {
+            // ----- Arrange -----
+            val mutationData = mockk<UpdateListMutation.Data>()
+            val listResponse = mockk<UpdateListMutation.Data.ListResponse>()
+
+            mockkObject(UpdateListMutation.Data.ListResponse.List.Companion)
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateListMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.listResponse
+            } returns listResponse
+
+            every {
+                listResponse.errors
+            } returns null
+
+            every {
+                listResponse.list
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.setListRanked(
+                    listId = 1,
+                    ranked = false,
                 )
             }
         }

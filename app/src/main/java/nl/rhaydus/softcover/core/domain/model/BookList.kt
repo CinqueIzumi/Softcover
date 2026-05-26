@@ -6,6 +6,7 @@ data class BookList(
     val id: Int,
     val name: String,
     val slug: String,
+    val ranked: Boolean = false,
     val books: List<ListBook>,
 ) {
     val isOwned: Boolean

@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookWithJournals
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.fragment.ListBookFragment
+import nl.rhaydus.softcover.fragment.ListFragment
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -35,12 +36,28 @@ class ListMapperTest {
         id: Int = 20,
         name: String = "My List",
         slug: String = "my-list",
+        ranked: Boolean = false,
         books: List<ListBook> = emptyList(),
     ): BookList = mockk {
         every { this@mockk.id } returns id
         every { this@mockk.name } returns name
         every { this@mockk.slug } returns slug
+        every { this@mockk.ranked } returns ranked
         every { this@mockk.books } returns books
+    }
+
+    private fun stubListFragment(
+        id: Int = 20,
+        name: String = "My List",
+        slug: String? = "my-list",
+        ranked: Boolean = false,
+        listBooks: List<ListFragment.List_book> = emptyList(),
+    ): ListFragment = mockk {
+        every { this@mockk.id } returns id
+        every { this@mockk.name } returns name
+        every { this@mockk.slug } returns slug
+        every { this@mockk.ranked } returns ranked
+        every { list_books } returns listBooks
     }
 
     private fun stubListBook(
@@ -48,6 +65,7 @@ class ListMapperTest {
         listBookId: Int = 99,
         bookId: Int = 1,
         editionId: Int = 10,
+        position: Int? = null,
         addedAt: String? = null,
         book: Book? = null,
         edition: nl.rhaydus.softcover.core.domain.model.BookEdition? = null,
@@ -56,6 +74,7 @@ class ListMapperTest {
         every { this@mockk.listBookId } returns listBookId
         every { this@mockk.bookId } returns bookId
         every { this@mockk.editionId } returns editionId
+        every { this@mockk.position } returns position
         every { this@mockk.addedAt } returns addedAt
         every { this@mockk.book } returns book
         every { this@mockk.edition } returns edition
@@ -203,12 +222,14 @@ class ListMapperTest {
         bookId: Int = 1,
         editionId: Int = 10,
         listBookId: Int = 99,
+        position: Int? = null,
         addedAt: String? = null,
     ): ListBookEntity = ListBookEntity(
         listId = listId,
         bookId = bookId,
         editionId = editionId,
         listBookId = listBookId,
+        position = position,
         addedAt = addedAt,
     )
 
@@ -226,10 +247,12 @@ class ListMapperTest {
         id: Int = 20,
         name: String = "My List",
         slug: String = "my-list",
+        ranked: Boolean = false,
     ): BookListEntity = BookListEntity(
         id = id,
         name = name,
         slug = slug,
+        ranked = ranked,
     )
 
     private fun stubBookListWithBooks(
@@ -265,6 +288,30 @@ class ListMapperTest {
             result.id shouldBe 20
             result.name shouldBe "My List"
             result.slug shouldBe "my-list"
+        }
+
+        @Test
+        fun `writes ranked=true to entity`() {
+            // ----- Arrange -----
+            val bookList = stubBookList(ranked = true)
+
+            // ----- Act -----
+            val result = bookList.toEntity()
+
+            // ----- Assert -----
+            result.ranked shouldBe true
+        }
+
+        @Test
+        fun `writes ranked=false to entity`() {
+            // ----- Arrange -----
+            val bookList = stubBookList(ranked = false)
+
+            // ----- Act -----
+            val result = bookList.toEntity()
+
+            // ----- Assert -----
+            result.ranked shouldBe false
         }
     }
 
@@ -313,6 +360,30 @@ class ListMapperTest {
 
             // ----- Assert -----
             result.addedAt shouldBe null
+        }
+
+        @Test
+        fun `writes position when present`() {
+            // ----- Arrange -----
+            val listBook = stubListBook(position = 5)
+
+            // ----- Act -----
+            val result = listBook.toEntity()
+
+            // ----- Assert -----
+            result.position shouldBe 5
+        }
+
+        @Test
+        fun `writes null position as null`() {
+            // ----- Arrange -----
+            val listBook = stubListBook(position = null)
+
+            // ----- Act -----
+            val result = listBook.toEntity()
+
+            // ----- Assert -----
+            result.position shouldBe null
         }
     }
 
@@ -446,6 +517,32 @@ class ListMapperTest {
 
             // ----- Assert -----
             result.addedAt shouldBe null
+        }
+
+        @Test
+        fun `copies position from ListBookEntity when present`() {
+            // ----- Arrange -----
+            val listBookEntity = stubListBookEntity(position = 7)
+            val listBookFull = stubListBookFull(listBook = listBookEntity)
+
+            // ----- Act -----
+            val result = listBookFull.toModel(isOwnedList = false)
+
+            // ----- Assert -----
+            result.position shouldBe 7
+        }
+
+        @Test
+        fun `copies null position from ListBookEntity`() {
+            // ----- Arrange -----
+            val listBookEntity = stubListBookEntity(position = null)
+            val listBookFull = stubListBookFull(listBook = listBookEntity)
+
+            // ----- Act -----
+            val result = listBookFull.toModel(isOwnedList = false)
+
+            // ----- Assert -----
+            result.position shouldBe null
         }
 
         @Test
@@ -807,6 +904,73 @@ class ListMapperTest {
         }
 
         @Test
+        fun `positioned books come before unpositioned ones regardless of addedAt`() {
+            // ----- Arrange -----
+            val unpositioned = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 1, addedAt = "2024-12-01"),
+            )
+            val positioned = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 2, position = 0, addedAt = "2023-01-01"),
+            )
+            val wrapper = stubBookListWithBooks(listBooks = listOf(unpositioned, positioned))
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.books[0].listBookId shouldBe 2
+            result.books[1].listBookId shouldBe 1
+        }
+
+        @Test
+        fun `multiple positioned books are ordered by ascending position`() {
+            // ----- Arrange -----
+            val pos2 = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 10, position = 2),
+            )
+            val pos0 = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 11, position = 0),
+            )
+            val pos1 = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 12, position = 1),
+            )
+            val wrapper = stubBookListWithBooks(listBooks = listOf(pos2, pos0, pos1))
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.books[0].listBookId shouldBe 11
+            result.books[1].listBookId shouldBe 12
+            result.books[2].listBookId shouldBe 10
+        }
+
+        @Test
+        fun `unpositioned books fall back to addedAt descending after all positioned books`() {
+            // ----- Arrange -----
+            val positioned = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 1, position = 0, addedAt = "2023-01-01"),
+            )
+            val newerUnpositioned = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 2, addedAt = "2024-06-01"),
+            )
+            val olderUnpositioned = stubListBookFull(
+                listBook = stubListBookEntity(listBookId = 3, addedAt = "2023-03-01"),
+            )
+            val wrapper = stubBookListWithBooks(
+                listBooks = listOf(olderUnpositioned, newerUnpositioned, positioned),
+            )
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.books[0].listBookId shouldBe 1
+            result.books[1].listBookId shouldBe 2
+            result.books[2].listBookId shouldBe 3
+        }
+
+        @Test
         fun `preserves list_books edition_id for owned slug even when userBook edition differs`() {
             // ----- Arrange -----
             val topLevelEditionId = 10
@@ -849,6 +1013,32 @@ class ListMapperTest {
             // ----- Assert -----
             result.books[0].editionId shouldBe topLevelEditionId
         }
+
+        @Test
+        fun `reads ranked=true from entity`() {
+            // ----- Arrange -----
+            val bookListEntity = stubBookListEntity(ranked = true)
+            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.ranked shouldBe true
+        }
+
+        @Test
+        fun `reads ranked=false from entity`() {
+            // ----- Arrange -----
+            val bookListEntity = stubBookListEntity(ranked = false)
+            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.ranked shouldBe false
+        }
     }
 
     // =========================================================
@@ -863,12 +1053,14 @@ class ListMapperTest {
             listId: Int = 20,
             bookId: Int = 1,
             editionId: Int? = 10,
+            position: Int? = null,
             createdAt: String? = null,
         ): ListBookFragment = mockk {
             every { this@mockk.id } returns id
             every { list_id } returns listId
             every { book_id } returns bookId
             every { edition_id } returns editionId
+            every { this@mockk.position } returns position
             every { created_at } returns createdAt
         }
 
@@ -939,6 +1131,58 @@ class ListMapperTest {
 
             // ----- Assert -----
             result?.addedAt shouldBe null
+        }
+
+        @Test
+        fun `propagates position when present`() {
+            // ----- Arrange -----
+            val fragment = stubListBookFragment(editionId = 10, position = 3)
+
+            // ----- Act -----
+            val result = fragment.toListBook()
+
+            // ----- Assert -----
+            result?.position shouldBe 3
+        }
+
+        @Test
+        fun `propagates null position as null`() {
+            // ----- Arrange -----
+            val fragment = stubListBookFragment(editionId = 10, position = null)
+
+            // ----- Act -----
+            val result = fragment.toListBook()
+
+            // ----- Assert -----
+            result?.position shouldBe null
+        }
+    }
+
+    @Nested
+    inner class ListFragmentToBookList {
+
+        @Test
+        fun `reads ranked=true from fragment`() {
+            // ----- Arrange -----
+            val fragment = stubListFragment(ranked = true)
+
+            // ----- Act -----
+            val result = fragment.toBookList()
+
+            // ----- Assert -----
+            result.ranked shouldBe true
+        }
+
+        @Test
+        fun `reads ranked=false from fragment`() {
+            // ----- Arrange -----
+            val fragment = stubListFragment(ranked = false)
+
+            // ----- Act -----
+            val result = fragment.toBookList()
+
+            // ----- Assert -----
+            result.ranked shouldBe false
         }
     }
 }

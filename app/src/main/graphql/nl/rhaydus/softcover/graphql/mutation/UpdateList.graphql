@@ -1,0 +1,9 @@
+mutation UpdateList($id: Int!, $list: ListInput!) {
+    listResponse: update_list(id: $id, object: $list) {
+        errors
+
+        list {
+            ...ListFragment
+        }
+    }
+}

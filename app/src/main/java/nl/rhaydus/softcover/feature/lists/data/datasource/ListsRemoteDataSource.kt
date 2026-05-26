@@ -14,6 +14,9 @@ import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion.listBookFragment
 import nl.rhaydus.softcover.RemoveListBookMutation
 import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Companion.listFragment as removeListBookListFragment
+import nl.rhaydus.softcover.UpdateListMutation
+import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
+import nl.rhaydus.softcover.UpdateListBookPositionsMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -27,6 +30,9 @@ import nl.rhaydus.softcover.type.Int_comparison_exp
 import nl.rhaydus.softcover.type.ListBookInput
 import nl.rhaydus.softcover.type.ListInput
 import nl.rhaydus.softcover.type.Lists_bool_exp
+import nl.rhaydus.softcover.type.List_books_bool_exp
+import nl.rhaydus.softcover.type.List_books_set_input
+import nl.rhaydus.softcover.type.List_books_updates
 
 interface ListsRemoteDataSource {
     suspend fun fetchUserLists(
@@ -45,6 +51,28 @@ interface ListsRemoteDataSource {
     ): ListBook
 
     suspend fun removeListBook(book: ListBook): BookList
+
+    /**
+     * Rewrites a contiguous slice of [listId]'s `list_books.position` column: clears positions
+     * `startPosition..startPosition + orderedListBookIds.size - 1` server-side, then assigns the
+     * new positions to [orderedListBookIds] in order. Mirrors the two-step pattern Hardcover's
+     * web client uses (null-then-set) so the server-side unique-position constraint never sees
+     * two rows claiming the same slot mid-mutation.
+     */
+    suspend fun updateListBookPositions(
+        listId: Int,
+        startPosition: Int,
+        orderedListBookIds: List<Int>,
+    )
+
+    /**
+     * Toggles a custom list's `ranked` flag on Hardcover. Returns the refreshed [BookList] so
+     * callers can reconcile any other server-side fields the mutation response carries.
+     */
+    suspend fun setListRanked(
+        listId: Int,
+        ranked: Boolean,
+    ): BookList
 }
 
 private const val DEFAULT_LIST_VIEW: String = "card"
@@ -160,5 +188,67 @@ class ListsRemoteDataSourceImpl(
             ?: throw Exception("Did not receive a list fragment")
 
         return listFragment.toBookList()
+    }
+
+    override suspend fun updateListBookPositions(
+        listId: Int,
+        startPosition: Int,
+        orderedListBookIds: List<Int>,
+    ) {
+        if (orderedListBookIds.isEmpty()) return
+
+        withContext(Dispatchers.IO) {
+            val clearedPositions = (startPosition until startPosition + orderedListBookIds.size).toList()
+
+            val updates = orderedListBookIds.mapIndexed { index, listBookId ->
+                List_books_updates(
+                    _set = Optional.Present(
+                        List_books_set_input(
+                            position = Optional.Present(startPosition + index),
+                        ),
+                    ),
+                    where = List_books_bool_exp(
+                        id = Optional.Present(
+                            Int_comparison_exp(_eq = Optional.Present(listBookId)),
+                        ),
+                    ),
+                )
+            }
+
+            apolloClient.safeMutation(
+                mutation = UpdateListBookPositionsMutation(
+                    listId = listId,
+                    clearedPositions = clearedPositions,
+                    updates = updates,
+                ),
+            )
+        }
+    }
+
+    override suspend fun setListRanked(
+        listId: Int,
+        ranked: Boolean,
+    ): BookList = withContext(Dispatchers.IO) {
+        val input = ListInput(
+            ranked = Optional.Present(ranked),
+        )
+
+        val response = apolloClient
+            .safeMutation(mutation = UpdateListMutation(id = listId, list = input))
+            .listResponse
+            ?: throw Exception("Did not receive an update-list response")
+
+        val errorText: String? = response.errors?.takeIf { it.isNotBlank() }
+
+        if (errorText != null) {
+            throw Exception("UpdateList rejected by server: $errorText")
+        }
+
+        val listFragment = response
+            .list
+            ?.updateListListFragment()
+            ?: throw Exception("Did not receive a list fragment")
+
+        listFragment.toBookList()
     }
 }
