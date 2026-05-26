@@ -9,7 +9,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -20,14 +20,14 @@ import org.junit.jupiter.api.Test
 
 class RefreshActionTest {
 
-    private lateinit var refreshUserBooksUseCase: RefreshUserBooksUseCase
+    private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
 
     @BeforeEach
     fun setUp() {
-        refreshUserBooksUseCase = mockk()
+        refreshLibraryUseCase = mockk()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -36,8 +36,8 @@ class RefreshActionTest {
         )
         dependencies = mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
             every {
-                mock.refreshUserBooksUseCase
-            } returns refreshUserBooksUseCase
+                mock.refreshLibraryUseCase
+            } returns refreshLibraryUseCase
         }
     }
 
@@ -51,7 +51,7 @@ class RefreshActionTest {
             val loadingStates = mutableListOf<Boolean>()
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } answers {
                 loadingStates.add(stateFlow.value.isLoading)
                 Result.success(Unit)
@@ -69,10 +69,10 @@ class RefreshActionTest {
         }
 
         @Test
-        fun `invokes refreshUserBooksUseCase`() = runTest {
+        fun `invokes refreshLibraryUseCase`() = runTest {
             // ----- Arrange -----
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             // ----- Act -----
@@ -83,7 +83,7 @@ class RefreshActionTest {
 
             // ----- Assert -----
             coVerify {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             }
         }
 
@@ -93,7 +93,7 @@ class RefreshActionTest {
             stateFlow.value = ReadingScreenUiState(isLoading = false)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.failure(RuntimeException("network error"))
 
             // ----- Act -----
@@ -110,7 +110,7 @@ class RefreshActionTest {
         fun `does not throw when use case fails`() = runTest {
             // ----- Arrange -----
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.failure(RuntimeException("network error"))
 
             // ----- Act & Assert -----

@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -76,7 +77,7 @@ class OnAddBookToLibraryClickActionTest {
 
             coEvery {
                 markBookAsWantToReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnAddBookToLibraryClickAction(book = book)
 
@@ -100,7 +101,7 @@ class OnAddBookToLibraryClickActionTest {
 
             coEvery {
                 markBookAsWantToReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnAddBookToLibraryClickAction(book = book)
             val stateBefore = stateFlow.value

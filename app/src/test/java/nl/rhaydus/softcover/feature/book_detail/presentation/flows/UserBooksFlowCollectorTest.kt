@@ -63,6 +63,7 @@ class UserBooksFlowCollectorTest {
         url = null,
         localImagePath = null,
         isbn10 = null,
+        isbn13 = null,
         pages = null,
         audioSeconds = null,
         authors = emptyList<Author>(),

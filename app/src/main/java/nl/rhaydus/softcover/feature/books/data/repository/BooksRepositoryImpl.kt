@@ -22,10 +22,7 @@ import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
-import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
@@ -36,25 +33,20 @@ import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
-import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 import timber.log.Timber
-
-private const val OWNED_LIST_SLUG: String = "owned"
 
 class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
     private val booksLocalDataSource: BooksLocalDataSource,
-    private val settingsRepository: SettingsRepository,
     private val networkAvailability: NetworkAvailabilityProvider,
     private val offlineProgressQueue: OfflineProgressQueue,
     private val pendingProgressDrainer: PendingProgressDrainer,
     private val applicationScope: ApplicationScope,
 ) : BooksRepository {
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
-    override val allUserLists: Flow<List<BookList>> = booksLocalDataSource.allUserLists
 
     private val inflightMutex = Mutex()
-    private val inflightRefreshes = mutableMapOf<RefreshScope, Deferred<Unit>>()
+    private val inflightRefreshes = mutableMapOf<UserBookStatus?, Deferred<Unit>>()
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return booksLocalDataSource.getBooksFlowByStatus(status = status)
@@ -78,35 +70,43 @@ class BooksRepositoryImpl(
         direction = direction,
     )
 
+    override suspend fun applyShelfManualOrderPrefix(
+        status: UserBookStatus,
+        prefixBookIds: List<Int>,
+    ) {
+        booksLocalDataSource.applyShelfManualOrderPrefix(
+            status = status,
+            prefixBookIds = prefixBookIds,
+        )
+    }
+
     override suspend fun refreshUserBooks(
         userId: Int,
-        scope: RefreshScope,
+        statusFilter: UserBookStatus?,
     ) {
-        runOrJoin(scope = scope) {
-            when (scope) {
-                RefreshScope.All -> refreshAll(userId = userId)
-                is RefreshScope.ByStatus -> refreshByStatus(userId = userId, status = scope.status)
-                is RefreshScope.ByList -> refreshByList(userId = userId, listId = scope.listId)
+        runOrJoin(statusFilter = statusFilter) {
+            withContext(Dispatchers.IO) {
+                refreshUserBooksInternal(userId = userId, statusFilter = statusFilter)
             }
         }
     }
 
     private suspend fun runOrJoin(
-        scope: RefreshScope,
+        statusFilter: UserBookStatus?,
         work: suspend () -> Unit,
     ) {
         val deferred: Deferred<Unit> = inflightMutex.withLock {
-            inflightRefreshes[scope]?.let { return@withLock it }
+            inflightRefreshes[statusFilter]?.let { return@withLock it }
 
             val started: Deferred<Unit> = applicationScope.scope.async {
                 try {
                     work()
                 } finally {
-                    inflightMutex.withLock { inflightRefreshes.remove(scope) }
+                    inflightMutex.withLock { inflightRefreshes.remove(statusFilter) }
                 }
             }
 
-            inflightRefreshes[scope] = started
+            inflightRefreshes[statusFilter] = started
 
             started
         }
@@ -114,27 +114,20 @@ class BooksRepositoryImpl(
         deferred.await()
     }
 
-    private suspend fun refreshAll(userId: Int) = withContext(Dispatchers.IO) {
+    private suspend fun refreshUserBooksInternal(
+        userId: Int,
+        statusFilter: UserBookStatus?,
+    ) {
         val syncedUserBookIds: Set<Int> = pendingProgressDrainer.drainPendingUpdates()
-        val seeded = settingsRepository.listDefaultsSeeded.first()
 
-        val booksDeferred = async {
-            booksRemoteDataSource.initializeBooks(
-                userId = userId,
-                statusIds = UserBookStatus.entries.map { it.code }.toSet(),
-            )
-        }
-        val listsDeferred = async {
-            booksRemoteDataSource.fetchUserLists(userId = userId, listIds = null)
-        }
+        val statusIds: Set<Int> = statusFilter
+            ?.let { setOf(it.code) }
+            ?: UserBookStatus.entries.map { it.code }.toSet()
 
-        val fetchedBooks = booksDeferred.await()
-        val fetchedLists = listsDeferred.await()
-
-        if (seeded.not()) {
-            val ownedListId = fetchedLists.firstOrNull { it.slug == OWNED_LIST_SLUG }?.id
-            settingsRepository.seedEnabledListIds(ids = setOfNotNull(ownedListId))
-        }
+        val fetchedBooks = booksRemoteDataSource.initializeBooks(
+            userId = userId,
+            statusIds = statusIds,
+        )
 
         val booksToCache: List<Book> = preserveSyncedProgress(
             fetchedBooks = fetchedBooks,
@@ -143,88 +136,42 @@ class BooksRepositoryImpl(
 
         booksLocalDataSource.cacheBooks(books = booksToCache)
 
-        val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }.toSet()
-        val locallyStoredUserBookIds = booksLocalDataSource.getAllUserBookIds()
+        val fetchedBookUserBookIds: Set<Int> = fetchedBooks.mapNotNull { it.userBook?.id }.toSet()
+        val locallyStoredUserBookIds: List<Int> = if (statusFilter == null) {
+            booksLocalDataSource.getAllUserBookIds()
+        } else {
+            booksLocalDataSource.getUserBookIdsByStatus(status = statusFilter)
+        }
+
         val userBookIdsToRemove: List<Int> = locallyStoredUserBookIds
             .filterNot { it in fetchedBookUserBookIds }
 
         booksLocalDataSource.removeUserBooksById(ids = userBookIdsToRemove)
+    }
 
-        booksLocalDataSource.syncBookListMetadata(serverListIds = fetchedLists.map { it.id }.toSet())
-
-        hydrateOrphanOwnedBooks(
-            lists = fetchedLists,
-            forceRefreshAll = true,
-        )
-
-        booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
-
+    override suspend fun deleteOrphanBooks() {
         booksLocalDataSource.deleteOrphanBooks()
     }
 
-    private suspend fun refreshByStatus(
-        userId: Int,
-        status: UserBookStatus,
-    ) = withContext(Dispatchers.IO) {
-        val syncedUserBookIds: Set<Int> = pendingProgressDrainer.drainPendingUpdates()
-
-        val fetchedBooks = booksRemoteDataSource.initializeBooks(
-            userId = userId,
-            statusIds = setOf(status.code),
-        )
-
-        val booksToCache: List<Book> = preserveSyncedProgress(
-            fetchedBooks = fetchedBooks,
-            syncedUserBookIds = syncedUserBookIds,
-        )
-
-        booksLocalDataSource.cacheBooks(books = booksToCache)
-
-        val fetchedBookUserBookIds = fetchedBooks.mapNotNull { it.userBook?.id }.toSet()
-        val localUserBookIdsForStatus = booksLocalDataSource.getUserBookIdsByStatus(status = status)
-        val userBookIdsToRemove: List<Int> = localUserBookIdsForStatus
-            .filterNot { it in fetchedBookUserBookIds }
-
-        booksLocalDataSource.removeUserBooksById(ids = userBookIdsToRemove)
-    }
-
-    private suspend fun refreshByList(
-        userId: Int,
-        listId: Int,
-    ) = withContext(Dispatchers.IO) {
-        val fetchedLists = booksRemoteDataSource.fetchUserLists(
-            userId = userId,
-            listIds = setOf(listId),
-        )
-
-        hydrateOrphanOwnedBooks(
-            lists = fetchedLists,
-            forceRefreshAll = true,
-        )
-
-        booksLocalDataSource.cacheUserBookLists(lists = fetchedLists)
-    }
-
-    private suspend fun hydrateOrphanOwnedBooks(
-        lists: List<BookList>,
-        forceRefreshAll: Boolean,
+    override suspend fun hydrateReferencedBooks(
+        bookIds: List<Int>,
+        editionIds: List<Int>,
+        forceNetwork: Boolean,
     ) {
-        val referenced = lists.flatMap { list -> list.books.map { it.bookId to it.editionId } }
+        if (bookIds.isEmpty() && editionIds.isEmpty()) return
 
-        if (referenced.isEmpty()) return
-
-        val referencedBookIds = referenced.map { it.first }.distinct()
-        val bookIdsToFetch: List<Int> = if (forceRefreshAll) {
-            referencedBookIds
+        val distinctBookIds = bookIds.distinct()
+        val bookIdsToFetch: List<Int> = if (forceNetwork) {
+            distinctBookIds
         } else {
-            val cachedBookIds = booksLocalDataSource.getExistingBookIds(ids = referencedBookIds).toSet()
-            referencedBookIds.filterNot { it in cachedBookIds }
+            val cachedBookIds = booksLocalDataSource.getExistingBookIds(ids = distinctBookIds).toSet()
+            distinctBookIds.filterNot { it in cachedBookIds }
         }
 
         if (bookIdsToFetch.isNotEmpty()) {
             val fetchedBooks = booksRemoteDataSource.fetchBooksByIds(
                 ids = bookIdsToFetch,
-                forceNetwork = forceRefreshAll,
+                forceNetwork = forceNetwork,
             )
 
             if (fetchedBooks.isNotEmpty()) {
@@ -232,18 +179,18 @@ class BooksRepositoryImpl(
             }
         }
 
-        val referencedEditionIds = referenced.map { it.second }.distinct()
-        val editionIdsToFetch: List<Int> = if (forceRefreshAll) {
-            referencedEditionIds
+        val distinctEditionIds = editionIds.distinct()
+        val editionIdsToFetch: List<Int> = if (forceNetwork) {
+            distinctEditionIds
         } else {
-            val cachedEditionIds = booksLocalDataSource.getExistingEditionIds(ids = referencedEditionIds).toSet()
-            referencedEditionIds.filterNot { it in cachedEditionIds }
+            val cachedEditionIds = booksLocalDataSource.getExistingEditionIds(ids = distinctEditionIds).toSet()
+            distinctEditionIds.filterNot { it in cachedEditionIds }
         }
 
         if (editionIdsToFetch.isNotEmpty()) {
             val fetchedEditions = booksRemoteDataSource.fetchEditionsByIds(
                 ids = editionIdsToFetch,
-                forceNetwork = forceRefreshAll,
+                forceNetwork = forceNetwork,
             )
 
             if (fetchedEditions.isNotEmpty()) {
@@ -292,12 +239,12 @@ class BooksRepositoryImpl(
 
         if (canonicalBookId == missingBookId) return null
 
-        Timber.w("-=- Book $missingBookId missing remotely; recovered canonical $canonicalBookId via edition $editionId")
+        Timber.w("Book $missingBookId missing remotely; recovered canonical $canonicalBookId via edition $editionId")
 
         val canonical: Book = try {
             booksRemoteDataSource.fetchBookById(id = canonicalBookId)
         } catch (canonicalMissing: BookNotFoundException) {
-            Timber.w("-=- Canonical $canonicalBookId also missing while recovering $missingBookId")
+            Timber.w("Canonical $canonicalBookId also missing while recovering $missingBookId")
 
             throw BookNotFoundException(bookId = missingBookId)
         }
@@ -510,7 +457,7 @@ class BooksRepositoryImpl(
 
     private suspend fun restoreOptimisticWrite(snapshot: Book?) {
         if (snapshot == null) {
-            Timber.w("-=- Optimistic rollback skipped: no prior snapshot in cache")
+            Timber.w("Optimistic rollback skipped: no prior snapshot in cache")
             return
         }
 
@@ -641,77 +588,10 @@ class BooksRepositoryImpl(
         )
     }
 
-    override suspend fun markEditionAsOwned(edition: BookEdition) {
-        val snapshot: ListBook? = booksLocalDataSource.findOwnedListBookByEditionId(
-            editionId = edition.id,
-        )
-        val ownedListId: Int? = booksLocalDataSource.getOwnedListId()
-
-        if (ownedListId != null) {
-            booksLocalDataSource.cacheListBook(
-                book = ListBook(
-                    listBookId = OPTIMISTIC_LIST_BOOK_ID,
-                    listId = ownedListId,
-                    bookId = edition.bookId,
-                    editionId = edition.id,
-                ),
-            )
-        }
-
-        val real: ListBook = runCatching {
-            booksRemoteDataSource.markEditionAsOwned(edition = edition)
-        }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            restoreOwnedListBook(
-                editionId = edition.id,
-                snapshot = snapshot,
-            )
-            throw error
-        }
-
-        booksLocalDataSource.removeOwnedListBookByEditionId(editionId = edition.id)
-        booksLocalDataSource.cacheListBook(book = real)
-    }
-
-    override suspend fun removeOwnedEdition(editionId: Int) {
-        val snapshot: ListBook = booksLocalDataSource.findOwnedListBookByEditionId(
-            editionId = editionId,
-        ) ?: return
-
-        booksLocalDataSource.removeOwnedListBookByEditionId(editionId = editionId)
-
-        val updatedList: BookList = runCatching {
-            booksRemoteDataSource.removeListBook(book = snapshot)
-        }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            booksLocalDataSource.cacheListBook(book = snapshot)
-            throw error
-        }
-
-        booksLocalDataSource.cacheUserBookLists(lists = listOf(updatedList))
-    }
-
-    private suspend fun restoreOwnedListBook(
-        editionId: Int,
-        snapshot: ListBook?,
-    ) {
-        booksLocalDataSource.removeOwnedListBookByEditionId(editionId = editionId)
-
-        if (snapshot != null && snapshot.listBookId != OPTIMISTIC_LIST_BOOK_ID) {
-            booksLocalDataSource.cacheListBook(book = snapshot)
-        }
-    }
-
     override suspend fun persistEditionImage(
         editionId: Int,
         source: File,
     ) {
         booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
-    }
-
-    private companion object {
-        const val OPTIMISTIC_LIST_BOOK_ID = 0
     }
 }

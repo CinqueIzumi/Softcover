@@ -22,7 +22,7 @@ class OnEditionOwnedToggleAction(
                 edition = edition,
                 owned = edition.owned.not(),
             ).onFailure { error ->
-                Timber.e("-=- $error")
+                Timber.e("$error")
 
                 scope.setState {
                     it.copy(failedMutationEditionIds = it.failedMutationEditionIds + edition.id)

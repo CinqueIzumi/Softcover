@@ -1,0 +1,11 @@
+mutation CreateList(
+    $list: ListInput!
+) {
+    insert_list(object: $list) {
+        errors
+
+        list {
+            ...ListFragment
+        }
+    }
+}

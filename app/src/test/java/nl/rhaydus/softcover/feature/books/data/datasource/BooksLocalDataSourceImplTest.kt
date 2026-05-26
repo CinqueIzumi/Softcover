@@ -2,36 +2,34 @@ package nl.rhaydus.softcover.feature.books.data.datasource
 
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.data.database.dao.BookDao
+import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
+import nl.rhaydus.softcover.core.data.database.model.BookEditionView
+import nl.rhaydus.softcover.core.data.database.model.BookEditionWithAuthors
+import nl.rhaydus.softcover.core.data.database.model.BookEntity
+import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
+import nl.rhaydus.softcover.core.data.database.model.EditionLocalImagePath
+import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import java.io.File
-import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
-import nl.rhaydus.softcover.feature.books.data.dao.BookDao
-import nl.rhaydus.softcover.feature.books.data.model.EditionLocalImagePath
 import nl.rhaydus.softcover.feature.books.data.mapper.toModel
-import nl.rhaydus.softcover.feature.books.data.model.AuthorEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookEditionView
-import nl.rhaydus.softcover.feature.books.data.model.BookEditionWithAuthors
-import nl.rhaydus.softcover.feature.books.data.model.BookEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
-import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
-import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
+import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.io.File
 
 class BooksLocalDataSourceImplTest {
 
@@ -74,6 +72,7 @@ class BooksLocalDataSourceImplTest {
         url = null,
         localImagePath = null,
         isbn10 = null,
+        isbn13 = null,
         pages = null,
         audioSeconds = null,
         releaseYear = 2020,
@@ -101,34 +100,7 @@ class BooksLocalDataSourceImplTest {
         series = null,
         editions = listOf(stubEditionWithAuthors(bookId = id)),
         userBookWithJournals = null,
-    )
-
-    private fun stubBookListWithBooks(id: Int = 1): BookListWithBooks = BookListWithBooks(
-        bookList = BookListEntity(
-            id = id,
-            name = "My List $id",
-            slug = "my-list-$id",
-        ),
-        listBooks = emptyList(),
-    )
-
-    private fun stubListBookFull(
-        listBookId: Int = 1,
-        listId: Int = 1,
-        bookId: Int = 1,
-        editionId: Int = 10,
-    ): ListBookFull = ListBookFull(
-        listBook = ListBookEntity(
-            listBookId = listBookId,
-            listId = listId,
-            bookId = bookId,
-            editionId = editionId,
-        ),
-        book = stubBookFullEntity(id = bookId),
-        edition = stubEditionWithAuthors(
-            id = editionId,
-            bookId = bookId,
-        ),
+        tags = emptyList(),
     )
 
     @Nested
@@ -193,57 +165,6 @@ class BooksLocalDataSourceImplTest {
 
             // ----- Act & Assert -----
             dataSource.allUserBooks.test {
-                awaitItem() shouldBe listOf(entity.toModel())
-                awaitComplete()
-            }
-        }
-    }
-
-    @Nested
-    inner class AllUserLists {
-
-        @Test
-        fun `emits mapped domain book lists from DAO observeBookLists`() = runTest {
-            // ----- Arrange -----
-            val entity = stubBookListWithBooks(id = 1)
-
-            every {
-                dao.observeBookLists()
-            } returns flowOf(listOf(entity))
-
-            // ----- Act & Assert -----
-            dataSource.allUserLists.test {
-                awaitItem() shouldBe listOf(entity.toModel())
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `emits empty list when DAO emits empty list`() = runTest {
-            // ----- Arrange -----
-            every {
-                dao.observeBookLists()
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            dataSource.allUserLists.test {
-                awaitItem() shouldBe emptyList<BookList>()
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `suppresses consecutive duplicate emissions via distinctUntilChanged`() = runTest {
-            // ----- Arrange -----
-            val entity = stubBookListWithBooks(id = 1)
-            val list = listOf(entity)
-
-            every {
-                dao.observeBookLists()
-            } returns flowOf(list, list)
-
-            // ----- Act & Assert -----
-            dataSource.allUserLists.test {
                 awaitItem() shouldBe listOf(entity.toModel())
                 awaitComplete()
             }
@@ -705,56 +626,6 @@ class BooksLocalDataSourceImplTest {
     }
 
     @Nested
-    inner class CacheUserBookLists {
-
-        @Test
-        fun `delegates to DAO with the given lists`() = runTest {
-            // ----- Arrange -----
-            val lists = listOf<nl.rhaydus.softcover.core.domain.model.BookList>(mockk(), mockk())
-
-            // ----- Act -----
-            dataSource.cacheUserBookLists(lists = lists)
-
-            // ----- Assert -----
-            coVerify {
-                dao.cacheBookLists(lists = lists)
-            }
-        }
-
-        @Test
-        fun `delegates to DAO with an empty list`() = runTest {
-            // ----- Arrange -----
-            val lists = emptyList<nl.rhaydus.softcover.core.domain.model.BookList>()
-
-            // ----- Act -----
-            dataSource.cacheUserBookLists(lists = lists)
-
-            // ----- Assert -----
-            coVerify {
-                dao.cacheBookLists(lists = lists)
-            }
-        }
-    }
-
-    @Nested
-    inner class CacheListBook {
-
-        @Test
-        fun `delegates to DAO with the given list book`() = runTest {
-            // ----- Arrange -----
-            val listBook: ListBook = mockk()
-
-            // ----- Act -----
-            dataSource.cacheListBook(book = listBook)
-
-            // ----- Assert -----
-            coVerify {
-                dao.cacheListBook(listBook = listBook)
-            }
-        }
-    }
-
-    @Nested
     inner class RemoveAllBooks {
 
         @Test
@@ -902,86 +773,142 @@ class BooksLocalDataSourceImplTest {
     }
 
     @Nested
-    inner class FindOwnedListBookByEditionId {
+    inner class ReplaceShelfManualOrder {
 
         @Test
-        fun `returns mapped domain model when DAO returns a result`() = runTest {
+        fun `forwards status code and bookIds to the DAO`() = runTest {
             // ----- Arrange -----
-            val editionId = 42
-            val entity = stubListBookFull(
-                listBookId = 1,
-                listId = 1,
-                bookId = 1,
-                editionId = editionId,
-            )
-
-            coEvery {
-                dao.getOwnedListBookByEditionId(editionId = editionId)
-            } returns entity
+            val status = UserBookStatus.READ
+            val bookIds = listOf(3, 1, 2)
 
             // ----- Act -----
-            val result = dataSource.findOwnedListBookByEditionId(editionId = editionId)
+            dataSource.applyShelfManualOrderPrefix(status = status, prefixBookIds = bookIds)
 
             // ----- Assert -----
-            result shouldBe entity.toModel(isOwnedList = true)
+            coVerify {
+                dao.applyShelfManualOrderPrefix(
+                    statusCode = status.code,
+                    prefixBookIds = bookIds,
+                )
+            }
         }
 
         @Test
-        fun `returns null when DAO returns null`() = runTest {
+        fun `forwards status code for a different status`() = runTest {
             // ----- Arrange -----
-            val editionId = 99
+            val status = UserBookStatus.WANT_TO_READ
+            val bookIds = emptyList<Int>()
+
+            // ----- Act -----
+            dataSource.applyShelfManualOrderPrefix(status = status, prefixBookIds = bookIds)
+
+            // ----- Assert -----
+            coVerify {
+                dao.applyShelfManualOrderPrefix(
+                    statusCode = status.code,
+                    prefixBookIds = bookIds,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class RemoveUserBooksByIdWithManualOrder {
+
+        @Test
+        fun `calls deleteShelfManualOrderForBookIds with resolved bookIds when bookIds is non-empty`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 5
+            val bookId = 100
 
             coEvery {
-                dao.getOwnedListBookByEditionId(editionId = editionId)
+                dao.getBookIdByUserBookId(userBookId = userBookId)
+            } returns bookId
+
+            coEvery {
+                dao.getLocalImagePathsByBookId(bookId = bookId)
+            } returns emptyList()
+
+            // ----- Act -----
+            dataSource.removeUserBooksById(ids = listOf(userBookId))
+
+            // ----- Assert -----
+            coVerify {
+                dao.deleteShelfManualOrderForBookIds(bookIds = listOf(bookId))
+            }
+        }
+
+        @Test
+        fun `does not call deleteShelfManualOrderForBookIds when all userBookId lookups return null`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 9
+
+            coEvery {
+                dao.getBookIdByUserBookId(userBookId = userBookId)
             } returns null
 
             // ----- Act -----
-            val result = dataSource.findOwnedListBookByEditionId(editionId = editionId)
+            dataSource.removeUserBooksById(ids = listOf(userBookId))
 
             // ----- Assert -----
-            result shouldBe null
-        }
-    }
-
-    @Nested
-    inner class GetOwnedListId {
-
-        @Test
-        fun `delegates to dao getOwnedListId and returns its result`() = runTest {
-            // ----- Arrange -----
-            val expectedId = 7
-
-            coEvery {
-                dao.getOwnedListId()
-            } returns expectedId
-
-            // ----- Act -----
-            val result = dataSource.getOwnedListId()
-
-            // ----- Assert -----
-            result shouldBe expectedId
-
-            coVerify {
-                dao.getOwnedListId()
+            coVerify(exactly = 0) {
+                dao.deleteShelfManualOrderForBookIds(bookIds = any())
             }
         }
     }
 
     @Nested
-    inner class RemoveOwnedListBookByEditionId {
+    inner class GetSortedBooksByStatus {
 
         @Test
-        fun `delegates to dao deleteOwnedListBookByEditionId with correct editionId`() = runTest {
+        fun `MANUAL mode builds SQL containing shelf_manual_order and binds statusCode twice`() = runTest {
             // ----- Arrange -----
-            val editionId = 55
+            val status = UserBookStatus.READ
+            val querySlot = slot<androidx.sqlite.db.SupportSQLiteQuery>()
+
+            every {
+                dao.observeBooksRaw(query = capture(querySlot))
+            } returns flowOf(emptyList())
 
             // ----- Act -----
-            dataSource.removeOwnedListBookByEditionId(editionId = editionId)
+            dataSource.getSortedBooksByStatus(
+                status = status,
+                mode = LibrarySortMode.MANUAL,
+                direction = SortDirection.ASCENDING,
+            ).test {
+                awaitItem()
+                awaitComplete()
+            }
 
             // ----- Assert -----
-            coVerify {
-                dao.deleteOwnedListBookByEditionId(editionId = editionId)
+            val sql = querySlot.captured.sql
+            sql shouldContain "shelf_manual_order"
+        }
+
+        @Test
+        fun `non-MANUAL mode builds SQL without shelf_manual_order and binds statusCode once`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.READ
+            val querySlot = slot<androidx.sqlite.db.SupportSQLiteQuery>()
+
+            every {
+                dao.observeBooksRaw(query = capture(querySlot))
+            } returns flowOf(emptyList())
+
+            // ----- Act -----
+            dataSource.getSortedBooksByStatus(
+                status = status,
+                mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
+            ).test {
+                awaitItem()
+                awaitComplete()
             }
+
+            // ----- Assert -----
+            val sql = querySlot.captured.sql
+            sql shouldNotContain "shelf_manual_order"
         }
     }
+
 }

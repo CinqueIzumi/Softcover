@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -58,7 +59,7 @@ class UpdateBookProgressTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             // ----- Act -----
             updateBookProgress(
@@ -79,7 +80,7 @@ class UpdateBookProgressTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             // ----- Act -----
             updateBookProgress(
@@ -237,7 +238,7 @@ class UpdateBookProgressTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             // ----- Act -----
             updateBookProgress(
@@ -258,7 +259,7 @@ class UpdateBookProgressTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             // ----- Act -----
             updateBookProgress(
@@ -279,7 +280,7 @@ class UpdateBookProgressTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             // ----- Act -----
             updateBookProgress(
@@ -423,7 +424,7 @@ class UpdateBookProgressTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             // ----- Act -----
             val result = updateBookProgress(

@@ -15,7 +15,7 @@ class OnClearDeadlineAction : BookDetailAction {
         val bookId = scope.currentState.book?.id ?: return
 
         dependencies.clearBookDeadlineUseCase(bookId = bookId).onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
     }
 }

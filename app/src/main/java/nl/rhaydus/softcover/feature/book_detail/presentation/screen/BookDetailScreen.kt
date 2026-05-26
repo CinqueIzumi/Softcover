@@ -69,6 +69,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -121,12 +122,14 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBo
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnExternalLinkClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
@@ -136,22 +139,28 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTa
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalLinkEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.feature.lists.presentation.component.ListMembership
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.Instant
 import java.time.LocalDate
@@ -179,6 +188,8 @@ class BookDetailScreen(
 
         val haptics = rememberHaptics()
 
+        val uriHandler = LocalUriHandler.current
+
         var celebrationKey by remember { mutableIntStateOf(0) }
 
         ObserveAsEvents(flow = screenModel.events) {
@@ -196,6 +207,10 @@ class BookDetailScreen(
                 is BookMarkedAsReadEvent -> {
                     haptics.commit()
                     celebrationKey++
+                }
+
+                is OpenExternalLinkEvent -> {
+                    uriHandler.openUri(uri = it.url)
                 }
             }
         }
@@ -217,6 +232,11 @@ class BookDetailScreen(
                     )
                 )
             },
+            onCreateNewListClick = {
+                screenModel.runAction(OnDismissChooseListsSheetAction())
+
+                navigator.push(item = CreateListScreen())
+            },
             isOnline = isOnline,
             celebrationKey = celebrationKey,
         )
@@ -229,6 +249,7 @@ class BookDetailScreen(
         runAction: (BookDetailAction) -> Unit,
         onNavigateBack: () -> Unit,
         onCoverClick: () -> Unit,
+        onCreateNewListClick: () -> Unit,
         isOnline: Boolean,
         celebrationKey: Int = 0,
     ) {
@@ -370,6 +391,15 @@ class BookDetailScreen(
 
                 item { AboutSection(state = state) }
 
+                item { EditionMetadataStrip(state = state) }
+
+                item {
+                    ExternalLinksStrip(
+                        state = state,
+                        runAction = runAction,
+                    )
+                }
+
                 item {
                     BelowDescriptionStatusPanel(
                         state = state,
@@ -424,6 +454,24 @@ class BookDetailScreen(
                 ShareBookBottomSheet(
                     book = state.book,
                     onDismissRequest = { runAction(OnDismissShareSheetAction()) },
+                )
+            }
+
+            if (state.showChooseListsSheet && state.book != null) {
+                ChooseListsBottomSheet(
+                    bookIds = setOf(state.book.id),
+                    customLists = state.userLists.filter { it.isOwned.not() },
+                    listsBeingMutated = state.listsBeingMutated,
+                    onDismissRequest = { runAction(OnDismissChooseListsSheetAction()) },
+                    onToggleMembership = { listId, membership ->
+                        runAction(
+                            OnToggleListMembershipAction(
+                                listId = listId,
+                                isMember = membership == ListMembership.ALL,
+                            )
+                        )
+                    },
+                    onCreateNewListClick = onCreateNewListClick,
                 )
             }
 
@@ -1180,6 +1228,22 @@ class BookDetailScreen(
                     },
                 )
 
+                if (isOnline) {
+                    DropdownMenuItem(
+                        text = { Text(text = "Choose lists") },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_bookmark_add),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            dismiss()
+                            runAction(OnShowChooseListsSheetAction())
+                        },
+                    )
+                }
+
                 if (isOnShelf.not()) return@DropdownMenu
 
                 if (isOnline) {
@@ -1657,6 +1721,106 @@ class BookDetailScreen(
         }
     }
 
+    @Composable
+    private fun EditionMetadataStrip(state: BookDetailUiState) {
+        val edition = state.book?.currentEdition ?: return
+
+        val publisher = edition.publisher?.takeIf { it.isNotBlank() }
+        val isbn13 = edition.isbn13?.takeIf { it.isNotBlank() }
+        val isbn10 = edition.isbn10?.takeIf { it.isNotBlank() }
+
+        if (publisher == null && isbn13 == null && isbn10 == null) return
+
+        val parts = listOfNotNull(
+            publisher,
+            isbn13?.let { "ISBN-13 $it" },
+            isbn10?.let { "ISBN-10 $it" },
+        )
+
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = parts.joinToString(separator = "  ·  "),
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+
+    @Composable
+    private fun ExternalLinksStrip(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        val edition = state.book?.currentEdition ?: return
+
+        val isbn = edition.isbn13?.takeIf { it.isNotBlank() }
+            ?: edition.isbn10?.takeIf { it.isNotBlank() }
+            ?: return
+
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Spacer(modifier = Modifier.height(28.dp))
+
+            SectionLabel(text = "Find it")
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ExternalLinkButton(
+                    iconRes = R.drawable.ic_storefront,
+                    contentDescription = "Find on Bookshop.org",
+                    onClick = {
+                        runAction(
+                            OnExternalLinkClickAction(
+                                url = "https://bookshop.org/search?keywords=$isbn",
+                            ),
+                        )
+                    },
+                )
+
+                ExternalLinkButton(
+                    iconRes = R.drawable.ic_shopping_bag,
+                    contentDescription = "Find on Amazon",
+                    onClick = {
+                        runAction(
+                            OnExternalLinkClickAction(
+                                url = "https://www.amazon.com/s?k=$isbn",
+                            ),
+                        )
+                    },
+                )
+
+                ExternalLinkButton(
+                    iconRes = R.drawable.ic_library_books,
+                    contentDescription = "Find on OpenLibrary",
+                    onClick = {
+                        runAction(
+                            OnExternalLinkClickAction(
+                                url = "https://openlibrary.org/search?isbn=$isbn",
+                            ),
+                        )
+                    },
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ExternalLinkButton(
+        iconRes: Int,
+        contentDescription: String,
+        onClick: () -> Unit,
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+
     // endregion
 
     // region Reviews
@@ -2048,6 +2212,7 @@ private fun BookDetailScreenReadingPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -2075,6 +2240,7 @@ private fun BookDetailScreenNonePreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -2102,6 +2268,7 @@ private fun BookDetailScreenDnfPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -2129,6 +2296,7 @@ private fun BookDetailScreenWantToReadPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -2156,6 +2324,7 @@ private fun BookDetailScreenReadPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
+                onCreateNewListClick = {},
                 isOnline = true,
             )
         }

@@ -14,7 +14,7 @@ class OnRemoveBookFromLibraryClickAction(val book: Book) : ExploreAction {
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
         dependencies.removeBookFromLibraryUseCase(book = book).onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
     }
 }

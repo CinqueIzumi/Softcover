@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ShelfMutationOutcome
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -27,6 +28,7 @@ class OnMarkBookAsReadClickActionTest {
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
@@ -34,10 +36,12 @@ class OnMarkBookAsReadClickActionTest {
         markBookAsReadUseCase = mockk()
         stateFlow = MutableStateFlow(BookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+        eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -77,7 +81,7 @@ class OnMarkBookAsReadClickActionTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
 
@@ -101,7 +105,7 @@ class OnMarkBookAsReadClickActionTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
 
@@ -145,7 +149,7 @@ class OnMarkBookAsReadClickActionTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
 
@@ -179,7 +183,7 @@ class OnMarkBookAsReadClickActionTest {
 
             coEvery {
                 markBookAsReadUseCase(book = book)
-            } returns Result.success(Unit)
+            } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
 
@@ -212,6 +216,29 @@ class OnMarkBookAsReadClickActionTest {
                 dependencies = dependencies,
                 scope = scope,
             )
+        }
+
+        @Test
+        fun `does not send BookMarkedAsReadEvent when use case returns NoChange`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.NoChange)
+
+            val action = OnMarkBookAsReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event shouldBe null
         }
     }
 }

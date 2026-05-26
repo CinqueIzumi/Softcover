@@ -17,7 +17,7 @@ class InitializeBookWithIdAction(
         dependencies.launch {
             val result = dependencies
                 .fetchBookByIdUseCase(id = id)
-                .onFailure { Timber.e("-=- $it") }
+                .onFailure { Timber.e("$it") }
                 .getOrNull()
 
             scope.setState { state ->

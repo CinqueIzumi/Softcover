@@ -91,6 +91,26 @@ class BookDetailUiStateTest {
         }
 
         @Test
+        fun `filters by isbn13 substring match`() {
+            // ----- Arrange -----
+            val editionWithIsbn13 = PreviewData.baseEdition.copy(
+                id = 10,
+                isbn13 = "9780451524935",
+                isbn10 = null,
+            )
+            val state = BookDetailUiState(
+                editions = listOf(editionWithIsbn13),
+                editionSearchQuery = "97804515",
+            )
+
+            // ----- Act -----
+            val result = state.filteredEditions
+
+            // ----- Assert -----
+            result shouldContainExactly listOf(editionWithIsbn13)
+        }
+
+        @Test
         fun `isbn10 match is case-insensitive`() {
             // ----- Arrange -----
             val editionLowerIsbn = PreviewData.baseEdition.copy(

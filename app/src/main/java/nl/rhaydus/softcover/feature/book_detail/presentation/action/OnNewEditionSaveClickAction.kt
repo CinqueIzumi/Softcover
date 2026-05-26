@@ -24,7 +24,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
                 userBook = userBook,
                 newEditionId = edition.id
             ).onFailure {
-                Timber.e("-=- Something went wrong updating book edition! $it")
+                Timber.e("Something went wrong updating book edition! $it")
             }
 
             scope.setState {

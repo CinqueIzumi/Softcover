@@ -19,7 +19,10 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseC
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.SetEditionAsOwnedUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
@@ -41,6 +44,9 @@ class BookDetailScreenScreenModel(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
+    private val getAllUserListsUseCase: GetAllUserListsUseCase,
+    private val addBookToListUseCase: AddBookToListUseCase,
+    private val removeBookFromListUseCase: RemoveBookFromListUseCase,
     private val observeBookDeadlineUseCase: ObserveBookDeadlineUseCase,
     private val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     private val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
@@ -66,6 +72,9 @@ class BookDetailScreenScreenModel(
         markBookAsReadUseCase = markBookAsReadUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         setEditionAsOwnedUseCase = setEditionAsOwnedUseCase,
+        getAllUserListsUseCase = getAllUserListsUseCase,
+        addBookToListUseCase = addBookToListUseCase,
+        removeBookFromListUseCase = removeBookFromListUseCase,
         observeBookDeadlineUseCase = observeBookDeadlineUseCase,
         setBookDeadlineUseCase = setBookDeadlineUseCase,
         clearBookDeadlineUseCase = clearBookDeadlineUseCase,

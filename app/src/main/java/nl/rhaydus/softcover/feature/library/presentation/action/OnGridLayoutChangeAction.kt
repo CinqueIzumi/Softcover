@@ -18,7 +18,7 @@ class OnGridLayoutChangeAction(
         scope.setState { it.copy(isLayoutMenuExpanded = false) }
 
         dependencies.setLibraryGridLayoutUseCase(newLayout = newLayout).onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
     }
 }

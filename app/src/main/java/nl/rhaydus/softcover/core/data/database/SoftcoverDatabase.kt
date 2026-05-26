@@ -6,20 +6,25 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import nl.rhaydus.softcover.feature.books.data.dao.BookDao
-import nl.rhaydus.softcover.feature.books.data.model.AuthorEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookAuthorCrossRef
-import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookEditionView
-import nl.rhaydus.softcover.feature.books.data.model.BookEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookSeriesEntity
-import nl.rhaydus.softcover.feature.books.data.model.EditionAuthorCrossRef
-import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
-import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
-import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
-import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
+import nl.rhaydus.softcover.core.data.database.dao.BookDao
+import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
+import nl.rhaydus.softcover.core.data.database.model.BookAuthorCrossRef
+import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
+import nl.rhaydus.softcover.core.data.database.model.BookEditionView
+import nl.rhaydus.softcover.core.data.database.model.BookEntity
+import nl.rhaydus.softcover.core.data.database.model.BookListEntity
+import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
+import nl.rhaydus.softcover.core.data.database.model.BookTagCrossRef
+import nl.rhaydus.softcover.core.data.database.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
+import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.ShelfManualOrderEntity
+import nl.rhaydus.softcover.core.data.database.model.TagEntity
+import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
+import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
+import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingListWriteDao
 import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingProgressUpdateDao
+import nl.rhaydus.softcover.feature.connectivity.data.model.PendingListWriteEntity
 import nl.rhaydus.softcover.feature.connectivity.data.model.PendingProgressUpdateEntity
 import nl.rhaydus.softcover.feature.deadlines.data.dao.BookDeadlineDao
 import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
@@ -50,17 +55,21 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
         BookSeriesEntity::class,
         BookDeadlineEntity::class,
         PendingProgressUpdateEntity::class,
+        PendingListWriteEntity::class,
         DismissedContinueSeriesBookEntity::class,
         DismissedContinueSeriesEntity::class,
         PersonalReviewEntity::class,
         HighlightEntity::class,
         ReadingSessionEntity::class,
         ReadingLogEntryEntity::class,
+        TagEntity::class,
+        BookTagCrossRef::class,
+        ShelfManualOrderEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 25,
+    version = 30,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -68,6 +77,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDeadlineDao(): BookDeadlineDao
 
     abstract fun pendingProgressUpdateDao(): PendingProgressUpdateDao
+
+    abstract fun pendingListWriteDao(): PendingListWriteDao
 
     abstract fun dismissedContinueSeriesDao(): DismissedContinueSeriesDao
 
@@ -109,6 +120,11 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_22_23)
                 .addMigrations(MIGRATION_23_24)
                 .addMigrations(MIGRATION_24_25)
+                .addMigrations(MIGRATION_25_26)
+                .addMigrations(MIGRATION_26_27)
+                .addMigrations(MIGRATION_27_28)
+                .addMigrations(MIGRATION_28_29)
+                .addMigrations(MIGRATION_29_30)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -853,6 +869,106 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_progress_updates_userBookId_kind ON pending_progress_updates(userBookId, kind)"
                 )
+            }
+        }
+
+        private val MIGRATION_26_27 = object : Migration(26, 27) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS shelf_manual_order (
+                            statusCode INTEGER NOT NULL,
+                            bookId INTEGER NOT NULL,
+                            position INTEGER NOT NULL,
+                            PRIMARY KEY(statusCode, bookId)
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_shelf_manual_order_statusCode ON shelf_manual_order(statusCode)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_shelf_manual_order_bookId ON shelf_manual_order(bookId)")
+            }
+        }
+
+        private val MIGRATION_28_29 = object : Migration(28, 29) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE book_lists ADD COLUMN ranked INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_29_30 = object : Migration(29, 30) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS pending_list_writes (
+                            localId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            kind TEXT NOT NULL,
+                            listId INTEGER,
+                            listName TEXT,
+                            bookId INTEGER,
+                            editionId INTEGER,
+                            listBookId INTEGER,
+                            startPosition INTEGER,
+                            orderedListBookIdsCsv TEXT,
+                            enqueuedAt TEXT NOT NULL,
+                            attempts INTEGER NOT NULL DEFAULT 0
+                        )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_27_28 = object : Migration(27, 28) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE book_editions ADD COLUMN isbn13 TEXT DEFAULT NULL")
+
+                db.execSQL("DROP VIEW IF EXISTS book_edition_view")
+                db.execSQL(
+                    """
+                        CREATE VIEW `book_edition_view` AS SELECT
+                                edition.*,
+                                EXISTS(
+                                    SELECT 1
+                                    FROM list_books lb
+                                    JOIN book_lists bl ON bl.id = lb.listId
+                                    WHERE bl.slug = 'owned'
+                                    AND (
+                                        lb.editionId = edition.id
+                                        OR lb.editionId = edition.canonicalId
+                                        OR lb.editionId IN (
+                                            SELECT sub.id FROM book_editions sub
+                                            WHERE sub.canonicalId = edition.id
+                                        )
+                                    )
+                                ) AS isOwned
+                            FROM book_editions edition
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_25_26 = object : Migration(25, 26) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS tags (
+                            id INTEGER NOT NULL PRIMARY KEY,
+                            name TEXT NOT NULL
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_tag_cross_ref (
+                            bookId INTEGER NOT NULL,
+                            tagId INTEGER NOT NULL,
+                            PRIMARY KEY(bookId, tagId)
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_book_tag_cross_ref_tagId ON book_tag_cross_ref(tagId)")
             }
         }
     }

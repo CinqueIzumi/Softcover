@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.state.SplashState
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
@@ -20,7 +20,7 @@ import timber.log.Timber
 
 class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
-    private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
+    private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
 ) : ViewModel() {
@@ -72,22 +72,22 @@ class MainActivityViewModel(
         val backgroundScope = MainScope()
 
         backgroundScope.launch {
-            refreshUserBooksUseCase(
+            refreshLibraryUseCase(
                 scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
             ).onFailure {
-                Timber.e("-=- $it")
+                Timber.e("$it")
             }
         }
 
         backgroundScope.launch {
-            refreshUserBooksUseCase(scope = RefreshScope.All).onFailure {
-                Timber.e("-=- $it")
+            refreshLibraryUseCase(scope = RefreshScope.All).onFailure {
+                Timber.e("$it")
             }
         }
 
         backgroundScope.launch {
             refreshUserProfileDataUseCase().onFailure {
-                Timber.e("-=- $it")
+                Timber.e("$it")
             }
         }
     }

@@ -17,7 +17,7 @@ class OnMarkBookAsWantToReadClickAction(private val book: Book) : BookDetailActi
 
         val job = dependencies.launch {
             dependencies.markBookAsWantToReadUseCase(book = book).onFailure { error ->
-                Timber.e("-=- $error")
+                Timber.e("$error")
 
                 scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
             }

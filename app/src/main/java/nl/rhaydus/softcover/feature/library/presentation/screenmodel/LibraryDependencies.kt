@@ -3,11 +3,20 @@ package nl.rhaydus.softcover.feature.library.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedBooksByStatusUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.ReorderListBooksUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.SetListRankedUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
@@ -20,7 +29,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortUseCas
 class LibraryDependencies(
     val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,
     val getSortedBooksByStatusUseCase: GetSortedBooksByStatusUseCase,
-    val refreshUserBooksUseCase: RefreshUserBooksUseCase,
+    val refreshLibraryUseCase: RefreshLibraryUseCase,
     val getAllUserListsUseCase: GetAllUserListsUseCase,
     val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
     val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
@@ -31,6 +40,16 @@ class LibraryDependencies(
     val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
     val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
+    val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
+    val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
+    val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    val reorderShelfBooksUseCase: ReorderShelfBooksUseCase,
+    val addBookToListUseCase: AddBookToListUseCase,
+    val removeBookFromListUseCase: RemoveBookFromListUseCase,
+    val reorderListBooksUseCase: ReorderListBooksUseCase,
+    val setListRankedUseCase: SetListRankedUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
+    val defaultDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

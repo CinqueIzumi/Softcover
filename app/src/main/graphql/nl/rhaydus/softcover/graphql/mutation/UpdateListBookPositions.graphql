@@ -1,0 +1,16 @@
+mutation UpdateListBookPositions(
+    $listId: Int!,
+    $clearedPositions: [Int!]!,
+    $updates: [list_books_updates!]!
+) {
+    clear: update_list_books(
+        where: { list_id: { _eq: $listId }, position: { _in: $clearedPositions } },
+        _set: { position: null }
+    ) {
+        affected_rows
+    }
+
+    apply: update_list_books_many(updates: $updates) {
+        affected_rows
+    }
+}

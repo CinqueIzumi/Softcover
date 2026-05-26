@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsR
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.books.domain.usecase.ShelfMutationOutcome
 import timber.log.Timber
 
 class OnMarkBookAsReadClickAction(
@@ -20,9 +21,15 @@ class OnMarkBookAsReadClickAction(
 
         val job = dependencies.launch {
             dependencies.markBookAsReadUseCase(book = book)
-                .onSuccess { scope.sendEvent(BookMarkedAsReadEvent()) }
+                .onSuccess { outcome ->
+                    // Celebrate only on a real transition — re-tapping the active "Read" chip
+                    // must not replay the burst or rewrite finished_at.
+                    if (outcome == ShelfMutationOutcome.Applied) {
+                        scope.sendEvent(BookMarkedAsReadEvent())
+                    }
+                }
                 .onFailure { error ->
-                    Timber.e("-=- $error")
+                    Timber.e("$error")
 
                     scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
                 }

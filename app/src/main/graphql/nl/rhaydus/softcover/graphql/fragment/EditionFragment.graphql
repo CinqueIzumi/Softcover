@@ -4,6 +4,7 @@ fragment EditionFragment on editions {
     title
     book_id
     isbn_10
+    isbn_13
     pages
     audio_seconds
     publisher {

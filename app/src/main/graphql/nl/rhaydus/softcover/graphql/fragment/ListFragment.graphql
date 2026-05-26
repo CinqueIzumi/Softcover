@@ -2,6 +2,7 @@ fragment ListFragment on lists {
     id
     name
     slug
+    ranked
 
     list_books {
         ...ListBookFragment

@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDeadlineC
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailInitializer
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.DateStyleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.UserBooksFlowCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.flows.UserListsFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import org.koin.dsl.bind
@@ -18,6 +19,7 @@ val bookDetailModule = module {
     factory { UserBooksFlowCollector() } bind BookDetailInitializer::class
     factory { DateStyleCollector() } bind BookDetailInitializer::class
     factory { BookDeadlineCollector() } bind BookDetailInitializer::class
+    factory { UserListsFlowCollector() } bind BookDetailInitializer::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -48,6 +50,9 @@ val bookDetailModule = module {
             appDispatchers = get(),
             getDateStyleAsFlowUseCase = get(),
             setEditionAsOwnedUseCase = get(),
+            getAllUserListsUseCase = get(),
+            addBookToListUseCase = get(),
+            removeBookFromListUseCase = get(),
             observeBookDeadlineUseCase = get(),
             setBookDeadlineUseCase = get(),
             clearBookDeadlineUseCase = get(),

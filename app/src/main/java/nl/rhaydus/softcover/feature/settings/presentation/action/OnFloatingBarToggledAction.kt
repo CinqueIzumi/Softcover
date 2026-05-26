@@ -19,7 +19,7 @@ class OnFloatingBarToggledAction(val newValue: Boolean) : SettingsAction {
         }
 
         dependencies.setBottomBarStyleUseCase(newStyle = newStyle).onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
     }
 }

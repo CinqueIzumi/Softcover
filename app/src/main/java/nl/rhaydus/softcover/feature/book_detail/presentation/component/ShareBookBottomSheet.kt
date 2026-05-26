@@ -128,7 +128,7 @@ fun ShareBookBottomSheet(
                                     bookTitle = book.title,
                                 )
                             }.onFailure {
-                                Timber.e("-=- $it")
+                                Timber.e("$it")
                             }
 
                             isSharing = false
@@ -155,7 +155,7 @@ fun ShareBookBottomSheet(
                         val saved = runCatching {
                             capture.saveToGallery(displayName = book.title)
                         }.onFailure {
-                            Timber.e("-=- $it")
+                            Timber.e("$it")
                         }.getOrNull()
 
                         val message = if (saved is SaveOutcome.Saved) {

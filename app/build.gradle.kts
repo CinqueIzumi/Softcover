@@ -17,8 +17,8 @@ android {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
         targetSdk = 36
-        versionCode = 27
-        versionName = "2.2.1"
+        versionCode = 28
+        versionName = "2.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -111,6 +111,9 @@ dependencies {
     // WorkManager for scheduled notifications
     implementation(libs.androidx.work.runtime.ktx)
 
+    // Drag-to-reorder for LazyGrid / LazyColumn
+    implementation(libs.reorderable)
+
     // Unit test dependencies
     testImplementation(libs.junit.params)
     testImplementation(libs.junit.engine)
@@ -138,6 +141,7 @@ apollo {
         mapScalar("timestamp", "kotlin.String")
         mapScalar("timestamptz", "kotlin.String")
         mapScalar("smallint", "kotlin.Int")
+        mapScalar("bigint", "kotlin.Long")
 
         codegenModels.set("responseBased")
         generateMethods.set(listOf("dataClass"))

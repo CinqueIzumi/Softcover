@@ -22,7 +22,7 @@ class UpdateBookProgress(
         }
 
         return if (finished) {
-            markBookAsReadUseCase(book = book)
+            markBookAsReadUseCase(book = book).map { }
         } else {
             updateBookProgressUseCase(
                 book = book,

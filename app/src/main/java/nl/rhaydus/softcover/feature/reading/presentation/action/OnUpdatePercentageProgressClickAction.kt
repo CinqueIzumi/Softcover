@@ -53,7 +53,7 @@ data class OnUpdatePercentageProgressClickAction(
                 newPage = newPage,
                 newSeconds = newSeconds,
             ).onFailure { error ->
-                Timber.e("-=- $error")
+                Timber.e("$error")
 
                 scope.setState {
                     it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)

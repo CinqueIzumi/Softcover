@@ -17,7 +17,7 @@ class TrendingBooksLoader : ReadingInitializer {
                 scope.setState { it.copy(trendingBooks = books) }
             }
             .onFailure {
-                Timber.e("-=- $it")
+                Timber.e("$it")
             }
     }
 }

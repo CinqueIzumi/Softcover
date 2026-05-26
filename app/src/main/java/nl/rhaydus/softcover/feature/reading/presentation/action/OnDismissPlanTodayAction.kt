@@ -15,7 +15,7 @@ class OnDismissPlanTodayAction(
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
         dependencies.dismissPlanTodayUseCase(bookId = bookId).onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
     }
 }

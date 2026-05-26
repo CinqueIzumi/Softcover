@@ -56,6 +56,7 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
+import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnListToggleAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReorderLibraryTabsAction
@@ -78,6 +79,7 @@ class LibraryVisibilitySettingsScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onNavigateBack = navigator::pop,
+            onCreateListClick = { navigator.push(CreateListScreen()) },
         )
     }
 
@@ -87,6 +89,7 @@ class LibraryVisibilitySettingsScreen : Screen {
         state: LibraryVisibilitySettingsUiState,
         runAction: (LibraryVisibilityAction) -> Unit,
         onNavigateBack: () -> Unit,
+        onCreateListClick: () -> Unit,
     ) {
         Scaffold(
             topBar = {
@@ -131,6 +134,16 @@ class LibraryVisibilitySettingsScreen : Screen {
                 ReorderableTabsGroup(
                     state = state,
                     runAction = runAction,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                SoftcoverButton(
+                    label = "Create custom list",
+                    style = ButtonStyle.OUTLINED,
+                    size = ButtonSize.S,
+                    onClick = onCreateListClick,
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

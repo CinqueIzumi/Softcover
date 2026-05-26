@@ -4,8 +4,8 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
@@ -26,7 +26,7 @@ class LibraryVisibilitySettingsScreenModel(
     private val setEnabledListIdsUseCase: SetEnabledListIdsUseCase,
     private val setLibraryTabOrderUseCase: SetLibraryTabOrderUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
-    private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
+    private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val applicationScope: ApplicationScope,
     appDispatchers: AppDispatchers,
     flows: List<LibraryVisibilityInitializer>,
@@ -49,7 +49,7 @@ class LibraryVisibilitySettingsScreenModel(
         setEnabledListIdsUseCase = setEnabledListIdsUseCase,
         setLibraryTabOrderUseCase = setLibraryTabOrderUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
-        refreshUserBooksUseCase = refreshUserBooksUseCase,
+        refreshLibraryUseCase = refreshLibraryUseCase,
         applicationScope = applicationScope,
         mainDispatcher = appDispatchers.main,
         coroutineScope = screenModelScope,

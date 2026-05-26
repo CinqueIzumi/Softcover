@@ -17,21 +17,22 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
-import nl.rhaydus.softcover.feature.books.data.model.AuthorEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookEditionEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookEditionView
-import nl.rhaydus.softcover.feature.books.data.model.BookEditionWithAuthors
-import nl.rhaydus.softcover.feature.books.data.model.BookEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookFullEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListEntity
-import nl.rhaydus.softcover.feature.books.data.model.BookListWithBooks
-import nl.rhaydus.softcover.feature.books.data.model.BookSeriesEntity
-import nl.rhaydus.softcover.feature.books.data.model.ListBookEntity
-import nl.rhaydus.softcover.feature.books.data.model.ListBookFull
-import nl.rhaydus.softcover.feature.books.data.model.ReadingJournalEntity
-import nl.rhaydus.softcover.feature.books.data.model.UserBookEntity
-import nl.rhaydus.softcover.feature.books.data.model.UserBookReadEntity
-import nl.rhaydus.softcover.feature.books.data.model.UserBookWithJournals
+import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
+import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
+import nl.rhaydus.softcover.core.data.database.model.BookEditionView
+import nl.rhaydus.softcover.core.data.database.model.BookEditionWithAuthors
+import nl.rhaydus.softcover.core.data.database.model.BookEntity
+import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
+import nl.rhaydus.softcover.core.data.database.model.BookListEntity
+import nl.rhaydus.softcover.core.data.database.model.BookListWithBooks
+import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
+import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
+import nl.rhaydus.softcover.core.data.database.model.ListBookFull
+import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.TagEntity
+import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
+import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
+import nl.rhaydus.softcover.core.data.database.model.UserBookWithJournals
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import nl.rhaydus.softcover.fragment.BookListFragment
 import nl.rhaydus.softcover.fragment.EditionDetailFragment
@@ -77,6 +78,7 @@ class BookMapperTest {
         url: String? = "https://example.com/cover.jpg",
         localImagePath: String? = null,
         isbn10: String? = "1234567890",
+        isbn13: String? = null,
         pages: Int? = 300,
         audioSeconds: Int? = null,
         authors: List<Author> = emptyList(),
@@ -116,6 +118,10 @@ class BookMapperTest {
         every {
             this@mockk.isbn10
         } returns isbn10
+
+        every {
+            this@mockk.isbn13
+        } returns isbn13
 
         every {
             this@mockk.pages
@@ -445,6 +451,7 @@ class BookMapperTest {
         url: String? = "https://example.com/cover.jpg",
         localImagePath: String? = null,
         isbn10: String? = "1234567890",
+        isbn13: String? = null,
         pages: Int? = 300,
         audioSeconds: Int? = null,
         releaseYear: Int = 2020,
@@ -459,6 +466,7 @@ class BookMapperTest {
         url = url,
         localImagePath = localImagePath,
         isbn10 = isbn10,
+        isbn13 = isbn13,
         pages = pages,
         audioSeconds = audioSeconds,
         releaseYear = releaseYear,
@@ -596,12 +604,14 @@ class BookMapperTest {
         series: BookSeriesEntity? = null,
         editions: List<BookEditionWithAuthors> = emptyList(),
         userBookWithJournals: UserBookWithJournals? = null,
+        tags: List<TagEntity> = emptyList(),
     ): BookFullEntity = BookFullEntity(
         book = book,
         bookAuthors = bookAuthors,
         series = series,
         editions = editions,
         userBookWithJournals = userBookWithJournals,
+        tags = tags,
     )
 
     private fun stubListBookEntity(
@@ -653,28 +663,6 @@ class BookMapperTest {
     // =========================================================
 
     @Nested
-    inner class BookListToEntity {
-
-        @Test
-        fun `maps all fields from BookList to BookListEntity`() {
-            // ----- Arrange -----
-            val bookList = stubBookList(
-                id = 20,
-                name = "My List",
-                slug = "my-list",
-            )
-
-            // ----- Act -----
-            val result = bookList.toEntity()
-
-            // ----- Assert -----
-            result.id shouldBe 20
-            result.name shouldBe "My List"
-            result.slug shouldBe "my-list"
-        }
-    }
-
-    @Nested
     inner class BookSeriesToEntity {
 
         @Test
@@ -693,54 +681,6 @@ class BookMapperTest {
             result.id shouldBe 5
             result.name shouldBe "Test Series"
             result.amountOfBooks shouldBe 3
-        }
-    }
-
-    @Nested
-    inner class ListBookToEntity {
-
-        @Test
-        fun `maps listId, bookId, editionId and listBookId directly from ListBook fields`() {
-            // ----- Arrange -----
-            val listBook = stubListBook(
-                listId = 20,
-                listBookId = 99,
-                bookId = 1,
-                editionId = 10,
-            )
-
-            // ----- Act -----
-            val result = listBook.toEntity()
-
-            // ----- Assert -----
-            result.listId shouldBe 20
-            result.bookId shouldBe 1
-            result.editionId shouldBe 10
-            result.listBookId shouldBe 99
-        }
-
-        @Test
-        fun `propagates addedAt when present`() {
-            // ----- Arrange -----
-            val listBook = stubListBook(addedAt = "2024-06-01")
-
-            // ----- Act -----
-            val result = listBook.toEntity()
-
-            // ----- Assert -----
-            result.addedAt shouldBe "2024-06-01"
-        }
-
-        @Test
-        fun `propagates null addedAt as null`() {
-            // ----- Arrange -----
-            val listBook = stubListBook(addedAt = null)
-
-            // ----- Act -----
-            val result = listBook.toEntity()
-
-            // ----- Assert -----
-            result.addedAt shouldBe null
         }
     }
 
@@ -1078,6 +1018,7 @@ class BookMapperTest {
                 title = "Edition Title",
                 url = "https://example.com/cover.jpg",
                 isbn10 = "1234567890",
+                isbn13 = null,
                 pages = 300,
                 releaseYear = 2020,
                 format = "Paperback",
@@ -1131,6 +1072,7 @@ class BookMapperTest {
                 title = null,
                 url = null,
                 isbn10 = null,
+                isbn13 = null,
                 pages = null,
             )
 
@@ -1623,6 +1565,21 @@ class BookMapperTest {
             // ----- Assert -----
             result.audioSeconds shouldBe null
         }
+
+        @Test
+        fun `maps non-null isbn13 from BookEditionEntity to BookEdition`() {
+            // ----- Arrange -----
+            val entity = stubBookEditionEntity(isbn13 = "9780451524935")
+
+            // ----- Act -----
+            val result = entity.toModel(
+                authors = emptyList(),
+                owned = false,
+            )
+
+            // ----- Assert -----
+            result.isbn13 shouldBe "9780451524935"
+        }
     }
 
     @Nested
@@ -1835,537 +1792,6 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.event shouldBe ""
-        }
-    }
-
-    @Nested
-    inner class ListBookFullToModel {
-
-        @Test
-        fun `maps listId, listBookId, bookId and editionId from ListBookEntity`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(
-                listId = 20,
-                listBookId = 99,
-                bookId = 1,
-                editionId = 10,
-            )
-            val editionEntity = stubBookEditionEntity(
-                id = 10,
-                bookId = 1,
-            )
-            val editionView = stubBookEditionView(
-                entity = editionEntity,
-                isOwned = false,
-            )
-            val editionWithAuthors = stubBookEditionWithAuthors(
-                editionView = editionView,
-                authors = emptyList(),
-            )
-            val bookFullEntity = stubBookFullEntity(book = stubBookEntity(id = 1))
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = bookFullEntity,
-                edition = editionWithAuthors,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.listId shouldBe 20
-            result.listBookId shouldBe 99
-            result.bookId shouldBe 1
-            result.editionId shouldBe 10
-        }
-
-        @Test
-        fun `populates book and edition from Room join data`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = 10)
-            val editionEntity = stubBookEditionEntity(id = 10, bookId = 1)
-            val editionView = stubBookEditionView(entity = editionEntity, isOwned = false)
-            val editionWithAuthors = stubBookEditionWithAuthors(editionView = editionView)
-            val bookFullEntity = stubBookFullEntity(
-                book = stubBookEntity(id = 1),
-                editions = listOf(editionWithAuthors),
-            )
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = bookFullEntity,
-                edition = editionWithAuthors,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.book shouldBe bookFullEntity.toModel()
-            result.edition?.id shouldBe 10
-        }
-
-        @Test
-        fun `maps edition owned flag from BookEditionView isOwned`() {
-            // ----- Arrange -----
-            val editionEntity = stubBookEditionEntity(id = 10)
-            val editionView = stubBookEditionView(
-                entity = editionEntity,
-                isOwned = true,
-            )
-            val editionWithAuthors = stubBookEditionWithAuthors(editionView = editionView)
-            val listBookFull = stubListBookFull(edition = editionWithAuthors)
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.edition?.owned shouldBe true
-        }
-
-        @Test
-        fun `maps edition owned as false when isOwned is false`() {
-            // ----- Arrange -----
-            val editionEntity = stubBookEditionEntity(id = 10)
-            val editionView = stubBookEditionView(
-                entity = editionEntity,
-                isOwned = false,
-            )
-            val editionWithAuthors = stubBookEditionWithAuthors(editionView = editionView)
-            val listBookFull = stubListBookFull(edition = editionWithAuthors)
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.edition?.owned shouldBe false
-        }
-
-        @Test
-        fun `copies addedAt from ListBookEntity`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(addedAt = "2024-07-20")
-            val listBookFull = stubListBookFull(listBook = listBookEntity)
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.addedAt shouldBe "2024-07-20"
-        }
-
-        @Test
-        fun `copies null addedAt from ListBookEntity`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(addedAt = null)
-            val listBookFull = stubListBookFull(listBook = listBookEntity)
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.addedAt shouldBe null
-        }
-
-        @Test
-        fun `returns null book when book relation is null`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(listBookId = 42)
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = null,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.book shouldBe null
-            result.listBookId shouldBe 42
-        }
-
-        @Test
-        fun `returns null edition when edition relation is null`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(listBookId = 43)
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                edition = null,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.edition shouldBe null
-            result.listBookId shouldBe 43
-        }
-
-        @Test
-        fun `prefers userBook editionId over defaultEditionId when edition exists in book editions`() {
-            // ----- Arrange -----
-            val userBookEditionId = 55
-            val defaultEditionId = 99
-            val topLevelEditionId = 10
-
-            val userBookEditionEntity = stubBookEditionEntity(id = userBookEditionId, bookId = 1)
-            val userBookEditionView = stubBookEditionView(entity = userBookEditionEntity, isOwned = false)
-            val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
-
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
-            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
-
-            val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
-            val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
-
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = defaultEditionId)
-            val bookFullEntity = stubBookFullEntity(
-                book = bookEntity,
-                editions = listOf(userBookEditionWithAuthors),
-                userBookWithJournals = userBookWithJournals,
-            )
-
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = bookFullEntity,
-                edition = topLevelEditionWithAuthors,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.edition?.id shouldBe userBookEditionId
-            result.editionId shouldBe userBookEditionId
-        }
-
-        @Test
-        fun `falls back to defaultEditionId when no userBook editionId but matching edition exists`() {
-            // ----- Arrange -----
-            val defaultEditionId = 77
-            val topLevelEditionId = 10
-
-            val defaultEditionEntity = stubBookEditionEntity(id = defaultEditionId, bookId = 1)
-            val defaultEditionView = stubBookEditionView(entity = defaultEditionEntity, isOwned = false)
-            val defaultEditionWithAuthors = stubBookEditionWithAuthors(editionView = defaultEditionView)
-
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
-            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
-
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = defaultEditionId)
-            val bookFullEntity = stubBookFullEntity(
-                book = bookEntity,
-                editions = listOf(defaultEditionWithAuthors),
-                userBookWithJournals = null,
-            )
-
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = bookFullEntity,
-                edition = topLevelEditionWithAuthors,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.edition?.id shouldBe defaultEditionId
-            result.editionId shouldBe defaultEditionId
-        }
-
-        @Test
-        fun `falls back to top-level edition when preferred id has no matching entry in book editions`() {
-            // ----- Arrange -----
-            val topLevelEditionId = 10
-
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
-            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
-
-            // defaultEditionId 99 is not present in the editions list, triggering fallback
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = 99)
-            val bookFullEntity = stubBookFullEntity(
-                book = bookEntity,
-                editions = emptyList(),
-                userBookWithJournals = null,
-            )
-
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = bookFullEntity,
-                edition = topLevelEditionWithAuthors,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.edition?.id shouldBe topLevelEditionId
-            result.editionId shouldBe topLevelEditionId
-        }
-
-        @Test
-        fun `uses list_books edition_id when isOwnedList is true even if userBook has a different edition`() {
-            // ----- Arrange -----
-            val topLevelEditionId = 10
-            val userBookEditionId = 55
-
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
-            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
-
-            val userBookEditionEntity = stubBookEditionEntity(id = userBookEditionId, bookId = 1)
-            val userBookEditionView = stubBookEditionView(entity = userBookEditionEntity, isOwned = false)
-            val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
-
-            val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
-            val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
-
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = userBookEditionId)
-            val bookFullEntity = stubBookFullEntity(
-                book = bookEntity,
-                editions = listOf(topLevelEditionWithAuthors, userBookEditionWithAuthors),
-                userBookWithJournals = userBookWithJournals,
-            )
-
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = bookFullEntity,
-                edition = topLevelEditionWithAuthors,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = true)
-
-            // ----- Assert -----
-            result.edition?.id shouldBe topLevelEditionId
-            result.editionId shouldBe topLevelEditionId
-        }
-
-        @Test
-        fun `uses list_books edition_id when isOwnedList is true even if defaultEditionId differs`() {
-            // ----- Arrange -----
-            val topLevelEditionId = 10
-            val defaultEditionId = 77
-
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
-            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
-
-            val defaultEditionEntity = stubBookEditionEntity(id = defaultEditionId, bookId = 1)
-            val defaultEditionView = stubBookEditionView(entity = defaultEditionEntity, isOwned = false)
-            val defaultEditionWithAuthors = stubBookEditionWithAuthors(editionView = defaultEditionView)
-
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = defaultEditionId)
-            val bookFullEntity = stubBookFullEntity(
-                book = bookEntity,
-                editions = listOf(topLevelEditionWithAuthors, defaultEditionWithAuthors),
-                userBookWithJournals = null,
-            )
-
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = bookFullEntity,
-                edition = topLevelEditionWithAuthors,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = true)
-
-            // ----- Assert -----
-            result.edition?.id shouldBe topLevelEditionId
-            result.editionId shouldBe topLevelEditionId
-        }
-    }
-
-    @Nested
-    inner class BookListWithBooksToModel {
-
-        @Test
-        fun `maps id, name and slug from BookListEntity`() {
-            // ----- Arrange -----
-            val bookListEntity = stubBookListEntity(
-                id = 20,
-                name = "My List",
-                slug = "my-list",
-            )
-            val wrapper = stubBookListWithBooks(
-                bookList = bookListEntity,
-                listBooks = emptyList(),
-            )
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.id shouldBe 20
-            result.name shouldBe "My List"
-            result.slug shouldBe "my-list"
-        }
-
-        @Test
-        fun `maps empty listBooks to empty books list`() {
-            // ----- Arrange -----
-            val wrapper = stubBookListWithBooks(listBooks = emptyList())
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.books shouldBe emptyList()
-        }
-
-        @Test
-        fun `maps each ListBookFull to a ListBook model`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(
-                listId = 20,
-                listBookId = 99,
-            )
-            val listBookFull = stubListBookFull(listBook = listBookEntity)
-            val wrapper = stubBookListWithBooks(listBooks = listOf(listBookFull))
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.books.size shouldBe 1
-            result.books[0].listId shouldBe 20
-            result.books[0].listBookId shouldBe 99
-        }
-
-        @Test
-        fun `sorts list books by addedAt descending`() {
-            // ----- Arrange -----
-            val older = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 1, addedAt = "2024-01-01"),
-            )
-            val newer = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 2, addedAt = "2024-06-01"),
-            )
-            val wrapper = stubBookListWithBooks(listBooks = listOf(older, newer))
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.books[0].listBookId shouldBe 2
-            result.books[1].listBookId shouldBe 1
-        }
-
-        @Test
-        fun `places null addedAt entries last`() {
-            // ----- Arrange -----
-            val withDate = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 1, addedAt = "2024-01-01"),
-            )
-            val nullDate = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 2, addedAt = null),
-            )
-            val wrapper = stubBookListWithBooks(listBooks = listOf(nullDate, withDate))
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.books[0].listBookId shouldBe 1
-            result.books[1].listBookId shouldBe 2
-        }
-
-        @Test
-        fun `uses listBookId descending as tiebreaker when addedAt values are equal`() {
-            // ----- Arrange -----
-            val lowerIdEntry = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 10, addedAt = "2024-03-01"),
-            )
-            val higherIdEntry = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 20, addedAt = "2024-03-01"),
-            )
-            val wrapper = stubBookListWithBooks(listBooks = listOf(lowerIdEntry, higherIdEntry))
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.books[0].listBookId shouldBe 20
-            result.books[1].listBookId shouldBe 10
-        }
-
-        @Test
-        fun `drops list entries whose book or edition relation is null`() {
-            // ----- Arrange -----
-            val fullyHydrated = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 1),
-            )
-            val nullBook = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 2),
-                book = null,
-            )
-            val nullEdition = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 3),
-                edition = null,
-            )
-
-            val wrapper = stubBookListWithBooks(
-                listBooks = listOf(fullyHydrated, nullBook, nullEdition),
-            )
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.books.size shouldBe 1
-            result.books[0].listBookId shouldBe 1
-        }
-
-        @Test
-        fun `preserves list_books edition_id for owned slug even when userBook edition differs`() {
-            // ----- Arrange -----
-            val topLevelEditionId = 10
-            val userBookEditionId = 55
-
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
-            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
-
-            val userBookEditionEntity = stubBookEditionEntity(id = userBookEditionId, bookId = 1)
-            val userBookEditionView = stubBookEditionView(entity = userBookEditionEntity, isOwned = false)
-            val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
-
-            val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
-            val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
-
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = userBookEditionId)
-            val bookFullEntity = stubBookFullEntity(
-                book = bookEntity,
-                editions = listOf(topLevelEditionWithAuthors, userBookEditionWithAuthors),
-                userBookWithJournals = userBookWithJournals,
-            )
-
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = bookFullEntity,
-                edition = topLevelEditionWithAuthors,
-            )
-
-            val bookListEntity = stubBookListEntity(slug = "owned")
-            val wrapper = stubBookListWithBooks(
-                bookList = bookListEntity,
-                listBooks = listOf(listBookFull),
-            )
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.books[0].editionId shouldBe topLevelEditionId
         }
     }
 
@@ -2684,6 +2110,38 @@ class BookMapperTest {
             result.editions[0].id shouldBe 10
             result.editions[0].owned shouldBe true
         }
+
+        @Test
+        fun `tags are mapped from TagEntity rows to Tag domain objects`() {
+            // ----- Arrange -----
+            val tagEntities = listOf(
+                TagEntity(id = 1, name = "Fiction"),
+                TagEntity(id = 2, name = "Sci-Fi"),
+            )
+            val entity = stubBookFullEntity(tags = tagEntities)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.tags.size shouldBe 2
+            result.tags[0].id shouldBe 1
+            result.tags[0].name shouldBe "Fiction"
+            result.tags[1].id shouldBe 2
+            result.tags[1].name shouldBe "Sci-Fi"
+        }
+
+        @Test
+        fun `tags is empty when no TagEntity rows are present`() {
+            // ----- Arrange -----
+            val entity = stubBookFullEntity(tags = emptyList())
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.tags shouldBe emptyList()
+        }
     }
 
     // =========================================================
@@ -2710,6 +2168,7 @@ class BookMapperTest {
                 every { title } returns "Edition Title"
                 every { book_id } returns 1
                 every { isbn_10 } returns "1234567890"
+                every { isbn_13 } returns null
                 every { pages } returns 300
                 every { this@mockk.publisher } returns publisher
                 every { this@mockk.image } returns image
@@ -2746,6 +2205,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2774,6 +2234,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2804,6 +2265,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { this@mockk.image } returns image
@@ -2833,6 +2295,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2859,6 +2322,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2889,6 +2353,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2915,6 +2380,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2941,6 +2407,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2967,6 +2434,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -2993,6 +2461,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3019,6 +2488,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3045,6 +2515,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3071,6 +2542,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3097,6 +2569,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3123,6 +2596,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3149,6 +2623,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3164,6 +2639,33 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.releaseDate shouldBe null
+        }
+
+        @Test
+        fun `maps non-null isbn_13 from EditionFragment to BookEdition`() {
+            // ----- Arrange -----
+            val fragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 1
+                every { isbn_10 } returns null
+                every { isbn_13 } returns "9780451524935"
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { release_date } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+            }
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.isbn13 shouldBe "9780451524935"
         }
     }
 
@@ -3188,6 +2690,7 @@ class BookMapperTest {
                 every { title } returns "Animal Farm"
                 every { book_id } returns 2
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns 112
                 every { publisher } returns null
                 every { image } returns null
@@ -3221,6 +2724,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 2
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3248,6 +2752,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 2
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3275,6 +2780,7 @@ class BookMapperTest {
                 every { title } returns "1984"
                 every { book_id } returns 3
                 every { isbn_10 } returns "0451524934"
+                every { isbn_13 } returns null
                 every { pages } returns 328
                 every { publisher } returns null
                 every { image } returns null
@@ -3308,6 +2814,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 2
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3335,6 +2842,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3350,93 +2858,6 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.localImagePath shouldBe null
-        }
-    }
-
-    @Nested
-    inner class ListBookFragmentToListBook {
-
-        private fun stubListBookFragment(
-            id: Int = 99,
-            listId: Int = 20,
-            bookId: Int = 1,
-            editionId: Int? = 10,
-            createdAt: String? = null,
-        ): nl.rhaydus.softcover.fragment.ListBookFragment = mockk {
-            every { this@mockk.id } returns id
-            every { list_id } returns listId
-            every { book_id } returns bookId
-            every { edition_id } returns editionId
-            every { created_at } returns createdAt
-        }
-
-        @Test
-        fun `returns null when edition_id is null`() {
-            // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = null)
-
-            // ----- Act -----
-            val result = fragment.toListBook()
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `returns ids-only ListBook when edition_id is present`() {
-            // ----- Arrange -----
-            val fragment = stubListBookFragment(
-                id = 99,
-                listId = 20,
-                bookId = 1,
-                editionId = 10,
-            )
-
-            // ----- Act -----
-            val result = fragment.toListBook()
-
-            // ----- Assert -----
-            result?.listBookId shouldBe 99
-            result?.listId shouldBe 20
-            result?.bookId shouldBe 1
-            result?.editionId shouldBe 10
-        }
-
-        @Test
-        fun `book and edition are null on the GraphQL path`() {
-            // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = 10)
-
-            // ----- Act -----
-            val result = fragment.toListBook()
-
-            // ----- Assert -----
-            result?.book shouldBe null
-            result?.edition shouldBe null
-        }
-
-        @Test
-        fun `propagates created_at into addedAt`() {
-            // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = 10, createdAt = "2024-03-15")
-
-            // ----- Act -----
-            val result = fragment.toListBook()
-
-            // ----- Assert -----
-            result?.addedAt shouldBe "2024-03-15"
-        }
-
-        @Test
-        fun `propagates null created_at as null addedAt`() {
-            // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = 10, createdAt = null)
-
-            // ----- Act -----
-            val result = fragment.toListBook()
-
-            // ----- Assert -----
-            result?.addedAt shouldBe null
         }
     }
 
@@ -3529,6 +2950,7 @@ class BookMapperTest {
                 every { title } returns "My Edition"
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3613,6 +3035,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3691,6 +3114,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3773,6 +3197,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3855,6 +3280,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -3936,6 +3362,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 999 // differs from parent book id
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -4017,6 +3444,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 100
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -4290,6 +3718,7 @@ class BookMapperTest {
                 every { title } returns "Hardcover Edition"
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns 400
                 every { publisher } returns null
                 every { image } returns null
@@ -4350,6 +3779,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -4406,6 +3836,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -4462,6 +3893,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -4517,6 +3949,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 999 // differs from parent book id
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -4570,6 +4003,7 @@ class BookMapperTest {
                 every { title } returns null
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null
@@ -4626,6 +4060,7 @@ class BookMapperTest {
                 url = null,
                 localImagePath = null,
                 isbn10 = null,
+                isbn13 = null,
                 pages = null,
                 audioSeconds = 3600,
                 authors = emptyList(),
@@ -4650,6 +4085,7 @@ class BookMapperTest {
                 url = null,
                 localImagePath = null,
                 isbn10 = null,
+                isbn13 = null,
                 pages = null,
                 audioSeconds = 0,
                 authors = emptyList(),
@@ -4674,6 +4110,7 @@ class BookMapperTest {
                 url = null,
                 localImagePath = null,
                 isbn10 = null,
+                isbn13 = null,
                 pages = null,
                 audioSeconds = null,
                 authors = emptyList(),
@@ -4703,6 +4140,7 @@ class BookMapperTest {
                 every { title } returns "Title"
                 every { book_id } returns 1
                 every { isbn_10 } returns null
+                every { isbn_13 } returns null
                 every { pages } returns null
                 every { publisher } returns null
                 every { image } returns null

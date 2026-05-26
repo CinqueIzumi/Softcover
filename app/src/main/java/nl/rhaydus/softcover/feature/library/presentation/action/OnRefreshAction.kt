@@ -20,8 +20,8 @@ class OnRefreshAction : LibraryAction {
 
         scope.setState { it.copy(isLoading = true) }
 
-        dependencies.refreshUserBooksUseCase(scope = refreshScope).onFailure {
-            Timber.e("-=- $it")
+        dependencies.refreshLibraryUseCase(scope = refreshScope).onFailure {
+            Timber.e("$it")
         }
 
         scope.setState { it.copy(isLoading = false) }

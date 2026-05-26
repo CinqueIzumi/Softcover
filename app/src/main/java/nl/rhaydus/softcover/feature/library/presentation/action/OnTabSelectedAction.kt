@@ -13,6 +13,19 @@ class OnTabSelectedAction(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        scope.setState { it.copy(selectedTabId = tabId) }
+        // Switching tabs collapses selection mode — selection is anchored to the tab the user
+        // long-pressed on, and silently carrying it across tabs (each of which has its own visible
+        // set) makes the count subtitle lie.
+        scope.setState {
+            it.copy(
+                selectedTabId = tabId,
+                selectionMode = false,
+                selectedBookIds = emptySet(),
+                isBulkMoveMenuExpanded = false,
+                isBulkRemoveDialogShown = false,
+                isBulkAddToListSheetShown = false,
+                listsBeingMutated = emptySet(),
+            )
+        }
     }
 }

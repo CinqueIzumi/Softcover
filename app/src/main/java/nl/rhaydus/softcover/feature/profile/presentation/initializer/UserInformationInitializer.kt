@@ -15,7 +15,7 @@ class UserInformationInitializer() : ProfileInitializer {
     ) {
         dependencies.launch {
             dependencies.refreshUserProfileDataUseCase()
-                .onFailure { Timber.e("-=- $it") }
+                .onFailure { Timber.e("$it") }
         }
 
         dependencies.observeUserProfileDataUseCase()

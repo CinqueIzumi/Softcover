@@ -11,7 +11,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -22,13 +22,13 @@ import org.junit.jupiter.api.Test
 
 class OnRefreshActionTest {
 
-    private lateinit var refreshUserBooksUseCase: RefreshUserBooksUseCase
+    private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     @BeforeEach
     fun setUp() {
-        refreshUserBooksUseCase = mockk()
+        refreshLibraryUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -41,8 +41,8 @@ class OnRefreshActionTest {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
-                mock.refreshUserBooksUseCase
-            } returns refreshUserBooksUseCase
+                mock.refreshLibraryUseCase
+            } returns refreshLibraryUseCase
 
             every {
                 mock.coroutineScope
@@ -67,7 +67,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()
@@ -88,7 +88,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.failure(RuntimeException("network error"))
 
             val action = OnRefreshAction()
@@ -104,12 +104,12 @@ class OnRefreshActionTest {
         }
 
         @Test
-        fun `invokes refreshUserBooksUseCase exactly once`() = runTest {
+        fun `invokes refreshLibraryUseCase exactly once`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()
@@ -122,7 +122,7 @@ class OnRefreshActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             }
         }
 
@@ -137,7 +137,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()
@@ -164,7 +164,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()

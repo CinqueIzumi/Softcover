@@ -49,7 +49,7 @@ class OnQueryChangeAction(
             delay(searchDelay)
 
             dependencies.searchForNameUseCase(name = scope.currentState.searchText).onFailure {
-                Timber.e("-=- $it")
+                Timber.e("$it")
             }
 
             scope.setState {

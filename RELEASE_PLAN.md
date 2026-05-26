@@ -40,17 +40,16 @@ The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; th
 ## 2.3.0 — Library filtering + book-detail metadata + custom-list MVP
 
 > **Release notes (Google Play):**
-> Filter your library by genre, format, year, ownership or rating — active chips show what's narrowing the view. Smart shelves surface "Owned & unread", "Started but stalled", "Quick wins" and more alongside your normal tabs. Create custom lists with a name and add or remove any book straight from its detail page. Drag any book to reorder it within any list — Want-to-Read, Currently Reading, Read, or any custom list. Long-press a cover to enter bulk-select mode and move books in batches. Reading rows briefly show your progress since last open. Book detail now lists publisher, imprint and ISBN, with quick links out to Bookshop.org, Amazon, library.org and author sites. List changes made while offline or during a Hardcover hiccup now retry automatically the next time the app starts or your connection returns.
+> Filter your library by genre, format, year, ownership or rating — active chips show what's narrowing the view. Create custom lists with a name and add or remove any book straight from its detail page. Drag any book to reorder it within any shelf or list — Want-to-Read, Currently Reading, Read, or any custom list. Long-press a cover to enter bulk-select mode and move a stack of books between shelves, into a list, or out of your library in one go. Book detail now lists publisher, imprint and ISBN, with quick links out to Bookshop.org, Amazon, library.org and author sites. List changes made while offline or during a Hardcover hiccup now retry automatically the next time the app starts or your connection returns.
 
 - **Step 2.2** — Library filter chips (M)
-- **Step 2.3** — Smart shelves as virtual tabs (M)
-- **Step 2.5** — Bulk select mode (M)
-- **Step 2.7** — Drag-to-reorder books within any library list (M) — long-press + drag on a row in any tab (Want-to-Read, Currently Reading, Read, custom lists). Custom-list reorders persist to Hardcover; built-in shelves stay local-only. Persisted as a manual sort mode per tab that coexists with Step 2.1's sort options.
-- **Step 2.9** — "Since last read" delta on Reading rows (S)
-- **Step 2.11** — Custom-list MVP: name-only creation + add/remove from book detail (M) — carved out of 5.3 + 5.5 and pulled forward. New `CreateList` + `AddListBook` mutations, name-only creation form, and an "Add to list" sheet on book detail. Rename/delete/reorder/share/curated discovery stay deferred to 2.6.0 (5.3); the bulk-select wiring + ink-fill chip animation stay deferred to 2.6.0 (5.5).
+- **Step 2.5** — Bulk select mode (M) — long-press to enter selection; bulk actions for move-to-shelf, add-to-list (the same `ChooseListsBottomSheet` book detail uses, now generalised to multi-book with tristate membership) and remove. Subsumes the bulk-select wiring originally scheduled for 5.5 in 2.6.0.
+- **Step 2.7** — Drag-to-reorder books within a custom list (M) — long-press + drag on a row in any custom list. Persists back to Hardcover via the list-position mutation; manual sort mode per list that coexists with Step 2.1's sort options.
+- **Step 2.11** — Custom-list MVP: name-only creation + add/remove from book detail (M) — carved out of 5.3 + 5.5 and pulled forward. New `CreateList` + `AddListBook` mutations, name-only creation form, and an "Add to list" sheet on book detail. Rename/delete/reorder/share/curated discovery stay deferred to 2.6.0 (5.3); the ink-fill chip animation polish stays deferred to 2.6.0 (5.5). The bulk-select wiring was pulled forward into 2.5 in this release.
 - **Step 2.12** — Persistent retry queue for list write mutations (S) — *deps: 2.7, 2.11 (same release)*. Narrow slice of 9.7 (offline mutation queue): Room-backed queue for `CreateList`, `AddListBook`, `RemoveListBook` and the custom-list reorder mutation, drained on app start and on network reconnect. Conflict UI and queueing for non-list mutations stay deferred to 9.7 in 3.2.0.
+- **Step 2.13** — Drag-to-reorder books within built-in shelves (S) — long-press + drag on Want-to-Read, Currently Reading, Read. Local-only (stored in Room) — Hardcover does not model a user-defined position on these shelves, so no server mutation and no retry-queue entry. Manual sort mode per shelf that coexists with Step 2.1's sort options. Reading-screen ordering is deferred to a later release.
 - **Step 4.4** — Publisher / imprint / ISBN inline (S)
-- **Step 4.5** — External links strip (S)
+- **Step 4.5** — External links strip (S) 
 
 ---
 
@@ -90,13 +89,13 @@ Closes out Phase 3 and tucks in two small Phase 4 wins.
 Three new screens in one release. They're independent enough to land together and they all unblock subsequent discovery work.
 
 > **Release notes (Google Play):**
-> Three new screens. Tap any author byline for a full Author page with their works, accolades and series. Tap a series eyebrow for the full reading-order checklist and aggregate progress. Browse and manage your custom lists as a first-class surface, with rename, delete, reorder, share and a curated/community discovery section on top of the create-and-add flow that landed in 2.3.0. Bulk-select in Library now flows into the Add to list sheet so you can move a stack of books at once. Finishing the last book in a series triggers a quiet celebration. Book detail gains genre and mood chips, plus audiobook finish-date predictions.
+> Three new screens. Tap any author byline for a full Author page with their works, accolades and series. Tap a series eyebrow for the full reading-order checklist and aggregate progress. Browse and manage your custom lists as a first-class surface, with rename, delete, reorder, share and a curated/community discovery section on top of the create-and-add flow that landed in 2.3.0. Finishing the last book in a series triggers a quiet celebration. Book detail gains genre and mood chips, plus audiobook finish-date predictions.
 
 - **Step 5.1** — Author detail screen (M)
 - **Step 5.2** — Series detail screen (M)
 - **Step 5.3** — Lists screen (M) — standalone Lists surface + rename, delete, reorder, share, privacy, header fields, curated/community discovery. Basic name-only creation already shipped in 2.11 (2.3.0).
 - **Step 5.4** — Series-completion cascade (S) — *deps: 5.2 (same release)*
-- **Step 5.5** — Add-to-list polish: bulk-select wiring + sheet anatomy (S) — *deps: 2.11 (2.3.0), 2.5 (2.3.0)*. Wires the existing book-detail sheet into the bulk-select bar and upgrades each row to the ink-fill chip animation. Core write path already shipped in 2.11.
+- **Step 5.5** — Add-to-list polish: ink-fill chip animation (S) — *deps: 2.11 (2.3.0)*. Upgrades each row of the `ChooseListsBottomSheet` to the ink-fill chip animation (A.1.5) with the `commit` haptic per toggle. Core write path shipped in 2.11; bulk-select wiring shipped with 2.5 in 2.3.0.
 - **Step 4.1** — Genre/mood chips (S)
 - **Step 4.6** — Audiobook predicted finish (S)
 
@@ -265,6 +264,8 @@ Closing release for the current roadmap horizon. Heavy on small polish; the two 
 
 ## Out-of-band / not scheduled
 
+- **Step 2.3** — Smart shelves as virtual tabs (M). Held back from 2.3.0; value not yet established. Re-evaluate once 2.3.0's filter chips (Step 2.2) have shipped — if users naturally reach for facet filtering to express "owned & unread" / "started but stalled" / "quick wins", smart shelves are redundant; if filtering alone doesn't surface those slices, bring this back into a future release.
+- **Step 2.9** — "Since last read" delta on Reading rows (S). Pulled out of 2.3.0. Re-evaluate before bringing back into the plan.
 - **Step 11.1** — Book club / group reading (L). Stretch; not on the roadmap horizon. Bring back into the release plan only when there's a deliberate decision to commit to the social arc beyond the friend feed.
 
 ---
@@ -278,7 +279,7 @@ Closing release for the current roadmap horizon. Heavy on small polish; the two 
   ├─> 2.5.0 (3.3, 3.4, 3.7) ─> 2.11.0 (7.12)
   └─> 2.8.0 (6.5) ───> 2.13.0 (8.11)
 
-2.3.0 (2.11, 2.5) ──> 2.6.0 (5.5)
+2.3.0 (2.11) ──> 2.6.0 (5.5)
 2.3.0 (2.12) ──> 3.2.0 (9.7)
 
 2.6.0 (5.1, 5.3) ──┬──> 2.7.0 (6.4)

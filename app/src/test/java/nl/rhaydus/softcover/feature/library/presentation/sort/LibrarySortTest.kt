@@ -31,6 +31,7 @@ class LibrarySortTest {
         url = null,
         localImagePath = null,
         isbn10 = null,
+        isbn13 = null,
         pages = pages,
         audioSeconds = null,
         authors = authors,
@@ -212,16 +213,142 @@ class LibrarySortTest {
         }
 
         @Nested
-        inner class UnchangedModes {
+        inner class DateAdded {
 
             @Test
-            fun `DATE_ADDED returns list unchanged`() {
+            fun `default direction DESCENDING sorts newest-added first`() {
+                val editions = listOf(
+                    buildEdition(id = 1),
+                    buildEdition(id = 2),
+                    buildEdition(id = 3),
+                )
+
+                val addedAt = mapOf(
+                    1 to "2025-01-15T10:00:00Z",
+                    2 to "2025-03-20T08:30:00Z",
+                    3 to "2024-11-05T14:00:00Z",
+                )
+
+                val result = editions.applyEditionSort(
+                    mode = LibrarySortMode.DATE_ADDED,
+                    addedAtByEditionId = addedAt,
+                )
+
+                result[0].id shouldBe 2
+                result[1].id shouldBe 1
+                result[2].id shouldBe 3
+            }
+
+            @Test
+            fun `ASCENDING direction sorts oldest-added first`() {
+                val editions = listOf(
+                    buildEdition(id = 1),
+                    buildEdition(id = 2),
+                    buildEdition(id = 3),
+                )
+
+                val addedAt = mapOf(
+                    1 to "2025-01-15T10:00:00Z",
+                    2 to "2025-03-20T08:30:00Z",
+                    3 to "2024-11-05T14:00:00Z",
+                )
+
+                val result = editions.applyEditionSort(
+                    mode = LibrarySortMode.DATE_ADDED,
+                    direction = SortDirection.ASCENDING,
+                    addedAtByEditionId = addedAt,
+                )
+
+                result[0].id shouldBe 3
+                result[1].id shouldBe 1
+                result[2].id shouldBe 2
+            }
+
+            @Test
+            fun `edition absent from map sorts last in ASCENDING`() {
+                val editions = listOf(
+                    buildEdition(id = 1),
+                    buildEdition(id = 2),
+                    buildEdition(id = 3),
+                )
+
+                val addedAt = mapOf(
+                    1 to "2025-01-15T10:00:00Z",
+                    2 to "2025-03-20T08:30:00Z",
+                )
+
+                val result = editions.applyEditionSort(
+                    mode = LibrarySortMode.DATE_ADDED,
+                    direction = SortDirection.ASCENDING,
+                    addedAtByEditionId = addedAt,
+                )
+
+                result[0].id shouldBe 1
+                result[1].id shouldBe 2
+                result[2].id shouldBe 3
+            }
+
+            @Test
+            fun `edition absent from map sorts first in DESCENDING`() {
+                val editions = listOf(
+                    buildEdition(id = 1),
+                    buildEdition(id = 2),
+                    buildEdition(id = 3),
+                )
+
+                val addedAt = mapOf(
+                    1 to "2025-01-15T10:00:00Z",
+                    2 to "2025-03-20T08:30:00Z",
+                )
+
+                val result = editions.applyEditionSort(
+                    mode = LibrarySortMode.DATE_ADDED,
+                    direction = SortDirection.DESCENDING,
+                    addedAtByEditionId = addedAt,
+                )
+
+                result[0].id shouldBe 3
+            }
+
+            @Test
+            fun `null addedAt value collapses to the missing-entry sentinel`() {
+                val editions = listOf(
+                    buildEdition(id = 1),
+                    buildEdition(id = 2),
+                )
+
+                val addedAt = mapOf<Int, String?>(
+                    1 to "2025-01-15T10:00:00Z",
+                    2 to null,
+                )
+
+                val result = editions.applyEditionSort(
+                    mode = LibrarySortMode.DATE_ADDED,
+                    direction = SortDirection.ASCENDING,
+                    addedAtByEditionId = addedAt,
+                )
+
+                result[0].id shouldBe 1
+                result[1].id shouldBe 2
+            }
+
+            @Test
+            fun `empty addedAtByEditionId map with ASCENDING preserves input order`() {
                 val editions = listOf(buildEdition(id = 1), buildEdition(id = 2))
 
-                val result = editions.applyEditionSort(mode = LibrarySortMode.DATE_ADDED)
+                val result = editions.applyEditionSort(
+                    mode = LibrarySortMode.DATE_ADDED,
+                    direction = SortDirection.ASCENDING,
+                    addedAtByEditionId = emptyMap(),
+                )
 
-                result shouldBe editions
+                result[0].id shouldBe 1
+                result[1].id shouldBe 2
             }
+        }
+
+        @Nested
+        inner class UnchangedModes {
 
             @Test
             fun `DATE_FINISHED returns list unchanged`() {

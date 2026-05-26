@@ -5,11 +5,20 @@ import androidx.compose.material3.TopAppBarState
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetSortedBooksByStatusUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.ReorderListBooksUseCase
+import nl.rhaydus.softcover.feature.lists.domain.usecase.SetListRankedUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
@@ -27,7 +36,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortUseCas
 class LibraryScreenScreenModel(
     private val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,
     private val getSortedBooksByStatusUseCase: GetSortedBooksByStatusUseCase,
-    private val refreshUserBooksUseCase: RefreshUserBooksUseCase,
+    private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
     private val getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase,
     private val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
@@ -38,6 +47,15 @@ class LibraryScreenScreenModel(
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     private val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
     private val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
+    private val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
+    private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
+    private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    private val reorderShelfBooksUseCase: ReorderShelfBooksUseCase,
+    private val addBookToListUseCase: AddBookToListUseCase,
+    private val removeBookFromListUseCase: RemoveBookFromListUseCase,
+    private val reorderListBooksUseCase: ReorderListBooksUseCase,
+    private val setListRankedUseCase: SetListRankedUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryInitializer>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
@@ -48,7 +66,7 @@ class LibraryScreenScreenModel(
     override val dependencies = LibraryDependencies(
         getSortedAllUserBooksUseCase = getSortedAllUserBooksUseCase,
         getSortedBooksByStatusUseCase = getSortedBooksByStatusUseCase,
-        refreshUserBooksUseCase = refreshUserBooksUseCase,
+        refreshLibraryUseCase = refreshLibraryUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
         getLibraryGridLayoutAsFlowUseCase = getLibraryGridLayoutAsFlowUseCase,
         setLibraryGridLayoutUseCase = setLibraryGridLayoutUseCase,
@@ -59,7 +77,17 @@ class LibraryScreenScreenModel(
         getEnabledStatusCodesAsFlowUseCase = getEnabledStatusCodesAsFlowUseCase,
         getEnabledListIdsAsFlowUseCase = getEnabledListIdsAsFlowUseCase,
         getLibraryTabOrderAsFlowUseCase = getLibraryTabOrderAsFlowUseCase,
+        markBookAsReadUseCase = markBookAsReadUseCase,
+        markBookAsReadingUseCase = markBookAsReadingUseCase,
+        markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
+        removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
+        reorderShelfBooksUseCase = reorderShelfBooksUseCase,
+        addBookToListUseCase = addBookToListUseCase,
+        removeBookFromListUseCase = removeBookFromListUseCase,
+        reorderListBooksUseCase = reorderListBooksUseCase,
+        setListRankedUseCase = setListRankedUseCase,
         mainDispatcher = appDispatchers.main,
+        defaultDispatcher = appDispatchers.default,
         coroutineScope = screenModelScope,
     )
 

@@ -14,7 +14,7 @@ class OnLogOutClickAction : ProfileAction {
         scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
     ) {
         dependencies.resetUserDataUseCase()
-            .onFailure { Timber.e("-=- $it") }
+            .onFailure { Timber.e("$it") }
             .onSuccess { scope.sendEvent(event = LogOutUserEvent()) }
     }
 }

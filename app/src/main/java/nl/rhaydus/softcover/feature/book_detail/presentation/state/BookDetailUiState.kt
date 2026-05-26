@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
@@ -34,6 +35,10 @@ data class BookDetailUiState(
     val failedMutationEditionIds: Set<Int> = emptySet(),
 
     val isShareSheetVisible: Boolean = false,
+
+    val showChooseListsSheet: Boolean = false,
+    val userLists: List<BookList> = emptyList(),
+    val listsBeingMutated: Set<Int> = emptySet(),
 ) : UiState {
     val filteredEditions: List<BookEdition>
         get() {
@@ -43,6 +48,7 @@ data class BookDetailUiState(
 
             return editions.filter { edition ->
                 edition.isbn10?.contains(other = query, ignoreCase = true) == true ||
+                    edition.isbn13?.contains(other = query, ignoreCase = true) == true ||
                     edition.publisher?.contains(other = query, ignoreCase = true) == true
             }
         }

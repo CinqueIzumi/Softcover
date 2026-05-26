@@ -27,6 +27,7 @@ class LibraryStatsTest {
         url = null,
         localImagePath = null,
         isbn10 = null,
+        isbn13 = null,
         pages = pages,
         audioSeconds = null,
         authors = emptyList(),

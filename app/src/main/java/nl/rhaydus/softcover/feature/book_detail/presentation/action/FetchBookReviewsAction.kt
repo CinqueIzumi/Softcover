@@ -24,7 +24,7 @@ class FetchBookReviewsAction(
 
             val reviews = dependencies
                 .getTopBookReviewsUseCase(bookId = bookId)
-                .onFailure { Timber.e("-=- $it") }
+                .onFailure { Timber.e("$it") }
                 .getOrDefault(emptyList())
 
             scope.setState {

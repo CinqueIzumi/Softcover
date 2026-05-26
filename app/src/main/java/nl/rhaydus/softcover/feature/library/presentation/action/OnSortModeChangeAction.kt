@@ -39,7 +39,7 @@ class OnSortModeChangeAction(
             mode = mode,
             direction = nextDirection,
         ).onFailure {
-            Timber.e("-=- $it")
+            Timber.e("$it")
         }
     }
 }

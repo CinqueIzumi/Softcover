@@ -13,7 +13,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.feature.books.domain.usecase.RefreshUserBooksUseCase
+import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
@@ -28,7 +28,7 @@ class OnSaveLibraryVisibilityActionTest {
 
     private lateinit var setEnabledStatusCodesUseCase: SetEnabledStatusCodesUseCase
     private lateinit var setEnabledListIdsUseCase: SetEnabledListIdsUseCase
-    private lateinit var refreshUserBooksUseCase: RefreshUserBooksUseCase
+    private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
     private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
 
@@ -36,7 +36,7 @@ class OnSaveLibraryVisibilityActionTest {
     fun setUp() {
         setEnabledStatusCodesUseCase = mockk()
         setEnabledListIdsUseCase = mockk()
-        refreshUserBooksUseCase = mockk()
+        refreshLibraryUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -68,8 +68,8 @@ class OnSaveLibraryVisibilityActionTest {
             } returns setEnabledListIdsUseCase
 
             every {
-                mock.refreshUserBooksUseCase
-            } returns refreshUserBooksUseCase
+                mock.refreshLibraryUseCase
+            } returns refreshLibraryUseCase
 
             every {
                 mock.applicationScope
@@ -107,7 +107,7 @@ class OnSaveLibraryVisibilityActionTest {
             // ----- Assert -----
             coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
             coVerify(exactly = 0) { setEnabledListIdsUseCase(ids = any()) }
-            coVerify(exactly = 0) { refreshUserBooksUseCase() }
+            coVerify(exactly = 0) { refreshLibraryUseCase() }
         }
 
         @Test
@@ -130,7 +130,7 @@ class OnSaveLibraryVisibilityActionTest {
             // ----- Assert -----
             coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
             coVerify(exactly = 0) { setEnabledListIdsUseCase(ids = any()) }
-            coVerify(exactly = 0) { refreshUserBooksUseCase() }
+            coVerify(exactly = 0) { refreshLibraryUseCase() }
         }
 
         @Test
@@ -154,7 +154,7 @@ class OnSaveLibraryVisibilityActionTest {
             } returns Result.success(Unit)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnSaveLibraryVisibilityAction()
@@ -187,7 +187,7 @@ class OnSaveLibraryVisibilityActionTest {
             } returns Result.success(Unit)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnSaveLibraryVisibilityAction()
@@ -200,7 +200,7 @@ class OnSaveLibraryVisibilityActionTest {
         }
 
         @Test
-        fun `calls refreshUserBooksUseCase after both setters succeed`() = runTest {
+        fun `calls refreshLibraryUseCase after both setters succeed`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 persistedEnabledStatusCodes = setOf(1),
@@ -220,7 +220,7 @@ class OnSaveLibraryVisibilityActionTest {
             } returns Result.success(Unit)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnSaveLibraryVisibilityAction()
@@ -229,7 +229,7 @@ class OnSaveLibraryVisibilityActionTest {
             action.execute(dependencies = dependencies, scope = scope)
 
             // ----- Assert -----
-            coVerify(exactly = 1) { refreshUserBooksUseCase() }
+            coVerify(exactly = 1) { refreshLibraryUseCase() }
         }
 
         @Test
@@ -260,7 +260,7 @@ class OnSaveLibraryVisibilityActionTest {
             } returns Result.success(Unit)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnSaveLibraryVisibilityAction()
@@ -274,7 +274,7 @@ class OnSaveLibraryVisibilityActionTest {
         }
 
         @Test
-        fun `still calls refreshUserBooksUseCase when setEnabledStatusCodesUseCase fails`() = runTest {
+        fun `still calls refreshLibraryUseCase when setEnabledStatusCodesUseCase fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 persistedEnabledStatusCodes = emptySet(),
@@ -294,7 +294,7 @@ class OnSaveLibraryVisibilityActionTest {
             } returns Result.success(Unit)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnSaveLibraryVisibilityAction()
@@ -303,11 +303,11 @@ class OnSaveLibraryVisibilityActionTest {
             action.execute(dependencies = dependencies, scope = scope)
 
             // ----- Assert -----
-            coVerify(exactly = 1) { refreshUserBooksUseCase() }
+            coVerify(exactly = 1) { refreshLibraryUseCase() }
         }
 
         @Test
-        fun `still calls refreshUserBooksUseCase when setEnabledListIdsUseCase fails`() = runTest {
+        fun `still calls refreshLibraryUseCase when setEnabledListIdsUseCase fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 persistedEnabledStatusCodes = emptySet(),
@@ -327,7 +327,7 @@ class OnSaveLibraryVisibilityActionTest {
             } returns Result.failure(RuntimeException("list save failed"))
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnSaveLibraryVisibilityAction()
@@ -336,7 +336,7 @@ class OnSaveLibraryVisibilityActionTest {
             action.execute(dependencies = dependencies, scope = scope)
 
             // ----- Assert -----
-            coVerify(exactly = 1) { refreshUserBooksUseCase() }
+            coVerify(exactly = 1) { refreshLibraryUseCase() }
         }
 
         @Test
@@ -360,7 +360,7 @@ class OnSaveLibraryVisibilityActionTest {
             } returns Result.failure(RuntimeException("error"))
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.failure(RuntimeException("error"))
 
             val action = OnSaveLibraryVisibilityAction()
@@ -393,7 +393,7 @@ class OnSaveLibraryVisibilityActionTest {
             } returns Result.failure(RuntimeException("error"))
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.failure(RuntimeException("error"))
 
             val action = OnSaveLibraryVisibilityAction()
@@ -438,7 +438,7 @@ class OnSaveLibraryVisibilityActionTest {
             } returns Result.success(Unit)
 
             coEvery {
-                refreshUserBooksUseCase()
+                refreshLibraryUseCase()
             } returns Result.success(Unit)
 
             val action = OnSaveLibraryVisibilityAction()
@@ -456,8 +456,8 @@ class OnSaveLibraryVisibilityActionTest {
 
             // ----- Assert -----
             // UnconfinedTestDispatcher runs the launched block eagerly inside execute(), so
-            // refreshUserBooksUseCase is already called by the time cancel() happens.
-            coVerify(exactly = 1) { refreshUserBooksUseCase() }
+            // refreshLibraryUseCase is already called by the time cancel() happens.
+            coVerify(exactly = 1) { refreshLibraryUseCase() }
         }
     }
 }
