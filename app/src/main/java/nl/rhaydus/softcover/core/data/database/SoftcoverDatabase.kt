@@ -23,9 +23,9 @@ import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingListWriteDao
-import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingProgressUpdateDao
+import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.feature.connectivity.data.model.PendingListWriteEntity
-import nl.rhaydus.softcover.feature.connectivity.data.model.PendingProgressUpdateEntity
+import nl.rhaydus.softcover.feature.connectivity.data.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.feature.deadlines.data.dao.BookDeadlineDao
 import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
 import nl.rhaydus.softcover.feature.explore.data.dao.DismissedContinueSeriesDao
@@ -54,7 +54,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
         ListBookEntity::class,
         BookSeriesEntity::class,
         BookDeadlineEntity::class,
-        PendingProgressUpdateEntity::class,
+        PendingUserBookWriteEntity::class,
         PendingListWriteEntity::class,
         DismissedContinueSeriesBookEntity::class,
         DismissedContinueSeriesEntity::class,
@@ -69,14 +69,14 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
     views = [
         BookEditionView::class
     ],
-    version = 31,
+    version = 32,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
 
     abstract fun bookDeadlineDao(): BookDeadlineDao
 
-    abstract fun pendingProgressUpdateDao(): PendingProgressUpdateDao
+    abstract fun pendingUserBookWriteDao(): PendingUserBookWriteDao
 
     abstract fun pendingListWriteDao(): PendingListWriteDao
 
@@ -126,6 +126,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_28_29)
                 .addMigrations(MIGRATION_29_30)
                 .addMigrations(MIGRATION_30_31)
+                .addMigrations(MIGRATION_31_32)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -900,6 +901,20 @@ abstract class SoftcoverDatabase : RoomDatabase() {
         private val MIGRATION_30_31 = object : Migration(30, 31) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE pending_progress_updates ADD COLUMN rating REAL DEFAULT NULL")
+            }
+        }
+
+        // The pending-write queue is no longer progress-only (it carries mark-as-read and rating
+        // writes too), so the table and its unique index are renamed to match the generalised model.
+        private val MIGRATION_31_32 = object : Migration(31, 32) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE pending_progress_updates RENAME TO pending_user_book_writes")
+
+                db.execSQL("DROP INDEX IF EXISTS index_pending_progress_updates_userBookId_kind")
+
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)"
+                )
             }
         }
 

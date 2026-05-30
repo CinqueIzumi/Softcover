@@ -5,12 +5,12 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "pending_progress_updates",
+    tableName = "pending_user_book_writes",
     indices = [
         Index(value = ["userBookId", "kind"], unique = true),
     ],
 )
-data class PendingProgressUpdateEntity(
+data class PendingUserBookWriteEntity(
     @PrimaryKey(autoGenerate = true)
     val localId: Long = 0,
     val kind: String,

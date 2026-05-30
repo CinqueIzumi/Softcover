@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.feature.connectivity.data.repository
 
-import nl.rhaydus.softcover.core.domain.connectivity.OfflineProgressQueue
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdate
-import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingProgressUpdateDao
-import nl.rhaydus.softcover.feature.connectivity.data.model.PendingProgressUpdateEntity
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
+import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingUserBookWriteDao
+import nl.rhaydus.softcover.feature.connectivity.data.model.PendingUserBookWriteEntity
 
-class OfflineProgressQueueImpl(
-    private val dao: PendingProgressUpdateDao,
-) : OfflineProgressQueue {
-    override suspend fun enqueue(update: PendingProgressUpdate) {
+class UserBookWriteQueueImpl(
+    private val dao: PendingUserBookWriteDao,
+) : UserBookWriteQueue {
+    override suspend fun enqueue(update: PendingUserBookWrite) {
         dao.insertReplacing(
-            PendingProgressUpdateEntity(
+            PendingUserBookWriteEntity(
                 kind = update.kind.name,
                 userBookId = update.userBookId,
                 userBookReadId = update.userBookReadId,

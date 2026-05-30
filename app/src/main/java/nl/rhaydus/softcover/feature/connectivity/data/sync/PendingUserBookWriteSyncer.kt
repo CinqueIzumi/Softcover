@@ -10,18 +10,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressDrainer
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdateKind
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
-import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingProgressUpdateDao
-import nl.rhaydus.softcover.feature.connectivity.data.model.PendingProgressUpdateEntity
+import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingUserBookWriteDao
+import nl.rhaydus.softcover.feature.connectivity.data.model.PendingUserBookWriteEntity
 import timber.log.Timber
 
-class PendingProgressSyncer(
+class PendingUserBookWriteSyncer(
     private val networkAvailability: NetworkAvailabilityProvider,
-    private val dao: PendingProgressUpdateDao,
+    private val dao: PendingUserBookWriteDao,
     private val booksRemoteDataSource: BooksRemoteDataSource,
-) : PendingProgressDrainer {
+) : UserBookWriteDrainer {
     private var job: Job? = null
     private val drainMutex: Mutex = Mutex()
     private val recentlySyncedUserBookIds: MutableSet<Int> = mutableSetOf()
@@ -61,7 +61,7 @@ class PendingProgressSyncer(
                     }
                 }
                 .onFailure { error ->
-                    Timber.w(error, "Pending progress update ${entity.localId} failed; halting drain")
+                    Timber.w(error, "Pending user-book write ${entity.localId} failed; halting drain")
                     dao.incrementAttempts(entity.localId)
                     return
                 }
@@ -75,9 +75,9 @@ class PendingProgressSyncer(
      * being counted as a server-side sync. A thrown exception (network/server failure) is handled by
      * [drain] — the row is kept and retried later.
      */
-    private suspend fun replay(entity: PendingProgressUpdateEntity): ReplayOutcome {
+    private suspend fun replay(entity: PendingUserBookWriteEntity): ReplayOutcome {
         return when (entity.kind) {
-            PendingProgressUpdateKind.UPDATE_PROGRESS.name -> {
+            PendingUserBookWriteKind.UPDATE_PROGRESS.name -> {
                 booksRemoteDataSource.replayUpdateBookProgress(
                     userBookReadId = entity.userBookReadId,
                     editionId = entity.editionId,
@@ -90,7 +90,7 @@ class PendingProgressSyncer(
                 ReplayOutcome.SYNCED
             }
 
-            PendingProgressUpdateKind.MARK_AS_READ.name -> {
+            PendingUserBookWriteKind.MARK_AS_READ.name -> {
                 booksRemoteDataSource.replayMarkBookAsRead(
                     bookId = entity.bookId,
                     userDate = entity.enqueuedAt.substringBefore('T'),
@@ -99,7 +99,7 @@ class PendingProgressSyncer(
                 ReplayOutcome.SYNCED
             }
 
-            PendingProgressUpdateKind.UPDATE_RATING.name -> {
+            PendingUserBookWriteKind.UPDATE_RATING.name -> {
                 val rating = entity.rating
 
                 if (rating == null) {
@@ -117,7 +117,7 @@ class PendingProgressSyncer(
             }
 
             else -> {
-                Timber.w("Unknown pending progress update kind: ${entity.kind}; discarding")
+                Timber.w("Unknown pending user-book write kind: ${entity.kind}; discarding")
 
                 ReplayOutcome.DISCARDED
             }

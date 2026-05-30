@@ -9,20 +9,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdateKind
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
-import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingProgressUpdateDao
-import nl.rhaydus.softcover.feature.connectivity.data.model.PendingProgressUpdateEntity
+import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingUserBookWriteDao
+import nl.rhaydus.softcover.feature.connectivity.data.model.PendingUserBookWriteEntity
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class PendingProgressSyncerTest {
+class PendingUserBookWriteSyncerTest {
 
     private lateinit var networkAvailability: NetworkAvailabilityProvider
-    private lateinit var dao: PendingProgressUpdateDao
+    private lateinit var dao: PendingUserBookWriteDao
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
-    private lateinit var syncer: PendingProgressSyncer
+    private lateinit var syncer: PendingUserBookWriteSyncer
 
     @BeforeEach
     fun setUp() {
@@ -30,7 +30,7 @@ class PendingProgressSyncerTest {
         dao = mockk()
         booksRemoteDataSource = mockk()
 
-        syncer = PendingProgressSyncer(
+        syncer = PendingUserBookWriteSyncer(
             networkAvailability = networkAvailability,
             dao = dao,
             booksRemoteDataSource = booksRemoteDataSource,
@@ -47,9 +47,9 @@ class PendingProgressSyncerTest {
         startedAt: String? = "2026-01-01",
         finishedAt: String? = null,
         enqueuedAt: String = "2026-05-04T12:00:00Z",
-    ) = PendingProgressUpdateEntity(
+    ) = PendingUserBookWriteEntity(
         localId = localId,
-        kind = PendingProgressUpdateKind.UPDATE_PROGRESS.name,
+        kind = PendingUserBookWriteKind.UPDATE_PROGRESS.name,
         userBookId = userBookId,
         userBookReadId = userBookReadId,
         bookId = 0,
@@ -66,9 +66,9 @@ class PendingProgressSyncerTest {
         userBookId: Int = 30,
         rating: Double? = 4.5,
         enqueuedAt: String = "2026-05-04T14:00:00Z",
-    ) = PendingProgressUpdateEntity(
+    ) = PendingUserBookWriteEntity(
         localId = localId,
-        kind = PendingProgressUpdateKind.UPDATE_RATING.name,
+        kind = PendingUserBookWriteKind.UPDATE_RATING.name,
         userBookId = userBookId,
         userBookReadId = 0,
         bookId = 0,
@@ -86,9 +86,9 @@ class PendingProgressSyncerTest {
         userBookId: Int = 20,
         bookId: Int = 300,
         enqueuedAt: String = "2026-05-04T12:34:56Z",
-    ) = PendingProgressUpdateEntity(
+    ) = PendingUserBookWriteEntity(
         localId = localId,
-        kind = PendingProgressUpdateKind.MARK_AS_READ.name,
+        kind = PendingUserBookWriteKind.MARK_AS_READ.name,
         userBookId = userBookId,
         userBookReadId = 0,
         bookId = bookId,
@@ -450,7 +450,7 @@ class PendingProgressSyncerTest {
         @Test
         fun `discards entity with unknown kind — deletes row but excludes userBookId from synced set`() = runTest {
             // ----- Arrange -----
-            val entity = PendingProgressUpdateEntity(
+            val entity = PendingUserBookWriteEntity(
                 localId = 11L,
                 kind = "SOME_UNKNOWN_KIND",
                 userBookId = 77,

@@ -14,10 +14,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.domain.connectivity.OfflineProgressQueue
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressDrainer
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdate
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdateKind
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -39,8 +39,8 @@ class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
     private val booksLocalDataSource: BooksLocalDataSource,
     private val networkAvailability: NetworkAvailabilityProvider,
-    private val offlineProgressQueue: OfflineProgressQueue,
-    private val pendingProgressDrainer: PendingProgressDrainer,
+    private val userBookWriteQueue: UserBookWriteQueue,
+    private val userBookWriteDrainer: UserBookWriteDrainer,
     private val applicationScope: ApplicationScope,
 ) : BooksRepository {
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
@@ -118,7 +118,7 @@ class BooksRepositoryImpl(
         userId: Int,
         statusFilter: UserBookStatus?,
     ) {
-        val syncedUserBookIds: Set<Int> = pendingProgressDrainer.drainPendingUpdates()
+        val syncedUserBookIds: Set<Int> = userBookWriteDrainer.drainPendingUpdates()
 
         val statusIds: Set<Int> = statusFilter
             ?.let { setOf(it.code) }
@@ -454,9 +454,9 @@ class BooksRepositoryImpl(
         val userBook = book.userBook ?: return
         val userBookRead = book.userBookRead ?: return
 
-        offlineProgressQueue.enqueue(
-            PendingProgressUpdate(
-                kind = PendingProgressUpdateKind.UPDATE_PROGRESS,
+        userBookWriteQueue.enqueue(
+            PendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 userBookId = userBook.id,
                 userBookReadId = userBookRead.id,
                 bookId = book.id,
@@ -474,9 +474,9 @@ class BooksRepositoryImpl(
         val userBook = book.userBook ?: return
         val userBookRead = book.userBookRead ?: return
 
-        offlineProgressQueue.enqueue(
-            PendingProgressUpdate(
-                kind = PendingProgressUpdateKind.MARK_AS_READ,
+        userBookWriteQueue.enqueue(
+            PendingUserBookWrite(
+                kind = PendingUserBookWriteKind.MARK_AS_READ,
                 userBookId = userBook.id,
                 userBookReadId = userBookRead.id,
                 bookId = book.id,
@@ -496,9 +496,9 @@ class BooksRepositoryImpl(
     ) {
         val userBook = book.userBook ?: return
 
-        offlineProgressQueue.enqueue(
-            PendingProgressUpdate(
-                kind = PendingProgressUpdateKind.UPDATE_RATING,
+        userBookWriteQueue.enqueue(
+            PendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_RATING,
                 userBookId = userBook.id,
                 // Unused for UPDATE_RATING replay (which keys off userBookId); a Read book may have
                 // no userBookRead, so fall back to the schema's non-null placeholder.

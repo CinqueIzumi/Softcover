@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.domain.connectivity
 
-data class PendingProgressUpdate(
-    val kind: PendingProgressUpdateKind,
+data class PendingUserBookWrite(
+    val kind: PendingUserBookWriteKind,
     val userBookId: Int,
     val userBookReadId: Int,
     val bookId: Int,

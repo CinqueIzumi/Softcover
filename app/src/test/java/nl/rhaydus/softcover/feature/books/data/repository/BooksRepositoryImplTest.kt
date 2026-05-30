@@ -18,9 +18,9 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.domain.connectivity.OfflineProgressQueue
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressDrainer
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdateKind
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -43,8 +43,8 @@ class BooksRepositoryImplTest {
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
     private lateinit var booksLocalDataSource: BooksLocalDataSource
     private lateinit var networkAvailability: NetworkAvailabilityProvider
-    private lateinit var offlineProgressQueue: OfflineProgressQueue
-    private lateinit var pendingProgressDrainer: PendingProgressDrainer
+    private lateinit var userBookWriteQueue: UserBookWriteQueue
+    private lateinit var userBookWriteDrainer: UserBookWriteDrainer
     private lateinit var testScope: TestScope
     private lateinit var repository: BooksRepositoryImpl
 
@@ -53,8 +53,8 @@ class BooksRepositoryImplTest {
         booksRemoteDataSource = mockk()
         booksLocalDataSource = mockk(relaxed = true)
         networkAvailability = mockk()
-        offlineProgressQueue = mockk(relaxed = true)
-        pendingProgressDrainer = mockk(relaxed = true)
+        userBookWriteQueue = mockk(relaxed = true)
+        userBookWriteDrainer = mockk(relaxed = true)
         testScope = TestScope(UnconfinedTestDispatcher())
 
         every {
@@ -65,8 +65,8 @@ class BooksRepositoryImplTest {
             booksRemoteDataSource = booksRemoteDataSource,
             booksLocalDataSource = booksLocalDataSource,
             networkAvailability = networkAvailability,
-            offlineProgressQueue = offlineProgressQueue,
-            pendingProgressDrainer = pendingProgressDrainer,
+            userBookWriteQueue = userBookWriteQueue,
+            userBookWriteDrainer = userBookWriteDrainer,
             applicationScope = ApplicationScope(scope = testScope),
         )
     }
@@ -110,8 +110,8 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource = booksRemoteDataSource,
                 booksLocalDataSource = booksLocalDataSource,
                 networkAvailability = networkAvailability,
-                offlineProgressQueue = offlineProgressQueue,
-                pendingProgressDrainer = pendingProgressDrainer,
+                userBookWriteQueue = userBookWriteQueue,
+                userBookWriteDrainer = userBookWriteDrainer,
                 applicationScope = ApplicationScope(scope = testScope),
             )
 
@@ -211,7 +211,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerifyOrder {
-                pendingProgressDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drainPendingUpdates()
                 booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
             }
         }
@@ -263,7 +263,7 @@ class BooksRepositoryImplTest {
             val localBook = remoteBook.copy(userBook = localUserBook, userBookRead = localUserBookRead)
 
             coEvery {
-                pendingProgressDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drainPendingUpdates()
             } returns setOf(syncedUserBookId)
 
             every {
@@ -298,7 +298,7 @@ class BooksRepositoryImplTest {
             val remoteBook = stubBook(userBookId = 7)
 
             coEvery {
-                pendingProgressDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drainPendingUpdates()
             } returns emptySet()
 
             coEvery {
@@ -1792,9 +1792,9 @@ class BooksRepositoryImplTest {
             }
 
             coVerify {
-                offlineProgressQueue.enqueue(
+                userBookWriteQueue.enqueue(
                     update = match {
-                        it.kind == PendingProgressUpdateKind.UPDATE_RATING &&
+                        it.kind == PendingUserBookWriteKind.UPDATE_RATING &&
                             it.userBookId == userBookId &&
                             it.rating == newRating
                     },
@@ -1842,9 +1842,9 @@ class BooksRepositoryImplTest {
             }
 
             coVerify {
-                offlineProgressQueue.enqueue(
+                userBookWriteQueue.enqueue(
                     update = match {
-                        it.kind == PendingProgressUpdateKind.UPDATE_RATING &&
+                        it.kind == PendingUserBookWriteKind.UPDATE_RATING &&
                             it.userBookId == userBookId &&
                             it.rating == newRating
                     },
@@ -2525,8 +2525,8 @@ class BooksRepositoryImplTest {
             }
 
             coVerify {
-                offlineProgressQueue.enqueue(
-                    update = match { it.kind == PendingProgressUpdateKind.UPDATE_PROGRESS },
+                userBookWriteQueue.enqueue(
+                    update = match { it.kind == PendingUserBookWriteKind.UPDATE_PROGRESS },
                 )
             }
 
@@ -2551,8 +2551,8 @@ class BooksRepositoryImplTest {
             }
 
             coVerify {
-                offlineProgressQueue.enqueue(
-                    update = match { it.kind == PendingProgressUpdateKind.MARK_AS_READ },
+                userBookWriteQueue.enqueue(
+                    update = match { it.kind == PendingUserBookWriteKind.MARK_AS_READ },
                 )
             }
 

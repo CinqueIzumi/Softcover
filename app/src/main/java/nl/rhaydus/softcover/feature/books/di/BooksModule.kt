@@ -38,8 +38,8 @@ val booksModule = module {
             booksRemoteDataSource = get(),
             booksLocalDataSource = get(),
             networkAvailability = get(),
-            offlineProgressQueue = get(),
-            pendingProgressDrainer = get(),
+            userBookWriteQueue = get(),
+            userBookWriteDrainer = get(),
             applicationScope = get(),
         )
     }

@@ -1,5 +1,5 @@
 package nl.rhaydus.softcover.core.domain.connectivity
 
-interface PendingProgressDrainer {
+interface UserBookWriteDrainer {
     suspend fun drainPendingUpdates(): Set<Int>
 }
