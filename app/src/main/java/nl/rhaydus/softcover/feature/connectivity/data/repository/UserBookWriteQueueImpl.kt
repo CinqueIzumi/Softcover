@@ -21,7 +21,7 @@ class UserBookWriteQueueImpl(
                 startedAt = update.startedAt,
                 finishedAt = update.finishedAt,
                 rating = update.rating,
-                reviewBody = update.reviewBody,
+                reviewSlateJson = update.reviewSlateJson,
                 reviewHasSpoilers = update.reviewHasSpoilers,
                 enqueuedAt = update.enqueuedAt,
             ),

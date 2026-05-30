@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -17,11 +18,11 @@ class OnDeleteReviewAction(
     ) {
         scope.setState { it.copy(showReviewSheet = false) }
 
-        // Hardcover owns the review, so deleting clears it there (an empty body), offline-replayable;
+        // Hardcover owns the review, so deleting clears it there (an empty document), offline-replayable;
         // the optimistic local clear is overwritten on the next refresh either way.
         dependencies.updateBookReviewUseCase(
             book = book,
-            body = "",
+            review = ReviewDocument.EMPTY,
             hasSpoilers = false,
         ).onFailure { error ->
             Timber.e("$error")

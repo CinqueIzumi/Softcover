@@ -6,7 +6,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromJson
+import nl.rhaydus.softcover.core.data.mapper.toJson
 import nl.rhaydus.softcover.core.domain.model.Author
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import java.time.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -275,7 +280,7 @@ class BookMapperTest {
         lastReadDate: String? = null,
         rating: Double? = null,
         referrerUserId: Int? = null,
-        review: String? = null,
+        reviewDocument: ReviewDocument? = null,
         reviewedAt: String? = null,
         updatedAt: String? = null,
         journals: List<ReadingJournal> = emptyList(),
@@ -321,8 +326,8 @@ class BookMapperTest {
         } returns referrerUserId
 
         every {
-            this@mockk.review
-        } returns review
+            this@mockk.reviewDocument
+        } returns reviewDocument
 
         every {
             this@mockk.reviewedAt
@@ -537,7 +542,7 @@ class BookMapperTest {
         lastReadDate: String? = null,
         rating: Double? = null,
         referrerUserId: Int? = null,
-        review: String? = null,
+        reviewSlateJson: String? = null,
         reviewedAt: String? = null,
         updatedAt: String? = null,
     ): UserBookEntity = UserBookEntity(
@@ -552,7 +557,7 @@ class BookMapperTest {
         lastReadDate = lastReadDate,
         rating = rating,
         referrerUserId = referrerUserId,
-        review = review,
+        reviewSlateJson = reviewSlateJson,
         reviewedAt = reviewedAt,
         updatedAt = updatedAt,
     )
@@ -978,27 +983,28 @@ class BookMapperTest {
         }
 
         @Test
-        fun `propagates non-null review to UserBookEntity`() {
+        fun `propagates non-null reviewDocument to UserBookEntity as JSON`() {
             // ----- Arrange -----
-            val userBook = stubUserBook(review = "Loved it")
+            val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Loved it")))))
+            val userBook = stubUserBook(reviewDocument = doc)
 
             // ----- Act -----
             val result = userBook.toEntity(bookId = 1)
 
             // ----- Assert -----
-            result.review shouldBe "Loved it"
+            result.reviewSlateJson shouldBe doc.toJson()
         }
 
         @Test
-        fun `propagates null review to UserBookEntity as null`() {
+        fun `propagates null reviewDocument to UserBookEntity as null reviewSlateJson`() {
             // ----- Arrange -----
-            val userBook = stubUserBook(review = null)
+            val userBook = stubUserBook(reviewDocument = null)
 
             // ----- Act -----
             val result = userBook.toEntity(bookId = 1)
 
             // ----- Assert -----
-            result.review shouldBe null
+            result.reviewSlateJson shouldBe null
         }
     }
 
@@ -1794,27 +1800,28 @@ class BookMapperTest {
         }
 
         @Test
-        fun `propagates non-null review from entity to model`() {
+        fun `propagates non-null reviewSlateJson from entity to model as ReviewDocument`() {
             // ----- Arrange -----
-            val entity = stubUserBookEntity(review = "Loved it")
+            val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Loved it")))))
+            val entity = stubUserBookEntity(reviewSlateJson = doc.toJson())
 
             // ----- Act -----
             val result = entity.toModel(journals = emptyList())
 
             // ----- Assert -----
-            result.review shouldBe "Loved it"
+            result.reviewDocument shouldBe doc
         }
 
         @Test
-        fun `propagates null review from entity to model as null`() {
+        fun `propagates null reviewSlateJson from entity to model as null reviewDocument`() {
             // ----- Arrange -----
-            val entity = stubUserBookEntity(review = null)
+            val entity = stubUserBookEntity(reviewSlateJson = null)
 
             // ----- Act -----
             val result = entity.toModel(journals = emptyList())
 
             // ----- Assert -----
-            result.review shouldBe null
+            result.reviewDocument shouldBe null
         }
     }
 
@@ -2963,7 +2970,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
-                every { review } returns null
+                every { review_slate } returns emptyList<Map<String, Any?>>()
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3051,7 +3058,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
-                every { review } returns null
+                every { review_slate } returns emptyList<Map<String, Any?>>()
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3138,7 +3145,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
-                every { review } returns null
+                every { review_slate } returns emptyList<Map<String, Any?>>()
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3219,7 +3226,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
-                every { review } returns null
+                every { review_slate } returns emptyList<Map<String, Any?>>()
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3304,7 +3311,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
-                every { review } returns null
+                every { review_slate } returns emptyList<Map<String, Any?>>()
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3389,7 +3396,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
-                every { review } returns null
+                every { review_slate } returns emptyList<Map<String, Any?>>()
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3473,7 +3480,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
-                every { review } returns null
+                every { review_slate } returns emptyList<Map<String, Any?>>()
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3503,7 +3510,7 @@ class BookMapperTest {
             statusStopped: List<UserBookFragment.Status_stopped_journal> = emptyList(),
             createdAt: String = "2024-01-01",
             ratingsCount: Int = 0,
-            review: String? = null,
+            reviewSlate: Any = emptyList<Map<String, Any?>>(),
         ): UserBookFragment {
             val bookInner = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
@@ -3564,7 +3571,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
-                every { this@mockk.review } returns review
+                every { review_slate } returns reviewSlate
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns createdAt
@@ -3746,31 +3753,42 @@ class BookMapperTest {
         }
 
         @Test
-        fun `propagates non-null review from fragment to UserBook`() {
+        fun `propagates non-empty review_slate from fragment to UserBook as ReviewDocument`() {
             // ----- Arrange -----
             mockkObject(UserBookFragment.Book.Companion)
             mockkObject(UserBookFragment.Edition.Companion)
-            val fragment = stubMinimalUserBookFragment(review = "Loved it")
+
+            val slate = listOf(
+                mapOf(
+                    "data" to emptyMap<String, Any?>(),
+                    "type" to "paragraph",
+                    "object" to "block",
+                    "children" to listOf(mapOf("object" to "text", "text" to "Loved it")),
+                ),
+            )
+
+            val fragment = stubMinimalUserBookFragment(reviewSlate = slate)
 
             // ----- Act -----
             val result = fragment.toBook()
 
             // ----- Assert -----
-            result?.userBook?.review shouldBe "Loved it"
+            result?.userBook?.reviewDocument?.paragraphs?.first()?.runs?.first()?.text shouldBe "Loved it"
         }
 
         @Test
-        fun `propagates null review from fragment to UserBook as null`() {
+        fun `propagates empty review_slate from fragment to UserBook as null reviewDocument`() {
             // ----- Arrange -----
             mockkObject(UserBookFragment.Book.Companion)
             mockkObject(UserBookFragment.Edition.Companion)
-            val fragment = stubMinimalUserBookFragment(review = null)
+
+            val fragment = stubMinimalUserBookFragment(reviewSlate = emptyList<Map<String, Any?>>())
 
             // ----- Act -----
             val result = fragment.toBook()
 
             // ----- Assert -----
-            result?.userBook?.review shouldBe null
+            result?.userBook?.reviewDocument shouldBe null
         }
     }
 

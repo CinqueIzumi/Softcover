@@ -18,12 +18,15 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
+import nl.rhaydus.softcover.core.data.mapper.toJson
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
@@ -353,7 +356,7 @@ class BooksRepositoryImpl(
 
     override suspend fun updateBookReview(
         book: Book,
-        body: String,
+        review: ReviewDocument,
         hasSpoilers: Boolean,
     ): Book {
         val userBook = book.userBook ?: throw Exception("User did not have a user book")
@@ -361,14 +364,14 @@ class BooksRepositoryImpl(
         val reviewedAt: String = LocalDate.now().toString()
 
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = book.withReview(body = body, hasSpoilers = hasSpoilers)
+        val optimistic = book.withReview(review = review, hasSpoilers = hasSpoilers)
         booksLocalDataSource.cacheBook(book = optimistic)
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
                 booksRemoteDataSource.updateBookReview(
                     userBook = userBook,
-                    body = body,
+                    review = review,
                     hasSpoilers = hasSpoilers,
                     reviewedAt = reviewedAt,
                 )
@@ -377,7 +380,7 @@ class BooksRepositoryImpl(
                     is CancellationException -> throw error
 
                     is OfflineException -> {
-                        enqueueReviewUpdate(book = optimistic, body = body, hasSpoilers = hasSpoilers)
+                        enqueueReviewUpdate(book = optimistic, review = review, hasSpoilers = hasSpoilers)
                         optimistic
                     }
 
@@ -389,7 +392,7 @@ class BooksRepositoryImpl(
             }
         }
 
-        enqueueReviewUpdate(book = optimistic, body = body, hasSpoilers = hasSpoilers)
+        enqueueReviewUpdate(book = optimistic, review = review, hasSpoilers = hasSpoilers)
 
         return optimistic
     }
@@ -560,7 +563,7 @@ class BooksRepositoryImpl(
 
     private suspend fun enqueueReviewUpdate(
         book: Book,
-        body: String,
+        review: ReviewDocument,
         hasSpoilers: Boolean,
     ) {
         val userBook = book.userBook ?: return
@@ -578,7 +581,7 @@ class BooksRepositoryImpl(
                 progressSeconds = null,
                 startedAt = null,
                 finishedAt = null,
-                reviewBody = body,
+                reviewSlateJson = review.toJson(),
                 reviewHasSpoilers = hasSpoilers,
                 enqueuedAt = Instant.now().toString(),
             )
@@ -691,17 +694,17 @@ class BooksRepositoryImpl(
     }
 
     private fun Book.withReview(
-        body: String,
+        review: ReviewDocument,
         hasSpoilers: Boolean,
     ): Book {
         val existingUserBook = userBook ?: return this
 
-        // A blank body clears the review; the optimistic copy stores the plain text the user typed,
-        // which the next server refresh overwrites with Hardcover's canonical (HTML) rendering.
-        val normalizedReview: String? = body.ifBlank { null }
+        // A blank document clears the review; the optimistic copy stores what the user wrote, which the
+        // next server refresh overwrites with Hardcover's canonical `review_slate`.
+        val normalizedReview: ReviewDocument? = review.takeUnless { it.isBlank() }
 
         val updatedUserBook: UserBook = existingUserBook.copy(
-            review = normalizedReview,
+            reviewDocument = normalizedReview,
             reviewHasSpoilers = hasSpoilers,
         )
 

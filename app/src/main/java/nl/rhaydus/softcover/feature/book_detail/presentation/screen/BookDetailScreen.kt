@@ -72,6 +72,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -88,11 +89,14 @@ import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DropCapText
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
+import nl.rhaydus.softcover.core.presentation.component.ReviewDocumentText
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.StarRatingInput
@@ -144,8 +148,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenReview
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRateBookAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnReviewBodyChangedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnReviewSpoilerToggledAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveReviewAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
@@ -395,7 +397,7 @@ class BookDetailScreen(
 
                     item {
                         PersonalReviewSection(
-                            review = ratingBook.userBook?.review,
+                            reviewDocument = ratingBook.userBook?.reviewDocument,
                             hasSpoilers = ratingBook.userBook?.reviewHasSpoilers == true,
                             runAction = runAction,
                         )
@@ -510,12 +512,18 @@ class BookDetailScreen(
             val reviewBook = state.book
             if (state.showReviewSheet && reviewBook != null) {
                 ReviewEditorBottomSheet(
-                    body = state.reviewEditorBody,
-                    hasSpoilers = state.reviewEditorHasSpoilers,
-                    canDelete = reviewBook.userBook?.review.isNullOrBlank().not(),
-                    onBodyChange = { runAction(OnReviewBodyChangedAction(body = it)) },
-                    onSpoilerToggle = { runAction(OnReviewSpoilerToggledAction(hasSpoilers = it)) },
-                    onSave = { runAction(OnSaveReviewAction(book = reviewBook)) },
+                    initialDocument = state.reviewEditorDocument,
+                    initialHasSpoilers = state.reviewEditorHasSpoilers,
+                    canDelete = reviewBook.userBook?.reviewDocument != null,
+                    onSave = { document, hasSpoilers ->
+                        runAction(
+                            OnSaveReviewAction(
+                                book = reviewBook,
+                                review = document,
+                                hasSpoilers = hasSpoilers,
+                            )
+                        )
+                    },
                     onDelete = { runAction(OnDeleteReviewAction(book = reviewBook)) },
                     onDismissRequest = { runAction(OnDismissReviewSheetAction()) },
                 )
@@ -1125,7 +1133,7 @@ class BookDetailScreen(
 
     @Composable
     private fun PersonalReviewSection(
-        review: String?,
+        reviewDocument: ReviewDocument?,
         hasSpoilers: Boolean,
         runAction: (BookDetailAction) -> Unit,
     ) {
@@ -1138,7 +1146,7 @@ class BookDetailScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            if (review.isNullOrBlank()) {
+            if (reviewDocument == null || reviewDocument.isBlank()) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.large,
@@ -1162,12 +1170,15 @@ class BookDetailScreen(
                     Column(
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
                     ) {
-                        Text(
-                            text = htmlToAnnotatedString(html = review),
-                            style = MaterialTheme.editorialTypography.body,
+                        ReviewDocumentText(
+                            document = reviewDocument,
+                            style = MaterialTheme.editorialTypography.body.copy(
+                                fontStyle = FontStyle.Normal,
+                            ),
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = REVIEW_COLLAPSED_LINES,
                             overflow = TextOverflow.Ellipsis,
+                            onClick = { runAction(OnOpenReviewSheetAction()) },
                         )
 
                         if (hasSpoilers) {
@@ -2070,8 +2081,8 @@ class BookDetailScreen(
                         var expanded by rememberSaveable(review.id) { mutableStateOf(false) }
                         var hasOverflow by rememberSaveable(review.id) { mutableStateOf(false) }
 
-                        Text(
-                            text = htmlToAnnotatedString(html = review.review),
+                        ReviewDocumentText(
+                            document = review.reviewDocument,
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 lineHeight = 22.sp,
                             ),

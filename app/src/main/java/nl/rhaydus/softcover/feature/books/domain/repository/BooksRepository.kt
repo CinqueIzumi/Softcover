@@ -4,6 +4,7 @@ import java.io.File
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
@@ -90,8 +91,9 @@ interface BooksRepository {
     ): Book
 
     /**
-     * Publishes the user's personal review for [book] to Hardcover (review body + spoiler flag,
-     * stamped with today's `reviewed_at`). The review is modelled on [UserBook.review] and Hardcover
+     * Publishes the user's personal review for [book] to Hardcover (structured review document +
+     * spoiler flag, stamped with today's `reviewed_at`). The review is carried as a
+     * [nl.rhaydus.softcover.core.domain.model.ReviewDocument] and Hardcover
      * owns it, so an optimistic copy is cached first; when online the remote call returns the
      * canonical server book, on a hard error the prior snapshot is restored and the error rethrown,
      * and when offline (or on [nl.rhaydus.softcover.core.domain.exception.OfflineException]) the
@@ -99,7 +101,7 @@ interface BooksRepository {
      */
     suspend fun updateBookReview(
         book: Book,
-        body: String,
+        review: ReviewDocument,
         hasSpoilers: Boolean,
     ): Book
 

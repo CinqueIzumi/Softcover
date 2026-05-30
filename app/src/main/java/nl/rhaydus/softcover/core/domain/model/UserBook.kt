@@ -18,7 +18,7 @@ data class UserBook(
     val lastReadDate: String?,
     val rating: Double?,
     val referrerUserId: Int?,
-    val review: String? = null,
+    val reviewDocument: ReviewDocument? = null,
     val reviewedAt: String?,
     val updatedAt: String?,
     val journals: List<ReadingJournal>,

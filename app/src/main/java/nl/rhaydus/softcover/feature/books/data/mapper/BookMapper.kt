@@ -1,14 +1,5 @@
 package nl.rhaydus.softcover.feature.books.data.mapper
 
-import nl.rhaydus.softcover.core.domain.model.Author
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookSeries
-import nl.rhaydus.softcover.core.domain.model.ReadingJournal
-import nl.rhaydus.softcover.core.domain.model.Tag
-import nl.rhaydus.softcover.core.domain.model.UserBook
-import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.data.database.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
@@ -20,6 +11,19 @@ import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
+import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromJson
+import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromSlate
+import nl.rhaydus.softcover.core.data.mapper.toJson
+import nl.rhaydus.softcover.core.domain.model.Author
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import nl.rhaydus.softcover.fragment.BookDetailFragment.Default_cover_edition.Companion.editionFragment
 import nl.rhaydus.softcover.fragment.BookListFragment
@@ -114,7 +118,7 @@ private fun UserBookFragment.toUserBook(): UserBook {
         privacySettingId = privacy_setting_id,
         rating = rating,
         referrerUserId = referrer_user_id,
-        review = review,
+        reviewDocument = reviewDocumentFromSlate(slate = review_slate).takeUnless { it.isBlank() },
         reviewHasSpoilers = review_has_spoilers,
         reviewedAt = reviewed_at,
         updatedAt = updated_at,
@@ -321,7 +325,7 @@ fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
     lastReadDate = lastReadDate,
     rating = rating,
     referrerUserId = referrerUserId,
-    review = review,
+    reviewSlateJson = reviewDocument?.toJson(),
     reviewedAt = reviewedAt,
     updatedAt = updatedAt,
     bookId = bookId,
@@ -415,7 +419,7 @@ fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook = UserBook(
     lastReadDate = lastReadDate,
     rating = rating,
     referrerUserId = referrerUserId,
-    review = review,
+    reviewDocument = reviewDocumentFromJson(json = reviewSlateJson),
     reviewedAt = reviewedAt,
     updatedAt = updatedAt,
     journals = journals,

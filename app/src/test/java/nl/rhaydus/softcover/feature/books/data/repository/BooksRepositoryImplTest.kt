@@ -23,9 +23,13 @@ import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
+import nl.rhaydus.softcover.core.data.mapper.toJson
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -1879,7 +1883,11 @@ class BooksRepositoryImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                repository.updateBookReview(book = book, body = "Great read", hasSpoilers = false)
+                repository.updateBookReview(
+                    book = book,
+                    review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
+                    hasSpoilers = false,
+                )
             }
         }
 
@@ -1899,7 +1907,7 @@ class BooksRepositoryImplTest {
             coEvery {
                 booksRemoteDataSource.updateBookReview(
                     userBook = any(),
-                    body = any(),
+                    review = any(),
                     hasSpoilers = any(),
                     reviewedAt = any(),
                 )
@@ -1912,7 +1920,7 @@ class BooksRepositoryImplTest {
             // ----- Act -----
             val result = repository.updateBookReview(
                 book = book,
-                body = "Great read",
+                review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
                 hasSpoilers = false,
             )
 
@@ -1928,7 +1936,7 @@ class BooksRepositoryImplTest {
         fun `when offline caches optimistic book and enqueues UPDATE_REVIEW without calling remote`() = runTest {
             // ----- Arrange -----
             val userBookId = 5
-            val body = "Great offline read"
+            val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great offline read")))))
             val hasSpoilers = true
             val book = Book(
                 id = 10,
@@ -1952,10 +1960,10 @@ class BooksRepositoryImplTest {
             every { networkAvailability.isOnline } returns MutableStateFlow(false)
 
             // ----- Act -----
-            val result = repository.updateBookReview(book = book, body = body, hasSpoilers = hasSpoilers)
+            val result = repository.updateBookReview(book = book, review = body, hasSpoilers = hasSpoilers)
 
             // ----- Assert -----
-            result.userBook?.review shouldBe body
+            result.userBook?.reviewDocument shouldBe body
             result.userBook?.reviewHasSpoilers shouldBe hasSpoilers
 
             coVerify {
@@ -1965,7 +1973,7 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 0) {
                 booksRemoteDataSource.updateBookReview(
                     userBook = any(),
-                    body = any(),
+                    review = any(),
                     hasSpoilers = any(),
                     reviewedAt = any(),
                 )
@@ -1976,7 +1984,7 @@ class BooksRepositoryImplTest {
                     update = match {
                         it.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
                             it.userBookId == userBookId &&
-                            it.reviewBody == body &&
+                            it.reviewSlateJson == body.toJson() &&
                             it.reviewHasSpoilers == hasSpoilers
                     },
                 )
@@ -1988,7 +1996,7 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val userBookId = 5
             val bookId = 10
-            val body = "Review written while falsely online"
+            val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Review written while falsely online")))))
             val hasSpoilers = false
             val book = Book(
                 id = bookId,
@@ -2019,7 +2027,7 @@ class BooksRepositoryImplTest {
             coEvery {
                 booksRemoteDataSource.updateBookReview(
                     userBook = any(),
-                    body = any(),
+                    review = any(),
                     hasSpoilers = any(),
                     reviewedAt = any(),
                 )
@@ -2030,16 +2038,16 @@ class BooksRepositoryImplTest {
             } returns Unit
 
             // ----- Act -----
-            val result = repository.updateBookReview(book = book, body = body, hasSpoilers = hasSpoilers)
+            val result = repository.updateBookReview(book = book, review = body, hasSpoilers = hasSpoilers)
 
             // ----- Assert -----
-            result.userBook?.review shouldBe body
+            result.userBook?.reviewDocument shouldBe body
             result.userBook?.reviewHasSpoilers shouldBe hasSpoilers
 
             coVerify(exactly = 1) {
                 booksRemoteDataSource.updateBookReview(
                     userBook = any(),
-                    body = any(),
+                    review = any(),
                     hasSpoilers = any(),
                     reviewedAt = any(),
                 )
@@ -2050,7 +2058,7 @@ class BooksRepositoryImplTest {
                     update = match {
                         it.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
                             it.userBookId == userBookId &&
-                            it.reviewBody == body &&
+                            it.reviewSlateJson == body.toJson() &&
                             it.reviewHasSpoilers == hasSpoilers
                     },
                 )
@@ -2062,7 +2070,7 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val userBookId = 5
             val bookId = 10
-            val body = "Review that will fail"
+            val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Review that will fail")))))
             val hasSpoilers = true
             val book = mockk<Book>(relaxed = true) {
                 every { this@mockk.id } returns bookId
@@ -2080,14 +2088,14 @@ class BooksRepositoryImplTest {
             coEvery {
                 booksRemoteDataSource.updateBookReview(
                     userBook = any(),
-                    body = any(),
+                    review = any(),
                     hasSpoilers = any(),
                     reviewedAt = any(),
                 )
             } throws remoteError
 
             // ----- Act -----
-            val caught = runCatching { repository.updateBookReview(book = book, body = body, hasSpoilers = hasSpoilers) }
+            val caught = runCatching { repository.updateBookReview(book = book, review = body, hasSpoilers = hasSpoilers) }
 
             // ----- Assert -----
             caught.exceptionOrNull() shouldBe remoteError

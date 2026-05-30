@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromJson
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
@@ -117,16 +118,16 @@ class PendingUserBookWriteSyncer(
             }
 
             PendingUserBookWriteKind.UPDATE_REVIEW.name -> {
-                val body = entity.reviewBody
+                val document = reviewDocumentFromJson(json = entity.reviewSlateJson)
 
-                if (body == null) {
+                if (document == null) {
                     Timber.w("Pending review update ${entity.localId} has no body; discarding")
 
                     ReplayOutcome.DISCARDED
                 } else {
                     booksRemoteDataSource.replayUpdateBookReview(
                         userBookId = entity.userBookId,
-                        body = body,
+                        review = document,
                         hasSpoilers = entity.reviewHasSpoilers ?: false,
                         reviewedAt = entity.enqueuedAt.substringBefore('T'),
                     )

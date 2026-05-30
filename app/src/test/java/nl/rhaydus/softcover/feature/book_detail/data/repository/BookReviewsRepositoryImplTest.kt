@@ -5,6 +5,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
@@ -27,7 +30,9 @@ class BookReviewsRepositoryImplTest {
 
     private fun stubReview(id: Int = 1): BookReview = BookReview(
         id = id,
-        review = "Great read",
+        reviewDocument = ReviewDocument(
+            paragraphs = listOf(ReviewParagraph(runs = listOf(ReviewRun(text = "Great read")))),
+        ),
         hasSpoilers = false,
         rating = 4.0,
         reviewedAt = "2024-01-01",

@@ -8,8 +8,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.data.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.feature.connectivity.data.model.PendingUserBookWriteEntity
@@ -84,7 +88,7 @@ class PendingUserBookWriteSyncerTest {
     private fun updateReviewEntity(
         localId: Long = 4L,
         userBookId: Int = 40,
-        reviewBody: String? = "Great book!",
+        reviewSlateJson: String? = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great book!"))))).toJson(),
         reviewHasSpoilers: Boolean? = false,
         enqueuedAt: String = "2026-05-30T10:15:30Z",
     ) = PendingUserBookWriteEntity(
@@ -98,7 +102,7 @@ class PendingUserBookWriteSyncerTest {
         progressSeconds = null,
         startedAt = null,
         finishedAt = null,
-        reviewBody = reviewBody,
+        reviewSlateJson = reviewSlateJson,
         reviewHasSpoilers = reviewHasSpoilers,
         enqueuedAt = enqueuedAt,
     )
@@ -470,12 +474,13 @@ class PendingUserBookWriteSyncerTest {
         }
 
         @Test
-        fun `delegates UPDATE_REVIEW with non-null body to replayUpdateBookReview and deletes entity`() = runTest {
+        fun `delegates UPDATE_REVIEW with non-null reviewSlateJson to replayUpdateBookReview and deletes entity`() = runTest {
             // ----- Arrange -----
+            val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Loved it")))))
             val entity = updateReviewEntity(
                 localId = 12L,
                 userBookId = 80,
-                reviewBody = "Loved it",
+                reviewSlateJson = doc.toJson(),
                 reviewHasSpoilers = true,
                 enqueuedAt = "2026-05-30T10:15:30Z",
             )
@@ -487,7 +492,7 @@ class PendingUserBookWriteSyncerTest {
             coJustRun {
                 booksRemoteDataSource.replayUpdateBookReview(
                     userBookId = any(),
-                    body = any(),
+                    review = any(),
                     hasSpoilers = any(),
                     reviewedAt = any(),
                 )
@@ -504,7 +509,7 @@ class PendingUserBookWriteSyncerTest {
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayUpdateBookReview(
                     userBookId = 80,
-                    body = "Loved it",
+                    review = doc,
                     hasSpoilers = true,
                     reviewedAt = "2026-05-30",
                 )
@@ -516,12 +521,12 @@ class PendingUserBookWriteSyncerTest {
         }
 
         @Test
-        fun `drops UPDATE_REVIEW entity with null body without calling replayUpdateBookReview`() = runTest {
+        fun `drops UPDATE_REVIEW entity with null reviewSlateJson without calling replayUpdateBookReview`() = runTest {
             // ----- Arrange -----
             val entity = updateReviewEntity(
                 localId = 13L,
                 userBookId = 90,
-                reviewBody = null,
+                reviewSlateJson = null,
             )
 
             coEvery {
@@ -539,7 +544,7 @@ class PendingUserBookWriteSyncerTest {
             coVerify(exactly = 0) {
                 booksRemoteDataSource.replayUpdateBookReview(
                     userBookId = any(),
-                    body = any(),
+                    review = any(),
                     hasSpoilers = any(),
                     reviewedAt = any(),
                 )
@@ -553,10 +558,11 @@ class PendingUserBookWriteSyncerTest {
         @Test
         fun `passes the date part before T as reviewedAt for UPDATE_REVIEW`() = runTest {
             // ----- Arrange -----
+            val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("A book")))))
             val entity = updateReviewEntity(
                 localId = 14L,
                 userBookId = 95,
-                reviewBody = "A book",
+                reviewSlateJson = doc.toJson(),
                 reviewHasSpoilers = false,
                 enqueuedAt = "2026-05-30T10:15:30Z",
             )
@@ -568,7 +574,7 @@ class PendingUserBookWriteSyncerTest {
             coJustRun {
                 booksRemoteDataSource.replayUpdateBookReview(
                     userBookId = any(),
-                    body = any(),
+                    review = any(),
                     hasSpoilers = any(),
                     reviewedAt = any(),
                 )
@@ -585,7 +591,7 @@ class PendingUserBookWriteSyncerTest {
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayUpdateBookReview(
                     userBookId = any(),
-                    body = any(),
+                    review = any(),
                     hasSpoilers = any(),
                     reviewedAt = "2026-05-30",
                 )

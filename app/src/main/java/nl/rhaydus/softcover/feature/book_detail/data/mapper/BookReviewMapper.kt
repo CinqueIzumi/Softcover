@@ -1,11 +1,15 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
+import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromSlate
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
 import nl.rhaydus.softcover.fragment.BookReviewFragment
 
 fun BookReviewFragment.toBookReview(): BookReview? {
-    val text = review ?: return null
+    val document = reviewDocumentFromSlate(slate = review_slate)
+
+    if (document.isBlank()) return null
 
     val reviewer = BookReviewer(
         id = user.id,
@@ -16,7 +20,7 @@ fun BookReviewFragment.toBookReview(): BookReview? {
 
     return BookReview(
         id = id,
-        review = text,
+        reviewDocument = document,
         hasSpoilers = review_has_spoilers,
         rating = rating,
         reviewedAt = reviewed_at,

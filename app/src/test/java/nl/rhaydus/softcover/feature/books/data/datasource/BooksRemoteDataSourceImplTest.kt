@@ -34,6 +34,9 @@ import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
@@ -2468,7 +2471,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Act -----
             val result = dataSource.updateBookReview(
                 userBook = userBook,
-                body = "Great read",
+                review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
                 hasSpoilers = false,
                 reviewedAt = "2026-05-30",
             )
@@ -2506,7 +2509,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Act -----
             dataSource.updateBookReview(
                 userBook = userBook,
-                body = "Great read",
+                review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
                 hasSpoilers = false,
                 reviewedAt = "2026-05-30",
             )
@@ -2537,7 +2540,7 @@ class BooksRemoteDataSourceImplTest {
             shouldThrow<Exception> {
                 dataSource.updateBookReview(
                     userBook = userBook,
-                    body = "Great read",
+                    review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
                     hasSpoilers = false,
                     reviewedAt = "2026-05-30",
                 )
@@ -2572,7 +2575,7 @@ class BooksRemoteDataSourceImplTest {
             shouldThrow<Exception> {
                 dataSource.updateBookReview(
                     userBook = userBook,
-                    body = "Great read",
+                    review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
                     hasSpoilers = false,
                     reviewedAt = "2026-05-30",
                 )
@@ -2595,7 +2598,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Act -----
             dataSource.replayUpdateBookReview(
                 userBookId = userBookId,
-                body = "Great read",
+                review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
                 hasSpoilers = false,
                 reviewedAt = "2026-05-30",
             )

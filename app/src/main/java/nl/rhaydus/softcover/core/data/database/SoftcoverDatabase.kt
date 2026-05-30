@@ -66,7 +66,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
     views = [
         BookEditionView::class
     ],
-    version = 35,
+    version = 36,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -125,6 +125,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_32_33)
                 .addMigrations(MIGRATION_33_34)
                 .addMigrations(MIGRATION_34_35)
+                .addMigrations(MIGRATION_35_36)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -939,6 +940,107 @@ abstract class SoftcoverDatabase : RoomDatabase() {
         private val MIGRATION_34_35 = object : Migration(34, 35) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("DROP TABLE IF EXISTS personal_reviews")
+            }
+        }
+
+        // Reviews become structured rich text: the cached review (previously the server's HTML in
+        // `review`) and the offline-replay payload (previously the plain-text `reviewBody`) both become
+        // a serialised `ReviewDocument` in `reviewSlateJson`. Neither old format is valid ReviewDocument
+        // JSON, so both tables are recreated dropping the old column and the new one is left NULL — the
+        // review re-fetches from Hardcover on the next refresh. SQLite < 3.35 (minSdk 26) can't drop a
+        // column, so each table is rebuilt; all non-review data is carried across.
+        private val MIGRATION_35_36 = object : Migration(35, 36) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE user_books_new (
+                            id INTEGER NOT NULL,
+                            bookId INTEGER NOT NULL,
+                            statusCode INTEGER NOT NULL,
+                            dateAdded TEXT NOT NULL,
+                            privacySettingId INTEGER NOT NULL,
+                            reviewHasSpoilers INTEGER NOT NULL,
+                            editionId INTEGER,
+                            lastReadDate TEXT,
+                            rating REAL,
+                            referrerUserId INTEGER,
+                            reviewSlateJson TEXT,
+                            reviewedAt TEXT,
+                            updatedAt TEXT,
+                            createdAt TEXT,
+                            PRIMARY KEY(id),
+                            FOREIGN KEY(bookId) REFERENCES books(id) ON UPDATE NO ACTION ON DELETE CASCADE
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        INSERT INTO user_books_new (
+                            id, bookId, statusCode, dateAdded, privacySettingId, reviewHasSpoilers,
+                            editionId, lastReadDate, rating, referrerUserId, reviewSlateJson, reviewedAt,
+                            updatedAt, createdAt
+                        )
+                        SELECT
+                            id, bookId, statusCode, dateAdded, privacySettingId, reviewHasSpoilers,
+                            editionId, lastReadDate, rating, referrerUserId, NULL, reviewedAt,
+                            updatedAt, createdAt
+                        FROM user_books
+                    """.trimIndent()
+                )
+
+                db.execSQL("DROP TABLE user_books")
+
+                db.execSQL("ALTER TABLE user_books_new RENAME TO user_books")
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_user_books_bookId ON user_books(bookId)")
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_user_books_statusCode ON user_books(statusCode)")
+
+                db.execSQL(
+                    """
+                        CREATE TABLE pending_user_book_writes_new (
+                            localId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            kind TEXT NOT NULL,
+                            userBookId INTEGER NOT NULL,
+                            userBookReadId INTEGER NOT NULL,
+                            bookId INTEGER NOT NULL,
+                            editionId INTEGER,
+                            progressPages INTEGER,
+                            progressSeconds INTEGER,
+                            startedAt TEXT,
+                            finishedAt TEXT,
+                            rating REAL,
+                            reviewSlateJson TEXT,
+                            reviewHasSpoilers INTEGER,
+                            enqueuedAt TEXT NOT NULL,
+                            attempts INTEGER NOT NULL DEFAULT 0
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        INSERT INTO pending_user_book_writes_new (
+                            localId, kind, userBookId, userBookReadId, bookId, editionId, progressPages,
+                            progressSeconds, startedAt, finishedAt, rating, reviewSlateJson,
+                            reviewHasSpoilers, enqueuedAt, attempts
+                        )
+                        SELECT
+                            localId, kind, userBookId, userBookReadId, bookId, editionId, progressPages,
+                            progressSeconds, startedAt, finishedAt, rating, NULL,
+                            reviewHasSpoilers, enqueuedAt, attempts
+                        FROM pending_user_book_writes
+                    """.trimIndent()
+                )
+
+                db.execSQL("DROP TABLE pending_user_book_writes")
+
+                db.execSQL("ALTER TABLE pending_user_book_writes_new RENAME TO pending_user_book_writes")
+
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)"
+                )
             }
         }
 

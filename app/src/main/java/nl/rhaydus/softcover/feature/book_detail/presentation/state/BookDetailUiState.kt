@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
@@ -32,7 +33,7 @@ data class BookDetailUiState(
     val revealedSpoilerReviewIds: Set<Int> = emptySet(),
 
     val showReviewSheet: Boolean = false,
-    val reviewEditorBody: String = "",
+    val reviewEditorDocument: ReviewDocument = ReviewDocument.EMPTY,
     val reviewEditorHasSpoilers: Boolean = false,
 
     val failedMutationBookIds: Set<Int> = emptySet(),

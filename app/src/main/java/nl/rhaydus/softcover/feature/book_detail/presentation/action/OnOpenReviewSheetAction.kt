@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -15,15 +15,9 @@ class OnOpenReviewSheetAction : BookDetailAction {
         scope.setState { state ->
             val userBook = state.book?.userBook
 
-            // Hardcover stores the review as HTML; seed the editor with its plain-text rendering so
-            // the user edits words, not markup.
-            val seedBody: String = userBook?.review
-                ?.let { htmlToAnnotatedString(html = it).text }
-                .orEmpty()
-
             state.copy(
                 showReviewSheet = true,
-                reviewEditorBody = seedBody,
+                reviewEditorDocument = userBook?.reviewDocument ?: ReviewDocument.EMPTY,
                 reviewEditorHasSpoilers = userBook?.reviewHasSpoilers ?: false,
             )
         }

@@ -8,6 +8,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import org.junit.jupiter.api.BeforeEach
@@ -36,19 +39,23 @@ class UpdateBookReviewUseCaseTest {
             every { inputBook.userBook } returns null
 
             // ----- Act -----
-            val result = useCase(inputBook, body = "Great read.", hasSpoilers = false)
+            val result = useCase(
+                inputBook,
+                review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read."))))),
+                hasSpoilers = false,
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
 
-            coVerify(exactly = 0) { booksRepository.updateBookReview(book = any(), body = any(), hasSpoilers = any()) }
+            coVerify(exactly = 0) { booksRepository.updateBookReview(book = any(), review = any(), hasSpoilers = any()) }
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
         @Test
         fun `calls updateBookReview then cacheBook with the returned book and returns success`() = runTest {
             // ----- Arrange -----
-            val body = "Absolutely loved it."
+            val review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Absolutely loved it.")))))
             val hasSpoilers = true
             val userBook = mockk<UserBook>()
             val inputBook = mockk<Book>()
@@ -57,7 +64,7 @@ class UpdateBookReviewUseCaseTest {
             every { inputBook.userBook } returns userBook
 
             coEvery {
-                booksRepository.updateBookReview(book = inputBook, body = body, hasSpoilers = hasSpoilers)
+                booksRepository.updateBookReview(book = inputBook, review = review, hasSpoilers = hasSpoilers)
             } returns updatedBook
 
             coJustRun {
@@ -65,11 +72,11 @@ class UpdateBookReviewUseCaseTest {
             }
 
             // ----- Act -----
-            val result = useCase(inputBook, body = body, hasSpoilers = hasSpoilers)
+            val result = useCase(inputBook, review = review, hasSpoilers = hasSpoilers)
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 1) { booksRepository.updateBookReview(book = inputBook, body = body, hasSpoilers = hasSpoilers) }
+            coVerify(exactly = 1) { booksRepository.updateBookReview(book = inputBook, review = review, hasSpoilers = hasSpoilers) }
             coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
     }

@@ -33,12 +33,13 @@ import nl.rhaydus.softcover.UpdateUserBookReviewMutation
 import nl.rhaydus.softcover.UpdateUserBookReviewMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookReviewUserBookFragment
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
+import nl.rhaydus.softcover.core.data.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.feature.books.data.mapper.reviewSlateFromBody
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
 import nl.rhaydus.softcover.type.DatesReadInput
@@ -69,7 +70,7 @@ interface BooksRemoteDataSource {
 
     suspend fun updateBookReview(
         userBook: UserBook,
-        body: String,
+        review: ReviewDocument,
         hasSpoilers: Boolean,
         reviewedAt: String,
     ): Book
@@ -122,7 +123,7 @@ interface BooksRemoteDataSource {
 
     suspend fun replayUpdateBookReview(
         userBookId: Int,
-        body: String,
+        review: ReviewDocument,
         hasSpoilers: Boolean,
         reviewedAt: String,
     )
@@ -284,12 +285,12 @@ class BooksRemoteDataSourceImpl(
 
     override suspend fun updateBookReview(
         userBook: UserBook,
-        body: String,
+        review: ReviewDocument,
         hasSpoilers: Boolean,
         reviewedAt: String,
     ): Book {
         val input = UserBookUpdateInput(
-            review_slate = Optional.Present(reviewSlateFromBody(body = body)),
+            review_slate = Optional.Present(reviewSlateFromDocument(document = review)),
             review_has_spoilers = Optional.Present(hasSpoilers),
             reviewed_at = Optional.Present(reviewedAt),
         )
@@ -515,12 +516,12 @@ class BooksRemoteDataSourceImpl(
 
     override suspend fun replayUpdateBookReview(
         userBookId: Int,
-        body: String,
+        review: ReviewDocument,
         hasSpoilers: Boolean,
         reviewedAt: String,
     ) {
         val input = UserBookUpdateInput(
-            review_slate = Optional.Present(reviewSlateFromBody(body = body)),
+            review_slate = Optional.Present(reviewSlateFromDocument(document = review)),
             review_has_spoilers = Optional.Present(hasSpoilers),
             reviewed_at = Optional.Present(reviewedAt),
         )
