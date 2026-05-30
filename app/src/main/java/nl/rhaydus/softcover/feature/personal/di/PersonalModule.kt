@@ -25,6 +25,8 @@ import nl.rhaydus.softcover.feature.personal.domain.usecase.ObserveHighlightsFor
 import nl.rhaydus.softcover.feature.personal.domain.usecase.ObserveReadingLogCountUseCase
 import nl.rhaydus.softcover.feature.personal.domain.usecase.ObserveReadingLogForBookUseCase
 import nl.rhaydus.softcover.feature.personal.domain.usecase.ObserveSessionsForBookUseCase
+import nl.rhaydus.softcover.feature.personal.domain.usecase.PauseReadingSessionUseCase
+import nl.rhaydus.softcover.feature.personal.domain.usecase.ResumeReadingSessionUseCase
 import nl.rhaydus.softcover.feature.personal.domain.usecase.StartReadingSessionUseCase
 import nl.rhaydus.softcover.feature.personal.domain.usecase.StopReadingSessionUseCase
 import nl.rhaydus.softcover.feature.personal.domain.usecase.UpdateHighlightUseCase
@@ -55,6 +57,8 @@ val personalModule = module {
     factory { ObserveActiveSessionUseCase(repository = get()) }
     factory { StartReadingSessionUseCase(repository = get()) }
     factory { StopReadingSessionUseCase(repository = get()) }
+    factory { PauseReadingSessionUseCase(repository = get()) }
+    factory { ResumeReadingSessionUseCase(repository = get()) }
     factory { DeleteReadingSessionUseCase(repository = get()) }
 
     factory { ObserveReadingLogForBookUseCase(repository = get()) }

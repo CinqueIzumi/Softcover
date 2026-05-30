@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUser
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetTrendingBooksUseCase
@@ -18,14 +19,13 @@ import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEven
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingInitializer
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
 
 class ReadingScreenScreenModel(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val refreshLibraryUseCase: RefreshLibraryUseCase,
-    private val updateBookProgress: UpdateBookProgress,
+    private val recordBookProgressUseCase: RecordBookProgressUseCase,
     private val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
@@ -46,7 +46,7 @@ class ReadingScreenScreenModel(
         updateBookProgressUseCase = updateBookProgressUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
         refreshLibraryUseCase = refreshLibraryUseCase,
-        updateBookProgress = updateBookProgress,
+        recordBookProgressUseCase = recordBookProgressUseCase,
         observeAllBookDeadlinesUseCase = observeAllBookDeadlinesUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         observePlanTodayDismissalsUseCase = observePlanTodayDismissalsUseCase,

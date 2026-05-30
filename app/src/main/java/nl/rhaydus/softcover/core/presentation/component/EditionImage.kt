@@ -186,6 +186,22 @@ fun rememberEditionImageRequest(
     }
 }
 
+/**
+ * Resolves the Coil image source (a local [File] or a remote URL [String]) for a book cover,
+ * preferring the user's selected [edition], then the [defaultEdition], then [fallbackCoverUrl].
+ * Shared so non-Composable surfaces (e.g. the reading-session notification) render the exact same
+ * edition cover the in-app [EditionImage] shows. Returns null when no source is known.
+ */
+fun resolveEditionImageSource(
+    edition: BookEdition?,
+    defaultEdition: BookEdition?,
+    fallbackCoverUrl: String?,
+): Any? = resolveEditionImage(
+    edition = edition,
+    defaultEdition = defaultEdition,
+    fallbackCoverUrl = fallbackCoverUrl,
+)?.source
+
 private data class EditionImageResolution(
     val source: Any,
     val cacheKeyUrl: String?,

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.presentation.screen
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -43,6 +44,7 @@ import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateU
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
+import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -56,10 +58,13 @@ class MainActivity() : ComponentActivity() {
     private val checkForAppUpdateUseCase: CheckForAppUpdateUseCase by inject()
     private val startAppUpdateFlowUseCase: StartAppUpdateFlowUseCase by inject()
     private val completeAppUpdateUseCase: CompleteAppUpdateUseCase by inject()
+    private val activeSessionController: ActiveSessionController by inject()
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        handleFocusModeIntent(intent = intent)
 
         val transparent = Color.Transparent.toArgb()
         val transparentAutoStyle = SystemBarStyle.auto(
@@ -160,12 +165,32 @@ class MainActivity() : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        setIntent(intent)
+
+        handleFocusModeIntent(intent = intent)
+    }
+
+    private fun handleFocusModeIntent(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_OPEN_FOCUS_MODE, false) != true) return
+
+        activeSessionController.requestFocusMode()
+
+        intent.removeExtra(EXTRA_OPEN_FOCUS_MODE)
+    }
+
     override fun onResume() {
         super.onResume()
 
         lifecycleScope.launch {
             checkForAppUpdateUseCase()
         }
+    }
+
+    companion object {
+        const val EXTRA_OPEN_FOCUS_MODE = "nl.rhaydus.softcover.OPEN_FOCUS_MODE"
     }
 }
 

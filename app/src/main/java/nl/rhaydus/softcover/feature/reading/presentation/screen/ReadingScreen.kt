@@ -49,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,15 +77,18 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import coil.compose.AsyncImage
+import org.koin.compose.koinInject
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.presentation.component.PullToRefreshEyebrow
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
@@ -93,6 +97,7 @@ import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCo
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
@@ -114,6 +119,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailSc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.prefetchBookDetailOnPress
+import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
+import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
@@ -741,7 +748,62 @@ object ReadingScreen : Screen {
                         size = ButtonSize.M,
                         fillMaxWidth = true,
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    FeaturedSessionButton(book = book)
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun FeaturedSessionButton(book: Book) {
+        val controller = koinInject<ActiveSessionController>()
+        val navigator = LocalNavigator.currentOrThrow
+        val haptics = rememberHaptics()
+        val active by controller.activeSession.collectAsStateWithLifecycle()
+
+        val currentBook by rememberUpdatedState(book)
+
+        // The lock-screen surface is a plain notification, so it needs POST_NOTIFICATIONS (Android
+        // 13+). Ask at the natural moment — the first session start — then start regardless of the
+        // outcome, since the in-app peek bar and Focus Mode work without the permission.
+        val sessionPermissionRequester = rememberNotificationPermissionRequester(
+            onResult = { controller.start(book = currentBook) },
+        )
+
+        when {
+            active?.book?.id == book.id -> {
+                SoftcoverButton(
+                    label = "Focus mode",
+                    style = ButtonStyle.TONAL,
+                    size = ButtonSize.M,
+                    icon = SoftcoverIconResource.Drawable(
+                        id = R.drawable.ic_reading,
+                        contentDescription = "Focus mode icon",
+                    ),
+                    onClick = { navigator.parent?.push(item = FocusModeScreen) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            active == null -> {
+                SoftcoverButton(
+                    label = "Start reading session",
+                    style = ButtonStyle.TONAL,
+                    size = ButtonSize.M,
+                    icon = SoftcoverIconResource.Drawable(
+                        id = R.drawable.ic_play,
+                        contentDescription = "Start reading session icon",
+                    ),
+                    onClick = {
+                        haptics.threshold()
+
+                        sessionPermissionRequester.request()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }

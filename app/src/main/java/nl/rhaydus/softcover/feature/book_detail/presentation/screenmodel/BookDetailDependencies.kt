@@ -21,11 +21,11 @@ import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviews
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
-import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
+import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 
 class BookDetailDependencies(
-    val updateBookProgress: UpdateBookProgress,
+    val recordBookProgressUseCase: RecordBookProgressUseCase,
     val updateBookEditionUseCase: UpdateBookEditionUseCase,
     val fetchBookByIdUseCase: FetchBookByIdUseCase,
     val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,

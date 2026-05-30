@@ -17,14 +17,14 @@ import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEven
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
+import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnUpdatePercentageProgressClickActionTest {
 
-    private lateinit var updateBookProgress: UpdateBookProgress
+    private lateinit var updateBookProgress: RecordBookProgressUseCase
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<ReadingLocalVariables>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
@@ -46,7 +46,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
         return mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
             every {
-                mock.updateBookProgress
+                mock.recordBookProgressUseCase
             } returns updateBookProgress
 
             every {

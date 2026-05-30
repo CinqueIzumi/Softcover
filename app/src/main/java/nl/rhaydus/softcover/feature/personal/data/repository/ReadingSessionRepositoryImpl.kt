@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.personal.data.mapper.toEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingSession
 import nl.rhaydus.softcover.feature.personal.domain.repository.ReadingSessionRepository
+import java.time.Duration
 import java.time.Instant
 
 class ReadingSessionRepositoryImpl(
@@ -49,11 +50,40 @@ class ReadingSessionRepositoryImpl(
     ) {
         val existing = localDataSource.observeById(id = id).first() ?: return
 
+        val now = Instant.now()
+
+        val foldedPausedSeconds = existing.pausedSeconds + existing.openPauseSeconds(now = now)
+
         localDataSource.update(
             entity = existing.copy(
-                endedAt = Instant.now().toString(),
+                endedAt = now.toString(),
                 endPage = endPage,
                 endSeconds = endSeconds,
+                pausedSeconds = foldedPausedSeconds,
+                lastPausedAt = null,
+            ),
+        )
+    }
+
+    override suspend fun pause(id: Long) {
+        val existing = localDataSource.observeById(id = id).first() ?: return
+
+        if (existing.endedAt != null || existing.lastPausedAt != null) return
+
+        localDataSource.update(
+            entity = existing.copy(lastPausedAt = Instant.now().toString()),
+        )
+    }
+
+    override suspend fun resume(id: Long) {
+        val existing = localDataSource.observeById(id = id).first() ?: return
+
+        if (existing.lastPausedAt == null) return
+
+        localDataSource.update(
+            entity = existing.copy(
+                pausedSeconds = existing.pausedSeconds + existing.openPauseSeconds(now = Instant.now()),
+                lastPausedAt = null,
             ),
         )
     }
@@ -65,4 +95,14 @@ class ReadingSessionRepositoryImpl(
     override suspend fun delete(id: Long) {
         localDataSource.delete(id = id)
     }
+}
+
+/** Seconds elapsed in the currently-open pause (since [lastPausedAt]), or 0 when running. */
+private fun ReadingSessionEntity.openPauseSeconds(now: Instant): Int {
+    val pausedAt = lastPausedAt ?: return 0
+
+    val seconds = runCatching { Duration.between(Instant.parse(pausedAt), now).seconds }
+        .getOrDefault(0L)
+
+    return seconds.coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
 }

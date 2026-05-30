@@ -8,7 +8,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingInit
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.TrendingBooksLoader
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.WantToReadCollector
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
-import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -19,7 +18,7 @@ val readingModule = module {
             updateBookProgressUseCase = get(),
             markBookAsReadUseCase = get(),
             refreshLibraryUseCase = get(),
-            updateBookProgress = get(),
+            recordBookProgressUseCase = get(),
             observeAllBookDeadlinesUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
             observePlanTodayDismissalsUseCase = get(),
@@ -28,13 +27,6 @@ val readingModule = module {
             getTrendingBooksUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
-        )
-    }
-
-    factory {
-        UpdateBookProgress(
-            markBookAsReadUseCase = get(),
-            updateBookProgressUseCase = get(),
         )
     }
 

@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
@@ -124,6 +125,13 @@ val booksModule = module {
 
     factory {
         UpdateBookProgressUseCase(repository = get())
+    }
+
+    factory {
+        RecordBookProgressUseCase(
+            markBookAsReadUseCase = get(),
+            updateBookProgressUseCase = get(),
+        )
     }
 
     factory {

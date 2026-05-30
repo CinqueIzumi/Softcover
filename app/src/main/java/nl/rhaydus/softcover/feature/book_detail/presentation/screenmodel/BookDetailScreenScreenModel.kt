@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
-import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
+import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
@@ -38,7 +38,7 @@ class BookDetailScreenScreenModel(
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
     private val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
-    private val updateBookProgress: UpdateBookProgress,
+    private val recordBookProgressUseCase: RecordBookProgressUseCase,
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
@@ -68,7 +68,7 @@ class BookDetailScreenScreenModel(
         fetchBookByIdUseCase = fetchBookByIdUseCase,
         getEditionsByBookIdUseCase = getEditionsByBookIdUseCase,
         updateBookEditionUseCase = updateBookEditionUseCase,
-        updateBookProgress = updateBookProgress,
+        recordBookProgressUseCase = recordBookProgressUseCase,
         getAllUserBooksUseCase = getAllUserBooksUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
         markBookAsReadingUseCase = markBookAsReadingUseCase,

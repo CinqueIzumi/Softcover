@@ -30,6 +30,7 @@ import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
 import nl.rhaydus.softcover.feature.personal.di.personalModule
 import nl.rhaydus.softcover.feature.profile.di.profileModule
 import nl.rhaydus.softcover.feature.explore.di.exploreModule
+import nl.rhaydus.softcover.feature.session.di.sessionModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -72,6 +73,7 @@ class SoftCoverApp : Application() {
                 connectivityModule,
                 notificationModule,
                 personalModule,
+                sessionModule,
             )
         }
 

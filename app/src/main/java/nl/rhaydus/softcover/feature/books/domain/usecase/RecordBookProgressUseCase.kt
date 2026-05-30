@@ -1,10 +1,14 @@
-package nl.rhaydus.softcover.feature.reading.presentation.util
+package nl.rhaydus.softcover.feature.books.domain.usecase
 
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
 
-class UpdateBookProgress(
+/**
+ * Advances a book's reading progress, auto-completing it when the new position reaches the end of
+ * the current edition. Wraps [UpdateBookProgressUseCase] and [MarkBookAsReadUseCase] so every
+ * "where am I now" entry point — the reading screen, Focus Mode, and the lock-screen quick update —
+ * shares one canonical finished-vs-progress decision.
+ */
+class RecordBookProgressUseCase(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
 ) {
@@ -14,6 +18,7 @@ class UpdateBookProgress(
         newSeconds: Int? = null,
     ): Result<Unit> {
         val edition = book.currentEdition
+
         val finished = when {
             edition == null -> false
             newSeconds != null -> edition.audioSeconds?.let { newSeconds >= it } == true

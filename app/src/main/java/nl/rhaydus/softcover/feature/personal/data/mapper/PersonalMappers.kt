@@ -12,6 +12,9 @@ import java.time.LocalDate
 private fun String.toInstantOrEpoch(): Instant =
     runCatching { Instant.parse(this) }.getOrDefault(Instant.EPOCH)
 
+private fun String?.toInstantOrNull(): Instant? =
+    this?.let { runCatching { Instant.parse(it) }.getOrNull() }
+
 private fun String?.toLocalDateOrNull(): LocalDate? =
     this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
@@ -42,6 +45,8 @@ fun ReadingSessionEntity.toDomain(): ReadingSession = ReadingSession(
     endPage = endPage,
     startSeconds = startSeconds,
     endSeconds = endSeconds,
+    pausedSeconds = pausedSeconds,
+    lastPausedAt = lastPausedAt.toInstantOrNull(),
 )
 
 fun ReadingSession.toEntity(): ReadingSessionEntity = ReadingSessionEntity(
@@ -53,6 +58,8 @@ fun ReadingSession.toEntity(): ReadingSessionEntity = ReadingSessionEntity(
     endPage = endPage,
     startSeconds = startSeconds,
     endSeconds = endSeconds,
+    pausedSeconds = pausedSeconds,
+    lastPausedAt = lastPausedAt?.toString(),
 )
 
 fun ReadingLogEntryEntity.toDomain(): ReadingLogEntry = ReadingLogEntry(

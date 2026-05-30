@@ -66,7 +66,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
     views = [
         BookEditionView::class
     ],
-    version = 36,
+    version = 37,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -126,6 +126,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_33_34)
                 .addMigrations(MIGRATION_34_35)
                 .addMigrations(MIGRATION_35_36)
+                .addMigrations(MIGRATION_36_37)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -1041,6 +1042,18 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)"
                 )
+            }
+        }
+
+        // Reading sessions gain honest pause tracking: pausedSeconds accumulates idle time from
+        // completed pauses, and lastPausedAt marks a currently-open pause (NULL while running).
+        // Both are ADD COLUMN (no DROP), so this is safe on SQLite < 3.35 (minSdk 26). An in-flight
+        // active session migrates as a never-paused running session.
+        private val MIGRATION_36_37 = object : Migration(36, 37) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE reading_sessions ADD COLUMN pausedSeconds INTEGER NOT NULL DEFAULT 0")
+
+                db.execSQL("ALTER TABLE reading_sessions ADD COLUMN lastPausedAt TEXT DEFAULT NULL")
             }
         }
 
