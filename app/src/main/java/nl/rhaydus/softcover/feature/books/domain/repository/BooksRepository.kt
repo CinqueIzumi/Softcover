@@ -89,6 +89,20 @@ interface BooksRepository {
         rating: Double,
     ): Book
 
+    /**
+     * Publishes the user's personal review for [book] to Hardcover (review body + spoiler flag,
+     * stamped with today's `reviewed_at`). The review is modelled on [UserBook.review] and Hardcover
+     * owns it, so an optimistic copy is cached first; when online the remote call returns the
+     * canonical server book, on a hard error the prior snapshot is restored and the error rethrown,
+     * and when offline (or on [nl.rhaydus.softcover.core.domain.exception.OfflineException]) the
+     * write is queued for replay and the optimistic book is returned.
+     */
+    suspend fun updateBookReview(
+        book: Book,
+        body: String,
+        hasSpoilers: Boolean,
+    ): Book
+
     suspend fun removeBookFromLibrary(book: Book)
 
     suspend fun updateBookProgress(

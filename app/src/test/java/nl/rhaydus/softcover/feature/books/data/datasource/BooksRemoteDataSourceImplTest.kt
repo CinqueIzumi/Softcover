@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.UpdateUserBookRatingMutation
+import nl.rhaydus.softcover.UpdateUserBookReviewMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -2430,6 +2431,179 @@ class BooksRemoteDataSourceImplTest {
             coVerify(exactly = 1) {
                 apolloClient.safeMutation(
                     mutation = match<UpdateUserBookRatingMutation> { it.id == userBookId },
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateBookReview {
+
+        @Test
+        fun `returns mapped book when mutation succeeds`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 7
+            val userBook = stubUserBook(id = userBookId)
+            val expectedBook = stubBook()
+            val mutationData = mockk<UpdateUserBookReviewMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookReviewMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookReviewMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            val result = dataSource.updateBookReview(
+                userBook = userBook,
+                body = "Great read",
+                hasSpoilers = false,
+                reviewedAt = "2026-05-30",
+            )
+
+            // ----- Assert -----
+            result shouldBe expectedBook
+        }
+
+        @Test
+        fun `issues UpdateUserBookReviewMutation with the correct user book id`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 42
+            val userBook = stubUserBook(id = userBookId)
+            val expectedBook = stubBook()
+            val mutationData = mockk<UpdateUserBookReviewMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookReviewMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookReviewMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.updateBookReview(
+                userBook = userBook,
+                body = "Great read",
+                hasSpoilers = false,
+                reviewedAt = "2026-05-30",
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateUserBookReviewMutation> { it.id == userBookId },
+                )
+            }
+        }
+
+        @Test
+        fun `throws when mutation returns null update_user_book wrapper`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 7)
+            val mutationData = mockk<UpdateUserBookReviewMutation.Data>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.updateBookReview(
+                    userBook = userBook,
+                    body = "Great read",
+                    hasSpoilers = false,
+                    reviewedAt = "2026-05-30",
+                )
+            }
+        }
+
+        @Test
+        fun `throws when toBook maps the fragment to null`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 7)
+            val mutationData = mockk<UpdateUserBookReviewMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookReviewMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookReviewMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.updateBookReview(
+                    userBook = userBook,
+                    body = "Great read",
+                    hasSpoilers = false,
+                    reviewedAt = "2026-05-30",
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class ReplayUpdateBookReview {
+
+        @Test
+        fun `issues UpdateUserBookReviewMutation with the correct userBookId`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 42
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayUpdateBookReview(
+                userBookId = userBookId,
+                body = "Great read",
+                hasSpoilers = false,
+                reviewedAt = "2026-05-30",
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateUserBookReviewMutation> { it.id == userBookId },
                 )
             }
         }

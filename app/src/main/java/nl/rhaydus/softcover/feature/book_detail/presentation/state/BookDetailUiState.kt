@@ -31,6 +31,10 @@ data class BookDetailUiState(
     val loadingReviews: Boolean = false,
     val revealedSpoilerReviewIds: Set<Int> = emptySet(),
 
+    val showReviewSheet: Boolean = false,
+    val reviewEditorBody: String = "",
+    val reviewEditorHasSpoilers: Boolean = false,
+
     val failedMutationBookIds: Set<Int> = emptySet(),
     val failedMutationEditionIds: Set<Int> = emptySet(),
 

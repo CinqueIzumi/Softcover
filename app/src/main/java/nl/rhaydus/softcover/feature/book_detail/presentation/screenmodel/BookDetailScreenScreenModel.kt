@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookRatingUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
@@ -53,6 +54,7 @@ class BookDetailScreenScreenModel(
     private val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     private val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     private val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
+    private val updateBookReviewUseCase: UpdateBookReviewUseCase,
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
@@ -82,6 +84,7 @@ class BookDetailScreenScreenModel(
         setBookDeadlineUseCase = setBookDeadlineUseCase,
         clearBookDeadlineUseCase = clearBookDeadlineUseCase,
         getTopBookReviewsUseCase = getTopBookReviewsUseCase,
+        updateBookReviewUseCase = updateBookReviewUseCase,
     )
 
     init {

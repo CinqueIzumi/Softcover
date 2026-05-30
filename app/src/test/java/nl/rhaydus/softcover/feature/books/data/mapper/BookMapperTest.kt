@@ -275,6 +275,7 @@ class BookMapperTest {
         lastReadDate: String? = null,
         rating: Double? = null,
         referrerUserId: Int? = null,
+        review: String? = null,
         reviewedAt: String? = null,
         updatedAt: String? = null,
         journals: List<ReadingJournal> = emptyList(),
@@ -318,6 +319,10 @@ class BookMapperTest {
         every {
             this@mockk.referrerUserId
         } returns referrerUserId
+
+        every {
+            this@mockk.review
+        } returns review
 
         every {
             this@mockk.reviewedAt
@@ -532,6 +537,7 @@ class BookMapperTest {
         lastReadDate: String? = null,
         rating: Double? = null,
         referrerUserId: Int? = null,
+        review: String? = null,
         reviewedAt: String? = null,
         updatedAt: String? = null,
     ): UserBookEntity = UserBookEntity(
@@ -546,6 +552,7 @@ class BookMapperTest {
         lastReadDate = lastReadDate,
         rating = rating,
         referrerUserId = referrerUserId,
+        review = review,
         reviewedAt = reviewedAt,
         updatedAt = updatedAt,
     )
@@ -968,6 +975,30 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.statusCode shouldBe BookStatus.WantToRead.code
+        }
+
+        @Test
+        fun `propagates non-null review to UserBookEntity`() {
+            // ----- Arrange -----
+            val userBook = stubUserBook(review = "Loved it")
+
+            // ----- Act -----
+            val result = userBook.toEntity(bookId = 1)
+
+            // ----- Assert -----
+            result.review shouldBe "Loved it"
+        }
+
+        @Test
+        fun `propagates null review to UserBookEntity as null`() {
+            // ----- Arrange -----
+            val userBook = stubUserBook(review = null)
+
+            // ----- Act -----
+            val result = userBook.toEntity(bookId = 1)
+
+            // ----- Assert -----
+            result.review shouldBe null
         }
     }
 
@@ -1760,6 +1791,30 @@ class BookMapperTest {
                 // ----- Assert -----
                 result.status shouldBe expectedStatus
             }
+        }
+
+        @Test
+        fun `propagates non-null review from entity to model`() {
+            // ----- Arrange -----
+            val entity = stubUserBookEntity(review = "Loved it")
+
+            // ----- Act -----
+            val result = entity.toModel(journals = emptyList())
+
+            // ----- Assert -----
+            result.review shouldBe "Loved it"
+        }
+
+        @Test
+        fun `propagates null review from entity to model as null`() {
+            // ----- Arrange -----
+            val entity = stubUserBookEntity(review = null)
+
+            // ----- Act -----
+            val result = entity.toModel(journals = emptyList())
+
+            // ----- Assert -----
+            result.review shouldBe null
         }
     }
 
@@ -2908,6 +2963,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
+                every { review } returns null
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -2975,6 +3031,7 @@ class BookMapperTest {
                 every { users_count } returns 250
                 every { ratings_count } returns 0
                 every { description } returns null
+                every { taggable_counts } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -2994,6 +3051,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
+                every { review } returns null
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3060,6 +3118,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 0
                 every { description } returns "some description"
+                every { taggable_counts } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3079,6 +3138,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
+                every { review } returns null
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3139,6 +3199,7 @@ class BookMapperTest {
                 every { users_count } returns 1234
                 every { ratings_count } returns 0
                 every { description } returns null
+                every { taggable_counts } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3158,6 +3219,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
+                every { review } returns null
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3222,6 +3284,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 0
                 every { description } returns null
+                every { taggable_counts } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3241,6 +3304,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
+                every { review } returns null
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3305,6 +3369,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 0
                 every { description } returns null
+                every { taggable_counts } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3324,6 +3389,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
+                every { review } returns null
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3387,6 +3453,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 0
                 every { description } returns null
+                every { taggable_counts } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
@@ -3406,6 +3473,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
+                every { review } returns null
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns "2024-01-01"
@@ -3435,6 +3503,7 @@ class BookMapperTest {
             statusStopped: List<UserBookFragment.Status_stopped_journal> = emptyList(),
             createdAt: String = "2024-01-01",
             ratingsCount: Int = 0,
+            review: String? = null,
         ): UserBookFragment {
             val bookInner = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
@@ -3468,6 +3537,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns ratingsCount
                 every { description } returns null
+                every { taggable_counts } returns emptyList()
             }
 
             every {
@@ -3494,6 +3564,7 @@ class BookMapperTest {
                 every { rating } returns null
                 every { referrer_user_id } returns null
                 every { review_has_spoilers } returns false
+                every { this@mockk.review } returns review
                 every { reviewed_at } returns null
                 every { updated_at } returns null
                 every { created_at } returns createdAt
@@ -3673,6 +3744,34 @@ class BookMapperTest {
             // ----- Assert -----
             result?.ratingsCount shouldBe 77
         }
+
+        @Test
+        fun `propagates non-null review from fragment to UserBook`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            val fragment = stubMinimalUserBookFragment(review = "Loved it")
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.userBook?.review shouldBe "Loved it"
+        }
+
+        @Test
+        fun `propagates null review from fragment to UserBook as null`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            val fragment = stubMinimalUserBookFragment(review = null)
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.userBook?.review shouldBe null
+        }
     }
 
     @Nested
@@ -3697,6 +3796,7 @@ class BookMapperTest {
                 every { description } returns null
                 every { users_count } returns 0
                 every { default_cover_edition } returns null
+                every { taggable_counts } returns emptyList()
             }
 
             // ----- Act -----
@@ -3744,6 +3844,7 @@ class BookMapperTest {
                 every { users_count } returns 500
                 every { ratings_count } returns 0
                 every { default_cover_edition } returns defaultEditionInner
+                every { taggable_counts } returns emptyList()
             }
 
             every {
@@ -3805,6 +3906,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 0
                 every { default_cover_edition } returns defaultEditionInner
+                every { taggable_counts } returns emptyList()
             }
 
             every {
@@ -3862,6 +3964,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 0
                 every { default_cover_edition } returns defaultEditionInner
+                every { taggable_counts } returns emptyList()
             }
 
             every {
@@ -3919,6 +4022,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 0
                 every { default_cover_edition } returns defaultEditionInner
+                every { taggable_counts } returns emptyList()
             }
 
             every {
@@ -3975,6 +4079,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 0
                 every { default_cover_edition } returns defaultEditionInner
+                every { taggable_counts } returns emptyList()
             }
 
             every {
@@ -4029,6 +4134,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 312
                 every { default_cover_edition } returns defaultEditionInner
+                every { taggable_counts } returns emptyList()
             }
 
             every {
@@ -4168,6 +4274,7 @@ class BookMapperTest {
                 every { users_count } returns 0
                 every { ratings_count } returns 0
                 every { default_cover_edition } returns defaultEditionInner
+                every { taggable_counts } returns emptyList()
             }
 
             every {

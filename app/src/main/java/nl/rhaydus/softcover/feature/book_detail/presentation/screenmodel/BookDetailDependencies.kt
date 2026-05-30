@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookRatingUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
@@ -43,6 +44,7 @@ class BookDetailDependencies(
     val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
+    val updateBookReviewUseCase: UpdateBookReviewUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

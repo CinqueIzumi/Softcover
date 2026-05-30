@@ -74,9 +74,6 @@ Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to the 
 
 These steps light up the personal-data layer from Step 0.3. Many of the largest "feels missing" gaps live here.
 
-### Step 3.2 — Personal review drafting (M)
-"Write a few words" affordance opens a sheet with editorial-typography input field. Local draft, publish-when-ready. *(B.4.2)*
-
 ### Step 3.3 — Personal highlights section on book detail + quick-add from Reading (M)
 "Passages" section above the community Voices section. Add a quick-add affordance on the Reading featured card. *(B.4.3, B.2.6)*
 

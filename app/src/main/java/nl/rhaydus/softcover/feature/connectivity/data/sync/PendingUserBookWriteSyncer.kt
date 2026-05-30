@@ -10,8 +10,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.feature.connectivity.data.model.PendingUserBookWriteEntity
@@ -110,6 +110,25 @@ class PendingUserBookWriteSyncer(
                     booksRemoteDataSource.replayUpdateBookRating(
                         userBookId = entity.userBookId,
                         rating = rating,
+                    )
+
+                    ReplayOutcome.SYNCED
+                }
+            }
+
+            PendingUserBookWriteKind.UPDATE_REVIEW.name -> {
+                val body = entity.reviewBody
+
+                if (body == null) {
+                    Timber.w("Pending review update ${entity.localId} has no body; discarding")
+
+                    ReplayOutcome.DISCARDED
+                } else {
+                    booksRemoteDataSource.replayUpdateBookReview(
+                        userBookId = entity.userBookId,
+                        body = body,
+                        hasSpoilers = entity.reviewHasSpoilers ?: false,
+                        reviewedAt = entity.enqueuedAt.substringBefore('T'),
                     )
 
                     ReplayOutcome.SYNCED

@@ -1,11 +1,9 @@
 package nl.rhaydus.softcover.feature.personal.data.mapper
 
 import nl.rhaydus.softcover.feature.personal.data.model.HighlightEntity
-import nl.rhaydus.softcover.feature.personal.data.model.PersonalReviewEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
 import nl.rhaydus.softcover.feature.personal.domain.model.Highlight
-import nl.rhaydus.softcover.feature.personal.domain.model.PersonalReview
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingLogEntry
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingSession
 import java.time.Instant
@@ -16,22 +14,6 @@ private fun String.toInstantOrEpoch(): Instant =
 
 private fun String?.toLocalDateOrNull(): LocalDate? =
     this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-
-fun PersonalReviewEntity.toDomain(): PersonalReview = PersonalReview(
-    bookId = bookId,
-    body = body,
-    hasSpoilers = hasSpoilers,
-    isDraft = isDraft,
-    updatedAt = updatedAt.toInstantOrEpoch(),
-)
-
-fun PersonalReview.toEntity(): PersonalReviewEntity = PersonalReviewEntity(
-    bookId = bookId,
-    body = body,
-    hasSpoilers = hasSpoilers,
-    isDraft = isDraft,
-    updatedAt = updatedAt.toString(),
-)
 
 fun HighlightEntity.toDomain(): Highlight = Highlight(
     id = id,

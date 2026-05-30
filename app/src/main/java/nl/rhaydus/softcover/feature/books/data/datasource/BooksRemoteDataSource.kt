@@ -29,6 +29,8 @@ import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.UpdateUserBookRatingMutation
 import nl.rhaydus.softcover.UpdateUserBookRatingMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookRatingUserBookFragment
+import nl.rhaydus.softcover.UpdateUserBookReviewMutation
+import nl.rhaydus.softcover.UpdateUserBookReviewMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookReviewUserBookFragment
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -36,6 +38,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.feature.books.data.mapper.reviewSlateFromBody
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
 import nl.rhaydus.softcover.type.DatesReadInput
@@ -62,6 +65,13 @@ interface BooksRemoteDataSource {
     suspend fun updateBookRating(
         userBook: UserBook,
         rating: Double,
+    ): Book
+
+    suspend fun updateBookReview(
+        userBook: UserBook,
+        body: String,
+        hasSpoilers: Boolean,
+        reviewedAt: String,
     ): Book
 
     suspend fun removeBookFromLibrary(book: Book)
@@ -108,6 +118,13 @@ interface BooksRemoteDataSource {
     suspend fun replayUpdateBookRating(
         userBookId: Int,
         rating: Double,
+    )
+
+    suspend fun replayUpdateBookReview(
+        userBookId: Int,
+        body: String,
+        hasSpoilers: Boolean,
+        reviewedAt: String,
     )
 }
 
@@ -262,6 +279,31 @@ class BooksRemoteDataSourceImpl(
             .update_user_book
             ?.user_book
             ?.updateUserBookRatingUserBookFragment()
+            ?.toBook() ?: throw Exception("Book could not be mapped")
+    }
+
+    override suspend fun updateBookReview(
+        userBook: UserBook,
+        body: String,
+        hasSpoilers: Boolean,
+        reviewedAt: String,
+    ): Book {
+        val input = UserBookUpdateInput(
+            review_slate = Optional.Present(reviewSlateFromBody(body = body)),
+            review_has_spoilers = Optional.Present(hasSpoilers),
+            reviewed_at = Optional.Present(reviewedAt),
+        )
+
+        return apolloClient
+            .safeMutation(
+                mutation = UpdateUserBookReviewMutation(
+                    id = userBook.id,
+                    `object` = input,
+                )
+            )
+            .update_user_book
+            ?.user_book
+            ?.updateUserBookReviewUserBookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
     }
 
@@ -465,6 +507,26 @@ class BooksRemoteDataSourceImpl(
 
         apolloClient.safeMutation(
             mutation = UpdateUserBookRatingMutation(
+                id = userBookId,
+                `object` = input,
+            ),
+        )
+    }
+
+    override suspend fun replayUpdateBookReview(
+        userBookId: Int,
+        body: String,
+        hasSpoilers: Boolean,
+        reviewedAt: String,
+    ) {
+        val input = UserBookUpdateInput(
+            review_slate = Optional.Present(reviewSlateFromBody(body = body)),
+            review_has_spoilers = Optional.Present(hasSpoilers),
+            reviewed_at = Optional.Present(reviewedAt),
+        )
+
+        apolloClient.safeMutation(
+            mutation = UpdateUserBookReviewMutation(
                 id = userBookId,
                 `object` = input,
             ),

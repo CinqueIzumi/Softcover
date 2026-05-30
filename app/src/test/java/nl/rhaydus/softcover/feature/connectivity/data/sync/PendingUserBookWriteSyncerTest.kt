@@ -81,6 +81,28 @@ class PendingUserBookWriteSyncerTest {
         enqueuedAt = enqueuedAt,
     )
 
+    private fun updateReviewEntity(
+        localId: Long = 4L,
+        userBookId: Int = 40,
+        reviewBody: String? = "Great book!",
+        reviewHasSpoilers: Boolean? = false,
+        enqueuedAt: String = "2026-05-30T10:15:30Z",
+    ) = PendingUserBookWriteEntity(
+        localId = localId,
+        kind = PendingUserBookWriteKind.UPDATE_REVIEW.name,
+        userBookId = userBookId,
+        userBookReadId = 0,
+        bookId = 0,
+        editionId = null,
+        progressPages = null,
+        progressSeconds = null,
+        startedAt = null,
+        finishedAt = null,
+        reviewBody = reviewBody,
+        reviewHasSpoilers = reviewHasSpoilers,
+        enqueuedAt = enqueuedAt,
+    )
+
     private fun markAsReadEntity(
         localId: Long = 2L,
         userBookId: Int = 20,
@@ -445,6 +467,129 @@ class PendingUserBookWriteSyncerTest {
             coVerify(exactly = 1) { dao.delete(9L) }
 
             result.contains(66) shouldBe false
+        }
+
+        @Test
+        fun `delegates UPDATE_REVIEW with non-null body to replayUpdateBookReview and deletes entity`() = runTest {
+            // ----- Arrange -----
+            val entity = updateReviewEntity(
+                localId = 12L,
+                userBookId = 80,
+                reviewBody = "Loved it",
+                reviewHasSpoilers = true,
+                enqueuedAt = "2026-05-30T10:15:30Z",
+            )
+
+            coEvery {
+                dao.getPending()
+            } returns listOf(entity)
+
+            coJustRun {
+                booksRemoteDataSource.replayUpdateBookReview(
+                    userBookId = any(),
+                    body = any(),
+                    hasSpoilers = any(),
+                    reviewedAt = any(),
+                )
+            }
+
+            coJustRun {
+                dao.delete(any())
+            }
+
+            // ----- Act -----
+            val result = syncer.drainPendingUpdates()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.replayUpdateBookReview(
+                    userBookId = 80,
+                    body = "Loved it",
+                    hasSpoilers = true,
+                    reviewedAt = "2026-05-30",
+                )
+            }
+
+            coVerify(exactly = 1) { dao.delete(12L) }
+
+            result.contains(80) shouldBe true
+        }
+
+        @Test
+        fun `drops UPDATE_REVIEW entity with null body without calling replayUpdateBookReview`() = runTest {
+            // ----- Arrange -----
+            val entity = updateReviewEntity(
+                localId = 13L,
+                userBookId = 90,
+                reviewBody = null,
+            )
+
+            coEvery {
+                dao.getPending()
+            } returns listOf(entity)
+
+            coJustRun {
+                dao.delete(any())
+            }
+
+            // ----- Act -----
+            val result = syncer.drainPendingUpdates()
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.replayUpdateBookReview(
+                    userBookId = any(),
+                    body = any(),
+                    hasSpoilers = any(),
+                    reviewedAt = any(),
+                )
+            }
+
+            coVerify(exactly = 1) { dao.delete(13L) }
+
+            result.contains(90) shouldBe false
+        }
+
+        @Test
+        fun `passes the date part before T as reviewedAt for UPDATE_REVIEW`() = runTest {
+            // ----- Arrange -----
+            val entity = updateReviewEntity(
+                localId = 14L,
+                userBookId = 95,
+                reviewBody = "A book",
+                reviewHasSpoilers = false,
+                enqueuedAt = "2026-05-30T10:15:30Z",
+            )
+
+            coEvery {
+                dao.getPending()
+            } returns listOf(entity)
+
+            coJustRun {
+                booksRemoteDataSource.replayUpdateBookReview(
+                    userBookId = any(),
+                    body = any(),
+                    hasSpoilers = any(),
+                    reviewedAt = any(),
+                )
+            }
+
+            coJustRun {
+                dao.delete(any())
+            }
+
+            // ----- Act -----
+            syncer.drainPendingUpdates()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.replayUpdateBookReview(
+                    userBookId = any(),
+                    body = any(),
+                    hasSpoilers = any(),
+                    reviewedAt = "2026-05-30",
+                )
+            }
         }
 
         @Test

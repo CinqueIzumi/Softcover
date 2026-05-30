@@ -58,6 +58,7 @@ val bookDetailModule = module {
             setBookDeadlineUseCase = get(),
             clearBookDeadlineUseCase = get(),
             getTopBookReviewsUseCase = get(),
+            updateBookReviewUseCase = get(),
         )
     }
 }

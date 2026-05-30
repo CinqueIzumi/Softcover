@@ -2,11 +2,9 @@ package nl.rhaydus.softcover.feature.personal.data.mapper
 
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.feature.personal.data.model.HighlightEntity
-import nl.rhaydus.softcover.feature.personal.data.model.PersonalReviewEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
 import nl.rhaydus.softcover.feature.personal.domain.model.Highlight
-import nl.rhaydus.softcover.feature.personal.domain.model.PersonalReview
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingLogEntry
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingSession
 import org.junit.jupiter.api.Nested
@@ -17,34 +15,6 @@ import java.time.LocalDate
 class PersonalMappersTest {
 
     // region Fixtures
-
-    private fun buildPersonalReviewEntity(
-        bookId: Int = 1,
-        body: String = "Great book",
-        hasSpoilers: Boolean = false,
-        isDraft: Boolean = true,
-        updatedAt: String = "2024-01-15T10:30:00Z",
-    ) = PersonalReviewEntity(
-        bookId = bookId,
-        body = body,
-        hasSpoilers = hasSpoilers,
-        isDraft = isDraft,
-        updatedAt = updatedAt,
-    )
-
-    private fun buildPersonalReview(
-        bookId: Int = 1,
-        body: String = "Great book",
-        hasSpoilers: Boolean = false,
-        isDraft: Boolean = true,
-        updatedAt: Instant = Instant.parse("2024-01-15T10:30:00Z"),
-    ) = PersonalReview(
-        bookId = bookId,
-        body = body,
-        hasSpoilers = hasSpoilers,
-        isDraft = isDraft,
-        updatedAt = updatedAt,
-    )
 
     private fun buildHighlightEntity(
         id: Long = 42L,
@@ -117,70 +87,6 @@ class PersonalMappersTest {
     )
 
     // endregion
-
-    @Nested
-    inner class PersonalReviewEntityToDomain {
-
-        @Test
-        fun `maps all fields correctly for a valid entity`() {
-            // ----- Arrange -----
-            val entity = buildPersonalReviewEntity()
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.bookId shouldBe 1
-            result.body shouldBe "Great book"
-            result.hasSpoilers shouldBe false
-            result.isDraft shouldBe true
-            result.updatedAt shouldBe Instant.parse("2024-01-15T10:30:00Z")
-        }
-
-        @Test
-        fun `falls back to Instant EPOCH when updatedAt is malformed`() {
-            // ----- Arrange -----
-            val entity = buildPersonalReviewEntity(updatedAt = "not-a-timestamp")
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.updatedAt shouldBe Instant.EPOCH
-        }
-
-        @Test
-        fun `falls back to Instant EPOCH when updatedAt is empty`() {
-            // ----- Arrange -----
-            val entity = buildPersonalReviewEntity(updatedAt = "")
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.updatedAt shouldBe Instant.EPOCH
-        }
-    }
-
-    @Nested
-    inner class PersonalReviewToEntity {
-
-        @Test
-        fun `maps all fields correctly for a valid domain model`() {
-            // ----- Arrange -----
-            val review = buildPersonalReview()
-
-            // ----- Act -----
-            val result = review.toEntity()
-
-            // ----- Assert -----
-            result.bookId shouldBe 1
-            result.body shouldBe "Great book"
-            result.hasSpoilers shouldBe false
-            result.isDraft shouldBe true
-            result.updatedAt shouldBe "2024-01-15T10:30:00Z"
-        }
-    }
 
     @Nested
     inner class HighlightEntityToDomain {

@@ -14,10 +14,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
-import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -351,6 +351,49 @@ class BooksRepositoryImpl(
         return optimistic
     }
 
+    override suspend fun updateBookReview(
+        book: Book,
+        body: String,
+        hasSpoilers: Boolean,
+    ): Book {
+        val userBook = book.userBook ?: throw Exception("User did not have a user book")
+
+        val reviewedAt: String = LocalDate.now().toString()
+
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val optimistic = book.withReview(body = body, hasSpoilers = hasSpoilers)
+        booksLocalDataSource.cacheBook(book = optimistic)
+
+        if (networkAvailability.isOnline.value) {
+            return runCatching {
+                booksRemoteDataSource.updateBookReview(
+                    userBook = userBook,
+                    body = body,
+                    hasSpoilers = hasSpoilers,
+                    reviewedAt = reviewedAt,
+                )
+            }.getOrElse { error ->
+                when (error) {
+                    is CancellationException -> throw error
+
+                    is OfflineException -> {
+                        enqueueReviewUpdate(book = optimistic, body = body, hasSpoilers = hasSpoilers)
+                        optimistic
+                    }
+
+                    else -> {
+                        restoreOptimisticWrite(snapshot = snapshot)
+                        throw error
+                    }
+                }
+            }
+        }
+
+        enqueueReviewUpdate(book = optimistic, body = body, hasSpoilers = hasSpoilers)
+
+        return optimistic
+    }
+
     override suspend fun removeBookFromLibrary(book: Book) {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val userBookId: Int? = book.userBook?.id
@@ -515,6 +558,33 @@ class BooksRepositoryImpl(
         )
     }
 
+    private suspend fun enqueueReviewUpdate(
+        book: Book,
+        body: String,
+        hasSpoilers: Boolean,
+    ) {
+        val userBook = book.userBook ?: return
+
+        userBookWriteQueue.enqueue(
+            PendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_REVIEW,
+                userBookId = userBook.id,
+                // Unused for UPDATE_REVIEW replay (which keys off userBookId); a Read book may have
+                // no userBookRead, so fall back to the schema's non-null placeholder.
+                userBookReadId = book.userBookRead?.id ?: 0,
+                bookId = book.id,
+                editionId = userBook.editionId,
+                progressPages = null,
+                progressSeconds = null,
+                startedAt = null,
+                finishedAt = null,
+                reviewBody = body,
+                reviewHasSpoilers = hasSpoilers,
+                enqueuedAt = Instant.now().toString(),
+            )
+        )
+    }
+
     private suspend fun restoreOptimisticWrite(snapshot: Book?) {
         if (snapshot == null) {
             Timber.w("Optimistic rollback skipped: no prior snapshot in cache")
@@ -616,6 +686,24 @@ class BooksRepositoryImpl(
         if (existingUserBook.rating == rating) return this
 
         val updatedUserBook: UserBook = existingUserBook.copy(rating = rating)
+
+        return copy(userBook = updatedUserBook)
+    }
+
+    private fun Book.withReview(
+        body: String,
+        hasSpoilers: Boolean,
+    ): Book {
+        val existingUserBook = userBook ?: return this
+
+        // A blank body clears the review; the optimistic copy stores the plain text the user typed,
+        // which the next server refresh overwrites with Hardcover's canonical (HTML) rendering.
+        val normalizedReview: String? = body.ifBlank { null }
+
+        val updatedUserBook: UserBook = existingUserBook.copy(
+            review = normalizedReview,
+            reviewHasSpoilers = hasSpoilers,
+        )
 
         return copy(userBook = updatedUserBook)
     }

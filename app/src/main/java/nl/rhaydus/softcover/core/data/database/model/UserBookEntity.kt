@@ -36,6 +36,7 @@ data class UserBookEntity(
     val lastReadDate: String?,
     val rating: Double?,
     val referrerUserId: Int?,
+    val review: String? = null,
     val reviewedAt: String?,
     val updatedAt: String?,
     val createdAt: String?,

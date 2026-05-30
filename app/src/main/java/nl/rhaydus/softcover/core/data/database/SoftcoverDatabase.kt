@@ -32,11 +32,9 @@ import nl.rhaydus.softcover.feature.explore.data.dao.DismissedContinueSeriesDao
 import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesBookEntity
 import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesEntity
 import nl.rhaydus.softcover.feature.personal.data.dao.HighlightDao
-import nl.rhaydus.softcover.feature.personal.data.dao.PersonalReviewDao
 import nl.rhaydus.softcover.feature.personal.data.dao.ReadingLogDao
 import nl.rhaydus.softcover.feature.personal.data.dao.ReadingSessionDao
 import nl.rhaydus.softcover.feature.personal.data.model.HighlightEntity
-import nl.rhaydus.softcover.feature.personal.data.model.PersonalReviewEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
 
@@ -58,7 +56,6 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
         PendingListWriteEntity::class,
         DismissedContinueSeriesBookEntity::class,
         DismissedContinueSeriesEntity::class,
-        PersonalReviewEntity::class,
         HighlightEntity::class,
         ReadingSessionEntity::class,
         ReadingLogEntryEntity::class,
@@ -69,7 +66,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
     views = [
         BookEditionView::class
     ],
-    version = 32,
+    version = 35,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -81,8 +78,6 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun pendingListWriteDao(): PendingListWriteDao
 
     abstract fun dismissedContinueSeriesDao(): DismissedContinueSeriesDao
-
-    abstract fun personalReviewDao(): PersonalReviewDao
 
     abstract fun highlightDao(): HighlightDao
 
@@ -127,6 +122,9 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_29_30)
                 .addMigrations(MIGRATION_30_31)
                 .addMigrations(MIGRATION_31_32)
+                .addMigrations(MIGRATION_32_33)
+                .addMigrations(MIGRATION_33_34)
+                .addMigrations(MIGRATION_34_35)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -915,6 +913,32 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)"
                 )
+            }
+        }
+
+        // The pending-write queue now also carries personal-review publishes, which need the review
+        // body and its spoiler flag for offline replay; both are nullable so existing rows are intact.
+        private val MIGRATION_32_33 = object : Migration(32, 33) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE pending_user_book_writes ADD COLUMN reviewBody TEXT DEFAULT NULL")
+
+                db.execSQL("ALTER TABLE pending_user_book_writes ADD COLUMN reviewHasSpoilers INTEGER DEFAULT NULL")
+            }
+        }
+
+        // The user's own review text now rides on the cached user_book row (Hardcover is the source
+        // of truth; the local copy is overwritten on every refresh), so the column is added here.
+        private val MIGRATION_33_34 = object : Migration(33, 34) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE user_books ADD COLUMN review TEXT DEFAULT NULL")
+            }
+        }
+
+        // The local personal-review draft store is retired — reviews are now owned by Hardcover and
+        // cached on the user_book row — so its table is dropped.
+        private val MIGRATION_34_35 = object : Migration(34, 35) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS personal_reviews")
             }
         }
 

@@ -125,10 +125,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBo
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeleteReviewAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissReviewSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
@@ -138,10 +140,14 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAs
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadlinePickerAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenReviewSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRateBookAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnReviewBodyChangedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnReviewSpoilerToggledAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveReviewAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
@@ -151,6 +157,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePage
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.ReviewEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalLinkEvent
@@ -383,6 +390,16 @@ class BookDetailScreen(
                             runAction = runAction,
                         )
                     }
+
+                    item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                    item {
+                        PersonalReviewSection(
+                            review = ratingBook.userBook?.review,
+                            hasSpoilers = ratingBook.userBook?.reviewHasSpoilers == true,
+                            runAction = runAction,
+                        )
+                    }
                 }
 
                 val shelfPanelStatus = state.book?.status
@@ -487,6 +504,20 @@ class BookDetailScreen(
                         )
                     },
                     onCreateNewListClick = onCreateNewListClick,
+                )
+            }
+
+            val reviewBook = state.book
+            if (state.showReviewSheet && reviewBook != null) {
+                ReviewEditorBottomSheet(
+                    body = state.reviewEditorBody,
+                    hasSpoilers = state.reviewEditorHasSpoilers,
+                    canDelete = reviewBook.userBook?.review.isNullOrBlank().not(),
+                    onBodyChange = { runAction(OnReviewBodyChangedAction(body = it)) },
+                    onSpoilerToggle = { runAction(OnReviewSpoilerToggledAction(hasSpoilers = it)) },
+                    onSave = { runAction(OnSaveReviewAction(book = reviewBook)) },
+                    onDelete = { runAction(OnDeleteReviewAction(book = reviewBook)) },
+                    onDismissRequest = { runAction(OnDismissReviewSheetAction()) },
                 )
             }
 
@@ -1089,6 +1120,68 @@ class BookDetailScreen(
                     runAction(OnRateBookAction(book = book, rating = rating))
                 },
             )
+        }
+    }
+
+    @Composable
+    private fun PersonalReviewSection(
+        review: String?,
+        hasSpoilers: Boolean,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            SectionLabel(text = "Your review")
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (review.isNullOrBlank()) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    onClick = { runAction(OnOpenReviewSheetAction()) },
+                ) {
+                    Text(
+                        text = "Write a few words…",
+                        style = MaterialTheme.editorialTypography.body,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+                    )
+                }
+            } else {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    onClick = { runAction(OnOpenReviewSheetAction()) },
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+                    ) {
+                        Text(
+                            text = htmlToAnnotatedString(html = review),
+                            style = MaterialTheme.editorialTypography.body,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = REVIEW_COLLAPSED_LINES,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        if (hasSpoilers) {
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Text(
+                                text = "Marked as containing spoilers",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 

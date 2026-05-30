@@ -23,6 +23,8 @@ data class PendingUserBookWriteEntity(
     val startedAt: String?,
     val finishedAt: String?,
     val rating: Double? = null,
+    val reviewBody: String? = null,
+    val reviewHasSpoilers: Boolean? = null,
     val enqueuedAt: String,
     val attempts: Int = 0,
 )
