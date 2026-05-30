@@ -73,3 +73,10 @@ val surfaceContainerLowDark = Color(0xFF231917)
 val surfaceContainerDark = Color(0xFF271D1B)
 val surfaceContainerHighDark = Color(0xFF322825)
 val surfaceContainerHighestDark = Color(0xFF3D322F)
+
+/**
+ * Brand gold reserved for rating stars — both the read-only community/review rating glyphs and
+ * the interactive personal rating control. Lives outside the Material scheme because the warm
+ * gold reads identically in light and dark and is a deliberate "rating" signal, not a theme role.
+ */
+val RatingGold = Color(0xFFFBBF23)

@@ -61,6 +61,26 @@ class PendingProgressSyncerTest {
         enqueuedAt = enqueuedAt,
     )
 
+    private fun updateRatingEntity(
+        localId: Long = 3L,
+        userBookId: Int = 30,
+        rating: Double? = 4.5,
+        enqueuedAt: String = "2026-05-04T14:00:00Z",
+    ) = PendingProgressUpdateEntity(
+        localId = localId,
+        kind = PendingProgressUpdateKind.UPDATE_RATING.name,
+        userBookId = userBookId,
+        userBookReadId = 0,
+        bookId = 0,
+        editionId = null,
+        progressPages = null,
+        progressSeconds = null,
+        startedAt = null,
+        finishedAt = null,
+        rating = rating,
+        enqueuedAt = enqueuedAt,
+    )
+
     private fun markAsReadEntity(
         localId: Long = 2L,
         userBookId: Int = 20,
@@ -120,6 +140,8 @@ class PendingProgressSyncerTest {
 
             // ----- Assert -----
             result shouldBe setOf(10, 20)
+            result.contains(10) shouldBe true
+            result.contains(20) shouldBe true
             coVerify(exactly = 1) { dao.delete(1L) }
             coVerify(exactly = 1) { dao.delete(2L) }
         }
@@ -296,7 +318,7 @@ class PendingProgressSyncerTest {
             }
 
             // ----- Act -----
-            syncer.drainPendingUpdates()
+            val result = syncer.drainPendingUpdates()
 
             // ----- Assert -----
             coVerify(exactly = 1) {
@@ -309,6 +331,8 @@ class PendingProgressSyncerTest {
                     finishedAt = "2026-04-15",
                 )
             }
+
+            result.contains(99) shouldBe true
         }
 
         @Test
@@ -337,7 +361,7 @@ class PendingProgressSyncerTest {
             }
 
             // ----- Act -----
-            syncer.drainPendingUpdates()
+            val result = syncer.drainPendingUpdates()
 
             // ----- Assert -----
             coVerify(exactly = 1) {
@@ -346,6 +370,140 @@ class PendingProgressSyncerTest {
                     userDate = "2026-05-04",
                 )
             }
+
+            result.contains(77) shouldBe true
+        }
+
+        @Test
+        fun `delegates UPDATE_RATING with non-null rating to replayUpdateBookRating and deletes entity`() = runTest {
+            // ----- Arrange -----
+            val entity = updateRatingEntity(
+                localId = 8L,
+                userBookId = 55,
+                rating = 3.5,
+            )
+
+            coEvery {
+                dao.getPending()
+            } returns listOf(entity)
+
+            coJustRun {
+                booksRemoteDataSource.replayUpdateBookRating(
+                    userBookId = any(),
+                    rating = any(),
+                )
+            }
+
+            coJustRun {
+                dao.delete(any())
+            }
+
+            // ----- Act -----
+            val result = syncer.drainPendingUpdates()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.replayUpdateBookRating(
+                    userBookId = 55,
+                    rating = 3.5,
+                )
+            }
+
+            coVerify(exactly = 1) { dao.delete(8L) }
+
+            result.contains(55) shouldBe true
+        }
+
+        @Test
+        fun `drops UPDATE_RATING entity with null rating without calling replayUpdateBookRating`() = runTest {
+            // ----- Arrange -----
+            val entity = updateRatingEntity(
+                localId = 9L,
+                userBookId = 66,
+                rating = null,
+            )
+
+            coEvery {
+                dao.getPending()
+            } returns listOf(entity)
+
+            coJustRun {
+                dao.delete(any())
+            }
+
+            // ----- Act -----
+            val result = syncer.drainPendingUpdates()
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.replayUpdateBookRating(
+                    userBookId = any(),
+                    rating = any(),
+                )
+            }
+
+            coVerify(exactly = 1) { dao.delete(9L) }
+
+            result.contains(66) shouldBe false
+        }
+
+        @Test
+        fun `discards entity with unknown kind — deletes row but excludes userBookId from synced set`() = runTest {
+            // ----- Arrange -----
+            val entity = PendingProgressUpdateEntity(
+                localId = 11L,
+                kind = "SOME_UNKNOWN_KIND",
+                userBookId = 77,
+                userBookReadId = 0,
+                bookId = 0,
+                editionId = null,
+                progressPages = null,
+                progressSeconds = null,
+                startedAt = null,
+                finishedAt = null,
+                enqueuedAt = "2026-05-04T12:00:00Z",
+            )
+
+            coEvery {
+                dao.getPending()
+            } returns listOf(entity)
+
+            coJustRun {
+                dao.delete(any())
+            }
+
+            // ----- Act -----
+            val result = syncer.drainPendingUpdates()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { dao.delete(11L) }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = any(),
+                    editionId = any(),
+                    progressPages = any(),
+                    progressSeconds = any(),
+                    startedAt = any(),
+                    finishedAt = any(),
+                )
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.replayMarkBookAsRead(
+                    bookId = any(),
+                    userDate = any(),
+                )
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.replayUpdateBookRating(
+                    userBookId = any(),
+                    rating = any(),
+                )
+            }
+
+            result.contains(77) shouldBe false
         }
     }
 }

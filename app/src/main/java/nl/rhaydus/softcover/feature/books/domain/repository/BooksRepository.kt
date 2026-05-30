@@ -84,6 +84,11 @@ interface BooksRepository {
 
     suspend fun markBookAsReading(book: Book): Book
 
+    suspend fun updateBookRating(
+        book: Book,
+        rating: Double,
+    ): Book
+
     suspend fun removeBookFromLibrary(book: Book)
 
     suspend fun updateBookProgress(

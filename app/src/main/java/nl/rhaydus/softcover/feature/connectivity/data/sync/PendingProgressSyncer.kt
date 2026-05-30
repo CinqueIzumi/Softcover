@@ -53,9 +53,12 @@ class PendingProgressSyncer(
             val replayed = runCatching { replay(entity) }
 
             replayed
-                .onSuccess {
+                .onSuccess { outcome ->
                     dao.delete(entity.localId)
-                    recentlySyncedUserBookIds.add(entity.userBookId)
+
+                    if (outcome == ReplayOutcome.SYNCED) {
+                        recentlySyncedUserBookIds.add(entity.userBookId)
+                    }
                 }
                 .onFailure { error ->
                     Timber.w(error, "Pending progress update ${entity.localId} failed; halting drain")
@@ -65,23 +68,64 @@ class PendingProgressSyncer(
         }
     }
 
-    private suspend fun replay(entity: PendingProgressUpdateEntity) {
-        when (entity.kind) {
-            PendingProgressUpdateKind.UPDATE_PROGRESS.name -> booksRemoteDataSource.replayUpdateBookProgress(
-                userBookReadId = entity.userBookReadId,
-                editionId = entity.editionId,
-                progressPages = entity.progressPages,
-                progressSeconds = entity.progressSeconds,
-                startedAt = entity.startedAt,
-                finishedAt = entity.finishedAt,
-            )
+    /**
+     * Replays a single queued mutation. A [ReplayOutcome.SYNCED] result means the mutation reached
+     * the server and the affected book was genuinely updated; a [ReplayOutcome.DISCARDED] result
+     * means the row was unprocessable (unknown kind, missing payload) and should be dropped without
+     * being counted as a server-side sync. A thrown exception (network/server failure) is handled by
+     * [drain] — the row is kept and retried later.
+     */
+    private suspend fun replay(entity: PendingProgressUpdateEntity): ReplayOutcome {
+        return when (entity.kind) {
+            PendingProgressUpdateKind.UPDATE_PROGRESS.name -> {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = entity.userBookReadId,
+                    editionId = entity.editionId,
+                    progressPages = entity.progressPages,
+                    progressSeconds = entity.progressSeconds,
+                    startedAt = entity.startedAt,
+                    finishedAt = entity.finishedAt,
+                )
 
-            PendingProgressUpdateKind.MARK_AS_READ.name -> booksRemoteDataSource.replayMarkBookAsRead(
-                bookId = entity.bookId,
-                userDate = entity.enqueuedAt.substringBefore('T'),
-            )
+                ReplayOutcome.SYNCED
+            }
 
-            else -> Timber.w("Unknown pending progress update kind: ${entity.kind}")
+            PendingProgressUpdateKind.MARK_AS_READ.name -> {
+                booksRemoteDataSource.replayMarkBookAsRead(
+                    bookId = entity.bookId,
+                    userDate = entity.enqueuedAt.substringBefore('T'),
+                )
+
+                ReplayOutcome.SYNCED
+            }
+
+            PendingProgressUpdateKind.UPDATE_RATING.name -> {
+                val rating = entity.rating
+
+                if (rating == null) {
+                    Timber.w("Pending rating update ${entity.localId} has no rating; discarding")
+
+                    ReplayOutcome.DISCARDED
+                } else {
+                    booksRemoteDataSource.replayUpdateBookRating(
+                        userBookId = entity.userBookId,
+                        rating = rating,
+                    )
+
+                    ReplayOutcome.SYNCED
+                }
+            }
+
+            else -> {
+                Timber.w("Unknown pending progress update kind: ${entity.kind}; discarding")
+
+                ReplayOutcome.DISCARDED
+            }
         }
+    }
+
+    private enum class ReplayOutcome {
+        SYNCED,
+        DISCARDED,
     }
 }

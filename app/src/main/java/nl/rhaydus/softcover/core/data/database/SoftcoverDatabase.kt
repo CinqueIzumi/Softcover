@@ -69,7 +69,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
     views = [
         BookEditionView::class
     ],
-    version = 30,
+    version = 31,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -125,6 +125,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_27_28)
                 .addMigrations(MIGRATION_28_29)
                 .addMigrations(MIGRATION_29_30)
+                .addMigrations(MIGRATION_30_31)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -893,6 +894,12 @@ abstract class SoftcoverDatabase : RoomDatabase() {
         private val MIGRATION_28_29 = object : Migration(28, 29) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE book_lists ADD COLUMN ranked INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_30_31 = object : Migration(30, 31) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE pending_progress_updates ADD COLUMN rating REAL DEFAULT NULL")
             }
         }
 

@@ -85,6 +85,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.core.parameter.parametersOf
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
@@ -94,6 +95,7 @@ import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
@@ -102,6 +104,7 @@ import nl.rhaydus.softcover.core.presentation.modifier.grayscale
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
+import nl.rhaydus.softcover.core.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
@@ -136,6 +139,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAs
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRateBookAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
@@ -167,8 +171,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.abs
 import kotlin.math.roundToInt
-
-private val GoldStar = Color(0xFFFBBF23)
 
 private const val REVIEW_COLLAPSED_LINES = 8
 
@@ -368,6 +370,19 @@ class BookDetailScreen(
                         runAction = runAction,
                         celebrationKey = celebrationKey,
                     )
+                }
+
+                val ratingBook = state.book
+
+                if (ratingBook != null && ratingBook.status == BookStatus.Read) {
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                    item {
+                        PersonalRatingRow(
+                            book = ratingBook,
+                            runAction = runAction,
+                        )
+                    }
                 }
 
                 val shelfPanelStatus = state.book?.status
@@ -834,7 +849,7 @@ class BookDetailScreen(
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_star_filled),
                                                     contentDescription = "",
-                                                    tint = GoldStar,
+                                                    tint = RatingGold,
                                                     modifier = Modifier.size(16.dp),
                                                 )
                                             }
@@ -1051,6 +1066,29 @@ class BookDetailScreen(
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun PersonalRatingRow(
+        book: Book,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            SectionLabel(text = "Your rating")
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            StarRatingInput(
+                rating = book.userBook?.rating?.takeIf { it > 0.0 },
+                onRatingChange = { rating ->
+                    runAction(OnRateBookAction(book = book, rating = rating))
+                },
+            )
         }
     }
 
@@ -1859,7 +1897,7 @@ class BookDetailScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_star_filled),
                             contentDescription = null,
-                            tint = GoldStar,
+                            tint = RatingGold,
                             modifier = Modifier.size(18.dp),
                         )
 

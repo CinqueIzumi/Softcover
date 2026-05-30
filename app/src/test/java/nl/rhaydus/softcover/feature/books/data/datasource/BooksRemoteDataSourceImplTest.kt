@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
 import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
+import nl.rhaydus.softcover.UpdateUserBookRatingMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -952,6 +953,130 @@ class BooksRemoteDataSourceImplTest {
             // ----- Act & Assert -----
             shouldThrow<Exception> {
                 dataSource.markBookAsReading(book = book)
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateBookRating {
+
+        @Test
+        fun `returns mapped book when mutation succeeds`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 7
+            val userBook = stubUserBook(id = userBookId)
+            val expectedBook = stubBook()
+            val mutationData = mockk<UpdateUserBookRatingMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookRatingMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookRatingMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            val result = dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+
+            // ----- Assert -----
+            result shouldBe expectedBook
+        }
+
+        @Test
+        fun `issues UpdateUserBookRatingMutation with the correct user book id`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 42
+            val userBook = stubUserBook(id = userBookId)
+            val expectedBook = stubBook()
+            val mutationData = mockk<UpdateUserBookRatingMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookRatingMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookRatingMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateUserBookRatingMutation> { it.id == userBookId },
+                )
+            }
+        }
+
+        @Test
+        fun `throws when mutation returns null update_user_book wrapper`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 7)
+            val mutationData = mockk<UpdateUserBookRatingMutation.Data>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+            }
+        }
+
+        @Test
+        fun `throws when toBook maps the fragment to null`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 7)
+            val mutationData = mockk<UpdateUserBookRatingMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookRatingMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookRatingMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.updateBookRating(userBook = userBook, rating = 4.5)
             }
         }
     }
@@ -2281,6 +2406,31 @@ class BooksRemoteDataSourceImplTest {
             // ----- Act & Assert -----
             shouldThrow<Exception> {
                 dataSource.updateBookEdition(userBook = userBook, newEditionId = newEditionId)
+            }
+        }
+    }
+
+    @Nested
+    inner class ReplayUpdateBookRating {
+
+        @Test
+        fun `issues UpdateUserBookRatingMutation with the correct userBookId and rating`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 42
+            val rating = 4.5
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayUpdateBookRating(userBookId = userBookId, rating = rating)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateUserBookRatingMutation> { it.id == userBookId },
+                )
             }
         }
     }

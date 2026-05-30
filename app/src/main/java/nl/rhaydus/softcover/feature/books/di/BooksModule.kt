@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUs
 import nl.rhaydus.softcover.feature.books.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookRatingUseCase
 import org.koin.dsl.module
 
 val booksModule = module {
@@ -94,6 +95,10 @@ val booksModule = module {
 
     factory {
         MarkBookAsReadingUseCase(booksRepository = get())
+    }
+
+    factory {
+        UpdateBookRatingUseCase(booksRepository = get())
     }
 
     factory {

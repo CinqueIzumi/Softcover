@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseC
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookRatingUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
@@ -31,6 +32,7 @@ class BookDetailDependencies(
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    val updateBookRatingUseCase: UpdateBookRatingUseCase,
     val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,

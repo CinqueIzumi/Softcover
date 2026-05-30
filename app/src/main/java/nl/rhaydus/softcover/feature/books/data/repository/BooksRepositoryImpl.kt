@@ -316,6 +316,41 @@ class BooksRepositoryImpl(
         }
     }
 
+    override suspend fun updateBookRating(
+        book: Book,
+        rating: Double,
+    ): Book {
+        val userBook = book.userBook ?: throw Exception("User did not have a user book")
+
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val optimistic = book.withRating(rating = rating)
+        booksLocalDataSource.cacheBook(book = optimistic)
+
+        if (networkAvailability.isOnline.value) {
+            return runCatching {
+                booksRemoteDataSource.updateBookRating(userBook = userBook, rating = rating)
+            }.getOrElse { error ->
+                when (error) {
+                    is CancellationException -> throw error
+
+                    is OfflineException -> {
+                        enqueueRatingUpdate(book = optimistic, rating = rating)
+                        optimistic
+                    }
+
+                    else -> {
+                        restoreOptimisticWrite(snapshot = snapshot)
+                        throw error
+                    }
+                }
+            }
+        }
+
+        enqueueRatingUpdate(book = optimistic, rating = rating)
+
+        return optimistic
+    }
+
     override suspend fun removeBookFromLibrary(book: Book) {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val userBookId: Int? = book.userBook?.id
@@ -455,6 +490,31 @@ class BooksRepositoryImpl(
         )
     }
 
+    private suspend fun enqueueRatingUpdate(
+        book: Book,
+        rating: Double,
+    ) {
+        val userBook = book.userBook ?: return
+
+        offlineProgressQueue.enqueue(
+            PendingProgressUpdate(
+                kind = PendingProgressUpdateKind.UPDATE_RATING,
+                userBookId = userBook.id,
+                // Unused for UPDATE_RATING replay (which keys off userBookId); a Read book may have
+                // no userBookRead, so fall back to the schema's non-null placeholder.
+                userBookReadId = book.userBookRead?.id ?: 0,
+                bookId = book.id,
+                editionId = userBook.editionId,
+                progressPages = null,
+                progressSeconds = null,
+                startedAt = null,
+                finishedAt = null,
+                rating = rating,
+                enqueuedAt = Instant.now().toString(),
+            )
+        )
+    }
+
     private suspend fun restoreOptimisticWrite(snapshot: Book?) {
         if (snapshot == null) {
             Timber.w("Optimistic rollback skipped: no prior snapshot in cache")
@@ -546,6 +606,16 @@ class BooksRepositoryImpl(
         val updatedUserBook: UserBook = existingUserBook
             .copy(status = BookStatus.Reading)
             .withAppendedJournal(event = JournalEventType.UserBookReadStarted)
+
+        return copy(userBook = updatedUserBook)
+    }
+
+    private fun Book.withRating(rating: Double): Book {
+        val existingUserBook = userBook ?: return this
+
+        if (existingUserBook.rating == rating) return this
+
+        val updatedUserBook: UserBook = existingUserBook.copy(rating = rating)
 
         return copy(userBook = updatedUserBook)
     }

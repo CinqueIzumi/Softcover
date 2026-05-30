@@ -10,5 +10,6 @@ data class PendingProgressUpdate(
     val progressSeconds: Int?,
     val startedAt: String?,
     val finishedAt: String?,
+    val rating: Double? = null,
     val enqueuedAt: String,
 )

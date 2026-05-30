@@ -27,6 +27,8 @@ import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book.Companion.userBookFragment
+import nl.rhaydus.softcover.UpdateUserBookRatingMutation
+import nl.rhaydus.softcover.UpdateUserBookRatingMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookRatingUserBookFragment
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -56,6 +58,11 @@ interface BooksRemoteDataSource {
     suspend fun markBookAsWantToRead(bookId: Int): Book
 
     suspend fun markBookAsReading(book: Book): Book
+
+    suspend fun updateBookRating(
+        userBook: UserBook,
+        rating: Double,
+    ): Book
 
     suspend fun removeBookFromLibrary(book: Book)
 
@@ -96,6 +103,11 @@ interface BooksRemoteDataSource {
     suspend fun replayMarkBookAsRead(
         bookId: Int,
         userDate: String,
+    )
+
+    suspend fun replayUpdateBookRating(
+        userBookId: Int,
+        rating: Double,
     )
 }
 
@@ -229,6 +241,27 @@ class BooksRemoteDataSourceImpl(
             .update_user_book
             ?.user_book
             ?.userBookFragment()
+            ?.toBook() ?: throw Exception("Book could not be mapped")
+    }
+
+    override suspend fun updateBookRating(
+        userBook: UserBook,
+        rating: Double,
+    ): Book {
+        val input = UserBookUpdateInput(
+            rating = Optional.Present(rating),
+        )
+
+        return apolloClient
+            .safeMutation(
+                mutation = UpdateUserBookRatingMutation(
+                    id = userBook.id,
+                    `object` = input,
+                )
+            )
+            .update_user_book
+            ?.user_book
+            ?.updateUserBookRatingUserBookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
     }
 
@@ -420,5 +453,21 @@ class BooksRemoteDataSourceImpl(
         )
 
         apolloClient.safeMutation(mutation = MarkBookAsReadMutation(userBookCreateInput = dataObject))
+    }
+
+    override suspend fun replayUpdateBookRating(
+        userBookId: Int,
+        rating: Double,
+    ) {
+        val input = UserBookUpdateInput(
+            rating = Optional.Present(rating),
+        )
+
+        apolloClient.safeMutation(
+            mutation = UpdateUserBookRatingMutation(
+                id = userBookId,
+                `object` = input,
+            ),
+        )
     }
 }

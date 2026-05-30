@@ -20,6 +20,7 @@ class OfflineProgressQueueImpl(
                 progressSeconds = update.progressSeconds,
                 startedAt = update.startedAt,
                 finishedAt = update.finishedAt,
+                rating = update.rating,
                 enqueuedAt = update.enqueuedAt,
             ),
         )
