@@ -61,13 +61,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -126,6 +126,7 @@ import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
+import nl.rhaydus.softcover.feature.profile.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
@@ -137,6 +138,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercenta
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdateTimeProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
+import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
@@ -188,6 +191,8 @@ object ReadingScreen : Screen {
         val playMotion = playDecorativeMotion()
 
         var celebrationKey by remember { mutableIntStateOf(0) }
+
+        var showStreakSheet by remember { mutableStateOf(false) }
 
         var slidingBookId by remember { mutableStateOf<Int?>(null) }
         val slideProgress = remember { Animatable(initialValue = 0f) }
@@ -261,6 +266,7 @@ object ReadingScreen : Screen {
                                     onBookClick = onBookClick,
                                     onNavigateToSearch = onNavigateToSearch,
                                     onMarkAsRead = onMarkAsRead,
+                                    onExpandStreak = { showStreakSheet = true },
                                     pullToRefreshState = pullToRefreshState,
                                     slidingBookId = slidingBookId,
                                     slideProgress = slideProgress.value,
@@ -313,6 +319,13 @@ object ReadingScreen : Screen {
                             },
                         )
                     }
+
+                    if (showStreakSheet) {
+                        StreakStripSheet(
+                            activity = state.recentReadingActivity,
+                            onDismiss = { showStreakSheet = false },
+                        )
+                    }
                 }
             }
 
@@ -333,6 +346,7 @@ object ReadingScreen : Screen {
         onBookClick: (Book) -> Unit,
         onNavigateToSearch: () -> Unit,
         onMarkAsRead: (Book) -> Unit,
+        onExpandStreak: () -> Unit,
         pullToRefreshState: PullToRefreshState,
         slidingBookId: Int?,
         slideProgress: Float,
@@ -373,6 +387,8 @@ object ReadingScreen : Screen {
                     EditorialHeader(
                         bookCount = state.books.size,
                         averageProgress = state.books.averageProgress(),
+                        recentReadingActivity = state.recentReadingActivity,
+                        onExpandStreak = onExpandStreak,
                         pullToRefreshState = pullToRefreshState,
                         isRefreshing = state.isLoading,
                     )
@@ -444,6 +460,8 @@ object ReadingScreen : Screen {
     private fun EditorialHeader(
         bookCount: Int,
         averageProgress: Float?,
+        recentReadingActivity: List<ReadingDayActivity>,
+        onExpandStreak: () -> Unit,
         pullToRefreshState: PullToRefreshState,
         isRefreshing: Boolean,
     ) {
@@ -485,6 +503,15 @@ object ReadingScreen : Screen {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+
+            if (recentReadingActivity.any { it.didRead }) {
+                Spacer(modifier = Modifier.height(14.dp))
+
+                StreakStrip(
+                    activity = recentReadingActivity,
+                    onClick = onExpandStreak,
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
         }
@@ -1550,6 +1577,36 @@ private fun ReadingScreenPreview() {
             state = ReadingScreenUiState(
                 books = previewBooks,
                 isLoading = false,
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+private fun previewReadingActivity(): List<ReadingDayActivity> {
+    val today = LocalDate.now()
+    val firstDay = today.minusDays(20)
+    val litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20)
+
+    return (0..20).map { offset ->
+        ReadingDayActivity(
+            date = firstDay.plusDays(offset.toLong()),
+            didRead = offset in litOffsets,
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenWithStreakStripPreview() {
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(
+                books = previewBooks,
+                isLoading = false,
+                recentReadingActivity = previewReadingActivity(),
             ),
             runAction = {},
             onBookClick = {},

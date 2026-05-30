@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.profile.data.model
 
 import kotlinx.serialization.Serializable
 import nl.rhaydus.softcover.feature.profile.domain.model.UserProfileData
+import java.time.LocalDate
 
 @Serializable
 data class UserProfileDataEntity(
@@ -12,6 +13,7 @@ data class UserProfileDataEntity(
     val totalPagesRead: Int,
     val averageRating: Double,
     val readingStreak: Int,
+    val activeReadingDates: List<String> = emptyList(),
 )
 
 fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
@@ -22,6 +24,9 @@ fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
     totalPagesRead = totalPagesRead,
     averageRating = averageRating,
     readingStreak = readingStreak,
+    activeReadingDates = activeReadingDates
+        .mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
+        .toSet(),
 )
 
 fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileDataEntity(
@@ -32,4 +37,7 @@ fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileDataEntity(
     totalPagesRead = totalPagesRead,
     averageRating = averageRating,
     readingStreak = readingStreak,
+    activeReadingDates = activeReadingDates
+        .sorted()
+        .map { it.toString() },
 )

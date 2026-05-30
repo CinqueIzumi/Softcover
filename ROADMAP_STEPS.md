@@ -86,9 +86,6 @@ Reverse-chronological timeline of all sessions. Reached from Profile. *(C.8)*
 ### Step 3.7 — Reading log (multiple read-throughs) on book detail (M)
 Replace single-status display with a log of read-throughs (start, end, rating, optional note). Detail summary becomes "Read 2× — 2023, 2026". *(B.4.4)*
 
-### Step 3.8 — Streak strip on Reading screen header (S, depends on 3.5)
-A small 21-day heatmap-style strip rendered near the greeting on the Reading screen: one dot per day, today highlighted, dot intensity keyed to that day's session activity. Tap the strip to expand into the full Reading Activity Calendar (Step 7.12) once that lands; until then, expansion goes to a transient bottom sheet listing the last 21 days' sessions inline. Uses `select` haptic on dot tap. *(B.2.3)*
-
 ### Step 3.9 — Personal identity & representation tagging (M, depends on 0.3)
 Adds two private tagging surfaces driven by user-supplied data, plus the Room schema to back them. Strictly local — never written to Hardcover.
 

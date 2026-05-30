@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.domain.model
 
+import java.time.LocalDate
+
 data class UserProfileData(
     val profileImageUrl: String,
     val name: String,
@@ -8,4 +10,5 @@ data class UserProfileData(
     val totalPagesRead: Int,
     val averageRating: Double,
     val readingStreak: Int,
+    val activeReadingDates: Set<LocalDate> = emptySet(),
 )

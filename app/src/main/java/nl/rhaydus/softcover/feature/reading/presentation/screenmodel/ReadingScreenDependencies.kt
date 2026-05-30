@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCa
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetTrendingBooksUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveRecentReadingActivityUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ObservePlanTodayDismissalsUseCase
@@ -27,6 +29,8 @@ data class ReadingScreenDependencies(
     val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
     val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
     val getTrendingBooksUseCase: GetTrendingBooksUseCase,
+    val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
+    val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCa
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetTrendingBooksUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveRecentReadingActivityUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.settings.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
@@ -32,6 +34,8 @@ class ReadingScreenScreenModel(
     private val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
     private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
     private val getTrendingBooksUseCase: GetTrendingBooksUseCase,
+    private val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
+    private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     appDispatchers: AppDispatchers,
     flows: List<ReadingInitializer>,
 ) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingInitializer, ReadingLocalVariables>(
@@ -53,6 +57,8 @@ class ReadingScreenScreenModel(
         dismissPlanTodayUseCase = dismissPlanTodayUseCase,
         getWantToReadUserBooksUseCase = getWantToReadUserBooksUseCase,
         getTrendingBooksUseCase = getTrendingBooksUseCase,
+        observeRecentReadingActivityUseCase = observeRecentReadingActivityUseCase,
+        refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
     )
 
     init {

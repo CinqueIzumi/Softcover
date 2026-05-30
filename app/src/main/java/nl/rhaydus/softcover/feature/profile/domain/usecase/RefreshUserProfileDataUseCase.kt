@@ -20,8 +20,14 @@ class RefreshUserProfileDataUseCase(
         profileRepository.cacheUserProfileData(data = data)
     }
 
-    private fun UserProfileSnapshot.toUserProfileData(today: LocalDate): UserProfileData =
-        UserProfileData(
+    private fun UserProfileSnapshot.toUserProfileData(today: LocalDate): UserProfileData {
+        // The streak is computed from the full fetched history, but only the strip's
+        // window of dates is persisted — long streaks never need the old dates kept.
+        val windowStart = today.minusDays((READING_ACTIVITY_WINDOW_DAYS - 1).toLong())
+        val windowedDates = activeReadingDates
+            .filterTo(mutableSetOf()) { it.isBefore(windowStart).not() && it.isAfter(today).not() }
+
+        return UserProfileData(
             profileImageUrl = profileImageUrl,
             name = name,
             bio = bio,
@@ -29,7 +35,9 @@ class RefreshUserProfileDataUseCase(
             totalPagesRead = totalPagesRead,
             averageRating = averageRating,
             readingStreak = computeStreak(activeReadingDates, today),
+            activeReadingDates = windowedDates,
         )
+    }
 
     // Grace day: a user who hasn't logged yet today should not see their streak break,
     // so we start counting from yesterday when today has no entry. The streak only ends
