@@ -80,8 +80,12 @@ These steps light up the personal-data layer from Step 0.3. Many of the largest 
 ### Step 3.4 — Notes & Highlights inbox screen (M)
 Aggregate every saved highlight across books. Editorial-quote pattern per row, search/filter, share single highlights via Step 0.2 surface. *(C.7)*
 
-### Step 3.5 — Reading session timer (M)
-Start/stop session affordance on the Reading featured card. Captures duration, page delta. Persists via the session table. *(B.2.1)*
+### Step 3.5 — Reading session timer + focus mode + lock-screen surface (L)
+Start/stop/pause/resume session affordance on the Reading featured card; captures duration and page delta, persists via the session table. Session UI lives as a peek bar above the bottom nav while active. Broadened beyond the original timer-only scope with two surfaces:
+- **Focus mode** — a distraction-free full-screen reading surface (dimmed chrome, the active cover, the running timer, a quick page-update affordance) launched from the active session.
+- **Lock-screen surface** — a foreground-service ongoing notification (media-style) that keeps the active book and the running timer glanceable on the lock screen and in the notification shade, with pause / resume / stop controls, so a session keeps running and stays visible while the phone is locked.
+
+*(B.2.1)*
 
 ### Step 3.6 — Reading Sessions log screen (S)
 Reverse-chronological timeline of all sessions. Reached from Profile. *(C.8)*
@@ -191,8 +195,8 @@ A dedicated personalisation surface reached from Explore. *(C.9)*
 ### Step 6.7 — Search filters & sorts (M)
 Filter chip row when search is active; sort modes (relevance, rating, year, popularity). *(B.3.8)*
 
-### Step 6.8 — ISBN/barcode scan (M)
-Camera scan from the search bar, drops result into search. Permission gate + offline ISBN-only fallback. *(B.3.9)*
+### Step 6.8 — Barcode scan to add books / editions (M) *(pulled forward to 2.4.0, broadened)*
+A barcode-scan affordance surfaced as a scan banner / entry point on the search bar (and the add-to-library flow). The camera scans an ISBN/barcode in the wild and resolves it to a specific Hardcover edition; from the result the user can add the book straight to their library **or** add/select that exact edition, in addition to the original drop-into-search behaviour. Camera-permission gate + offline ISBN-only fallback. *(B.3.9)*
 
 ### Step 6.9 — Author spotlight tile (S, depends on 5.1)
 "Author of the week" full-width tile linking to author detail. *(B.3.7)*

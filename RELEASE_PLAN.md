@@ -55,25 +55,26 @@ The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; th
 
 ## 2.4.0 — Personal data lights up
 
-The first release where the corpus from 0.3 surfaces to the user. Pair big personal-data steps with smaller drag/reorder polish.
+The first release where the corpus from 0.3 surfaces to the user: rating, review, a streak strip, and a reading-session surface that grows into a focus mode and a lock-screen ongoing notification — plus scan-to-add and a batch of smaller fixes.
 
 > **Release notes (Google Play):**
-> Your reading becomes personal. Rate any book on its detail page and draft your own review. Start a reading session straight from the Reading screen — the timer captures duration and page deltas, and a 21-day streak strip sits above your greeting. Book detail surfaces literary awards and accolades when relevant.
+> Your reading becomes personal. Rate any book on its detail page and draft your own review. Start a reading session straight from the Reading screen — the timer captures duration and page deltas, a focus mode clears the chrome for distraction-free reading, and the active book and running timer stay glanceable on your lock screen. A 21-day streak strip sits above your greeting. And scan a barcode to add any book — or the exact edition — straight to your library. Plus a handful of smaller fixes.
 
 - **Step 3.1** — Personal rating control on book detail (S) — *deps: 0.3*
 - **Step 3.2** — Personal review drafting (M) — *deps: 0.3*
-- **Step 3.5** — Reading session timer (M) — *deps: 0.3*
+- **Step 3.5** — Reading session timer + focus mode + lock-screen surface (L) — *deps: 0.3*. Broadened from the original timer-only step: on top of start/stop/pause and page-delta capture, it adds a distraction-free focus mode and a foreground-service ongoing notification that keeps the active book + running timer on the lock screen / shade with pause-resume-stop controls.
 - **Step 3.8** — Streak strip on Reading screen header (S) — *deps: 3.5 (same release, ship in order)*
-- **Step 4.2** — Awards & accolades (S)
+- **Step 6.8** — Barcode scan to add books / editions (M) — *pulled forward from 2.9.0 and broadened*. A scan banner / affordance that resolves an ISBN/barcode to a specific edition and adds the book — or the exact edition — to the library, on top of the original drop-into-search behaviour. Camera-permission gate + offline ISBN-only fallback.
+- **Fixes** — Assorted smaller fixes and polish (S) — bucket for minor bug fixes batched into this release.
 
 ---
 
 ## 2.5.0 — Highlights, sessions log, reading log, personal tagging
 
-Closes out Phase 3 — including the personal tagging, mood-logging and private-notes surfaces — and tucks in two small Phase 4 wins. This is a dense release; if it becomes too heavy in practice, the personal-tagging trio (3.9 / 3.10 / 3.11) is the natural slice to defer to a follow-up 2.5.x.
+Closes out Phase 3 — including the personal tagging, mood-logging and private-notes surfaces — and tucks in a few small Phase 4 wins (including awards, moved down from 2.4.0). This is a dense release; if it becomes too heavy in practice, the personal-tagging trio (3.9 / 3.10 / 3.11) is the natural slice to defer to a follow-up 2.5.x.
 
 > **Release notes (Google Play):**
-> Save the passages you love. A new Passages section on every book detail holds your highlights, and the Notes & Highlights inbox lets you search across every quote you've saved. A Reading Sessions log timelines every session you've tracked. Re-reads finally make sense — each book detail tracks every read-through separately with its own dates, rating and notes. Make any book yours: tag authors and books with the identities and representation that matter to you (LGBTQ+, BIPOC, country of birth, gender — all private), log how each book made you feel with personal moods (overall or chapter-by-chapter), and keep private notes against the book or any character — separate from the review you might publish. Content warnings get an opt-in reveal, and you can add your own private warnings alongside the community list. Reviews can be filtered by friends, top-rated, recent and language.
+> Save the passages you love. A new Passages section on every book detail holds your highlights, and the Notes & Highlights inbox lets you search across every quote you've saved. A Reading Sessions log timelines every session you've tracked. Re-reads finally make sense — each book detail tracks every read-through separately with its own dates, rating and notes. Make any book yours: tag authors and books with the identities and representation that matter to you (LGBTQ+, BIPOC, country of birth, gender — all private), log how each book made you feel with personal moods (overall or chapter-by-chapter), and keep private notes against the book or any character — separate from the review you might publish. Book detail now surfaces literary awards and accolades when relevant. Content warnings get an opt-in reveal, and you can add your own private warnings alongside the community list. Reviews can be filtered by friends, top-rated, recent and language.
 
 - **Step 3.3** — Personal highlights section + quick-add from Reading (M)
 - **Step 3.4** — Notes & Highlights inbox screen (M)
@@ -82,6 +83,7 @@ Closes out Phase 3 — including the personal tagging, mood-logging and private-
 - **Step 3.9** — Personal identity & representation tagging (M) — *deps: 0.3 (2.2.0)*. Author identity tags (gender, BIPOC, LGBTQ+, country of birth) + book representation tags (LGBTQ+ / BIPOC characters). Strictly local. Feeds 7.13 (2.10.0) and 7.14 (2.11.0).
 - **Step 3.10** — Personal moods (book + chapter) (M) — *deps: 0.3 (2.2.0)*. Private mood log distinct from the community moods used for discovery.
 - **Step 3.11** — Personal notes (book + characters) (M) — *deps: 0.3 (2.2.0)*. Private notes field separate from the personal review (3.2), with per-character notes when characters are available.
+- **Step 4.2** — Awards & accolades (S) — *moved down from 2.4.0*.
 - **Step 4.3** — Content warnings collapsible (S) — covers community-sourced trigger warnings.
 - **Step 4.9** — Personal trigger warnings (S) — *deps: 4.3 (same release, ship in order)*. User-added warnings on top of community ones.
 - **Step 4.7** — Reviews filters & sorts (S)
@@ -135,17 +137,18 @@ Explore gets richer. Each step here is fundamentally a new section on an existin
 
 ---
 
-## 2.9.0 — Profile depth + scan + sharing
+## 2.9.0 — Profile depth + sharing
 
 > **Release notes (Google Play):**
-> Profile becomes editable — set your name, bio and avatar in-app. A handful of new stats land: genre and rating distributions, reading seasons across twelve months, top authors, format split (print/ebook/audio) and personal records like longest haul and fastest read. Scan a barcode from the search bar to find any book in the wild. Share a book as an editorial card image, a plain link or a send-to-a-friend deep link.
+> Profile becomes editable — set your name, bio and avatar in-app. A handful of new stats land: genre and rating distributions, reading seasons across twelve months, top authors, format split (print/ebook/audio) and personal records like longest haul and fastest read. Share a book as an editorial card image, a plain link or a send-to-a-friend deep link.
 
 - **Step 7.1** — Edit profile + Settings shortcut (S)
 - **Step 7.4** — Genre + rating distributions (M)
 - **Step 7.5** — Reading seasons (S)
 - **Step 7.6** — Author top-list + format split + records (S)
-- **Step 6.8** — ISBN/barcode scan (M)
 - **Step 4.8 (remaining modes)** — Share book sheet: link + deep-link modes (S) — *image mode shipped in 2.2.0; this release adds the three-mode sheet on top.*
+
+*(Barcode scan moved to 2.4.0 — see Step 6.8, pulled forward and broadened to scan-to-add.)*
 
 ---
 
