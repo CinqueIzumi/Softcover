@@ -13,7 +13,20 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        val userBook = scope.currentState.book?.userBook ?: return
+        val userBook = scope.currentState.book?.userBook
+
+        // No user book yet: switching editions is a local-only preview. Show the chosen edition's
+        // details without creating or mutating a user book and without caching anything.
+        if (userBook == null) {
+            scope.setState {
+                it.copy(
+                    previewEdition = edition,
+                    showEditEditionSheet = false,
+                )
+            }
+
+            return
+        }
 
         dependencies.launch {
             scope.setState {

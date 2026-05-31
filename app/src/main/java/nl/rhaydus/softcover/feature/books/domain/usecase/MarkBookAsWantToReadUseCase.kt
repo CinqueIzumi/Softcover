@@ -7,10 +7,13 @@ import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 class MarkBookAsWantToReadUseCase(
     private val booksRepository: BooksRepository,
 ) {
-    suspend operator fun invoke(book: Book): Result<ShelfMutationOutcome> = runCatching {
+    suspend operator fun invoke(
+        book: Book,
+        editionId: Int? = null,
+    ): Result<ShelfMutationOutcome> = runCatching {
         if (book.status == BookStatus.WantToRead) return@runCatching ShelfMutationOutcome.NoChange
 
-        booksRepository.markBookAsWantToRead(book = book)
+        booksRepository.markBookAsWantToRead(book = book, editionId = editionId)
 
         ShelfMutationOutcome.Applied
     }

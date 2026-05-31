@@ -237,7 +237,7 @@ class BookDetailScreen(
 
                 navigator.push(
                     FullScreenCoverScreen(
-                        edition = book.currentEdition,
+                        edition = state.displayedEdition,
                         defaultEdition = book.defaultEdition,
                         fallbackCoverUrl = book.coverUrl,
                     )
@@ -355,7 +355,7 @@ class BookDetailScreen(
                         ),
                     ) {
                         GeneralBookInfoSection(
-                            edition = state.book?.currentEdition ?: state.initialCover?.currentEdition,
+                            edition = state.displayedEdition,
                             isLoading = state.loadingBookDetails && state.book == null,
                             fallBackEdition = state.book?.defaultEdition ?: state.initialCover?.defaultEdition,
                             fallbackCoverUrl = state.book?.coverUrl ?: state.initialCover?.fallbackCoverUrl,
@@ -363,7 +363,7 @@ class BookDetailScreen(
                             rating = state.book?.rating,
                             title = state.book?.title,
                             seriesText = state.book?.seriesText,
-                            releaseYear = state.book?.currentEdition?.releaseYear.takeIf { it != -1 }
+                            releaseYear = state.displayedEdition?.releaseYear.takeIf { it != -1 }
                                 ?: state.book?.releaseYear,
                             unreleasedDate = state.book?.takeIf { it.isUnreleased }?.effectiveReleaseDate,
                             onCoverClick = onCoverClick,
@@ -487,6 +487,7 @@ class BookDetailScreen(
             if (state.isShareSheetVisible && state.book != null) {
                 ShareBookBottomSheet(
                     book = state.book,
+                    edition = state.displayedEdition,
                     onDismissRequest = { runAction(OnDismissShareSheetAction()) },
                 )
             }
@@ -529,7 +530,7 @@ class BookDetailScreen(
                 )
             }
 
-            val currentEditionForSheet = state.book?.currentEdition
+            val currentEditionForSheet = state.displayedEdition
             if (state.showEditEditionSheet && state.book != null && currentEditionForSheet != null) {
                 EditionBottomSheetSelector(
                     bookTitle = state.book.title,
@@ -1386,8 +1387,8 @@ class BookDetailScreen(
                     )
                 }
 
-                if (isOnShelf.not()) return@DropdownMenu
-
+                // Switching editions is a preview that works without a user book, so it sits above the
+                // on-shelf gate. Marking an edition as owned mutates the user's shelf, so it stays below.
                 if (isOnline) {
                     DropdownMenuItem(
                         text = { Text(text = "Change edition") },
@@ -1402,7 +1403,11 @@ class BookDetailScreen(
                             runAction(OnShowEditEditionSheetClickAction())
                         },
                     )
+                }
 
+                if (isOnShelf.not()) return@DropdownMenu
+
+                if (isOnline) {
                     book.currentEdition?.let { currentEdition ->
                         val ownedLabel =
                             if (currentEdition.owned) "Unmark as owned" else "Mark as owned"
@@ -1865,7 +1870,7 @@ class BookDetailScreen(
 
     @Composable
     private fun EditionMetadataStrip(state: BookDetailUiState) {
-        val edition = state.book?.currentEdition ?: return
+        val edition = state.displayedEdition ?: return
 
         val publisher = edition.publisher?.takeIf { it.isNotBlank() }
         val isbn13 = edition.isbn13?.takeIf { it.isNotBlank() }
@@ -1895,7 +1900,7 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        val edition = state.book?.currentEdition ?: return
+        val edition = state.displayedEdition ?: return
 
         val isbn = edition.isbn13?.takeIf { it.isNotBlank() }
             ?: edition.isbn10?.takeIf { it.isNotBlank() }

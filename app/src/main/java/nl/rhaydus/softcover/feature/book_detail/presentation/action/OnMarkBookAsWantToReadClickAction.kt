@@ -15,8 +15,11 @@ class OnMarkBookAsWantToReadClickAction(private val book: Book) : BookDetailActi
     ) {
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
+        // A previewed edition (off-shelf) becomes the created user book's edition.
+        val editionId = scope.currentState.previewEdition?.id
+
         val job = dependencies.launch {
-            dependencies.markBookAsWantToReadUseCase(book = book).onFailure { error ->
+            dependencies.markBookAsWantToReadUseCase(book = book, editionId = editionId).onFailure { error ->
                 Timber.e("$error")
 
                 scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }

@@ -1237,7 +1237,7 @@ class BooksRepositoryImplTest {
             val remoteBook = stubBook(userBookId = 5)
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId)
+                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
             } returns remoteBook
 
             // ----- Act -----
@@ -1247,11 +1247,58 @@ class BooksRepositoryImplTest {
             result shouldBe remoteBook
 
             coVerify {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId)
+                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
             }
 
             coVerify {
                 booksLocalDataSource.cacheBook(book = remoteBook)
+            }
+        }
+
+        @Test
+        fun `forwards non-null editionId to remote data source`() = runTest {
+            // ----- Arrange -----
+            val bookId = 11
+            val editionId = 55
+            val book = mockk<Book>(relaxed = true) {
+                every { this@mockk.id } returns bookId
+                every { this@mockk.userBook } returns stubUserBookWithStatus(id = 5, status = BookStatus.Reading)
+            }
+            val remoteBook = stubBook(userBookId = 5)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = editionId)
+            } returns remoteBook
+
+            // ----- Act -----
+            repository.markBookAsWantToRead(book = book, editionId = editionId)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = editionId)
+            }
+        }
+
+        @Test
+        fun `forwards null editionId to remote data source when omitted`() = runTest {
+            // ----- Arrange -----
+            val bookId = 11
+            val book = mockk<Book>(relaxed = true) {
+                every { this@mockk.id } returns bookId
+                every { this@mockk.userBook } returns stubUserBookWithStatus(id = 5, status = BookStatus.Reading)
+            }
+            val remoteBook = stubBook(userBookId = 5)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = null)
+            } returns remoteBook
+
+            // ----- Act -----
+            repository.markBookAsWantToRead(book = book)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = null)
             }
         }
 
@@ -1266,7 +1313,7 @@ class BooksRepositoryImplTest {
             val remoteBook = stubBook(userBookId = null)
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId)
+                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
             } returns remoteBook
 
             // ----- Act -----
@@ -1297,7 +1344,7 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId)
+                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
             } throws remoteError
 
             // ----- Act -----
@@ -1329,7 +1376,7 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId)
+                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
             } throws CancellationException("cancelled")
 
             // ----- Act & Assert -----
@@ -2430,7 +2477,7 @@ class BooksRepositoryImplTest {
             val expectedBook = stubBook(userBookId = 1)
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book)
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = any())
             } returns expectedBook
 
             // ----- Act -----
@@ -2438,6 +2485,45 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe expectedBook
+        }
+
+        @Test
+        fun `forwards non-null editionId to remote data source`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBookId = 1)
+            val editionId = 77
+            val expectedBook = stubBook(userBookId = 1)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = editionId)
+            } returns expectedBook
+
+            // ----- Act -----
+            repository.markBookAsRead(book = book, editionId = editionId)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = editionId)
+            }
+        }
+
+        @Test
+        fun `forwards null editionId to remote data source when omitted`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBookId = 1)
+            val expectedBook = stubBook(userBookId = 1)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = null)
+            } returns expectedBook
+
+            // ----- Act -----
+            repository.markBookAsRead(book = book)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = null)
+            }
         }
 
         @Test
@@ -2493,7 +2579,7 @@ class BooksRepositoryImplTest {
             every { networkAvailability.isOnline } returns MutableStateFlow(true)
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = any())
+                booksRemoteDataSource.markBookAsRead(book = any(), editionId = any())
             } returns stubBook(userBookId = 1)
 
             coEvery {
@@ -2531,7 +2617,7 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book)
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = any())
             } throws RuntimeException("network failure")
 
             // ----- Act -----
@@ -2562,7 +2648,7 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book)
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = any())
             } throws remoteError
 
             // ----- Act & Assert -----
@@ -2589,7 +2675,7 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book)
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = any())
             } throws OfflineException()
 
             // ----- Act -----
@@ -2810,7 +2896,7 @@ class BooksRepositoryImplTest {
             }
 
             coVerify(exactly = 0) {
-                booksRemoteDataSource.markBookAsRead(book = any())
+                booksRemoteDataSource.markBookAsRead(book = any(), editionId = any())
             }
         }
     }

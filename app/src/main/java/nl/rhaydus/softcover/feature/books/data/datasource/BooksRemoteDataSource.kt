@@ -59,7 +59,10 @@ interface BooksRemoteDataSource {
         forceNetwork: Boolean = false,
     ): List<Book>
 
-    suspend fun markBookAsWantToRead(bookId: Int): Book
+    suspend fun markBookAsWantToRead(
+        bookId: Int,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun markBookAsReading(book: Book): Book
 
@@ -95,7 +98,10 @@ interface BooksRemoteDataSource {
         newSeconds: Int? = null,
     ): Book
 
-    suspend fun markBookAsRead(book: Book): Book
+    suspend fun markBookAsRead(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun updateBookEdition(
         userBook: UserBook,
@@ -213,9 +219,13 @@ class BooksRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun markBookAsWantToRead(bookId: Int): Book {
+    override suspend fun markBookAsWantToRead(
+        bookId: Int,
+        editionId: Int?,
+    ): Book {
         val userBookCreateInput = UserBookCreateInput(
             book_id = bookId,
+            edition_id = Optional.presentIfNotNull(editionId),
             status_id = Optional.Present(UserBookStatus.WANT_TO_READ.code),
             privacy_setting_id = Optional.Present(PrivacySetting.PUBLIC.code),
         )
@@ -407,11 +417,15 @@ class BooksRemoteDataSourceImpl(
         return userBookFragment.toBook() ?: throw Exception("Book could not be mapped")
     }
 
-    override suspend fun markBookAsRead(book: Book): Book {
+    override suspend fun markBookAsRead(
+        book: Book,
+        editionId: Int?,
+    ): Book {
         val currentDate = LocalDate.now().toString()
 
         val dataObject = UserBookCreateInput(
             book_id = book.id,
+            edition_id = Optional.presentIfNotNull(editionId),
             status_id = Optional.present(UserBookStatus.READ.code),
             user_date = Optional.present(currentDate),
             privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),

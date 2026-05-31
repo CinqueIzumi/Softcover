@@ -3,11 +3,107 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
 import nl.rhaydus.softcover.core.PreviewData
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookDetailUiStateTest {
+
+    private fun stubEdition(id: Int = 1): BookEdition = mockk<BookEdition>().also { mock ->
+        every { mock.id } returns id
+    }
+
+    private fun stubBook(userBook: UserBook?, currentEdition: BookEdition?): Book =
+        mockk<Book>().also { mock ->
+            every { mock.userBook } returns userBook
+            every { mock.currentEdition } returns currentEdition
+        }
+
+    @Nested
+    inner class DisplayedEdition {
+
+        @Test
+        fun `returns previewEdition when book has no user book and previewEdition is set`() {
+            // ----- Arrange -----
+            val preview = stubEdition(id = 5)
+            val bookEdition = stubEdition(id = 10)
+            val book = stubBook(userBook = null, currentEdition = bookEdition)
+            val state = BookDetailUiState(
+                book = book,
+                previewEdition = preview,
+            )
+
+            // ----- Act -----
+            val result = state.displayedEdition
+
+            // ----- Assert -----
+            result shouldBe preview
+        }
+
+        @Test
+        fun `falls back to book currentEdition when off-shelf and no preview`() {
+            // ----- Arrange -----
+            val bookEdition = stubEdition(id = 10)
+            val book = stubBook(userBook = null, currentEdition = bookEdition)
+            val state = BookDetailUiState(
+                book = book,
+                previewEdition = null,
+            )
+
+            // ----- Act -----
+            val result = state.displayedEdition
+
+            // ----- Assert -----
+            result shouldBe bookEdition
+        }
+
+        @Test
+        fun `falls back to initialCover currentEdition when off-shelf, no preview, and no book`() {
+            // ----- Arrange -----
+            val coverEdition = stubEdition(id = 20)
+            val initialCover = BookInitialCover(
+                currentEdition = coverEdition,
+                defaultEdition = null,
+                fallbackCoverUrl = null,
+            )
+            val state = BookDetailUiState(
+                book = null,
+                previewEdition = null,
+                initialCover = initialCover,
+            )
+
+            // ----- Act -----
+            val result = state.displayedEdition
+
+            // ----- Assert -----
+            result shouldBe coverEdition
+        }
+
+        @Test
+        fun `ignores previewEdition and returns book currentEdition when user book is present`() {
+            // ----- Arrange -----
+            val preview = stubEdition(id = 5)
+            val bookEdition = stubEdition(id = 10)
+            val userBook = mockk<UserBook>()
+            val book = stubBook(userBook = userBook, currentEdition = bookEdition)
+            val state = BookDetailUiState(
+                book = book,
+                previewEdition = preview,
+            )
+
+            // ----- Act -----
+            val result = state.displayedEdition
+
+            // ----- Assert -----
+            result shouldBe bookEdition
+        }
+    }
 
     @Nested
     inner class FilteredEditions {

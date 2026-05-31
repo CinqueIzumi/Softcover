@@ -81,7 +81,10 @@ interface BooksRepository {
         forceNetwork: Boolean,
     )
 
-    suspend fun markBookAsWantToRead(book: Book): Book
+    suspend fun markBookAsWantToRead(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun markBookAsReading(book: Book): Book
 
@@ -113,7 +116,10 @@ interface BooksRepository {
         newSeconds: Int? = null,
     ): Book
 
-    suspend fun markBookAsRead(book: Book): Book
+    suspend fun markBookAsRead(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun updateBookEdition(
         userBook: UserBook,

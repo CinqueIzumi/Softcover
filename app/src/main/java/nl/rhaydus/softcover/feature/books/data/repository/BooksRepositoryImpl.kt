@@ -284,7 +284,10 @@ class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchEditionsByIds(ids = ids)
     }
 
-    override suspend fun markBookAsWantToRead(book: Book): Book {
+    override suspend fun markBookAsWantToRead(
+        book: Book,
+        editionId: Int?,
+    ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsWantToRead()
 
@@ -293,7 +296,7 @@ class BooksRepositoryImpl(
         }
 
         return runCatching {
-            booksRemoteDataSource.markBookAsWantToRead(bookId = book.id)
+            booksRemoteDataSource.markBookAsWantToRead(bookId = book.id, editionId = editionId)
         }.getOrElse { error ->
             if (error is CancellationException) throw error
 
@@ -463,14 +466,17 @@ class BooksRepositoryImpl(
         return optimistic
     }
 
-    override suspend fun markBookAsRead(book: Book): Book {
+    override suspend fun markBookAsRead(
+        book: Book,
+        editionId: Int?,
+    ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsRead()
         booksLocalDataSource.cacheBook(book = optimistic)
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
-                booksRemoteDataSource.markBookAsRead(book = book)
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = editionId)
             }.getOrElse { error ->
                 when (error) {
                     is CancellationException -> throw error

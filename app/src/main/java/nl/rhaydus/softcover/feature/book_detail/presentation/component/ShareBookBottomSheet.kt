@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
@@ -52,9 +53,10 @@ import timber.log.Timber
 @Composable
 fun ShareBookBottomSheet(
     book: Book,
+    edition: BookEdition?,
     onDismissRequest: () -> Unit,
 ) {
-    val content = remember(book) { book.toShareContent() }
+    val content = remember(book, edition) { book.toShareContent(edition = edition) }
     val capture = rememberShareCardCapture()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -222,19 +224,19 @@ private fun ShareCardPreview(
     }
 }
 
-private fun Book.toShareContent(): BookShareContent {
-    val edition = currentEdition ?: defaultEdition
+private fun Book.toShareContent(edition: BookEdition?): BookShareContent {
+    val resolvedEdition = edition ?: defaultEdition
 
     return BookShareContent(
-        coverUrl = edition?.localImagePath
-            ?: edition?.url
+        coverUrl = resolvedEdition?.localImagePath
+            ?: resolvedEdition?.url
             ?: coverUrl,
         title = title,
         author = authors.firstOrNull()?.name.orEmpty(),
         communityRating = rating.takeIf { it > 0.0 },
         userRating = userBook?.rating?.toInt(),
-        releaseYear = edition?.releaseYear?.takeIf { it != -1 } ?: releaseYear.takeIf { it != -1 },
-        pageCount = edition?.pages,
+        releaseYear = resolvedEdition?.releaseYear?.takeIf { it != -1 } ?: releaseYear.takeIf { it != -1 },
+        pageCount = resolvedEdition?.pages,
         description = description.takeIf { it.isNotBlank() },
         quote = null,
     )

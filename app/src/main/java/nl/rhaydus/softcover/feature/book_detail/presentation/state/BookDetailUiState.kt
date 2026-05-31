@@ -20,6 +20,7 @@ data class BookDetailUiState(
     val editions: List<BookEdition> = emptyList(),
     val loadingEditions: Boolean = false,
     val editionSearchQuery: String = "",
+    val previewEdition: BookEdition? = null,
     val showUpdateProgressSheet: Boolean = false,
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
@@ -45,6 +46,18 @@ data class BookDetailUiState(
     val userLists: List<BookList> = emptyList(),
     val listsBeingMutated: Set<Int> = emptySet(),
 ) : UiState {
+    /**
+     * The edition the screen currently shows. A preview ([previewEdition]) only applies to an
+     * off-shelf book — an ephemeral selection that is never persisted or cached. Once the book has a
+     * user book, the persisted edition always wins (any leftover preview is ignored), so previewing
+     * then adding to the shelf transitions without flicker.
+     */
+    val displayedEdition: BookEdition?
+        get() = when {
+            book?.userBook != null -> book.currentEdition
+            else -> previewEdition ?: book?.currentEdition ?: initialCover?.currentEdition
+        }
+
     val filteredEditions: List<BookEdition>
         get() {
             val query = editionSearchQuery.trim()
