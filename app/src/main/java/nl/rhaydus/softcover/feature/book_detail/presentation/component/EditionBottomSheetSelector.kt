@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.enum.ReadingFormat
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
@@ -279,6 +280,14 @@ private fun EditionItem(
                     )
                 }
 
+                edition.readingFormat?.let { readingFormat ->
+                    Text(
+                        text = readingFormat.label,
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
                 if (edition.owned) {
                     Text(
                         text = "You own this edition!",
@@ -311,6 +320,7 @@ private fun EditionBottomSheetContentPreview() {
             publisher = "Titan Books",
             id = 20,
             format = "",
+            readingFormat = ReadingFormat.Audio,
             owned = true,
         ),
         baseEdition.copy(
@@ -319,6 +329,7 @@ private fun EditionBottomSheetContentPreview() {
             isbn13 = "9780062060624",
             publisher = "47 north",
             id = 80,
+            readingFormat = ReadingFormat.Ebook,
         ),
     )
 

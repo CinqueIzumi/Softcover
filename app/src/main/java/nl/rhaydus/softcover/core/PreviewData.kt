@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.domain.model.enum.ReadingFormat
 
 object PreviewData {
     val baseAuthor = Author(
@@ -28,6 +29,7 @@ object PreviewData {
         releaseYear = 2023,
         authors = listOf(baseAuthor),
         format = "Hardcover",
+        readingFormat = ReadingFormat.Physical,
         bookId = 1,
         owned = false,
     )

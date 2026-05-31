@@ -19,4 +19,5 @@ fragment EditionFragment on editions {
     release_year
     release_date
     edition_format
+    reading_format_id
 }

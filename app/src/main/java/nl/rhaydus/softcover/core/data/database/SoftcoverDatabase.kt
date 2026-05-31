@@ -66,7 +66,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
     views = [
         BookEditionView::class
     ],
-    version = 37,
+    version = 38,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -127,6 +127,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_34_35)
                 .addMigrations(MIGRATION_35_36)
                 .addMigrations(MIGRATION_36_37)
+                .addMigrations(MIGRATION_37_38)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -1054,6 +1055,38 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE reading_sessions ADD COLUMN pausedSeconds INTEGER NOT NULL DEFAULT 0")
 
                 db.execSQL("ALTER TABLE reading_sessions ADD COLUMN lastPausedAt TEXT DEFAULT NULL")
+            }
+        }
+
+        // Editions gain Hardcover's reading_format_id (1=Physical, 2=Audio, 3=Both, 4=Ebook),
+        // surfaced in the edition selector. ADD COLUMN is safe on SQLite < 3.35 (minSdk 26); the
+        // view selects edition.*, so it is dropped and recreated to expose the new column.
+        private val MIGRATION_37_38 = object : Migration(37, 38) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE book_editions ADD COLUMN readingFormatId INTEGER DEFAULT NULL")
+
+                db.execSQL("DROP VIEW IF EXISTS book_edition_view")
+                db.execSQL(
+                    """
+                        CREATE VIEW `book_edition_view` AS SELECT
+                                edition.*,
+                                EXISTS(
+                                    SELECT 1
+                                    FROM list_books lb
+                                    JOIN book_lists bl ON bl.id = lb.listId
+                                    WHERE bl.slug = 'owned'
+                                    AND (
+                                        lb.editionId = edition.id
+                                        OR lb.editionId = edition.canonicalId
+                                        OR lb.editionId IN (
+                                            SELECT sub.id FROM book_editions sub
+                                            WHERE sub.canonicalId = edition.id
+                                        )
+                                    )
+                                ) AS isOwned
+                            FROM book_editions edition
+                    """.trimIndent()
+                )
             }
         }
 

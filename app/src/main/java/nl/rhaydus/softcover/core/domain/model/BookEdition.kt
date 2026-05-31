@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.domain.model
 
+import nl.rhaydus.softcover.core.domain.model.enum.ReadingFormat
 import java.time.LocalDate
 
 data class BookEdition(
@@ -18,6 +19,7 @@ data class BookEdition(
     val releaseYear: Int,
     val releaseDate: LocalDate? = null,
     val format: String,
+    val readingFormat: ReadingFormat? = null,
     val owned: Boolean,
 ) {
     val authorString: String

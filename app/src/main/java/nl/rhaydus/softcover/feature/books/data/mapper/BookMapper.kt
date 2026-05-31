@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.domain.model.enum.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import nl.rhaydus.softcover.fragment.BookDetailFragment.Default_cover_edition.Companion.editionFragment
@@ -75,6 +76,7 @@ fun EditionFragment.toBookEdition(
     releaseYear = release_year ?: -1,
     releaseDate = release_date.toLocalDateOrNull(),
     format = edition_format ?: "",
+    readingFormat = ReadingFormat.fromId(reading_format_id),
     bookId = book_id,
     owned = false,
 )
@@ -348,6 +350,7 @@ fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     releaseYear = releaseYear,
     releaseDate = releaseDate?.toString(),
     format = format,
+    readingFormatId = readingFormat?.id,
 )
 
 fun Author.toEntity(): AuthorEntity = AuthorEntity(name = name, id = id)
@@ -391,6 +394,7 @@ fun BookEditionEntity.toModel(
     releaseDate = releaseDate.toLocalDateOrNull(),
     authors = authors.map { it.toModel() },
     format = format,
+    readingFormat = ReadingFormat.fromId(readingFormatId),
     bookId = bookId,
     owned = owned,
 )
