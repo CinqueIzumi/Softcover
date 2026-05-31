@@ -1929,6 +1929,7 @@ class BookDetailScreen(
 
     @Composable
     private fun AboutSection(state: BookDetailUiState) {
+        val headline = state.book?.headline.orEmpty()
         val description = state.book?.description.orEmpty()
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
@@ -1937,7 +1938,7 @@ class BookDetailScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             SkeletonCrossfade(
-                isLoading = state.loadingBookDetails && description.isBlank(),
+                isLoading = state.loadingBookDetails && headline.isBlank() && description.isBlank(),
                 label = "AboutSection",
             ) { loading ->
                 if (loading) {
@@ -1948,21 +1949,38 @@ class BookDetailScreen(
                             .clip(RoundedCornerShape(8.dp))
                             .shimmer(isLoading = true),
                     )
-                } else if (description.isBlank()) {
-                    Text(
-                        text = "No description for this book yet.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 } else {
-                    DropCapText(
-                        text = htmlToAnnotatedString(html = description),
-                        bodyStyle = MaterialTheme.typography.bodyLarge.copy(
-                            lineHeight = 26.sp,
-                        ),
-                        bodyColor = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    Column {
+                        if (headline.isNotBlank()) {
+                            Text(
+                                text = headline,
+                                style = MaterialTheme.editorialTypography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+
+                        if (headline.isNotBlank() && description.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        if (description.isNotBlank()) {
+                            DropCapText(
+                                text = htmlToAnnotatedString(html = description),
+                                bodyStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    lineHeight = 26.sp,
+                                ),
+                                bodyColor = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        } else if (headline.isBlank()) {
+                            Text(
+                                text = "No description for this book yet.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
             }
         }

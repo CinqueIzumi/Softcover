@@ -221,6 +221,7 @@ fun UserBookFragment.toBook(): Book? {
         editions = editions,
         defaultEdition = null,
         rating = listFragment.roundedRating(),
+        headline = listFragment.headline ?: "",
         description = listFragment.description ?: "",
         releaseYear = listFragment.release_year ?: -1,
         releaseDate = listFragment.release_date.toLocalDateOrNull(),
@@ -252,6 +253,7 @@ fun BookDetailFragment.toBook(): Book? {
         editions = editions,
         defaultEdition = defaultEdition,
         rating = listFragment.roundedRating(),
+        headline = listFragment.headline ?: "",
         description = description ?: "",
         releaseYear = listFragment.release_year ?: -1,
         releaseDate = listFragment.release_date.toLocalDateOrNull(),
@@ -274,7 +276,7 @@ private fun BookSeriesFragment.toBookSeries(): BookSeries? {
     return BookSeries(
         id = series.id,
         name = series.name,
-        amountOfBooks = series.primary_books_count ?: 0
+        amountOfBooks = series.primary_books_count ?: 0,
     )
 }
 // endregion
@@ -290,6 +292,7 @@ fun Book.toEntity(): BookEntity = BookEntity(
     id = id,
     title = title,
     rating = rating,
+    headline = headline,
     description = description,
     releaseYear = releaseYear,
     releaseDate = releaseDate?.toString(),
@@ -309,7 +312,7 @@ fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity = UserBookReadEnt
     progress = progress,
     startedAt = startedAt,
     finishedAt = finishedAt,
-    userBookId = userBookId
+    userBookId = userBookId,
 )
 
 fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
@@ -332,7 +335,7 @@ fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
 fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity = ReadingJournalEntity(
     event = event ?: "",
     updatedAt = updatedAt,
-    userBookId = userBookId
+    userBookId = userBookId,
 )
 
 fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
@@ -451,6 +454,7 @@ fun BookFullEntity.toModel(): Book {
         editions = uiEditions,
         defaultEdition = defaultEdition,
         rating = book.rating,
+        headline = book.headline,
         description = book.description,
         releaseYear = book.releaseYear,
         releaseDate = book.releaseDate.toLocalDateOrNull(),

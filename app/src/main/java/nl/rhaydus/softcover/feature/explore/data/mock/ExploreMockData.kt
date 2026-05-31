@@ -57,6 +57,7 @@ internal object ExploreMockData {
             editions = listOf(edition),
             defaultEdition = edition,
             rating = rating,
+            headline = "",
             description = "",
             releaseYear = releaseYear,
             coverUrl = "",

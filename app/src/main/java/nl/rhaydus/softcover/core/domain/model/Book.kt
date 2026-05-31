@@ -10,6 +10,7 @@ data class Book(
     val editions: List<BookEdition>,
     val defaultEdition: BookEdition?,
     val rating: Double,
+    val headline: String = "",
     val description: String,
     val releaseYear: Int,
     val releaseDate: LocalDate? = null,

@@ -4,6 +4,7 @@ fragment BookListFragment on books {
         id
     }
     title
+    headline
     description
     rating
     image {

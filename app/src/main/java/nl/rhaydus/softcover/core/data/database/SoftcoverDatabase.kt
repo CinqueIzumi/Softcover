@@ -66,7 +66,7 @@ import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
     views = [
         BookEditionView::class
     ],
-    version = 38,
+    version = 39,
 )
 abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
@@ -128,6 +128,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_35_36)
                 .addMigrations(MIGRATION_36_37)
                 .addMigrations(MIGRATION_37_38)
+                .addMigrations(MIGRATION_38_39)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
@@ -1087,6 +1088,15 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             FROM book_editions edition
                     """.trimIndent()
                 )
+            }
+        }
+
+        // Books gain Hardcover's `headline` — a short editorial standfirst surfaced above the
+        // book-detail description. ADD COLUMN is safe on SQLite < 3.35 (minSdk 26); existing rows
+        // default to an empty headline and refill on the next book-detail refresh.
+        private val MIGRATION_38_39 = object : Migration(38, 39) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE books ADD COLUMN headline TEXT NOT NULL DEFAULT ''")
             }
         }
 

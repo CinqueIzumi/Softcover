@@ -11,6 +11,7 @@ data class BookEntity(
     val title: String,
     val defaultEditionId: Int?,
     val rating: Double,
+    val headline: String,
     val description: String,
     val releaseYear: Int,
     val releaseDate: String?,
