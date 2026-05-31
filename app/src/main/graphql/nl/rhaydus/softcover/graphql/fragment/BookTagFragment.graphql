@@ -1,6 +1,10 @@
 fragment BookTagFragment on taggable_counts {
+    count
     tag {
         id
         tag
+        tag_category {
+            category
+        }
     }
 }

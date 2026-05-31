@@ -5,19 +5,22 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryFilterOptionsBuilderTest {
 
-    private val tagFiction = Tag(id = 1, name = "Fiction")
-    private val tagScifi = Tag(id = 2, name = "Sci-Fi")
+    private val tagFiction = Tag(id = 1, name = "Fiction", category = TagCategory.GENRE)
+    private val tagScifi = Tag(id = 2, name = "Sci-Fi", category = TagCategory.GENRE)
 
     @Nested
     inner class BuildBookFilterOptions {
 
         @Test
         fun `returns empty options when book list is empty`() {
+            // ----- Arrange -----
+
             // ----- Act -----
             val result = buildBookFilterOptions(books = emptyList())
 
@@ -107,20 +110,33 @@ class LibraryFilterOptionsBuilderTest {
         }
 
         @Test
-        fun `supportsOwnedFilter is true only when at least one edition is owned`() {
+        fun `supportsOwnedFilter is true when a book has an owned edition`() {
             // ----- Arrange -----
-            val bookWithOwned = buildBook(
+            val book = buildBook(
                 id = 1,
                 editions = listOf(buildEdition(id = 1, owned = true)),
             )
-            val bookNoOwned = buildBook(
-                id = 2,
-                editions = listOf(buildEdition(id = 2, owned = false)),
+
+            // ----- Act -----
+            val result = buildBookFilterOptions(books = listOf(book))
+
+            // ----- Assert -----
+            result.supportsOwnedFilter shouldBe true
+        }
+
+        @Test
+        fun `supportsOwnedFilter is false when no book has an owned edition`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                id = 1,
+                editions = listOf(buildEdition(id = 1, owned = false)),
             )
 
-            // ----- Act & Assert -----
-            buildBookFilterOptions(books = listOf(bookWithOwned)).supportsOwnedFilter shouldBe true
-            buildBookFilterOptions(books = listOf(bookNoOwned)).supportsOwnedFilter shouldBe false
+            // ----- Act -----
+            val result = buildBookFilterOptions(books = listOf(book))
+
+            // ----- Assert -----
+            result.supportsOwnedFilter shouldBe false
         }
 
         @Test
@@ -146,6 +162,22 @@ class LibraryFilterOptionsBuilderTest {
             // ----- Assert -----
             result.ratingBuckets shouldBe emptyList()
         }
+
+        @Test
+        fun `excludes non-Genre tags from tag facets`() {
+            // ----- Arrange -----
+            val tagGenre = Tag(id = 1, name = "Fantasy", category = TagCategory.GENRE)
+            val tagMood = Tag(id = 3, name = "Hopeful", category = TagCategory.MOOD)
+            val tagWarning = Tag(id = 4, name = "Violence", category = TagCategory.CONTENT_WARNING)
+
+            val book = buildBook(id = 1, tags = listOf(tagGenre, tagMood, tagWarning))
+
+            // ----- Act -----
+            val result = buildBookFilterOptions(books = listOf(book))
+
+            // ----- Assert -----
+            result.tags.map { it.id } shouldBe listOf(tagGenre.id)
+        }
     }
 
     @Nested
@@ -153,6 +185,8 @@ class LibraryFilterOptionsBuilderTest {
 
         @Test
         fun `returns empty options when edition list is empty`() {
+            // ----- Arrange -----
+
             // ----- Act -----
             val result = buildEditionFilterOptions(
                 editions = emptyList(),
@@ -177,6 +211,26 @@ class LibraryFilterOptionsBuilderTest {
 
             // ----- Assert -----
             result.tags.map { it.id } shouldBe listOf(tagFiction.id)
+        }
+
+        @Test
+        fun `excludes non-Genre tags from tag facets`() {
+            // ----- Arrange -----
+            val tagGenre = Tag(id = 1, name = "Fantasy", category = TagCategory.GENRE)
+            val tagMood = Tag(id = 3, name = "Hopeful", category = TagCategory.MOOD)
+            val tagWarning = Tag(id = 4, name = "Violence", category = TagCategory.CONTENT_WARNING)
+
+            val book = buildBook(id = 10, tags = listOf(tagGenre, tagMood, tagWarning))
+            val edition = buildEdition(id = 1, bookId = 10)
+
+            // ----- Act -----
+            val result = buildEditionFilterOptions(
+                editions = listOf(edition),
+                bookByBookId = mapOf(10 to book),
+            )
+
+            // ----- Assert -----
+            result.tags.map { it.id } shouldBe listOf(tagGenre.id)
         }
 
         @Test

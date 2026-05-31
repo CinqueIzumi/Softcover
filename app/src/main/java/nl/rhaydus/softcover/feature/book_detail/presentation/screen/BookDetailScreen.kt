@@ -6,10 +6,13 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,17 +66,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -91,12 +96,15 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DropCapText
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
+import nl.rhaydus.softcover.core.presentation.component.PillChip
 import nl.rhaydus.softcover.core.presentation.component.ReviewDocumentText
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
@@ -442,6 +450,8 @@ class BookDetailScreen(
                 }
 
                 item { AboutSection(state = state) }
+
+                item(key = "tags") { TagsSection(state = state) }
 
                 item { EditionMetadataStrip(state = state) }
 
@@ -1985,6 +1995,88 @@ class BookDetailScreen(
                     }
                 }
             }
+        }
+    }
+
+    @OptIn(ExperimentalLayoutApi::class)
+    @Composable
+    private fun TagsSection(state: BookDetailUiState) {
+        val tags = state.book?.tags.orEmpty()
+
+        val groups: List<Pair<TagCategory, List<Tag>>> = remember(tags) {
+            listOf(
+                TagCategory.GENRE,
+                TagCategory.MOOD,
+                TagCategory.CONTENT_WARNING,
+            ).mapNotNull { category ->
+                // The remote query orders by count desc, but the Room (offline) read does not
+                // preserve that order — sort here so both paths rank identically.
+                val top = tags
+                    .filter { it.category == category }
+                    .sortedByDescending { it.count }
+                    .take(5)
+
+                top.takeIf { it.isNotEmpty() }?.let { category to it }
+            }
+        }
+
+        if (groups.isEmpty()) return
+
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Spacer(modifier = Modifier.height(28.dp))
+
+            SectionLabel(text = "Tags")
+
+            groups.forEach { (category, categoryTags) ->
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = category.label,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    categoryTags.forEach { tag ->
+                        if (category == TagCategory.CONTENT_WARNING) {
+                            key(tag.id) {
+                                ConcealableTagChip(label = tag.name)
+                            }
+                        } else {
+                            PillChip(label = tag.name)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ConcealableTagChip(label: String) {
+        var revealed by rememberSaveable { mutableStateOf(false) }
+
+        if (revealed) {
+            PillChip(label = label)
+        } else {
+            PillChip(
+                label = label,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(percent = 50))
+                    .clickable(
+                        onClickLabel = "Reveal content warning",
+                        role = Role.Button,
+                    ) {
+                        revealed = true
+                    },
+                concealed = true,
+            )
         }
     }
 

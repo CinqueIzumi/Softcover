@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 
 /**
  * Rating thresholds offered as filter chips. Each is included only if the underlying tab has at
@@ -20,6 +21,7 @@ fun buildBookFilterOptions(books: List<Book>): LibraryFilterOptions {
 
     val tags = books
         .flatMap { it.tags }
+        .filter { it.category == TagCategory.GENRE }
         .distinctBy { it.id }
         .sortedBy { it.name.lowercase() }
 
@@ -59,6 +61,7 @@ fun buildEditionFilterOptions(
 
     val tags: List<Tag> = parentBooks
         .flatMap { it.tags }
+        .filter { it.category == TagCategory.GENRE }
         .distinctBy { it.id }
         .sortedBy { it.name.lowercase() }
 

@@ -6,9 +6,9 @@ import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEntity
 import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
 import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
+import nl.rhaydus.softcover.core.data.database.model.BookTagFull
 import nl.rhaydus.softcover.core.data.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
-import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromJson
@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
@@ -193,12 +194,14 @@ private fun BookListFragment.roundedRating(): Double =
     ((rating ?: 0.0) * 10).roundToInt() / 10.0
 
 private fun BookListFragment.tags(): List<Tag> =
-    taggable_counts.mapNotNull { count ->
-        val tag = count.tag ?: return@mapNotNull null
+    taggable_counts.mapNotNull { taggableCount ->
+        val tag = taggableCount.tag ?: return@mapNotNull null
 
         Tag(
             id = tag.id.toInt(),
             name = tag.tag,
+            category = TagCategory.fromApiString(tag.tag_category.category),
+            count = taggableCount.count,
         )
     }
 
@@ -377,7 +380,12 @@ fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<Edi
 // region Entity -> UI mappers
 fun AuthorEntity.toModel(): Author = Author(name = name, id = id)
 
-fun TagEntity.toModel(): Tag = Tag(id = id, name = name)
+fun BookTagFull.toModel(): Tag = Tag(
+    id = tag.id,
+    name = tag.name,
+    category = TagCategory.fromName(tag.category),
+    count = crossRef.count,
+)
 
 fun BookEditionEntity.toModel(
     authors: List<AuthorEntity>,

@@ -24,7 +24,7 @@ fragment BookListFragment on books {
             name
         }
     }
-    taggable_counts(where: { hardcover_tagged: { _eq: true } }) {
+    taggable_counts(order_by: { count: desc }) {
         ...BookTagFragment
     }
 }

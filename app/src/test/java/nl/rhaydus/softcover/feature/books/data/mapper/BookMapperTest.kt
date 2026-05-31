@@ -36,12 +36,18 @@ import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.data.database.model.ListBookFull
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
+import nl.rhaydus.softcover.core.data.database.model.BookTagCrossRef
+import nl.rhaydus.softcover.core.data.database.model.BookTagFull
 import nl.rhaydus.softcover.core.data.database.model.TagEntity
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookWithJournals
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import nl.rhaydus.softcover.fragment.BookListFragment
+import nl.rhaydus.softcover.fragment.BookListFragment.Taggable_count as BookListTaggableCount
+import nl.rhaydus.softcover.fragment.BookListFragment.Taggable_count.Tag as BookListTaggableTag
+import nl.rhaydus.softcover.fragment.BookListFragment.Taggable_count.Tag.Tag_category as BookListTagCategory
 import nl.rhaydus.softcover.fragment.EditionDetailFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.ReadingJournalFragment
@@ -631,7 +637,7 @@ class BookMapperTest {
         series: BookSeriesEntity? = null,
         editions: List<BookEditionWithAuthors> = emptyList(),
         userBookWithJournals: UserBookWithJournals? = null,
-        tags: List<TagEntity> = emptyList(),
+        tags: List<BookTagFull> = emptyList(),
     ): BookFullEntity = BookFullEntity(
         book = book,
         bookAuthors = bookAuthors,
@@ -2239,13 +2245,19 @@ class BookMapperTest {
         }
 
         @Test
-        fun `tags are mapped from TagEntity rows to Tag domain objects`() {
+        fun `tags are mapped from BookTagFull rows to Tag domain objects`() {
             // ----- Arrange -----
-            val tagEntities = listOf(
-                TagEntity(id = 1, name = "Fiction"),
-                TagEntity(id = 2, name = "Sci-Fi"),
+            val tags = listOf(
+                BookTagFull(
+                    crossRef = BookTagCrossRef(bookId = 10, tagId = 1, count = 5),
+                    tag = TagEntity(id = 1, name = "Fiction", category = "GENRE"),
+                ),
+                BookTagFull(
+                    crossRef = BookTagCrossRef(bookId = 10, tagId = 2, count = 3),
+                    tag = TagEntity(id = 2, name = "Sci-Fi", category = "GENRE"),
+                ),
             )
-            val entity = stubBookFullEntity(tags = tagEntities)
+            val entity = stubBookFullEntity(tags = tags)
 
             // ----- Act -----
             val result = entity.toModel()
@@ -2259,7 +2271,7 @@ class BookMapperTest {
         }
 
         @Test
-        fun `tags is empty when no TagEntity rows are present`() {
+        fun `tags is empty when no BookTagFull rows are present`() {
             // ----- Arrange -----
             val entity = stubBookFullEntity(tags = emptyList())
 
@@ -2268,6 +2280,60 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.tags shouldBe emptyList()
+        }
+
+        @Test
+        fun `tag category string GENRE is mapped to TagCategory GENRE`() {
+            // ----- Arrange -----
+            val tags = listOf(
+                BookTagFull(
+                    crossRef = BookTagCrossRef(bookId = 10, tagId = 1, count = 0),
+                    tag = TagEntity(id = 1, name = "Fiction", category = "GENRE"),
+                ),
+            )
+            val entity = stubBookFullEntity(tags = tags)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.tags[0].category shouldBe TagCategory.GENRE
+        }
+
+        @Test
+        fun `unknown tag category string is mapped to TagCategory OTHER`() {
+            // ----- Arrange -----
+            val tags = listOf(
+                BookTagFull(
+                    crossRef = BookTagCrossRef(bookId = 10, tagId = 1, count = 0),
+                    tag = TagEntity(id = 1, name = "Fiction", category = "UNKNOWN_CATEGORY"),
+                ),
+            )
+            val entity = stubBookFullEntity(tags = tags)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.tags[0].category shouldBe TagCategory.OTHER
+        }
+
+        @Test
+        fun `crossRef count is mapped to Tag count`() {
+            // ----- Arrange -----
+            val tags = listOf(
+                BookTagFull(
+                    crossRef = BookTagCrossRef(bookId = 10, tagId = 1, count = 42),
+                    tag = TagEntity(id = 1, name = "Fiction", category = "GENRE"),
+                ),
+            )
+            val entity = stubBookFullEntity(tags = tags)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.tags[0].count shouldBe 42
         }
     }
 
@@ -4067,6 +4133,213 @@ class BookMapperTest {
 
             // ----- Assert -----
             result?.userBook?.reviewDocument shouldBe null
+        }
+
+        @Test
+        fun `taggable_counts entries map category and count onto Book tags`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.User_book_read.Companion)
+
+            val tagCategory = mockk<BookListTagCategory> {
+                every { this@mockk.category } returns "Genre"
+            }
+
+            val tag = mockk<BookListTaggableTag> {
+                every { id } returns 7L
+                every { tag } returns "Science Fiction"
+                every { tag_category } returns tagCategory
+            }
+
+            val taggableCountGenre = mockk<BookListTaggableCount> {
+                every { count } returns 15
+                every { this@mockk.tag } returns tag
+            }
+
+            val nullTagEntry = mockk<BookListTaggableCount> {
+                every { count } returns 1
+                every { this@mockk.tag } returns null
+            }
+
+            val bookListFragment = mockk<UserBookFragment.Book>()
+            val editionInner = mockk<UserBookFragment.Edition>()
+
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 100
+                every { isbn_10 } returns null
+                every { isbn_13 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { release_date } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+                every { reading_format_id } returns 0
+            }
+
+            val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
+                every { id } returns 100
+                every { canonical } returns null
+                every { title } returns "My Book"
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { release_date } returns null
+                every { book_series } returns emptyList()
+                every { compilation } returns false
+                every { contributions } returns emptyList()
+                every { users_count } returns 0
+                every { ratings_count } returns 0
+                every { description } returns null
+                every { headline } returns null
+                every { taggable_counts } returns listOf(taggableCountGenre, nullTagEntry)
+            }
+
+            val fragment = mockk<UserBookFragment> {
+                every { book } returns bookListFragment
+                every { edition } returns editionInner
+                every { progress_updated_journal } returns emptyList()
+                every { user_book_read_started_journal } returns emptyList()
+                every { user_book_read_finished_journal } returns emptyList()
+                every { status_stopped_journal } returns emptyList()
+                every { user_book_reads } returns emptyList()
+                every { id } returns 1
+                every { status_id } returns 1
+                every { edition_id } returns 10
+                every { last_read_date } returns null
+                every { date_added } returns "2024-01-01"
+                every { privacy_setting_id } returns 1
+                every { rating } returns null
+                every { referrer_user_id } returns null
+                every { review_has_spoilers } returns false
+                every { review_slate } returns emptyList<Map<String, Any?>>()
+                every { reviewed_at } returns null
+                every { updated_at } returns null
+                every { created_at } returns "2024-01-01"
+            }
+
+            every {
+                with(UserBookFragment.Book.Companion) { bookListFragment.bookListFragment() }
+            } returns bookListFragmentModel
+
+            every {
+                with(UserBookFragment.Edition.Companion) { editionInner.editionFragment() }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.tags?.size shouldBe 1
+            result?.tags?.get(0)?.id shouldBe 7
+            result?.tags?.get(0)?.name shouldBe "Science Fiction"
+            result?.tags?.get(0)?.category shouldBe TagCategory.GENRE
+            result?.tags?.get(0)?.count shouldBe 15
+        }
+
+        @Test
+        fun `taggable_counts entry with null tag_category category maps to TagCategory OTHER`() {
+            // ----- Arrange -----
+            mockkObject(UserBookFragment.Book.Companion)
+            mockkObject(UserBookFragment.Edition.Companion)
+            mockkObject(UserBookFragment.User_book_read.Companion)
+
+            val tagCategory = mockk<BookListTagCategory> {
+                every { this@mockk.category } returns null
+            }
+
+            val tag = mockk<BookListTaggableTag> {
+                every { id } returns 3L
+                every { tag } returns "Dark"
+                every { tag_category } returns tagCategory
+            }
+
+            val taggableCount = mockk<BookListTaggableCount> {
+                every { count } returns 2
+                every { this@mockk.tag } returns tag
+            }
+
+            val bookListFragment = mockk<UserBookFragment.Book>()
+            val editionInner = mockk<UserBookFragment.Edition>()
+
+            val editionFragment = mockk<EditionFragment> {
+                every { id } returns 10
+                every { canonical_id } returns null
+                every { title } returns null
+                every { book_id } returns 100
+                every { isbn_10 } returns null
+                every { isbn_13 } returns null
+                every { pages } returns null
+                every { publisher } returns null
+                every { image } returns null
+                every { fallbackImages } returns emptyList()
+                every { release_year } returns null
+                every { release_date } returns null
+                every { edition_format } returns null
+                every { audio_seconds } returns null
+                every { reading_format_id } returns 0
+            }
+
+            val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
+                every { id } returns 100
+                every { canonical } returns null
+                every { title } returns "My Book"
+                every { rating } returns null
+                every { image } returns null
+                every { release_year } returns null
+                every { release_date } returns null
+                every { book_series } returns emptyList()
+                every { compilation } returns false
+                every { contributions } returns emptyList()
+                every { users_count } returns 0
+                every { ratings_count } returns 0
+                every { description } returns null
+                every { headline } returns null
+                every { taggable_counts } returns listOf(taggableCount)
+            }
+
+            val fragment = mockk<UserBookFragment> {
+                every { book } returns bookListFragment
+                every { edition } returns editionInner
+                every { progress_updated_journal } returns emptyList()
+                every { user_book_read_started_journal } returns emptyList()
+                every { user_book_read_finished_journal } returns emptyList()
+                every { status_stopped_journal } returns emptyList()
+                every { user_book_reads } returns emptyList()
+                every { id } returns 1
+                every { status_id } returns 1
+                every { edition_id } returns 10
+                every { last_read_date } returns null
+                every { date_added } returns "2024-01-01"
+                every { privacy_setting_id } returns 1
+                every { rating } returns null
+                every { referrer_user_id } returns null
+                every { review_has_spoilers } returns false
+                every { review_slate } returns emptyList<Map<String, Any?>>()
+                every { reviewed_at } returns null
+                every { updated_at } returns null
+                every { created_at } returns "2024-01-01"
+            }
+
+            every {
+                with(UserBookFragment.Book.Companion) { bookListFragment.bookListFragment() }
+            } returns bookListFragmentModel
+
+            every {
+                with(UserBookFragment.Edition.Companion) { editionInner.editionFragment() }
+            } returns editionFragment
+
+            // ----- Act -----
+            val result = fragment.toBook()
+
+            // ----- Assert -----
+            result?.tags?.get(0)?.category shouldBe TagCategory.OTHER
         }
     }
 
