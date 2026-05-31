@@ -6,20 +6,13 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-class OnEnterSelectionModeAction(
-    private val bookId: Int,
-) : LibraryAction {
+class OnExitRearrangeModeAction : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        // Selection and rearrange are mutually exclusive editing modes — entering one clears the other.
         scope.setState {
-            it.copy(
-                selectionMode = true,
-                selectedBookIds = setOf(bookId),
-                isRearranging = false,
-            )
+            it.copy(isRearranging = false)
         }
     }
 }

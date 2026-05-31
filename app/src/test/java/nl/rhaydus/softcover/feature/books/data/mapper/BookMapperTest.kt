@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.domain.model.enum.ReadingFormat
 import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEditionView
@@ -91,6 +92,7 @@ class BookMapperTest {
         releaseYear: Int = 2020,
         releaseDate: LocalDate? = null,
         format: String = "Paperback",
+        readingFormat: ReadingFormat? = null,
         owned: Boolean = false,
     ): BookEdition = mockk {
         every {
@@ -152,6 +154,10 @@ class BookMapperTest {
         every {
             this@mockk.format
         } returns format
+
+        every {
+            this@mockk.readingFormat
+        } returns readingFormat
 
         every {
             this@mockk.owned
@@ -483,6 +489,7 @@ class BookMapperTest {
         releaseYear = releaseYear,
         releaseDate = releaseDate,
         format = format,
+        readingFormatId = null,
     )
 
     private fun stubBookEditionView(
@@ -2239,6 +2246,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns "Paperback"
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2277,6 +2285,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2306,6 +2315,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2336,6 +2346,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2367,6 +2378,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2394,6 +2406,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2425,6 +2438,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2452,6 +2466,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2479,6 +2494,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2506,6 +2522,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2533,6 +2550,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2560,6 +2578,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2587,6 +2606,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns 3600
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2614,6 +2634,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2641,6 +2662,7 @@ class BookMapperTest {
                 every { release_date } returns "2026-05-05"
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2668,6 +2690,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2695,6 +2718,7 @@ class BookMapperTest {
                 every { release_date } returns "not-a-date"
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2722,6 +2746,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -2762,6 +2787,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns "Hardcover"
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
                 every { contributions } returns listOf(contribution)
             }
 
@@ -2796,6 +2822,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
                 every { contributions } returns listOf(contribution)
             }
 
@@ -2824,6 +2851,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
                 every { contributions } returns emptyList()
             }
 
@@ -2852,6 +2880,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns "Paperback"
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
                 every { contributions } returns emptyList()
             }
 
@@ -2886,6 +2915,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns 7200
+                every { reading_format_id } returns 0
                 every { contributions } returns emptyList()
             }
 
@@ -2914,6 +2944,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             // ----- Act -----
@@ -3029,6 +3060,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -3116,6 +3148,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -3197,6 +3230,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -3282,6 +3316,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -3367,6 +3402,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -3451,6 +3487,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
@@ -3536,6 +3573,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
                 every { id } returns 100
@@ -3855,6 +3893,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns "Hardcover"
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -3917,6 +3956,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -3975,6 +4015,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -4033,6 +4074,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -4090,6 +4132,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -4145,6 +4188,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
@@ -4283,6 +4327,7 @@ class BookMapperTest {
                 every { release_date } returns null
                 every { edition_format } returns null
                 every { audio_seconds } returns null
+                every { reading_format_id } returns 0
             }
 
             val seriesList = listOfNotNull(bookSeriesEntry)

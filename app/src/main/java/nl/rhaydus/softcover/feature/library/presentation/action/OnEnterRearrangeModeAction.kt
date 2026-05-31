@@ -6,26 +6,19 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-class OnTabSelectedAction(
-    private val tabId: String,
-) : LibraryAction {
+class OnEnterRearrangeModeAction : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        // Switching tabs collapses selection mode — selection is anchored to the tab the user
-        // long-pressed on, and silently carrying it across tabs (each of which has its own visible
-        // set) makes the count subtitle lie.
+        // Rearrange and selection are mutually exclusive editing modes — clear any active selection
+        // so the two never co-exist (the control strip only offers Rearrange when not selecting, but
+        // we guard here too so the invariant holds regardless of entry path).
         scope.setState {
             it.copy(
-                selectedTabId = tabId,
+                isRearranging = true,
                 selectionMode = false,
                 selectedBookIds = emptySet(),
-                isBulkMoveMenuExpanded = false,
-                isBulkRemoveDialogShown = false,
-                isBulkAddToListSheetShown = false,
-                listsBeingMutated = emptySet(),
-                isRearranging = false,
             )
         }
     }

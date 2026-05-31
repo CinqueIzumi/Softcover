@@ -31,8 +31,14 @@ class OnSortModeChangeAction(
         // the actual reorder. The menu close animation (~150 ms) gives the atomic DataStore write
         // and single-flow collector emission time to land, so the user perceives "tap → menu
         // closes → reveals sorted list" instead of seeing the grid reorganize behind the still-
-        // open dropdown.
-        scope.setState { it.copy(isSortMenuExpanded = false) }
+        // open dropdown. Changing the sort also leaves rearrange mode — the positional order the
+        // user was editing may no longer be what's shown.
+        scope.setState {
+            it.copy(
+                isSortMenuExpanded = false,
+                isRearranging = false,
+            )
+        }
 
         dependencies.setLibrarySortUseCase(
             tabId = tabId,

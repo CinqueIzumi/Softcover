@@ -78,6 +78,7 @@ class BooksLocalDataSourceImplTest {
         releaseYear = 2020,
         releaseDate = null,
         format = "Paperback",
+        readingFormatId = null,
     )
 
     private fun stubEditionWithAuthors(

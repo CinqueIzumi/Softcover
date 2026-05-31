@@ -114,6 +114,7 @@ class ListMapperTest {
         releaseYear = releaseYear,
         releaseDate = releaseDate,
         format = format,
+        readingFormatId = null,
     )
 
     private fun stubBookEditionView(
