@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.feature.lists.data.datasource.ListsRemoteDataSource
 import nl.rhaydus.softcover.feature.lists.domain.exception.ListNameTakenException
@@ -23,6 +24,7 @@ import nl.rhaydus.softcover.feature.lists.domain.repository.ListsRepository
 class ListsRepositoryImpl(
     private val listsRemoteDataSource: ListsRemoteDataSource,
     private val listsLocalDataSource: ListsLocalDataSource,
+    private val booksRepository: BooksRepository,
     private val applicationScope: ApplicationScope,
     private val listWriteQueue: ListWriteQueue,
     private val listWriteDrainer: ListWriteDrainer,
@@ -101,6 +103,8 @@ class ListsRepositoryImpl(
             )
         }
 
+        hydrateReferencedBook(bookId = edition.bookId, editionId = edition.id)
+
         val real: ListBook = runCatching {
             listsRemoteDataSource.markEditionAsOwned(edition = edition)
         }.getOrElse { error ->
@@ -130,6 +134,8 @@ class ListsRepositoryImpl(
                 editionId = edition.id,
             ),
         )
+
+        hydrateReferencedBook(bookId = bookId, editionId = edition.id)
 
         val real: ListBook = runCatching {
             listsRemoteDataSource.addBookToList(
@@ -208,6 +214,28 @@ class ListsRepositoryImpl(
 
         if (snapshot != null && snapshot.listBookId != OPTIMISTIC_LIST_BOOK_ID) {
             listsLocalDataSource.cacheListBook(book = snapshot)
+        }
+    }
+
+    /**
+     * Ensures the book + edition a freshly-written `list_book` references are cached locally. The
+     * `BookListWithBooks` join drops list-books whose book/edition aren't cached, so without this an
+     * off-shelf reference (e.g. a scanned edition just marked owned) would only surface after a
+     * library refresh re-hydrates it. Best-effort: hydration failure (e.g. offline) is non-fatal —
+     * the next refresh fills the gap — so it never blocks the optimistic list write.
+     */
+    private suspend fun hydrateReferencedBook(
+        bookId: Int,
+        editionId: Int,
+    ) {
+        runCatching {
+            booksRepository.hydrateReferencedBooks(
+                bookIds = listOf(bookId),
+                editionIds = listOf(editionId),
+                forceNetwork = false,
+            )
+        }.onFailure { error ->
+            if (error is CancellationException) throw error
         }
     }
 

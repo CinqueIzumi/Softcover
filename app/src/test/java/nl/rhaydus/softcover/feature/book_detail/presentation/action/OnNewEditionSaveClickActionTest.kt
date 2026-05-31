@@ -197,6 +197,59 @@ class OnNewEditionSaveClickActionTest {
         }
 
         @Test
+        fun `clears scannedEditionId when userBook is null`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBook = null)
+            val edition = stubEdition(id = 77)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+                showEditEditionSheet = true,
+            )
+            dependencies = stubDependencies(this)
+
+            val action = OnNewEditionSaveClickAction(edition = edition)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.scannedEditionId shouldBe null
+        }
+
+        @Test
+        fun `clears scannedEditionId when userBook is present`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook()
+            val book = stubBook(userBook = userBook)
+            val edition = stubEdition(id = 99)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+                showEditEditionSheet = true,
+            )
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookEditionUseCase(userBook = userBook, newEditionId = 99)
+            } returns Result.success(Unit)
+
+            val action = OnNewEditionSaveClickAction(edition = edition)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.scannedEditionId shouldBe null
+        }
+
+        @Test
         fun `clears loadingBookDetails after use case fails`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook()

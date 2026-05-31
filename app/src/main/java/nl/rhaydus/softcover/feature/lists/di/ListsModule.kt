@@ -29,6 +29,7 @@ val listsModule = module {
         ListsRepositoryImpl(
             listsRemoteDataSource = get(),
             listsLocalDataSource = get(),
+            booksRepository = get(),
             applicationScope = get(),
             listWriteQueue = get(),
             listWriteDrainer = get(),

@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.feature.lists.data.datasource.ListsRemoteDataSource
 import nl.rhaydus.softcover.feature.lists.domain.exception.ListNameTakenException
@@ -26,6 +27,7 @@ class ListsRepositoryImplCreateListTest {
 
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
+    private val booksRepository = mockk<BooksRepository>()
     private lateinit var listWriteQueue: ListWriteQueue
     private lateinit var listWriteDrainer: ListWriteDrainer
     private lateinit var repository: ListsRepositoryImpl
@@ -40,6 +42,7 @@ class ListsRepositoryImplCreateListTest {
         repository = ListsRepositoryImpl(
             listsRemoteDataSource = listsRemoteDataSource,
             listsLocalDataSource = listsLocalDataSource,
+            booksRepository = booksRepository,
             applicationScope = ApplicationScope(scope = CoroutineScope(UnconfinedTestDispatcher())),
             listWriteQueue = listWriteQueue,
             listWriteDrainer = listWriteDrainer,

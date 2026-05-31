@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.feature.lists.data.datasource.ListsRemoteDataSource
 import org.junit.jupiter.api.BeforeEach
@@ -29,6 +30,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
 
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
+    private val booksRepository = mockk<BooksRepository>()
     private lateinit var listWriteQueue: ListWriteQueue
     private lateinit var listWriteDrainer: ListWriteDrainer
     private lateinit var repository: ListsRepositoryImpl
@@ -40,9 +42,18 @@ class ListsRepositoryImplAddRemoveListBookTest {
         listWriteQueue = mockk(relaxed = true)
         listWriteDrainer = mockk(relaxed = true)
 
+        coEvery {
+            booksRepository.hydrateReferencedBooks(
+                bookIds = any(),
+                editionIds = any(),
+                forceNetwork = any(),
+            )
+        } returns Unit
+
         repository = ListsRepositoryImpl(
             listsRemoteDataSource = listsRemoteDataSource,
             listsLocalDataSource = listsLocalDataSource,
+            booksRepository = booksRepository,
             applicationScope = ApplicationScope(scope = CoroutineScope(UnconfinedTestDispatcher())),
             listWriteQueue = listWriteQueue,
             listWriteDrainer = listWriteDrainer,
@@ -114,6 +125,14 @@ class ListsRepositoryImplAddRemoveListBookTest {
                         bookId = bookId,
                         editionId = editionId,
                     ),
+                )
+            }
+
+            coVerify {
+                booksRepository.hydrateReferencedBooks(
+                    bookIds = listOf(bookId),
+                    editionIds = listOf(editionId),
+                    forceNetwork = false,
                 )
             }
         }

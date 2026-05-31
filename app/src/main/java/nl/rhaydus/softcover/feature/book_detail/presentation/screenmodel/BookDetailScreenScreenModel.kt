@@ -58,7 +58,10 @@ class BookDetailScreenScreenModel(
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
-    initialState = BookDetailUiState(initialCover = initialCover),
+    initialState = BookDetailUiState(
+        initialCover = initialCover,
+        scannedEditionId = initialCover?.scannedEditionId,
+    ),
     initialLocalVariables = BookDetailLocalVariables(),
     initializers = flows,
 ) {

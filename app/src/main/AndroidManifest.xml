@@ -7,6 +7,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
+    <!-- Barcode scanning; camera-less devices fall back to manual ISBN entry. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
+
     <!-- Legacy gallery writes (Android 9 and below); API 29+ uses scoped storage / MediaStore. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"

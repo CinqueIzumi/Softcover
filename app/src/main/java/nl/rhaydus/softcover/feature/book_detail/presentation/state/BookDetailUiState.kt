@@ -21,6 +21,9 @@ data class BookDetailUiState(
     val loadingEditions: Boolean = false,
     val editionSearchQuery: String = "",
     val previewEdition: BookEdition? = null,
+    val scannedEditionId: Int? = null,
+    val scannedEditionBannerDismissed: Boolean = false,
+    val isUpdatingScannedEdition: Boolean = false,
     val showUpdateProgressSheet: Boolean = false,
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
@@ -47,16 +50,60 @@ data class BookDetailUiState(
     val listsBeingMutated: Set<Int> = emptySet(),
 ) : UiState {
     /**
-     * The edition the screen currently shows. A preview ([previewEdition]) only applies to an
-     * off-shelf book — an ephemeral selection that is never persisted or cached. Once the book has a
-     * user book, the persisted edition always wins (any leftover preview is ignored), so previewing
-     * then adding to the shelf transitions without flicker.
+     * The edition pinned by an external entry point (a barcode scan), if any. It wins over every
+     * other edition — including the persisted on-shelf edition — so a scan always shows the exact
+     * edition that was scanned. Resolved from [book]'s editions (so it carries the locally-overlaid
+     * `owned` flag — e.g. the owned cover badge shows for a scanned edition the user owns); falls
+     * back to [initialCover] for the pre-load frame before the book has loaded.
+     */
+    val scannedEdition: BookEdition?
+        get() = scannedEditionId?.let { id ->
+            book?.editions?.firstOrNull { it.id == id } ?: initialCover?.currentEdition?.takeIf { it.id == id }
+        }
+
+    /**
+     * The edition the screen currently shows. A [scannedEdition] always wins. Otherwise a preview
+     * ([previewEdition]) only applies to an off-shelf book — an ephemeral selection that is never
+     * persisted or cached. Once the book has a user book, the persisted edition wins (any leftover
+     * preview is ignored), so previewing then adding to the shelf transitions without flicker.
      */
     val displayedEdition: BookEdition?
-        get() = when {
-            book?.userBook != null -> book.currentEdition
-            else -> previewEdition ?: book?.currentEdition ?: initialCover?.currentEdition
+        get() {
+            scannedEdition?.let { return it }
+
+            return when {
+                book?.userBook != null -> book.currentEdition
+                else -> previewEdition ?: book?.currentEdition ?: initialCover?.currentEdition
+            }
         }
+
+    /**
+     * Whether to offer updating the on-shelf edition to the scanned one — shown only when the book
+     * is already on a shelf with a *different* edition than the one scanned, and not yet dismissed.
+     */
+    val showScanEditionUpdateBanner: Boolean
+        get() {
+            val scannedId = scannedEditionId ?: return false
+
+            if (scannedEditionBannerDismissed) return false
+
+            val shelvedEditionId = book?.userBook?.editionId ?: return false
+
+            return shelvedEditionId != scannedId
+        }
+
+    /**
+     * Edition ids the user owns, sourced from the local "Owned" list rather than the per-shelf
+     * `owned` overlay — so ownership reflects regardless of whether the book is on a reading shelf
+     * (e.g. a scanned, un-shelved edition the user owns shows the owned badge and "Unmark as owned").
+     */
+    val ownedEditionIds: Set<Int>
+        get() = userLists.firstOrNull { it.isOwned }
+            ?.books
+            ?.mapTo(mutableSetOf()) { it.editionId }
+            ?: emptySet()
+
+    fun isEditionOwned(edition: BookEdition?): Boolean = edition != null && edition.id in ownedEditionIds
 
     val filteredEditions: List<BookEdition>
         get() {

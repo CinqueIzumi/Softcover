@@ -37,6 +37,7 @@ import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.feature.books.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -2807,6 +2808,68 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerify(exactly = 1) {
                 booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
+            }
+        }
+    }
+
+    @Nested
+    inner class FetchEditionMatchForIsbn {
+
+        @Test
+        fun `online — delegates to remote and returns IsbnEditionMatch`() = runTest {
+            // ----- Arrange -----
+            val isbn = "9780451524935"
+            val expectedMatch = IsbnEditionMatch(bookId = 42, editionId = 99)
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+            } returns expectedMatch
+
+            // ----- Act -----
+            val result = repository.fetchEditionMatchForIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe expectedMatch
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+            }
+        }
+
+        @Test
+        fun `online — remote returns null — returns null`() = runTest {
+            // ----- Arrange -----
+            val isbn = "9780451524935"
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+            } returns null
+
+            // ----- Act -----
+            val result = repository.fetchEditionMatchForIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe null
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+            }
+        }
+
+        @Test
+        fun `offline — throws OfflineException without calling remote`() = runTest {
+            // ----- Arrange -----
+            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+
+            val isbn = "9780451524935"
+
+            // ----- Act & Assert -----
+            shouldThrow<OfflineException> {
+                repository.fetchEditionMatchForIsbn(isbn = isbn)
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = any())
             }
         }
     }

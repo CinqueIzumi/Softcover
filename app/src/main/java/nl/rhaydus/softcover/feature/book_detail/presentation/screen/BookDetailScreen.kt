@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -97,12 +98,15 @@ import nl.rhaydus.softcover.core.presentation.component.DropCapText
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.presentation.component.ReviewDocumentText
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.presentation.modifier.grayscale
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
@@ -135,6 +139,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDea
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissReviewSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissScanEditionBannerClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
@@ -158,6 +163,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleList
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToScannedEditionClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ReviewEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
@@ -366,6 +372,7 @@ class BookDetailScreen(
                             releaseYear = state.displayedEdition?.releaseYear.takeIf { it != -1 }
                                 ?: state.book?.releaseYear,
                             unreleasedDate = state.book?.takeIf { it.isUnreleased }?.effectiveReleaseDate,
+                            isOwned = state.isEditionOwned(edition = state.displayedEdition),
                             onCoverClick = onCoverClick,
                         )
                     }
@@ -379,6 +386,17 @@ class BookDetailScreen(
                         runAction = runAction,
                         celebrationKey = celebrationKey,
                     )
+                }
+
+                if (state.showScanEditionUpdateBanner) {
+                    item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                    item {
+                        ScanEditionUpdateBanner(
+                            isUpdating = state.isUpdatingScannedEdition,
+                            runAction = runAction,
+                        )
+                    }
                 }
 
                 val ratingBook = state.book
@@ -603,6 +621,7 @@ class BookDetailScreen(
         isLoading: Boolean,
         fallbackCoverUrl: String?,
         isExpired: Boolean,
+        isOwned: Boolean,
         onCoverClick: () -> Unit,
     ) {
         val imageHeight = with(LocalDensity.current) {
@@ -683,7 +702,7 @@ class BookDetailScreen(
                     val enterSettled = navScope == null ||
                         navScope.transition.currentState == EnterExitState.Visible
 
-                    if (edition?.owned == true) {
+                    if (isOwned) {
                         val badgeAlpha by animateFloatAsState(
                             targetValue = if (enterSettled) 1f else 0f,
                             label = "OwnedCoverBadgeAlpha",
@@ -1405,14 +1424,15 @@ class BookDetailScreen(
                     )
                 }
 
-                if (isOnShelf.not()) return@DropdownMenu
-
+                // Owning an edition is a list operation, independent of the reading shelf, so it stays
+                // available off-shelf (e.g. for a scanned edition) and sits above the on-shelf gate.
+                // The displayed edition — the scanned one when arriving from a scan — is what it acts on.
                 if (isOnline) {
-                    book.currentEdition?.let { currentEdition ->
-                        val ownedLabel =
-                            if (currentEdition.owned) "Unmark as owned" else "Mark as owned"
-                        val ownedIconId =
-                            if (currentEdition.owned) R.drawable.ic_close else R.drawable.ic_check
+                    state.displayedEdition?.let { ownedEdition ->
+                        val isOwned = state.isEditionOwned(edition = ownedEdition)
+
+                        val ownedLabel = if (isOwned) "Unmark as owned" else "Mark as owned"
+                        val ownedIconId = if (isOwned) R.drawable.ic_close else R.drawable.ic_check
 
                         DropdownMenuItem(
                             text = { Text(text = ownedLabel) },
@@ -1424,11 +1444,13 @@ class BookDetailScreen(
                             },
                             onClick = {
                                 dismiss()
-                                runAction(OnEditionOwnedToggleAction(edition = currentEdition))
+                                runAction(OnEditionOwnedToggleAction(edition = ownedEdition, owned = isOwned.not()))
                             },
                         )
                     }
                 }
+
+                if (isOnShelf.not()) return@DropdownMenu
 
                 if (state.deadline == null) {
                     DropdownMenuItem(
@@ -1826,6 +1848,82 @@ class BookDetailScreen(
     // endregion
 
     // region About
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
+    private fun ScanEditionUpdateBanner(
+        isUpdating: Boolean,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Row(
+                modifier = Modifier.padding(
+                    start = 20.dp,
+                    top = 16.dp,
+                    end = 8.dp,
+                    bottom = 16.dp,
+                ),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "ALREADY ON YOUR SHELVES",
+                        style = MaterialTheme.editorialTypography.eyebrowSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "You've added a different edition of this book. Update it to the one you scanned?",
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    if (isUpdating) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularWavyProgressIndicator(modifier = Modifier.size(20.dp))
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Text(
+                                text = "Updating edition…",
+                                style = MaterialTheme.editorialTypography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    } else {
+                        SoftcoverButton(
+                            label = "Update edition",
+                            style = ButtonStyle.TONAL,
+                            size = ButtonSize.S,
+                            onClick = { runAction(OnUpdateToScannedEditionClickAction()) },
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = { runAction(OnDismissScanEditionBannerClickAction()) },
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = "Dismiss",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+        }
+    }
 
     @Composable
     private fun AboutSection(state: BookDetailUiState) {

@@ -15,8 +15,8 @@ class OnMarkBookAsWantToReadClickAction(private val book: Book) : BookDetailActi
     ) {
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
-        // A previewed edition (off-shelf) becomes the created user book's edition.
-        val editionId = scope.currentState.previewEdition?.id
+        // A previewed or scanned edition (off-shelf) becomes the created user book's edition.
+        val editionId = scope.currentState.previewEdition?.id ?: scope.currentState.scannedEditionId
 
         val job = dependencies.launch {
             dependencies.markBookAsWantToReadUseCase(book = book, editionId = editionId).onFailure { error ->

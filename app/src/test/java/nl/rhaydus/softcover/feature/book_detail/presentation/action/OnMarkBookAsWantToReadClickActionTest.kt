@@ -246,6 +246,31 @@ class OnMarkBookAsWantToReadClickActionTest {
         }
 
         @Test
+        fun `uses scannedEditionId as editionId when previewEdition is null`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 42)
+            stateFlow.value = BookDetailUiState(previewEdition = null, scannedEditionId = 555)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsWantToReadUseCase(book = book, editionId = 555)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnMarkBookAsWantToReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                markBookAsWantToReadUseCase(book = book, editionId = 555)
+            }
+        }
+
+        @Test
         fun `forwards null as editionId when no preview is set`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)

@@ -185,8 +185,10 @@ A dedicated personalisation surface reached from Explore. *(C.9)*
 ### Step 6.7 — Search filters & sorts (M)
 Filter chip row when search is active; sort modes (relevance, rating, year, popularity). *(B.3.8)*
 
-### Step 6.8 — Barcode scan to add books / editions (M) *(pulled forward to 2.4.0, broadened)*
-A barcode-scan affordance surfaced as a scan banner / entry point on the search bar (and the add-to-library flow). The camera scans an ISBN/barcode in the wild and resolves it to a specific Hardcover edition; from the result the user can add the book straight to their library **or** add/select that exact edition, in addition to the original drop-into-search behaviour. Camera-permission gate + offline ISBN-only fallback. *(B.3.9)*
+### Step 6.8b — Barcode scan: handle editions Hardcover doesn't know yet (M, depends on 6.8a) *(pulled forward to 2.4.0)*
+Step 6.8a shipped the scan path for **known** books: a scan affordance in the Explore search bar opens a CameraX + bundled-ML-Kit scanner (camera-permission gate + manual ISBN-entry fallback), resolves the scanned/typed ISBN to a Hardcover edition via `ResolveBookByIsbnUseCase`, and opens book detail. An ISBN with no matching edition shows a non-blocking "we don't know that book yet" message and stops — the `IsbnLookupResult.UnknownEdition` branch is the clean seam this step extends.
+
+This step replaces that dead-end for the unmatched branch: from the "unknown" result the user can add the book/edition to Hardcover (create-edition mutation + metadata enrichment) and add it straight to their library **or** select that exact edition. Also broadens the scan entry point beyond the Explore search bar into the add-to-library flow. *(B.3.9)*
 
 ### Step 6.9 — Author spotlight tile (S, depends on 5.1)
 "Author of the week" full-width tile linking to author detail. *(B.3.7)*

@@ -71,8 +71,9 @@ val label = when (status) {
 
 ## Data Classes
 
-- **One data class per file.** Every `data class` lives in its own file, named after the class. This applies to models, DTOs, snapshots, small result holders, wrappers — everything. Never declare a `data class` locally inside a function, method, or `init` block, and never colocate multiple `data class` declarations in a shared file.
+- **One data class per file.** Every `data class` lives in its own file, named after the class. This applies to models, DTOs, snapshots, small result holders, wrappers — everything. Never declare a `data class` locally inside a function, method, or `init` block, and never colocate multiple unrelated `data class` declarations in a shared file.
 - If a data class is only used by a single caller, it still gets its own file next to that caller.
+- **Exception — sealed hierarchy variants.** The `data class` / `data object` variants of a `sealed interface` / `sealed class` MAY be co-located inside the sealed type's own file (named after the sealed type), for cohesion and the `SealedType.Variant` namespacing at call sites. Splitting the variants one-per-file (each variant a top-level subtype in its own file) is equally acceptable — both keep exhaustive `when` support, since a sealed type's permitted subtypes can live in separate files of the same package. Pick whichever reads better for the hierarchy; do **not** treat a co-located sealed-variant `data class` as a violation of the one-data-class-per-file rule. (Examples: `IsbnLookupResult` and `ShelfMutationOutcome` co-locate; `ScanEvent` / `BookDetailEvent` split.)
 
 ```kotlin
 // Good — HoursMinutesSeconds.kt

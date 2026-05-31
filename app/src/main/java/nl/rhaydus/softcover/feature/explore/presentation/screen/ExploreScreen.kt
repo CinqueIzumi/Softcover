@@ -72,9 +72,11 @@ import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimated
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBarAction
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
@@ -86,6 +88,7 @@ import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
+import nl.rhaydus.softcover.feature.scan.presentation.screen.BarcodeScannerScreen
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
@@ -143,6 +146,7 @@ object ExploreScreen : Screen {
                         ),
                     )
                 },
+                onScanClick = { navigator.parent?.push(item = BarcodeScannerScreen()) },
                 isOnline = isOnline,
             )
         }
@@ -154,6 +158,7 @@ object ExploreScreen : Screen {
         state: ExploreScreenUiState,
         runAction: (ExploreAction) -> Unit,
         onBookClick: (Book, String?) -> Unit,
+        onScanClick: () -> Unit,
         isOnline: Boolean,
     ) {
         Scaffold(
@@ -166,6 +171,13 @@ object ExploreScreen : Screen {
                         runAction(OnQueryChangeAction(newQuery = it))
                     },
                     isLoading = state.isLoading,
+                    trailingFieldAction = SoftcoverTopBarAction(
+                        iconResource = SoftcoverIconResource.Drawable(
+                            id = R.drawable.ic_barcode_scanner,
+                            contentDescription = "Scan a book's barcode",
+                        ),
+                        onClick = onScanClick,
+                    ),
                 )
             }
         ) { padding ->
@@ -969,6 +981,7 @@ private fun ExploreScreenPreview() {
         ExploreScreen.Screen(
             runAction = {},
             onBookClick = { _, _ -> },
+            onScanClick = {},
             isOnline = true,
             state = previewMockState,
         )
@@ -982,6 +995,7 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
         ExploreScreen.Screen(
             runAction = {},
             onBookClick = { _, _ -> },
+            onScanClick = {},
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
@@ -1001,6 +1015,7 @@ private fun LoadingTrendingExploreScreenPreview() {
         ExploreScreen.Screen(
             runAction = {},
             onBookClick = { _, _ -> },
+            onScanClick = {},
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = emptyList(),
@@ -1020,6 +1035,7 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
         ExploreScreen.Screen(
             runAction = {},
             onBookClick = { _, _ -> },
+            onScanClick = {},
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
@@ -1039,6 +1055,7 @@ private fun OfflineExploreScreenPreview() {
         ExploreScreen.Screen(
             runAction = {},
             onBookClick = { _, _ -> },
+            onScanClick = {},
             isOnline = false,
             state = previewMockState,
         )
@@ -1052,6 +1069,7 @@ private fun ActiveExploreScreenPreview() {
         ExploreScreen.Screen(
             runAction = {},
             onBookClick = { _, _ -> },
+            onScanClick = {},
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "Last to leave",
@@ -1104,6 +1122,7 @@ private fun LoadingActiveExploreScreenPreview() {
         ExploreScreen.Screen(
             runAction = {},
             onBookClick = { _, _ -> },
+            onScanClick = {},
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "Piranesi",
@@ -1121,6 +1140,7 @@ private fun NoResultsActiveExploreScreenPreview() {
         ExploreScreen.Screen(
             runAction = {},
             onBookClick = { _, _ -> },
+            onScanClick = {},
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "qwertyuiop",

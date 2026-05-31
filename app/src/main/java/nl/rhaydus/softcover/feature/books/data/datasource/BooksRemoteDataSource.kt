@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragm
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment as booksByIdsBookDetailFragment
+import nl.rhaydus.softcover.GetEditionByIsbnQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery.Data.Edition.Companion.editionDetailFragment
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
@@ -42,6 +43,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
+import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
@@ -53,6 +55,8 @@ interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
 
     suspend fun fetchBookIdForEdition(editionId: Int): Int?
+
+    suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch?
 
     suspend fun fetchBooksByIds(
         ids: List<Int>,
@@ -172,6 +176,21 @@ class BooksRemoteDataSourceImpl(
         )
 
         return result.editions.firstOrNull()?.book_id
+    }
+
+    override suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch? {
+        val result = apolloClient.safeQuery(
+            query = GetEditionByIsbnQuery(isbn = isbn),
+            fetchPolicy = FetchPolicy.NetworkFirst,
+        )
+
+        result.isbn13.firstOrNull()?.let { edition ->
+            return IsbnEditionMatch(bookId = edition.book_id, editionId = edition.id)
+        }
+
+        return result.isbn10.firstOrNull()?.let { edition ->
+            IsbnEditionMatch(bookId = edition.book_id, editionId = edition.id)
+        }
     }
 
     override suspend fun fetchBooksByIds(

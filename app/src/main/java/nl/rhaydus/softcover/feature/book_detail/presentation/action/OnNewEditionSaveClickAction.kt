@@ -21,6 +21,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
             scope.setState {
                 it.copy(
                     previewEdition = edition,
+                    scannedEditionId = null,
                     showEditEditionSheet = false,
                 )
             }
@@ -35,7 +36,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
 
             dependencies.updateBookEditionUseCase(
                 userBook = userBook,
-                newEditionId = edition.id
+                newEditionId = edition.id,
             ).onFailure {
                 Timber.e("Something went wrong updating book edition! $it")
             }
@@ -46,7 +47,10 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
         }
 
         scope.setState {
-            it.copy(showEditEditionSheet = false)
+            it.copy(
+                scannedEditionId = null,
+                showEditEditionSheet = false,
+            )
         }
     }
 }

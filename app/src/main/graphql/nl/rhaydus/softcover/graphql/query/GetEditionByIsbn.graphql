@@ -1,0 +1,26 @@
+query GetEditionByIsbn(
+    $isbn: String!,
+) {
+    isbn13: editions(
+        where: {
+            isbn_13: {
+                _eq: $isbn
+            }
+        }
+        limit: 1
+    ) {
+        id
+        book_id
+    }
+    isbn10: editions(
+        where: {
+            isbn_10: {
+                _eq: $isbn
+            }
+        }
+        limit: 1
+    ) {
+        id
+        book_id
+    }
+}

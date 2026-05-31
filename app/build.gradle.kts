@@ -114,6 +114,13 @@ dependencies {
     // Drag-to-reorder for LazyGrid / LazyColumn
     implementation(libs.reorderable)
 
+    // Barcode scanning (CameraX preview/analysis + bundled ML Kit model, no Play Services)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.mlkit.barcode.scanning)
+
     // Unit test dependencies
     testImplementation(libs.junit.params)
     testImplementation(libs.junit.engine)

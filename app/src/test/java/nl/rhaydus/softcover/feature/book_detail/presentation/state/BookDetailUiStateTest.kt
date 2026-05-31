@@ -9,6 +9,8 @@ import io.mockk.mockk
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -19,11 +21,19 @@ class BookDetailUiStateTest {
         every { mock.id } returns id
     }
 
-    private fun stubBook(userBook: UserBook?, currentEdition: BookEdition?): Book =
-        mockk<Book>().also { mock ->
-            every { mock.userBook } returns userBook
-            every { mock.currentEdition } returns currentEdition
-        }
+    private fun stubBook(
+        userBook: UserBook?,
+        currentEdition: BookEdition?,
+        editions: List<BookEdition> = emptyList(),
+    ): Book = mockk<Book>().also { mock ->
+        every { mock.userBook } returns userBook
+        every { mock.currentEdition } returns currentEdition
+        every { mock.editions } returns editions
+    }
+
+    private fun stubUserBook(editionId: Int? = null): UserBook = mockk<UserBook>().also { mock ->
+        every { mock.editionId } returns editionId
+    }
 
     @Nested
     inner class DisplayedEdition {
@@ -102,6 +112,163 @@ class BookDetailUiStateTest {
 
             // ----- Assert -----
             result shouldBe bookEdition
+        }
+
+        @Test
+        fun `returns scanned edition from book editions even when userBook has a different editionId`() {
+            // ----- Arrange -----
+            val scannedEdition = stubEdition(id = 42)
+            val shelvedEdition = stubEdition(id = 99)
+            val userBook = stubUserBook(editionId = 99)
+            val book = stubBook(
+                userBook = userBook,
+                currentEdition = shelvedEdition,
+                editions = listOf(scannedEdition, shelvedEdition),
+            )
+            val state = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+            )
+
+            // ----- Act -----
+            val result = state.displayedEdition
+
+            // ----- Assert -----
+            result shouldBe scannedEdition
+        }
+
+        @Test
+        fun `falls back to book currentEdition when scannedEditionId is null and userBook is present`() {
+            // ----- Arrange -----
+            val bookEdition = stubEdition(id = 10)
+            val userBook = stubUserBook(editionId = 10)
+            val book = stubBook(userBook = userBook, currentEdition = bookEdition)
+            val state = BookDetailUiState(
+                book = book,
+                scannedEditionId = null,
+            )
+
+            // ----- Act -----
+            val result = state.displayedEdition
+
+            // ----- Assert -----
+            result shouldBe bookEdition
+        }
+
+        @Test
+        fun `resolves scanned edition from initialCover currentEdition when editions list is empty`() {
+            // ----- Arrange -----
+            val coverEdition = stubEdition(id = 7)
+            val initialCover = BookInitialCover(
+                currentEdition = coverEdition,
+                defaultEdition = null,
+                fallbackCoverUrl = null,
+            )
+            val state = BookDetailUiState(
+                book = null,
+                editions = emptyList(),
+                initialCover = initialCover,
+                scannedEditionId = 7,
+            )
+
+            // ----- Act -----
+            val result = state.displayedEdition
+
+            // ----- Assert -----
+            result shouldBe coverEdition
+        }
+    }
+
+    @Nested
+    inner class ShowScanEditionUpdateBanner {
+
+        @Test
+        fun `is true when on-shelf with a different edition and not dismissed`() {
+            // ----- Arrange -----
+            val userBook = stubUserBook(editionId = 10)
+            val book = stubBook(userBook = userBook, currentEdition = null)
+            val state = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+                scannedEditionBannerDismissed = false,
+            )
+
+            // ----- Act -----
+            val result = state.showScanEditionUpdateBanner
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `is false when banner is dismissed`() {
+            // ----- Arrange -----
+            val userBook = stubUserBook(editionId = 10)
+            val book = stubBook(userBook = userBook, currentEdition = null)
+            val state = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+                scannedEditionBannerDismissed = true,
+            )
+
+            // ----- Act -----
+            val result = state.showScanEditionUpdateBanner
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `is false when book has no userBook`() {
+            // ----- Arrange -----
+            val book = stubBook(userBook = null, currentEdition = null)
+            val state = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+                scannedEditionBannerDismissed = false,
+            )
+
+            // ----- Act -----
+            val result = state.showScanEditionUpdateBanner
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `is false when shelved editionId matches scannedEditionId`() {
+            // ----- Arrange -----
+            val userBook = stubUserBook(editionId = 42)
+            val book = stubBook(userBook = userBook, currentEdition = null)
+            val state = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+                scannedEditionBannerDismissed = false,
+            )
+
+            // ----- Act -----
+            val result = state.showScanEditionUpdateBanner
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `is false when scannedEditionId is null`() {
+            // ----- Arrange -----
+            val userBook = stubUserBook(editionId = 10)
+            val book = stubBook(userBook = userBook, currentEdition = null)
+            val state = BookDetailUiState(
+                book = book,
+                scannedEditionId = null,
+                scannedEditionBannerDismissed = false,
+            )
+
+            // ----- Act -----
+            val result = state.showScanEditionUpdateBanner
+
+            // ----- Assert -----
+            result shouldBe false
         }
     }
 
@@ -359,6 +526,118 @@ class BookDetailUiStateTest {
 
             // ----- Assert -----
             result.shouldBeEmpty()
+        }
+    }
+
+    @Nested
+    inner class IsEditionOwned {
+
+        private fun listBook(editionId: Int): ListBook = ListBook(
+            listBookId = editionId * 10,
+            listId = 1,
+            bookId = 100,
+            editionId = editionId,
+        )
+
+        private fun ownedList(vararg editionIds: Int): BookList = BookList(
+            id = 1,
+            name = "Owned",
+            slug = "owned",
+            books = editionIds.map { listBook(it) },
+        )
+
+        @Test
+        fun `ownedEditionIds returns expected set from the owned list`() {
+            // ----- Arrange -----
+            val state = BookDetailUiState(
+                userLists = listOf(ownedList(77, 88)),
+            )
+
+            // ----- Act -----
+            val result = state.ownedEditionIds
+
+            // ----- Assert -----
+            result shouldBe setOf(77, 88)
+        }
+
+        @Test
+        fun `isEditionOwned returns true when edition id is in the owned list`() {
+            // ----- Arrange -----
+            val edition = stubEdition(id = 77)
+            val state = BookDetailUiState(
+                userLists = listOf(ownedList(77)),
+            )
+
+            // ----- Act -----
+            val result = state.isEditionOwned(edition)
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `isEditionOwned returns false when edition id is not in the owned list`() {
+            // ----- Arrange -----
+            val edition = stubEdition(id = 99)
+            val state = BookDetailUiState(
+                userLists = listOf(ownedList(77)),
+            )
+
+            // ----- Act -----
+            val result = state.isEditionOwned(edition)
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `isEditionOwned returns false when userLists is empty`() {
+            // ----- Arrange -----
+            val edition = stubEdition(id = 77)
+            val state = BookDetailUiState(
+                userLists = emptyList(),
+            )
+
+            // ----- Act -----
+            val result = state.isEditionOwned(edition)
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `isEditionOwned returns false when no list has slug owned`() {
+            // ----- Arrange -----
+            val edition = stubEdition(id = 77)
+            val nonOwnedList = BookList(
+                id = 2,
+                name = "Favorites",
+                slug = "favorites",
+                books = listOf(listBook(77)),
+            )
+            val state = BookDetailUiState(
+                userLists = listOf(nonOwnedList),
+            )
+
+            // ----- Act -----
+            val result = state.isEditionOwned(edition)
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `isEditionOwned returns false when edition is null`() {
+            // ----- Arrange -----
+            val state = BookDetailUiState(
+                userLists = listOf(ownedList(77)),
+            )
+
+            // ----- Act -----
+            val result = state.isEditionOwned(null)
+
+            // ----- Assert -----
+            result shouldBe false
         }
     }
 }

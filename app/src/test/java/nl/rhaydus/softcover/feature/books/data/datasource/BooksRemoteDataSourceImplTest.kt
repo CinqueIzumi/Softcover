@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
+import nl.rhaydus.softcover.GetEditionByIsbnQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
@@ -41,6 +42,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
+import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion.userBookReadFragment
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -2742,6 +2744,85 @@ class BooksRemoteDataSourceImplTest {
                     reviewedAt = "2026-05-30",
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class FetchEditionMatchForIsbn {
+
+        @Test
+        fun `isbn13 match — returns IsbnEditionMatch from first isbn13 row`() = runTest {
+            // ----- Arrange -----
+            val isbn = "9780451524935"
+            val queryData = mockk<GetEditionByIsbnQuery.Data>()
+            val isbn13Row = mockk<GetEditionByIsbnQuery.Data.Isbn13>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionByIsbnQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every { queryData.isbn13 } returns listOf(isbn13Row)
+            every { queryData.isbn10 } returns emptyList()
+            every { isbn13Row.book_id } returns 10
+            every { isbn13Row.id } returns 110
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe IsbnEditionMatch(bookId = 10, editionId = 110)
+        }
+
+        @Test
+        fun `isbn13 empty — falls back to isbn10 and returns IsbnEditionMatch`() = runTest {
+            // ----- Arrange -----
+            val isbn = "0451524934"
+            val queryData = mockk<GetEditionByIsbnQuery.Data>()
+            val isbn10Row = mockk<GetEditionByIsbnQuery.Data.Isbn10>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionByIsbnQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every { queryData.isbn13 } returns emptyList()
+            every { queryData.isbn10 } returns listOf(isbn10Row)
+            every { isbn10Row.book_id } returns 20
+            every { isbn10Row.id } returns 220
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe IsbnEditionMatch(bookId = 20, editionId = 220)
+        }
+
+        @Test
+        fun `both lists empty — returns null`() = runTest {
+            // ----- Arrange -----
+            val isbn = "0000000000000"
+            val queryData = mockk<GetEditionByIsbnQuery.Data>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionByIsbnQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every { queryData.isbn13 } returns emptyList()
+            every { queryData.isbn10 } returns emptyList()
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe null
         }
     }
 

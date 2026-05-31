@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
@@ -60,6 +61,15 @@ interface BooksRepository {
     suspend fun removeAllBooks()
 
     suspend fun fetchBookById(id: Int): Book
+
+    /**
+     * Resolves a scanned/typed ISBN (ISBN-10 or ISBN-13) to the Hardcover book + edition that carry
+     * it, or `null` when no edition matches. Carries the edition id (not just the book id) so the
+     * detail screen can preview the exact scanned edition. Throws
+     * [nl.rhaydus.softcover.core.domain.exception.OfflineException] when offline so callers can tell
+     * a genuine "not in Hardcover" miss apart from a network outage.
+     */
+    suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch?
 
     suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
