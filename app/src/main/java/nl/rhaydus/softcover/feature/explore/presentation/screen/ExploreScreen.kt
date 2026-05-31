@@ -677,7 +677,7 @@ object ExploreScreen : Screen {
             )
 
             Text(
-                text = book.currentEdition?.authorString.orEmpty(),
+                text = book.authorString,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -892,7 +892,7 @@ object ExploreScreen : Screen {
                 )
 
                 Text(
-                    text = "By ${book.currentEdition?.authorString.orEmpty()}",
+                    text = "By ${book.authorString}",
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

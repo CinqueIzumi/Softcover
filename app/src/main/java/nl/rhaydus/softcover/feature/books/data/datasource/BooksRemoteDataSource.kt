@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.cache.normalized.FetchPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragment
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
@@ -43,6 +44,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
+import nl.rhaydus.softcover.feature.books.domain.model.CreatedBook
 import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
@@ -57,6 +59,8 @@ interface BooksRemoteDataSource {
     suspend fun fetchBookIdForEdition(editionId: Int): Int?
 
     suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch?
+
+    suspend fun addBookByIsbn(isbn: String): CreatedBook
 
     suspend fun fetchBooksByIds(
         ids: List<Int>,
@@ -141,6 +145,9 @@ interface BooksRemoteDataSource {
 
 private const val BATCH_ID_LIMIT: Int = 200
 
+/** Hardcover's ISBN external-book provider platform — `upsert_book` uses the ISBN as the external id. */
+private const val HARDCOVER_ISBN_PLATFORM_ID: Int = 8
+
 class BooksRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : BooksRemoteDataSource {
@@ -191,6 +198,34 @@ class BooksRemoteDataSourceImpl(
         return result.isbn10.firstOrNull()?.let { edition ->
             IsbnEditionMatch(bookId = edition.book_id, editionId = edition.id)
         }
+    }
+
+    override suspend fun addBookByIsbn(isbn: String): CreatedBook {
+        val response = apolloClient
+            .safeMutation(
+                mutation = CreateBookMutation(
+                    externalId = isbn,
+                    platformId = HARDCOVER_ISBN_PLATFORM_ID,
+                    bookId = Optional.absent(),
+                ),
+            )
+            .upsert_book
+            ?: throw Exception("Did not receive an upsert-book response")
+
+        val errors: List<String> = response.errors
+            .orEmpty()
+            .filterNotNull()
+            .filter { it.isNotBlank() }
+
+        if (errors.isNotEmpty()) throw Exception("CreateBook rejected by server: ${errors.joinToString()}")
+
+        val bookId = response.book?.id
+            ?: throw Exception("upsert_book returned no book")
+
+        return CreatedBook(
+            bookId = bookId,
+            editionId = response.edition?.id,
+        )
     }
 
     override suspend fun fetchBooksByIds(

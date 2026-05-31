@@ -7,19 +7,19 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
-import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.feature.books.domain.model.CreatedBook
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class ResolveBookByIsbnUseCaseTest {
+class AddBookByIsbnUseCaseTest {
 
     private lateinit var booksRepository: BooksRepository
     private lateinit var fetchBookByIdUseCase: FetchBookByIdUseCase
-    private lateinit var useCase: ResolveBookByIsbnUseCase
+    private lateinit var useCase: AddBookByIsbnUseCase
 
-    private val validIsbn = "9780374710781"
+    private val isbn = "9780374710781"
     private val bookId = 42
     private val editionId = 99
     private val book = PreviewData.baseBook
@@ -28,7 +28,7 @@ class ResolveBookByIsbnUseCaseTest {
     fun setUp() {
         booksRepository = mockk()
         fetchBookByIdUseCase = mockk()
-        useCase = ResolveBookByIsbnUseCase(
+        useCase = AddBookByIsbnUseCase(
             booksRepository = booksRepository,
             fetchBookByIdUseCase = fetchBookByIdUseCase,
         )
@@ -38,60 +38,51 @@ class ResolveBookByIsbnUseCaseTest {
     inner class Invoke {
 
         @Test
-        fun `valid ISBN with matching bookId returns Found with hydrated book`() = runTest {
+        fun `success returns Found with hydrated book and editionId from CreatedBook`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn)
-            } returns IsbnEditionMatch(bookId = bookId, editionId = editionId)
+                booksRepository.addBookByIsbn(isbn = isbn)
+            } returns CreatedBook(bookId = bookId, editionId = editionId)
 
             coEvery { fetchBookByIdUseCase(id = bookId) } returns Result.success(book)
 
             // ----- Act -----
-            val result = useCase(validIsbn)
+            val result = useCase(isbn)
 
             // ----- Assert -----
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe IsbnLookupResult.Found(book = book, editionId = editionId)
 
-            coVerify(exactly = 1) { booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn) }
+            coVerify(exactly = 1) { booksRepository.addBookByIsbn(isbn = isbn) }
             coVerify(exactly = 1) { fetchBookByIdUseCase(id = bookId) }
         }
 
         @Test
-        fun `valid ISBN with no matching bookId returns UnknownEdition without calling fetchBookByIdUseCase`() = runTest {
+        fun `null editionId in CreatedBook falls back to hydrated book currentEdition id`() = runTest {
             // ----- Arrange -----
-            coEvery { booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn) } returns null
+            coEvery {
+                booksRepository.addBookByIsbn(isbn = isbn)
+            } returns CreatedBook(bookId = bookId, editionId = null)
+
+            coEvery { fetchBookByIdUseCase(id = bookId) } returns Result.success(book)
 
             // ----- Act -----
-            val result = useCase(validIsbn)
+            val result = useCase(isbn)
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            result.getOrNull() shouldBe IsbnLookupResult.UnknownEdition(normalizedIsbn = validIsbn)
 
-            coVerify(exactly = 0) { fetchBookByIdUseCase(id = any()) }
+            // PreviewData.baseBook.currentEdition resolves to baseEdition (id = 1) via defaultEdition
+            result.getOrNull() shouldBe IsbnLookupResult.Found(book = book, editionId = 1)
         }
 
         @Test
-        fun `malformed ISBN returns InvalidIsbn without calling repository`() = runTest {
+        fun `repository addBookByIsbn throws returns failure`() = runTest {
             // ----- Arrange -----
-            // ----- Act -----
-            val result = useCase("not-an-isbn")
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe IsbnLookupResult.InvalidIsbn
-
-            coVerify(exactly = 0) { booksRepository.fetchEditionMatchForIsbn(isbn = any()) }
-        }
-
-        @Test
-        fun `repository throws returns failure`() = runTest {
-            // ----- Arrange -----
-            coEvery { booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn) } throws OfflineException()
+            coEvery { booksRepository.addBookByIsbn(isbn = isbn) } throws OfflineException()
 
             // ----- Act -----
-            val result = useCase(validIsbn)
+            val result = useCase(isbn)
 
             // ----- Assert -----
             result.isFailure shouldBe true
@@ -101,13 +92,15 @@ class ResolveBookByIsbnUseCaseTest {
         fun `fetchBookByIdUseCase returns failure causes overall failure via getOrThrow`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn)
-            } returns IsbnEditionMatch(bookId = bookId, editionId = editionId)
+                booksRepository.addBookByIsbn(isbn = isbn)
+            } returns CreatedBook(bookId = bookId, editionId = editionId)
 
-            coEvery { fetchBookByIdUseCase(id = bookId) } returns Result.failure(RuntimeException("hydration failed"))
+            coEvery {
+                fetchBookByIdUseCase(id = bookId)
+            } returns Result.failure(RuntimeException("hydration failed"))
 
             // ----- Act -----
-            val result = useCase(validIsbn)
+            val result = useCase(isbn)
 
             // ----- Assert -----
             result.isFailure shouldBe true

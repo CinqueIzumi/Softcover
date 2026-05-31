@@ -4,5 +4,5 @@ import nl.rhaydus.softcover.core.domain.model.Book
 
 data class BookResolvedEvent(
     val book: Book,
-    val editionId: Int,
+    val editionId: Int?,
 ) : ScanEvent

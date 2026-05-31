@@ -44,6 +44,11 @@ data class Book(
                 ?: editions.firstOrNull()
         }
 
+    /** Author names for display, falling back to the book's own authors when no edition is known. */
+    val authorString: String
+        get() = currentEdition?.authorString?.takeIf { it.isNotBlank() }
+            ?: authors.joinToString(", ") { it.name }
+
     val firstPositionInSeries: Double?
         get() = positionsInSeries.firstOrNull()
 

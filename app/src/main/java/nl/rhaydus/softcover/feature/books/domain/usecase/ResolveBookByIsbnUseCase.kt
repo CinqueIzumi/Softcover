@@ -9,8 +9,9 @@ import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
  * The ISBN is normalized, looked up to a Hardcover `book_id`, then hydrated through the existing
  * [FetchBookByIdUseCase] so a scanned book reaches the detail screen identically to every other
  * navigation. A malformed ISBN or an ISBN with no matching edition resolves to
- * [IsbnLookupResult.UnknownEdition] on the success channel; network/mapping faults propagate as a
- * [Result] failure (the repository throws on offline, so an outage is never mistaken for "unknown").
+ * [IsbnLookupResult.InvalidIsbn] (malformed input) or [IsbnLookupResult.UnknownEdition] (valid ISBN
+ * with no matching edition) on the success channel; network/mapping faults propagate as a [Result]
+ * failure (the repository throws on offline, so an outage is never mistaken for "unknown").
  */
 class ResolveBookByIsbnUseCase(
     private val booksRepository: BooksRepository,
@@ -18,10 +19,10 @@ class ResolveBookByIsbnUseCase(
 ) {
     suspend operator fun invoke(isbn: String): Result<IsbnLookupResult> = runCatching {
         val normalized = IsbnNormalizer.normalize(raw = isbn)
-            ?: return@runCatching IsbnLookupResult.UnknownEdition
+            ?: return@runCatching IsbnLookupResult.InvalidIsbn
 
         val match = booksRepository.fetchEditionMatchForIsbn(isbn = normalized)
-            ?: return@runCatching IsbnLookupResult.UnknownEdition
+            ?: return@runCatching IsbnLookupResult.UnknownEdition(normalizedIsbn = normalized)
 
         val book = fetchBookByIdUseCase(id = match.bookId).getOrThrow()
 

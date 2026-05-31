@@ -210,8 +210,6 @@ fun UserBookFragment.toBook(): Book? {
 
     val editions = listOfNotNull(selectedEdition)
 
-    if (editions.isEmpty()) return null
-
     val userBookReadFragment = user_book_reads.firstOrNull()?.userBookReadFragment()
 
     return Book(
@@ -244,8 +242,6 @@ fun BookDetailFragment.toBook(): Book? {
         ?.toBookEdition(authors = bookAuthors)
         ?.copy(bookId = listFragment.id)
     val editions = listOfNotNull(defaultEdition)
-
-    if (editions.isEmpty()) return null
 
     return Book(
         id = listFragment.id,

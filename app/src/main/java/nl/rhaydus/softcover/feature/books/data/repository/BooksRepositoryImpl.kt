@@ -33,6 +33,7 @@ import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
 import nl.rhaydus.softcover.feature.books.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.feature.books.domain.model.CreatedBook
 import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
@@ -273,6 +274,12 @@ class BooksRepositoryImpl(
         if (networkAvailability.isOnline.value.not()) throw OfflineException()
 
         return booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+    }
+
+    override suspend fun addBookByIsbn(isbn: String): CreatedBook {
+        if (networkAvailability.isOnline.value.not()) throw OfflineException()
+
+        return booksRemoteDataSource.addBookByIsbn(isbn = isbn)
     }
 
     override suspend fun fetchBooksByIds(ids: List<Int>): List<Book> {

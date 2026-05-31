@@ -1408,7 +1408,9 @@ class BookDetailScreen(
 
                 // Switching editions is a preview that works without a user book, so it sits above the
                 // on-shelf gate. Marking an edition as owned mutates the user's shelf, so it stays below.
-                if (isOnline) {
+                // Hidden when the book has no known editions (e.g. a freshly added-by-ISBN book) — there
+                // is nothing to switch between.
+                if (isOnline && book.editions.isNotEmpty()) {
                     DropdownMenuItem(
                         text = { Text(text = "Change edition") },
                         leadingIcon = {

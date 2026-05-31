@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.books.data.mapper
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -2948,7 +2949,7 @@ class BookMapperTest {
         }
 
         @Test
-        fun `returns null when edition is null`() {
+        fun `maps to Book with no editions when edition is null`() {
             // ----- Arrange -----
             mockkObject(UserBookFragment.Book.Companion)
 
@@ -2989,13 +2990,19 @@ class BookMapperTest {
                 every { book_series } returns emptyList()
                 every { compilation } returns false
                 every { contributions } returns emptyList()
+                every { description } returns null
+                every { users_count } returns 0
+                every { ratings_count } returns 0
+                every { taggable_counts } returns emptyList()
             }
 
             // ----- Act -----
             val result = fragment.toBook()
 
             // ----- Assert -----
-            result shouldBe null
+            result shouldNotBe null
+            result!!.editions shouldBe emptyList()
+            result.defaultEdition shouldBe null
         }
 
         @Test
@@ -3796,7 +3803,7 @@ class BookMapperTest {
     inner class BookDetailFragmentToBook {
 
         @Test
-        fun `returns null when default_cover_edition is null`() {
+        fun `maps to Book with no editions when default_cover_edition is null`() {
             // ----- Arrange -----
             mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
@@ -3813,6 +3820,7 @@ class BookMapperTest {
                 every { contributions } returns emptyList()
                 every { description } returns null
                 every { users_count } returns 0
+                every { ratings_count } returns 0
                 every { default_cover_edition } returns null
                 every { taggable_counts } returns emptyList()
             }
@@ -3821,7 +3829,9 @@ class BookMapperTest {
             val result = fragment.toBook()
 
             // ----- Assert -----
-            result shouldBe null
+            result shouldNotBe null
+            result!!.editions shouldBe emptyList()
+            result.defaultEdition shouldBe null
         }
 
         @Test

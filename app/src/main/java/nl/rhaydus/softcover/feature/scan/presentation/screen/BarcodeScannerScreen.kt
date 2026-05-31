@@ -51,10 +51,14 @@ import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
+import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnConfirmedAction
+import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction
+import nl.rhaydus.softcover.feature.scan.presentation.component.UnknownIsbnSheet
+import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
+import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.UnknownEditionEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanScreenModel
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
@@ -107,8 +111,9 @@ class BarcodeScannerScreen : Screen {
                     )
                 }
 
-                is UnknownEditionEvent -> SnackBarManager.showSnackbar(title = "We don't know that book yet.")
+                is InvalidIsbnEvent -> SnackBarManager.showSnackbar(title = "That doesn't look like a valid ISBN.")
                 is ResolutionFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't look that up — try again.")
+                is AddBookFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't add it — try again.")
             }
         }
 
@@ -120,6 +125,15 @@ class BarcodeScannerScreen : Screen {
             onEnterManually = { manualMode = true },
             onNavigateBack = navigator::pop,
         )
+
+        state.unknownIsbn?.let { unknownIsbn ->
+            UnknownIsbnSheet(
+                isbn = unknownIsbn,
+                isAdding = state.isAddingBook,
+                onConfirm = { screenModel.runAction(OnAddUnknownIsbnConfirmedAction()) },
+                onDismiss = { screenModel.runAction(OnAddUnknownIsbnDismissedAction()) },
+            )
+        }
     }
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -148,11 +162,12 @@ class BarcodeScannerScreen : Screen {
                 when {
                     manualMode -> ManualEntryContent(
                         isResolving = state.isResolving,
+                        isAddingBook = state.isAddingBook,
                         onIsbnSubmit = onIsbnSubmit,
                     )
 
                     cameraGranted -> ScannerContent(
-                        isResolving = state.isResolving,
+                        cameraPaused = state.isResolving || state.unknownIsbn != null,
                         onIsbnSubmit = onIsbnSubmit,
                         onEnterManually = onEnterManually,
                     )
@@ -171,12 +186,12 @@ class BarcodeScannerScreen : Screen {
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     private fun ScannerContent(
-        isResolving: Boolean,
+        cameraPaused: Boolean,
         onIsbnSubmit: (String) -> Unit,
         onEnterManually: () -> Unit,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (isResolving) {
+            if (cameraPaused) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
@@ -206,13 +221,16 @@ class BarcodeScannerScreen : Screen {
     @Composable
     private fun ManualEntryContent(
         isResolving: Boolean,
+        isAddingBook: Boolean,
         onIsbnSubmit: (String) -> Unit,
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
 
         var isbn by remember { mutableStateOf("") }
 
-        val canSubmit = isbn.isNotBlank() && isResolving.not()
+        val busy = isResolving || isAddingBook
+
+        val canSubmit = isbn.isNotBlank() && busy.not()
 
         val submit: () -> Unit = {
             if (canSubmit) {
@@ -244,7 +262,7 @@ class BarcodeScannerScreen : Screen {
                 onValueChange = { isbn = it },
                 shape = RoundedCornerShape(8.dp),
                 placeholder = { Text(text = "e.g. 9780374710781") },
-                enabled = isResolving.not(),
+                enabled = busy.not(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,

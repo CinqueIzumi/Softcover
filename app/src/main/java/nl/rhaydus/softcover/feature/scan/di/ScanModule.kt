@@ -7,6 +7,7 @@ val scanModule = module {
     factory {
         ScanScreenModel(
             resolveBookByIsbnUseCase = get(),
+            addBookByIsbnUseCase = get(),
             dispatchers = get(),
         )
     }

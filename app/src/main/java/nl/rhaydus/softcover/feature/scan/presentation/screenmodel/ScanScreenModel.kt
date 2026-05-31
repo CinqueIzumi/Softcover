@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.scan.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
+import nl.rhaydus.softcover.feature.books.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.feature.scan.presentation.action.ScanAction
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
@@ -12,6 +13,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
 class ScanScreenModel(
     private val resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase,
+    private val addBookByIsbnUseCase: AddBookByIsbnUseCase,
     dispatchers: AppDispatchers,
 ) : ToadScreenModel<ScanUiState, ScanEvent, ScanDependencies, ScanInitializer, LocalScanVariables>(
     initializers = emptyList(),
@@ -20,6 +22,7 @@ class ScanScreenModel(
 ) {
     override val dependencies: ScanDependencies = ScanDependencies(
         resolveBookByIsbnUseCase = resolveBookByIsbnUseCase,
+        addBookByIsbnUseCase = addBookByIsbnUseCase,
         coroutineScope = screenModelScope,
         mainDispatcher = dispatchers.main,
     )
