@@ -1573,6 +1573,7 @@ object LibraryScreen : Screen {
                                     isLoading = false,
                                     defaultEdition = book.defaultEdition,
                                     fallbackCoverUrl = book.coverUrl,
+                                    coverlessTitle = book.title,
                                     elevation = 6.dp,
                                     cornerRadius = 10.dp,
                                     sharedTransitionKey = bookCoverTransitionKey(
@@ -1719,6 +1720,7 @@ object LibraryScreen : Screen {
                             modifier = coverModifier,
                             isLoading = false,
                             defaultEdition = edition,
+                            coverlessTitle = title,
                             elevation = 6.dp,
                             cornerRadius = 10.dp,
                             sharedTransitionKey = bookCoverTransitionKey(
