@@ -44,6 +44,8 @@ data class BookDetailUiState(
     val failedMutationEditionIds: Set<Int> = emptySet(),
 
     val isShareSheetVisible: Boolean = false,
+    val currentUsername: String? = null,
+    val currentUserAvatarUrl: String? = null,
 
     val showChooseListsSheet: Boolean = false,
     val userLists: List<BookList> = emptyList(),

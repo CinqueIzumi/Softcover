@@ -36,6 +36,7 @@ class ProfileRepositoryImplTest {
     private fun buildSnapshot(): UserProfileSnapshot = UserProfileSnapshot(
         profileImageUrl = "https://example.com/avatar.png",
         name = "Jane Doe",
+        username = "cinque",
         bio = "Avid reader",
         booksRead = 42,
         totalPagesRead = 12345,
@@ -46,6 +47,7 @@ class ProfileRepositoryImplTest {
     private fun buildProfileData(): UserProfileData = UserProfileData(
         profileImageUrl = "https://example.com/avatar.png",
         name = "Jane Doe",
+        username = "cinque",
         bio = "Avid reader",
         booksRead = 42,
         totalPagesRead = 12345,

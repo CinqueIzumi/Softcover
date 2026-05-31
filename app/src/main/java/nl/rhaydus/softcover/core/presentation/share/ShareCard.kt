@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -23,10 +24,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.presentation.component.ReviewDocumentText
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
+import nl.rhaydus.softcover.core.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
@@ -41,6 +49,7 @@ fun ShareCard(
     val surfaceColor = when (content) {
         is StatShareContent -> MaterialTheme.colorScheme.primary
         is BookShareContent,
+        is ReadingUpdateShareContent,
         is QuoteShareContent,
         is YearRecapShareContent -> MaterialTheme.colorScheme.surface
     }
@@ -48,6 +57,7 @@ fun ShareCard(
     val contentColor = when (content) {
         is StatShareContent -> MaterialTheme.colorScheme.onPrimary
         is BookShareContent,
+        is ReadingUpdateShareContent,
         is QuoteShareContent,
         is YearRecapShareContent -> MaterialTheme.colorScheme.onSurface
     }
@@ -79,6 +89,7 @@ fun ShareCard(
         ) {
             when (content) {
                 is BookShareContent -> BookShareCardBody(content)
+                is ReadingUpdateShareContent -> ReadingUpdateShareCardBody(content)
                 is StatShareContent -> StatShareCardBody(content)
                 is QuoteShareContent -> QuoteShareCardBody(content)
                 is YearRecapShareContent -> YearRecapShareCardBody(content)
@@ -196,6 +207,151 @@ private fun buildBookStatsLine(content: BookShareContent): String? {
     }
 
     return parts.takeIf { it.isNotEmpty() }?.joinToString(separator = " · ")
+}
+
+@Composable
+private fun ReadingUpdateShareCardBody(content: ReadingUpdateShareContent) {
+    val eyebrow = when (content.kind) {
+        ReadingUpdateKind.FINISHED -> "FROM MY SHELF"
+        ReadingUpdateKind.READING -> "CURRENTLY READING"
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = eyebrow,
+            style = MaterialTheme.editorialTypography.eyebrow,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Box(
+            modifier = Modifier
+                .width(140.dp)
+                .aspectRatio(2f / 3f)
+                .clip(RoundedCornerShape(6.dp)),
+        ) {
+            SoftcoverImage(
+                model = content.coverUrl,
+                contentDescription = "Cover of ${content.title}",
+                isLoading = false,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = content.title,
+            style = MaterialTheme.editorialTypography.headlineSmall,
+            color = LocalContentColor.current,
+            textAlign = TextAlign.Center,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        if (content.author.isNotBlank()) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "BY ${content.author.uppercase()}",
+                style = MaterialTheme.editorialTypography.eyebrowSmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        ReadingUpdateReaderIdentity(
+            username = content.username,
+            avatarUrl = content.avatarUrl,
+        )
+
+        when (content.kind) {
+            ReadingUpdateKind.FINISHED -> {
+                if (content.ratingStars != null) {
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    StarRatingInput(
+                        rating = content.ratingStars,
+                        onRatingChange = {},
+                        enabled = false,
+                        starSize = 20.dp,
+                    )
+                }
+
+                if (content.review != null) {
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    ReviewDocumentText(
+                        document = content.review,
+                        style = MaterialTheme.editorialTypography.body.copy(
+                            fontStyle = FontStyle.Normal,
+                            textAlign = TextAlign.Center,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 5,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+
+            ReadingUpdateKind.READING -> {
+                if (content.progressLabel != null) {
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = content.progressLabel,
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReadingUpdateReaderIdentity(
+    username: String,
+    avatarUrl: String?,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (avatarUrl != null) {
+            Box(
+                modifier = Modifier
+                    .requiredSize(28.dp)
+                    .clip(CircleShape),
+            ) {
+                SoftcoverImage(
+                    model = avatarUrl,
+                    contentDescription = "$username's avatar",
+                    isLoading = false,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+        }
+
+        Text(
+            text = username,
+            style = MaterialTheme.editorialTypography.eyebrowSmall,
+            color = LocalContentColor.current,
+        )
+    }
 }
 
 @Composable
@@ -362,6 +518,56 @@ private fun BookShareCardMinimalPreview() {
                 pageCount = null,
                 description = null,
                 quote = null,
+            ),
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingUpdateFinishedShareCardPreview() {
+    SoftcoverTheme {
+        ShareCard(
+            content = ReadingUpdateShareContent(
+                username = "cinque",
+                avatarUrl = null,
+                coverUrl = null,
+                title = "The Name of the Wind",
+                author = "Patrick Rothfuss",
+                kind = ReadingUpdateKind.FINISHED,
+                ratingStars = 4.5,
+                review = ReviewDocument(
+                    paragraphs = listOf(
+                        ReviewParagraph(
+                            runs = listOf(
+                                ReviewRun(text = "A gorgeous, immersive tale that pulls you into Kvothe's world. The ending — "),
+                                ReviewRun(text = "he was the villain all along", spoiler = true),
+                                ReviewRun(text = " — still floored me."),
+                            ),
+                        ),
+                    ),
+                ),
+                progressLabel = null,
+            ),
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingUpdateReadingShareCardPreview() {
+    SoftcoverTheme {
+        ShareCard(
+            content = ReadingUpdateShareContent(
+                username = "cinque",
+                avatarUrl = null,
+                coverUrl = null,
+                title = "The Name of the Wind",
+                author = "Patrick Rothfuss",
+                kind = ReadingUpdateKind.READING,
+                ratingStars = null,
+                review = null,
+                progressLabel = "page 212 / 662 · 32%",
             ),
         )
     }

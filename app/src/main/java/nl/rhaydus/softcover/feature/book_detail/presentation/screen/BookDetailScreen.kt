@@ -506,6 +506,8 @@ class BookDetailScreen(
                 ShareBookBottomSheet(
                     book = state.book,
                     edition = state.displayedEdition,
+                    currentUsername = state.currentUsername,
+                    currentUserAvatarUrl = state.currentUserAvatarUrl,
                     onDismissRequest = { runAction(OnDismissShareSheetAction()) },
                 )
             }

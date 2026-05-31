@@ -31,6 +31,7 @@ class ProfileRemoteDataSourceImpl(
         return UserProfileSnapshot(
             profileImageUrl = me.image?.url ?: "",
             name = me.name ?: "",
+            username = me.username?.toString() ?: "",
             bio = me.bio ?: "",
             booksRead = me.books_read.aggregate?.count ?: 0,
             totalPagesRead = me.user_books_pages.sumOf { it.pagesRead() },

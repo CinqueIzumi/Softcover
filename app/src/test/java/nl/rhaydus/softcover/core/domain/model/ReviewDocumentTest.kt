@@ -142,6 +142,21 @@ class ReviewDocumentTest {
             // ----- Act & Assert -----
             doc.plainText() shouldBe "Before\n\nAfter"
         }
+
+        @Test
+        fun `spoiler run text is included — plainText concatenates all runs regardless of spoiler mark`() {
+            // ----- Arrange -----
+            val doc = ReviewDocument(listOf(
+                ReviewParagraph(listOf(
+                    ReviewRun("Visible text"),
+                    ReviewRun(" hidden part", spoiler = true),
+                    ReviewRun(" more visible"),
+                )),
+            ))
+
+            // ----- Act & Assert -----
+            doc.plainText() shouldBe "Visible text hidden part more visible"
+        }
     }
 
     // ----- canonical -----

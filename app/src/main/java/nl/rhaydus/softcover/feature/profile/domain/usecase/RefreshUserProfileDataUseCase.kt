@@ -30,6 +30,7 @@ class RefreshUserProfileDataUseCase(
         return UserProfileData(
             profileImageUrl = profileImageUrl,
             name = name,
+            username = username,
             bio = bio,
             booksRead = booksRead,
             totalPagesRead = totalPagesRead,

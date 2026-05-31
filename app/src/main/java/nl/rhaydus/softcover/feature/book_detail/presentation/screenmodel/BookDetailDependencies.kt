@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUs
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 
 class BookDetailDependencies(
@@ -45,6 +46,7 @@ class BookDetailDependencies(
     val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
     val updateBookReviewUseCase: UpdateBookReviewUseCase,
+    val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

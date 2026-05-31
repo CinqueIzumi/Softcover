@@ -8,6 +8,7 @@ import java.time.LocalDate
 data class UserProfileDataEntity(
     val profileImageUrl: String,
     val name: String,
+    val username: String = "",
     val bio: String,
     val booksRead: Int,
     val totalPagesRead: Int,
@@ -19,6 +20,7 @@ data class UserProfileDataEntity(
 fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
     profileImageUrl = profileImageUrl,
     name = name,
+    username = username,
     bio = bio,
     booksRead = booksRead,
     totalPagesRead = totalPagesRead,
@@ -32,6 +34,7 @@ fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
 fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileDataEntity(
     profileImageUrl = profileImageUrl,
     name = name,
+    username = username,
     bio = bio,
     booksRead = booksRead,
     totalPagesRead = totalPagesRead,

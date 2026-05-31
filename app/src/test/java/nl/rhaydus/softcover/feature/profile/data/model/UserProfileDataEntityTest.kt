@@ -12,6 +12,7 @@ class UserProfileDataEntityTest {
     private fun minimalModel(dates: Set<LocalDate> = emptySet()): UserProfileData = UserProfileData(
         profileImageUrl = "https://example.com/avatar.png",
         name = "Jane Doe",
+        username = "cinque",
         bio = "Avid reader",
         booksRead = 42,
         totalPagesRead = 12000,
@@ -50,6 +51,18 @@ class UserProfileDataEntityTest {
 
             // ----- Assert -----
             result.activeReadingDates shouldBe dates
+        }
+
+        @Test
+        fun `toEntity then toModel preserves username`() {
+            // ----- Arrange -----
+            val model = minimalModel()
+
+            // ----- Act -----
+            val result = model.toEntity().toModel()
+
+            // ----- Assert -----
+            result.username shouldBe "cinque"
         }
 
         @Test
@@ -126,6 +139,7 @@ class UserProfileDataEntityTest {
             val entity = UserProfileDataEntity(
                 profileImageUrl = "https://example.com/avatar.png",
                 name = "Jane Doe",
+                username = "cinque",
                 bio = "Avid reader",
                 booksRead = 42,
                 totalPagesRead = 12000,

@@ -42,6 +42,7 @@ class RefreshUserProfileDataUseCaseTest {
     private fun snapshot(activeReadingDates: Set<LocalDate>): UserProfileSnapshot = UserProfileSnapshot(
         profileImageUrl = "https://example.com/avatar.png",
         name = "Jane Doe",
+        username = "cinque",
         bio = "Avid reader",
         booksRead = 42,
         totalPagesRead = 12000,
@@ -78,6 +79,7 @@ class RefreshUserProfileDataUseCaseTest {
             val expectedData = UserProfileData(
                 profileImageUrl = profileSnapshot.profileImageUrl,
                 name = profileSnapshot.name,
+                username = profileSnapshot.username,
                 bio = profileSnapshot.bio,
                 booksRead = profileSnapshot.booksRead,
                 totalPagesRead = profileSnapshot.totalPagesRead,
@@ -136,6 +138,15 @@ class RefreshUserProfileDataUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe exception
+        }
+
+        @Test
+        fun `username from snapshot propagates into the cached UserProfileData`() = runTest {
+            // ----- Act -----
+            val cached = capturedDataFor(activeReadingDates = emptySet())
+
+            // ----- Assert -----
+            cached.username shouldBe "cinque"
         }
     }
 
