@@ -30,7 +30,7 @@ dependencies {
     implementation(libs.voyager.tabNavigator)
     implementation(libs.voyager.transitions)
 
-    implementation(libs.coil)
+    api(libs.coil)
 
     // Shared BarcodeScanner composable
     implementation(libs.androidx.camera.core)
