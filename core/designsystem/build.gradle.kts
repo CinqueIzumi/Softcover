@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.compose.ui.text.google.fonts)
+    implementation(libs.material.components)
 
     implementation(libs.koin.compose)
 
