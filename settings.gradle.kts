@@ -36,4 +36,7 @@ include(":core:profile")
 include(":core:library")
 include(":core:connectivity")
 include(":core:designsystem")
+include(":feature:lists")
+include(":feature:profile")
+include(":feature:onboarding")
  

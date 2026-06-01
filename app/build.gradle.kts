@@ -61,6 +61,11 @@ dependencies {
     implementation(project(":core:connectivity"))
     implementation(project(":core:designsystem"))
 
+    // Feature modules
+    implementation(project(":feature:lists"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:onboarding"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
