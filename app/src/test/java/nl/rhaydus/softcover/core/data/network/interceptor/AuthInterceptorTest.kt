@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.flow.MutableStateFlow
-import nl.rhaydus.softcover.core.preferences.data.datasource.ApiKeyLocalDataSource
+import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 class AuthInterceptorTest {
 
     private lateinit var apiKeyFlow: MutableStateFlow<String?>
-    private lateinit var apiKeyLocalDataSource: ApiKeyLocalDataSource
+    private lateinit var authTokenProvider: AuthTokenProvider
     private lateinit var chain: Interceptor.Chain
     private lateinit var mockResponse: Response
 
@@ -27,10 +27,10 @@ class AuthInterceptorTest {
     @BeforeEach
     fun setUp() {
         apiKeyFlow = MutableStateFlow(null)
-        apiKeyLocalDataSource = mockk()
+        authTokenProvider = mockk()
 
         every {
-            apiKeyLocalDataSource.apiKey
+            authTokenProvider.apiKey
         } returns apiKeyFlow
 
         chain = mockk()
@@ -46,7 +46,7 @@ class AuthInterceptorTest {
     }
 
     private fun buildInterceptor(): AuthInterceptor {
-        val interceptor = AuthInterceptor(apiKeyLocalDataSource = apiKeyLocalDataSource)
+        val interceptor = AuthInterceptor(authTokenProvider = authTokenProvider)
         // Allow the IO coroutine launched in init to process the current MutableStateFlow value
         Thread.sleep(50)
         return interceptor

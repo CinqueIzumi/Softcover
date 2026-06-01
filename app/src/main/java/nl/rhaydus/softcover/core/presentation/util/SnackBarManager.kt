@@ -10,6 +10,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 
 object SnackBarManager {
     private val _snackBarState = MutableStateFlow(SnackbarHostState())
@@ -17,6 +18,14 @@ object SnackBarManager {
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val isShowing = AtomicBoolean(false)
+
+    init {
+        scope.launch {
+            UserMessageNotifier.messages.collect { message ->
+                showSnackbar(title = message)
+            }
+        }
+    }
 
     fun showSnackbar(
         title: String,

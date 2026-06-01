@@ -15,7 +15,7 @@ private const val APOLLO_MEMORY_CACHE_BYTES = 10 * 1024 * 1024
 
 val apolloModule = module {
     single {
-        AuthInterceptor(apiKeyLocalDataSource = get())
+        AuthInterceptor(authTokenProvider = get())
     }
 
     single {

@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import timber.log.Timber
@@ -23,8 +24,8 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-interface ApiKeyLocalDataSource {
-    val apiKey: Flow<String?>
+interface ApiKeyLocalDataSource : AuthTokenProvider {
+    override val apiKey: Flow<String?>
 
     suspend fun updateApiKey(key: String)
 

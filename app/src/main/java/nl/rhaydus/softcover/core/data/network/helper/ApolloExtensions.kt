@@ -14,12 +14,12 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 
 private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
 
 private fun notifyGenericError() {
-    SnackBarManager.showSnackbar(title = GENERIC_ERROR_MESSAGE)
+    UserMessageNotifier.notify(message = GENERIC_ERROR_MESSAGE)
 }
 
 private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
