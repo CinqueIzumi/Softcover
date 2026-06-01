@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.presentation.component
 
 import android.annotation.SuppressLint
+import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
@@ -55,6 +56,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * call site (see `feature/scan`), never to this leaf.
  */
 @SuppressLint("MissingPermission")
+@OptIn(markerClass = [ExperimentalGetImage::class])
 @Composable
 fun BarcodeScanner(
     onIsbnDetected: (String) -> Unit,
