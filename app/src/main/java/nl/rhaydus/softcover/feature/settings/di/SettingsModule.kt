@@ -27,6 +27,7 @@ val settingsModule = module {
             getThemeConfigurationUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
             setDateStyleUseCase = get(),
+            appVersionProvider = get(),
         )
     }
 

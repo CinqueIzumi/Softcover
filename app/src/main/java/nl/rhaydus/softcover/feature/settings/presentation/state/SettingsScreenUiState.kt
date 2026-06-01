@@ -8,4 +8,6 @@ data class SettingsScreenUiState(
     val useDynamicColorChecked: Boolean = false,
     val userDateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val dropDownExpanded: Boolean = false,
+    val appVersionName: String = "",
+    val appVersionCode: Int = 0,
 ) : UiState

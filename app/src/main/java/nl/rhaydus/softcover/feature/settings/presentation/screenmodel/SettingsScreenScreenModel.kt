@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
@@ -20,10 +21,14 @@ class SettingsScreenScreenModel(
     private val setBottomBarStyleUseCase: SetBottomBarStyleUseCase,
     private val setDynamicColorUseCase: SetDynamicColorUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
+    appVersionProvider: AppVersionProvider,
     appDispatchers: AppDispatchers,
     flows: List<SettingsInitializer>,
 ) : ToadScreenModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsInitializer, SettingsLocalVariables>(
-    initialState = SettingsScreenUiState(),
+    initialState = SettingsScreenUiState(
+        appVersionName = appVersionProvider.versionInfo.name,
+        appVersionCode = appVersionProvider.versionInfo.code,
+    ),
     initialLocalVariables = SettingsLocalVariables(),
     initializers = flows,
 ) {

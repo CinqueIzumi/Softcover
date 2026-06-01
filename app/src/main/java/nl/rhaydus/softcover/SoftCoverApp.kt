@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
+import nl.rhaydus.softcover.di.appModule
 import nl.rhaydus.softcover.di.notificationModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
@@ -88,6 +89,7 @@ class SoftCoverApp : Application() {
                 personalModule,
                 sessionModule,
                 orchestrationModule,
+                appModule,
             )
         }
 

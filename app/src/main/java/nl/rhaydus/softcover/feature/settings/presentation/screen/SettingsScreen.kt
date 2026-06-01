@@ -38,7 +38,6 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.BuildConfig
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
@@ -190,7 +189,10 @@ object SettingsScreen : Screen {
 
                 debugSection()
 
-                VersionFooter()
+                VersionFooter(
+                    versionName = state.appVersionName,
+                    versionCode = state.appVersionCode,
+                )
 
                 Spacer(modifier = Modifier.height(24.dp + bottomBarPadding))
             }
@@ -425,13 +427,16 @@ object SettingsScreen : Screen {
     }
 
     @Composable
-    private fun VersionFooter() {
+    private fun VersionFooter(
+        versionName: String,
+        versionCode: Int,
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                text = "Version $versionName ($versionCode)",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
