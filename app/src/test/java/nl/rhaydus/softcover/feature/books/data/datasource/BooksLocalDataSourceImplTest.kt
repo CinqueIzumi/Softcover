@@ -52,6 +52,7 @@ class BooksLocalDataSourceImplTest {
         title = "Test Book $id",
         defaultEditionId = null,
         rating = 4.0,
+        headline = "",
         description = "Description",
         releaseYear = 2020,
         releaseDate = null,
@@ -78,6 +79,7 @@ class BooksLocalDataSourceImplTest {
         releaseYear = 2020,
         releaseDate = null,
         format = "Paperback",
+        readingFormatId = null,
     )
 
     private fun stubEditionWithAuthors(

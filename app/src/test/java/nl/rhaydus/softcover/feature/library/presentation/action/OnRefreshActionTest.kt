@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -67,7 +69,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()
@@ -88,7 +90,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             } returns Result.failure(RuntimeException("network error"))
 
             val action = OnRefreshAction()
@@ -109,7 +111,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()
@@ -122,7 +124,7 @@ class OnRefreshActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             }
         }
 
@@ -137,7 +139,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()
@@ -164,7 +166,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()

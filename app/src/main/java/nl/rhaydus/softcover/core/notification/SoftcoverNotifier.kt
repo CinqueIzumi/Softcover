@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.notification
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -32,6 +33,9 @@ class SoftcoverNotifierImpl(private val context: Context) : SoftcoverNotifier {
         return granted == PackageManager.PERMISSION_GRANTED
     }
 
+    // The notify() call is guarded by the hasPostPermission() early-return below; lint can't trace
+    // that custom check, so the runtime-permission warning is suppressed here rather than at the call.
+    @SuppressLint("MissingPermission")
     override fun notify(id: Int, content: SoftcoverNotificationContent) {
         if (hasPostPermission().not()) {
             Timber.w("Skipping notify(id=$id) — POST_NOTIFICATIONS not granted")

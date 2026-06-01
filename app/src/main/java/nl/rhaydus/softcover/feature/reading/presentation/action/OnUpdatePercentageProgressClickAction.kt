@@ -48,7 +48,7 @@ data class OnUpdatePercentageProgressClickAction(
         scope.currentLocalVariables.bookMutationJobs[bookToUpdate.id]?.cancel()
 
         val job = dependencies.launch {
-            dependencies.updateBookProgress(
+            dependencies.recordBookProgressUseCase(
                 book = bookToUpdate,
                 newPage = newPage,
                 newSeconds = newSeconds,

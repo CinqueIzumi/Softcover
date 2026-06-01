@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -532,61 +530,6 @@ private fun TimeColon(textStyle: TextStyle) {
 }
 
 @Composable
-private fun EditorialSuffix(text: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.editorialTypography.body,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun HeroStatNumberField(
-    value: TextFieldValue,
-    charCount: Int,
-    onValueChange: (TextFieldValue) -> Unit,
-    onFocusReset: () -> Unit,
-    onFocusGained: () -> Unit,
-) {
-    val style = MaterialTheme.editorialTypography.statLarge
-
-    val width = computeFieldWidth(textStyle = style, charCount = charCount)
-
-    val focusManager = LocalFocusManager.current
-
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        singleLine = true,
-        textStyle = style.copy(
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        ),
-        cursorBrush = SolidColor(value = MaterialTheme.colorScheme.primary),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done,
-        ),
-        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-        modifier = Modifier
-            .width(width = width)
-            .onFocusChanged { focusState ->
-                if (focusState.hasFocus.not()) {
-                    onFocusReset()
-                    return@onFocusChanged
-                }
-
-                onFocusGained()
-            },
-    )
-}
-
-@Composable
 private fun TimeField(
     value: TextFieldValue,
     charCount: Int,
@@ -595,7 +538,7 @@ private fun TimeField(
 ) {
     var firstTimeFocusedGained by remember { mutableStateOf(true) }
 
-    val width = computeFieldWidth(textStyle = textStyle, charCount = charCount)
+    val width = computeHeroStatFieldWidth(textStyle = textStyle, charCount = charCount)
 
     val focusManager = LocalFocusManager.current
 
@@ -636,23 +579,6 @@ private fun TimeField(
                 )
             },
     )
-}
-
-@Composable
-private fun computeFieldWidth(
-    textStyle: TextStyle,
-    charCount: Int,
-): Dp {
-    val density = LocalDensity.current
-
-    return remember(density, textStyle, charCount) {
-        with(density) {
-            val fontSizeInPx = textStyle.fontSize.toPx()
-            val padding = 16.dp.toPx()
-
-            ((charCount * fontSizeInPx * 0.62f) + padding).toDp()
-        }
-    }
 }
 
 @StandardPreview

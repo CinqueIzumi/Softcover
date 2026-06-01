@@ -2,10 +2,14 @@ package nl.rhaydus.softcover.feature.books.domain.repository
 
 import java.io.File
 import kotlinx.coroutines.flow.Flow
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.feature.books.domain.model.CreatedBook
+import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
@@ -60,6 +64,23 @@ interface BooksRepository {
 
     suspend fun fetchBookById(id: Int): Book
 
+    /**
+     * Resolves a scanned/typed ISBN (ISBN-10 or ISBN-13) to the Hardcover book + edition that carry
+     * it, or `null` when no edition matches. Carries the edition id (not just the book id) so the
+     * detail screen can preview the exact scanned edition. Throws
+     * [OfflineException] when offline so callers can tell
+     * a genuine "not in Hardcover" miss apart from a network outage.
+     */
+    suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch?
+
+    /**
+     * Creates a not-yet-catalogued book in Hardcover from its ISBN via `upsert_book`, returning the
+     * new book id (and edition id when Hardcover supplies one). Throws
+     * [OfflineException] when offline, mirroring
+     * [fetchEditionMatchForIsbn].
+     */
+    suspend fun addBookByIsbn(isbn: String): CreatedBook
+
     suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
@@ -80,9 +101,32 @@ interface BooksRepository {
         forceNetwork: Boolean,
     )
 
-    suspend fun markBookAsWantToRead(book: Book): Book
+    suspend fun markBookAsWantToRead(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun markBookAsReading(book: Book): Book
+
+    suspend fun updateBookRating(
+        book: Book,
+        rating: Double,
+    ): Book
+
+    /**
+     * Publishes the user's personal review for [book] to Hardcover (structured review document +
+     * spoiler flag, stamped with today's `reviewed_at`). The review is carried as a
+     * [nl.rhaydus.softcover.core.domain.model.ReviewDocument] and Hardcover
+     * owns it, so an optimistic copy is cached first; when online the remote call returns the
+     * canonical server book, on a hard error the prior snapshot is restored and the error rethrown,
+     * and when offline (or on [OfflineException]) the
+     * write is queued for replay and the optimistic book is returned.
+     */
+    suspend fun updateBookReview(
+        book: Book,
+        review: ReviewDocument,
+        hasSpoilers: Boolean,
+    ): Book
 
     suspend fun removeBookFromLibrary(book: Book)
 
@@ -92,7 +136,10 @@ interface BooksRepository {
         newSeconds: Int? = null,
     ): Book
 
-    suspend fun markBookAsRead(book: Book): Book
+    suspend fun markBookAsRead(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun updateBookEdition(
         userBook: UserBook,

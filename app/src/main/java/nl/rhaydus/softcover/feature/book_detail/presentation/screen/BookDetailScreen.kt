@@ -6,10 +6,13 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -48,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,17 +66,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -85,23 +92,35 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.core.parameter.parametersOf
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DropCapText
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
+import nl.rhaydus.softcover.core.presentation.component.PillChip
+import nl.rhaydus.softcover.core.presentation.component.ReviewDocumentText
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.presentation.modifier.grayscale
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
+import nl.rhaydus.softcover.core.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
@@ -119,14 +138,19 @@ import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnAddUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeleteReviewAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissReviewSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissScanEditionBannerClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissTagEditorAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnExternalLinkClickAction
@@ -135,19 +159,30 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAs
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadlinePickerAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenReviewSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenTagEditorAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRateBookAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveReviewAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagDraftChangeAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagEditorCategoryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleUserTagSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToScannedEditionClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.ReviewEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalLinkEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
@@ -155,9 +190,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.feature.lists.presentation.component.ListMembership
-import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
@@ -167,8 +202,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.abs
 import kotlin.math.roundToInt
-
-private val GoldStar = Color(0xFFFBBF23)
 
 private const val REVIEW_COLLAPSED_LINES = 8
 
@@ -226,7 +259,7 @@ class BookDetailScreen(
 
                 navigator.push(
                     FullScreenCoverScreen(
-                        edition = book.currentEdition,
+                        edition = state.displayedEdition,
                         defaultEdition = book.defaultEdition,
                         fallbackCoverUrl = book.coverUrl,
                     )
@@ -344,7 +377,7 @@ class BookDetailScreen(
                         ),
                     ) {
                         GeneralBookInfoSection(
-                            edition = state.book?.currentEdition ?: state.initialCover?.currentEdition,
+                            edition = state.displayedEdition,
                             isLoading = state.loadingBookDetails && state.book == null,
                             fallBackEdition = state.book?.defaultEdition ?: state.initialCover?.defaultEdition,
                             fallbackCoverUrl = state.book?.coverUrl ?: state.initialCover?.fallbackCoverUrl,
@@ -352,9 +385,10 @@ class BookDetailScreen(
                             rating = state.book?.rating,
                             title = state.book?.title,
                             seriesText = state.book?.seriesText,
-                            releaseYear = state.book?.currentEdition?.releaseYear.takeIf { it != -1 }
+                            releaseYear = state.displayedEdition?.releaseYear.takeIf { it != -1 }
                                 ?: state.book?.releaseYear,
                             unreleasedDate = state.book?.takeIf { it.isUnreleased }?.effectiveReleaseDate,
+                            isOwned = state.isEditionOwned(edition = state.displayedEdition),
                             onCoverClick = onCoverClick,
                         )
                     }
@@ -368,6 +402,51 @@ class BookDetailScreen(
                         runAction = runAction,
                         celebrationKey = celebrationKey,
                     )
+                }
+
+                if (state.showScanEditionUpdateBanner) {
+                    item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                    item {
+                        ScanEditionUpdateBanner(
+                            isUpdating = state.isUpdatingScannedEdition,
+                            runAction = runAction,
+                        )
+                    }
+                }
+
+                if (state.book?.userBook != null) {
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                    item(key = "userTags") {
+                        UserTagsSection(
+                            state = state,
+                            runAction = runAction,
+                        )
+                    }
+                }
+
+                val ratingBook = state.book
+
+                if (ratingBook != null && ratingBook.status == BookStatus.Read) {
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                    item {
+                        PersonalRatingRow(
+                            book = ratingBook,
+                            runAction = runAction,
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                    item {
+                        PersonalReviewSection(
+                            reviewDocument = ratingBook.userBook?.reviewDocument,
+                            hasSpoilers = ratingBook.userBook?.reviewHasSpoilers == true,
+                            runAction = runAction,
+                        )
+                    }
                 }
 
                 val shelfPanelStatus = state.book?.status
@@ -390,6 +469,8 @@ class BookDetailScreen(
                 }
 
                 item { AboutSection(state = state) }
+
+                item(key = "tags") { TagsSection(state = state) }
 
                 item { EditionMetadataStrip(state = state) }
 
@@ -453,7 +534,32 @@ class BookDetailScreen(
             if (state.isShareSheetVisible && state.book != null) {
                 ShareBookBottomSheet(
                     book = state.book,
+                    edition = state.displayedEdition,
+                    currentUsername = state.currentUsername,
+                    currentUserAvatarUrl = state.currentUserAvatarUrl,
+                    userTags = state.userTags,
                     onDismissRequest = { runAction(OnDismissShareSheetAction()) },
+                )
+            }
+
+            if (state.showTagEditorSheet && state.book != null) {
+                TagEditorBottomSheet(
+                    userTags = state.userTags,
+                    selectedCategory = state.tagEditorCategory,
+                    draft = state.tagEditorInput,
+                    onCategorySelected = { runAction(OnTagEditorCategoryChangeAction(category = it)) },
+                    onDraftChange = { runAction(OnTagDraftChangeAction(input = it)) },
+                    onAddTag = { name, category ->
+                        runAction(
+                            OnAddUserTagAction(
+                                name = name,
+                                category = category,
+                            )
+                        )
+                    },
+                    onRemoveTag = { runAction(OnRemoveUserTagAction(tag = it)) },
+                    onToggleSpoiler = { runAction(OnToggleUserTagSpoilerAction(tag = it)) },
+                    onDismissRequest = { runAction(OnDismissTagEditorAction()) },
                 )
             }
 
@@ -475,7 +581,27 @@ class BookDetailScreen(
                 )
             }
 
-            val currentEditionForSheet = state.book?.currentEdition
+            val reviewBook = state.book
+            if (state.showReviewSheet && reviewBook != null) {
+                ReviewEditorBottomSheet(
+                    initialDocument = state.reviewEditorDocument,
+                    initialHasSpoilers = state.reviewEditorHasSpoilers,
+                    canDelete = reviewBook.userBook?.reviewDocument != null,
+                    onSave = { document, hasSpoilers ->
+                        runAction(
+                            OnSaveReviewAction(
+                                book = reviewBook,
+                                review = document,
+                                hasSpoilers = hasSpoilers,
+                            )
+                        )
+                    },
+                    onDelete = { runAction(OnDeleteReviewAction(book = reviewBook)) },
+                    onDismissRequest = { runAction(OnDismissReviewSheetAction()) },
+                )
+            }
+
+            val currentEditionForSheet = state.displayedEdition
             if (state.showEditEditionSheet && state.book != null && currentEditionForSheet != null) {
                 EditionBottomSheetSelector(
                     bookTitle = state.book.title,
@@ -548,6 +674,7 @@ class BookDetailScreen(
         isLoading: Boolean,
         fallbackCoverUrl: String?,
         isExpired: Boolean,
+        isOwned: Boolean,
         onCoverClick: () -> Unit,
     ) {
         val imageHeight = with(LocalDensity.current) {
@@ -628,7 +755,7 @@ class BookDetailScreen(
                     val enterSettled = navScope == null ||
                         navScope.transition.currentState == EnterExitState.Visible
 
-                    if (edition?.owned == true) {
+                    if (isOwned) {
                         val badgeAlpha by animateFloatAsState(
                             targetValue = if (enterSettled) 1f else 0f,
                             label = "OwnedCoverBadgeAlpha",
@@ -834,7 +961,7 @@ class BookDetailScreen(
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_star_filled),
                                                     contentDescription = "",
-                                                    tint = GoldStar,
+                                                    tint = RatingGold,
                                                     modifier = Modifier.size(16.dp),
                                                 )
                                             }
@@ -1055,6 +1182,94 @@ class BookDetailScreen(
     }
 
     @Composable
+    private fun PersonalRatingRow(
+        book: Book,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            SectionLabel(text = "Your rating")
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            StarRatingInput(
+                rating = book.userBook?.rating?.takeIf { it > 0.0 },
+                onRatingChange = { rating ->
+                    runAction(OnRateBookAction(book = book, rating = rating))
+                },
+            )
+        }
+    }
+
+    @Composable
+    private fun PersonalReviewSection(
+        reviewDocument: ReviewDocument?,
+        hasSpoilers: Boolean,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            SectionLabel(text = "Your review")
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (reviewDocument == null || reviewDocument.isBlank()) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    onClick = { runAction(OnOpenReviewSheetAction()) },
+                ) {
+                    Text(
+                        text = "Write a few words…",
+                        style = MaterialTheme.editorialTypography.body,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+                    )
+                }
+            } else {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    onClick = { runAction(OnOpenReviewSheetAction()) },
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+                    ) {
+                        ReviewDocumentText(
+                            document = reviewDocument,
+                            style = MaterialTheme.editorialTypography.body.copy(
+                                fontStyle = FontStyle.Normal,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = REVIEW_COLLAPSED_LINES,
+                            overflow = TextOverflow.Ellipsis,
+                            onClick = { runAction(OnOpenReviewSheetAction()) },
+                        )
+
+                        if (hasSpoilers) {
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Text(
+                                text = "Marked as containing spoilers",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
     private fun ShelfChip(
         label: String,
         iconRes: Int,
@@ -1244,9 +1459,11 @@ class BookDetailScreen(
                     )
                 }
 
-                if (isOnShelf.not()) return@DropdownMenu
-
-                if (isOnline) {
+                // Switching editions is a preview that works without a user book, so it sits above the
+                // on-shelf gate. Marking an edition as owned mutates the user's shelf, so it stays below.
+                // Hidden when the book has no known editions (e.g. a freshly added-by-ISBN book) — there
+                // is nothing to switch between.
+                if (isOnline && book.editions.isNotEmpty()) {
                     DropdownMenuItem(
                         text = { Text(text = "Change edition") },
                         leadingIcon = {
@@ -1260,12 +1477,17 @@ class BookDetailScreen(
                             runAction(OnShowEditEditionSheetClickAction())
                         },
                     )
+                }
 
-                    book.currentEdition?.let { currentEdition ->
-                        val ownedLabel =
-                            if (currentEdition.owned) "Unmark as owned" else "Mark as owned"
-                        val ownedIconId =
-                            if (currentEdition.owned) R.drawable.ic_close else R.drawable.ic_check
+                // Owning an edition is a list operation, independent of the reading shelf, so it stays
+                // available off-shelf (e.g. for a scanned edition) and sits above the on-shelf gate.
+                // The displayed edition — the scanned one when arriving from a scan — is what it acts on.
+                if (isOnline) {
+                    state.displayedEdition?.let { ownedEdition ->
+                        val isOwned = state.isEditionOwned(edition = ownedEdition)
+
+                        val ownedLabel = if (isOwned) "Unmark as owned" else "Mark as owned"
+                        val ownedIconId = if (isOwned) R.drawable.ic_close else R.drawable.ic_check
 
                         DropdownMenuItem(
                             text = { Text(text = ownedLabel) },
@@ -1277,11 +1499,13 @@ class BookDetailScreen(
                             },
                             onClick = {
                                 dismiss()
-                                runAction(OnEditionOwnedToggleAction(edition = currentEdition))
+                                runAction(OnEditionOwnedToggleAction(edition = ownedEdition, owned = isOwned.not()))
                             },
                         )
                     }
                 }
+
+                if (isOnShelf.not()) return@DropdownMenu
 
                 if (state.deadline == null) {
                     DropdownMenuItem(
@@ -1680,8 +1904,85 @@ class BookDetailScreen(
 
     // region About
 
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
+    private fun ScanEditionUpdateBanner(
+        isUpdating: Boolean,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Row(
+                modifier = Modifier.padding(
+                    start = 20.dp,
+                    top = 16.dp,
+                    end = 8.dp,
+                    bottom = 16.dp,
+                ),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "ALREADY ON YOUR SHELVES",
+                        style = MaterialTheme.editorialTypography.eyebrowSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "You've added a different edition of this book. Update it to the one you scanned?",
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    if (isUpdating) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularWavyProgressIndicator(modifier = Modifier.size(20.dp))
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Text(
+                                text = "Updating edition…",
+                                style = MaterialTheme.editorialTypography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    } else {
+                        SoftcoverButton(
+                            label = "Update edition",
+                            style = ButtonStyle.TONAL,
+                            size = ButtonSize.S,
+                            onClick = { runAction(OnUpdateToScannedEditionClickAction()) },
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = { runAction(OnDismissScanEditionBannerClickAction()) },
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = "Dismiss",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+        }
+    }
+
     @Composable
     private fun AboutSection(state: BookDetailUiState) {
+        val headline = state.book?.headline.orEmpty()
         val description = state.book?.description.orEmpty()
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
@@ -1690,7 +1991,7 @@ class BookDetailScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             SkeletonCrossfade(
-                isLoading = state.loadingBookDetails && description.isBlank(),
+                isLoading = state.loadingBookDetails && headline.isBlank() && description.isBlank(),
                 label = "AboutSection",
             ) { loading ->
                 if (loading) {
@@ -1701,29 +2002,168 @@ class BookDetailScreen(
                             .clip(RoundedCornerShape(8.dp))
                             .shimmer(isLoading = true),
                     )
-                } else if (description.isBlank()) {
-                    Text(
-                        text = "No description for this book yet.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 } else {
-                    DropCapText(
-                        text = htmlToAnnotatedString(html = description),
-                        bodyStyle = MaterialTheme.typography.bodyLarge.copy(
-                            lineHeight = 26.sp,
-                        ),
-                        bodyColor = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.fillMaxWidth(),
+                    Column {
+                        if (headline.isNotBlank()) {
+                            Text(
+                                text = headline,
+                                style = MaterialTheme.editorialTypography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+
+                        if (headline.isNotBlank() && description.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        if (description.isNotBlank()) {
+                            DropCapText(
+                                text = htmlToAnnotatedString(html = description),
+                                bodyStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    lineHeight = 26.sp,
+                                ),
+                                bodyColor = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        } else if (headline.isBlank()) {
+                            Text(
+                                text = "No description for this book yet.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalLayoutApi::class)
+    @Composable
+    private fun UserTagsSection(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        val tags = state.userTags
+
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            SectionLabel(text = "Your tags")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (tags.isEmpty()) {
+                PillChip(
+                    label = "Add tags",
+                    onClick = { runAction(OnOpenTagEditorAction()) },
+                )
+            } else {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    tags.forEach { tag ->
+                        key(tag.category, tag.name) {
+                            PillChip(label = tag.name)
+                        }
+                    }
+
+                    PillChip(
+                        label = "Edit tags",
+                        selected = true,
+                        onClick = { runAction(OnOpenTagEditorAction()) },
                     )
                 }
             }
         }
     }
 
+    @OptIn(ExperimentalLayoutApi::class)
+    @Composable
+    private fun TagsSection(state: BookDetailUiState) {
+        val tags = state.book?.tags.orEmpty()
+
+        val groups: List<Pair<TagCategory, List<Tag>>> = remember(tags) {
+            listOf(
+                TagCategory.GENRE,
+                TagCategory.MOOD,
+                TagCategory.CONTENT_WARNING,
+            ).mapNotNull { category ->
+                // The remote query orders by count desc, but the Room (offline) read does not
+                // preserve that order — sort here so both paths rank identically.
+                val top = tags
+                    .filter { it.category == category }
+                    .sortedByDescending { it.count }
+                    .take(5)
+
+                top.takeIf { it.isNotEmpty() }?.let { category to it }
+            }
+        }
+
+        if (groups.isEmpty()) return
+
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Spacer(modifier = Modifier.height(28.dp))
+
+            SectionLabel(text = "Tags")
+
+            groups.forEach { (category, categoryTags) ->
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = category.label,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    categoryTags.forEach { tag ->
+                        if (category == TagCategory.CONTENT_WARNING) {
+                            key(tag.id) {
+                                ConcealableTagChip(label = tag.name)
+                            }
+                        } else {
+                            PillChip(label = tag.name)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ConcealableTagChip(label: String) {
+        var revealed by rememberSaveable { mutableStateOf(false) }
+
+        if (revealed) {
+            PillChip(label = label)
+        } else {
+            PillChip(
+                label = label,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(percent = 50))
+                    .clickable(
+                        onClickLabel = "Reveal content warning",
+                        role = Role.Button,
+                    ) {
+                        revealed = true
+                    },
+                concealed = true,
+            )
+        }
+    }
+
     @Composable
     private fun EditionMetadataStrip(state: BookDetailUiState) {
-        val edition = state.book?.currentEdition ?: return
+        val edition = state.displayedEdition ?: return
 
         val publisher = edition.publisher?.takeIf { it.isNotBlank() }
         val isbn13 = edition.isbn13?.takeIf { it.isNotBlank() }
@@ -1753,7 +2193,7 @@ class BookDetailScreen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
     ) {
-        val edition = state.book?.currentEdition ?: return
+        val edition = state.displayedEdition ?: return
 
         val isbn = edition.isbn13?.takeIf { it.isNotBlank() }
             ?: edition.isbn10?.takeIf { it.isNotBlank() }
@@ -1859,7 +2299,7 @@ class BookDetailScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_star_filled),
                             contentDescription = null,
-                            tint = GoldStar,
+                            tint = RatingGold,
                             modifier = Modifier.size(18.dp),
                         )
 
@@ -1939,8 +2379,8 @@ class BookDetailScreen(
                         var expanded by rememberSaveable(review.id) { mutableStateOf(false) }
                         var hasOverflow by rememberSaveable(review.id) { mutableStateOf(false) }
 
-                        Text(
-                            text = htmlToAnnotatedString(html = review.review),
+                        ReviewDocumentText(
+                            document = review.reviewDocument,
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 lineHeight = 22.sp,
                             ),

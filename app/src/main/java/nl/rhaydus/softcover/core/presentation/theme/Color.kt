@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.presentation.theme
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF8F4C38)
@@ -73,3 +74,22 @@ val surfaceContainerLowDark = Color(0xFF231917)
 val surfaceContainerDark = Color(0xFF271D1B)
 val surfaceContainerHighDark = Color(0xFF322825)
 val surfaceContainerHighestDark = Color(0xFF3D322F)
+
+/**
+ * Brand gold reserved for rating stars — both the read-only community/review rating glyphs and
+ * the interactive personal rating control. Lives outside the Material scheme because the warm
+ * gold reads identically in light and dark and is a deliberate "rating" signal, not a theme role.
+ */
+val RatingGold = Color(0xFFFBBF23)
+
+/**
+ * Spoiler redaction treatment, derived from `onSurfaceVariant` so it tracks light/dark. The two roles
+ * are deliberately different: in the review editor the author must keep reading their own words, so a
+ * spoiler run gets only a translucent [spoilerEditorHighlight] wash; on display the run is hidden under
+ * a near-solid [spoilerCover] block until the reader taps to reveal it.
+ */
+val ColorScheme.spoilerEditorHighlight: Color
+    get() = onSurfaceVariant.copy(alpha = 0.20f)
+
+val ColorScheme.spoilerCover: Color
+    get() = onSurfaceVariant.copy(alpha = 0.90f)

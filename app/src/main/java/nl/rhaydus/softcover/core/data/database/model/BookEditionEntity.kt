@@ -21,4 +21,5 @@ data class BookEditionEntity(
     val releaseYear: Int,
     val releaseDate: String?,
     val format: String,
+    val readingFormatId: Int?,
 )

@@ -1,0 +1,4 @@
+fragment TaggingFragment on taggings {
+    id
+    spoiler
+}

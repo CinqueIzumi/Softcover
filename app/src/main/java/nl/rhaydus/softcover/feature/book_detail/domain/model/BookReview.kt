@@ -1,11 +1,12 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.model
 
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.LocalDateTime
 
 data class BookReview(
     val id: Int,
-    val review: String,
+    val reviewDocument: ReviewDocument,
     val hasSpoilers: Boolean,
     val rating: Double?,
     val reviewedAt: String?,

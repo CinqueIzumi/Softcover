@@ -20,7 +20,7 @@ data class OnUpdatePageProgressClickAction(val newPage: String) : ReadingAction 
         scope.currentLocalVariables.bookMutationJobs[bookToUpdate.id]?.cancel()
 
         val job = dependencies.launch {
-            dependencies.updateBookProgress(
+            dependencies.recordBookProgressUseCase(
                 book = bookToUpdate,
                 newPage = newPageValue,
                 newSeconds = null,

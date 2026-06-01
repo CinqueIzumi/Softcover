@@ -19,6 +19,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -34,9 +37,10 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
@@ -44,17 +48,33 @@ import nl.rhaydus.softcover.core.presentation.share.BookShareContent
 import nl.rhaydus.softcover.core.presentation.share.CapturableShareCard
 import nl.rhaydus.softcover.core.presentation.share.SaveOutcome
 import nl.rhaydus.softcover.core.presentation.share.ShareCardCapture
+import nl.rhaydus.softcover.core.presentation.share.ShareContent
 import nl.rhaydus.softcover.core.presentation.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import timber.log.Timber
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShareBookBottomSheet(
     book: Book,
+    edition: BookEdition?,
+    currentUsername: String?,
+    currentUserAvatarUrl: String?,
+    userTags: List<UserTag>,
     onDismissRequest: () -> Unit,
 ) {
-    val content = remember(book) { book.toShareContent() }
+    val bookContent = remember(book, edition) { book.toShareContent(edition = edition) }
+
+    val updateContent = remember(book, edition, currentUsername, currentUserAvatarUrl, userTags) {
+        book.toReadingUpdateContent(
+            edition = edition,
+            username = currentUsername,
+            avatarUrl = currentUserAvatarUrl,
+            userTags = userTags,
+        )
+    }
+
     val capture = rememberShareCardCapture()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -62,6 +82,21 @@ fun ShareBookBottomSheet(
     var isSharing by remember { mutableStateOf(false) }
     var isSavingToGallery by remember { mutableStateOf(false) }
     val isBusy = isSharing || isSavingToGallery
+
+    var selectedVariant by remember(updateContent != null) {
+        mutableStateOf(if (updateContent != null) ShareCardVariant.MY_UPDATE else ShareCardVariant.BOOK)
+    }
+
+    val displayedContent: ShareContent = when (selectedVariant) {
+        ShareCardVariant.MY_UPDATE -> updateContent ?: bookContent
+        ShareCardVariant.BOOK -> bookContent
+    }
+
+    val subtitle = if (updateContent != null && selectedVariant == ShareCardVariant.MY_UPDATE) {
+        "Your reading update for ${book.title}"
+    } else {
+        "An editorial card of ${book.title}"
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -85,15 +120,25 @@ fun ShareBookBottomSheet(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "An editorial card of ${book.title}",
+                text = subtitle,
                 style = MaterialTheme.editorialTypography.body,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            if (updateContent != null) {
+                Spacer(modifier = Modifier.height(20.dp))
+
+                ShareCardVariantToggle(
+                    selectedVariant = selectedVariant,
+                    onVariantSelected = { selectedVariant = it },
+                    enabled = isBusy.not(),
+                )
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
 
             ShareCardPreview(
-                content = content,
+                content = displayedContent,
                 capture = capture,
             )
 
@@ -180,9 +225,39 @@ fun ShareBookBottomSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ShareCardVariantToggle(
+    selectedVariant: ShareCardVariant,
+    onVariantSelected: (ShareCardVariant) -> Unit,
+    enabled: Boolean,
+) {
+    val variants = ShareCardVariant.entries
+
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        variants.forEachIndexed { index, variant ->
+            SegmentedButton(
+                selected = variant == selectedVariant,
+                onClick = { onVariantSelected(variant) },
+                enabled = enabled,
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = variants.size,
+                ),
+                label = {
+                    Text(
+                        text = variant.label,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                },
+            )
+        }
+    }
+}
+
 @Composable
 private fun ShareCardPreview(
-    content: BookShareContent,
+    content: ShareContent,
     capture: ShareCardCapture,
 ) {
     val maxPreviewWidth = 280.dp
@@ -222,19 +297,19 @@ private fun ShareCardPreview(
     }
 }
 
-private fun Book.toShareContent(): BookShareContent {
-    val edition = currentEdition ?: defaultEdition
+private fun Book.toShareContent(edition: BookEdition?): BookShareContent {
+    val resolvedEdition = edition ?: defaultEdition
 
     return BookShareContent(
-        coverUrl = edition?.localImagePath
-            ?: edition?.url
+        coverUrl = resolvedEdition?.localImagePath
+            ?: resolvedEdition?.url
             ?: coverUrl,
         title = title,
         author = authors.firstOrNull()?.name.orEmpty(),
         communityRating = rating.takeIf { it > 0.0 },
         userRating = userBook?.rating?.toInt(),
-        releaseYear = edition?.releaseYear?.takeIf { it != -1 } ?: releaseYear.takeIf { it != -1 },
-        pageCount = edition?.pages,
+        releaseYear = resolvedEdition?.releaseYear?.takeIf { it != -1 } ?: releaseYear.takeIf { it != -1 },
+        pageCount = resolvedEdition?.pages,
         description = description.takeIf { it.isNotBlank() },
         quote = null,
     )

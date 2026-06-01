@@ -116,5 +116,25 @@ class OnSortModeChangeActionTest {
             // ----- Assert -----
             stateFlow.value.isSortMenuExpanded shouldBe false
         }
+
+        @Test
+        fun `resets isRearranging to false when sort mode changes`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(isRearranging = true)
+
+            val action = OnSortModeChangeAction(
+                tabId = tabId,
+                mode = LibrarySortMode.TITLE,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isRearranging shouldBe false
+        }
     }
 }

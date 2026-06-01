@@ -55,31 +55,39 @@ The plumbing release. Step 0.3 has no UI but unblocks all personal-data work; th
 
 ## 2.4.0 — Personal data lights up
 
-The first release where the corpus from 0.3 surfaces to the user. Pair big personal-data steps with smaller drag/reorder polish.
+The first release where the corpus from 0.3 surfaces to the user: rating, review, your own tags, a streak strip, and a reading-session surface that grows into a focus mode and a lock-screen ongoing notification — plus scan-to-add, a layer of book-detail editorial polish, and a batch of smaller fixes.
 
 > **Release notes (Google Play):**
-> Your reading becomes personal. Rate any book on its detail page and draft your own review. Start a reading session straight from the Reading screen — the timer captures duration and page deltas, and a 21-day streak strip sits above your greeting. Book detail surfaces literary awards and accolades when relevant.
+> Your reading gets personal. Rate and review any book — reviews now support bold, italic and hide-able spoilers. Add your own genre, mood, tag and content-warning tags (with spoiler flags). Track reading sessions with a live timer, Focus Mode and a lock-screen notification — pause, resume or update your page without opening the app; pausing skips idle time. A 21-day streak strip on Reading. Preview any edition before shelving, and scan a barcode to add a book or exact edition. Plus fixes.
 
 - **Step 3.1** — Personal rating control on book detail (S) — *deps: 0.3*
 - **Step 3.2** — Personal review drafting (M) — *deps: 0.3*
-- **Step 3.5** — Reading session timer (M) — *deps: 0.3*
+- **Step 3.5** — Reading session timer + Focus Mode + lock-screen notification (L) — *deps: 0.3*. Start/pause/resume/stop from the Reading featured card; pausing excludes idle time from the recorded duration (honest reading time). A persistent peek bar above the bottom nav shows the active book, a live timer and controls, and taps into **Focus Mode** — a distraction-free full-screen editorial surface (cover, `statHero` timer, inline page update via the shared `HeroStatNumberField`, pause/resume/stop). The lock-screen / shade surface is a **plain ongoing foreground-service notification** carrying the edition cover, a live chronometer, pause/resume + stop, and an inline "update page" reply — deliberately *not* a `MediaSession`/media notification (that competes with real audio apps like Spotify for the single media slot and drags in the speaker-output chip), and kept persistent via a re-post-on-dismiss `deleteIntent` since Android 14+ ignores `setOngoing` for FGS notifications. The activity uses `windowSoftInputMode=adjustNothing` so Compose owns the IME inset (single keyboard-avoidance source).
 - **Step 3.8** — Streak strip on Reading screen header (S) — *deps: 3.5 (same release, ship in order)*
-- **Step 4.2** — Awards & accolades (S)
+- **Improvement** — Preview & switch editions without a shelf entry (S) — *prerequisite for Step 6.8*. The book-detail "Change edition" action now works for any book, not just shelved ones. Picking an edition for a book with no user book is an ephemeral, never-cached preview (`BookDetailUiState.previewEdition`); a single `displayedEdition` resolver drives every edition-derived surface — cover, page count / duration, the publisher + ISBN strip, the "Find it" links, and the share card — while user-book-gated surfaces (mark-as-owned, progress, deadline) stay on the persisted edition. For a shelved book the selection still persists to the user book as before. Adding a previewed off-shelf book via Want-to-Read / Read creates the user book with the previewed edition (`edition_id` threaded through the create mutations).
+- **Step 6.8** — Barcode scan to add books / editions (M) — *pulled forward from 2.9.0 and broadened*. A scan banner / affordance that resolves an ISBN/barcode to a specific edition and adds the book — or the exact edition — to the library, on top of the original drop-into-search behaviour. Camera-permission gate + offline ISBN-only fallback. An unrecognised ISBN is created on Hardcover from the scan rather than dropped, and editionless results are no longer discarded.
+- **Step 10.10 (tagging slice)** — User tags on book detail (S) — *pulled forward from 3.3.0*. Add your own **Genre / Mood / Tag / Content-warning** tags to any shelved book through Hardcover's complete-set `upsert_tags` contract — naming a tag that doesn't exist creates it server-side, removing one re-sends the set without it, and each tag carries a per-tag spoiler flag. Tags render as a flat chip row below the shelf bar (above rating/review) and feed the personal reading-update share card, with spoiler-flagged tags excluded from the shareable image. The tag editor is free-text add (no `_ilike` search — disallowed by the API on cost). The library filter-by-tag and custom-list-creation halves of 10.10 stay deferred to 3.3.0.
+- **Fixes** — Assorted smaller fixes and polish (S) — bucket for minor bug fixes batched into this release.
 
 ---
 
-## 2.5.0 — Highlights, sessions log, reading log
+## 2.5.0 — Highlights, sessions log, reading log, personal tagging
 
-Closes out Phase 3 and tucks in two small Phase 4 wins.
+Closes out Phase 3 — including the personal tagging, mood-logging and private-notes surfaces — and tucks in a few small Phase 4 wins (including awards, moved down from 2.4.0). This is a dense release; if it becomes too heavy in practice, the personal-tagging trio (3.9 / 3.10 / 3.11) is the natural slice to defer to a follow-up 2.5.x.
 
 > **Release notes (Google Play):**
-> Save the passages you love. A new Passages section on every book detail holds your highlights, and the Notes & Highlights inbox lets you search across every quote you've saved. A Reading Sessions log timelines every session you've tracked. Re-reads finally make sense — each book detail tracks every read-through separately with its own dates, rating and notes. Content warnings get an opt-in reveal. Reviews can be filtered by friends, top-rated, recent and language.
+> Save the passages you love. A new Passages section on every book detail holds your highlights, and the Notes & Highlights inbox lets you search across every quote you've saved. A Reading Sessions log timelines every session you've tracked. Re-reads finally make sense — each book detail tracks every read-through separately with its own dates, rating and notes. Make any book yours: tag authors and books with the identities and representation that matter to you (LGBTQ+, BIPOC, country of birth, gender — all private), log how each book made you feel with personal moods (overall or chapter-by-chapter), and keep private notes against the book or any character — separate from the review you might publish. Book detail now surfaces literary awards and accolades when relevant. Content warnings get an opt-in reveal, and you can add your own private warnings alongside the community list. Reviews can be filtered by friends, top-rated, recent and language.
 
 - **Step 3.3** — Personal highlights section + quick-add from Reading (M)
 - **Step 3.4** — Notes & Highlights inbox screen (M)
 - **Step 3.6** — Reading Sessions log screen (S)
 - **Step 3.7** — Reading log (multiple read-throughs) (M)
-- **Step 4.3** — Content warnings collapsible (S)
+- **Step 3.9** — Personal identity & representation tagging (M) — *deps: 0.3 (2.2.0)*. Author identity tags (gender, BIPOC, LGBTQ+, country of birth) + book representation tags (LGBTQ+ / BIPOC characters). Strictly local. Feeds 7.13 (2.10.0) and 7.14 (2.11.0).
+- **Step 3.10** — Personal moods (book + chapter) (M) — *deps: 0.3 (2.2.0)*. Private mood log distinct from the community moods used for discovery.
+- **Step 3.11** — Personal notes (book + characters) (M) — *deps: 0.3 (2.2.0)*. Private notes field separate from the personal review (3.2), with per-character notes when characters are available.
+- **Step 4.2** — Awards & accolades (S) — *moved down from 2.4.0*.
+- **Step 4.3** — Content warnings collapsible (S) — covers community-sourced trigger warnings.
+- **Step 4.9** — Personal trigger warnings (S) — *deps: 4.3 (same release, ship in order)*. User-added warnings on top of community ones.
 - **Step 4.7** — Reviews filters & sorts (S)
 
 ---
@@ -106,7 +114,7 @@ Three new screens in one release. They're independent enough to land together an
 Explore gets richer. Each step here is fundamentally a new section on an existing screen, so the release is mostly Compose work over data that's already reachable.
 
 > **Release notes (Google Play):**
-> Explore gets richer. Browse by genre or mood, separate New & Noteworthy from Most Anticipated, and discover Award winners across Booker, Pulitzer, Hugo and more. A curated Lists carousel lets you tour staff picks and themed collections. Every book detail page now suggests similar reads, and stalled series get gentle "pick this back up" nudges instead of quietly drifting.
+> Explore gets richer. Browse by genre or mood, separate New & Noteworthy from Most Anticipated, and discover Award winners across Booker, Pulitzer, Hugo and more. A curated Lists carousel lets you tour staff picks and themed collections. Audience now reads as its own filter — Young Adult, Middle Grade and New Adult sit alongside genre rather than being mixed into it. Every book detail page now suggests similar reads, and stalled series get gentle "pick this back up" nudges instead of quietly drifting.
 
 - **Step 6.1** — Genre/mood browser (M)
 - **Step 6.2** — New & noteworthy + Most anticipated (S)
@@ -114,6 +122,7 @@ Explore gets richer. Each step here is fundamentally a new section on an existin
 - **Step 6.4** — Curated lists carousel (S) — *deps: 5.3 (2.6.0)*
 - **Step 6.10** — Similar books carousel on book detail (S)
 - **Step 6.11** — Continue-series nudges (S)
+- **Step 6.14** — Audience as a separate classification from genre (M) — *deps: 6.1 (same release, ship in order)*. Design phase first to confirm what's recoverable from Hardcover's tag taxonomy; surfaces an audience eyebrow on book detail and an independent audience filter on the genre/mood browser.
 
 ---
 
@@ -130,17 +139,18 @@ Explore gets richer. Each step here is fundamentally a new section on an existin
 
 ---
 
-## 2.9.0 — Profile depth + scan + sharing
+## 2.9.0 — Profile depth + sharing
 
 > **Release notes (Google Play):**
-> Profile becomes editable — set your name, bio and avatar in-app. A handful of new stats land: genre and rating distributions, reading seasons across twelve months, top authors, format split (print/ebook/audio) and personal records like longest haul and fastest read. Scan a barcode from the search bar to find any book in the wild. Share a book as an editorial card image, a plain link or a send-to-a-friend deep link.
+> Profile becomes editable — set your name, bio and avatar in-app. A handful of new stats land: genre and rating distributions, reading seasons across twelve months, top authors, format split (print/ebook/audio) and personal records like longest haul and fastest read. Share a book as an editorial card image, a plain link or a send-to-a-friend deep link.
 
 - **Step 7.1** — Edit profile + Settings shortcut (S)
 - **Step 7.4** — Genre + rating distributions (M)
 - **Step 7.5** — Reading seasons (S)
 - **Step 7.6** — Author top-list + format split + records (S)
-- **Step 6.8** — ISBN/barcode scan (M)
 - **Step 4.8 (remaining modes)** — Share book sheet: link + deep-link modes (S) — *image mode shipped in 2.2.0; this release adds the three-mode sheet on top.*
+
+*(Barcode scan moved to 2.4.0 — see Step 6.8, pulled forward and broadened to scan-to-add.)*
 
 ---
 
@@ -149,7 +159,7 @@ Explore gets richer. Each step here is fundamentally a new section on an existin
 The big personal-stats consolidation. Step 7.7 (12-week heatmap) ships here knowing it will be subsumed by 7.12 in 2.11.0; the interim shipping order is intentional because 7.12 depends on 7.7 being in the codebase.
 
 > **Release notes (Google Play):**
-> Set a yearly reading goal. A new Reading Challenge tile tracks your pace with a wavy progress bar, and a wizard helps you scope it — books, pages or genre diversity. A 12-week streak heatmap replaces the simple streak stat, and a time-of-day heatmap shows when you read most. The new Reading Stats Atlas pulls every chart into one long editorial spread. Optionally toggle a public activity log so others can see your finishes.
+> Set a yearly reading goal. A new Reading Challenge tile tracks your pace with a wavy progress bar, and a wizard helps you scope it — books, pages or genre diversity. A 12-week streak heatmap replaces the simple streak stat, and a time-of-day heatmap shows when you read most. The new Reading Stats Atlas pulls every chart into one long editorial spread, including a diversity & representation section driven by the author and book tags you've set yourself. Optionally toggle a public activity log so others can see your finishes.
 
 - **Step 7.2** — Yearly reading challenge tile + screen (M) — *deps: 3.1 (2.4.0)*
 - **Step 7.3** — Goal setup wizard (S)
@@ -157,6 +167,7 @@ The big personal-stats consolidation. Step 7.7 (12-week heatmap) ships here know
 - **Step 7.8** — Time-of-day reading heatmap (M) — *deps: 3.5 (2.4.0)*
 - **Step 7.9** — Reading Stats Atlas screen (M)
 - **Step 7.10** — Public activity log (M)
+- **Step 7.13** — Diversity & representation stats (M) — *deps: 3.9 (2.5.0), 7.9 (same release)*. Stats Atlas section driven by the user's private author identity and book representation tags.
 
 ---
 
@@ -165,10 +176,11 @@ The big personal-stats consolidation. Step 7.7 (12-week heatmap) ships here know
 7.12 folds 7.7's heatmap surface into the activity calendar in this release — the two-step path was a dependency artefact, not a duplication.
 
 > **Release notes (Google Play):**
-> The Reading Activity Calendar lands. A full month-grid view of every day you read, with the covers you touched, your sessions and your finishes shown in each day cell. Pinch out to a 12-month overview that replaces the standalone streak heatmap. Year in Books returns as a December recap with shareable slides. New pace cards on each Reading row predict your finish date, and Library tabs surface an "Up against the clock" section when deadlines loom. Plus data export and finer account and privacy controls.
+> The Reading Activity Calendar lands. A full month-grid view of every day you read, with the covers you touched, your sessions and your finishes shown in each day cell. Pinch out to a 12-month overview that replaces the standalone streak heatmap. Year in Books returns as a December recap with shareable slides — and now you can generate a wrap-up for any scope you like: a day, a week, a month, since you joined. Every slide exports as an editorial image card to share with friends who don't track their reading. New pace cards on each Reading row predict your finish date, and Library tabs surface an "Up against the clock" section when deadlines loom. Plus data export and finer account and privacy controls.
 
 - **Step 7.12** — Reading Activity Calendar (M) — *deps: 3.5, 3.7 (2.4.0/2.5.0), 7.7 (2.10.0)*
 - **Step 7.11** — Year in Books recap (M) — seasonal; gate the in-app surface behind a December trigger
+- **Step 7.14** — Custom-scope wrap-up generator (M) — *deps: 7.11 (same release, ship in order)*. Generalises Year in Books to arbitrary scopes (day / week / month / year / since-join / custom range); each slide exports via the share surface (4.8 / 0.2). The year-scope route shares the generator with 7.11's December trigger.
 - **Step 8.5** — Data export (S)
 - **Step 8.7** — Account, cache, privacy (S)
 - **Step 10.13** — Pace card per active book + deadline urgency pinned section (S)
@@ -277,6 +289,7 @@ Closing release for the current roadmap horizon. Heavy on small polish; the two 
   ├─> 2.4.0 (3.1, 3.5) ──> 2.10.0 (7.2, 7.7, 7.8)
   │                            └──> 2.11.0 (7.12)
   ├─> 2.5.0 (3.3, 3.4, 3.7) ─> 2.11.0 (7.12)
+  ├─> 2.5.0 (3.9) ──> 2.10.0 (7.13)
   └─> 2.8.0 (6.5) ───> 2.13.0 (8.11)
 
 2.3.0 (2.11) ──> 2.6.0 (5.5)
@@ -296,4 +309,4 @@ Closing release for the current roadmap horizon. Heavy on small polish; the two 
 3.0.0 (5-tab dock) ──> 3.3.0 (10.3 retune)
 ```
 
-The longest dependency chain is **2.2.0 → 2.4.0 → 2.10.0 → 2.11.0** (foundations → sessions → heatmap → activity calendar). Everything else branches off earlier than that, so the release order has comfortable slack — most releases can slip a slot without cascading.
+The longest dependency chain is **2.2.0 → 2.4.0 → 2.10.0 → 2.11.0** (foundations → sessions → heatmap → activity calendar). Everything else branches off earlier than that, so the release order has comfortable slack — most releases can slip a slot without cascading. The personal-tagging chain (2.2.0 → 2.5.0 → 2.10.0) and the wrap-up chain (… → 2.11.0 internal 7.11 → 7.14) both fit comfortably inside that envelope.

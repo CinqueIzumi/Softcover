@@ -19,7 +19,7 @@ data class OnUpdatePageProgressClickAction(
         val newPageValue = newPage.toIntOrNull() ?: 0
 
         dependencies.launch {
-            dependencies.updateBookProgress(
+            dependencies.recordBookProgressUseCase(
                 book = bookToUpdate,
                 newPage = newPageValue,
             )

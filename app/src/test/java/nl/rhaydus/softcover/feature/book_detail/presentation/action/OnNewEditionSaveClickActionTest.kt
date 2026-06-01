@@ -152,7 +152,7 @@ class OnNewEditionSaveClickActionTest {
         }
 
         @Test
-        fun `does not invoke use case and does not close sheet when book is null`() = runTest {
+        fun `does not invoke use case when book is null`() = runTest {
             // ----- Arrange -----
             val edition = stubEdition()
             stateFlow.value = BookDetailUiState(book = null, showEditEditionSheet = true)
@@ -167,17 +167,16 @@ class OnNewEditionSaveClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe true
             coVerify(exactly = 0) {
                 updateBookEditionUseCase(any(), any())
             }
         }
 
         @Test
-        fun `does not invoke use case and does not close sheet when userBook is null`() = runTest {
+        fun `sets previewEdition and closes sheet when userBook is null`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
-            val edition = stubEdition()
+            val edition = stubEdition(id = 77)
             stateFlow.value = BookDetailUiState(book = book, showEditEditionSheet = true)
             dependencies = stubDependencies(this)
 
@@ -190,10 +189,64 @@ class OnNewEditionSaveClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe true
+            stateFlow.value.previewEdition shouldBe edition
+            stateFlow.value.showEditEditionSheet shouldBe false
             coVerify(exactly = 0) {
                 updateBookEditionUseCase(any(), any())
             }
+        }
+
+        @Test
+        fun `clears scannedEditionId when userBook is null`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBook = null)
+            val edition = stubEdition(id = 77)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+                showEditEditionSheet = true,
+            )
+            dependencies = stubDependencies(this)
+
+            val action = OnNewEditionSaveClickAction(edition = edition)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.scannedEditionId shouldBe null
+        }
+
+        @Test
+        fun `clears scannedEditionId when userBook is present`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook()
+            val book = stubBook(userBook = userBook)
+            val edition = stubEdition(id = 99)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+                showEditEditionSheet = true,
+            )
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookEditionUseCase(userBook = userBook, newEditionId = 99)
+            } returns Result.success(Unit)
+
+            val action = OnNewEditionSaveClickAction(edition = edition)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.scannedEditionId shouldBe null
         }
 
         @Test

@@ -72,6 +72,17 @@ data class LibraryUiState(
      */
     val selectionMode: Boolean = false,
     val selectedBookIds: Set<Int> = emptySet(),
+
+    /**
+     * Rearrange mode. A transient editing state entered from the drag-handle icon-button in the
+     * view-control strip's trailing cluster, and only meaningful while the current tab is on a
+     * positional sort (MANUAL on a built-in shelf, or
+     * ORDER on a ranked custom list). Outside this mode, positional sorts render display-only — the
+     * saved order shows with normal tap/long-press intact and no drag handles — so scrolling can't
+     * nudge the order. Mutually exclusive with [selectionMode]; cleared on tab switch, sort change,
+     * and back.
+     */
+    val isRearranging: Boolean = false,
     val bulkActionInProgress: Boolean = false,
     val isBulkMoveMenuExpanded: Boolean = false,
     val isBulkRemoveDialogShown: Boolean = false,

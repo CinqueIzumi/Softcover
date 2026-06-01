@@ -5,11 +5,13 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.cache.normalized.FetchPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragment
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment as booksByIdsBookDetailFragment
+import nl.rhaydus.softcover.GetEditionByIsbnQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery.Data.Edition.Companion.editionDetailFragment
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
@@ -27,15 +29,23 @@ import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book.Companion.userBookFragment
+import nl.rhaydus.softcover.UpdateUserBookRatingMutation
+import nl.rhaydus.softcover.UpdateUserBookRatingMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookRatingUserBookFragment
+import nl.rhaydus.softcover.UpdateUserBookReviewMutation
+import nl.rhaydus.softcover.UpdateUserBookReviewMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookReviewUserBookFragment
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
+import nl.rhaydus.softcover.core.data.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
+import nl.rhaydus.softcover.feature.books.domain.model.CreatedBook
+import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
@@ -48,14 +58,33 @@ interface BooksRemoteDataSource {
 
     suspend fun fetchBookIdForEdition(editionId: Int): Int?
 
+    suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch?
+
+    suspend fun addBookByIsbn(isbn: String): CreatedBook
+
     suspend fun fetchBooksByIds(
         ids: List<Int>,
         forceNetwork: Boolean = false,
     ): List<Book>
 
-    suspend fun markBookAsWantToRead(bookId: Int): Book
+    suspend fun markBookAsWantToRead(
+        bookId: Int,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun markBookAsReading(book: Book): Book
+
+    suspend fun updateBookRating(
+        userBook: UserBook,
+        rating: Double,
+    ): Book
+
+    suspend fun updateBookReview(
+        userBook: UserBook,
+        review: ReviewDocument,
+        hasSpoilers: Boolean,
+        reviewedAt: String,
+    ): Book
 
     suspend fun removeBookFromLibrary(book: Book)
 
@@ -77,7 +106,10 @@ interface BooksRemoteDataSource {
         newSeconds: Int? = null,
     ): Book
 
-    suspend fun markBookAsRead(book: Book): Book
+    suspend fun markBookAsRead(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun updateBookEdition(
         userBook: UserBook,
@@ -97,9 +129,24 @@ interface BooksRemoteDataSource {
         bookId: Int,
         userDate: String,
     )
+
+    suspend fun replayUpdateBookRating(
+        userBookId: Int,
+        rating: Double,
+    )
+
+    suspend fun replayUpdateBookReview(
+        userBookId: Int,
+        review: ReviewDocument,
+        hasSpoilers: Boolean,
+        reviewedAt: String,
+    )
 }
 
 private const val BATCH_ID_LIMIT: Int = 200
+
+/** Hardcover's ISBN external-book provider platform — `upsert_book` uses the ISBN as the external id. */
+private const val HARDCOVER_ISBN_PLATFORM_ID: Int = 8
 
 class BooksRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
@@ -136,6 +183,49 @@ class BooksRemoteDataSourceImpl(
         )
 
         return result.editions.firstOrNull()?.book_id
+    }
+
+    override suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch? {
+        val result = apolloClient.safeQuery(
+            query = GetEditionByIsbnQuery(isbn = isbn),
+            fetchPolicy = FetchPolicy.NetworkFirst,
+        )
+
+        result.isbn13.firstOrNull()?.let { edition ->
+            return IsbnEditionMatch(bookId = edition.book_id, editionId = edition.id)
+        }
+
+        return result.isbn10.firstOrNull()?.let { edition ->
+            IsbnEditionMatch(bookId = edition.book_id, editionId = edition.id)
+        }
+    }
+
+    override suspend fun addBookByIsbn(isbn: String): CreatedBook {
+        val response = apolloClient
+            .safeMutation(
+                mutation = CreateBookMutation(
+                    externalId = isbn,
+                    platformId = HARDCOVER_ISBN_PLATFORM_ID,
+                    bookId = Optional.absent(),
+                ),
+            )
+            .upsert_book
+            ?: throw Exception("Did not receive an upsert-book response")
+
+        val errors: List<String> = response.errors
+            .orEmpty()
+            .filterNotNull()
+            .filter { it.isNotBlank() }
+
+        if (errors.isNotEmpty()) throw Exception("CreateBook rejected by server: ${errors.joinToString()}")
+
+        val bookId = response.book?.id
+            ?: throw Exception("upsert_book returned no book")
+
+        return CreatedBook(
+            bookId = bookId,
+            editionId = response.edition?.id,
+        )
     }
 
     override suspend fun fetchBooksByIds(
@@ -183,9 +273,13 @@ class BooksRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun markBookAsWantToRead(bookId: Int): Book {
+    override suspend fun markBookAsWantToRead(
+        bookId: Int,
+        editionId: Int?,
+    ): Book {
         val userBookCreateInput = UserBookCreateInput(
             book_id = bookId,
+            edition_id = Optional.presentIfNotNull(editionId),
             status_id = Optional.Present(UserBookStatus.WANT_TO_READ.code),
             privacy_setting_id = Optional.Present(PrivacySetting.PUBLIC.code),
         )
@@ -229,6 +323,52 @@ class BooksRemoteDataSourceImpl(
             .update_user_book
             ?.user_book
             ?.userBookFragment()
+            ?.toBook() ?: throw Exception("Book could not be mapped")
+    }
+
+    override suspend fun updateBookRating(
+        userBook: UserBook,
+        rating: Double,
+    ): Book {
+        val input = UserBookUpdateInput(
+            rating = Optional.Present(rating),
+        )
+
+        return apolloClient
+            .safeMutation(
+                mutation = UpdateUserBookRatingMutation(
+                    id = userBook.id,
+                    `object` = input,
+                )
+            )
+            .update_user_book
+            ?.user_book
+            ?.updateUserBookRatingUserBookFragment()
+            ?.toBook() ?: throw Exception("Book could not be mapped")
+    }
+
+    override suspend fun updateBookReview(
+        userBook: UserBook,
+        review: ReviewDocument,
+        hasSpoilers: Boolean,
+        reviewedAt: String,
+    ): Book {
+        val input = UserBookUpdateInput(
+            review_slate = Optional.Present(reviewSlateFromDocument(document = review)),
+            review_has_spoilers = Optional.Present(hasSpoilers),
+            reviewed_at = Optional.Present(reviewedAt),
+        )
+
+        return apolloClient
+            .safeMutation(
+                mutation = UpdateUserBookReviewMutation(
+                    id = userBook.id,
+                    `object` = input,
+                )
+            )
+            .update_user_book
+            ?.user_book
+            ?.updateUserBookReviewUserBookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
     }
 
@@ -331,11 +471,15 @@ class BooksRemoteDataSourceImpl(
         return userBookFragment.toBook() ?: throw Exception("Book could not be mapped")
     }
 
-    override suspend fun markBookAsRead(book: Book): Book {
+    override suspend fun markBookAsRead(
+        book: Book,
+        editionId: Int?,
+    ): Book {
         val currentDate = LocalDate.now().toString()
 
         val dataObject = UserBookCreateInput(
             book_id = book.id,
+            edition_id = Optional.presentIfNotNull(editionId),
             status_id = Optional.present(UserBookStatus.READ.code),
             user_date = Optional.present(currentDate),
             privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
@@ -420,5 +564,41 @@ class BooksRemoteDataSourceImpl(
         )
 
         apolloClient.safeMutation(mutation = MarkBookAsReadMutation(userBookCreateInput = dataObject))
+    }
+
+    override suspend fun replayUpdateBookRating(
+        userBookId: Int,
+        rating: Double,
+    ) {
+        val input = UserBookUpdateInput(
+            rating = Optional.Present(rating),
+        )
+
+        apolloClient.safeMutation(
+            mutation = UpdateUserBookRatingMutation(
+                id = userBookId,
+                `object` = input,
+            ),
+        )
+    }
+
+    override suspend fun replayUpdateBookReview(
+        userBookId: Int,
+        review: ReviewDocument,
+        hasSpoilers: Boolean,
+        reviewedAt: String,
+    ) {
+        val input = UserBookUpdateInput(
+            review_slate = Optional.Present(reviewSlateFromDocument(document = review)),
+            review_has_spoilers = Optional.Present(hasSpoilers),
+            reviewed_at = Optional.Present(reviewedAt),
+        )
+
+        apolloClient.safeMutation(
+            mutation = UpdateUserBookReviewMutation(
+                id = userBookId,
+                `object` = input,
+            ),
+        )
     }
 }

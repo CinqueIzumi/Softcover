@@ -14,22 +14,27 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.domain.connectivity.OfflineProgressQueue
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressDrainer
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdate
-import nl.rhaydus.softcover.core.domain.connectivity.PendingProgressUpdateKind
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
+import nl.rhaydus.softcover.core.data.mapper.toJson
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
 import nl.rhaydus.softcover.feature.books.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.feature.books.domain.model.CreatedBook
+import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
@@ -39,8 +44,8 @@ class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
     private val booksLocalDataSource: BooksLocalDataSource,
     private val networkAvailability: NetworkAvailabilityProvider,
-    private val offlineProgressQueue: OfflineProgressQueue,
-    private val pendingProgressDrainer: PendingProgressDrainer,
+    private val userBookWriteQueue: UserBookWriteQueue,
+    private val userBookWriteDrainer: UserBookWriteDrainer,
     private val applicationScope: ApplicationScope,
 ) : BooksRepository {
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
@@ -118,7 +123,7 @@ class BooksRepositoryImpl(
         userId: Int,
         statusFilter: UserBookStatus?,
     ) {
-        val syncedUserBookIds: Set<Int> = pendingProgressDrainer.drainPendingUpdates()
+        val syncedUserBookIds: Set<Int> = userBookWriteDrainer.drainPendingUpdates()
 
         val statusIds: Set<Int> = statusFilter
             ?.let { setOf(it.code) }
@@ -265,6 +270,18 @@ class BooksRepositoryImpl(
         booksLocalDataSource.deleteOrphanBooks()
     }
 
+    override suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch? {
+        if (networkAvailability.isOnline.value.not()) throw OfflineException()
+
+        return booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+    }
+
+    override suspend fun addBookByIsbn(isbn: String): CreatedBook {
+        if (networkAvailability.isOnline.value.not()) throw OfflineException()
+
+        return booksRemoteDataSource.addBookByIsbn(isbn = isbn)
+    }
+
     override suspend fun fetchBooksByIds(ids: List<Int>): List<Book> {
         return booksRemoteDataSource.fetchBooksByIds(ids = ids)
     }
@@ -281,7 +298,10 @@ class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchEditionsByIds(ids = ids)
     }
 
-    override suspend fun markBookAsWantToRead(book: Book): Book {
+    override suspend fun markBookAsWantToRead(
+        book: Book,
+        editionId: Int?,
+    ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsWantToRead()
 
@@ -290,7 +310,7 @@ class BooksRepositoryImpl(
         }
 
         return runCatching {
-            booksRemoteDataSource.markBookAsWantToRead(bookId = book.id)
+            booksRemoteDataSource.markBookAsWantToRead(bookId = book.id, editionId = editionId)
         }.getOrElse { error ->
             if (error is CancellationException) throw error
 
@@ -314,6 +334,84 @@ class BooksRepositoryImpl(
             restoreOptimisticWrite(snapshot = snapshot)
             throw error
         }
+    }
+
+    override suspend fun updateBookRating(
+        book: Book,
+        rating: Double,
+    ): Book {
+        val userBook = book.userBook ?: throw Exception("User did not have a user book")
+
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val optimistic = book.withRating(rating = rating)
+        booksLocalDataSource.cacheBook(book = optimistic)
+
+        if (networkAvailability.isOnline.value) {
+            return runCatching {
+                booksRemoteDataSource.updateBookRating(userBook = userBook, rating = rating)
+            }.getOrElse { error ->
+                when (error) {
+                    is CancellationException -> throw error
+
+                    is OfflineException -> {
+                        enqueueRatingUpdate(book = optimistic, rating = rating)
+                        optimistic
+                    }
+
+                    else -> {
+                        restoreOptimisticWrite(snapshot = snapshot)
+                        throw error
+                    }
+                }
+            }
+        }
+
+        enqueueRatingUpdate(book = optimistic, rating = rating)
+
+        return optimistic
+    }
+
+    override suspend fun updateBookReview(
+        book: Book,
+        review: ReviewDocument,
+        hasSpoilers: Boolean,
+    ): Book {
+        val userBook = book.userBook ?: throw Exception("User did not have a user book")
+
+        val reviewedAt: String = LocalDate.now().toString()
+
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val optimistic = book.withReview(review = review, hasSpoilers = hasSpoilers)
+        booksLocalDataSource.cacheBook(book = optimistic)
+
+        if (networkAvailability.isOnline.value) {
+            return runCatching {
+                booksRemoteDataSource.updateBookReview(
+                    userBook = userBook,
+                    review = review,
+                    hasSpoilers = hasSpoilers,
+                    reviewedAt = reviewedAt,
+                )
+            }.getOrElse { error ->
+                when (error) {
+                    is CancellationException -> throw error
+
+                    is OfflineException -> {
+                        enqueueReviewUpdate(book = optimistic, review = review, hasSpoilers = hasSpoilers)
+                        optimistic
+                    }
+
+                    else -> {
+                        restoreOptimisticWrite(snapshot = snapshot)
+                        throw error
+                    }
+                }
+            }
+        }
+
+        enqueueReviewUpdate(book = optimistic, review = review, hasSpoilers = hasSpoilers)
+
+        return optimistic
     }
 
     override suspend fun removeBookFromLibrary(book: Book) {
@@ -382,14 +480,17 @@ class BooksRepositoryImpl(
         return optimistic
     }
 
-    override suspend fun markBookAsRead(book: Book): Book {
+    override suspend fun markBookAsRead(
+        book: Book,
+        editionId: Int?,
+    ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsRead()
         booksLocalDataSource.cacheBook(book = optimistic)
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
-                booksRemoteDataSource.markBookAsRead(book = book)
+                booksRemoteDataSource.markBookAsRead(book = book, editionId = editionId)
             }.getOrElse { error ->
                 when (error) {
                     is CancellationException -> throw error
@@ -419,9 +520,9 @@ class BooksRepositoryImpl(
         val userBook = book.userBook ?: return
         val userBookRead = book.userBookRead ?: return
 
-        offlineProgressQueue.enqueue(
-            PendingProgressUpdate(
-                kind = PendingProgressUpdateKind.UPDATE_PROGRESS,
+        userBookWriteQueue.enqueue(
+            PendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 userBookId = userBook.id,
                 userBookReadId = userBookRead.id,
                 bookId = book.id,
@@ -439,9 +540,9 @@ class BooksRepositoryImpl(
         val userBook = book.userBook ?: return
         val userBookRead = book.userBookRead ?: return
 
-        offlineProgressQueue.enqueue(
-            PendingProgressUpdate(
-                kind = PendingProgressUpdateKind.MARK_AS_READ,
+        userBookWriteQueue.enqueue(
+            PendingUserBookWrite(
+                kind = PendingUserBookWriteKind.MARK_AS_READ,
                 userBookId = userBook.id,
                 userBookReadId = userBookRead.id,
                 bookId = book.id,
@@ -450,6 +551,58 @@ class BooksRepositoryImpl(
                 progressSeconds = userBookRead.currentSeconds,
                 startedAt = userBookRead.startedAt,
                 finishedAt = userBookRead.finishedAt,
+                enqueuedAt = Instant.now().toString(),
+            )
+        )
+    }
+
+    private suspend fun enqueueRatingUpdate(
+        book: Book,
+        rating: Double,
+    ) {
+        val userBook = book.userBook ?: return
+
+        userBookWriteQueue.enqueue(
+            PendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_RATING,
+                userBookId = userBook.id,
+                // Unused for UPDATE_RATING replay (which keys off userBookId); a Read book may have
+                // no userBookRead, so fall back to the schema's non-null placeholder.
+                userBookReadId = book.userBookRead?.id ?: 0,
+                bookId = book.id,
+                editionId = userBook.editionId,
+                progressPages = null,
+                progressSeconds = null,
+                startedAt = null,
+                finishedAt = null,
+                rating = rating,
+                enqueuedAt = Instant.now().toString(),
+            )
+        )
+    }
+
+    private suspend fun enqueueReviewUpdate(
+        book: Book,
+        review: ReviewDocument,
+        hasSpoilers: Boolean,
+    ) {
+        val userBook = book.userBook ?: return
+
+        userBookWriteQueue.enqueue(
+            PendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_REVIEW,
+                userBookId = userBook.id,
+                // Unused for UPDATE_REVIEW replay (which keys off userBookId); a Read book may have
+                // no userBookRead, so fall back to the schema's non-null placeholder.
+                userBookReadId = book.userBookRead?.id ?: 0,
+                bookId = book.id,
+                editionId = userBook.editionId,
+                progressPages = null,
+                progressSeconds = null,
+                startedAt = null,
+                finishedAt = null,
+                reviewSlateJson = review.toJson(),
+                reviewHasSpoilers = hasSpoilers,
                 enqueuedAt = Instant.now().toString(),
             )
         )
@@ -546,6 +699,34 @@ class BooksRepositoryImpl(
         val updatedUserBook: UserBook = existingUserBook
             .copy(status = BookStatus.Reading)
             .withAppendedJournal(event = JournalEventType.UserBookReadStarted)
+
+        return copy(userBook = updatedUserBook)
+    }
+
+    private fun Book.withRating(rating: Double): Book {
+        val existingUserBook = userBook ?: return this
+
+        if (existingUserBook.rating == rating) return this
+
+        val updatedUserBook: UserBook = existingUserBook.copy(rating = rating)
+
+        return copy(userBook = updatedUserBook)
+    }
+
+    private fun Book.withReview(
+        review: ReviewDocument,
+        hasSpoilers: Boolean,
+    ): Book {
+        val existingUserBook = userBook ?: return this
+
+        // A blank document clears the review; the optimistic copy stores what the user wrote, which the
+        // next server refresh overwrites with Hardcover's canonical `review_slate`.
+        val normalizedReview: ReviewDocument? = review.takeUnless { it.isBlank() }
+
+        val updatedUserBook: UserBook = existingUserBook.copy(
+            reviewDocument = normalizedReview,
+            reviewHasSpoilers = hasSpoilers,
+        )
 
         return copy(userBook = updatedUserBook)
     }

@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.state
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
+import nl.rhaydus.softcover.feature.profile.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 
@@ -21,4 +22,6 @@ data class ReadingScreenUiState(
 
     val wantToReadBooks: List<Book> = emptyList(),
     val trendingBooks: List<Book> = emptyList(),
+
+    val recentReadingActivity: List<ReadingDayActivity> = emptyList(),
 ) : UiState

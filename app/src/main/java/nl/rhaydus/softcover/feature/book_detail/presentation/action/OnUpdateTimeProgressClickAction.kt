@@ -26,7 +26,7 @@ data class OnUpdateTimeProgressClickAction(
         val newSeconds = (h * 3600 + m * 60 + s).coerceIn(0, total)
 
         dependencies.launch {
-            dependencies.updateBookProgress(
+            dependencies.recordBookProgressUseCase(
                 book = bookToUpdate,
                 newSeconds = newSeconds,
             )

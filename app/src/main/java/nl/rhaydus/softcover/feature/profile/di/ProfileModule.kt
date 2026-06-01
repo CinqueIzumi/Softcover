@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.profile.data.datastore.ProfileCacheDataStore
 import nl.rhaydus.softcover.feature.profile.data.datastore.profileCache
 import nl.rhaydus.softcover.feature.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.feature.profile.domain.repository.ProfileRepository
+import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.initializer.ProfileInitializer
@@ -52,6 +53,13 @@ val profileModule = module {
 
     factory {
         ObserveUserProfileDataUseCase(profileRepository = get())
+    }
+
+    factory {
+        ObserveRecentReadingActivityUseCase(
+            profileRepository = get(),
+            clock = get(),
+        )
     }
 
     factory {

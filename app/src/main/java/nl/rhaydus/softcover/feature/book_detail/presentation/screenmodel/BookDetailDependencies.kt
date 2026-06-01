@@ -3,27 +3,32 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookRatingUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookReviewUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.SetEditionAsOwnedUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
-import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
+import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 
 class BookDetailDependencies(
-    val updateBookProgress: UpdateBookProgress,
+    val recordBookProgressUseCase: RecordBookProgressUseCase,
     val updateBookEditionUseCase: UpdateBookEditionUseCase,
     val fetchBookByIdUseCase: FetchBookByIdUseCase,
     val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
@@ -31,6 +36,7 @@ class BookDetailDependencies(
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    val updateBookRatingUseCase: UpdateBookRatingUseCase,
     val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
@@ -41,6 +47,10 @@ class BookDetailDependencies(
     val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
+    val updateBookReviewUseCase: UpdateBookReviewUseCase,
+    val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
+    val getUserTagsUseCase: GetUserTagsUseCase,
+    val saveUserTagsUseCase: SaveUserTagsUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

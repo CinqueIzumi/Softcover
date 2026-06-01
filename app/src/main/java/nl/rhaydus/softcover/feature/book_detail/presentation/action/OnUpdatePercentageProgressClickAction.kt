@@ -40,7 +40,7 @@ data class OnUpdatePercentageProgressClickAction(
         }
 
         dependencies.launch {
-            dependencies.updateBookProgress(
+            dependencies.recordBookProgressUseCase(
                 book = bookToUpdate,
                 newPage = newPage,
                 newSeconds = newSeconds,

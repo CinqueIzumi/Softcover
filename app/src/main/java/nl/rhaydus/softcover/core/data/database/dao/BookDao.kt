@@ -309,13 +309,29 @@ interface BookDao {
         insertEditionAuthors(book.toEditionAuthorRefs(authorIdsByName))
 
         if (book.tags.isNotEmpty()) {
-            insertTags(book.tags.map { TagEntity(id = it.id, name = it.name) })
+            insertTags(
+                book.tags.map {
+                    TagEntity(
+                        id = it.id,
+                        name = it.name,
+                        category = it.category.name,
+                    )
+                },
+            )
         }
 
         clearBookTags(bookId = book.id)
 
         if (book.tags.isNotEmpty()) {
-            insertBookTags(book.tags.map { BookTagCrossRef(bookId = book.id, tagId = it.id) })
+            insertBookTags(
+                book.tags.map {
+                    BookTagCrossRef(
+                        bookId = book.id,
+                        tagId = it.id,
+                        count = it.count,
+                    )
+                },
+            )
         }
     }
 

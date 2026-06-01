@@ -115,6 +115,7 @@ class ProfileRemoteDataSourceImplTest {
             every { meEntry.user_books_pages } returns listOf(userBooksPage)
             every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns "John Doe"
+            every { meEntry.username } returns "johndoe"
             every { meEntry.bio } returns "A bio"
             every { meEntry.image } returns image
             every { image.url } returns "https://example.com/avatar.jpg"
@@ -133,6 +134,7 @@ class ProfileRemoteDataSourceImplTest {
             result shouldBe UserProfileSnapshot(
                 profileImageUrl = "https://example.com/avatar.jpg",
                 name = "John Doe",
+                username = "johndoe",
                 bio = "A bio",
                 booksRead = 42,
                 totalPagesRead = 12500,
@@ -160,6 +162,7 @@ class ProfileRemoteDataSourceImplTest {
             every { meEntry.user_books_pages } returns emptyList()
             every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns null
+            every { meEntry.username } returns null
             every { meEntry.bio } returns null
             every { meEntry.image } returns null
             every { meEntry.books_read } returns booksRead
@@ -175,6 +178,7 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result.name shouldBe ""
+            result.username shouldBe ""
             result.bio shouldBe ""
         }
 
@@ -197,6 +201,7 @@ class ProfileRemoteDataSourceImplTest {
             every { meEntry.user_books_pages } returns emptyList()
             every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns "Jane"
+            every { meEntry.username } returns "jane"
             every { meEntry.bio } returns "Bio"
             every { meEntry.image } returns null
             every { meEntry.books_read } returns booksRead
@@ -234,6 +239,7 @@ class ProfileRemoteDataSourceImplTest {
             every { meEntry.user_books_pages } returns emptyList()
             every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns "Jane"
+            every { meEntry.username } returns "jane"
             every { meEntry.bio } returns "Bio"
             every { meEntry.image } returns image
             every { image.url } returns null
@@ -268,6 +274,7 @@ class ProfileRemoteDataSourceImplTest {
             every { meEntry.user_books_pages } returns emptyList()
             every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns "Jane"
+            every { meEntry.username } returns "jane"
             every { meEntry.bio } returns "Bio"
             every { meEntry.image } returns null
             every { meEntry.books_read } returns booksRead
@@ -346,6 +353,7 @@ class ProfileRemoteDataSourceImplTest {
             every { unparseable.action_at } returns "not-a-date"
             every { duplicate.action_at } returns "2026-05-04"
             every { meEntry.name } returns ""
+            every { meEntry.username } returns ""
             every { meEntry.bio } returns ""
             every { meEntry.image } returns null
             every { meEntry.books_read } returns booksRead
@@ -386,6 +394,7 @@ class ProfileRemoteDataSourceImplTest {
             every { timestamp2.action_at } returns "2026-05-03T22:00:00+00:00"
             every { bareDate.action_at } returns "2026-05-02"
             every { meEntry.name } returns ""
+            every { meEntry.username } returns ""
             every { meEntry.bio } returns ""
             every { meEntry.image } returns null
             every { meEntry.books_read } returns booksRead
@@ -423,6 +432,7 @@ class ProfileRemoteDataSourceImplTest {
             every { queryData.streak_journals } returns listOf(entry)
             every { entry.action_at } returns "2026-05-05T01:30:00+04:00"
             every { meEntry.name } returns ""
+            every { meEntry.username } returns ""
             every { meEntry.bio } returns ""
             every { meEntry.image } returns null
             every { meEntry.books_read } returns booksRead
@@ -457,6 +467,7 @@ class ProfileRemoteDataSourceImplTest {
             every { queryData.streak_journals } returns emptyList()
             every { meEntry.user_books_pages } returns userBooksPages
             every { meEntry.name } returns ""
+            every { meEntry.username } returns ""
             every { meEntry.bio } returns ""
             every { meEntry.image } returns null
             every { meEntry.books_read } returns booksRead

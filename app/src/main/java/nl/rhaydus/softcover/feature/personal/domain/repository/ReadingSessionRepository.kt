@@ -24,6 +24,10 @@ interface ReadingSessionRepository {
         endSeconds: Int?,
     )
 
+    suspend fun pause(id: Long)
+
+    suspend fun resume(id: Long)
+
     suspend fun update(session: ReadingSession)
 
     suspend fun delete(id: Long)

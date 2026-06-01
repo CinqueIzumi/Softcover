@@ -20,4 +20,10 @@ enum class SoftcoverNotificationChannel(
         description = "Celebrations when you finish a series, hit a streak, or complete a yearly goal.",
         importance = NotificationManagerCompat.IMPORTANCE_DEFAULT,
     ),
+    Session(
+        id = "softcover.session",
+        title = "Reading session",
+        description = "The live timer and controls for your current reading session.",
+        importance = NotificationManagerCompat.IMPORTANCE_LOW,
+    ),
 }

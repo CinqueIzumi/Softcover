@@ -3,6 +3,10 @@ package nl.rhaydus.softcover.feature.book_detail.data.mapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromSlate
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
 import nl.rhaydus.softcover.fragment.BookReviewFragment
@@ -56,9 +60,18 @@ class BookReviewMapperTest {
         } returns image
     }
 
+    private fun slateWithText(text: String): List<Map<String, Any?>> = listOf(
+        mapOf(
+            "data" to emptyMap<String, Any?>(),
+            "type" to "paragraph",
+            "object" to "block",
+            "children" to listOf(mapOf("object" to "text", "text" to text)),
+        ),
+    )
+
     private fun stubFragment(
         id: Int = 10,
-        review: String? = "Great book!",
+        reviewSlate: List<Map<String, Any?>> = slateWithText("Great book!"),
         hasSpoilers: Boolean = false,
         rating: Double? = 4.5,
         reviewedAt: String? = "2024-01-01",
@@ -69,8 +82,8 @@ class BookReviewMapperTest {
         } returns id
 
         every {
-            fragment.review
-        } returns review
+            fragment.review_slate
+        } returns reviewSlate
 
         every {
             fragment.review_has_spoilers
@@ -93,9 +106,9 @@ class BookReviewMapperTest {
     inner class ToBookReview {
 
         @Test
-        fun `returns null when review field is null`() {
+        fun `returns null when review_slate is empty`() {
             // ----- Arrange -----
-            stubFragment(review = null)
+            stubFragment(reviewSlate = emptyList())
             stubUser()
 
             // ----- Act -----
@@ -106,9 +119,9 @@ class BookReviewMapperTest {
         }
 
         @Test
-        fun `returns non-null BookReview when review field is present`() {
+        fun `returns non-null BookReview when review_slate has content`() {
             // ----- Arrange -----
-            stubFragment(review = "A fine read.")
+            stubFragment(reviewSlate = slateWithText("A fine read."))
             stubUser()
 
             // ----- Act -----
@@ -117,7 +130,11 @@ class BookReviewMapperTest {
             // ----- Assert -----
             result shouldBe BookReview(
                 id = 10,
-                review = "A fine read.",
+                reviewDocument = ReviewDocument(
+                    paragraphs = listOf(
+                        ReviewParagraph(runs = listOf(ReviewRun(text = "A fine read."))),
+                    ),
+                ),
                 hasSpoilers = false,
                 rating = 4.5,
                 reviewedAt = "2024-01-01",
@@ -134,7 +151,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps id from fragment`() {
             // ----- Arrange -----
-            stubFragment(id = 99, review = "Excellent!")
+            stubFragment(id = 99, reviewSlate = slateWithText("Excellent!"))
             stubUser()
 
             // ----- Act -----
@@ -145,22 +162,22 @@ class BookReviewMapperTest {
         }
 
         @Test
-        fun `maps review text from fragment`() {
+        fun `maps review text from review_slate into reviewDocument plainText`() {
             // ----- Arrange -----
-            stubFragment(review = "Loved every page.")
+            stubFragment(reviewSlate = slateWithText("Loved every page."))
             stubUser()
 
             // ----- Act -----
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.review shouldBe "Loved every page."
+            result!!.reviewDocument shouldBe reviewDocumentFromSlate(slateWithText("Loved every page."))
         }
 
         @Test
         fun `maps hasSpoilers from review_has_spoilers field`() {
             // ----- Arrange -----
-            stubFragment(review = "Watch out!", hasSpoilers = true)
+            stubFragment(reviewSlate = slateWithText("Watch out!"), hasSpoilers = true)
             stubUser()
 
             // ----- Act -----
@@ -173,7 +190,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps rating as null when fragment rating is null`() {
             // ----- Arrange -----
-            stubFragment(review = "No stars given.", rating = null)
+            stubFragment(reviewSlate = slateWithText("No stars given."), rating = null)
             stubUser()
 
             // ----- Act -----
@@ -186,7 +203,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps rating from fragment when present`() {
             // ----- Arrange -----
-            stubFragment(review = "Five stars!", rating = 5.0)
+            stubFragment(reviewSlate = slateWithText("Five stars!"), rating = 5.0)
             stubUser()
 
             // ----- Act -----
@@ -199,7 +216,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps reviewedAt as null when fragment reviewed_at is null`() {
             // ----- Arrange -----
-            stubFragment(review = "Timeless.", reviewedAt = null)
+            stubFragment(reviewSlate = slateWithText("Timeless."), reviewedAt = null)
             stubUser()
 
             // ----- Act -----
@@ -212,7 +229,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps likesCount from fragment`() {
             // ----- Arrange -----
-            stubFragment(review = "Many liked this.", likesCount = 42)
+            stubFragment(reviewSlate = slateWithText("Many liked this."), likesCount = 42)
             stubUser()
 
             // ----- Act -----
@@ -225,7 +242,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps reviewer id from user`() {
             // ----- Arrange -----
-            stubFragment(review = "Good one.")
+            stubFragment(reviewSlate = slateWithText("Good one."))
             stubUser(id = 77)
 
             // ----- Act -----
@@ -238,7 +255,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps reviewer username by calling toString on user username`() {
             // ----- Arrange -----
-            stubFragment(review = "Hello world.")
+            stubFragment(reviewSlate = slateWithText("Hello world."))
             stubUser(username = "bob123")
 
             // ----- Act -----
@@ -251,7 +268,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps reviewer name as null when user name is null`() {
             // ----- Arrange -----
-            stubFragment(review = "Anonymous reviewer.")
+            stubFragment(reviewSlate = slateWithText("Anonymous reviewer."))
             stubUser(name = null)
 
             // ----- Act -----
@@ -264,7 +281,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps reviewer avatarUrl as null when user image is null`() {
             // ----- Arrange -----
-            stubFragment(review = "No avatar.")
+            stubFragment(reviewSlate = slateWithText("No avatar."))
             stubUser(avatarUrl = null)
 
             // ----- Act -----
@@ -277,7 +294,7 @@ class BookReviewMapperTest {
         @Test
         fun `maps reviewer avatarUrl from user image url when present`() {
             // ----- Arrange -----
-            stubFragment(review = "Has avatar.")
+            stubFragment(reviewSlate = slateWithText("Has avatar."))
             stubUser(avatarUrl = "https://cdn.example.com/pic.jpg")
 
             // ----- Act -----

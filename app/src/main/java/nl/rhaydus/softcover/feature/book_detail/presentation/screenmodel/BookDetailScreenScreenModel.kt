@@ -3,9 +3,9 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
-import nl.rhaydus.softcover.feature.reading.presentation.util.UpdateBookProgress
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
@@ -15,19 +15,24 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookRatingUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookReviewUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
+import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.SetEditionAsOwnedUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
+import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
 
 class BookDetailScreenScreenModel(
@@ -36,12 +41,13 @@ class BookDetailScreenScreenModel(
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
     private val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
-    private val updateBookProgress: UpdateBookProgress,
+    private val recordBookProgressUseCase: RecordBookProgressUseCase,
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    private val updateBookRatingUseCase: UpdateBookRatingUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
@@ -51,10 +57,17 @@ class BookDetailScreenScreenModel(
     private val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     private val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     private val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
+    private val updateBookReviewUseCase: UpdateBookReviewUseCase,
+    private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
+    private val getUserTagsUseCase: GetUserTagsUseCase,
+    private val saveUserTagsUseCase: SaveUserTagsUseCase,
     flows: List<BookDetailInitializer>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
-    initialState = BookDetailUiState(initialCover = initialCover),
+    initialState = BookDetailUiState(
+        initialCover = initialCover,
+        scannedEditionId = initialCover?.scannedEditionId,
+    ),
     initialLocalVariables = BookDetailLocalVariables(),
     initializers = flows,
 ) {
@@ -64,12 +77,13 @@ class BookDetailScreenScreenModel(
         fetchBookByIdUseCase = fetchBookByIdUseCase,
         getEditionsByBookIdUseCase = getEditionsByBookIdUseCase,
         updateBookEditionUseCase = updateBookEditionUseCase,
-        updateBookProgress = updateBookProgress,
+        recordBookProgressUseCase = recordBookProgressUseCase,
         getAllUserBooksUseCase = getAllUserBooksUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
+        updateBookRatingUseCase = updateBookRatingUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         setEditionAsOwnedUseCase = setEditionAsOwnedUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
@@ -79,6 +93,10 @@ class BookDetailScreenScreenModel(
         setBookDeadlineUseCase = setBookDeadlineUseCase,
         clearBookDeadlineUseCase = clearBookDeadlineUseCase,
         getTopBookReviewsUseCase = getTopBookReviewsUseCase,
+        updateBookReviewUseCase = updateBookReviewUseCase,
+        observeUserProfileDataUseCase = observeUserProfileDataUseCase,
+        getUserTagsUseCase = getUserTagsUseCase,
+        saveUserTagsUseCase = saveUserTagsUseCase,
     )
 
     init {

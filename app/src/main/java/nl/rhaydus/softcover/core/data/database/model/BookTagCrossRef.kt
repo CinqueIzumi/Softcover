@@ -11,4 +11,5 @@ import androidx.room.Index
 data class BookTagCrossRef(
     val bookId: Int,
     val tagId: Int,
+    val count: Int = 0,
 )

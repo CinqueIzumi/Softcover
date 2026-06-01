@@ -1,6 +1,6 @@
 fragment BookReviewFragment on user_books {
     id
-    review
+    review_slate
     review_has_spoilers
     rating
     reviewed_at

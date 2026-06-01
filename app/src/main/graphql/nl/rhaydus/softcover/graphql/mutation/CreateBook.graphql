@@ -1,0 +1,26 @@
+mutation CreateBook(
+    $externalId: String!,
+    $platformId: Int!,
+    $bookId: Int,
+) {
+    upsert_book(
+        book: {
+            platform_id: $platformId,
+            external_id: $externalId,
+            book_id: $bookId,
+        }
+    ) {
+        errors
+
+        book {
+            id
+            slug
+            title
+        }
+
+        edition {
+            id
+            title
+        }
+    }
+}

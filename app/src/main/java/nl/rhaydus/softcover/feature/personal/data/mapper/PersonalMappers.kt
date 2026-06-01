@@ -1,11 +1,9 @@
 package nl.rhaydus.softcover.feature.personal.data.mapper
 
 import nl.rhaydus.softcover.feature.personal.data.model.HighlightEntity
-import nl.rhaydus.softcover.feature.personal.data.model.PersonalReviewEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
 import nl.rhaydus.softcover.feature.personal.domain.model.Highlight
-import nl.rhaydus.softcover.feature.personal.domain.model.PersonalReview
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingLogEntry
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingSession
 import java.time.Instant
@@ -14,24 +12,11 @@ import java.time.LocalDate
 private fun String.toInstantOrEpoch(): Instant =
     runCatching { Instant.parse(this) }.getOrDefault(Instant.EPOCH)
 
+private fun String?.toInstantOrNull(): Instant? =
+    this?.let { runCatching { Instant.parse(it) }.getOrNull() }
+
 private fun String?.toLocalDateOrNull(): LocalDate? =
     this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-
-fun PersonalReviewEntity.toDomain(): PersonalReview = PersonalReview(
-    bookId = bookId,
-    body = body,
-    hasSpoilers = hasSpoilers,
-    isDraft = isDraft,
-    updatedAt = updatedAt.toInstantOrEpoch(),
-)
-
-fun PersonalReview.toEntity(): PersonalReviewEntity = PersonalReviewEntity(
-    bookId = bookId,
-    body = body,
-    hasSpoilers = hasSpoilers,
-    isDraft = isDraft,
-    updatedAt = updatedAt.toString(),
-)
 
 fun HighlightEntity.toDomain(): Highlight = Highlight(
     id = id,
@@ -60,6 +45,8 @@ fun ReadingSessionEntity.toDomain(): ReadingSession = ReadingSession(
     endPage = endPage,
     startSeconds = startSeconds,
     endSeconds = endSeconds,
+    pausedSeconds = pausedSeconds,
+    lastPausedAt = lastPausedAt.toInstantOrNull(),
 )
 
 fun ReadingSession.toEntity(): ReadingSessionEntity = ReadingSessionEntity(
@@ -71,6 +58,8 @@ fun ReadingSession.toEntity(): ReadingSessionEntity = ReadingSessionEntity(
     endPage = endPage,
     startSeconds = startSeconds,
     endSeconds = endSeconds,
+    pausedSeconds = pausedSeconds,
+    lastPausedAt = lastPausedAt?.toString(),
 )
 
 fun ReadingLogEntryEntity.toDomain(): ReadingLogEntry = ReadingLogEntry(

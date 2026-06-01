@@ -13,10 +13,12 @@ class OnEnterSelectionModeAction(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
+        // Selection and rearrange are mutually exclusive editing modes — entering one clears the other.
         scope.setState {
             it.copy(
                 selectionMode = true,
                 selectedBookIds = setOf(bookId),
+                isRearranging = false,
             )
         }
     }

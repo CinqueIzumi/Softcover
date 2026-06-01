@@ -69,13 +69,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -115,7 +115,6 @@ import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.PullToRefreshEyebrow
-import nl.rhaydus.softcover.core.presentation.component.StaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
@@ -145,6 +144,7 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveFrom
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkToggleListMembershipAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnClearFiltersAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnEnterSelectionModeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReadYearSelectedAction
@@ -316,6 +316,10 @@ object LibraryScreen : Screen {
 
         BackHandler(enabled = state.selectionMode) {
             runAction(OnExitSelectionModeAction())
+        }
+
+        BackHandler(enabled = state.isRearranging) {
+            runAction(OnExitRearrangeModeAction())
         }
 
         Scaffold(
@@ -978,6 +982,14 @@ object LibraryScreen : Screen {
 
         val sortMode = state.sortModeFor(tabId = tab.id)
 
+        val isRanked = state.customLists.firstOrNull { it.id == tab.listId }?.ranked == true
+
+        // ORDER sort renders display-only until the user enters rearrange mode. The grid is the
+        // SAME node either way — items only gain a drag handle and drop their tap target — so
+        // toggling rearrange never disposes and recomposes the grid, which is what flashed every
+        // cover (each `AsyncImage` remounting and reloading) on the old swap-between-two-grids path.
+        val isRearranging = sortMode == LibrarySortMode.ORDER && isRanked && state.isRearranging
+
         val animator = rememberLazyItemMutationAnimator(keys = visibleEditionIds)
 
         val entry = rememberStaggeredEntryCoordinator(key = "library:editions:${tab.id}")
@@ -991,65 +1003,12 @@ object LibraryScreen : Screen {
             gridState = gridState,
         )
 
-        val isRanked = state.customLists.firstOrNull { it.id == tab.listId }?.ranked == true
-
-        if (sortMode == LibrarySortMode.ORDER && isRanked) {
-            ReorderableEditionGrid(
-                tab = tab,
-                visibleEditions = visibleEditions,
-                visibleEditionIds = visibleEditionIds,
-                state = state,
-                gridState = gridState,
-                entry = entry,
-                onEditionClick = onEditionClick,
-                runAction = runAction,
-            )
-
-            return
-        }
-
-        LayoutGrid(
-            layout = state.gridLayout,
-            gridState = gridState,
-        ) {
-            itemsIndexed(visibleEditions, key = { _, edition -> edition.id }) { index, edition ->
-                LayoutEditionEntry(
-                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = edition.id)
-                        .staggeredEntry(coordinator = entry, index = index),
-                    edition = edition,
-                    layout = state.gridLayout,
-                    onEditionClick = onEditionClick,
-                )
-            }
-        }
-    }
-
-    /**
-     * ORDER-sort path for custom lists with `ranked = true`. Maintains a local shadow of edition
-     * ids that the reorder library updates during drag so the grid reflects the move immediately;
-     * on drop we map the touched `[min, max]` visible range to `list_books.listBookId`s and
-     * dispatch the action. The DAO re-emission becomes the source of truth on the next list
-     * refresh.
-     *
-     * Unlike the built-in shelf path (which writes a prefix `0..maxTouched`), Hardcover's web
-     * client rewrites only the contiguous `[minTouched, maxTouched]` range — confirmed by the
-     * sample mutations users emit when reordering. We mirror that exactly so two clients editing
-     * the same list see consistent server-side semantics.
-     */
-    @Composable
-    private fun ReorderableEditionGrid(
-        tab: LibraryContentTab.CustomList,
-        visibleEditions: List<BookEdition>,
-        visibleEditionIds: List<Int>,
-        state: LibraryUiState,
-        gridState: LazyGridState,
-        entry: StaggeredEntryCoordinator,
-        onEditionClick: (BookEdition) -> Unit,
-        runAction: (LibraryAction) -> Unit,
-    ) {
         val haptics = LocalHaptics.current
 
-        val orderedIds = remember { mutableStateListOf<Int>() }
+        // Live shadow the reorder library mutates during a drag. Eagerly seeded and kept in
+        // lock-step with the canonical list so the first frame is already correct — an empty seed
+        // synced in only via the LaunchedEffect would blank the grid for a frame.
+        val orderedIds = remember { visibleEditionIds.toMutableStateList() }
 
         LaunchedEffect(visibleEditionIds) {
             if (orderedIds.toList() != visibleEditionIds) {
@@ -1076,6 +1035,12 @@ object LibraryScreen : Screen {
         val minTouchedIndex = remember { mutableIntStateOf(-1) }
         val maxTouchedIndex = remember { mutableIntStateOf(-1) }
 
+        // Built for every list so the grid node is stable across the rearrange toggle. The reorder
+        // callback only fires while a handle is attached (rearrange mode), so for unranked or
+        // unordered lists it is inert. Persistence is range-scoped: unlike the built-in shelf path
+        // (which writes a prefix `0..maxTouched`), Hardcover's web client rewrites only the
+        // contiguous `[minTouched, maxTouched]` range, and we mirror that so two clients editing the
+        // same list stay consistent.
         val reorderableState = rememberReorderableLazyGridState(lazyGridState = gridState) { from, to ->
             val fromIndex = orderedIds.indexOf(from.key as Int)
             val toIndex = orderedIds.indexOf(to.key as Int)
@@ -1095,14 +1060,22 @@ object LibraryScreen : Screen {
             maxTouchedIndex.intValue = maxOf(maxTouchedIndex.intValue, fromIndex, toIndex)
         }
 
+        // Display mode renders the canonical list directly; only while rearranging do we render the
+        // live shadow the drag mutates. At the toggle the two are equal, so the source swap keeps
+        // every key stable — the grid node and every cover persist, no remount (no flash).
+        val renderIds = if (isRearranging) orderedIds else visibleEditionIds
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            itemsIndexed(orderedIds, key = { _, id -> id }) { index, id ->
+            itemsIndexed(renderIds, key = { _, id -> id }) { index, id ->
                 val edition = editionsById[id] ?: return@itemsIndexed
 
                 ReorderableItem(state = reorderableState, key = id) {
+                    // Built unconditionally so the per-item composable structure is identical whether
+                    // or not rearranging — only the dragHandle slot and tap target are toggled below,
+                    // so the cover is never remounted (no flash).
                     val handleModifier = Modifier.draggableHandle(
                         onDragStarted = {
                             minTouchedIndex.intValue = -1
@@ -1116,7 +1089,7 @@ object LibraryScreen : Screen {
                             val min = minTouchedIndex.intValue
                             val max = maxTouchedIndex.intValue
 
-                            if (min < 0 || max < 0 || max >= orderedIds.size) {
+                            if (isRearranging.not() || min < 0 || max < 0 || max >= orderedIds.size) {
                                 return@draggableHandle
                             }
 
@@ -1140,12 +1113,23 @@ object LibraryScreen : Screen {
                         },
                     )
 
+                    // Drag-only while rearranging: tapping a cover doesn't open the edition with the
+                    // handle live (matches the built-in shelf grid).
                     LayoutEditionEntry(
-                        modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
+                        modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = edition.id)
+                            .staggeredEntry(coordinator = entry, index = index),
                         edition = edition,
                         layout = state.gridLayout,
-                        onEditionClick = onEditionClick,
-                        dragHandle = { DragHandle(modifier = handleModifier) },
+                        onEditionClick = if (isRearranging) {
+                            {}
+                        } else {
+                            onEditionClick
+                        },
+                        dragHandle = if (isRearranging) {
+                            { DragHandle(modifier = handleModifier) }
+                        } else {
+                            null
+                        },
                     )
                 }
             }
@@ -1180,16 +1164,25 @@ object LibraryScreen : Screen {
         val sortMode = state.sortModeFor(tabId = tab.id)
         val selectionMode = state.selectionMode
 
-        val manualReorderStatus: UserBookStatus? = if (
+        // MANUAL sort renders display-only unless the user has explicitly entered rearrange mode. The
+        // saved order stays visible with normal tap/long-press and no handles, so scrolling can't
+        // nudge it. The grid is the SAME node either way — items only gain a drag handle and drop
+        // their tap targets — so toggling rearrange never disposes and recomposes the grid, which is
+        // what flashed every cover (each `AsyncImage` remounting and reloading) on the old
+        // swap-between-two-grids path.
+        val reorderStatus: UserBookStatus? = if (
             sortMode == LibrarySortMode.MANUAL &&
             tab is LibraryContentTab.Status &&
             tab.status != UserBookStatus.DID_NOT_FINISH &&
-            selectionMode.not()
+            selectionMode.not() &&
+            state.isRearranging
         ) {
             tab.status
         } else {
             null
         }
+
+        val isRearranging = reorderStatus != null
 
         val animator = rememberLazyItemMutationAnimator(keys = visibleBookIds)
 
@@ -1204,90 +1197,15 @@ object LibraryScreen : Screen {
             gridState = gridState,
         )
 
-        if (manualReorderStatus != null) {
-            ReorderableBookGrid(
-                status = manualReorderStatus,
-                visibleBooks = visibleBooks,
-                visibleBookIds = visibleBookIds,
-                state = state,
-                gridState = gridState,
-                entry = entry,
-                onBookClick = onBookClick,
-                runAction = runAction,
-            )
-
-            return
-        }
-
         val haptics = LocalHaptics.current
 
-        LayoutGrid(
-            layout = state.gridLayout,
-            gridState = gridState,
-        ) {
-            itemsIndexed(visibleBooks, key = { _, book -> book.id }) { index, book ->
-                val isSelected = selectionMode && book.id in state.selectedBookIds
+        val booksById = remember(visibleBooks) { visibleBooks.associateBy { it.id } }
 
-                val onClick: () -> Unit = if (selectionMode) {
-                    {
-                        haptics.select()
-
-                        runAction(OnToggleBookSelectionAction(bookId = book.id))
-                    }
-                } else {
-                    { onBookClick(book) }
-                }
-
-                val onLongClick: (() -> Unit)? = if (selectionMode) {
-                    null
-                } else {
-                    {
-                        haptics.threshold()
-
-                        runAction(OnEnterSelectionModeAction(bookId = book.id))
-                    }
-                }
-
-                LayoutBookEntry(
-                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
-                        .staggeredEntry(coordinator = entry, index = index),
-                    book = book,
-                    layout = state.gridLayout,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                    isSelectionMode = selectionMode,
-                    isSelected = isSelected,
-                    deadline = state.deadlines[book.id],
-                    dateStyle = state.dateStyle,
-                )
-            }
-        }
-    }
-
-    /**
-     * MANUAL-sort path. Maintains a local shadow of book ids that the reorder library updates
-     * during drag so the grid reflects the move immediately; on drop we dispatch the action and
-     * the DAO re-emission becomes the source of truth. The shadow re-syncs whenever the canonical
-     * (DB-sorted) list changes — e.g. a book is shelved or unshelved from elsewhere.
-     *
-     * Long-press still enters bulk-select (parent gating then re-routes to the non-MANUAL path so
-     * drag handles disappear while a selection is active). Drag is initiated only from the
-     * dedicated handle overlaid on each card.
-     */
-    @Composable
-    private fun ReorderableBookGrid(
-        status: UserBookStatus,
-        visibleBooks: List<Book>,
-        visibleBookIds: List<Int>,
-        state: LibraryUiState,
-        gridState: LazyGridState,
-        entry: StaggeredEntryCoordinator,
-        onBookClick: (Book) -> Unit,
-        runAction: (LibraryAction) -> Unit,
-    ) {
-        val haptics = LocalHaptics.current
-
-        val orderedIds = remember { mutableStateListOf<Int>() }
+        // Live shadow the reorder library mutates during a drag. Eagerly seeded and kept in
+        // lock-step with the canonical (DB-sorted) list so the first frame is already correct and
+        // toggling rearrange never blanks the grid; it re-syncs whenever the canonical list changes
+        // (e.g. a book shelved or unshelved from elsewhere).
+        val orderedIds = remember { visibleBookIds.toMutableStateList() }
 
         LaunchedEffect(visibleBookIds) {
             if (orderedIds.toList() != visibleBookIds) {
@@ -1296,14 +1214,15 @@ object LibraryScreen : Screen {
             }
         }
 
-        val booksById = remember(visibleBooks) { visibleBooks.associateBy { it.id } }
-
         // Highest visual index touched during the current drag — defines the prefix the user is
-        // re-arranging. Reset on drag start, read on drop. Books beyond this index are NOT
-        // persisted, so a shallow drag at the top of the shelf leaves the rest of the shelf in
-        // its natural order (and newcomers from the API still slot in just below the prefix).
+        // re-arranging. Books beyond this index are NOT persisted, so a shallow drag at the top of
+        // the shelf leaves the rest in its natural order (and newcomers from the API still slot in
+        // just below the prefix).
         val maxTouchedIndex = remember { mutableIntStateOf(-1) }
 
+        // Built for every tab so the grid node is stable across the rearrange toggle. The reorder
+        // callback only fires while a handle is attached (rearrange mode), so on the All tab and
+        // non-MANUAL sorts it is inert.
         val reorderableState = rememberReorderableLazyGridState(lazyGridState = gridState) { from, to ->
             val fromIndex = orderedIds.indexOf(from.key as Int)
             val toIndex = orderedIds.indexOf(to.key as Int)
@@ -1315,14 +1234,24 @@ object LibraryScreen : Screen {
             maxTouchedIndex.intValue = maxOf(maxTouchedIndex.intValue, fromIndex, toIndex)
         }
 
+        // Display mode renders the canonical list directly (byte-identical to before); only while
+        // rearranging do we render the live shadow the drag mutates. At the toggle the two are equal
+        // (same ids, same order), so swapping the source keeps every key stable — the grid node and
+        // every cover persist, no remount.
+        val renderIds = if (isRearranging) orderedIds else visibleBookIds
+
         LayoutGrid(
             layout = state.gridLayout,
             gridState = gridState,
         ) {
-            itemsIndexed(orderedIds, key = { _, id -> id }) { index, id ->
+            itemsIndexed(renderIds, key = { _, id -> id }) { index, id ->
                 val book = booksById[id] ?: return@itemsIndexed
 
                 ReorderableItem(state = reorderableState, key = id) {
+                    // Built unconditionally so the per-item composable structure is identical in and
+                    // out of rearrange mode — only the dragHandle slot and click handlers are
+                    // swapped below (parameter values, not composable calls), so the cover is never
+                    // remounted (no flash).
                     val handleModifier = Modifier.draggableHandle(
                         onDragStarted = {
                             maxTouchedIndex.intValue = -1
@@ -1334,10 +1263,10 @@ object LibraryScreen : Screen {
 
                             val touchedDepth = maxTouchedIndex.intValue
 
-                            if (touchedDepth >= 0 && touchedDepth < orderedIds.size) {
+                            if (reorderStatus != null && touchedDepth >= 0 && touchedDepth < orderedIds.size) {
                                 runAction(
                                     OnReorderShelfBooksAction(
-                                        status = status,
+                                        status = reorderStatus,
                                         prefixOrderedBookIds = orderedIds
                                             .take(touchedDepth + 1),
                                     ),
@@ -1346,21 +1275,48 @@ object LibraryScreen : Screen {
                         },
                     )
 
-                    LayoutBookEntry(
-                        modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
-                        book = book,
-                        layout = state.gridLayout,
-                        onClick = { onBookClick(book) },
-                        onLongClick = {
+                    val isSelected = selectionMode && book.id in state.selectedBookIds
+
+                    // Rearrange mode is drag-only (tap and long-press suppressed); otherwise selection
+                    // mode toggles, and the default opens the book / long-press enters bulk-select.
+                    val onClick: () -> Unit = if (isRearranging) {
+                        {}
+                    } else if (selectionMode) {
+                        {
+                            haptics.select()
+
+                            runAction(OnToggleBookSelectionAction(bookId = book.id))
+                        }
+                    } else {
+                        { onBookClick(book) }
+                    }
+
+                    val onLongClick: (() -> Unit)? = if (isRearranging || selectionMode) {
+                        null
+                    } else {
+                        {
                             haptics.threshold()
 
                             runAction(OnEnterSelectionModeAction(bookId = book.id))
-                        },
-                        isSelectionMode = false,
-                        isSelected = false,
+                        }
+                    }
+
+                    LayoutBookEntry(
+                        modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
+                            .staggeredEntry(coordinator = entry, index = index),
+                        book = book,
+                        layout = state.gridLayout,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        isSelectionMode = selectionMode,
+                        isSelected = isSelected,
                         deadline = state.deadlines[book.id],
                         dateStyle = state.dateStyle,
-                        dragHandle = { DragHandle(modifier = handleModifier) },
+                        dragHandle = if (isRearranging) {
+                            { DragHandle(modifier = handleModifier) }
+                        } else {
+                            null
+                        },
                     )
                 }
             }
@@ -1573,6 +1529,7 @@ object LibraryScreen : Screen {
                                     isLoading = false,
                                     defaultEdition = book.defaultEdition,
                                     fallbackCoverUrl = book.coverUrl,
+                                    coverlessTitle = book.title,
                                     elevation = 6.dp,
                                     cornerRadius = 10.dp,
                                     sharedTransitionKey = bookCoverTransitionKey(
@@ -1719,6 +1676,7 @@ object LibraryScreen : Screen {
                             modifier = coverModifier,
                             isLoading = false,
                             defaultEdition = edition,
+                            coverlessTitle = title,
                             elevation = 6.dp,
                             cornerRadius = 10.dp,
                             sharedTransitionKey = bookCoverTransitionKey(

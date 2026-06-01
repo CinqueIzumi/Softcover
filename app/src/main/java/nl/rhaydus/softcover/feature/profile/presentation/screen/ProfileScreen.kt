@@ -481,6 +481,7 @@ private fun ProfileScreenPreview() {
                 userProfileData = UserProfileData(
                     profileImageUrl = "",
                     name = "Cinque",
+                    username = "cinque",
                     bio = "Lover of classic literature and sci-fi.",
                     booksRead = 20,
                     totalPagesRead = 5_432,

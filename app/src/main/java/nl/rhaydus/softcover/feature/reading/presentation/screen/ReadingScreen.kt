@@ -49,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,13 +61,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -76,15 +77,18 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import coil.compose.AsyncImage
+import org.koin.compose.koinInject
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.presentation.component.PullToRefreshEyebrow
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
@@ -93,6 +97,7 @@ import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCo
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
@@ -114,11 +119,14 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailSc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.prefetchBookDetailOnPress
+import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
+import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import nl.rhaydus.softcover.feature.books.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
+import nl.rhaydus.softcover.feature.profile.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
@@ -130,6 +138,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercenta
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdateTimeProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
+import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
@@ -181,6 +191,8 @@ object ReadingScreen : Screen {
         val playMotion = playDecorativeMotion()
 
         var celebrationKey by remember { mutableIntStateOf(0) }
+
+        var showStreakSheet by remember { mutableStateOf(false) }
 
         var slidingBookId by remember { mutableStateOf<Int?>(null) }
         val slideProgress = remember { Animatable(initialValue = 0f) }
@@ -254,6 +266,7 @@ object ReadingScreen : Screen {
                                     onBookClick = onBookClick,
                                     onNavigateToSearch = onNavigateToSearch,
                                     onMarkAsRead = onMarkAsRead,
+                                    onExpandStreak = { showStreakSheet = true },
                                     pullToRefreshState = pullToRefreshState,
                                     slidingBookId = slidingBookId,
                                     slideProgress = slideProgress.value,
@@ -306,6 +319,13 @@ object ReadingScreen : Screen {
                             },
                         )
                     }
+
+                    if (showStreakSheet) {
+                        StreakStripSheet(
+                            activity = state.recentReadingActivity,
+                            onDismiss = { showStreakSheet = false },
+                        )
+                    }
                 }
             }
 
@@ -326,6 +346,7 @@ object ReadingScreen : Screen {
         onBookClick: (Book) -> Unit,
         onNavigateToSearch: () -> Unit,
         onMarkAsRead: (Book) -> Unit,
+        onExpandStreak: () -> Unit,
         pullToRefreshState: PullToRefreshState,
         slidingBookId: Int?,
         slideProgress: Float,
@@ -366,6 +387,8 @@ object ReadingScreen : Screen {
                     EditorialHeader(
                         bookCount = state.books.size,
                         averageProgress = state.books.averageProgress(),
+                        recentReadingActivity = state.recentReadingActivity,
+                        onExpandStreak = onExpandStreak,
                         pullToRefreshState = pullToRefreshState,
                         isRefreshing = state.isLoading,
                     )
@@ -437,6 +460,8 @@ object ReadingScreen : Screen {
     private fun EditorialHeader(
         bookCount: Int,
         averageProgress: Float?,
+        recentReadingActivity: List<ReadingDayActivity>,
+        onExpandStreak: () -> Unit,
         pullToRefreshState: PullToRefreshState,
         isRefreshing: Boolean,
     ) {
@@ -478,6 +503,15 @@ object ReadingScreen : Screen {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+
+            if (recentReadingActivity.any { it.didRead }) {
+                Spacer(modifier = Modifier.height(14.dp))
+
+                StreakStrip(
+                    activity = recentReadingActivity,
+                    onClick = onExpandStreak,
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
         }
@@ -741,7 +775,62 @@ object ReadingScreen : Screen {
                         size = ButtonSize.M,
                         fillMaxWidth = true,
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    FeaturedSessionButton(book = book)
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun FeaturedSessionButton(book: Book) {
+        val controller = koinInject<ActiveSessionController>()
+        val navigator = LocalNavigator.currentOrThrow
+        val haptics = rememberHaptics()
+        val active by controller.activeSession.collectAsStateWithLifecycle()
+
+        val currentBook by rememberUpdatedState(book)
+
+        // The lock-screen surface is a plain notification, so it needs POST_NOTIFICATIONS (Android
+        // 13+). Ask at the natural moment — the first session start — then start regardless of the
+        // outcome, since the in-app peek bar and Focus Mode work without the permission.
+        val sessionPermissionRequester = rememberNotificationPermissionRequester(
+            onResult = { controller.start(book = currentBook) },
+        )
+
+        when {
+            active?.book?.id == book.id -> {
+                SoftcoverButton(
+                    label = "Focus mode",
+                    style = ButtonStyle.TONAL,
+                    size = ButtonSize.M,
+                    icon = SoftcoverIconResource.Drawable(
+                        id = R.drawable.ic_reading,
+                        contentDescription = "Focus mode icon",
+                    ),
+                    onClick = { navigator.parent?.push(item = FocusModeScreen) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            active == null -> {
+                SoftcoverButton(
+                    label = "Start reading session",
+                    style = ButtonStyle.TONAL,
+                    size = ButtonSize.M,
+                    icon = SoftcoverIconResource.Drawable(
+                        id = R.drawable.ic_play,
+                        contentDescription = "Start reading session icon",
+                    ),
+                    onClick = {
+                        haptics.threshold()
+
+                        sessionPermissionRequester.request()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -1488,6 +1577,36 @@ private fun ReadingScreenPreview() {
             state = ReadingScreenUiState(
                 books = previewBooks,
                 isLoading = false,
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+private fun previewReadingActivity(): List<ReadingDayActivity> {
+    val today = LocalDate.now()
+    val firstDay = today.minusDays(20)
+    val litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20)
+
+    return (0..20).map { offset ->
+        ReadingDayActivity(
+            date = firstDay.plusDays(offset.toLong()),
+            didRead = offset in litOffsets,
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenWithStreakStripPreview() {
+    SoftcoverTheme {
+        ReadingScreen.Screen(
+            state = ReadingScreenUiState(
+                books = previewBooks,
+                isLoading = false,
+                recentReadingActivity = previewReadingActivity(),
             ),
             runAction = {},
             onBookClick = {},

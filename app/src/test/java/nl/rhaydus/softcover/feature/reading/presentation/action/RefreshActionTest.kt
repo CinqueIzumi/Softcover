@@ -8,6 +8,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -51,7 +53,7 @@ class RefreshActionTest {
             val loadingStates = mutableListOf<Boolean>()
 
             coEvery {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             } answers {
                 loadingStates.add(stateFlow.value.isLoading)
                 Result.success(Unit)
@@ -69,10 +71,10 @@ class RefreshActionTest {
         }
 
         @Test
-        fun `invokes refreshLibraryUseCase`() = runTest {
+        fun `invokes refreshLibraryUseCase with ByStatus CURRENTLY_READING`() = runTest {
             // ----- Arrange -----
             coEvery {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             } returns Result.success(Unit)
 
             // ----- Act -----
@@ -82,8 +84,8 @@ class RefreshActionTest {
             )
 
             // ----- Assert -----
-            coVerify {
-                refreshLibraryUseCase()
+            coVerify(exactly = 1) {
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             }
         }
 
@@ -93,7 +95,7 @@ class RefreshActionTest {
             stateFlow.value = ReadingScreenUiState(isLoading = false)
 
             coEvery {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             } returns Result.failure(RuntimeException("network error"))
 
             // ----- Act -----
@@ -110,7 +112,7 @@ class RefreshActionTest {
         fun `does not throw when use case fails`() = runTest {
             // ----- Arrange -----
             coEvery {
-                refreshLibraryUseCase()
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
             } returns Result.failure(RuntimeException("network error"))
 
             // ----- Act & Assert -----

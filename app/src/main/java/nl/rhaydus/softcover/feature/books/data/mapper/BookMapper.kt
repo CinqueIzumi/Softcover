@@ -1,25 +1,31 @@
 package nl.rhaydus.softcover.feature.books.data.mapper
 
-import nl.rhaydus.softcover.core.domain.model.Author
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookSeries
-import nl.rhaydus.softcover.core.domain.model.ReadingJournal
-import nl.rhaydus.softcover.core.domain.model.Tag
-import nl.rhaydus.softcover.core.domain.model.UserBook
-import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.data.database.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEntity
 import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
 import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
+import nl.rhaydus.softcover.core.data.database.model.BookTagFull
 import nl.rhaydus.softcover.core.data.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
-import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
+import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromJson
+import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromSlate
+import nl.rhaydus.softcover.core.data.mapper.toJson
+import nl.rhaydus.softcover.core.domain.model.Author
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.domain.model.enum.ReadingFormat
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import nl.rhaydus.softcover.fragment.BookDetailFragment.Default_cover_edition.Companion.editionFragment
 import nl.rhaydus.softcover.fragment.BookListFragment
@@ -71,6 +77,7 @@ fun EditionFragment.toBookEdition(
     releaseYear = release_year ?: -1,
     releaseDate = release_date.toLocalDateOrNull(),
     format = edition_format ?: "",
+    readingFormat = ReadingFormat.fromId(reading_format_id),
     bookId = book_id,
     owned = false,
 )
@@ -114,6 +121,7 @@ private fun UserBookFragment.toUserBook(): UserBook {
         privacySettingId = privacy_setting_id,
         rating = rating,
         referrerUserId = referrer_user_id,
+        reviewDocument = reviewDocumentFromSlate(slate = review_slate).takeUnless { it.isBlank() },
         reviewHasSpoilers = review_has_spoilers,
         reviewedAt = reviewed_at,
         updatedAt = updated_at,
@@ -186,12 +194,14 @@ private fun BookListFragment.roundedRating(): Double =
     ((rating ?: 0.0) * 10).roundToInt() / 10.0
 
 private fun BookListFragment.tags(): List<Tag> =
-    taggable_counts.mapNotNull { count ->
-        val tag = count.tag ?: return@mapNotNull null
+    taggable_counts.mapNotNull { taggableCount ->
+        val tag = taggableCount.tag ?: return@mapNotNull null
 
         Tag(
             id = tag.id.toInt(),
             name = tag.tag,
+            category = TagCategory.fromApiString(tag.tag_category.category),
+            count = taggableCount.count,
         )
     }
 
@@ -205,8 +215,6 @@ fun UserBookFragment.toBook(): Book? {
 
     val editions = listOfNotNull(selectedEdition)
 
-    if (editions.isEmpty()) return null
-
     val userBookReadFragment = user_book_reads.firstOrNull()?.userBookReadFragment()
 
     return Book(
@@ -216,6 +224,7 @@ fun UserBookFragment.toBook(): Book? {
         editions = editions,
         defaultEdition = null,
         rating = listFragment.roundedRating(),
+        headline = listFragment.headline ?: "",
         description = listFragment.description ?: "",
         releaseYear = listFragment.release_year ?: -1,
         releaseDate = listFragment.release_date.toLocalDateOrNull(),
@@ -240,8 +249,6 @@ fun BookDetailFragment.toBook(): Book? {
         ?.copy(bookId = listFragment.id)
     val editions = listOfNotNull(defaultEdition)
 
-    if (editions.isEmpty()) return null
-
     return Book(
         id = listFragment.id,
         canonicalId = listFragment.canonicalIdOrNull(),
@@ -249,6 +256,7 @@ fun BookDetailFragment.toBook(): Book? {
         editions = editions,
         defaultEdition = defaultEdition,
         rating = listFragment.roundedRating(),
+        headline = listFragment.headline ?: "",
         description = description ?: "",
         releaseYear = listFragment.release_year ?: -1,
         releaseDate = listFragment.release_date.toLocalDateOrNull(),
@@ -271,7 +279,7 @@ private fun BookSeriesFragment.toBookSeries(): BookSeries? {
     return BookSeries(
         id = series.id,
         name = series.name,
-        amountOfBooks = series.primary_books_count ?: 0
+        amountOfBooks = series.primary_books_count ?: 0,
     )
 }
 // endregion
@@ -287,6 +295,7 @@ fun Book.toEntity(): BookEntity = BookEntity(
     id = id,
     title = title,
     rating = rating,
+    headline = headline,
     description = description,
     releaseYear = releaseYear,
     releaseDate = releaseDate?.toString(),
@@ -306,7 +315,7 @@ fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity = UserBookReadEnt
     progress = progress,
     startedAt = startedAt,
     finishedAt = finishedAt,
-    userBookId = userBookId
+    userBookId = userBookId,
 )
 
 fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
@@ -320,6 +329,7 @@ fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
     lastReadDate = lastReadDate,
     rating = rating,
     referrerUserId = referrerUserId,
+    reviewSlateJson = reviewDocument?.toJson(),
     reviewedAt = reviewedAt,
     updatedAt = updatedAt,
     bookId = bookId,
@@ -328,7 +338,7 @@ fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
 fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity = ReadingJournalEntity(
     event = event ?: "",
     updatedAt = updatedAt,
-    userBookId = userBookId
+    userBookId = userBookId,
 )
 
 fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
@@ -346,6 +356,7 @@ fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     releaseYear = releaseYear,
     releaseDate = releaseDate?.toString(),
     format = format,
+    readingFormatId = readingFormat?.id,
 )
 
 fun Author.toEntity(): AuthorEntity = AuthorEntity(name = name, id = id)
@@ -369,7 +380,12 @@ fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<Edi
 // region Entity -> UI mappers
 fun AuthorEntity.toModel(): Author = Author(name = name, id = id)
 
-fun TagEntity.toModel(): Tag = Tag(id = id, name = name)
+fun BookTagFull.toModel(): Tag = Tag(
+    id = tag.id,
+    name = tag.name,
+    category = TagCategory.fromName(tag.category),
+    count = crossRef.count,
+)
 
 fun BookEditionEntity.toModel(
     authors: List<AuthorEntity>,
@@ -389,6 +405,7 @@ fun BookEditionEntity.toModel(
     releaseDate = releaseDate.toLocalDateOrNull(),
     authors = authors.map { it.toModel() },
     format = format,
+    readingFormat = ReadingFormat.fromId(readingFormatId),
     bookId = bookId,
     owned = owned,
 )
@@ -413,6 +430,7 @@ fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook = UserBook(
     lastReadDate = lastReadDate,
     rating = rating,
     referrerUserId = referrerUserId,
+    reviewDocument = reviewDocumentFromJson(json = reviewSlateJson),
     reviewedAt = reviewedAt,
     updatedAt = updatedAt,
     journals = journals,
@@ -444,6 +462,7 @@ fun BookFullEntity.toModel(): Book {
         editions = uiEditions,
         defaultEdition = defaultEdition,
         rating = book.rating,
+        headline = book.headline,
         description = book.description,
         releaseYear = book.releaseYear,
         releaseDate = book.releaseDate.toLocalDateOrNull(),

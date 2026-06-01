@@ -17,7 +17,7 @@ import nl.rhaydus.softcover.di.notificationModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
 import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingListWriteSyncer
-import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingProgressSyncer
+import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingUserBookWriteSyncer
 import nl.rhaydus.softcover.feature.connectivity.di.connectivityModule
 import nl.rhaydus.softcover.feature.reading.di.readingModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
@@ -30,6 +30,8 @@ import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
 import nl.rhaydus.softcover.feature.personal.di.personalModule
 import nl.rhaydus.softcover.feature.profile.di.profileModule
 import nl.rhaydus.softcover.feature.explore.di.exploreModule
+import nl.rhaydus.softcover.feature.scan.di.scanModule
+import nl.rhaydus.softcover.feature.session.di.sessionModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -64,6 +66,7 @@ class SoftCoverApp : Application() {
                 onboardingModule,
                 readingModule,
                 exploreModule,
+                scanModule,
                 settingsModule,
                 profileModule,
                 appUpdateModule,
@@ -72,12 +75,13 @@ class SoftCoverApp : Application() {
                 connectivityModule,
                 notificationModule,
                 personalModule,
+                sessionModule,
             )
         }
 
         val koin = GlobalContext.get()
         NetworkAvailability.install(koin.get<NetworkAvailabilityProvider>())
-        koin.get<PendingProgressSyncer>().start(koin.get<ApplicationScope>().scope)
+        koin.get<PendingUserBookWriteSyncer>().start(koin.get<ApplicationScope>().scope)
         koin.get<PendingListWriteSyncer>().start(koin.get<ApplicationScope>().scope)
         koin.get<NotificationChannelInitializer>().initialize()
 

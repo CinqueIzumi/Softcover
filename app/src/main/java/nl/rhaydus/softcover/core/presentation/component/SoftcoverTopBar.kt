@@ -48,20 +48,36 @@ fun SoftcoverSearchTopBar(
     searchBarState: SearchBarState = rememberSearchBarState(),
     onNavigateBack: (() -> Unit)? = null,
     actions: List<SoftcoverTopBarAction> = emptyList(),
+    trailingFieldAction: SoftcoverTopBarAction? = null,
 ) {
-    val trailingIcon: (@Composable () -> Unit)? = if (searchText.isNotEmpty()) {
-        {
-            IconButton(
-                onClick = { onSearchValueChange("") }
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close),
-                    contentDescription = "Clear search icon"
-                )
+    val trailingIcon: (@Composable () -> Unit)? = when {
+        searchText.isNotEmpty() -> {
+            {
+                IconButton(
+                    onClick = { onSearchValueChange("") }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = "Clear search icon"
+                    )
+                }
             }
         }
-    } else {
-        null
+
+        trailingFieldAction != null -> {
+            {
+                IconButton(
+                    onClick = trailingFieldAction.onClick
+                ) {
+                    Icon(
+                        painter = trailingFieldAction.iconResource.getIconPainter(),
+                        contentDescription = trailingFieldAction.iconResource.contentDescription,
+                    )
+                }
+            }
+        }
+
+        else -> null
     }
 
     AppBarWithSearch(

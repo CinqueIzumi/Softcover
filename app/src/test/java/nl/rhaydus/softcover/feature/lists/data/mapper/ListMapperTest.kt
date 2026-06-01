@@ -114,6 +114,7 @@ class ListMapperTest {
         releaseYear = releaseYear,
         releaseDate = releaseDate,
         format = format,
+        readingFormatId = null,
     )
 
     private fun stubBookEditionView(
@@ -137,6 +138,7 @@ class ListMapperTest {
         title: String = "Test Book",
         defaultEditionId: Int? = null,
         rating: Double = 4.2,
+        headline: String = "",
         description: String = "A great book.",
         releaseYear: Int = 2019,
         releaseDate: String? = null,
@@ -151,6 +153,7 @@ class ListMapperTest {
         title = title,
         defaultEditionId = defaultEditionId,
         rating = rating,
+        headline = headline,
         description = description,
         releaseYear = releaseYear,
         releaseDate = releaseDate,

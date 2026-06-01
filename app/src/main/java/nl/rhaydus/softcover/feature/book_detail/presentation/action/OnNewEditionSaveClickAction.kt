@@ -13,7 +13,21 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        val userBook = scope.currentState.book?.userBook ?: return
+        val userBook = scope.currentState.book?.userBook
+
+        // No user book yet: switching editions is a local-only preview. Show the chosen edition's
+        // details without creating or mutating a user book and without caching anything.
+        if (userBook == null) {
+            scope.setState {
+                it.copy(
+                    previewEdition = edition,
+                    scannedEditionId = null,
+                    showEditEditionSheet = false,
+                )
+            }
+
+            return
+        }
 
         dependencies.launch {
             scope.setState {
@@ -22,7 +36,7 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
 
             dependencies.updateBookEditionUseCase(
                 userBook = userBook,
-                newEditionId = edition.id
+                newEditionId = edition.id,
             ).onFailure {
                 Timber.e("Something went wrong updating book edition! $it")
             }
@@ -33,7 +47,10 @@ data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAct
         }
 
         scope.setState {
-            it.copy(showEditEditionSheet = false)
+            it.copy(
+                scannedEditionId = null,
+                showEditEditionSheet = false,
+            )
         }
     }
 }

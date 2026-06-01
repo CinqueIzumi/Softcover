@@ -11,6 +11,12 @@ data class BookInitialCover(
     val fallbackCoverUrl: String?,
     val userBook: UserBook? = null,
     val userBookRead: UserBookRead? = null,
+    /**
+     * When set (e.g. opening detail from a barcode scan), the screen shows this specific edition —
+     * winning over both the book's default edition and any on-shelf edition — and, if the book is
+     * already on a shelf with a different edition, surfaces a banner offering to update it.
+     */
+    val scannedEditionId: Int? = null,
 ) {
     companion object {
         fun fromBook(book: Book): BookInitialCover = BookInitialCover(

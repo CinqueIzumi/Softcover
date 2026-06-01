@@ -21,9 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.presentation.component.PillChip
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
@@ -88,7 +88,7 @@ private fun FacetSections(
     if (options.tags.isNotEmpty()) {
         FacetSection(title = "Tags") {
             options.tags.forEach { tag ->
-                FacetChip(
+                PillChip(
                     label = tag.name,
                     selected = filters.tags.any { it.id == tag.id },
                     onClick = { onToggle(LibraryFilterValue.Tag(tag = tag)) },
@@ -102,7 +102,7 @@ private fun FacetSections(
     if (options.formats.isNotEmpty()) {
         FacetSection(title = "Format") {
             options.formats.forEach { format ->
-                FacetChip(
+                PillChip(
                     label = format,
                     selected = format in filters.formats,
                     onClick = { onToggle(LibraryFilterValue.Format(value = format)) },
@@ -116,7 +116,7 @@ private fun FacetSections(
     if (options.releaseYears.isNotEmpty()) {
         FacetSection(title = "Release year") {
             options.releaseYears.forEach { year ->
-                FacetChip(
+                PillChip(
                     label = year.toString(),
                     selected = year in filters.releaseYears,
                     onClick = { onToggle(LibraryFilterValue.ReleaseYear(year = year)) },
@@ -129,13 +129,13 @@ private fun FacetSections(
 
     if (options.supportsOwnedFilter) {
         FacetSection(title = "Ownership") {
-            FacetChip(
+            PillChip(
                 label = "Owned",
                 selected = filters.owned == true,
                 onClick = { onToggle(LibraryFilterValue.Owned(owned = true)) },
             )
 
-            FacetChip(
+            PillChip(
                 label = "Unowned",
                 selected = filters.owned == false,
                 onClick = { onToggle(LibraryFilterValue.Owned(owned = false)) },
@@ -148,7 +148,7 @@ private fun FacetSections(
     if (options.ratingBuckets.isNotEmpty()) {
         FacetSection(title = "Rating") {
             options.ratingBuckets.forEach { threshold ->
-                FacetChip(
+                PillChip(
                     label = formatRatingLabel(threshold = threshold),
                     selected = filters.ratingMin == threshold,
                     onClick = { onToggle(LibraryFilterValue.RatingMin(threshold = threshold)) },
@@ -181,42 +181,6 @@ private fun FacetSection(
         ) {
             chips()
         }
-    }
-}
-
-@Composable
-private fun FacetChip(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    val container = if (selected) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerHigh
-    }
-
-    val content = if (selected) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
-
-    Surface(
-        color = container,
-        contentColor = content,
-        shape = RoundedCornerShape(percent = 50),
-        onClick = onClick,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-            ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-        )
     }
 }
 

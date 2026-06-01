@@ -2,13 +2,19 @@ package nl.rhaydus.softcover.core.presentation.component
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -21,8 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.SubcomposeAsyncImage
 import coil.imageLoader
@@ -33,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
+import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.presentation.transition.LocalSharedTransitionScope
 import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
@@ -47,6 +57,7 @@ fun EditionImage(
     isLoading: Boolean,
     modifier: Modifier = Modifier,
     fallbackCoverUrl: String? = null,
+    coverlessTitle: String? = null,
     elevation: Dp = 0.dp,
     cornerRadius: Dp = 4.dp,
     shadowColor: Color = Color.Unspecified,
@@ -57,6 +68,8 @@ fun EditionImage(
         defaultEdition = defaultEdition,
         fallbackCoverUrl = fallbackCoverUrl,
     )
+
+    val coverlessFallback = coverlessTitle?.takeIf { it.isNotBlank() }
 
     val shape = RoundedCornerShape(cornerRadius)
     val imageModifier = if (elevation > 0.dp) {
@@ -100,12 +113,25 @@ fun EditionImage(
     ) { loading ->
         if (loading) {
             Box(modifier = Modifier.fillMaxSize().shimmer())
+        } else if (request == null) {
+            if (coverlessFallback != null) {
+                CoverlessTitleCover(title = coverlessFallback)
+            } else {
+                Box(modifier = Modifier.fillMaxSize())
+            }
         } else {
             SubcomposeAsyncImage(
                 model = request,
                 contentDescription = "Book edition image",
                 modifier = Modifier.fillMaxSize(),
                 loading = { Box(modifier = Modifier.fillMaxSize().shimmer()) },
+                error = {
+                    if (coverlessFallback != null) {
+                        CoverlessTitleCover(title = coverlessFallback)
+                    } else {
+                        Box(modifier = Modifier.fillMaxSize())
+                    }
+                },
                 success = { state ->
                     val intrinsic = state.painter.intrinsicSize
                     val ratio = if (intrinsic.isSpecified && intrinsic.height > 0f) {
@@ -131,6 +157,40 @@ fun EditionImage(
                 contentScale = ContentScale.Fit,
             )
         }
+    }
+}
+
+/**
+ * The final rung of [EditionImage]'s fallback chain: when no cover source resolves (and the data is
+ * not still loading), a book with a known title is rendered as a coverless cover rather than a blank
+ * tile — a filled [surfaceContainerHighest] card carrying the title in the editorial Fraunces voice,
+ * autosized to fit the cover. Used by the cover-only library layouts, where there is no adjacent
+ * title text to fall back on. Imagery cards keep a container shade (DS §2.1), so this never reaches
+ * for primary.
+ */
+@Composable
+private fun CoverlessTitleCover(title: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .padding(horizontal = 12.dp, vertical = 16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.editorialTypography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 12.sp,
+                maxFontSize = MaterialTheme.editorialTypography.headlineMedium.fontSize,
+                stepSize = 1.sp,
+            ),
+            maxLines = 5,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -185,6 +245,22 @@ fun rememberEditionImageRequest(
         builder.build()
     }
 }
+
+/**
+ * Resolves the Coil image source (a local [File] or a remote URL [String]) for a book cover,
+ * preferring the user's selected [edition], then the [defaultEdition], then [fallbackCoverUrl].
+ * Shared so non-Composable surfaces (e.g. the reading-session notification) render the exact same
+ * edition cover the in-app [EditionImage] shows. Returns null when no source is known.
+ */
+fun resolveEditionImageSource(
+    edition: BookEdition?,
+    defaultEdition: BookEdition?,
+    fallbackCoverUrl: String?,
+): Any? = resolveEditionImage(
+    edition = edition,
+    defaultEdition = defaultEdition,
+    fallbackCoverUrl = fallbackCoverUrl,
+)?.source
 
 private data class EditionImageResolution(
     val source: Any,

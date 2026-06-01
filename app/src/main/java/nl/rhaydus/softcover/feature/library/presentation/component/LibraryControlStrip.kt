@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnEnterRearrangeModeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnGridLayoutChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpandedChangeAction
@@ -71,6 +75,13 @@ fun LibraryControlStrip(
         )
 
         Spacer(modifier = Modifier.weight(1f))
+
+        if (canRearrange(state = state, tab = currentTab) || state.isRearranging) {
+            RearrangeAction(
+                isRearranging = state.isRearranging,
+                runAction = runAction,
+            )
+        }
 
         LayoutAction(
             state = state,
@@ -236,6 +247,82 @@ private fun FilterPill(
             null
         },
     )
+}
+
+/**
+ * Whether [tab] is currently on a positional sort with enough items to be worth rearranging —
+ * MANUAL on a built-in reading shelf (not Did Not Finish), or ORDER on a ranked custom list. Mirrors
+ * the screen's reorder-grid gating so the pill only appears where a drag actually persists. The
+ * `>= 2` guard hides the pill when the visible set (after search/filters) has nothing to reorder.
+ */
+private fun canRearrange(
+    state: LibraryUiState,
+    tab: LibraryTab,
+): Boolean {
+    val mode = state.sortModeFor(tabId = tab.id)
+
+    return when (tab) {
+        is LibraryTab.Status ->
+            mode == LibrarySortMode.MANUAL &&
+                tab.status != UserBookStatus.DID_NOT_FINISH &&
+                (state.displayBooksFor(tabId = tab.id)?.size ?: 0) >= 2
+
+        is LibraryTab.CustomList -> {
+            val isRanked = state.customLists.firstOrNull { it.id == tab.listId }?.ranked == true
+
+            mode == LibrarySortMode.ORDER &&
+                isRanked &&
+                (state.displayEditionsFor(tabId = tab.id)?.size ?: 0) >= 2
+        }
+
+        LibraryTab.All -> false
+    }
+}
+
+/**
+ * Trailing icon-button toggle into and out of rearrange mode, sitting in the strip's trailing
+ * cluster beside the layout button (a labelled pill doesn't fit alongside Sort + Filter + Layout on
+ * narrow screens). Idle it reads as plain chrome like the layout button; while rearranging it fills
+ * to the `secondaryContainer` tonal state so the active mode is unmistakable, and tapping it is the
+ * canonical "Done" exit.
+ */
+@Composable
+private fun RearrangeAction(
+    isRearranging: Boolean,
+    runAction: (LibraryAction) -> Unit,
+) {
+    val onClick = {
+        val action = if (isRearranging) {
+            OnExitRearrangeModeAction()
+        } else {
+            OnEnterRearrangeModeAction()
+        }
+
+        runAction(action)
+    }
+
+    val icon = @Composable {
+        Icon(
+            painter = painterResource(R.drawable.ic_drag_handle),
+            contentDescription = if (isRearranging) "Finish rearranging" else "Rearrange this order",
+        )
+    }
+
+    if (isRearranging) {
+        FilledIconButton(
+            onClick = onClick,
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            ),
+            content = { icon() },
+        )
+    } else {
+        IconButton(
+            onClick = onClick,
+            content = { icon() },
+        )
+    }
 }
 
 @Composable

@@ -25,6 +25,7 @@ class OnTabSelectedAction(
                 isBulkRemoveDialogShown = false,
                 isBulkAddToListSheetShown = false,
                 listsBeingMutated = emptySet(),
+                isRearranging = false,
             )
         }
     }

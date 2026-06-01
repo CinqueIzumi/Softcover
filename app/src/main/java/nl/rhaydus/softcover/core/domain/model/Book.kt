@@ -10,6 +10,7 @@ data class Book(
     val editions: List<BookEdition>,
     val defaultEdition: BookEdition?,
     val rating: Double,
+    val headline: String = "",
     val description: String,
     val releaseYear: Int,
     val releaseDate: LocalDate? = null,
@@ -43,6 +44,11 @@ data class Book(
                 ?: defaultEdition
                 ?: editions.firstOrNull()
         }
+
+    /** Author names for display, falling back to the book's own authors when no edition is known. */
+    val authorString: String
+        get() = currentEdition?.authorString?.takeIf { it.isNotBlank() }
+            ?: authors.joinToString(", ") { it.name }
 
     val firstPositionInSeries: Double?
         get() = positionsInSeries.firstOrNull()

@@ -74,20 +74,11 @@ Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to the 
 
 These steps light up the personal-data layer from Step 0.3. Many of the largest "feels missing" gaps live here.
 
-### Step 3.1 — Personal rating control on book detail (S)
-5-star (or 1–10, choose during design) personal rating field below the shelf chips. Pairs with `tickle` haptic per star. *(B.4.1)*
-
-### Step 3.2 — Personal review drafting (M)
-"Write a few words" affordance opens a sheet with editorial-typography input field. Local draft, publish-when-ready. *(B.4.2)*
-
 ### Step 3.3 — Personal highlights section on book detail + quick-add from Reading (M)
 "Passages" section above the community Voices section. Add a quick-add affordance on the Reading featured card. *(B.4.3, B.2.6)*
 
 ### Step 3.4 — Notes & Highlights inbox screen (M)
 Aggregate every saved highlight across books. Editorial-quote pattern per row, search/filter, share single highlights via Step 0.2 surface. *(C.7)*
-
-### Step 3.5 — Reading session timer (M)
-Start/stop session affordance on the Reading featured card. Captures duration, page delta. Persists via the session table. *(B.2.1)*
 
 ### Step 3.6 — Reading Sessions log screen (S)
 Reverse-chronological timeline of all sessions. Reached from Profile. *(C.8)*
@@ -95,10 +86,26 @@ Reverse-chronological timeline of all sessions. Reached from Profile. *(C.8)*
 ### Step 3.7 — Reading log (multiple read-throughs) on book detail (M)
 Replace single-status display with a log of read-throughs (start, end, rating, optional note). Detail summary becomes "Read 2× — 2023, 2026". *(B.4.4)*
 
-### Step 3.8 — Streak strip on Reading screen header (S, depends on 3.5)
-A small 21-day heatmap-style strip rendered near the greeting on the Reading screen: one dot per day, today highlighted, dot intensity keyed to that day's session activity. Tap the strip to expand into the full Reading Activity Calendar (Step 7.12) once that lands; until then, expansion goes to a transient bottom sheet listing the last 21 days' sessions inline. Uses `select` haptic on dot tap. *(B.2.3)*
+### Step 3.9 — Personal identity & representation tagging (M, depends on 0.3)
+Adds two private tagging surfaces driven by user-supplied data, plus the Room schema to back them. Strictly local — never written to Hardcover.
 
-> **End of Phase 3:** The app has personal voice — the user's ratings, words, and highlights become a corpus the rest of the app can draw from.
+- **Author identity tags** on the byline (and on the Author detail screen once Step 5.1 lands): gender, BIPOC affiliation, LGBTQ+ affiliation, optional country of birth. Renders as an italic eyebrow line under the byline ("you tagged: woman · queer · Nigerian"), tappable to edit. *(B.4.19)*
+- **Book representation tags** at the book level (distinct from author identity): LGBTQ+ characters, BIPOC characters/protagonists. Opt-in to reveal on book detail so spoilers don't leak. *(B.4.20)*
+
+Both tag sets feed Step 7.13 (diversity stats) and Step 7.14 (custom-scope wrap-ups). Tag vocabularies are curated with a "your own" free-text fallback so users can use their own language.
+
+### Step 3.10 — Personal moods (book + chapter) (M, depends on 0.3)
+A private mood log. Book-level mood tagging (one or more moods per book) and an optional per-chapter / per-percentage anchored mood ("at 62% — wrecked"). Distinct from B.3.1 community moods used for discovery — these never leave the device. Mood column renders on book detail in italic; per-chapter moods render as a thin mood ribbon along the wavy progress bar where anchors exist. Picker uses a curated mood vocabulary plus a free-text "your moods" option. *(B.4.21)*
+
+### Step 3.11 — Personal notes (book + characters) (M, depends on 0.3)
+A private notes field deliberately separated from Step 3.2 (personal review): notes are unfiltered marginalia that never publish. Two surfaces:
+
+- **Book-level Notes** section on book detail (private), with optional chapter/page anchor per note.
+- **Per-character notes** affordance for books where Hardcover exposes a character list (especially useful for romance — notes against love interests, the antagonist, an ensemble).
+
+Notes appear in the Notes & Highlights inbox (Step 3.4) under a "private — notes" group; the inbox UI suppresses the share affordance for this group so private notes can't be exported accidentally. *(B.4.22)*
+
+> **End of Phase 3:** The app has personal voice — the user's ratings, words, highlights, tags, moods, and notes become a corpus the rest of the app can draw from.
 
 ---
 
@@ -123,6 +130,9 @@ Chip row inside the "Voices" section: friends only, top-rated, recent, with spoi
 
 ### Step 4.8 — Share book sheet (S, depends on 0.2)
 Overflow "Share" → sheet with three modes (image, link, deep link) all routed through Step 0.2. *(B.4.12)*
+
+### Step 4.9 — Personal trigger warnings (S, depends on 4.3)
+Extends the community-sourced content-warnings collapsible (Step 4.3) so the user can add their own private warnings to a book — for warnings the community hasn't tagged yet, or to mark which canonical warnings matter most for *them*. Same opt-in reveal as Step 4.3; user-added warnings render alongside the community list under a small "you noted" italic eyebrow. Strictly local. *(B.4.24)*
 
 ---
 
@@ -175,9 +185,6 @@ A dedicated personalisation surface reached from Explore. *(C.9)*
 ### Step 6.7 — Search filters & sorts (M)
 Filter chip row when search is active; sort modes (relevance, rating, year, popularity). *(B.3.8)*
 
-### Step 6.8 — ISBN/barcode scan (M)
-Camera scan from the search bar, drops result into search. Permission gate + offline ISBN-only fallback. *(B.3.9)*
-
 ### Step 6.9 — Author spotlight tile (S, depends on 5.1)
 "Author of the week" full-width tile linking to author detail. *(B.3.7)*
 
@@ -192,6 +199,9 @@ Stalled-series re-engagement cards in the existing series row. *(B.3.11)*
 
 ### Step 6.13 — New Releases calendar: author/series follow tints (S, depends on 6.12 + follow infra)
 Extends the calendar with two additional tint intensities for releases from authors and series the user follows. Lands after the follow graph is wired (depends on whatever step first reads/writes follows — likely Step 9.10 or earlier if author-follow lands standalone). Each tint is distinct enough from Want-to-Read full-intensity and "Most anticipated" low-intensity to read cleanly in a single cell that combines two or more reasons. *(C.15)*
+
+### Step 6.14 — Audience as a separate classification from genre (M, depends on 6.1)
+*Rough plan — design phase before build.* Treats audience-style tags (Young Adult, Middle Grade, New Adult, Adult) as a distinct *classification* dimension from genre (Romance, Fantasy, Mystery, Literary Fiction). Surfaces on book detail as a small audience eyebrow above the genre chip strip ("YOUNG ADULT · ROMANCE") and on the genre/mood browser (Step 6.1) as an independent audience filter that composes with genre filters. Requires a mapping layer over Hardcover's tag taxonomy: open design questions before build — what's recoverable from Hardcover's `cached_tags`, whether the mapping is a hand-curated allowlist or pattern-derived, and how to handle ambiguous tags ("YA Fantasy" supplied as a single tag). Out of scope: mutating Hardcover state — we surface the regrouping in the UI only. *(B.4.23)*
 
 ---
 
@@ -234,6 +244,12 @@ Time-limited screen surfaced in December via notification. 8–10 editorial slid
 
 ### Step 7.12 — Reading Activity calendar (M, depends on 3.5 + 3.7 + 7.7)
 *Rough plan — design phase before build, and subsumes the streak heatmap once shipped.* A full-screen calendar with month grid + 12-month zoom-out where each day cell shows what the user did that day: pages read, time read, finishes, ratings published, highlights saved. Day cells render editorial-style — tiny stacked spine row of covers touched, dominant cover tinting the cell background. Tap a day → editorial sheet with per-day breakdown and deep links into book detail, the Sessions log (Step 3.6), and the Notes & Highlights inbox (Step 3.4). The 12-month overview replaces the standalone streak heatmap (Step 7.7); when this step ships, fold 7.7's surface into this screen rather than maintaining both. Reached from Profile, from the Reading screen's streak strip (Step 3.8), and from the Stats Atlas (Step 7.9). Out of scope for first cut: forward-looking "planned reading" entries. *(C.14, B.5.3)*
+
+### Step 7.13 — Diversity & representation stats (M, depends on 3.9 + 7.9)
+A new Stats Atlas section driven by the private tags from Step 3.9 (author identity + book representation). Surfaces: share of authors by gender, share of authors by BIPOC affiliation, share of authors by LGBTQ+ affiliation, country distribution, share of books with LGBTQ+ representation, share with BIPOC representation. Editorial framing ("38% women, 22% authors of colour, 14 countries this year") with italic copy and hairline bars — no dashboard chrome. Composes with the year filter on the Stats Atlas so the same section can scope to any year on record, and with the custom-scope generator (Step 7.14) so any wrap-up can include a diversity slide. Strictly personal — driven by the user's own private tags. *(B.5.15)*
+
+### Step 7.14 — Custom-scope wrap-up generator (M, depends on 7.11)
+Generalises Step 7.11 (Year in Books) into a wrap-up generator that takes any scope: day, week, month, year, "since you joined Softcover", or a custom date range. User picks the scope from a small sheet (preset chips + custom-range picker); the generator produces an editorial 6–10 slide spread tuned to the scope's density — a "day" wrap-up is leaner (single book, single session, single highlight) while a "year" wrap-up matches Step 7.11's density. Slides draw on every personal-data source the user has lit up: sessions (Step 3.5), highlights (Step 3.3), reading log (Step 3.7), personal ratings (Step 3.1), personal moods (Step 3.10), personal identity & representation tags (Step 3.9 + Step 7.13). Each slide is shareable via the Step 0.2 / Step 4.8 share surface so users can send a "this week in books" card to a friend who doesn't use the app. Reached from Profile and from a "Wrap it up" affordance on the Stats Atlas (Step 7.9). The year-scope route shares the generator with Step 7.11's December trigger — both surface the same output. *(C.17, C.4)*
 
 ---
 

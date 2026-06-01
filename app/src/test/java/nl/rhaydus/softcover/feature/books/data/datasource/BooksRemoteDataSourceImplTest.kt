@@ -15,9 +15,11 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
+import nl.rhaydus.softcover.GetEditionByIsbnQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
@@ -27,15 +29,22 @@ import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
 import nl.rhaydus.softcover.RemoveUserBookMutation
 import nl.rhaydus.softcover.UpdateBookEditionMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
+import nl.rhaydus.softcover.UpdateUserBookRatingMutation
+import nl.rhaydus.softcover.UpdateUserBookReviewMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.feature.books.data.mapper.toBookEdition
+import nl.rhaydus.softcover.feature.books.domain.model.CreatedBook
+import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion.userBookReadFragment
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -842,6 +851,83 @@ class BooksRemoteDataSourceImplTest {
                 dataSource.markBookAsWantToRead(bookId = 5)
             }
         }
+
+        @Test
+        fun `sets edition_id to Optional presentIfNotNull when editionId is non-null`() = runTest {
+            // ----- Arrange -----
+            val bookId = 5
+            val editionId = 42
+            val expectedBook = stubBook()
+            val mutationData = mockk<MarkBookAsWantToReadMutation.Data>()
+            val insertUserBook = mockk<MarkBookAsWantToReadMutation.Data.Insert_user_book>()
+            val userBookEntry = mockk<MarkBookAsWantToReadMutation.Data.Insert_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsWantToReadMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_user_book
+            } returns insertUserBook
+
+            every {
+                insertUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.markBookAsWantToRead(bookId = bookId, editionId = editionId)
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsWantToReadMutation> {
+                        it.`object`.edition_id == Optional.presentIfNotNull(editionId)
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `sets edition_id to Optional Absent when editionId is null`() = runTest {
+            // ----- Arrange -----
+            val bookId = 5
+            val expectedBook = stubBook()
+            val mutationData = mockk<MarkBookAsWantToReadMutation.Data>()
+            val insertUserBook = mockk<MarkBookAsWantToReadMutation.Data.Insert_user_book>()
+            val userBookEntry = mockk<MarkBookAsWantToReadMutation.Data.Insert_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsWantToReadMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_user_book
+            } returns insertUserBook
+
+            every {
+                insertUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.markBookAsWantToRead(bookId = bookId, editionId = null)
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsWantToReadMutation> {
+                        it.`object`.edition_id == Optional.Absent
+                    },
+                )
+            }
+        }
     }
 
     @Nested
@@ -952,6 +1038,130 @@ class BooksRemoteDataSourceImplTest {
             // ----- Act & Assert -----
             shouldThrow<Exception> {
                 dataSource.markBookAsReading(book = book)
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateBookRating {
+
+        @Test
+        fun `returns mapped book when mutation succeeds`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 7
+            val userBook = stubUserBook(id = userBookId)
+            val expectedBook = stubBook()
+            val mutationData = mockk<UpdateUserBookRatingMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookRatingMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookRatingMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            val result = dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+
+            // ----- Assert -----
+            result shouldBe expectedBook
+        }
+
+        @Test
+        fun `issues UpdateUserBookRatingMutation with the correct user book id`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 42
+            val userBook = stubUserBook(id = userBookId)
+            val expectedBook = stubBook()
+            val mutationData = mockk<UpdateUserBookRatingMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookRatingMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookRatingMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateUserBookRatingMutation> { it.id == userBookId },
+                )
+            }
+        }
+
+        @Test
+        fun `throws when mutation returns null update_user_book wrapper`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 7)
+            val mutationData = mockk<UpdateUserBookRatingMutation.Data>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+            }
+        }
+
+        @Test
+        fun `throws when toBook maps the fragment to null`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 7)
+            val mutationData = mockk<UpdateUserBookRatingMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookRatingMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookRatingMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.updateBookRating(userBook = userBook, rating = 4.5)
             }
         }
     }
@@ -2099,6 +2309,91 @@ class BooksRemoteDataSourceImplTest {
                 dataSource.markBookAsRead(book = book)
             }
         }
+
+        @Test
+        fun `sets edition_id to Optional presentIfNotNull when editionId is non-null`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            val editionId = 77
+            val expectedBook = stubBook()
+            val mutationData = mockk<MarkBookAsReadMutation.Data>()
+            val insertUserBook = mockk<MarkBookAsReadMutation.Data.Insert_user_book>()
+            val userBookEntry = mockk<MarkBookAsReadMutation.Data.Insert_user_book.User_book>()
+
+            every {
+                book.id
+            } returns 11
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsReadMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_user_book
+            } returns insertUserBook
+
+            every {
+                insertUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.markBookAsRead(book = book, editionId = editionId)
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsReadMutation> {
+                        it.userBookCreateInput.edition_id == Optional.presentIfNotNull(editionId)
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `sets edition_id to Optional Absent when editionId is null`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            val expectedBook = stubBook()
+            val mutationData = mockk<MarkBookAsReadMutation.Data>()
+            val insertUserBook = mockk<MarkBookAsReadMutation.Data.Insert_user_book>()
+            val userBookEntry = mockk<MarkBookAsReadMutation.Data.Insert_user_book.User_book>()
+
+            every {
+                book.id
+            } returns 11
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsReadMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_user_book
+            } returns insertUserBook
+
+            every {
+                insertUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.markBookAsRead(book = book, editionId = null)
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsReadMutation> {
+                        it.userBookCreateInput.edition_id == Optional.Absent
+                    },
+                )
+            }
+        }
     }
 
     @Nested
@@ -2281,6 +2576,424 @@ class BooksRemoteDataSourceImplTest {
             // ----- Act & Assert -----
             shouldThrow<Exception> {
                 dataSource.updateBookEdition(userBook = userBook, newEditionId = newEditionId)
+            }
+        }
+    }
+
+    @Nested
+    inner class ReplayUpdateBookRating {
+
+        @Test
+        fun `issues UpdateUserBookRatingMutation with the correct userBookId and rating`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 42
+            val rating = 4.5
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookRatingMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayUpdateBookRating(userBookId = userBookId, rating = rating)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateUserBookRatingMutation> { it.id == userBookId },
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class UpdateBookReview {
+
+        @Test
+        fun `returns mapped book when mutation succeeds`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 7
+            val userBook = stubUserBook(id = userBookId)
+            val expectedBook = stubBook()
+            val mutationData = mockk<UpdateUserBookReviewMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookReviewMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookReviewMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            val result = dataSource.updateBookReview(
+                userBook = userBook,
+                review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
+                hasSpoilers = false,
+                reviewedAt = "2026-05-30",
+            )
+
+            // ----- Assert -----
+            result shouldBe expectedBook
+        }
+
+        @Test
+        fun `issues UpdateUserBookReviewMutation with the correct user book id`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 42
+            val userBook = stubUserBook(id = userBookId)
+            val expectedBook = stubBook()
+            val mutationData = mockk<UpdateUserBookReviewMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookReviewMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookReviewMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.updateBookReview(
+                userBook = userBook,
+                review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
+                hasSpoilers = false,
+                reviewedAt = "2026-05-30",
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateUserBookReviewMutation> { it.id == userBookId },
+                )
+            }
+        }
+
+        @Test
+        fun `throws when mutation returns null update_user_book wrapper`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 7)
+            val mutationData = mockk<UpdateUserBookReviewMutation.Data>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.updateBookReview(
+                    userBook = userBook,
+                    review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
+                    hasSpoilers = false,
+                    reviewedAt = "2026-05-30",
+                )
+            }
+        }
+
+        @Test
+        fun `throws when toBook maps the fragment to null`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 7)
+            val mutationData = mockk<UpdateUserBookReviewMutation.Data>()
+            val updateUserBook = mockk<UpdateUserBookReviewMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<UpdateUserBookReviewMutation.Data.Update_user_book.User_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.updateBookReview(
+                    userBook = userBook,
+                    review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
+                    hasSpoilers = false,
+                    reviewedAt = "2026-05-30",
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class FetchEditionMatchForIsbn {
+
+        @Test
+        fun `isbn13 match — returns IsbnEditionMatch from first isbn13 row`() = runTest {
+            // ----- Arrange -----
+            val isbn = "9780451524935"
+            val queryData = mockk<GetEditionByIsbnQuery.Data>()
+            val isbn13Row = mockk<GetEditionByIsbnQuery.Data.Isbn13>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionByIsbnQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every { queryData.isbn13 } returns listOf(isbn13Row)
+            every { queryData.isbn10 } returns emptyList()
+            every { isbn13Row.book_id } returns 10
+            every { isbn13Row.id } returns 110
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe IsbnEditionMatch(bookId = 10, editionId = 110)
+        }
+
+        @Test
+        fun `isbn13 empty — falls back to isbn10 and returns IsbnEditionMatch`() = runTest {
+            // ----- Arrange -----
+            val isbn = "0451524934"
+            val queryData = mockk<GetEditionByIsbnQuery.Data>()
+            val isbn10Row = mockk<GetEditionByIsbnQuery.Data.Isbn10>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionByIsbnQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every { queryData.isbn13 } returns emptyList()
+            every { queryData.isbn10 } returns listOf(isbn10Row)
+            every { isbn10Row.book_id } returns 20
+            every { isbn10Row.id } returns 220
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe IsbnEditionMatch(bookId = 20, editionId = 220)
+        }
+
+        @Test
+        fun `both lists empty — returns null`() = runTest {
+            // ----- Arrange -----
+            val isbn = "0000000000000"
+            val queryData = mockk<GetEditionByIsbnQuery.Data>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionByIsbnQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every { queryData.isbn13 } returns emptyList()
+            every { queryData.isbn10 } returns emptyList()
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+    }
+
+    @Nested
+    inner class ReplayUpdateBookReview {
+
+        @Test
+        fun `issues UpdateUserBookReviewMutation with the correct userBookId`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 42
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateUserBookReviewMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayUpdateBookReview(
+                userBookId = userBookId,
+                review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
+                hasSpoilers = false,
+                reviewedAt = "2026-05-30",
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateUserBookReviewMutation> { it.id == userBookId },
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class AddBookByIsbn {
+
+        @Test
+        fun `returns CreatedBook with bookId and editionId when mutation succeeds`() = runTest {
+            // ----- Arrange -----
+            val isbn = "9780451524935"
+            val mutationData = mockk<CreateBookMutation.Data>()
+            val upsertBook = mockk<CreateBookMutation.Data.Upsert_book>()
+            val bookEntry = mockk<CreateBookMutation.Data.Upsert_book.Book>()
+            val editionEntry = mockk<CreateBookMutation.Data.Upsert_book.Edition>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateBookMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.upsert_book
+            } returns upsertBook
+
+            every {
+                upsertBook.errors
+            } returns null
+
+            every {
+                upsertBook.book
+            } returns bookEntry
+
+            every {
+                bookEntry.id
+            } returns 42
+
+            every {
+                upsertBook.edition
+            } returns editionEntry
+
+            every {
+                editionEntry.id
+            } returns 110
+
+            // ----- Act -----
+            val result = dataSource.addBookByIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe CreatedBook(bookId = 42, editionId = 110)
+        }
+
+        @Test
+        fun `returns CreatedBook with null editionId when edition is absent from response`() = runTest {
+            // ----- Arrange -----
+            val isbn = "9780451524935"
+            val mutationData = mockk<CreateBookMutation.Data>()
+            val upsertBook = mockk<CreateBookMutation.Data.Upsert_book>()
+            val bookEntry = mockk<CreateBookMutation.Data.Upsert_book.Book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateBookMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.upsert_book
+            } returns upsertBook
+
+            every {
+                upsertBook.errors
+            } returns null
+
+            every {
+                upsertBook.book
+            } returns bookEntry
+
+            every {
+                bookEntry.id
+            } returns 42
+
+            every {
+                upsertBook.edition
+            } returns null
+
+            // ----- Act -----
+            val result = dataSource.addBookByIsbn(isbn = isbn)
+
+            // ----- Assert -----
+            result shouldBe CreatedBook(bookId = 42, editionId = null)
+        }
+
+        @Test
+        fun `throws when errors list contains a non-blank string`() = runTest {
+            // ----- Arrange -----
+            val isbn = "9780451524935"
+            val mutationData = mockk<CreateBookMutation.Data>()
+            val upsertBook = mockk<CreateBookMutation.Data.Upsert_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateBookMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.upsert_book
+            } returns upsertBook
+
+            every {
+                upsertBook.errors
+            } returns listOf("Book already exists")
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.addBookByIsbn(isbn = isbn)
+            }
+        }
+
+        @Test
+        fun `throws when book is absent from upsert_book response`() = runTest {
+            // ----- Arrange -----
+            val isbn = "9780451524935"
+            val mutationData = mockk<CreateBookMutation.Data>()
+            val upsertBook = mockk<CreateBookMutation.Data.Upsert_book>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateBookMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.upsert_book
+            } returns upsertBook
+
+            every {
+                upsertBook.errors
+            } returns null
+
+            every {
+                upsertBook.book
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.addBookByIsbn(isbn = isbn)
             }
         }
     }

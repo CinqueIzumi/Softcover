@@ -43,6 +43,7 @@ import nl.rhaydus.softcover.core.presentation.component.BottomFloatingBar
 import nl.rhaydus.softcover.core.presentation.component.DockedBottomNavigationBar
 import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
+import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
 
 private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
@@ -68,7 +69,11 @@ object BottomBarScreen : Screen {
                 contentWindowInsets = WindowInsets(0),
                 bottomBar = {
                     if (themeConfig.bottomBarStyle == BottomBarStyle.DOCKED) {
-                        DockedBottomNavigationBar()
+                        Column {
+                            SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
+
+                            DockedBottomNavigationBar()
+                        }
                     }
                 }
             ) { innerPadding ->
@@ -88,6 +93,7 @@ object BottomBarScreen : Screen {
                         val shieldInteractionSource = remember { MutableInteractionSource() }
 
                         Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .windowInsetsPadding(WindowInsets.navigationBars)
@@ -100,6 +106,8 @@ object BottomBarScreen : Screen {
                                     onClick = {},
                                 )
                         ) {
+                            SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
+
                             BottomFloatingBar(
                                 modifier = Modifier.padding(
                                     horizontal = 8.dp,

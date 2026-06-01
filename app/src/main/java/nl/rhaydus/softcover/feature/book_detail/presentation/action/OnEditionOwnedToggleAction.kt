@@ -8,8 +8,14 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import timber.log.Timber
 
+/**
+ * Sets whether [edition] is marked owned. [owned] is the **desired new state** — the caller decides
+ * the toggle from the authoritative owned source (the local "Owned" list), so this action never
+ * infers it from the edition's overlay flag (which isn't populated for off-shelf editions).
+ */
 class OnEditionOwnedToggleAction(
     private val edition: BookEdition,
+    private val owned: Boolean,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
@@ -20,7 +26,7 @@ class OnEditionOwnedToggleAction(
         val job = dependencies.launch {
             dependencies.setEditionAsOwnedUseCase(
                 edition = edition,
-                owned = edition.owned.not(),
+                owned = owned,
             ).onFailure { error ->
                 Timber.e("$error")
 

@@ -7,6 +7,7 @@ fragment UserBookFragment on user_books {
     privacy_setting_id
     rating
     referrer_user_id
+    review_slate
     review_has_spoilers
     reviewed_at
     updated_at

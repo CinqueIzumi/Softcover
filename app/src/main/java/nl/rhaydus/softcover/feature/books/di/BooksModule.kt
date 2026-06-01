@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.feature.books.data.datasource.BooksRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.books.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
+import nl.rhaydus.softcover.feature.books.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
@@ -21,10 +22,14 @@ import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.ReorderShelfBooksUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookProgressUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookRatingUseCase
+import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookReviewUseCase
 import org.koin.dsl.module
 
 val booksModule = module {
@@ -37,8 +42,8 @@ val booksModule = module {
             booksRemoteDataSource = get(),
             booksLocalDataSource = get(),
             networkAvailability = get(),
-            offlineProgressQueue = get(),
-            pendingProgressDrainer = get(),
+            userBookWriteQueue = get(),
+            userBookWriteDrainer = get(),
             applicationScope = get(),
         )
     }
@@ -89,11 +94,33 @@ val booksModule = module {
     }
 
     factory {
+        ResolveBookByIsbnUseCase(
+            booksRepository = get(),
+            fetchBookByIdUseCase = get(),
+        )
+    }
+
+    factory {
+        AddBookByIsbnUseCase(
+            booksRepository = get(),
+            fetchBookByIdUseCase = get(),
+        )
+    }
+
+    factory {
         GetEditionsByBookIdUseCase(booksRepository = get())
     }
 
     factory {
         MarkBookAsReadingUseCase(booksRepository = get())
+    }
+
+    factory {
+        UpdateBookRatingUseCase(booksRepository = get())
+    }
+
+    factory {
+        UpdateBookReviewUseCase(booksRepository = get())
     }
 
     factory {
@@ -114,6 +141,13 @@ val booksModule = module {
 
     factory {
         UpdateBookProgressUseCase(repository = get())
+    }
+
+    factory {
+        RecordBookProgressUseCase(
+            markBookAsReadUseCase = get(),
+            updateBookProgressUseCase = get(),
+        )
     }
 
     factory {

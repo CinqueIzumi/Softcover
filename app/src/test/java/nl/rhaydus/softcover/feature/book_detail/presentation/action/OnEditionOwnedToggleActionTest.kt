@@ -83,7 +83,7 @@ class OnEditionOwnedToggleActionTest {
                 setEditionAsOwnedUseCase(edition = edition, owned = true)
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition)
+            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
 
             // ----- Act -----
             action.execute(
@@ -107,7 +107,7 @@ class OnEditionOwnedToggleActionTest {
                 setEditionAsOwnedUseCase(edition = edition, owned = false)
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition)
+            val action = OnEditionOwnedToggleAction(edition = edition, owned = false)
 
             // ----- Act -----
             action.execute(
@@ -131,7 +131,7 @@ class OnEditionOwnedToggleActionTest {
                 setEditionAsOwnedUseCase(edition = edition, owned = true)
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition)
+            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
 
             // ----- Act -----
             action.execute(
@@ -153,7 +153,7 @@ class OnEditionOwnedToggleActionTest {
                 setEditionAsOwnedUseCase(edition = edition, owned = true)
             } returns Result.failure(RuntimeException("network error"))
 
-            val action = OnEditionOwnedToggleAction(edition = edition)
+            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
 
             // ----- Act -----
             action.execute(
@@ -175,7 +175,7 @@ class OnEditionOwnedToggleActionTest {
                 setEditionAsOwnedUseCase(edition = edition, owned = true)
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition)
+            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
 
             // ----- Act -----
             action.execute(
@@ -209,7 +209,7 @@ class OnEditionOwnedToggleActionTest {
                 setEditionAsOwnedUseCase(edition = edition, owned = true)
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition)
+            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
 
             // ----- Act -----
             action.execute(
@@ -232,7 +232,7 @@ class OnEditionOwnedToggleActionTest {
                 setEditionAsOwnedUseCase(edition = edition, owned = false)
             } returns Result.failure(RuntimeException("network error"))
 
-            val action = OnEditionOwnedToggleAction(edition = edition)
+            val action = OnEditionOwnedToggleAction(edition = edition, owned = false)
 
             // ----- Act & Assert -----
             action.execute(

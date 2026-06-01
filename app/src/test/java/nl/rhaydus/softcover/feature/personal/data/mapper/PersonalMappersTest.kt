@@ -2,11 +2,9 @@ package nl.rhaydus.softcover.feature.personal.data.mapper
 
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.feature.personal.data.model.HighlightEntity
-import nl.rhaydus.softcover.feature.personal.data.model.PersonalReviewEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.feature.personal.data.model.ReadingSessionEntity
 import nl.rhaydus.softcover.feature.personal.domain.model.Highlight
-import nl.rhaydus.softcover.feature.personal.domain.model.PersonalReview
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingLogEntry
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingSession
 import org.junit.jupiter.api.Nested
@@ -17,34 +15,6 @@ import java.time.LocalDate
 class PersonalMappersTest {
 
     // region Fixtures
-
-    private fun buildPersonalReviewEntity(
-        bookId: Int = 1,
-        body: String = "Great book",
-        hasSpoilers: Boolean = false,
-        isDraft: Boolean = true,
-        updatedAt: String = "2024-01-15T10:30:00Z",
-    ) = PersonalReviewEntity(
-        bookId = bookId,
-        body = body,
-        hasSpoilers = hasSpoilers,
-        isDraft = isDraft,
-        updatedAt = updatedAt,
-    )
-
-    private fun buildPersonalReview(
-        bookId: Int = 1,
-        body: String = "Great book",
-        hasSpoilers: Boolean = false,
-        isDraft: Boolean = true,
-        updatedAt: Instant = Instant.parse("2024-01-15T10:30:00Z"),
-    ) = PersonalReview(
-        bookId = bookId,
-        body = body,
-        hasSpoilers = hasSpoilers,
-        isDraft = isDraft,
-        updatedAt = updatedAt,
-    )
 
     private fun buildHighlightEntity(
         id: Long = 42L,
@@ -87,6 +57,8 @@ class PersonalMappersTest {
         endPage: Int? = null,
         startSeconds: Int? = null,
         endSeconds: Int? = null,
+        pausedSeconds: Int = 0,
+        lastPausedAt: String? = null,
     ) = ReadingSessionEntity(
         id = id,
         bookId = bookId,
@@ -96,6 +68,8 @@ class PersonalMappersTest {
         endPage = endPage,
         startSeconds = startSeconds,
         endSeconds = endSeconds,
+        pausedSeconds = pausedSeconds,
+        lastPausedAt = lastPausedAt,
     )
 
     private fun buildReadingLogEntryEntity(
@@ -117,70 +91,6 @@ class PersonalMappersTest {
     )
 
     // endregion
-
-    @Nested
-    inner class PersonalReviewEntityToDomain {
-
-        @Test
-        fun `maps all fields correctly for a valid entity`() {
-            // ----- Arrange -----
-            val entity = buildPersonalReviewEntity()
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.bookId shouldBe 1
-            result.body shouldBe "Great book"
-            result.hasSpoilers shouldBe false
-            result.isDraft shouldBe true
-            result.updatedAt shouldBe Instant.parse("2024-01-15T10:30:00Z")
-        }
-
-        @Test
-        fun `falls back to Instant EPOCH when updatedAt is malformed`() {
-            // ----- Arrange -----
-            val entity = buildPersonalReviewEntity(updatedAt = "not-a-timestamp")
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.updatedAt shouldBe Instant.EPOCH
-        }
-
-        @Test
-        fun `falls back to Instant EPOCH when updatedAt is empty`() {
-            // ----- Arrange -----
-            val entity = buildPersonalReviewEntity(updatedAt = "")
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.updatedAt shouldBe Instant.EPOCH
-        }
-    }
-
-    @Nested
-    inner class PersonalReviewToEntity {
-
-        @Test
-        fun `maps all fields correctly for a valid domain model`() {
-            // ----- Arrange -----
-            val review = buildPersonalReview()
-
-            // ----- Act -----
-            val result = review.toEntity()
-
-            // ----- Assert -----
-            result.bookId shouldBe 1
-            result.body shouldBe "Great book"
-            result.hasSpoilers shouldBe false
-            result.isDraft shouldBe true
-            result.updatedAt shouldBe "2024-01-15T10:30:00Z"
-        }
-    }
 
     @Nested
     inner class HighlightEntityToDomain {
@@ -311,6 +221,62 @@ class PersonalMappersTest {
             // ----- Assert -----
             result.endedAt shouldBe Instant.EPOCH
         }
+
+        @Test
+        fun `maps pausedSeconds and non-null lastPausedAt correctly`() {
+            // ----- Arrange -----
+            val entity = buildReadingSessionEntity(
+                pausedSeconds = 120,
+                lastPausedAt = "2024-04-01T09:30:00Z",
+            )
+
+            // ----- Act -----
+            val result = entity.toDomain()
+
+            // ----- Assert -----
+            result.pausedSeconds shouldBe 120
+            result.lastPausedAt shouldBe Instant.parse("2024-04-01T09:30:00Z")
+        }
+
+        @Test
+        fun `maps null lastPausedAt to null`() {
+            // ----- Arrange -----
+            val entity = buildReadingSessionEntity(lastPausedAt = null)
+
+            // ----- Act -----
+            val result = entity.toDomain()
+
+            // ----- Assert -----
+            result.lastPausedAt shouldBe null
+        }
+
+        @Test
+        fun `maps a malformed lastPausedAt to null`() {
+            // ----- Arrange -----
+            val entity = buildReadingSessionEntity(lastPausedAt = "not-a-timestamp")
+
+            // ----- Act -----
+            val result = entity.toDomain()
+
+            // ----- Assert -----
+            result.lastPausedAt shouldBe null
+        }
+
+        @Test
+        fun `round-trips entity to domain and back preserving pausedSeconds and lastPausedAt`() {
+            // ----- Arrange -----
+            val entity = buildReadingSessionEntity(
+                pausedSeconds = 300,
+                lastPausedAt = "2024-04-01T09:45:00Z",
+            )
+
+            // ----- Act -----
+            val result = entity.toDomain().toEntity()
+
+            // ----- Assert -----
+            result.pausedSeconds shouldBe 300
+            result.lastPausedAt shouldBe "2024-04-01T09:45:00Z"
+        }
     }
 
     @Nested
@@ -339,6 +305,77 @@ class PersonalMappersTest {
             result.startedAt shouldBe "2024-04-01T09:00:00Z"
             result.endedAt shouldBe null
             result.startPage shouldBe 50
+        }
+
+        @Test
+        fun `maps pausedSeconds and non-null lastPausedAt to entity correctly`() {
+            // ----- Arrange -----
+            val session = ReadingSession(
+                id = 10L,
+                bookId = 1,
+                startedAt = Instant.parse("2024-04-01T09:00:00Z"),
+                endedAt = null,
+                startPage = null,
+                endPage = null,
+                startSeconds = null,
+                endSeconds = null,
+                pausedSeconds = 180,
+                lastPausedAt = Instant.parse("2024-04-01T09:20:00Z"),
+            )
+
+            // ----- Act -----
+            val result = session.toEntity()
+
+            // ----- Assert -----
+            result.pausedSeconds shouldBe 180
+            result.lastPausedAt shouldBe "2024-04-01T09:20:00Z"
+        }
+
+        @Test
+        fun `maps null lastPausedAt to null in entity`() {
+            // ----- Arrange -----
+            val session = ReadingSession(
+                id = 10L,
+                bookId = 1,
+                startedAt = Instant.parse("2024-04-01T09:00:00Z"),
+                endedAt = null,
+                startPage = null,
+                endPage = null,
+                startSeconds = null,
+                endSeconds = null,
+                pausedSeconds = 0,
+                lastPausedAt = null,
+            )
+
+            // ----- Act -----
+            val result = session.toEntity()
+
+            // ----- Assert -----
+            result.lastPausedAt shouldBe null
+        }
+
+        @Test
+        fun `round-trips domain to entity and back preserving pausedSeconds and lastPausedAt`() {
+            // ----- Arrange -----
+            val session = ReadingSession(
+                id = 10L,
+                bookId = 1,
+                startedAt = Instant.parse("2024-04-01T09:00:00Z"),
+                endedAt = null,
+                startPage = null,
+                endPage = null,
+                startSeconds = null,
+                endSeconds = null,
+                pausedSeconds = 240,
+                lastPausedAt = Instant.parse("2024-04-01T09:50:00Z"),
+            )
+
+            // ----- Act -----
+            val result = session.toEntity().toDomain()
+
+            // ----- Assert -----
+            result.pausedSeconds shouldBe 240
+            result.lastPausedAt shouldBe Instant.parse("2024-04-01T09:50:00Z")
         }
     }
 

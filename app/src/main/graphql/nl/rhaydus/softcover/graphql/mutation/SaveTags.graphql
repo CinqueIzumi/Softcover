@@ -1,0 +1,18 @@
+mutation SaveTags(
+    $id: bigint!,
+    $tags: [BasicTag]!,
+    $type: String!,
+) {
+    upsertTags: upsert_tags(
+        tags: $tags,
+        id: $id,
+        type: $type,
+    ) {
+        tags {
+            category
+            tag
+            count
+            spoiler
+        }
+    }
+}

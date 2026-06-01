@@ -17,8 +17,8 @@ android {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
         targetSdk = 36
-        versionCode = 28
-        versionName = "2.3.0"
+        versionCode = 29
+        versionName = "2.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -113,6 +113,13 @@ dependencies {
 
     // Drag-to-reorder for LazyGrid / LazyColumn
     implementation(libs.reorderable)
+
+    // Barcode scanning (CameraX preview/analysis + bundled ML Kit model, no Play Services)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.mlkit.barcode.scanning)
 
     // Unit test dependencies
     testImplementation(libs.junit.params)
