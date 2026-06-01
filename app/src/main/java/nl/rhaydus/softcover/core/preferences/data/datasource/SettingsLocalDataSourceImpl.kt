@@ -3,16 +3,16 @@ package nl.rhaydus.softcover.core.preferences.data.datasource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 import nl.rhaydus.softcover.core.preferences.data.model.toModel
-import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 
 class SettingsLocalDataSourceImpl(
     private val appSettingsDataStore: AppSettingsDataStore,

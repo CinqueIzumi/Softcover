@@ -11,13 +11,6 @@ interface SearchRemoteDataSource {
         userId: Int,
     )
 
-    suspend fun fetchTrendingBooks(
-        from: String,
-        to: String,
-        limit: Int,
-        offset: Int,
-    ): List<Book>
-
     suspend fun fetchNextInSeries(
         seriesId: Int,
         afterPosition: Double,

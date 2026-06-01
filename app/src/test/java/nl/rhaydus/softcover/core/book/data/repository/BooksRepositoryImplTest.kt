@@ -2963,4 +2963,55 @@ class BooksRepositoryImplTest {
             }
         }
     }
+
+    @Nested
+    inner class FetchTrendingBooks {
+
+        @Test
+        fun `returns list from remote data source`() = runTest {
+            // ----- Arrange -----
+            val trendingBooks = listOf(stubBook(userBookId = null), stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks(
+                    from = any(),
+                    to = any(),
+                    limit = 10,
+                    offset = 0,
+                )
+            } returns trendingBooks
+
+            // ----- Act -----
+            val result = repository.fetchTrendingBooks()
+
+            // ----- Assert -----
+            result shouldBe trendingBooks
+        }
+
+        @Test
+        fun `calls remote data source with limit 10 and offset 0`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks(
+                    from = any(),
+                    to = any(),
+                    limit = any(),
+                    offset = any(),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.fetchTrendingBooks()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchTrendingBooks(
+                    from = any(),
+                    to = any(),
+                    limit = 10,
+                    offset = 0,
+                )
+            }
+        }
+    }
 }

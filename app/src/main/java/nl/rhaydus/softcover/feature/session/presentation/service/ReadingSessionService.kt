@@ -27,9 +27,9 @@ import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
 import nl.rhaydus.softcover.core.presentation.component.resolveEditionImageSource
 import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
-import nl.rhaydus.softcover.feature.session.presentation.ActiveSession
-import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
-import nl.rhaydus.softcover.feature.session.presentation.formatSessionElapsed
+import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 import java.time.Duration

@@ -109,12 +109,16 @@ import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
@@ -125,6 +129,7 @@ import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimated
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
@@ -138,9 +143,6 @@ import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveMenuExpandedChangeAction
@@ -165,14 +167,12 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAc
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlStrip
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
-import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 import nl.rhaydus.softcover.feature.library.presentation.util.formatPageCount
 import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
-import nl.rhaydus.softcover.core.presentation.component.ChooseListsBottomSheet
 
 object LibraryScreen : Screen {
     @Composable

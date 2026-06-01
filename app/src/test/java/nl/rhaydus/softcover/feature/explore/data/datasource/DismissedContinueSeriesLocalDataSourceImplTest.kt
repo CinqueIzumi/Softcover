@@ -7,9 +7,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.feature.explore.data.dao.DismissedContinueSeriesDao
-import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesBookEntity
-import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesEntity
+import nl.rhaydus.softcover.core.data.database.dao.DismissedContinueSeriesDao
+import nl.rhaydus.softcover.core.data.database.model.DismissedContinueSeriesBookEntity
+import nl.rhaydus.softcover.core.data.database.model.DismissedContinueSeriesEntity
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

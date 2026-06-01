@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.feature.reading.di
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.CurrentlyReadingBooksCollector
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.DateStyleCollector
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingActivityCollector
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.PlanTodayDismissalsCollector
+import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingActivityCollector
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingInitializer
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.TrendingBooksLoader
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.WantToReadCollector

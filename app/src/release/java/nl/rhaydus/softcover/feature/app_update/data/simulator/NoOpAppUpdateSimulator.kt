@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.app_update.data.simulator
 
-import nl.rhaydus.softcover.feature.app_update.domain.simulator.AppUpdateSimulator
+import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 
 object NoOpAppUpdateSimulator : AppUpdateSimulator {
     override val isEnabled: Boolean = false

@@ -12,10 +12,18 @@ import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCas
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
+import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
+import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
+import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
@@ -26,14 +34,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailInitializer
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
-import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
-import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
-import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
-import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
-import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveUserProfileDataUseCase
 
 class BookDetailScreenScreenModel(
     private val bookId: Int,

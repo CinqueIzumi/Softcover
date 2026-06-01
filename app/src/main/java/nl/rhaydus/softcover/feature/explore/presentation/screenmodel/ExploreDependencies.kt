@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
@@ -12,7 +13,6 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeries
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
-import nl.rhaydus.softcover.feature.explore.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveAllSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase

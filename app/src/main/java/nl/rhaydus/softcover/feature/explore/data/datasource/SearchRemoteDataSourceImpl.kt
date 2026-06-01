@@ -11,7 +11,6 @@ import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFra
 import nl.rhaydus.softcover.GetIdsForQuery
 import nl.rhaydus.softcover.GetNextBookInSeriesQuery
 import nl.rhaydus.softcover.GetNextBookInSeriesQuery.Data.Book_series.Book.Companion.bookDetailFragment as nextInSeriesBookDetailFragment
-import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -43,39 +42,6 @@ class SearchRemoteDataSourceImpl(
             .sortedBy { book -> idOrdered[book.id] }
 
         _queriedBooks.update { books }
-    }
-
-    override suspend fun fetchTrendingBooks(
-        from: String,
-        to: String,
-        limit: Int,
-        offset: Int,
-    ): List<Book> {
-        val trendingIds: List<Int> = apolloClient.safeQuery(
-            query = GetTrendingBookIdsQuery(
-                from = from,
-                to = to,
-                limit = limit,
-                offset = offset,
-            )
-        )
-            .books_trending
-            ?.ids
-            ?.mapNotNull { it }
-            ?: return emptyList()
-
-        if (trendingIds.isEmpty()) return emptyList()
-
-        val idOrdered = trendingIds.withIndex().associate { it.value to it.index }
-
-        return apolloClient
-            .safeQuery(
-                query = GetBooksByIdsQuery(ids = trendingIds),
-                fetchPolicy = FetchPolicy.CacheFirst,
-            )
-            .books
-            .mapNotNull { it.bookDetailFragment()?.toBook() }
-            .sortedBy { book -> idOrdered[book.id] }
     }
 
     override suspend fun fetchNextInSeries(

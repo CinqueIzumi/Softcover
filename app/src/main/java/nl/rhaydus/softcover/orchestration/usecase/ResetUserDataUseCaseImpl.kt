@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.orchestration.usecase
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
-import nl.rhaydus.softcover.feature.profile.domain.repository.ProfileRepository
+import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
 class ResetUserDataUseCaseImpl(
     private val settingsRepository: SettingsRepository,

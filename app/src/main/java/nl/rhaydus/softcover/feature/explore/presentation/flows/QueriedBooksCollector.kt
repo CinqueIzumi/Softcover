@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
-import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 
 class QueriedBooksCollector() : ExploreInitializer {
     override suspend fun onLaunch(

@@ -2,20 +2,20 @@ package nl.rhaydus.softcover.feature.reading.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
+import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
-import nl.rhaydus.softcover.feature.explore.domain.usecase.GetTrendingBooksUseCase
-import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
-import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveRecentReadingActivityUseCase
-import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingInitializer

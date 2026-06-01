@@ -9,12 +9,12 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataSource
-import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

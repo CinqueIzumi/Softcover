@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
@@ -11,7 +12,6 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeries
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
-import nl.rhaydus.softcover.feature.explore.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveAllSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.library.di
 
-import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.library.presentation.flows.AllBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.library.presentation.flows.BookListsCollector
@@ -33,16 +32,6 @@ val libraryModule = module {
     factory { DateStyleCollector() } bind LibraryInitializer::class
 
     factory { FilterOptionsCollector() } bind LibraryInitializer::class
-
-    factory {
-        RefreshLibraryUseCase(
-            getUserIdUseCase = get(),
-            booksRepository = get(),
-            listsRepository = get(),
-            settingsRepository = get(),
-            dispatchers = get(),
-        )
-    }
 
     factory {
         LibraryScreenScreenModel(

@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.feature.app_update.data.repository
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import kotlinx.coroutines.flow.Flow
+import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.data.datasource.AppUpdateDataSource
-import nl.rhaydus.softcover.feature.app_update.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.domain.repository.AppUpdateRepository
 
 class AppUpdateRepositoryImpl(private val appUpdateDataSource: AppUpdateDataSource) : AppUpdateRepository {

@@ -40,6 +40,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.BuildConfig
 import nl.rhaydus.softcover.R
+import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
+import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesSection
@@ -55,8 +57,6 @@ import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.feature.app_update.domain.model.AppUpdateState
-import nl.rhaydus.softcover.feature.app_update.domain.simulator.AppUpdateSimulator
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState

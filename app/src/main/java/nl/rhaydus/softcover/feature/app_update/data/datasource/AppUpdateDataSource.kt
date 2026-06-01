@@ -13,7 +13,7 @@ import com.google.android.play.core.ktx.requestAppUpdateInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import nl.rhaydus.softcover.feature.app_update.domain.model.AppUpdateState
+import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import timber.log.Timber
 
 interface AppUpdateDataSource {

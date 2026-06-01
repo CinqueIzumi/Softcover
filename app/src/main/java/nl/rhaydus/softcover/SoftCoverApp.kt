@@ -4,15 +4,22 @@ import android.app.Application
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.book.di.bookModule
+import nl.rhaydus.softcover.core.connectivity.data.sync.PendingListWriteSyncer
+import nl.rhaydus.softcover.core.connectivity.data.sync.PendingUserBookWriteSyncer
+import nl.rhaydus.softcover.core.connectivity.di.connectivityModule
+import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
+import nl.rhaydus.softcover.core.library.di.libraryServiceModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.logging.PrefixedDebugTree
 import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
+import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.di.apolloModule
 import nl.rhaydus.softcover.di.coreModule
 import nl.rhaydus.softcover.di.databaseModule
@@ -21,16 +28,11 @@ import nl.rhaydus.softcover.di.notificationModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
 import nl.rhaydus.softcover.feature.book_detail.di.bookDetailModule
-import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingListWriteSyncer
-import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingUserBookWriteSyncer
-import nl.rhaydus.softcover.feature.connectivity.di.connectivityModule
-import nl.rhaydus.softcover.feature.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.feature.explore.di.exploreModule
 import nl.rhaydus.softcover.feature.library.di.libraryModule
 import nl.rhaydus.softcover.feature.lists.di.createListModule
 import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
-import nl.rhaydus.softcover.feature.personal.di.personalModule
-import nl.rhaydus.softcover.feature.profile.di.profileModule
+import nl.rhaydus.softcover.feature.profile.di.profileScreenModule
 import nl.rhaydus.softcover.feature.reading.di.readingModule
 import nl.rhaydus.softcover.feature.scan.di.scanModule
 import nl.rhaydus.softcover.feature.session.di.sessionModule
@@ -68,6 +70,7 @@ class SoftCoverApp : Application() {
                 databaseModule,
                 bookDetailModule,
                 libraryModule,
+                libraryServiceModule,
                 listsModule,
                 createListModule,
                 onboardingModule,
@@ -76,6 +79,7 @@ class SoftCoverApp : Application() {
                 scanModule,
                 settingsModule,
                 profileModule,
+                profileScreenModule,
                 appUpdateModule,
                 appUpdateVariantModule,
                 deadlinesModule,

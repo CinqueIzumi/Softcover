@@ -77,17 +77,25 @@ KMP later).
 ```
 :app                      nav host + cross-feature ORCHESTRATION use cases (top tier)
    │
-:feature:book_detail      aggregator; depends DOWN on the features it composes
+:feature:{library, reading, explore, book_detail, lists, profile, scan,
+          session, onboarding, settings, app_update}   ← all leaves after Steps 7–18
    │
-:feature:{library, reading, explore, lists, deadlines, profile, scan,
-          session, onboarding, personal, connectivity, settings, app_update}
-   │
-:core:book  :core:lists           book/list operations: repositories + the use cases every feature calls
-   │
+:core:book  :core:lists  :core:deadlines  :core:personal  :core:profile  :core:library
+   │         operations services: repositories + the use cases features call
 :core:domain  :core:preferences  :core:identity   shared model, config value types, user id
    │           (T3 :app also holds orchestration/ — cross-feature use case impls behind core/domain contracts)
-:core:designsystem (toad, theme, components)  :core:network  :core:database
+:core:designsystem (toad, theme, components, nav contract, session controller)
+:core:connectivity  :core:network  :core:database
 ```
+
+> **Update (Steps 7–18 landed, 2026-06-01).** The post-Step-6 audit was *not* yet a clean DAG — its
+> §4 script greps only `feature → feature`, so it missed (a) four `core → feature` cycles and (b) a
+> second wave of kernels still wearing feature folders. Steps 7–18 (below) closed both. The graph is
+> now **fully acyclic with zero `feature → feature` edges**: every former aggregator edge resolved by
+> pushing the shared thing to `core`, so even `book_detail` and `reading` are clean **leaves** (no T2
+> tier is needed in practice). `deadlines`, `personal`, and `connectivity` became `core` modules and
+> are no longer features; `profile`/`explore` kept their *screens* as features while their *services*
+> moved to core.
 
 Tier rule: a module may depend only on modules **below** it. See
 [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) §"Tiers" for the authoritative
@@ -383,6 +391,93 @@ future audits. Every *other* feature's `domain/` is Android-free and remains a `
 > `AppUpdateState`, consumed by `settings` + the bottom bar) is a distinct concern: it is resolved by
 > **promoting the pure `AppUpdateState` enum to `core/domain/model`**, not by anything in this step.
 > Tracked for a later cleanup; it does not affect the `androidMain` decision above.
+
+---
+
+## 3b. The second-wave refactors (Steps 7–18, landed 2026-06-01)
+
+A fresh audit before the mechanical split found the post-Step-6 graph was **not** the clean DAG §3
+promised: the §4 script greps only `feature → feature`, so it missed four `core → feature` cycles and
+a whole second wave of kernels disguised as features. Steps 7–18 closed all of it. Each was
+independently shippable, build-green, and package-only (no behavioural change except the trending
+relocation and the session-launcher inversion noted below).
+
+### Step 7 — Room schema ownership → `core:database` ☑
+**Moved** the DAOs+entities for the shared/cross-joined tables (`deadlines`, `connectivity`,
+`explore`, `personal`) into `core/data/database/{dao,model}`. `SoftcoverDatabase` and `BookDao` (which
+SQL-joins the deadline table) now reference them intra-`core`. Each feature's *data source* stays put
+and injects the now-`core` DAO downward — the `BooksLocalDataSource → BookDao` precedent. **No Room
+migration** (package-only; same tables/columns, `books.db`, `@Database(version = 40)`). Cleared the two
+hardest `core → feature` blockers.
+
+### Step 8 — Promote shared models → `core/domain/model` ☑
+`BookDeadline`, `DeadlineProgress`, `DeadlineStatus`, `DeadlineUnit`, `ReadingSession`,
+`ReadingDayActivity` → `core/domain/model` (flat). Re-pointed the three core `Deadline*` components.
+Cleared the `core/presentation → feature.deadlines` blocker.
+
+### Step 9 — Extract `core:deadlines` ☑
+Deadline repository + `Observe*/Set/Clear` use cases + data source + mapper + Koin module → `core/deadlines`.
+`feature/deadlines` ceased to exist. Removed `library/reading/book_detail → deadlines`.
+
+### Step 10 — Extract `core:personal` ☑
+The reading-activity service (highlight/log/session repos + use cases + data; no presentation) →
+`core/personal`. `feature/personal` ceased to exist. Removed `session → personal`.
+
+### Step 11 — Split `profile`: service → `core:profile`, screen stays a feature ☑
+`ProfileRepository`(+impl), `Observe/RefreshUserProfileData`, `ObserveRecentReadingActivity`,
+`UserProfileData`/`Snapshot` → `core/profile` (own `profileModule`). `feature/profile` keeps
+`presentation/**` (own `profileScreenModule`) and depends down. Removed `reading/book_detail → profile`.
+
+### Step 12 — Fold explore trending into `core:book` ☑
+`GetTrendingBooksUseCase` + a `fetchTrendingBooks()` method on `BooksRepository`/`BooksRemoteDataSource`
+(reusing the existing `toBook` mapper and id-batch query) → `core/book`. The Explore *screen* +
+search/continue-series stay in `feature/explore`. Removed `reading → explore`.
+
+### Step 13 — Move `connectivity` infra → core ☑
+Repo/queue impls + sync → `core/connectivity` (contracts already in `core/domain/connectivity`);
+`ConnectivityBanner` + `OfflineGuard` (`OfflineScreenContent`/`rememberIsOnline`) →
+`core/presentation/component`. `feature/connectivity` ceased to exist. Removed `book_detail/explore →
+connectivity`.
+
+### Step 14 — Promote `ActiveSessionController` → `core/presentation/session` ☑
+The app-scoped controller (+ `ActiveSession`, `formatSessionElapsed`) → core. Its one feature coupling
+— starting `ReadingSessionService` — was **inverted** with a `ReadingSessionLauncher` contract in core
+(impl `ReadingSessionLauncherImpl` in `feature/session`, Koin-bound), which also removed Android
+`Context` from the controller. `SessionPeekBar`/`FocusModeScreen`/`ReadingSessionService` stay in
+`feature/session`. Removed `reading → session`.
+
+### Step 15 — `MainActivityViewModel` stays in `core` (deviation from the original plan) ☑
+The plan said relocate it to orchestration. Investigation showed it is consumed by **two features**
+(`profile`, `onboarding`, signal-only `setUserAuthenticated`) and the shell — so by this repo's own
+core litmus (a type imported by ≥2 features is `core`) it belongs in `core`. Its *only* feature
+dependency was `RefreshLibraryUseCase`, which Step 17 moves to `core:library`; once that landed the VM
+coordinates **only core services** and is a legitimate `core/presentation` type. No relocation, no
+orchestration `UserAuthenticationNotifier` indirection needed. (Cleared `core → feature` blocker #2.)
+
+### Step 16 — Promote `AppUpdateState` + `AppUpdateSimulator` → core ☑
+`AppUpdateState` (pure sealed state) → `core/domain/model`; the `AppUpdateSimulator` **contract** →
+`core/domain/appupdate` (debug/release impls stay in `feature/app_update`). Re-typed `LocalAppUpdate`;
+`settings` imports from core. The Play-`AppUpdateManager`-bound repository + flow stay in
+`feature/app_update` (the sanctioned androidMain domain). Cleared `core → feature` blocker #4 and
+removed `settings → app_update`.
+
+### Step 17 — Extract `core:library`; promote `LibraryTab` ☑
+`RefreshLibraryUseCase` (deps all core) → `core/library` (own `libraryServiceModule`), covering both
+`reading → library` and the `settings → library` use-case edge. The shared sealed `LibraryTab`
+(consumed by `library` + the settings library-visibility screen) → `core/presentation/model`. The
+library-visibility screen stays in `settings` and reaches `library` only through the Step-5
+`AppNavigator` contract, so `settings → library` is fully gone.
+
+### Step 18 — Final audit ☑
+All three greps clean: `feature → feature` **empty** (not just `:app`/`book_detail` downward — *zero*
+sibling edges, so `book_detail`/`reading` are clean leaves and no T2 tier is needed), `core → feature`
+**empty**, `feature → orchestration` **empty**. Full unit suite green. Docs updated
+(`MODULE_STRUCTURE_GUIDELINES.md`, `DESIGN_SYSTEM.md`).
+
+> **BSD-`sed` foot-gun, recorded.** macOS `sed` does not support `\b`; word-boundary remaps silently
+> no-op. Two class-specific remaps (`ReadingSession`, `ReadingDayActivity`, `ActiveSession`) hit this
+> and were caught + corrected by per-step compilation. Use exact-string FQN remaps, and after any move
+> verify both the `package` declaration *and* the file's physical directory match.
 
 ---
 

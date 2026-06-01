@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
@@ -18,8 +20,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -110,7 +110,7 @@ class BookDeadlineCollectorTest {
         deadlineDate = deadlineDate,
         setAt = LocalDate.of(2026, 4, 20),
         initialPerDay = initialPerDay,
-        unit = nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit.PAGES,
+        unit = nl.rhaydus.softcover.core.domain.model.DeadlineUnit.PAGES,
     )
 
     @Nested

@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.feature.app_update.domain.model.AppUpdateState
+import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.domain.repository.AppUpdateRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

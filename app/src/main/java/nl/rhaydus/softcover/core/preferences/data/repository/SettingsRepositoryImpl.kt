@@ -1,15 +1,15 @@
 package nl.rhaydus.softcover.core.preferences.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataSource
-import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class SettingsRepositoryImpl(

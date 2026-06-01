@@ -14,9 +14,9 @@ import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion.listBookFragment
 import nl.rhaydus.softcover.RemoveListBookMutation
 import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Companion.listFragment as removeListBookListFragment
+import nl.rhaydus.softcover.UpdateListBookPositionsMutation
 import nl.rhaydus.softcover.UpdateListMutation
 import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
-import nl.rhaydus.softcover.UpdateListBookPositionsMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeMutation
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -29,10 +29,10 @@ import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.type.Int_comparison_exp
 import nl.rhaydus.softcover.type.ListBookInput
 import nl.rhaydus.softcover.type.ListInput
-import nl.rhaydus.softcover.type.Lists_bool_exp
 import nl.rhaydus.softcover.type.List_books_bool_exp
 import nl.rhaydus.softcover.type.List_books_set_input
 import nl.rhaydus.softcover.type.List_books_updates
+import nl.rhaydus.softcover.type.Lists_bool_exp
 
 interface ListsRemoteDataSource {
     suspend fun fetchUserLists(

@@ -33,20 +33,20 @@ import androidx.lifecycle.lifecycleScope
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
 import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
-import nl.rhaydus.softcover.feature.app_update.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CheckForAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
-import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

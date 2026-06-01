@@ -49,11 +49,11 @@ import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
-import nl.rhaydus.softcover.feature.session.presentation.ActiveSession
-import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
-import nl.rhaydus.softcover.feature.session.presentation.formatSessionElapsed
 import org.koin.compose.koinInject
 import java.time.Instant
 import kotlin.math.min

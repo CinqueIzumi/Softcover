@@ -40,6 +40,10 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
 import timber.log.Timber
 
+private const val TRENDING_LIMIT = 10
+private const val TRENDING_OFFSET = 0
+private const val TRENDING_WINDOW_DAYS = 7L
+
 class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
     private val booksLocalDataSource: BooksLocalDataSource,
@@ -284,6 +288,17 @@ class BooksRepositoryImpl(
 
     override suspend fun fetchBooksByIds(ids: List<Int>): List<Book> {
         return booksRemoteDataSource.fetchBooksByIds(ids = ids)
+    }
+
+    override suspend fun fetchTrendingBooks(): List<Book> {
+        val today = LocalDate.now()
+
+        return booksRemoteDataSource.fetchTrendingBooks(
+            from = today.minusDays(TRENDING_WINDOW_DAYS).toString(),
+            to = today.toString(),
+            limit = TRENDING_LIMIT,
+            offset = TRENDING_OFFSET,
+        )
     }
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {

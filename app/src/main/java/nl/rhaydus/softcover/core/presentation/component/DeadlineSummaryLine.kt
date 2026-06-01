@@ -13,10 +13,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineStatus
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 
 @Composable
 fun DeadlineSummaryLine(

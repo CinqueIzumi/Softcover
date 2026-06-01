@@ -68,10 +68,12 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBarAction
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
+import nl.rhaydus.softcover.core.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
@@ -93,8 +95,6 @@ import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
-import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction

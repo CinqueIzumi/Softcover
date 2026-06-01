@@ -6,11 +6,6 @@ import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSer
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSource
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
-import java.time.LocalDate
-
-private const val TRENDING_LIMIT = 10
-private const val TRENDING_OFFSET = 0
-private const val TRENDING_WINDOW_DAYS = 7L
 
 class ExploreRepositoryImpl(
     private val searchRemoteDataSource: SearchRemoteDataSource,
@@ -27,17 +22,6 @@ class ExploreRepositoryImpl(
 
     override val dismissedContinueSeriesIds: Flow<List<Int>> =
         dismissedContinueSeriesLocalDataSource.dismissedSeriesIds
-
-    override suspend fun fetchTrendingBooks(): List<Book> {
-        val today = LocalDate.now()
-
-        return searchRemoteDataSource.fetchTrendingBooks(
-            from = today.minusDays(TRENDING_WINDOW_DAYS).toString(),
-            to = today.toString(),
-            limit = TRENDING_LIMIT,
-            offset = TRENDING_OFFSET,
-        )
-    }
 
     override suspend fun fetchNextInSeries(
         seriesId: Int,

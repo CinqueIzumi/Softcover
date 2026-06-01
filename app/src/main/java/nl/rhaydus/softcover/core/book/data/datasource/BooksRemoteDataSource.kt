@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery.Data.Edition.Companion.editionDetailFragment
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.editionDetailFragment as editionsByIdsDetailFragment
+import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.MarkBookAsReadMutation
@@ -65,6 +66,13 @@ interface BooksRemoteDataSource {
     suspend fun fetchBooksByIds(
         ids: List<Int>,
         forceNetwork: Boolean = false,
+    ): List<Book>
+
+    suspend fun fetchTrendingBooks(
+        from: String,
+        to: String,
+        limit: Int,
+        offset: Int,
     ): List<Book>
 
     suspend fun markBookAsWantToRead(
@@ -244,6 +252,41 @@ class BooksRemoteDataSourceImpl(
 
             result.books.mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
         }
+    }
+
+    override suspend fun fetchTrendingBooks(
+        from: String,
+        to: String,
+        limit: Int,
+        offset: Int,
+    ): List<Book> {
+        val trendingIds: List<Int> = apolloClient.safeQuery(
+            query = GetTrendingBookIdsQuery(
+                from = from,
+                to = to,
+                limit = limit,
+                offset = offset,
+            )
+        )
+            .books_trending
+            ?.ids
+            ?.mapNotNull { it }
+            ?: return emptyList()
+
+        if (trendingIds.isEmpty()) return emptyList()
+
+        val idOrdered = trendingIds.withIndex().associate { it.value to it.index }
+
+        return apolloClient
+            .safeQuery(
+                query = GetBooksByIdsQuery(ids = trendingIds),
+                fetchPolicy = FetchPolicy.CacheFirst,
+            )
+            .books
+            .mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
+            // Restore the trending rank lost by the by-ids batch fetch; a book whose id isn't in the
+            // trending set (e.g. an Apollo canonical-merge redirect) sorts last on its null rank.
+            .sortedBy { book -> idOrdered[book.id] }
     }
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {

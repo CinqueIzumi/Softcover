@@ -56,7 +56,7 @@ import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
-import nl.rhaydus.softcover.feature.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent

@@ -27,13 +27,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
-import nl.rhaydus.softcover.feature.profile.domain.model.ReadingDayActivity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

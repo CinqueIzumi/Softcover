@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

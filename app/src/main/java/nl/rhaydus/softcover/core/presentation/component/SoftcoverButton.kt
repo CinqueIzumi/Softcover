@@ -38,11 +38,11 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.modifier.pressScale
 import nl.rhaydus.softcover.core.presentation.model.IconToggleButtonShape
 import nl.rhaydus.softcover.core.presentation.model.IconToggleButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.model.ToggleButtonStyle
+import nl.rhaydus.softcover.core.presentation.modifier.pressScale
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 

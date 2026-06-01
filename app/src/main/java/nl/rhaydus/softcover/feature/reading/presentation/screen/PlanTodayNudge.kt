@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import kotlin.math.ceil
 
 internal fun planTodayNudgeFor(progress: DeadlineProgress?): String? {

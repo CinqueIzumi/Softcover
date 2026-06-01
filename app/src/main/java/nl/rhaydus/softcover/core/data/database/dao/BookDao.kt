@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.data.database.mapper.toEditionAuthorRefs
 import nl.rhaydus.softcover.core.data.database.mapper.toEntity
 import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.data.database.model.BookAuthorCrossRef
+import nl.rhaydus.softcover.core.data.database.model.BookDeadlineEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEntity
 import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
@@ -32,7 +33,6 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
-import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
 import timber.log.Timber
 
 @Dao

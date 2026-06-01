@@ -9,6 +9,13 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
+import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
+import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.SetListRankedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
@@ -18,13 +25,6 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
-import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
-import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
-import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
-import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
-import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
-import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
-import nl.rhaydus.softcover.core.lists.domain.usecase.SetListRankedUseCase
 
 class LibraryDependencies(
     val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,

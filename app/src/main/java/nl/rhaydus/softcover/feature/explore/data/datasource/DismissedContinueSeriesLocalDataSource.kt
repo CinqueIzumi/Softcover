@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.explore.data.datasource
 
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.feature.explore.data.dao.DismissedContinueSeriesDao
-import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesBookEntity
-import nl.rhaydus.softcover.feature.explore.data.model.DismissedContinueSeriesEntity
+import nl.rhaydus.softcover.core.data.database.dao.DismissedContinueSeriesDao
+import nl.rhaydus.softcover.core.data.database.model.DismissedContinueSeriesBookEntity
+import nl.rhaydus.softcover.core.data.database.model.DismissedContinueSeriesEntity
 
 interface DismissedContinueSeriesLocalDataSource {
     val dismissedBookIds: Flow<List<Int>>

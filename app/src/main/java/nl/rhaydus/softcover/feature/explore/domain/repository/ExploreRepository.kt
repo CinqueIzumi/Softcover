@@ -9,8 +9,6 @@ interface ExploreRepository {
     val dismissedContinueSeriesBookIds: Flow<List<Int>>
     val dismissedContinueSeriesIds: Flow<List<Int>>
 
-    suspend fun fetchTrendingBooks(): List<Book>
-
     suspend fun fetchNextInSeries(
         seriesId: Int,
         afterPosition: Double,

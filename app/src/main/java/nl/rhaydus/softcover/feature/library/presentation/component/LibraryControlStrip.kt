@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnEnterRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
@@ -43,7 +44,6 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnLayoutMenuExpa
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSetListRankedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @Composable

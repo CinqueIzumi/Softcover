@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.initializer
 
 import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.feature.profile.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables

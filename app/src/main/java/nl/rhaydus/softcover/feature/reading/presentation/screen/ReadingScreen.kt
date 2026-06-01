@@ -81,8 +81,12 @@ import org.koin.compose.koinInject
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
@@ -112,6 +116,7 @@ import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.bodyFontFamily
@@ -123,10 +128,6 @@ import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
-import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.feature.profile.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
@@ -142,7 +143,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.math.roundToInt

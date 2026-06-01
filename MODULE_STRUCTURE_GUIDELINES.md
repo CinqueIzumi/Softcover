@@ -75,19 +75,35 @@ identity. Split into focused modules, not one `:core` grab-bag:
 
 | Module | Holds | Examples |
 |--------|-------|----------|
-| `core:domain` | shared domain models, classification enums, config value types, and cross-feature use-case **contracts** whose impls live in `:app` | `Book`, `BookEdition`, `BookStatus`, `LibrarySortMode`, `SortDirection`, `DateStyle`, `LibraryGridLayout`; account-lifecycle contracts `ResetUserDataUseCase`, `InitializeUserIdAndBooksUseCase` (in `core/domain/account/`) |
-| `core:book` | the book-**operations** service: repository + use cases every feature calls | `BooksRepository`, `MarkBookAsReadUseCase`, `RecordBookProgressUseCase`, `AddBookByIsbnUseCase` |
+| `core:domain` | shared domain models, classification enums, config value types, and cross-feature use-case **contracts** whose impls live elsewhere | `Book`, `BookEdition`, `BookStatus`, `LibrarySortMode`, `DateStyle`, `BookDeadline`, `ReadingSession`, `ReadingDayActivity`, `AppUpdateState`; contracts `ResetUserDataUseCase`/`InitializeUserIdAndBooksUseCase` (`core/domain/account/`), `AppUpdateSimulator` (`core/domain/appupdate/`) |
+| `core:book` | the book-**operations** service: repository + use cases every feature calls (incl. trending discovery) | `BooksRepository`, `MarkBookAsReadUseCase`, `RecordBookProgressUseCase`, `AddBookByIsbnUseCase`, `GetTrendingBooksUseCase` |
 | `core:lists` | the list-**operations** service: repository + use cases consumed by library/book_detail/settings | `ListsRepository`, `GetAllUserListsUseCase`, `AddBookToListUseCase`, `SetEditionAsOwnedUseCase` |
+| `core:deadlines` | the deadline-**operations** service consumed by library/reading/book_detail | `BookDeadlineRepository`, `ObserveBookDeadlineUseCase`, `SetBookDeadlineUseCase` |
+| `core:personal` | the reading-**activity** service (sessions, highlights, reading log) — no screen | `ReadingSessionRepository`, `Start/Stop/Pause/ResumeReadingSessionUseCase`, `HighlightRepository` |
+| `core:profile` | the profile-**data** service consumed by reading/book_detail (the `ProfileScreen` stays a feature) | `ProfileRepository`, `ObserveUserProfileDataUseCase`, `RefreshUserProfileDataUseCase` |
+| `core:library` | library-refresh operation consumed by reading + the settings library-visibility screen | `RefreshLibraryUseCase` |
 | `core:preferences` | preference read/write contracts + value access + the DataStore-backed impl | `SettingsRepository`, `Get*AsFlowUseCase` readers, `AppSettingsDataStore`, `ApiKeyLocalDataSource` |
 | `core:identity` | user identity / auth credential use cases | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
-| `core:designsystem` | TOAD framework, theme, reusable components, modifiers, shared presentation models | `core/presentation/{toad, theme, component, model}` |
+| `core:connectivity` | offline write-queue/sync infra (contracts in `core:domain/connectivity`) | `ListWriteQueueImpl`, `UserBookWriteQueueImpl`, the pending-write syncers |
+| `core:designsystem` | TOAD framework, theme, reusable components, modifiers, shared presentation models, nav contract, app-scoped session controller | `core/presentation/{toad, theme, component, model, navigation, session}`, `ActiveSessionController`, `MainActivityViewModel`, `ReadingSessionLauncher` (contract) |
 | `core:network` | Apollo client, interceptors, `safeQuery`/`safeMutation` | |
-| `core:database` | Room database, migrations | |
+| `core:database` | Room database, migrations, **all persisted entities + DAOs** (incl. those a feature's data source uses) | `SoftcoverDatabase`, `BookDao`, `BookDeadlineEntity`, `ReadingSessionEntity`, … |
 
 **The litmus test for "is this `core`?":** *Would a second, unrelated feature reasonably import this
 to do its job?* If yes, it is a kernel and belongs in `core`. A feature that everyone imports is not
-a feature — it is a kernel wearing a feature's folder (this is exactly what `books` and `settings`
-became; see the plan).
+a feature — it is a kernel wearing a feature's folder (this is exactly what `books`, `settings`,
+`deadlines`, `personal`, and `connectivity` turned out to be; see the plan). **Corollary:** a type
+imported by ≥2 features is `core` even when it is a ViewModel or presentation model — e.g.
+`MainActivityViewModel` (consumed by the shell + `profile` + `onboarding`) and `LibraryTab` (consumed
+by `library` + `settings`) are `core:designsystem`, not feature-local.
+
+**The vertical-slice rule (where a shared concept's pieces live).** A `core:<concept>` operations
+module owns only the **repository + use cases** (and its data sources/mappers). Its **domain models**
+live in `core:domain` (pure, KMP `commonMain` candidates); its **Room entities + DAOs** live in
+`core:database` (the single `@Database` must see every entity, and `BookDao` SQL-joins across them).
+So `core:deadlines` = `BookDeadlineRepository` + use cases; `BookDeadline` is in `core:domain`;
+`BookDeadlineEntity`/`BookDeadlineDao` are in `core:database`. Do **not** try to make a concept module
+self-contained with its own models/entities — that breaks the shared model tier and the single Room DB.
 
 `core` modules may depend on each other **downward only** — e.g. `core:book → core:domain` is fine;
 `core:domain` depends on nothing.
@@ -119,14 +135,23 @@ Rules specific to the module axis:
 
 ### Current feature roster and tier
 
+After the Steps 7–18 second-wave extraction (see the plan), **every feature is a leaf** — there are no
+sibling `feature → feature` edges, so `book_detail` and `reading`, though they compose many concepts,
+import only `core` and need no separate T2 tier in practice. (T2 remains a *sanctioned position* for a
+future aggregator that genuinely must import another feature's screen.)
+
 | Tier | Features |
 |------|----------|
-| T2 (aggregator) | `book_detail` |
-| T1 (leaf) | `library`, `reading`, `explore`, `lists`, `deadlines`, `profile`, `scan`, `session`, `onboarding`, `personal`, `connectivity`, `settings`, `app_update` |
+| T1 (leaf) | `library`, `reading`, `explore`, `book_detail`, `lists`, `profile`, `scan`, `session`, `onboarding`, `settings`, `app_update` |
 
 `settings` remains a T1 feature for its **screens** only — its shared value types, preference readers,
-and identity use cases belong in `core` (`core:domain` / `core:preferences` / `core:identity`), and
-its cross-feature orchestration belongs in T3 (see §5).
+and identity use cases belong in `core`, and its cross-feature orchestration belongs in T3 (see §5).
+
+`profile` and `explore` keep their **screens** as features; their cross-feature **services** moved to
+`core:profile` / `core:book` (trending). `deadlines`, `personal`, and `connectivity` were kernels in
+disguise and are now `core` modules — they are **not** features. `app_update` stays a feature (its
+Play-`AppUpdateManager` domain is the sanctioned `androidMain` exception), but its pure `AppUpdateState`
+and the `AppUpdateSimulator` contract live in `core:domain`.
 
 `lists` likewise remains a T1 feature for its **CreateList surface** only (`CreateListUseCase` +
 `CreateListScreen`) — its repository and the operation use cases the rest of the app calls live in

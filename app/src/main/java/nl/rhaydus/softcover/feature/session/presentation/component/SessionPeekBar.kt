@@ -33,11 +33,11 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
-import nl.rhaydus.softcover.feature.session.presentation.ActiveSession
-import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
-import nl.rhaydus.softcover.feature.session.presentation.formatSessionElapsed
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import org.koin.compose.koinInject
 import java.time.Instant

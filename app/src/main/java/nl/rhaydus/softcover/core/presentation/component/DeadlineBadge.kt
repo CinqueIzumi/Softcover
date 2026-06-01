@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineStatus
+import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
 
 @Composable
 fun DeadlineBadge(
