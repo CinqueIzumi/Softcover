@@ -33,6 +33,7 @@ import androidx.lifecycle.lifecycleScope
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
@@ -135,6 +136,12 @@ class MainActivity : ComponentActivity() {
                             AppUpdateState.Idle -> Unit
                         }
                     }
+            }
+
+            LaunchedEffect(Unit) {
+                UserMessageNotifier.messages.collect { message ->
+                    SnackBarManager.showSnackbar(title = message)
+                }
             }
 
             SoftcoverTheme(dynamicColor = themeConfig.useDynamicColor) {

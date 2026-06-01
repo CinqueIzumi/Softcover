@@ -63,7 +63,6 @@ class BooksRemoteDataSourceImplTest {
 
         mockkStatic("nl.rhaydus.softcover.core.data.network.helper.ApolloExtensionsKt")
         mockkStatic("nl.rhaydus.softcover.core.book.data.mapper.BookMapperKt")
-        mockkStatic("nl.rhaydus.softcover.core.lists.data.mapper.ListMapperKt")
         mockkObject(UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion)
     }
 
