@@ -1,0 +1,29 @@
+query FindTagsByUserAndTaggable(
+    $userId: Int!,
+    $type: String!,
+    $id: bigint!,
+) {
+    taggings(
+        where: {
+            user_id: {
+                _eq: $userId
+            },
+            taggable_id: {
+                _eq: $id
+            },
+            taggable_type: {
+                _eq: $type
+            }
+        },
+        order_by: {
+            tag: {
+                tag_category_id: asc
+            }
+        }
+    ) {
+        ...TaggingFragment
+        tag {
+            ...TagFragment
+        }
+    }
+}

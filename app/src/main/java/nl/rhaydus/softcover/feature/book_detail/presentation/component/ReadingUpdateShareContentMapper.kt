@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.component
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.presentation.share.ReadingUpdateKind
@@ -21,6 +22,7 @@ internal fun Book.toReadingUpdateContent(
     edition: BookEdition?,
     username: String?,
     avatarUrl: String?,
+    userTags: List<UserTag> = emptyList(),
 ): ReadingUpdateShareContent? {
     val resolvedUsername = username?.takeIf { it.isNotBlank() } ?: return null
 
@@ -63,6 +65,8 @@ internal fun Book.toReadingUpdateContent(
         } else {
             null
         },
+
+        tags = userTags.filterNot { it.spoiler }.map { it.name },
     )
 }
 

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
@@ -60,15 +61,17 @@ fun ShareBookBottomSheet(
     edition: BookEdition?,
     currentUsername: String?,
     currentUserAvatarUrl: String?,
+    userTags: List<UserTag>,
     onDismissRequest: () -> Unit,
 ) {
     val bookContent = remember(book, edition) { book.toShareContent(edition = edition) }
 
-    val updateContent = remember(book, edition, currentUsername, currentUserAvatarUrl) {
+    val updateContent = remember(book, edition, currentUsername, currentUserAvatarUrl, userTags) {
         book.toReadingUpdateContent(
             edition = edition,
             username = currentUsername,
             avatarUrl = currentUserAvatarUrl,
+            userTags = userTags,
         )
     }
 

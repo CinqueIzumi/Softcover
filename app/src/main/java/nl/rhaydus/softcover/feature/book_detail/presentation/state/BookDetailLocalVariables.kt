@@ -7,4 +7,5 @@ data class BookDetailLocalVariables(
     val editionsLoadedForBookId: Int? = null,
     val bookMutationJobs: Map<Int, Job> = emptyMap(),
     val editionMutationJobs: Map<Int, Job> = emptyMap(),
+    val tagSaveJob: Job? = null,
 ) : LocalVariables

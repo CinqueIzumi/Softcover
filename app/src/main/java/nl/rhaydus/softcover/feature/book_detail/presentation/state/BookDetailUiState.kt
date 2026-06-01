@@ -4,6 +4,8 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
@@ -50,6 +52,11 @@ data class BookDetailUiState(
     val showChooseListsSheet: Boolean = false,
     val userLists: List<BookList> = emptyList(),
     val listsBeingMutated: Set<Int> = emptySet(),
+
+    val userTags: List<UserTag> = emptyList(),
+    val showTagEditorSheet: Boolean = false,
+    val tagEditorCategory: TagCategory = TagCategory.TAG,
+    val tagEditorInput: String = "",
 ) : UiState {
     /**
      * The edition pinned by an external entry point (a barcode scan), if any. It wins over every

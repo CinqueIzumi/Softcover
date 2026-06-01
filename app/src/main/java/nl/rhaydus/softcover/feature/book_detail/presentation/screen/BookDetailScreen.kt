@@ -138,6 +138,7 @@ import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnAddUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
@@ -149,6 +150,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissPro
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissReviewSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissScanEditionBannerClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissTagEditorAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnExternalLinkClickAction
@@ -158,16 +160,21 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAs
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenReviewSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenTagEditorAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRateBookAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveReviewAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagDraftChangeAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagEditorCategoryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleUserTagSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
@@ -175,6 +182,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToSc
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ReviewEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalLinkEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
@@ -182,9 +190,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.feature.lists.presentation.component.ListMembership
-import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
@@ -407,6 +415,17 @@ class BookDetailScreen(
                     }
                 }
 
+                if (state.book?.userBook != null) {
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                    item(key = "userTags") {
+                        UserTagsSection(
+                            state = state,
+                            runAction = runAction,
+                        )
+                    }
+                }
+
                 val ratingBook = state.book
 
                 if (ratingBook != null && ratingBook.status == BookStatus.Read) {
@@ -518,7 +537,29 @@ class BookDetailScreen(
                     edition = state.displayedEdition,
                     currentUsername = state.currentUsername,
                     currentUserAvatarUrl = state.currentUserAvatarUrl,
+                    userTags = state.userTags,
                     onDismissRequest = { runAction(OnDismissShareSheetAction()) },
+                )
+            }
+
+            if (state.showTagEditorSheet && state.book != null) {
+                TagEditorBottomSheet(
+                    userTags = state.userTags,
+                    selectedCategory = state.tagEditorCategory,
+                    draft = state.tagEditorInput,
+                    onCategorySelected = { runAction(OnTagEditorCategoryChangeAction(category = it)) },
+                    onDraftChange = { runAction(OnTagDraftChangeAction(input = it)) },
+                    onAddTag = { name, category ->
+                        runAction(
+                            OnAddUserTagAction(
+                                name = name,
+                                category = category,
+                            )
+                        )
+                    },
+                    onRemoveTag = { runAction(OnRemoveUserTagAction(tag = it)) },
+                    onToggleSpoiler = { runAction(OnToggleUserTagSpoilerAction(tag = it)) },
+                    onDismissRequest = { runAction(OnDismissTagEditorAction()) },
                 )
             }
 
@@ -1993,6 +2034,46 @@ class BookDetailScreen(
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalLayoutApi::class)
+    @Composable
+    private fun UserTagsSection(
+        state: BookDetailUiState,
+        runAction: (BookDetailAction) -> Unit,
+    ) {
+        val tags = state.userTags
+
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            SectionLabel(text = "Your tags")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (tags.isEmpty()) {
+                PillChip(
+                    label = "Add tags",
+                    onClick = { runAction(OnOpenTagEditorAction()) },
+                )
+            } else {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    tags.forEach { tag ->
+                        key(tag.category, tag.name) {
+                            PillChip(label = tag.name)
+                        }
+                    }
+
+                    PillChip(
+                        label = "Edit tags",
+                        selected = true,
+                        onClick = { runAction(OnOpenTagEditorAction()) },
+                    )
                 }
             }
         }

@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.core.presentation.share
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -32,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.presentation.component.PillChip
 import nl.rhaydus.softcover.core.presentation.component.ReviewDocumentText
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.presentation.component.StarRatingInput
@@ -209,6 +212,7 @@ private fun buildBookStatsLine(content: BookShareContent): String? {
     return parts.takeIf { it.isNotEmpty() }?.joinToString(separator = " · ")
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ReadingUpdateShareCardBody(content: ReadingUpdateShareContent) {
     val eyebrow = when (content.kind) {
@@ -275,6 +279,20 @@ private fun ReadingUpdateShareCardBody(content: ReadingUpdateShareContent) {
             username = content.username,
             avatarUrl = content.avatarUrl,
         )
+
+        if (content.tags.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                content.tags.forEach { tag ->
+                    PillChip(label = tag)
+                }
+            }
+        }
 
         when (content.kind) {
             ReadingUpdateKind.FINISHED -> {

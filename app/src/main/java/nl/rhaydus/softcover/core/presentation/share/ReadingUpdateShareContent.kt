@@ -22,4 +22,5 @@ data class ReadingUpdateShareContent(
     val ratingStars: Double?,
     val review: ReviewDocument?,
     val progressLabel: String?,
+    val tags: List<String> = emptyList(),
 ) : ShareContent

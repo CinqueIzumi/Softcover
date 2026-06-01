@@ -1,0 +1,8 @@
+fragment TagFragment on tags {
+    id
+    tag
+    count
+    tag_category {
+        category
+    }
+}
