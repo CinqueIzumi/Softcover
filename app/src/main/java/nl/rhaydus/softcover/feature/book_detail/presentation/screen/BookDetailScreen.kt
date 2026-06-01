@@ -194,8 +194,8 @@ import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineS
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
-import nl.rhaydus.softcover.feature.lists.presentation.component.ListMembership
+import nl.rhaydus.softcover.core.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.core.presentation.component.ListMembership
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import java.time.Instant
 import java.time.LocalDate

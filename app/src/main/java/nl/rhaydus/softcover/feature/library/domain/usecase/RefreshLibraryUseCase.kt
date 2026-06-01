@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
-import nl.rhaydus.softcover.feature.lists.domain.repository.ListsRepository
+import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 
 private const val OWNED_LIST_SLUG: String = "owned"
 

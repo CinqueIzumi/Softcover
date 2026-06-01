@@ -170,7 +170,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 import nl.rhaydus.softcover.feature.library.presentation.util.formatPageCount
 import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
-import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.core.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen
 

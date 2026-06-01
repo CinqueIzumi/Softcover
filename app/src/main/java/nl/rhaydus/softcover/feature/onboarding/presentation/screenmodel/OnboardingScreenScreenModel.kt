@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
+import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.softcover.core.identity.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.initializer.OnboardingInitializer
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
-import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdAndBooksUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.identity.domain.usecase.UpdateApiKeyUseCase
 
 class OnboardingScreenScreenModel(
     val initializeUserIdAndBooksUseCase: InitializeUserIdAndBooksUseCase,

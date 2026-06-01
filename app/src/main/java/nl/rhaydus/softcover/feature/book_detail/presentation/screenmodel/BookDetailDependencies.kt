@@ -21,10 +21,10 @@ import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCa
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
-import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
-import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
-import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
-import nl.rhaydus.softcover.feature.lists.domain.usecase.SetEditionAsOwnedUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveUserProfileDataUseCase
 
 class BookDetailDependencies(

@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
+import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.logging.PrefixedDebugTree
 import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
@@ -26,7 +27,7 @@ import nl.rhaydus.softcover.feature.connectivity.di.connectivityModule
 import nl.rhaydus.softcover.feature.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.feature.explore.di.exploreModule
 import nl.rhaydus.softcover.feature.library.di.libraryModule
-import nl.rhaydus.softcover.feature.lists.di.listsModule
+import nl.rhaydus.softcover.feature.lists.di.createListModule
 import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
 import nl.rhaydus.softcover.feature.personal.di.personalModule
 import nl.rhaydus.softcover.feature.profile.di.profileModule
@@ -34,6 +35,7 @@ import nl.rhaydus.softcover.feature.reading.di.readingModule
 import nl.rhaydus.softcover.feature.scan.di.scanModule
 import nl.rhaydus.softcover.feature.session.di.sessionModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
+import nl.rhaydus.softcover.orchestration.di.orchestrationModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -67,6 +69,7 @@ class SoftCoverApp : Application() {
                 bookDetailModule,
                 libraryModule,
                 listsModule,
+                createListModule,
                 onboardingModule,
                 readingModule,
                 exploreModule,
@@ -80,6 +83,7 @@ class SoftCoverApp : Application() {
                 notificationModule,
                 personalModule,
                 sessionModule,
+                orchestrationModule,
             )
         }
 

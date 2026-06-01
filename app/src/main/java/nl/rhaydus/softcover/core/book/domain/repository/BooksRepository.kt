@@ -42,7 +42,7 @@ interface BooksRepository {
     /**
      * Re-fetches the user's books from the remote and reconciles them with the local cache.
      * When [statusFilter] is null, refreshes every status; otherwise refreshes only that status's
-     * books. This is a books-only operation — list refresh is owned by [nl.rhaydus.softcover.feature.lists.domain.repository.ListsRepository].
+     * books. This is a books-only operation — list refresh is owned by [nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository].
      */
     suspend fun refreshUserBooks(
         userId: Int,

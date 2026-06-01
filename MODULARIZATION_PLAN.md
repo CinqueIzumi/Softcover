@@ -82,9 +82,10 @@ KMP later).
 :feature:{library, reading, explore, lists, deadlines, profile, scan,
           session, onboarding, personal, connectivity, settings, app_update}
    │
-:core:book                BooksRepository + book-operations use cases (the real shared "books")
+:core:book  :core:lists           book/list operations: repositories + the use cases every feature calls
    │
 :core:domain  :core:preferences  :core:identity   shared model, config value types, user id
+   │           (T3 :app also holds orchestration/ — cross-feature use case impls behind core/domain contracts)
 :core:designsystem (toad, theme, components)  :core:network  :core:database
 ```
 
@@ -236,7 +237,7 @@ got its **own Koin module** (`val bookModule`, renamed from `booksModule`):
   The only remaining `core → feature` edges left on `BookDao` (`feature/lists` `toEntity`,
   `feature/deadlines` `BookDeadlineEntity`) are unrelated to books and belong to later steps.
 
-### Step 4 — Move orchestration use cases up to `:app` ☐
+### Step 4 — Move orchestration use cases up to `:app` (+ extract `core/lists`) ☑
 
 **Move** the cross-feature orchestration use cases — `ResetUserDataUseCase`,
 `InitializeUserIdAndBooksUseCase`, and any refresh/sync coordination that reaches into
@@ -246,7 +247,60 @@ into the top tier (an `app/`-level `orchestration/` package, or a `core/sync` mo
 - **Why:** these are the edges that create the `settings ↔ library/lists/profile` cycles. They are
   *allowed* to know about multiple features — but only from the top tier, which depends downward on
   all of them. Relocating them **breaks all four `settings ↔ *` cycles** at once.
-- **Done when:** the audit shows no `settings → {library, lists, profile, books}` edges.
+- **Done when:** the audit shows no `settings → {library, profile, books}` orchestration edges and no
+  feature → `core/lists` *kernel* edges from `library` / `book_detail` / `settings` / `connectivity`.
+
+**Landed (2026-06-01).** Investigation showed the targeted cycles were carried by **two distinct kinds
+of coupling**, and both were resolved in this step:
+
+- **Orchestration (dependency-inverted, not a plain move).** `ResetUserDataUseCase` and
+  `InitializeUserIdAndBooksUseCase` are injected as constructor params into **leaf-feature** screen
+  models (`profile`, `onboarding`). Moving the concrete classes straight to T3 would have made a T1
+  leaf depend on T3 — an upward edge the import-audit script (which only greps `feature → feature`)
+  does **not** catch, but the Gradle split would. So each became a **pure contract interface** in
+  `core/domain/account/` (`suspend operator fun invoke(): Result<Unit>`, imports nothing
+  feature-specific), with the feature-reaching implementation as `…UseCaseImpl` in a new top-level T3
+  `nl.rhaydus.softcover.orchestration.usecase` package + `orchestrationModule` Koin module. Leaf
+  features depend on the `core` interface (downward, legal); `:app` binds interface→impl. Call sites
+  changed only their import line (the `Repository`/`RepositoryImpl` convention applied to a use case).
+  `core/domain/account` was chosen over `core/identity` to keep identity pure (a first-wave KMP
+  `commonMain` candidate) — the contracts touch books/profile/library, which is broader than identity.
+- **A disguised kernel — `core/lists` extracted.** The `settings → lists` edge was **not**
+  orchestration: `settings`, `library`, and `book_detail` all consumed `feature/lists` as a service.
+  `lists` was a kernel wearing a feature's folder, exactly like `books` (Step 3). The **full operations
+  vertical** moved into **`core/lists/`** — `ListsRepository`, `ListNameTakenException`, the six
+  cross-feature use cases (`GetAllUserListsUseCase`, `AddBookToListUseCase`,
+  `RemoveBookFromListUseCase`, `SetEditionAsOwnedUseCase`, `SetListRankedUseCase`,
+  `ReorderListBooksUseCase`), `ListsRepositoryImpl`, both data sources, and the Apollo→domain
+  `ListMapper` — with its own `listsModule` Koin module. `ListsRepositoryImpl`'s deps are all
+  downward: `core:book`, `core:domain`, and the `ListWriteQueue`/`ListWriteDrainer` contracts already
+  in `core/domain/connectivity`, so **no `core:lists ↔ connectivity` cycle**. The shared list UI
+  (`ChooseListsBottomSheet`, `ListMembership`) moved to `core/presentation/component/` (recorded in
+  `DESIGN_SYSTEM.md`). `feature/lists` survives as a thin T1 feature owning only the **CreateList**
+  surface (`CreateListUseCase` + `CreateListScreen` and its TOAD pieces, `createListModule`).
+- **`ListMapper` split along the Step-3 seam.** `BookDao` (in `core/data/database`) consumed the
+  domain↔entity half of `ListMapper`, a pre-existing `core/data/database → feature/lists` cycle.
+  The Apollo→domain half stays at `core/lists/data/mapper/ListMapper.kt`; the domain↔entity half
+  (`BookList.toEntity`, `ListBook.toEntity`, `ListBookFull.toModel`, `BookListWithBooks.toModel`)
+  moved **into the database layer** at `core/data/database/mapper/ListEntityMapper.kt`. `BookDao` now
+  uses those intra-module (the `toListEntity` alias is gone). This **resolves** the `database↔lists`
+  cycle (same outcome as `BookEntityMapper`). `ListMapperTest` split to mirror, into `ListMapperTest`
+  (Apollo) + `ListEntityMapperTest` (entity).
+- **This extends the written plan.** `core:lists` was not in the original §1.1 findings (which named
+  only `settings` and `books` as kernels); it was recognised during Step 4 and added to §2 and to
+  `MODULE_STRUCTURE_GUIDELINES.md` §3.
+
+> **Audit blind spot, recorded.** The §4 script only greps `feature → feature` edges, so it cannot
+> catch a future leaf → `:app` orchestration import. Step 4 verification therefore **also** runs
+> `grep -rn "import nl.rhaydus.softcover.orchestration" feature/` (must be empty) alongside the script.
+
+> **Deliberately left for later steps.** The only `* → lists` edges that remain are the
+> `CreateListScreen` **navigation** imports from `library`, `book_detail`, and `settings` (Step 5's
+> routing contract). Separately, `settings → library` survives via `LibraryVisibilitySettingsScreen`
+> (it injects `RefreshLibraryUseCase` and imports `LibraryTab`) and `settings → profile` via the
+> `ProfileScreen` nav import — these are a library-config screen and a screen-nav edge, both
+> pre-existing and **out of Step 4's scope**; they belong with the Step 5 navigation work or a
+> follow-up that relocates `LibraryVisibilitySettingsScreen` to `library`.
 
 ### Step 5 — Break navigation cycles with a routing contract ☐
 

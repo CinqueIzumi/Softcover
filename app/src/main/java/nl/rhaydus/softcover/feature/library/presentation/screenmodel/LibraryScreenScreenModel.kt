@@ -27,11 +27,11 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.lists.domain.usecase.AddBookToListUseCase
-import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
-import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
-import nl.rhaydus.softcover.feature.lists.domain.usecase.ReorderListBooksUseCase
-import nl.rhaydus.softcover.feature.lists.domain.usecase.SetListRankedUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.SetListRankedUseCase
 
 class LibraryScreenScreenModel(
     private val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,

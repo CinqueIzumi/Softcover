@@ -75,8 +75,9 @@ identity. Split into focused modules, not one `:core` grab-bag:
 
 | Module | Holds | Examples |
 |--------|-------|----------|
-| `core:domain` | shared domain models, classification enums, config value types | `Book`, `BookEdition`, `BookStatus`, `LibrarySortMode`, `SortDirection`, `DateStyle`, `LibraryGridLayout` |
+| `core:domain` | shared domain models, classification enums, config value types, and cross-feature use-case **contracts** whose impls live in `:app` | `Book`, `BookEdition`, `BookStatus`, `LibrarySortMode`, `SortDirection`, `DateStyle`, `LibraryGridLayout`; account-lifecycle contracts `ResetUserDataUseCase`, `InitializeUserIdAndBooksUseCase` (in `core/domain/account/`) |
 | `core:book` | the book-**operations** service: repository + use cases every feature calls | `BooksRepository`, `MarkBookAsReadUseCase`, `RecordBookProgressUseCase`, `AddBookByIsbnUseCase` |
+| `core:lists` | the list-**operations** service: repository + use cases consumed by library/book_detail/settings | `ListsRepository`, `GetAllUserListsUseCase`, `AddBookToListUseCase`, `SetEditionAsOwnedUseCase` |
 | `core:preferences` | preference read/write contracts + value access + the DataStore-backed impl | `SettingsRepository`, `Get*AsFlowUseCase` readers, `AppSettingsDataStore`, `ApiKeyLocalDataSource` |
 | `core:identity` | user identity / auth credential use cases | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:designsystem` | TOAD framework, theme, reusable components, modifiers, shared presentation models | `core/presentation/{toad, theme, component, model}` |
@@ -127,6 +128,12 @@ Rules specific to the module axis:
 and identity use cases belong in `core` (`core:domain` / `core:preferences` / `core:identity`), and
 its cross-feature orchestration belongs in T3 (see §5).
 
+`lists` likewise remains a T1 feature for its **CreateList surface** only (`CreateListUseCase` +
+`CreateListScreen`) — its repository and the operation use cases the rest of the app calls live in
+`core:lists`, and the shared list UI (`ChooseListsBottomSheet`, `ListMembership`) in
+`core:designsystem`. The remaining `* → lists` edges are `CreateListScreen` *navigation* imports,
+resolved by the §6 navigation contract.
+
 ---
 
 ## 5. What goes in `:app` (T3, orchestration)
@@ -143,6 +150,17 @@ its cross-feature orchestration belongs in T3 (see §5).
 If a use case needs to reach into two or more *features*, it is orchestration and belongs here — not
 in whichever feature you happened to be editing. (If it reaches into two or more *core* modules only,
 it can live in `core` instead; orchestration is specifically about coordinating *features*.)
+
+**When a leaf feature must trigger orchestration, invert the dependency — never let a leaf import
+`:app`.** A T1 screen model that needs to kick off a cross-feature flow (e.g. `onboarding` completing
+sign-in, `profile` logging out) depends on a **contract interface in `core/domain`**; the
+feature-reaching implementation (`…UseCaseImpl`) lives here in `:app/orchestration` and is bound to the
+interface in the orchestration Koin module. The leaf depends downward on the contract; `:app` depends
+downward on the leaf. This keeps the graph a DAG — the import audit's `feature → feature` grep will not
+flag a leaf → `:app` import, so verify it separately
+(`grep -rn "import …orchestration" feature/` must be empty). Pattern landed for `ResetUserDataUseCase`
+and `InitializeUserIdAndBooksUseCase` (contracts in `core/domain/account/`, impls in
+`orchestration/usecase/`).
 
 ---
 

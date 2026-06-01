@@ -33,7 +33,6 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
-import nl.rhaydus.softcover.feature.lists.data.mapper.toEntity as toListEntity
 import timber.log.Timber
 
 @Dao
@@ -344,7 +343,7 @@ interface BookDao {
     suspend fun cacheBookList(bookList: BookList) {
         clearBookList(bookListId = bookList.id)
 
-        insertBookList(bookList.toListEntity())
+        insertBookList(bookList.toEntity())
 
         val safeBooks = filterCacheableListBooks(books = bookList.books)
 
@@ -357,7 +356,7 @@ interface BookDao {
         }
 
         safeBooks.forEach { listBook ->
-            insertListBook(listBook.toListEntity())
+            insertListBook(listBook.toEntity())
         }
     }
 
@@ -371,7 +370,7 @@ interface BookDao {
             return
         }
 
-        insertListBook(listBook.toListEntity())
+        insertListBook(listBook.toEntity())
     }
 
     private suspend fun canCacheListBook(listBook: ListBook): Boolean {

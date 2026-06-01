@@ -2,8 +2,6 @@ package nl.rhaydus.softcover.feature.settings.di
 
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdAndBooksUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
@@ -35,21 +33,6 @@ val settingsModule = module {
     factory { ThemeConfigurationCollector() } bind SettingsInitializer::class
 
     factory { DateStyleCollector() } bind SettingsInitializer::class
-
-    factory {
-        InitializeUserIdAndBooksUseCase(
-            settingsRepository = get(),
-            refreshLibraryUseCase = get(),
-        )
-    }
-
-    factory {
-        ResetUserDataUseCase(
-            settingsRepository = get(),
-            booksRepository = get(),
-            profileRepository = get(),
-        )
-    }
 
     factory { SetBottomBarStyleUseCase(settingsRepository = get()) }
 

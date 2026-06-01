@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.lists.presentation.action
 
-import nl.rhaydus.softcover.feature.lists.domain.exception.ListNameTakenException
+import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
 import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreatedEvent

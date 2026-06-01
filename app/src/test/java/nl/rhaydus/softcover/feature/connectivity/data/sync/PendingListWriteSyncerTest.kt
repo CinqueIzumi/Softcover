@@ -12,8 +12,8 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.connectivity.data.dao.PendingListWriteDao
 import nl.rhaydus.softcover.feature.connectivity.data.model.PendingListWriteEntity
-import nl.rhaydus.softcover.feature.lists.data.datasource.ListsLocalDataSource
-import nl.rhaydus.softcover.feature.lists.data.datasource.ListsRemoteDataSource
+import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
+import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 import kotlin.coroutines.cancellation.CancellationException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
