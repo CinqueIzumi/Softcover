@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.lists.data.mapper
 
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.ListBook
-import nl.rhaydus.softcover.feature.books.data.mapper.toModel
+import nl.rhaydus.softcover.core.data.database.mapper.toModel
 import nl.rhaydus.softcover.core.data.database.model.BookListEntity
 import nl.rhaydus.softcover.core.data.database.model.BookListWithBooks
 import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.data.database.model.ListBookFull
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ListFragment
 import nl.rhaydus.softcover.fragment.ListFragment.List_book.Companion.listBookFragment

@@ -2,21 +2,22 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.FetchBookByIdUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetAllUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetEditionsByBookIdUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsReadingUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RemoveBookFromLibraryUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookEditionUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookRatingUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.feature.deadlines.domain.usecase.SetBookDeadlineUseCase
@@ -25,7 +26,6 @@ import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveUserProfileDataUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 
 class BookDetailDependencies(
     val recordBookProgressUseCase: RecordBookProgressUseCase,

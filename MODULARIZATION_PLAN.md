@@ -189,7 +189,7 @@ each new kernel got its **own Koin module**:
 > the routing contract in **Step 5**). No preference, identity, or value-type edge into `settings`
 > remains.
 
-### Step 3 — Extract book-operations into `core/book` ☐
+### Step 3 — Extract book-operations into `core/book` ☑
 
 **Move** `BooksRepository` and the cross-feature book use cases (mark-as-read/reading/want-to-read,
 record/update progress, update rating/review/edition, add-by-ISBN, resolve-by-ISBN, reorder shelf,
@@ -202,6 +202,39 @@ the `Get*UserBooks*` queries) out of `feature/books` into `core/book/`.
   the app is built on. Splitting the service out lets every feature depend on `core/book` without
   depending on a sibling feature.
 - **Done when:** no feature imports `feature/books`; book operations come from `core/book`.
+
+**Landed (2026-06-01).** The **full vertical** moved into core (matching Step 2), and the new kernel
+got its **own Koin module** (`val bookModule`, renamed from `booksModule`):
+
+- **`core/book/`** — `BooksRepository` under `domain/repository/`; all the book use cases under
+  `domain/usecase/` (the mutation set `MarkBookAs{Read,Reading,WantToRead}UseCase`,
+  `RecordBookProgressUseCase`/`UpdateBookProgressUseCase`,
+  `UpdateBook{Rating,Review,Edition}UseCase`, `RemoveBookFromLibraryUseCase`,
+  `AddBookByIsbnUseCase`/`ResolveBookByIsbnUseCase`, `ReorderShelfBooksUseCase`,
+  `PersistEditionImageUseCase`, plus the `Get*UserBooks*` queries and `FetchBookByIdUseCase`); the
+  `CreatedBook`/`IsbnEditionMatch` domain models; and the entire data layer under `data/`
+  (`BooksRepositoryImpl`, `Books{Local,Remote}DataSource(+Impl)`, `BookNotFoundException`, the
+  `SortSql` ORDER-BY builder). New `core/book/di/BookModule.kt`. `feature/books` no longer exists.
+- **Prefetch helpers** (`BookDetailPrefetcher`, `LocalBookDetailPrefetcher`,
+  `rememberBookDetailPrefetcher`, `Modifier.prefetchBookDetailOnPress`) moved to
+  `core/presentation/prefetch/`. `core/presentation` already depended on a book use case
+  (`EditionImage` → `PersistEditionImageUseCase`), so this introduces no new edge.
+- **`BookMapper` was split along its natural seam** to keep the graph acyclic. The mapper mixed
+  Apollo-fragment→domain mappers with domain↔Room-entity mappers, and `BookDao` (in
+  `core/data/database`) consumed the entity ones — i.e. there was a pre-existing
+  `core/data/database ↔ feature/books` **cycle**. Because `core:book → core:database` (its local
+  data source uses `BookDao`), moving the whole mapper into `core/book` would have recreated that as
+  a `core:database ↔ core:book` cycle. Instead: the Apollo→domain half stays with the remote data
+  source at `core/book/data/mapper/BookMapper.kt`; the domain↔entity half — which maps
+  `core/domain` ↔ `core/data/database/model`, neither of them book-feature-specific — moved **into
+  the database layer** at `core/data/database/mapper/BookEntityMapper.kt`. `BookDao` now uses those
+  mappers intra-module; the local data source and `lists`' `ListMapper` reach them via the legal
+  downward `→ core:database` edge; the remote data source and `explore` use the Apollo half via
+  `→ core:book`. This **resolves** the long-standing `database↔books` cycle rather than relocating
+  it. (`BookMapperTest` split to mirror, into `BookMapperTest` + `BookEntityMapperTest`.)
+- Audit result: **`books` has zero inbound cross-feature edges** and `core/book` imports no feature.
+  The only remaining `core → feature` edges left on `BookDao` (`feature/lists` `toEntity`,
+  `feature/deadlines` `BookDeadlineEntity`) are unrelated to books and belong to later steps.
 
 ### Step 4 — Move orchestration use cases up to `:app` ☐
 

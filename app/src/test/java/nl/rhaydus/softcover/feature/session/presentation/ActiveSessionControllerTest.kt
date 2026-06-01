@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.feature.personal.domain.model.ReadingSession
 import nl.rhaydus.softcover.feature.personal.domain.usecase.ObserveActiveSessionUseCase
 import nl.rhaydus.softcover.feature.personal.domain.usecase.PauseReadingSessionUseCase

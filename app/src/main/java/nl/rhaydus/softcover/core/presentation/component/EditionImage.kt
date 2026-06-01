@@ -40,13 +40,13 @@ import coil.request.ImageRequest
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.presentation.transition.LocalSharedTransitionScope
 import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
-import nl.rhaydus.softcover.feature.books.domain.usecase.PersistEditionImageUseCase
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)

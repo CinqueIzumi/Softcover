@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.books.domain.usecase.GetCurrentlyReadingUserBooksUseCase
-import nl.rhaydus.softcover.feature.books.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.feature.personal.domain.usecase.ObserveActiveSessionUseCase
 import nl.rhaydus.softcover.feature.personal.domain.usecase.PauseReadingSessionUseCase
 import nl.rhaydus.softcover.feature.personal.domain.usecase.ResumeReadingSessionUseCase

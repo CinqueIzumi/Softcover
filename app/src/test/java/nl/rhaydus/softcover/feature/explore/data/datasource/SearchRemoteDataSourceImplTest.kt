@@ -14,9 +14,9 @@ import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetIdsForQuery
+import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.books.data.mapper.toBook
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -34,7 +34,7 @@ class SearchRemoteDataSourceImplTest {
         dataSource = SearchRemoteDataSourceImpl(apolloClient = apolloClient)
 
         mockkStatic("nl.rhaydus.softcover.core.data.network.helper.ApolloExtensionsKt")
-        mockkStatic("nl.rhaydus.softcover.feature.books.data.mapper.BookMapperKt")
+        mockkStatic("nl.rhaydus.softcover.core.book.data.mapper.BookMapperKt")
         mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
     }
 

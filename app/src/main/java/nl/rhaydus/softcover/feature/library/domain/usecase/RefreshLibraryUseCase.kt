@@ -5,14 +5,14 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
-import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
-import nl.rhaydus.softcover.feature.lists.domain.repository.ListsRepository
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
+import nl.rhaydus.softcover.feature.lists.domain.repository.ListsRepository
 
 private const val OWNED_LIST_SLUG: String = "owned"
 

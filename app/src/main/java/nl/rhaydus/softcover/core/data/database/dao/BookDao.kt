@@ -7,14 +7,9 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.ListBook
-import nl.rhaydus.softcover.feature.books.data.mapper.toBookAuthorRefs
-import nl.rhaydus.softcover.feature.books.data.mapper.toEditionAuthorRefs
-import nl.rhaydus.softcover.feature.books.data.mapper.toEntity
-import nl.rhaydus.softcover.feature.lists.data.mapper.toEntity as toListEntity
+import nl.rhaydus.softcover.core.data.database.mapper.toBookAuthorRefs
+import nl.rhaydus.softcover.core.data.database.mapper.toEditionAuthorRefs
+import nl.rhaydus.softcover.core.data.database.mapper.toEntity
 import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.data.database.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
@@ -33,7 +28,12 @@ import nl.rhaydus.softcover.core.data.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.data.database.model.TagEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.deadlines.data.model.BookDeadlineEntity
+import nl.rhaydus.softcover.feature.lists.data.mapper.toEntity as toListEntity
 import timber.log.Timber
 
 @Dao
@@ -63,7 +63,7 @@ interface BookDao {
     /**
      * Dynamic-sort variant used by the library screen. The caller composes a SELECT against
      * `books` (and joins `user_books`) and supplies the ORDER BY fragment — see
-     * `nl.rhaydus.softcover.feature.books.data.sort.toOrderByFragment`. The observedEntities
+     * `nl.rhaydus.softcover.core.book.data.sort.toOrderByFragment`. The observedEntities
      * list covers every table the supported ORDER BY fragments reach into via subquery so
      * Room re-emits whenever any of them changes.
      */

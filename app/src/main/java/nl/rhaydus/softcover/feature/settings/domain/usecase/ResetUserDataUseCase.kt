@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.domain.usecase
 
+import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
-import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 import nl.rhaydus.softcover.feature.profile.domain.repository.ProfileRepository
 
 class ResetUserDataUseCase(

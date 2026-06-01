@@ -3,6 +3,7 @@ package nl.rhaydus.softcover
 import android.app.Application
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
@@ -19,7 +20,6 @@ import nl.rhaydus.softcover.di.notificationModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
 import nl.rhaydus.softcover.feature.book_detail.di.bookDetailModule
-import nl.rhaydus.softcover.feature.books.di.booksModule
 import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingListWriteSyncer
 import nl.rhaydus.softcover.feature.connectivity.data.sync.PendingUserBookWriteSyncer
 import nl.rhaydus.softcover.feature.connectivity.di.connectivityModule
@@ -60,7 +60,7 @@ class SoftCoverApp : Application() {
                 coreModule,
                 preferencesModule,
                 identityModule,
-                booksModule,
+                bookModule,
                 apolloModule,
                 dispatcherModule,
                 databaseModule,
