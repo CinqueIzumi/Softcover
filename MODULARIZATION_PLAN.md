@@ -137,7 +137,7 @@ of Steps 2–6.
 > `AppDispatchers`/`ApplicationScope` are concurrency infrastructure, not domain models, and should
 > eventually move out of `domain/model`.
 
-### Step 2 — Extract preferences + identity contracts into core ☐
+### Step 2 — Extract preferences + identity contracts into core ☑
 
 **Move** the `SettingsRepository` interface, its preference-**read** use cases
 (`GetDateStyleAsFlowUseCase`, `GetLibrarySortSettingsAsFlowUseCase`,
@@ -152,6 +152,42 @@ user-identity use cases (`GetUserIdUseCase`, and the read side of user-id storag
   inbound pressure on `settings`.
 - **Done when:** the only inbound edges left on `feature/settings` are write-path calls from screens
   that genuinely belong to settings.
+
+**Landed (2026-06-01).** The **full vertical** moved into core (not just the domain contracts), and
+each new kernel got its **own Koin module**:
+
+- **`core/preferences/`** — `SettingsRepository` (kept whole, per plan) under
+  `domain/repository/`; the cross-feature preference use cases under `domain/usecase/`
+  (`GetDateStyleAsFlowUseCase`, `GetLibraryGridLayoutAsFlowUseCase`,
+  `GetLibrarySortSettingsAsFlowUseCase`, `GetEnabledStatusCodesAsFlowUseCase`,
+  `GetEnabledListIdsAsFlowUseCase`, `GetLibraryTabOrderAsFlowUseCase`,
+  `ObservePlanTodayDismissalsUseCase`, `GetThemeConfigurationUseCase`, plus the cross-feature *writes*
+  `SetLibraryGridLayoutUseCase`/`SetLibrarySortUseCase`/`DismissPlanTodayUseCase` — these are
+  library/reading concerns, not settings-screen concerns); and the entire data layer under `data/`
+  (`SettingsRepositoryImpl`, `Settings{Local,Remote}DataSource(+Impl)`, `ApiKeyLocalDataSource(+Impl)`,
+  `AppSettingsDataStore` + the `Context.appSettings` delegate, `AppSettingsSerializer`,
+  `AppSettingsEntity`, `ThemeConfigurationEntity`). New `core/preferences/di/preferencesModule`.
+- **`core/identity/`** — `GetUserIdUseCase`, `GetUserIdAsFlowUseCase`, `UpdateApiKeyUseCase` (the api
+  key is the auth credential, so it sits with user-id). These read through the `core:preferences`
+  `SettingsRepository`, i.e. `core:identity → core:preferences` (a legal downward core→core edge). New
+  `core/identity/di/identityModule`.
+- **`core/domain/model/`** — the value types `ThemeConfiguration`, `BottomBarStyle` joined
+  `DateStyle` et al. from Step 1. `SettingsRepository` references them, and they were already imported
+  by `core/presentation`, so promoting them also cleared a **core → feature** violation.
+- This step also fixed the second **core → feature** violation: `core/data/network/AuthInterceptor`
+  now imports `ApiKeyLocalDataSource` from `core/preferences/data/datasource`.
+- Storage is on-disk-compatible: `BottomBarStyle` serializes by kotlinx-serialization constant name,
+  so the package move doesn't touch persisted `app_settings.json` (same reasoning as Step 1).
+- `feature/settings` now holds only its screens/screenmodels/flows + the genuinely settings-screen
+  write use cases (`SetDateStyle`, `SetBottomBarStyle`, `SetDynamicColor`, `SetEnabledStatusCodes`,
+  `SetEnabledListIds`, `SetLibraryTabOrder`) and — still — the two orchestration use cases.
+
+> **Deliberately left for later steps.** The remaining inbound edges on `feature/settings` are
+> `onboarding/profile → {InitializeUserIdAndBooksUseCase, ResetUserDataUseCase}` (cross-feature
+> **orchestration**, relocated to `:app` in **Step 4**) and `library → LibraryVisibilitySettingsScreen`
+> + `core/presentation/BottomNavigationBar → SettingsTab` (cross-feature **navigation**, addressed by
+> the routing contract in **Step 5**). No preference, identity, or value-type edge into `settings`
+> remains.
 
 ### Step 3 — Extract book-operations into `core/book` ☐
 

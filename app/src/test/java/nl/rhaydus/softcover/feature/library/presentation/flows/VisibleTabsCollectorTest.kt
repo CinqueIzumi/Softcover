@@ -18,9 +18,9 @@ import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

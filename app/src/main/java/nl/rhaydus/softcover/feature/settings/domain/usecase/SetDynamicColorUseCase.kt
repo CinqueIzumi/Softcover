@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.domain.usecase
 
-import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class SetDynamicColorUseCase(
     private val settingsRepository: SettingsRepository,

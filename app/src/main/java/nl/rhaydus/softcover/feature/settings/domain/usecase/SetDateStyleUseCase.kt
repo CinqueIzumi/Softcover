@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.domain.usecase
 
 import nl.rhaydus.softcover.core.domain.model.DateStyle
-import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class SetDateStyleUseCase(
     private val settingsRepository: SettingsRepository,

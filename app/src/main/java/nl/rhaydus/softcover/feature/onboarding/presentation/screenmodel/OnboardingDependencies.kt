@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
+import nl.rhaydus.softcover.core.identity.domain.usecase.UpdateApiKeyUseCase
 
 class OnboardingDependencies(
     val initializeUserIdAndBooksUseCase: InitializeUserIdAndBooksUseCase,

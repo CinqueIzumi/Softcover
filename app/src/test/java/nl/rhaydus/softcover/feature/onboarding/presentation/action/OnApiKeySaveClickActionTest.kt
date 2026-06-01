@@ -20,7 +20,7 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardin
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 import nl.rhaydus.softcover.feature.settings.domain.usecase.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ResetUserDataUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.UpdateApiKeyUseCase
+import nl.rhaydus.softcover.core.identity.domain.usecase.UpdateApiKeyUseCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

@@ -77,8 +77,8 @@ identity. Split into focused modules, not one `:core` grab-bag:
 |--------|-------|----------|
 | `core:domain` | shared domain models, classification enums, config value types | `Book`, `BookEdition`, `BookStatus`, `LibrarySortMode`, `SortDirection`, `DateStyle`, `LibraryGridLayout` |
 | `core:book` | the book-**operations** service: repository + use cases every feature calls | `BooksRepository`, `MarkBookAsReadUseCase`, `RecordBookProgressUseCase`, `AddBookByIsbnUseCase` |
-| `core:preferences` | preference read contracts + value access | `SettingsRepository`, `Get*AsFlowUseCase` readers |
-| `core:identity` | user identity / session id | `GetUserIdUseCase`, user-id storage |
+| `core:preferences` | preference read/write contracts + value access + the DataStore-backed impl | `SettingsRepository`, `Get*AsFlowUseCase` readers, `AppSettingsDataStore`, `ApiKeyLocalDataSource` |
+| `core:identity` | user identity / auth credential use cases | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:designsystem` | TOAD framework, theme, reusable components, modifiers, shared presentation models | `core/presentation/{toad, theme, component, model}` |
 | `core:network` | Apollo client, interceptors, `safeQuery`/`safeMutation` | |
 | `core:database` | Room database, migrations | |

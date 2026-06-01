@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.feature.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.feature.profile.domain.repository.ProfileRepository
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

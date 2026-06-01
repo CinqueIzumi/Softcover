@@ -22,7 +22,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.lists.domain.usecase.SetListRankedUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

@@ -17,14 +17,14 @@ import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.ReorderListBooksUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.SetListRankedUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 
 class LibraryDependencies(
     val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,

@@ -7,7 +7,7 @@ import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
-import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

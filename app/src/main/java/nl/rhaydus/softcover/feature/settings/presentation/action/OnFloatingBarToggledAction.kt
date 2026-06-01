@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables

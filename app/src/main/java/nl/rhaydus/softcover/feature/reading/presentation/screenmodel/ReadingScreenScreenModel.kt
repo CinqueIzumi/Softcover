@@ -14,9 +14,9 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.GetTrendingBooksUseCa
 import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
-import nl.rhaydus.softcover.feature.settings.domain.usecase.DismissPlanTodayUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.ObservePlanTodayDismissalsUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingInitializer
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables

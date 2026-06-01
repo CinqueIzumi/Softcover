@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.presentation.screen.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.screen.LocalThemeConfiguration
-import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 
 @Composable
 fun BottomNavigationSpacer() {

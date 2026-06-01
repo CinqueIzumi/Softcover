@@ -45,7 +45,7 @@ import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateSt
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
 import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
-import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

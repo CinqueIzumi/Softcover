@@ -24,14 +24,14 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledListIdsAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetLibraryTabOrderAsFlowUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryGridLayoutUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibrarySortUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 
 class LibraryScreenScreenModel(
     private val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,

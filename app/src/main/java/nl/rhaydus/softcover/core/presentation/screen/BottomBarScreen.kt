@@ -44,7 +44,7 @@ import nl.rhaydus.softcover.core.presentation.component.DockedBottomNavigationBa
 import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
-import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 
 private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
 private val TAB_ROOT_DRIFT = 12.dp

@@ -13,9 +13,9 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.state.SplashState
 import nl.rhaydus.softcover.feature.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.RefreshUserProfileDataUseCase
-import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetThemeConfigurationUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
+import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import timber.log.Timber
 
 class MainActivityViewModel(

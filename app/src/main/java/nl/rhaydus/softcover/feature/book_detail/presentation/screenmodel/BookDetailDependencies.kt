@@ -25,7 +25,7 @@ import nl.rhaydus.softcover.feature.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.feature.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.feature.profile.domain.usecase.ObserveUserProfileDataUseCase
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 
 class BookDetailDependencies(
     val recordBookProgressUseCase: RecordBookProgressUseCase,

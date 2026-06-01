@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
-import nl.rhaydus.softcover.feature.settings.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
