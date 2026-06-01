@@ -71,6 +71,8 @@ dependencies {
     implementation(project(":feature:reading"))
     implementation(project(":feature:session"))
     implementation(project(":feature:scan"))
+    implementation(project(":feature:settings"))
+    implementation(project(":feature:app_update"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

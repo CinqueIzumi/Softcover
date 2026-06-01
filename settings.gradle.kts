@@ -45,4 +45,6 @@ include(":feature:book_detail")
 include(":feature:reading")
 include(":feature:session")
 include(":feature:scan")
+include(":feature:settings")
+include(":feature:app_update")
  
