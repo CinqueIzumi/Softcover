@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":core:personal"))
     implementation(project(":core:preferences"))
     implementation(project(":core:deadlines"))
+    implementation(project(":core:platform"))
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
