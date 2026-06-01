@@ -4,44 +4,37 @@ Softcover is a native Android client for [Hardcover.app](https://hardcover.app/)
 
 ## Project Structure
 
+The app is a **multi-module Gradle build**. Modules depend only on lower tiers
+(`:app → :orchestration → :feature:* → :core:*`); the tier rules, full module roster, and build-setup
+conventions live in [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md). Each module's
+source lives under `<module>/src/main/java/nl/rhaydus/softcover/…` with the package matching its
+namespace.
+
 ```
-app/src/main/java/nl/rhaydus/softcover/
-├── core/                              # Shared modules used across features
-│   ├── data/
-│   │   ├── database/                  # Room database setup and migrations
-│   │   └── network/                   # Apollo GraphQL client and interceptors
-│   ├── domain/
-│   │   ├── exception/                 # Custom exceptions
-│   │   ├── model/                     # Shared domain models and enums
-│   │   └── util/                      # Domain utilities
-│   └── presentation/
-│       ├── component/                 # Reusable Compose components
-│       ├── modifier/                  # Custom Compose modifiers
-│       ├── screen/                    # Root screens (MainActivity, RootScreen)
-│       ├── state/                     # Shared UI states
-│       ├── theme/                     # Material 3 theming
-│       ├── toad/                      # TOAD framework implementation
-│       ├── viewmodel/                 # Activity-level ViewModels
-│       └── util/                      # Presentation utilities
-├── di/                                # Top-level Koin DI modules
-├── feature/                           # Feature modules
-│   ├── books/                         # Book management (core feature)
-│   ├── search/                        # Search functionality
-│   ├── library/                       # User's library view
-│   ├── book_detail/                   # Book detail screen
-│   ├── onboarding/                    # Authentication flow
-│   ├── reading/                       # Reading progress tracking
-│   ├── profile/                       # User profile
-│   └── settings/                      # App settings and theming
-└── SoftCoverApp.kt                    # Application entry point
+:app                  # Application shell: SoftCoverApp, launcher manifest + resources, Koin startup
+:orchestration        # Nav host (MainActivity, RootScreen, bottom bars), AppNavigator / AppEntryPoint
+                      #   impls, cross-feature orchestration use cases, the softcoverModules aggregate
+:feature:*            # Leaf features: lists, profile, onboarding, explore, library, book_detail,
+                      #   reading, session, scan, settings, app_update
+:core:domain          # Shared domain models, classification enums, config value types, use-case contracts
+:core:database        # Room database, migrations, all persisted entities + DAOs
+:core:network         # Apollo GraphQL client, interceptors, safeQuery / safeMutation
+:core:designsystem    # TOAD framework, Material 3 theme, reusable Compose components, nav contract,
+                      #   shared presentation models, app-scoped session controller, MainActivityViewModel
+:core:platform        # Logging, notifications, permission infrastructure
+:core:preferences     # SettingsRepository, preference readers, DataStore-backed impl
+:core:identity        # User identity / auth-credential use cases
+:core:{book,lists,deadlines,personal,profile,library}   # Operation services (repository + use cases)
+:core:connectivity    # Offline write-queue / sync infrastructure
 ```
 
 ## Layered Architecture
 
-Each feature is organized into three layers:
+Each `:feature:*` module is organized into three layers (the same `domain`/`data`/`presentation`
+split also structures the `:core:*` operation modules):
 
 ```
-feature/<name>/
+feature/<name>/src/main/java/nl/rhaydus/softcover/feature/<name>/
 ├── data/                              # Data layer
 │   ├── dao/                           # Room DAO interfaces
 │   ├── datasource/                    # Local and Remote data sources
@@ -218,14 +211,14 @@ Koin is used for DI. Each feature defines its own Koin module that provides:
 - Use cases
 - ScreenModels (injected via `koinScreenModel`)
 
-Top-level modules in `di/` aggregate feature modules and provide shared dependencies (database, Apollo client, dispatchers).
+Each Gradle module owns one Koin `module { }`. `:orchestration` aggregates them all into the `softcoverModules` list, and `:app`'s `SoftCoverApp` starts Koin with `modules(softcoverModules + appModule)`. Shared dependencies (database, Apollo client, dispatchers) come from their owning `:core:*` modules.
 
 ## Navigation
 
 Voyager handles navigation with two patterns:
 
 - **Navigator**: Standard push/pop screen stack for flows like onboarding vs. main content.
-- **TabNavigator**: Bottom bar navigation for main feature tabs (Library, Search, Profile, Settings).
+- **TabNavigator**: Bottom bar navigation for main feature tabs (Reading, Library, Explore, Settings).
 
 Authentication state determines the root screen:
 
@@ -233,11 +226,45 @@ Authentication state determines the root screen:
 Navigator(screen = if (authenticated) RootScreen else OnboardingScreen)
 ```
 
+### Cross-feature navigation: the `AppNavigator` contract
+
+A feature must **never** import another feature's `Screen` or `Tab` class — that is a horizontal
+coupling the module split rejects. Instead, cross-feature navigation goes through the
+`AppNavigator` contract in `core/presentation/navigation/`:
+
+```kotlin
+interface AppNavigator {
+    fun screen(destination: ScreenDestination): Screen   // BookDetail(id, …), CreateList, Profile, …
+    fun tab(destination: TabDestination): Tab             // READING, LIBRARY, EXPLORE, SETTINGS
+}
+```
+
+A feature injects it with `koinInject<AppNavigator>()` and keeps control of *how* it navigates
+(`navigator.push`, `navigator.parent?.push`, `tabNavigator.current = …`); the contract only resolves
+*what* to navigate to. The single implementation, `AppNavigatorImpl`, lives in the **orchestration
+tier** (`orchestration/navigation/`) — the only place allowed to depend on every feature's
+`Screen`/`Tab` — and is bound `single<AppNavigator>` in `orchestrationModule`. A feature adding a
+new externally-reachable surface adds a `ScreenDestination`/`TabDestination` case and wires it in
+`AppNavigatorImpl`, never an import in the calling feature.
+
+`AppEntryPoint` (same package) is the analogous contract for non-Compose deep links: it builds
+`Intent`s targeting the launcher Activity (e.g. a notification opening Focus Mode) so a feature need
+not reference `MainActivity`.
+
+### The app shell lives at the orchestration tier
+
+The navigation host — `MainActivity`, `RootScreen`, `BottomBarScreen`, and the bottom bars — lives in
+the **`:orchestration`** module, **not** `core`. It composes feature tabs and screens, so it depends
+*down* on features (legal); its manifest contributes the launcher `MainActivity`, merged into `:app`.
+`core` only owns the reusable pieces the shell and features both consume (theme, components, and the
+composition locals `LocalThemeConfiguration` / `LocalBottomBarPadding` / `LocalAppUpdateState`). Do not
+move host/shell code back into `core`.
+
 ## Network Layer
 
 - **Apollo GraphQL** communicates with the Hardcover API.
 - `safeQuery()` and `safeMutation()` extension functions wrap Apollo calls with error handling. `safeQuery` takes an optional `FetchPolicy` (defaults to `NetworkOnly`); a `safeQueryFlow` variant exists for `CacheAndNetwork` rendering.
-- An in-memory normalized cache is configured on `ApolloClient` (10 MiB), keyed by `@typePolicy` declarations on entity types in `app/src/main/graphql/extra.graphqls`. Session-stable queries (book detail, editions, reviews, series lookups, books-by-ids hydration) are served `CacheFirst` for instant revisits. Lists that should refresh on screen entry stay on `NetworkOnly`. Mutations write through the cache automatically — Room remains the source of truth for user-book state, so Apollo cache writes on `user_books` rows are currently inert observers.
+- An in-memory normalized cache is configured on `ApolloClient` (10 MiB), keyed by `@typePolicy` declarations on entity types in `core/network/src/main/graphql/extra.graphqls`. Session-stable queries (book detail, editions, reviews, series lookups, books-by-ids hydration) are served `CacheFirst` for instant revisits. Lists that should refresh on screen entry stay on `NetworkOnly`. Mutations write through the cache automatically — Room remains the source of truth for user-book state, so Apollo cache writes on `user_books` rows are currently inert observers.
 - Network interceptors handle authentication headers.
 - Apollo errors are wrapped in `RuntimeException` with descriptive messages.
 

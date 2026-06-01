@@ -69,12 +69,15 @@ The agent is required to run the tests after writing them. Prefer narrow filters
 
 Always consult [ARCHITECTURE.md](ARCHITECTURE.md) before writing or reviewing code that touches layering, DI, navigation, or the TOAD state-management framework. Read it before adding a new feature module, modifying a ScreenModel / Action / Initializer, or changing data flow between layers — it is the source of truth for Clean Architecture boundaries and TOAD implementation details (generic signatures, per-feature boilerplate, Koin wiring). The summary below is a quick reference only; resolve any ambiguity against `ARCHITECTURE.md`.
 
-The app follows **Clean Architecture** with a custom **TOAD** state management framework. Code lives under `app/src/main/java/nl/rhaydus/softcover/`.
+Consult [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) for how code is categorized and grouped across the Gradle modules — the `core`/`feature`/orchestration tiers, allowed dependency directions, the module roster + build-setup conventions, and where a new type, screen, or use case belongs (the *tier* axis above the layer axis). Read it before adding a module, deciding whether something is shared infrastructure vs. feature-local, or wiring a cross-feature dependency.
+
+The app follows **Clean Architecture** with a custom **TOAD** state management framework. It is a multi-module Gradle build: `:app` (application shell) → `:orchestration` (nav host + cross-feature use cases) → `:feature:*` → `:core:*`.
 
 ### Core vs Feature
 
-- `core/` — Shared infrastructure: Room database, Apollo GraphQL client, reusable Compose components, Material 3 theming, and the TOAD framework itself (`core/presentation/toad/`).
-- `feature/` — Feature modules: `books`, `search`, `library`, `book_detail`, `onboarding`, `reading`, `profile`, `settings`. Each is self-contained.
+- `:core:*` — Shared kernels consumed by ≥2 features: Room database (`:core:database`), Apollo GraphQL client (`:core:network`), shared domain model (`:core:domain`), operation services (`:core:book`, `:core:lists`, `:core:deadlines`, `:core:personal`, `:core:profile`, `:core:library`), preferences/identity, platform infra (`:core:platform`), and the design system — reusable Compose components, Material 3 theming, and the TOAD framework itself (`:core:designsystem`).
+- `:feature:*` — Self-contained leaf features: `lists`, `profile`, `onboarding`, `explore`, `library`, `book_detail`, `reading`, `session`, `scan`, `settings`, `app_update`. A feature never imports a sibling feature.
+- `:orchestration` — The nav host and cross-feature orchestration use cases; `:app` is a thin application shell on top. See `MODULE_STRUCTURE_GUIDELINES.md` for the full roster and tier rules.
 
 ### Layer Structure (per feature)
 
@@ -100,8 +103,8 @@ Data flow: `User → UiAction.execute() → use cases via Dependencies → setSt
 
 ### Key Patterns
 
-- **Apollo GraphQL** for all API communication. Queries/mutations live in `app/src/main/graphql/`. Use `safeQuery()` / `safeMutation()` extension functions for error handling.
-- **Room** for local book/user data caching with migrations in `core/data/database/`.
+- **Apollo GraphQL** for all API communication. Queries/mutations live in `core/network/src/main/graphql/`. Use `safeQuery()` / `safeMutation()` extension functions for error handling.
+- **Room** for local book/user data caching with migrations in `:core:database`.
 - **DataStore** for key-value preferences (settings, search history).
 - **Koin** for DI. Each feature has its own module; top-level `di/` aggregates them.
 - **Voyager** for navigation: `Navigator` for screen stacks, `TabNavigator` for bottom bar tabs.

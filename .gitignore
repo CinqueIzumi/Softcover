@@ -10,6 +10,8 @@
 .DS_Store
 /build
 /buildSrc/build
+# Build outputs for every module (build-logic, :core:*, :feature:*, …)
+build/
 /captures
 .externalNativeBuild
 .cxx

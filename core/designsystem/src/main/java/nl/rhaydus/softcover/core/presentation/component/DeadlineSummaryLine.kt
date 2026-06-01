@@ -1,0 +1,67 @@
+package nl.rhaydus.softcover.core.presentation.component
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.R
+import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.core.presentation.util.secondsToHm
+
+@Composable
+fun DeadlineSummaryLine(
+    progress: DeadlineProgress,
+    dateStyle: DateStyle,
+    modifier: Modifier = Modifier,
+) {
+    val status = progress.status
+    val dateText = progress.deadline.format(dateStyle.formatter)
+
+    val paceText = if (status == DeadlineStatus.Expired) {
+        status.label
+    } else {
+        val pace = ceilToInt(progress.requiredPerDay)
+        when (progress.unit) {
+            DeadlineUnit.PAGES -> {
+                val pageLabel = if (pace == 1) "page" else "pages"
+                "$pace $pageLabel / day"
+            }
+            DeadlineUnit.SECONDS -> "${secondsToHm(pace)} / day"
+        }
+    }
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_date_range),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(14.dp),
+        )
+
+        Text(
+            text = "$dateText • $paceText",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+private fun ceilToInt(value: Float): Int {
+    val rounded = value.toInt()
+
+    return if (value > rounded) rounded + 1 else rounded
+}
