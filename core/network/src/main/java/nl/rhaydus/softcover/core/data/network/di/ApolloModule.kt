@@ -5,10 +5,10 @@ import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.apollo.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.apollo.cache.normalized.normalizedCache
 import com.apollographql.apollo.network.okHttpClient
-import nl.rhaydus.softcover.core.data.network.cache.SoftcoverCacheResolver
-import nl.rhaydus.softcover.core.data.network.interceptor.AuthInterceptor
 import okhttp3.OkHttpClient
 import org.koin.dsl.module
+import nl.rhaydus.softcover.core.data.network.cache.SoftcoverCacheResolver
+import nl.rhaydus.softcover.core.data.network.interceptor.AuthInterceptor
 import java.util.concurrent.TimeUnit
 
 private const val APOLLO_MEMORY_CACHE_BYTES = 10 * 1024 * 1024

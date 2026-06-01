@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import timber.log.Timber
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
 import nl.rhaydus.softcover.core.presentation.component.resolveEditionImageSource
@@ -30,8 +32,6 @@ import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
-import org.koin.android.ext.android.inject
-import timber.log.Timber
 import java.time.Duration
 
 /**

@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.presentation.di
 
+import org.koin.dsl.module
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
-import org.koin.dsl.module
 
 val designSystemModule = module {
     single<MainActivityViewModel> {

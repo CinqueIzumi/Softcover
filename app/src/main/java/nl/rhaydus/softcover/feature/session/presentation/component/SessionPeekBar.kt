@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
+import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
@@ -39,7 +40,6 @@ import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
-import org.koin.compose.koinInject
 import java.time.Instant
 
 /**

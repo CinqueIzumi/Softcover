@@ -6,14 +6,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 import okhttp3.Interceptor
 import okhttp3.Response
-import org.koin.core.component.KoinComponent
+import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 
 class AuthInterceptor(
     authTokenProvider: AuthTokenProvider,
-) : Interceptor, KoinComponent {
+) : Interceptor {
 
     @Volatile
     private var cachedToken: String? = null

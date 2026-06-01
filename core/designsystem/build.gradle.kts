@@ -9,7 +9,6 @@ android {
 
 dependencies {
     api(project(":core:domain"))
-    implementation(project(":core:network"))
     implementation(project(":core:book"))
     implementation(project(":core:library"))
     implementation(project(":core:profile"))

@@ -14,9 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
-import org.koin.compose.koinInject
 
 @Composable
 fun rememberIsOnline(provider: NetworkAvailabilityProvider = koinInject()): Boolean {

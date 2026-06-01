@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.presentation.component.ClickableText
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
@@ -63,7 +64,6 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAct
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
-import org.koin.androidx.compose.koinViewModel
 
 object OnboardingScreen : Screen {
     @Composable
