@@ -776,8 +776,6 @@ object ReadingScreen : Screen {
                         fillMaxWidth = true,
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
                     FeaturedSessionButton(book = book)
                 }
             }
@@ -802,6 +800,8 @@ object ReadingScreen : Screen {
 
         when {
             active?.book?.id == book.id -> {
+                Spacer(modifier = Modifier.height(10.dp))
+
                 SoftcoverButton(
                     label = "Focus mode",
                     style = ButtonStyle.TONAL,
@@ -815,7 +815,13 @@ object ReadingScreen : Screen {
                 )
             }
 
+            // Audiobooks are tracked by listening time, not page-based reading sessions, so
+            // the start control is never offered for them.
+            book.currentEdition?.isAudiobook == true -> Unit
+
             active == null -> {
+                Spacer(modifier = Modifier.height(10.dp))
+
                 SoftcoverButton(
                     label = "Start reading session",
                     style = ButtonStyle.TONAL,
