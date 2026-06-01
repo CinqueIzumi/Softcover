@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.books.domain.usecase
 
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.books.domain.repository.BooksRepository
 
 class MarkBookAsReadUseCase(

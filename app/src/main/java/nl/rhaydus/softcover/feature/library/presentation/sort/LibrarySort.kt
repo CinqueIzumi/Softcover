@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.sort
 
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.SortDirection
 import java.time.LocalDate
 
 /**

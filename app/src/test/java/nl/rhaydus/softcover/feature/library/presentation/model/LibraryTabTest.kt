@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.model
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 

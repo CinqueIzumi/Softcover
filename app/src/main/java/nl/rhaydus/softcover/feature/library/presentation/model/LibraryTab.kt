@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.model
 
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
 
 sealed class LibraryTab(
     val id: String,

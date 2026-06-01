@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.domain.model.enum
+package nl.rhaydus.softcover.core.domain.model
 
 enum class ReadingFormat(val id: Int, val label: String) {
     Physical(id = 1, label = "Physical"),

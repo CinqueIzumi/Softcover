@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.model
 
+import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.LocalDateTime
 
 data class BookReview(

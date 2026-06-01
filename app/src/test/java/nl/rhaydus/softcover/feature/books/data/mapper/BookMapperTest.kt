@@ -14,16 +14,6 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import java.time.LocalDate
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.BookSeries
-import nl.rhaydus.softcover.core.domain.model.ListBook
-import nl.rhaydus.softcover.core.domain.model.ReadingJournal
-import nl.rhaydus.softcover.core.domain.model.UserBook
-import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
-import nl.rhaydus.softcover.core.domain.model.enum.ReadingFormat
 import nl.rhaydus.softcover.core.data.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.data.database.model.BookEditionView
@@ -33,16 +23,26 @@ import nl.rhaydus.softcover.core.data.database.model.BookFullEntity
 import nl.rhaydus.softcover.core.data.database.model.BookListEntity
 import nl.rhaydus.softcover.core.data.database.model.BookListWithBooks
 import nl.rhaydus.softcover.core.data.database.model.BookSeriesEntity
+import nl.rhaydus.softcover.core.data.database.model.BookTagCrossRef
+import nl.rhaydus.softcover.core.data.database.model.BookTagFull
 import nl.rhaydus.softcover.core.data.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.data.database.model.ListBookFull
 import nl.rhaydus.softcover.core.data.database.model.ReadingJournalEntity
-import nl.rhaydus.softcover.core.data.database.model.BookTagCrossRef
-import nl.rhaydus.softcover.core.data.database.model.BookTagFull
 import nl.rhaydus.softcover.core.data.database.model.TagEntity
-import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.data.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.data.database.model.UserBookWithJournals
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import nl.rhaydus.softcover.fragment.BookListFragment
 import nl.rhaydus.softcover.fragment.BookListFragment.Taggable_count as BookListTaggableCount
@@ -53,9 +53,9 @@ import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Progress_updated_journal.Companion.readingJournalFragment as progressUpdatedJournalFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Companion.readingJournalFragment as statusStoppedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

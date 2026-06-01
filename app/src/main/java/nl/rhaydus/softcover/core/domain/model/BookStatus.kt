@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.domain.model.enum
+package nl.rhaydus.softcover.core.domain.model
 
 import timber.log.Timber
 

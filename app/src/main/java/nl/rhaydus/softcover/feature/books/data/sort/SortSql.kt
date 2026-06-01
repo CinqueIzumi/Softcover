@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.books.data.sort
 
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.SortDirection
 
 /**
  * Maps a [LibrarySortMode] + [SortDirection] to the SQL `ORDER BY` fragment used by the

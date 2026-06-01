@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.settings.domain.model
+package nl.rhaydus.softcover.core.domain.model
 
 enum class LibraryGridLayout(val label: String) {
     GRID_TWO_COLUMNS(label = "Grid - 2 per row, with details"),

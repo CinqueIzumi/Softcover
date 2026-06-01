@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.feature.settings.domain.repository.SettingsRepository
 
 class GetLibrarySortSettingsAsFlowUseCase(

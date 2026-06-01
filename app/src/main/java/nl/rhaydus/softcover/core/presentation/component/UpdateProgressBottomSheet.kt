@@ -56,7 +56,7 @@ import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.toHoursMinutesSeconds
-import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
+import nl.rhaydus.softcover.feature.reading.presentation.model.ProgressSheetTab
 import kotlin.math.min
 import kotlin.math.roundToInt
 

@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
+import nl.rhaydus.softcover.feature.reading.presentation.model.ProgressSheetTab
 
 class OnProgressTabClickAction(
     private val tab: ProgressSheetTab,

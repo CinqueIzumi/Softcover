@@ -100,7 +100,7 @@ Each step is independently shippable and touches only packages/imports — no Gr
 until §5. Re-run the cross-feature import audit after each step to confirm the edge it targets is
 gone.
 
-### Step 1 — Lift shared value types into `core/domain` ☐
+### Step 1 — Lift shared value types into `core/domain` ☑
 
 **Move** the preference/config enums and value objects that other features consume out of
 `feature/settings/domain` into `core/domain/model/`:
@@ -113,6 +113,29 @@ remaining `BookStatus`-style classification enums still filed under a feature.
 - **Blast radius:** import-only churn across `library`, `books`, `reading`, `book_detail`,
   `onboarding`, `profile`. No logic changes.
 - **Done when:** no feature imports a value type from `feature/settings`.
+
+**Landed (2026-06-01).** The five types (`LibrarySortMode`, `SortDirection`, `DateStyle`,
+`LibraryGridLayout`, `LibrarySortSettings`) moved into a **flat** `core/domain/model/` (package
+`…core.domain.model`), alongside `Book` and the other domain types. `SortDirectionTest` moved with
+its subject. Pure restructure — no logic, serialization, or enum-ordering changes (the types are
+DataStore/kotlinx-serialization values keyed by constant name, so the package move is
+on-disk-compatible). This also removed the only **core → feature** violations on these types
+(`core/domain/model/UserBook.kt` and `core/presentation/component/DeadlineSummaryLine.kt` previously
+imported `DateStyle` from the feature). Remaining inbound edges on `settings` (`SettingsRepository`,
+preference/identity use cases, `ThemeConfiguration`, `BottomBarStyle`, `SettingsTab`) are the targets
+of Steps 2–6.
+
+> **Structure note — no construct-axis subpackages.** `core/domain/model` is organized by domain
+> concept, not by Kotlin construct. The pre-existing `core/domain/model/enum/` subpackage (which held
+> some but not all of the module's enums — `PrivacySetting`/`TagCategory`/`UserBookStatus` already sat
+> at the top level) was retired in this step and its files flattened up, so enums and data classes
+> coexist in one flat package. The lone `feature/reading/presentation/enums/` directory
+> (`ProgressSheetTab`) was likewise flattened into `feature/reading/presentation/model/`, matching
+> `library`'s `presentation/model/LibraryTab`. Concept-level grouping is delivered by the module split
+> itself (`core:preferences`, `core:book` in Steps 2–3), not by folders-by-keyword. Do not
+> reintroduce an `enum/` (or similar construct-named) directory. Separately noted for a later cleanup:
+> `AppDispatchers`/`ApplicationScope` are concurrency infrastructure, not domain models, and should
+> eventually move out of `domain/model`.
 
 ### Step 2 — Extract preferences + identity contracts into core ☐
 

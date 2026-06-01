@@ -5,13 +5,13 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.books.domain.model.CreatedBook
 import nl.rhaydus.softcover.feature.books.domain.model.IsbnEditionMatch
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
 interface BooksRepository {
     val books: Flow<List<Book>>

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.settings.domain.model
+package nl.rhaydus.softcover.core.domain.model
 
 enum class LibrarySortMode(
     val label: String,

@@ -3,6 +3,10 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
@@ -10,10 +14,6 @@ import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.sort.applyEditionSort
 import nl.rhaydus.softcover.feature.library.presentation.util.availableFinishedYears
 import nl.rhaydus.softcover.feature.library.presentation.util.finishedYear
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
-import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 
 data class LibraryUiState(
     val visibleTabs: List<LibraryTab> = listOf(

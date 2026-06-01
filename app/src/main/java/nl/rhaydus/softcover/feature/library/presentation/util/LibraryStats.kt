@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.util
 
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
+import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeParseException

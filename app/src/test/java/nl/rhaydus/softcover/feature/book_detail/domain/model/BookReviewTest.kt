@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.model
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -81,7 +81,7 @@ class BookReviewTest {
 
             // ----- Act -----
             val result = review.getFormattedDate(
-                style = nl.rhaydus.softcover.feature.settings.domain.model.DateStyle.MONTH_DAY_YEAR
+                style = DateStyle.MONTH_DAY_YEAR
             )
 
             // ----- Assert -----
@@ -95,7 +95,7 @@ class BookReviewTest {
 
             // ----- Act -----
             val result = review.getFormattedDate(
-                style = nl.rhaydus.softcover.feature.settings.domain.model.DateStyle.YEAR_MONTH_DAY
+                style = DateStyle.YEAR_MONTH_DAY
             )
 
             // ----- Assert -----

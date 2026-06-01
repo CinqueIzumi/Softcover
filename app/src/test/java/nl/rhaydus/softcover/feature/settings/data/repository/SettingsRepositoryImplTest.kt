@@ -9,11 +9,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
-import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -36,14 +36,14 @@ class SettingsRepositoryImplTest {
     }
 
     @Nested
-    inner class DateStyle {
+    inner class DateStyleProperty {
 
         @Test
         fun `dateStyle property is wired to local data source dateStyle flow`() = runTest {
             // ----- Arrange -----
             every {
                 settingsLocalDataSource.dateStyle
-            } returns flowOf(nl.rhaydus.softcover.feature.settings.domain.model.DateStyle.MONTH_DAY_YEAR)
+            } returns flowOf(DateStyle.MONTH_DAY_YEAR)
 
             val freshRepository = SettingsRepositoryImpl(
                 settingsLocalDataSource = settingsLocalDataSource,
@@ -52,7 +52,7 @@ class SettingsRepositoryImplTest {
 
             // ----- Act & Assert -----
             freshRepository.dateStyle.test {
-                awaitItem() shouldBe nl.rhaydus.softcover.feature.settings.domain.model.DateStyle.MONTH_DAY_YEAR
+                awaitItem() shouldBe DateStyle.MONTH_DAY_YEAR
                 awaitComplete()
             }
         }
@@ -105,7 +105,7 @@ class SettingsRepositoryImplTest {
         @Test
         fun `delegates to local data source with the given style`() = runTest {
             // ----- Arrange -----
-            val style = nl.rhaydus.softcover.feature.settings.domain.model.DateStyle.YEAR_MONTH_DAY
+            val style = DateStyle.YEAR_MONTH_DAY
 
             // ----- Act -----
             repository.setDateStyle(style = style)

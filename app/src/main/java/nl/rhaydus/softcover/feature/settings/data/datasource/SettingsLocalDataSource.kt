@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.settings.data.datasource
 
 import kotlinx.coroutines.flow.Flow
+import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
-import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortSettings
-import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 
 interface SettingsLocalDataSource {

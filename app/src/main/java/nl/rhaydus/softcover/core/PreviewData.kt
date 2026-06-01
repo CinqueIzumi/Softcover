@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.core
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
-import nl.rhaydus.softcover.core.domain.model.enum.ReadingFormat
 
 object PreviewData {
     val baseAuthor = Author(

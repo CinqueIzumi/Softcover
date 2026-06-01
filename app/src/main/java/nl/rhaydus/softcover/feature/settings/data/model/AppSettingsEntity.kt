@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.settings.data.model
 
 import kotlinx.serialization.Serializable
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
-import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.SortDirection
 
 @Serializable
 data class AppSettingsEntity(

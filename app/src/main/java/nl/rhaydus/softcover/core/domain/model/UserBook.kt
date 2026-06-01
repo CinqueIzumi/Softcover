@@ -1,8 +1,5 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
-import nl.rhaydus.softcover.core.domain.model.enum.JournalEventType
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

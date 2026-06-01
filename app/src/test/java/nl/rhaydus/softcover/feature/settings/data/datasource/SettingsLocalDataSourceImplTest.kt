@@ -9,12 +9,12 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.feature.settings.data.model.AppSettingsEntity
 import nl.rhaydus.softcover.feature.settings.data.model.ThemeConfigurationEntity
 import nl.rhaydus.softcover.feature.settings.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
-import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.settings.domain.model.ThemeConfiguration
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

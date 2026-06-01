@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -10,8 +11,7 @@ import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.feature.reading.presentation.enums.ProgressSheetTab
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
+import nl.rhaydus.softcover.feature.reading.presentation.model.ProgressSheetTab
 
 data class BookDetailUiState(
     val loadingBookDetails: Boolean = true,

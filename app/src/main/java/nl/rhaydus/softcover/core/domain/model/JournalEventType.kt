@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.domain.model.enum
+package nl.rhaydus.softcover.core.domain.model
 
 enum class JournalEventType(val eventName: String) {
     StatusDidNotFinish(eventName = "status_stopped"),

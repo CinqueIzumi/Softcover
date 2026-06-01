@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.settings.domain.model
+package nl.rhaydus.softcover.core.domain.model
 
 data class LibrarySortSettings(
     val mode: LibrarySortMode,

@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.presentation.toad.ActionScope
@@ -74,7 +75,7 @@ class UserBooksFlowCollectorTest {
 
     private fun buildUserBook(): UserBook = UserBook(
         id = 1,
-        status = nl.rhaydus.softcover.core.domain.model.enum.BookStatus.None,
+        status = BookStatus.None,
         dateAdded = "2024-01-01",
         createdAt = null,
         privacySettingId = 0,

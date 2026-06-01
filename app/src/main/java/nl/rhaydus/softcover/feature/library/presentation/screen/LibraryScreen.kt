@@ -109,6 +109,10 @@ import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
@@ -159,6 +163,7 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAc
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlStrip
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
+import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -167,12 +172,7 @@ import nl.rhaydus.softcover.feature.library.presentation.util.formatPageCount
 import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
 import nl.rhaydus.softcover.feature.lists.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
-import nl.rhaydus.softcover.feature.settings.domain.model.DateStyle
-import nl.rhaydus.softcover.feature.settings.domain.model.LibraryGridLayout
-import nl.rhaydus.softcover.feature.settings.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.feature.settings.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen
-import nl.rhaydus.softcover.feature.library.presentation.model.LibraryTab as LibraryContentTab
 
 object LibraryScreen : Screen {
     @Composable

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import nl.rhaydus.softcover.core.domain.model.enum.BookStatus
 import java.time.LocalDate
 
 data class Book(
