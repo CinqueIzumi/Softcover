@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import nl.rhaydus.softcover.R
+import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
 import nl.rhaydus.softcover.core.presentation.component.resolveEditionImageSource
 import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint

@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.apollo)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
@@ -46,6 +45,22 @@ android {
 }
 
 dependencies {
+    // Core modules (extracted from the former core/ package tree)
+    implementation(project(":core:domain"))
+    implementation(project(":core:database"))
+    implementation(project(":core:network"))
+    implementation(project(":core:platform"))
+    implementation(project(":core:preferences"))
+    implementation(project(":core:identity"))
+    implementation(project(":core:book"))
+    implementation(project(":core:lists"))
+    implementation(project(":core:deadlines"))
+    implementation(project(":core:personal"))
+    implementation(project(":core:profile"))
+    implementation(project(":core:library"))
+    implementation(project(":core:connectivity"))
+    implementation(project(":core:designsystem"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -66,10 +81,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    // Apollo (graph ql communication)
-    implementation(libs.apollo)
-    implementation(libs.apollo.normalized.cache)
 
     // Datastore
     implementation(libs.dataStore)
@@ -133,24 +144,4 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-apollo {
-    service("service") {
-        packageName.set("nl.rhaydus.softcover")
-        addTypename.set("always")
-
-        schemaFiles.from("src/main/graphql/schema.graphqls", "src/main/graphql/extra.graphqls")
-
-        mapScalar("numeric", "kotlin.Double")
-        mapScalar("float8", "kotlin.Double")
-        mapScalar("date", "kotlin.String")
-        mapScalar("timestamp", "kotlin.String")
-        mapScalar("timestamptz", "kotlin.String")
-        mapScalar("smallint", "kotlin.Int")
-        mapScalar("bigint", "kotlin.Long")
-
-        codegenModels.set("responseBased")
-        generateMethods.set(listOf("dataClass"))
-    }
 }

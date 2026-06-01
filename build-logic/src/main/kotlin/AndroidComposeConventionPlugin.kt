@@ -19,10 +19,10 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
         }
 
         dependencies {
-            val bom = libs.library("androidx-compose-bom")
+            val bom = libs.library("androidx-compose-bom").get()
 
-            add("implementation", platformOf(bom))
-            add("androidTestImplementation", platformOf(bom))
+            add("implementation", platform(bom))
+            add("androidTestImplementation", platform(bom))
 
             add("implementation", libs.library("androidx-compose-ui"))
             add("implementation", libs.library("androidx-compose-ui-graphics"))
@@ -34,7 +34,4 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
             add("debugImplementation", libs.library("androidx-compose-ui-test-manifest"))
         }
     }
-
-    private fun Project.platformOf(provider: org.gradle.api.provider.Provider<*>) =
-        dependencies.platform(provider)
 }

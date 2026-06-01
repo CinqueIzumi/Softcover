@@ -49,7 +49,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.R
+import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar

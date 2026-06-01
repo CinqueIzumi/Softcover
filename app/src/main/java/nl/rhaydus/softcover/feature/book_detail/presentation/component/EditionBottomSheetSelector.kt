@@ -35,7 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.R
+import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
@@ -232,17 +232,17 @@ private fun EditionItem(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                edition.title?.let {
+                edition.title?.let { title ->
                     Text(
-                        text = edition.title,
+                        text = title,
                         style = MaterialTheme.editorialTypography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
-                edition.publisher?.let {
+                edition.publisher?.let { publisher ->
                     Text(
-                        text = edition.publisher,
+                        text = publisher,
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

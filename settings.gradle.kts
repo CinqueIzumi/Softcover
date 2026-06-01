@@ -22,4 +22,18 @@ dependencyResolutionManagement {
 
 rootProject.name = "Softcover"
 include(":app")
+include(":core:domain")
+include(":core:database")
+include(":core:network")
+include(":core:platform")
+include(":core:preferences")
+include(":core:identity")
+include(":core:book")
+include(":core:lists")
+include(":core:deadlines")
+include(":core:personal")
+include(":core:profile")
+include(":core:library")
+include(":core:connectivity")
+include(":core:designsystem")
  

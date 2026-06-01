@@ -42,7 +42,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
         dependencies {
             add("implementation", libs.library("kotlinx-coroutines-android"))
-            add("implementation", libs.library("koin-core"))
+            add("implementation", libs.library("koin-android"))
             add("implementation", libs.library("timber"))
 
             add("testImplementation", libs.library("junit-api"))
