@@ -1,18 +1,18 @@
 # Module Structure Guidelines
 
 This document is the source of truth for **how code is categorized, grouped, and placed** across
-Softcover's modules — what belongs in `core` vs a `feature` vs the orchestration tier, the allowed
-dependency directions, and where a new type or screen goes. It is the *target* structure the codebase
-is migrating toward; the migration path itself is in
-[MODULARIZATION_PLAN.md](MODULARIZATION_PLAN.md).
+Softcover's Gradle modules — what belongs in `core` vs a `feature` vs the orchestration tier, the
+allowed dependency directions, and where a new type or screen goes. The app is a fully split
+multi-module build (`:app → :orchestration → :feature:* → :core:*`); these rules keep that graph an
+acyclic DAG.
 
 It builds on [ARCHITECTURE.md](ARCHITECTURE.md) (Clean Architecture layers + TOAD). Layer rules
 (`domain → data → presentation`) are unchanged and not repeated here — this doc is about the
 *module* axis that sits above the layer axis. When the two are in tension, both must hold: every type
 has a layer **and** a tier.
 
-> Authored 2026-06-01. Whether the code physically lives in one Gradle module or many, these
-> categorization rules apply — they are package-level rules first, module-level rules second.
+> These categorization rules are package-level rules first, module-level rules second: they hold
+> whether a concept is its own Gradle module yet or still a package awaiting extraction.
 
 ---
 
@@ -94,7 +94,7 @@ identity. Split into focused modules, not one `:core` grab-bag:
 **The litmus test for "is this `core`?":** *Would a second, unrelated feature reasonably import this
 to do its job?* If yes, it is a kernel and belongs in `core`. A feature that everyone imports is not
 a feature — it is a kernel wearing a feature's folder (this is exactly what `books`, `settings`,
-`deadlines`, `personal`, and `connectivity` turned out to be; see the plan). **Corollary:** a type
+`deadlines`, `personal`, and `connectivity` turned out to be — all now `core`). **Corollary:** a type
 imported by ≥2 features is `core` even when it is a ViewModel or presentation model — e.g.
 `MainActivityViewModel` (consumed by the shell + `profile` + `onboarding`) and `LibraryTab` (consumed
 by `library` + `settings`) are `core:designsystem`, not feature-local.
@@ -137,10 +137,10 @@ Rules specific to the module axis:
 
 ### Current feature roster and tier
 
-After the Steps 7–18 second-wave extraction (see the plan), **every feature is a leaf** — there are no
-sibling `feature → feature` edges, so `book_detail` and `reading`, though they compose many concepts,
-import only `core` and need no separate T2 tier in practice. (T2 remains a *sanctioned position* for a
-future aggregator that genuinely must import another feature's screen.)
+**Every feature is a leaf** — there are no sibling `feature → feature` edges, so `book_detail` and
+`reading`, though they compose many concepts, import only `core` and need no separate T2 tier in
+practice. (T2 remains a *sanctioned position* for a future aggregator that genuinely must import
+another feature's screen.)
 
 | Tier | Features |
 |------|----------|
@@ -264,6 +264,50 @@ A change is structurally correct when:
 - [ ] No module depends sideways or upward — only on lower tiers.
 - [ ] A type imported by ≥2 features lives in `core`, not in a feature.
 - [ ] Cross-feature navigation goes through a `core` contract, not a `Screen` import.
-- [ ] Cross-feature coordination lives in `:app` orchestration, not inside a single feature.
-- [ ] The new type's **layer** (domain/data/presentation) and **tier** (core/feature/app) were both
-      chosen deliberately, not inherited from where the first caller happened to sit.
+- [ ] Cross-feature coordination lives in `:orchestration`, not inside a single feature.
+- [ ] The new type's **layer** (domain/data/presentation) and **tier** (core/feature/orchestration)
+      were both chosen deliberately, not inherited from where the first caller happened to sit.
+
+---
+
+## 10. The module roster and build setup
+
+The build is split into the following Gradle modules (see `settings.gradle.kts`). A module may depend
+only on modules **below** its tier (§2).
+
+| Tier | Modules |
+|------|---------|
+| T3 app shell | `:app` |
+| T3 orchestration | `:orchestration` |
+| T1 features | `:feature:{lists, profile, onboarding, explore, library, book_detail, reading, session, scan, settings, app_update}` |
+| T0 core | `:core:{domain, database, network, platform, preferences, identity, book, lists, deadlines, personal, profile, library, connectivity, designsystem}` |
+
+Build wiring conventions:
+
+- **Convention plugins** in `build-logic/` keep module build files uniform. Apply the smallest set:
+  `softcover.android.library` (base for every `:core:*`/`:feature:*`/`:orchestration` module — sets
+  SDK/JDK, and the shared coroutines/Koin/Timber runtime + JUnit5/Kotest/MockK/Turbine test stack),
+  plus `softcover.android.compose` (any module with Compose UI), `softcover.android.room`
+  (`:core:database` only), `softcover.android.apollo` (`:core:network` only). `:app` is the lone
+  `com.android.application`. Do **not** re-declare what a convention plugin already provides, and do
+  **not** enable `buildConfig`/`room`/`ksp` in a feature (Room/Apollo are core-only).
+- **Each module declares the `project(":core:x")` deps its own code imports** — never rely on a
+  transitive dep. A module whose *public API* exposes a type from a library (e.g. `:core:designsystem`
+  returning a coil `ImageRequest`) declares that library `api`, so consumers get it transitively; all
+  other deps are `implementation`.
+- **Manifests merge upward.** Library modules contribute components via their own
+  `src/main/AndroidManifest.xml` (`:orchestration` the launcher `MainActivity`, `:feature:session` the
+  `ReadingSessionService`); `:app` owns the `<application>` element, permissions, FileProvider, and
+  launcher icons. Shared resources (strings, drawables, `Theme.Softcover`) live in `:core:designsystem`.
+- **Koin:** each module owns one `module { }`; `:orchestration` aggregates them all into
+  `softcoverModules`, and `:app` starts Koin with `modules(softcoverModules + appModule)`.
+
+## 11. Future: Kotlin Multiplatform
+
+The module boundaries are shaped so a later KMP conversion is a per-module `commonMain`/`androidMain`
+source-set split rather than a re-architecture. `:core:domain`, `:core:preferences`, `:core:identity`,
+and `:core:book` are the natural first `commonMain` candidates (their `domain` packages are Android-free
+by the layer rule). `:feature:app_update` (Play `AppUpdateManager`), `:feature:scan` (CameraX),
+notification/WorkManager code in `:core:platform`, and Room in `:core:database` stay `androidMain`. Keep
+Android-only types out of `domain` packages so that boundary stays clean — `app_update` is the one
+sanctioned exception (its domain is inherently Android).
