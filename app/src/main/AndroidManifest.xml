@@ -42,15 +42,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".feature.session.presentation.service.ReadingSessionService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="active_reading_session_timer" />
-        </service>
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.shareprovider"

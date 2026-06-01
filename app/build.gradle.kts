@@ -68,6 +68,9 @@ dependencies {
     implementation(project(":feature:explore"))
     implementation(project(":feature:library"))
     implementation(project(":feature:book_detail"))
+    implementation(project(":feature:reading"))
+    implementation(project(":feature:session"))
+    implementation(project(":feature:scan"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

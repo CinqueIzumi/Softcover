@@ -42,4 +42,7 @@ include(":feature:onboarding")
 include(":feature:explore")
 include(":feature:library")
 include(":feature:book_detail")
+include(":feature:reading")
+include(":feature:session")
+include(":feature:scan")
  
