@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.presentation.screen
+package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -24,13 +24,13 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.ScreenTransition
 import kotlinx.coroutines.flow.combine
+import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.presentation.transition.LocalSharedTransitionScope
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.ConnectivityBanner
 import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
-import org.koin.compose.koinInject
 
 object RootScreen : Screen {
     @OptIn(ExperimentalSharedTransitionApi::class)

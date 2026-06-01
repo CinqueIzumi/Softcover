@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.presentation.screen
+package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -24,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,17 +38,15 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import nl.rhaydus.softcover.core.presentation.component.BottomFloatingBar
-import nl.rhaydus.softcover.core.presentation.component.DockedBottomNavigationBar
+import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
+import nl.rhaydus.softcover.core.presentation.util.LocalBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
-import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 
 private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
 private val TAB_ROOT_DRIFT = 12.dp
-
-val LocalBottomBarPadding = compositionLocalOf { 0.dp }
 
 object BottomBarScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)

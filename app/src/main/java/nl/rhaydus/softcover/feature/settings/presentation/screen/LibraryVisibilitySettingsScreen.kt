@@ -48,15 +48,17 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import org.koin.compose.koinInject
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
-import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnListToggleAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReorderLibraryTabsAction
@@ -71,6 +73,8 @@ class LibraryVisibilitySettingsScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
+        val appNavigator = koinInject<AppNavigator>()
+
         val screenModel = koinScreenModel<LibraryVisibilitySettingsScreenModel>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()
@@ -79,7 +83,7 @@ class LibraryVisibilitySettingsScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onNavigateBack = navigator::pop,
-            onCreateListClick = { navigator.push(CreateListScreen()) },
+            onCreateListClick = { navigator.push(appNavigator.screen(ScreenDestination.CreateList)) },
         )
     }
 

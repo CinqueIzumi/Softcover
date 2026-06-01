@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.presentation.component
+package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -26,17 +26,18 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
+import kotlinx.coroutines.flow.drop
+import nl.rhaydus.softcover.core.presentation.component.SoftcoverIconToggleButton
 import nl.rhaydus.softcover.core.presentation.model.IconToggleButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.presentation.screen.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.BottomBarPulseManager
+import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.feature.app_update.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsTab
-import kotlinx.coroutines.flow.drop
 
 private val bottomBarScreens = listOf(
     ReadingTab,
@@ -160,7 +161,7 @@ fun BottomFloatingBar(modifier: Modifier = Modifier) {
                     onCheckedChange = { tabNavigator.current = tab },
                     icon = SoftcoverIconResource.SoftcoverPainter(
                         painter = iconPainter,
-                        contentDescription = tab.options.title
+                        contentDescription = tab.options.title,
                     ),
                     style = IconToggleButtonStyle.FILLED,
                     modifier = buttonModifier,

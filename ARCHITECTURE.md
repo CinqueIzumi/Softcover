@@ -233,6 +233,39 @@ Authentication state determines the root screen:
 Navigator(screen = if (authenticated) RootScreen else OnboardingScreen)
 ```
 
+### Cross-feature navigation: the `AppNavigator` contract
+
+A feature must **never** import another feature's `Screen` or `Tab` class — that is a horizontal
+coupling the module split rejects. Instead, cross-feature navigation goes through the
+`AppNavigator` contract in `core/presentation/navigation/`:
+
+```kotlin
+interface AppNavigator {
+    fun screen(destination: ScreenDestination): Screen   // BookDetail(id, …), CreateList, Profile, …
+    fun tab(destination: TabDestination): Tab             // READING, LIBRARY, EXPLORE, SETTINGS
+}
+```
+
+A feature injects it with `koinInject<AppNavigator>()` and keeps control of *how* it navigates
+(`navigator.push`, `navigator.parent?.push`, `tabNavigator.current = …`); the contract only resolves
+*what* to navigate to. The single implementation, `AppNavigatorImpl`, lives in the **orchestration
+tier** (`orchestration/navigation/`) — the only place allowed to depend on every feature's
+`Screen`/`Tab` — and is bound `single<AppNavigator>` in `orchestrationModule`. A feature adding a
+new externally-reachable surface adds a `ScreenDestination`/`TabDestination` case and wires it in
+`AppNavigatorImpl`, never an import in the calling feature.
+
+`AppEntryPoint` (same package) is the analogous contract for non-Compose deep links: it builds
+`Intent`s targeting the launcher Activity (e.g. a notification opening Focus Mode) so a feature need
+not reference `MainActivity`.
+
+### The app shell lives at the orchestration tier
+
+The navigation host — `MainActivity`, `RootScreen`, `BottomBarScreen`, and the bottom bars — lives in
+`orchestration/presentation/`, **not** `core`. It composes feature tabs and screens, so it depends
+*down* on features (legal). `core` only owns the reusable pieces the shell and features both consume
+(theme, components, and the composition locals `LocalThemeConfiguration` / `LocalBottomBarPadding` /
+`LocalAppUpdateState`). Do not move host/shell code back into `core`.
+
 ## Network Layer
 
 - **Apollo GraphQL** communicates with the Hardcover API.

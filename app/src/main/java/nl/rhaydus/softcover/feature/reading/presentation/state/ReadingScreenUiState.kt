@@ -2,10 +2,10 @@ package nl.rhaydus.softcover.feature.reading.presentation.state
 
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.profile.domain.model.ReadingDayActivity
-import nl.rhaydus.softcover.feature.reading.presentation.model.ProgressSheetTab
 
 data class ReadingScreenUiState(
     val books: List<Book> = emptyList(),

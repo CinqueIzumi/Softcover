@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.book_detail.presentation.state
+package nl.rhaydus.softcover.core.presentation.model
 
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition

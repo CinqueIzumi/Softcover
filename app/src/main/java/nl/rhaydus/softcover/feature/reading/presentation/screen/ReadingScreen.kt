@@ -97,6 +97,7 @@ import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutation
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
@@ -105,6 +106,9 @@ import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.pressScale
 import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
@@ -119,12 +123,9 @@ import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.presentation.util.secondsToHm
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.profile.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
@@ -142,7 +143,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSh
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
-import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.math.roundToInt
@@ -158,20 +158,23 @@ object ReadingScreen : Screen {
 
         val navigator = LocalNavigator.currentOrThrow
         val tabNavigator = LocalTabNavigator.current
+        val appNavigator = koinInject<AppNavigator>()
 
         Screen(
             state = state,
             runAction = screenModel::runAction,
             onBookClick = {
                 navigator.parent?.push(
-                    item = BookDetailScreen(
-                        id = it.id,
-                        initialCover = BookInitialCover.fromBook(book = it),
+                    item = appNavigator.screen(
+                        ScreenDestination.BookDetail(
+                            id = it.id,
+                            initialCover = BookInitialCover.fromBook(book = it),
+                        ),
                     ),
                 )
             },
             onNavigateToSearch = {
-                tabNavigator.current = ExploreTab
+                tabNavigator.current = appNavigator.tab(TabDestination.EXPLORE)
             },
         )
     }
@@ -786,6 +789,7 @@ object ReadingScreen : Screen {
     private fun FeaturedSessionButton(book: Book) {
         val controller = koinInject<ActiveSessionController>()
         val navigator = LocalNavigator.currentOrThrow
+        val appNavigator = koinInject<AppNavigator>()
         val haptics = rememberHaptics()
         val active by controller.activeSession.collectAsStateWithLifecycle()
 
@@ -810,7 +814,9 @@ object ReadingScreen : Screen {
                         id = R.drawable.ic_reading,
                         contentDescription = "Focus mode icon",
                     ),
-                    onClick = { navigator.parent?.push(item = FocusModeScreen) },
+                    onClick = {
+                        navigator.parent?.push(item = appNavigator.screen(ScreenDestination.FocusMode))
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

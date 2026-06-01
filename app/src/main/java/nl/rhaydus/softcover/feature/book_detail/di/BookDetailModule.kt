@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.di
 
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
@@ -19,7 +20,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.flows.UserBooksFlow
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.UserListsFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.UserTagsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import org.koin.dsl.bind
 import org.koin.dsl.module
 

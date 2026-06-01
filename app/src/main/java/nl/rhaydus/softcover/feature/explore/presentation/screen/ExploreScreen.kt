@@ -61,6 +61,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -75,11 +76,14 @@ import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutation
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
@@ -89,8 +93,6 @@ import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
@@ -105,7 +107,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFrom
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQueryClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
-import nl.rhaydus.softcover.feature.scan.presentation.screen.BarcodeScannerScreen
 import kotlin.time.Duration.Companion.seconds
 
 private const val TRENDING_SKELETON_COUNT = 4
@@ -125,6 +126,8 @@ object ExploreScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
+        val appNavigator = koinInject<AppNavigator>()
+
         val screenModel = koinScreenModel<ExploreScreenScreenModel>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()
@@ -139,14 +142,18 @@ object ExploreScreen : Screen {
                 runAction = screenModel::runAction,
                 onBookClick = { book, surface ->
                     navigator.parent?.push(
-                        item = BookDetailScreen(
-                            id = book.id,
-                            initialCover = BookInitialCover.fromBook(book = book),
-                            transitionSurface = surface,
+                        item = appNavigator.screen(
+                            ScreenDestination.BookDetail(
+                                id = book.id,
+                                initialCover = BookInitialCover.fromBook(book = book),
+                                transitionSurface = surface,
+                            ),
                         ),
                     )
                 },
-                onScanClick = { navigator.parent?.push(item = BarcodeScannerScreen()) },
+                onScanClick = {
+                    navigator.parent?.push(item = appNavigator.screen(ScreenDestination.BarcodeScanner))
+                },
                 isOnline = isOnline,
             )
         }

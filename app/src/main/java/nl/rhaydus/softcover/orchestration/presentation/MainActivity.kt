@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.presentation.screen
+package nl.rhaydus.softcover.orchestration.presentation
 
 import android.content.Intent
 import android.os.Bundle
@@ -17,7 +17,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -35,7 +34,10 @@ import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
+import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
 import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.app_update.domain.model.AppUpdateState
@@ -45,13 +47,10 @@ import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateSt
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
 import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
-import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-val LocalThemeConfiguration = compositionLocalOf { ThemeConfiguration() }
-
-class MainActivity() : ComponentActivity() {
+class MainActivity : ComponentActivity() {
 
     private val viewModel: MainActivityViewModel by viewModel()
     private val observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase by inject()

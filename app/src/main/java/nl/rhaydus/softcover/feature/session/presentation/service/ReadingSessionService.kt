@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
 import nl.rhaydus.softcover.core.presentation.component.resolveEditionImageSource
-import nl.rhaydus.softcover.core.presentation.screen.MainActivity
+import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
 import nl.rhaydus.softcover.feature.session.presentation.ActiveSession
 import nl.rhaydus.softcover.feature.session.presentation.ActiveSessionController
 import nl.rhaydus.softcover.feature.session.presentation.formatSessionElapsed
@@ -46,6 +46,8 @@ import java.time.Duration
 class ReadingSessionService : Service() {
 
     private val controller: ActiveSessionController by inject()
+
+    private val appEntryPoint: AppEntryPoint by inject()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -248,9 +250,7 @@ class ReadingSessionService : Service() {
     }
 
     private fun focusModePendingIntent(): PendingIntent {
-        val intent = Intent(this, MainActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .putExtra(MainActivity.EXTRA_OPEN_FOCUS_MODE, true)
+        val intent = appEntryPoint.focusModeIntent(context = this)
 
         return PendingIntent.getActivity(
             this,

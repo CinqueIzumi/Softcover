@@ -7,11 +7,12 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.feature.reading.presentation.model.ProgressSheetTab
 
 data class BookDetailUiState(
     val loadingBookDetails: Boolean = true,

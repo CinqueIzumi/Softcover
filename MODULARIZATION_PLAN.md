@@ -302,7 +302,7 @@ of coupling**, and both were resolved in this step:
 > pre-existing and **out of Step 4's scope**; they belong with the Step 5 navigation work or a
 > follow-up that relocates `LibraryVisibilitySettingsScreen` to `library`.
 
-### Step 5 — Break navigation cycles with a routing contract ☐
+### Step 5 — Break navigation cycles with a routing contract ☑
 
 **Introduce** a navigation contract in `core/presentation` (a route key, or a `BookDetailNavigator`
 interface) so `reading`, `explore`, `library`, and `scan` open the book-detail surface **without
@@ -313,6 +313,49 @@ importing `BookDetailScreen`**. **Move** the shared presentation types they pass
   leaving `book_detail` as a clean top-of-graph aggregator with no inbound feature edges.
 - **Done when:** no feature imports `feature/book_detail`; cross-feature navigation goes through the
   contract.
+
+**Landed (2026-06-01).** Generalised beyond `book_detail` to a **single unified navigation contract
+covering every cross-feature destination**, and the **entire app shell relocated to the orchestration
+tier** — so the graph is acyclic for *all* navigation, not just the book-detail cycle.
+
+- **Type moves.** `BookInitialCover` → `core/presentation/model/`; `ProgressSheetTab` (which actually
+  lived in `feature/reading/presentation/model`, not `book_detail`) → `core/presentation/model/`. The
+  latter also cleared a pre-existing **core → feature** violation (`core/presentation/component/
+  UpdateProgressBottomSheet` imported `ProgressSheetTab` from `reading`).
+- **`core/presentation/navigation/` contract.** `AppNavigator` (`fun screen(ScreenDestination): Screen`,
+  `fun tab(TabDestination): Tab`) with a sealed `ScreenDestination` (`BookDetail(id, initialCover,
+  transitionSurface)`, `CreateList`, `BarcodeScanner`, `LibraryVisibilitySettings`, `FocusMode`,
+  `Profile`) and a `TabDestination` enum (`READING`/`LIBRARY`/`EXPLORE`/`SETTINGS`). Features inject it
+  via `koinInject` and keep control of *how* they navigate (`push` / `parent?.push` /
+  `tabNavigator.current = …`); the contract only resolves *what*. Implemented once as
+  `orchestration/navigation/AppNavigatorImpl` (the single place that imports every feature's
+  `Screen`/`Tab`), bound `single<AppNavigator>` in `orchestrationModule`. This follows Step 4's
+  pattern — pure contract in `core`, impl in the top tier, Koin-bound — rather than Voyager's global
+  `ScreenRegistry` (used nowhere else). **All 11 cross-feature screen pushes + the one
+  `reading → ExploreTab` tab switch now route through it; zero `feature → feature` navigation imports
+  remain.**
+- **App-shell relocation.** The nav host was mis-filed in `core/presentation` while reaching into
+  features. `MainActivity`, `RootScreen`, `BottomBarScreen`, and the two bottom bars
+  (`DockedBottomNavigationBar`/`BottomFloatingBar`) moved to `orchestration/presentation/`, legalising
+  their tab / `SessionPeekBar` / `ConnectivityBanner` / `ActiveSessionController` / `FocusModeScreen` /
+  `OnboardingScreen` / `AppUpdateState` references as downward edges. `AndroidManifest.xml` now points
+  at `.orchestration.presentation.MainActivity`. The composition locals the shell *defines* but core
+  utilities + features *consume* were extracted **down** to core first: `LocalThemeConfiguration` →
+  `core/presentation/theme/`, `LocalBottomBarPadding` + `LocalAppUpdate(State/StartAppUpdate)` →
+  `core/presentation/util/`. `core/presentation/screen/` was emptied and removed.
+- **A surfaced edge — `AppEntryPoint`.** Relocating `MainActivity` upward exposed
+  `feature/session`'s `ReadingSessionService`, which built a notification `Intent` targeting the
+  launcher Activity (was a legal `feature → core` edge only because the Activity was mis-filed in
+  `core`). Resolved with the same contract pattern: `AppEntryPoint` (`fun focusModeIntent(Context):
+  Intent`) in `core/presentation/navigation/`, `AppEntryPointImpl` in `orchestration/navigation/`,
+  Koin-bound; the service injects it instead of referencing `MainActivity`.
+
+> **Deliberately left for later steps.** `core/presentation/util/LocalAppUpdate.kt` still types its
+> locals with `feature/app_update`'s `AppUpdateState` (a **non-navigation** core → feature edge,
+> consumed by `settings` + the bottom bar) — it belongs with the `app_update` work in Step 6 / a
+> follow-up that promotes `AppUpdateState` to `core/domain`. The remaining `settings → library`
+> (`LibraryVisibilitySettingsScreen` injecting `RefreshLibraryUseCase` + `LibraryTab`) and other
+> non-screen cross-feature use-case edges are out of Step 5's navigation scope.
 
 ### Step 6 — Acknowledge `app_update`'s Android domain ☐
 

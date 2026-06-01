@@ -47,15 +47,16 @@ import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
-import nl.rhaydus.softcover.core.presentation.screen.LocalAppUpdateState
-import nl.rhaydus.softcover.core.presentation.screen.LocalStartAppUpdate
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
+import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.app_update.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.domain.simulator.AppUpdateSimulator
-import nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreen
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -70,6 +71,7 @@ object SettingsScreen : Screen {
         val state by screenModel.state.collectAsStateWithLifecycle()
 
         val navigator = LocalNavigator.currentOrThrow
+        val appNavigator = koinInject<AppNavigator>()
         val appUpdateState = LocalAppUpdateState.current
         val onStartAppUpdate = LocalStartAppUpdate.current
 
@@ -77,7 +79,7 @@ object SettingsScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             navigateToProfile = {
-                navigator.parent?.push(ProfileScreen())
+                navigator.parent?.push(appNavigator.screen(ScreenDestination.Profile))
             },
             navigateToAppearanceSettings = {
                 navigator.parent?.push(AppearanceSettingsScreen())

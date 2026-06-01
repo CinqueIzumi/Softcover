@@ -52,11 +52,11 @@ import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.util.toHoursMinutesSeconds
-import nl.rhaydus.softcover.feature.reading.presentation.model.ProgressSheetTab
 import kotlin.math.min
 import kotlin.math.roundToInt
 

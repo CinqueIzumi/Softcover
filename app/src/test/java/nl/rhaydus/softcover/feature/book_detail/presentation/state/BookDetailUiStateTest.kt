@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 

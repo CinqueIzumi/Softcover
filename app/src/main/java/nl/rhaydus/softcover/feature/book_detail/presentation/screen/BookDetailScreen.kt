@@ -89,6 +89,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import nl.rhaydus.softcover.R
 import nl.rhaydus.softcover.core.PreviewData
@@ -114,6 +115,7 @@ import nl.rhaydus.softcover.core.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.presentation.modifier.conditional
@@ -121,6 +123,8 @@ import nl.rhaydus.softcover.core.presentation.modifier.grayscale
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.presentation.modifier.shimmer
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
@@ -189,14 +193,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalL
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.feature.connectivity.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.presentation.component.ListMembership
-import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -213,6 +215,8 @@ class BookDetailScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+
+        val appNavigator = koinInject<AppNavigator>()
 
         val screenModel: BookDetailScreenScreenModel =
             koinScreenModel<BookDetailScreenScreenModel> { parametersOf(id, initialCover) }
@@ -268,7 +272,7 @@ class BookDetailScreen(
             onCreateNewListClick = {
                 screenModel.runAction(OnDismissChooseListsSheetAction())
 
-                navigator.push(item = CreateListScreen())
+                navigator.push(item = appNavigator.screen(ScreenDestination.CreateList))
             },
             isOnline = isOnline,
             celebrationKey = celebrationKey,

@@ -103,6 +103,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.softcover.R
@@ -123,8 +124,11 @@ import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutation
 import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
 import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
@@ -134,8 +138,6 @@ import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookInitialCover
 import nl.rhaydus.softcover.feature.deadlines.domain.model.BookDeadline
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.feature.deadlines.domain.model.DeadlineUnit
@@ -171,13 +173,13 @@ import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 import nl.rhaydus.softcover.feature.library.presentation.util.formatPageCount
 import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
 import nl.rhaydus.softcover.core.presentation.component.ChooseListsBottomSheet
-import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
-import nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen
 
 object LibraryScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+
+        val appNavigator = koinInject<AppNavigator>()
 
         val screenModel = koinScreenModel<LibraryScreenScreenModel>()
 
@@ -194,28 +196,34 @@ object LibraryScreen : Screen {
                 topAppBarState = screenModel.headerScrollState,
                 onBookClick = {
                     navigator.parent?.push(
-                        item = BookDetailScreen(
-                            id = it.id,
-                            initialCover = BookInitialCover.fromBook(book = it),
+                        item = appNavigator.screen(
+                            ScreenDestination.BookDetail(
+                                id = it.id,
+                                initialCover = BookInitialCover.fromBook(book = it),
+                            ),
                         ),
                     )
                 },
                 onEditionClick = {
                     navigator.parent?.push(
-                        item = BookDetailScreen(
-                            id = it.bookId,
-                            initialCover = BookInitialCover.fromEdition(edition = it),
-                            transitionSurface = "edition-${it.id}",
+                        item = appNavigator.screen(
+                            ScreenDestination.BookDetail(
+                                id = it.bookId,
+                                initialCover = BookInitialCover.fromEdition(edition = it),
+                                transitionSurface = "edition-${it.id}",
+                            ),
                         ),
                     )
                 },
                 onTabLongPress = {
-                    navigator.parent?.push(item = LibraryVisibilitySettingsScreen())
+                    navigator.parent?.push(
+                        item = appNavigator.screen(ScreenDestination.LibraryVisibilitySettings),
+                    )
                 },
                 onCreateNewListClick = {
                     screenModel.runAction(OnBulkAddToListSheetShownAction(shown = false))
 
-                    navigator.parent?.push(item = CreateListScreen())
+                    navigator.parent?.push(item = appNavigator.screen(ScreenDestination.CreateList))
                 },
             )
         }
