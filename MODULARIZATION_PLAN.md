@@ -357,12 +357,32 @@ tier** — so the graph is acyclic for *all* navigation, not just the book-detai
 > (`LibraryVisibilitySettingsScreen` injecting `RefreshLibraryUseCase` + `LibraryTab`) and other
 > non-screen cross-feature use-case edges are out of Step 5's navigation scope.
 
-### Step 6 — Acknowledge `app_update`'s Android domain ☐
+### Step 6 — Acknowledge `app_update`'s Android domain ☑
 
 **No code change.** `feature/app_update/domain` is the only domain layer that imports Android types
 (`AppUpdateRepository`, `StartAppUpdateFlowUseCase` need `Activity`/`AppUpdateManager`). This is
 correct. Recorded here so it is a deliberate decision, not a surprise: under KMP this module's domain
 stays in `androidMain`, and it must not be a target for `commonMain` extraction.
+
+**Acknowledged (2026-06-01).** Re-ran the audit
+(`grep -rlnE "^import (android\.|androidx\.|com\.google\.android\.play)" $(find . -type d -name domain)`):
+exactly **two** domain files import Android types, both in `app_update`:
+
+- `feature/app_update/domain/repository/AppUpdateRepository.kt`
+- `feature/app_update/domain/usecase/StartAppUpdateFlowUseCase.kt`
+
+The concrete imports are `androidx.activity.result.ActivityResultLauncher` and
+`androidx.activity.result.IntentSenderRequest` — the in-app-update flow must hand the Play
+`AppUpdateManager` an `ActivityResultLauncher` to surface the system update dialog, which is
+irreducibly Android UI plumbing. **Decision: leave it.** This is the deliberate `androidMain` boundary
+for this module; do not "purify" it into `commonMain`, and do not treat it as a layering violation in
+future audits. Every *other* feature's `domain/` is Android-free and remains a `commonMain` candidate.
+
+> **Not part of Step 6 — a separate follow-up.** The `core → feature` edge surfaced in Step 5
+> (`core/presentation/util/LocalAppUpdate.kt` typing its composition locals with `app_update`'s
+> `AppUpdateState`, consumed by `settings` + the bottom bar) is a distinct concern: it is resolved by
+> **promoting the pure `AppUpdateState` enum to `core/domain/model`**, not by anything in this step.
+> Tracked for a later cleanup; it does not affect the `androidMain` decision above.
 
 ---
 
