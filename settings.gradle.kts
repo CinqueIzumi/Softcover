@@ -39,4 +39,7 @@ include(":core:designsystem")
 include(":feature:lists")
 include(":feature:profile")
 include(":feature:onboarding")
+include(":feature:explore")
+include(":feature:library")
+include(":feature:book_detail")
  

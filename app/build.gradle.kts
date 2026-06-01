@@ -65,6 +65,9 @@ dependencies {
     implementation(project(":feature:lists"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:onboarding"))
+    implementation(project(":feature:explore"))
+    implementation(project(":feature:library"))
+    implementation(project(":feature:book_detail"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
