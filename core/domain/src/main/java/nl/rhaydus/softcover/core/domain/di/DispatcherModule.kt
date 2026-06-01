@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.di
+package nl.rhaydus.softcover.core.domain.di
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

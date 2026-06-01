@@ -7,9 +7,12 @@ import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.connectivity.data.sync.PendingListWriteSyncer
 import nl.rhaydus.softcover.core.connectivity.data.sync.PendingUserBookWriteSyncer
 import nl.rhaydus.softcover.core.connectivity.di.connectivityModule
+import nl.rhaydus.softcover.core.data.database.di.databaseModule
+import nl.rhaydus.softcover.core.data.network.di.apolloModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
@@ -19,11 +22,8 @@ import nl.rhaydus.softcover.core.logging.PrefixedDebugTree
 import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
 import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
-import nl.rhaydus.softcover.di.apolloModule
-import nl.rhaydus.softcover.di.coreModule
-import nl.rhaydus.softcover.di.databaseModule
-import nl.rhaydus.softcover.di.dispatcherModule
 import nl.rhaydus.softcover.di.notificationModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
@@ -61,7 +61,7 @@ class SoftCoverApp : Application() {
             androidContext(this@SoftCoverApp)
 
             modules(
-                coreModule,
+                designSystemModule,
                 preferencesModule,
                 identityModule,
                 bookModule,

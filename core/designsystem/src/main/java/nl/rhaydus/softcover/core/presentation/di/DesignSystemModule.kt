@@ -1,13 +1,10 @@
-package nl.rhaydus.softcover.di
+package nl.rhaydus.softcover.core.presentation.di
 
-import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
-import nl.rhaydus.softcover.core.data.storage.EditionImageStorageImpl
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
-import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
-val coreModule = module {
+val designSystemModule = module {
     single<MainActivityViewModel> {
         MainActivityViewModel(
             getUserIdUseCase = get(),
@@ -15,10 +12,6 @@ val coreModule = module {
             getThemeConfigurationUseCase = get(),
             refreshUserProfileDataUseCase = get(),
         )
-    }
-
-    single<EditionImageStorage> {
-        EditionImageStorageImpl(context = androidContext())
     }
 
     single {

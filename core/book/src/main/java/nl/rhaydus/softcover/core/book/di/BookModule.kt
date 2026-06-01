@@ -31,9 +31,16 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.data.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.data.database.dao.BookDao
+import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
+import nl.rhaydus.softcover.core.data.storage.EditionImageStorageImpl
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val bookModule = module {
+    single<EditionImageStorage> {
+        EditionImageStorageImpl(context = androidContext())
+    }
+
     single<BooksRemoteDataSource> {
         BooksRemoteDataSourceImpl(apolloClient = get())
     }

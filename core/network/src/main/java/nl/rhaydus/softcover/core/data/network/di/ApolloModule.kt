@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.di
+package nl.rhaydus.softcover.core.data.network.di
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory

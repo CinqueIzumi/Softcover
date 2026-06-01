@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.di
+package nl.rhaydus.softcover.core.data.database.di
 
 import nl.rhaydus.softcover.core.data.database.SoftcoverDatabase
 import org.koin.android.ext.koin.androidContext
