@@ -22,6 +22,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Softcover"
 include(":app")
+include(":orchestration")
 include(":core:domain")
 include(":core:database")
 include(":core:network")

@@ -61,6 +61,8 @@ dependencies {
     implementation(project(":core:connectivity"))
     implementation(project(":core:designsystem"))
 
+    implementation(project(":orchestration"))
+
     // Feature modules
     implementation(project(":feature:lists"))
     implementation(project(":feature:profile"))
