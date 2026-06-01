@@ -39,8 +39,10 @@ and the build splittable.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  T3  :app            navigation host + cross-feature          │  may depend on everything below
-│                      orchestration use cases                  │
+│  T3  :app            thin application shell (Application +     │  depends on :orchestration (+ a few
+│                      manifest + Koin startup)                 │  core modules it touches directly)
+│      :orchestration  navigation host + cross-feature          │  may depend on everything below
+│                      orchestration use cases + Koin aggregate │
 ├─────────────────────────────────────────────────────────────┤
 │  T2  :feature:book_detail   aggregator features that compose  │  may depend on T1, T0
 │                             several other features            │
@@ -161,16 +163,25 @@ resolved by the §6 navigation contract.
 
 ---
 
-## 5. What goes in `:app` (T3, orchestration)
+## 5. What goes in the T3 tier (`:orchestration` + `:app`)
 
-`:app` is the only tier allowed to know about many features at once. It holds:
+The T3 tier is the only one allowed to know about many features at once. It is split across two
+modules:
 
-- The **navigation host** (Voyager `Navigator` / `TabNavigator` setup, root screens, tab registry).
+**`:orchestration`** (the library that composes everything) holds:
+
+- The **navigation host** (Voyager `Navigator` / `TabNavigator` setup, root screens, the bottom bars,
+  the `AppNavigator`/`AppEntryPoint` impls). Its manifest contributes the launcher `MainActivity`.
 - **Cross-feature orchestration use cases** — logic that coordinates *several* features and cannot
   honestly live in any one of them. Examples: `ResetUserDataUseCase` (wipes data across library,
   lists, profile, identity), `InitializeUserIdAndBooksUseCase` (identity + book sync on launch),
   app-launch sync coordination.
-- Top-level DI aggregation (`di/` combining every module's Koin module).
+- The **Koin aggregate** `softcoverModules` (the list of every feature + core module's `module { }`).
+
+**`:app`** (the `com.android.application` shell) holds only the `SoftCoverApp` Application class, the
+launcher resources/manifest `<application>`, and the Koin startup (`modules(softcoverModules + appModule)`).
+It depends on `:orchestration` plus the few core modules its Application/version-provider touch
+directly, and binds the `AppVersionProvider` (which reads its `BuildConfig`).
 
 If a use case needs to reach into two or more *features*, it is orchestration and belongs here — not
 in whichever feature you happened to be editing. (If it reaches into two or more *core* modules only,
@@ -236,7 +247,8 @@ to the tier axis.
 - Suffixes are unchanged from `ARCHITECTURE.md`: `*Repository`/`*RepositoryImpl`, `*UseCase`,
   `*DataSource`/`*DataSourceImpl`, `*Entity`, `*Dto`, `*Screen`, `*ScreenModel`, `*Action`,
   `*Event`, `*UiState`, `*Dependencies`, `*LocalVariables`.
-- Each module owns exactly one Koin `module { }`; `:app` aggregates them.
+- Each module owns exactly one Koin `module { }`; `:orchestration` aggregates them into
+  `softcoverModules` and `:app` starts Koin with it.
 - The `domain`/`data`/`presentation` package boundary inside a feature is intentionally the future
   KMP source-set boundary (`commonMain`/`androidMain`). Keep Android-only types out of `domain`
   packages so that boundary stays clean — `app_update` is the one sanctioned exception (its domain is

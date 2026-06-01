@@ -515,6 +515,31 @@ Only once the audit is acyclic and core-pointing:
 No business logic changes in §5 — it is folder moves plus build files. The hard thinking is all in
 §3.
 
+**Landed (2026-06-01).** All 11 features extracted into `:feature:*` Gradle modules and the
+orchestration tier into its own `:orchestration` module; `:app` is now a thin
+`com.android.application` shell (the `SoftCoverApp` Application class, the launcher resources, and a
+one-line Koin startup). Notes on how the end state differs from / refines §2:
+
+- **Separate `:orchestration` module, not `:app`-as-orchestration.** §2's diagram folded orchestration
+  into `:app`; the build instead has `:app → :orchestration → :feature:* → :core:*`. `:orchestration`
+  owns the nav host (`MainActivity`, `RootScreen`, `BottomBarScreen`, the bottom bars), the
+  `AppNavigator`/`AppEntryPoint` impls, the two orchestration use-case impls, and the Koin aggregate
+  `softcoverModules` (the list of every feature + core module). `:app` depends only on `:orchestration`
+  plus the handful of core modules its `Application`/version-provider touch directly, and starts Koin
+  via `modules(softcoverModules + appModule)`.
+- **`MainActivity` (with the LAUNCHER intent-filter) and `ReadingSessionService` are contributed by
+  library-module manifests** (`:orchestration` and `:feature:session` respectively) and merged into
+  `:app`'s `<application>`. `Theme.Softcover` moved to `:core:designsystem` so both the orchestration
+  activity and the app `<application>` resolve it downward.
+- **Three pre-split prep moves (Step 0).** (a) `AppVersionProvider` contract added to `core:domain`
+  (impl bound in `:app`) so `settings` reads the version via DI instead of the app `BuildConfig`;
+  (b) the orphan `notificationModule` folded into `designSystemModule` (`:core:designsystem →
+  :core:platform`, presentation supplying the notification's visual identity); (c) the debug-only
+  screens moved into `:core:designsystem` `src/debug`/`src/release` source sets. `:core:designsystem`
+  also gained the Material Components dependency it was missing for release resource verification.
+- **Audit clean:** zero `core → feature`, `core → orchestration`, `feature → feature`, and
+  `feature → orchestration` edges; full unit suite green; `assembleDebug` + `assembleRelease` green.
+
 ---
 
 ## 6. What this sets up (KMP, later — out of scope here)
