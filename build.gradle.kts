@@ -16,6 +16,66 @@ plugins {
 subprojects {
     tasks.matching { it.name == "check" }.configureEach {
         dependsOn(":ktlint-rules:ktlintCheck")
+        dependsOn(":checkModuleGraph")
+    }
+}
+
+// Enforces the module-tier DAG from MODULE_STRUCTURE_GUIDELINES §2 so the split graph cannot
+// silently regress: a module may depend only on a lower tier, and a leaf feature may never depend on
+// a sibling feature. Replaces the manual `grep` import audits with a build-time gate (wired into
+// `check` above). Tiers are derived from the module path.
+val allowedTargetTiers = mapOf(
+    "core" to setOf("core"),
+    "feature" to setOf("core"),
+    "orchestration" to setOf("feature", "core"),
+    "app" to setOf("orchestration", "core"),
+)
+
+fun tierOf(path: String): String? = when {
+    path.startsWith(":core:") -> "core"
+    path.startsWith(":feature:") -> "feature"
+    path == ":orchestration" -> "orchestration"
+    path == ":app" -> "app"
+    else -> null
+}
+
+tasks.register("checkModuleGraph") {
+    group = "verification"
+    description = "Fails on any module dependency that breaks the tier DAG (MODULE_STRUCTURE_GUIDELINES §2)."
+
+    doLast {
+        val violations = mutableListOf<String>()
+        var edges = 0
+
+        subprojects.forEach { module ->
+            val fromTier = tierOf(module.path) ?: return@forEach
+            val allowed = allowedTargetTiers.getValue(fromTier)
+
+            module.configurations.forEach { configuration ->
+                configuration.dependencies
+                    .filterIsInstance<ProjectDependency>()
+                    .forEach { dependency ->
+                        if (dependency.path == module.path) return@forEach
+
+                        val targetTier = tierOf(dependency.path) ?: return@forEach
+                        edges++
+
+                        if (targetTier !in allowed) {
+                            violations += "${module.path} → ${dependency.path}  " +
+                                "($fromTier may depend only on $allowed)"
+                        }
+                    }
+            }
+        }
+
+        if (violations.isNotEmpty()) {
+            throw GradleException(
+                "Illegal module dependencies (see MODULE_STRUCTURE_GUIDELINES §2):\n" +
+                    violations.distinct().sorted().joinToString("\n") { "  - $it" },
+            )
+        }
+
+        logger.lifecycle("checkModuleGraph: $edges project dependencies validated, DAG intact.")
     }
 }
 

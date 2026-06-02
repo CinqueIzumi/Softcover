@@ -258,10 +258,15 @@ to the tier axis.
 
 ## 9. Review checklist
 
+The first two items are **enforced automatically** by the `checkModuleGraph` Gradle task (registered in
+the root build, wired into `check`, so CI gates on it). It derives each module's tier from its path and
+fails the build on any `project(...)` dependency that points sideways or upward — replacing the old manual
+`grep` import audits for tier violations. The remaining items still rely on review.
+
 A change is structurally correct when:
 
-- [ ] No leaf feature (T1) imports another feature.
-- [ ] No module depends sideways or upward — only on lower tiers.
+- [ ] No leaf feature (T1) imports another feature. *(gated by `checkModuleGraph`)*
+- [ ] No module depends sideways or upward — only on lower tiers. *(gated by `checkModuleGraph`)*
 - [ ] A type imported by ≥2 features lives in `core`, not in a feature.
 - [ ] Cross-feature navigation goes through a `core` contract, not a `Screen` import.
 - [ ] Cross-feature coordination lives in `:orchestration`, not inside a single feature.
