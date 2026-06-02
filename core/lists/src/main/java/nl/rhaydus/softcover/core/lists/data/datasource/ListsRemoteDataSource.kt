@@ -17,8 +17,6 @@ import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Co
 import nl.rhaydus.softcover.UpdateListBookPositionsMutation
 import nl.rhaydus.softcover.UpdateListMutation
 import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
-import nl.rhaydus.softcover.core.data.network.helper.safeMutation
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
@@ -26,6 +24,8 @@ import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.data.mapper.toBookList
 import nl.rhaydus.softcover.core.lists.data.mapper.toListBook
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
+import nl.rhaydus.softcover.core.network.helper.safeMutation
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.type.Int_comparison_exp
 import nl.rhaydus.softcover.type.ListBookInput
 import nl.rhaydus.softcover.type.ListInput

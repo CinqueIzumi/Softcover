@@ -19,7 +19,7 @@ import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.data.mapper.toJson
+import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind

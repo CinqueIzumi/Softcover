@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.deadlines.data.datasource
 
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.core.data.database.dao.BookDeadlineDao
-import nl.rhaydus.softcover.core.data.database.model.BookDeadlineEntity
+import nl.rhaydus.softcover.core.database.dao.BookDeadlineDao
+import nl.rhaydus.softcover.core.database.model.BookDeadlineEntity
 
 interface BookDeadlineLocalDataSource {
     fun observe(bookId: Int): Flow<BookDeadlineEntity?>

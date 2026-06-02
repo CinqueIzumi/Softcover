@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.model.ProgressSheetTab
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables

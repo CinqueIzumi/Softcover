@@ -2,8 +2,8 @@ package nl.rhaydus.softcover.core.profile.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import nl.rhaydus.softcover.GetUserProfileDataQuery
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import java.time.LocalDate
 import java.time.OffsetDateTime

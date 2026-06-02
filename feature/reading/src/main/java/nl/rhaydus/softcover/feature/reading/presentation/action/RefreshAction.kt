@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables

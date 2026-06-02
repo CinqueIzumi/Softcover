@@ -12,8 +12,8 @@ import nl.rhaydus.softcover.GetIdsForQuery
 import nl.rhaydus.softcover.GetNextBookInSeriesQuery
 import nl.rhaydus.softcover.GetNextBookInSeriesQuery.Data.Book_series.Book.Companion.bookDetailFragment as nextInSeriesBookDetailFragment
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 
 class SearchRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,

@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.personal.data.datasource
 
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.core.data.database.dao.ReadingSessionDao
-import nl.rhaydus.softcover.core.data.database.model.ReadingSessionEntity
+import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
+import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 
 interface ReadingSessionLocalDataSource {
     fun observeByBookId(bookId: Int): Flow<List<ReadingSessionEntity>>

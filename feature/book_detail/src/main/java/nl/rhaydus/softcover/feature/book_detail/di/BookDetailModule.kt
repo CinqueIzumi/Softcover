@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.di
 
-import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource

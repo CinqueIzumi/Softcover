@@ -10,7 +10,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.GetUserProfileDataQuery
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +28,7 @@ class ProfileRemoteDataSourceImplTest {
         apolloClient = mockk()
         dataSource = ProfileRemoteDataSourceImpl(apolloClient = apolloClient)
 
-        mockkStatic("nl.rhaydus.softcover.core.data.network.helper.ApolloExtensionsKt")
+        mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
     }
 
     @AfterEach

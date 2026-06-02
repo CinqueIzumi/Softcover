@@ -38,10 +38,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
+import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalBottomBarPadding
+import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
-import nl.rhaydus.softcover.core.presentation.util.LocalBottomBarPadding
-import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
 

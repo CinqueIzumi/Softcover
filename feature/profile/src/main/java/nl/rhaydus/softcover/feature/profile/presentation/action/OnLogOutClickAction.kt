@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies

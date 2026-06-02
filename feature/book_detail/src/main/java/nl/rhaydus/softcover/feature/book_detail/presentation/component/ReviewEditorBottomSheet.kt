@@ -43,13 +43,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.theme.spoilerEditorHighlight
 
 /**
  * Editorial editing surface for the user's personal review. The body is a rich-text field: selecting

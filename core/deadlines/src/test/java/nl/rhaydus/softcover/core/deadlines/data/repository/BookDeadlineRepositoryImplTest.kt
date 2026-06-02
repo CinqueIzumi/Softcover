@@ -9,7 +9,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.data.database.model.BookDeadlineEntity
+import nl.rhaydus.softcover.core.database.model.BookDeadlineEntity
 import nl.rhaydus.softcover.core.deadlines.data.datasource.BookDeadlineLocalDataSource
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import org.junit.jupiter.api.BeforeEach

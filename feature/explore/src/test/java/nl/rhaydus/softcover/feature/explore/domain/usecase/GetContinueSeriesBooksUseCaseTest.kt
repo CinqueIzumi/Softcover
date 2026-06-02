@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus

@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.data.database.model.HighlightEntity
-import nl.rhaydus.softcover.core.data.database.model.ReadingLogEntryEntity
-import nl.rhaydus.softcover.core.data.database.model.ReadingSessionEntity
+import nl.rhaydus.softcover.core.database.model.HighlightEntity
+import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
+import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
 import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry

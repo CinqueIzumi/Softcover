@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables

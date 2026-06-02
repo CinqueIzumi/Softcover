@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.core.lists.data.datasource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.data.database.dao.BookDao
-import nl.rhaydus.softcover.core.data.database.mapper.toModel
+import nl.rhaydus.softcover.core.database.dao.BookDao
+import nl.rhaydus.softcover.core.database.mapper.toModel
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 

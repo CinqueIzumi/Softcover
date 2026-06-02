@@ -2,7 +2,7 @@ package nl.rhaydus.softcover.core.personal.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.data.database.model.HighlightEntity
+import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.mapper.toDomain
 import nl.rhaydus.softcover.core.personal.data.mapper.toEntity

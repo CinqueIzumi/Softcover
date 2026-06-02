@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiState
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.UiState
 
 data class ExploreScreenUiState(
     val previousSearchQueries: List<String> = emptyList(),

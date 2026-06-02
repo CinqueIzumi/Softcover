@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.deadlines.data.mapper
 
-import nl.rhaydus.softcover.core.data.database.model.BookDeadlineEntity
+import nl.rhaydus.softcover.core.database.model.BookDeadlineEntity
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import java.time.LocalDate

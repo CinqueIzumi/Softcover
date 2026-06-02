@@ -12,11 +12,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.identity.domain.usecase.UpdateApiKeyUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables

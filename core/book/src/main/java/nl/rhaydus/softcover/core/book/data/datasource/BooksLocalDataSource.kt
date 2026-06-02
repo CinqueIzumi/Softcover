@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.book.data.sort.toOrderByFragment
-import nl.rhaydus.softcover.core.data.database.dao.BookDao
-import nl.rhaydus.softcover.core.data.database.mapper.toModel
-import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
+import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
+import nl.rhaydus.softcover.core.database.dao.BookDao
+import nl.rhaydus.softcover.core.database.mapper.toModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode

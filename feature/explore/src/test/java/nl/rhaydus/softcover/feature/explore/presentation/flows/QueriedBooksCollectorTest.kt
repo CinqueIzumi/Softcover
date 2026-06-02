@@ -10,8 +10,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies

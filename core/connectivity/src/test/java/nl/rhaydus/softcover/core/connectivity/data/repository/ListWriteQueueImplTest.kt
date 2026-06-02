@@ -6,8 +6,8 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.data.database.dao.PendingListWriteDao
-import nl.rhaydus.softcover.core.data.database.model.PendingListWriteEntity
+import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
+import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 import org.junit.jupiter.api.BeforeEach

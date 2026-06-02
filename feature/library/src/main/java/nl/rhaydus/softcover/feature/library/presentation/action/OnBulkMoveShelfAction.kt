@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables

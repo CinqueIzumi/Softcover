@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.action
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables

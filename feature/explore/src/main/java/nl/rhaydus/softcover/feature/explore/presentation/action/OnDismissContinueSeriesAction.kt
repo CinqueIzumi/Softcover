@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables

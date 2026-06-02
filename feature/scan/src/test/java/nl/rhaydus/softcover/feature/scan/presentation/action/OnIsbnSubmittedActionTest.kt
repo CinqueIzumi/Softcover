@@ -9,11 +9,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent

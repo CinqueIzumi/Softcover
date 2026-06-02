@@ -5,6 +5,8 @@ import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.repository.BooksRepositoryImpl
+import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
+import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorageImpl
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
@@ -29,10 +31,8 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
-import nl.rhaydus.softcover.core.data.database.SoftcoverDatabase
-import nl.rhaydus.softcover.core.data.database.dao.BookDao
-import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
-import nl.rhaydus.softcover.core.data.storage.EditionImageStorageImpl
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
+import nl.rhaydus.softcover.core.database.dao.BookDao
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 

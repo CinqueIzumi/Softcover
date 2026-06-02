@@ -32,13 +32,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.R
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.PillChip
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
 
 /**
  * The canonical surface for managing the user's own tags on a book (§3.5 modal sheet). The user picks

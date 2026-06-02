@@ -11,8 +11,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.rhaydus.softcover.core.connectivity.data.mapper.toPendingListWrite
-import nl.rhaydus.softcover.core.data.database.dao.PendingListWriteDao
-import nl.rhaydus.softcover.core.data.database.model.PendingListWriteEntity
+import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
+import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite

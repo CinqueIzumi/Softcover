@@ -4,7 +4,7 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.cache.normalized.FetchPolicy
 import nl.rhaydus.softcover.GetTopBookReviewsQuery
 import nl.rhaydus.softcover.GetTopBookReviewsQuery.Data.User_book.Companion.bookReviewFragment
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toBookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 

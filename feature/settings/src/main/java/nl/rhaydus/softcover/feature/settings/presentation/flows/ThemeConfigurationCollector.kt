@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.settings.presentation.flows
 
 import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables

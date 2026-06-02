@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent

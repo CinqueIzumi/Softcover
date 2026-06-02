@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.connectivity.data.mapper
 
-import nl.rhaydus.softcover.core.data.database.model.PendingListWriteEntity
+import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 

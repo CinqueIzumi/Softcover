@@ -6,8 +6,8 @@ import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.data.database.dao.PendingListWriteDao
-import nl.rhaydus.softcover.core.data.database.model.PendingListWriteEntity
+import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
+import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 import nl.rhaydus.softcover.core.domain.model.BookList

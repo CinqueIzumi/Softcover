@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables

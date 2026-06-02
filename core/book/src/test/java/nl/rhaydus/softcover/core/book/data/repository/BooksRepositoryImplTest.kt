@@ -21,7 +21,7 @@ import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
-import nl.rhaydus.softcover.core.data.mapper.toJson
+import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer

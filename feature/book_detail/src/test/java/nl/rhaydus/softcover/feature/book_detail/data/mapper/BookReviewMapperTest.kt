@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.data.mapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromSlate
+import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromSlate
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun

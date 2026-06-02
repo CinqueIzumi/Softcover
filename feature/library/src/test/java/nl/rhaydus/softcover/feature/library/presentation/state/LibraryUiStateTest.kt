@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -12,7 +13,6 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 

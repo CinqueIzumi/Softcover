@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
-import nl.rhaydus.softcover.core.data.database.dao.PendingUserBookWriteDao
-import nl.rhaydus.softcover.core.data.database.model.PendingUserBookWriteEntity
-import nl.rhaydus.softcover.core.data.mapper.toJson
+import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
+import nl.rhaydus.softcover.core.database.mapper.toJson
+import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument

@@ -10,10 +10,10 @@ import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
 import nl.rhaydus.softcover.SaveTagsMutation
-import nl.rhaydus.softcover.core.data.network.helper.safeMutation
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.core.network.helper.safeMutation
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toUserTag
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -30,7 +30,7 @@ class UserTagsRemoteDataSourceImplTest {
         apolloClient = mockk()
         dataSource = UserTagsRemoteDataSourceImpl(apolloClient = apolloClient)
 
-        mockkStatic("nl.rhaydus.softcover.core.data.network.helper.ApolloExtensionsKt")
+        mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
         mockkStatic("nl.rhaydus.softcover.feature.book_detail.data.mapper.UserTagMapperKt")
     }
 

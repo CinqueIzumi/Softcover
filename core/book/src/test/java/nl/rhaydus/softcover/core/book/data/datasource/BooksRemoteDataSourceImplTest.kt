@@ -36,8 +36,6 @@ import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
-import nl.rhaydus.softcover.core.data.network.helper.safeMutation
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
@@ -46,6 +44,8 @@ import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.network.helper.safeMutation
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -61,7 +61,7 @@ class BooksRemoteDataSourceImplTest {
         apolloClient = mockk()
         dataSource = BooksRemoteDataSourceImpl(apolloClient = apolloClient)
 
-        mockkStatic("nl.rhaydus.softcover.core.data.network.helper.ApolloExtensionsKt")
+        mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
         mockkStatic("nl.rhaydus.softcover.core.book.data.mapper.BookMapperKt")
         mockkObject(UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.Companion)
     }

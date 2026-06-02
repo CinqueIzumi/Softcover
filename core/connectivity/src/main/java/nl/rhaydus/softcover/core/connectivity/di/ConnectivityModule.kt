@@ -7,9 +7,9 @@ import nl.rhaydus.softcover.core.connectivity.data.repository.ListWriteQueueImpl
 import nl.rhaydus.softcover.core.connectivity.data.repository.UserBookWriteQueueImpl
 import nl.rhaydus.softcover.core.connectivity.data.sync.PendingListWriteSyncer
 import nl.rhaydus.softcover.core.connectivity.data.sync.PendingUserBookWriteSyncer
-import nl.rhaydus.softcover.core.data.database.SoftcoverDatabase
-import nl.rhaydus.softcover.core.data.database.dao.PendingListWriteDao
-import nl.rhaydus.softcover.core.data.database.dao.PendingUserBookWriteDao
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
+import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
+import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider

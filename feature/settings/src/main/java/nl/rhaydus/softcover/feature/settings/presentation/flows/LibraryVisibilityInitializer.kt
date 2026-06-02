@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.flows
 
-import nl.rhaydus.softcover.core.presentation.toad.Initializer
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.Initializer
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables

@@ -1,5 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
+import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiState
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -9,9 +12,6 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
-import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.presentation.model.ProgressSheetTab
-import nl.rhaydus.softcover.core.presentation.toad.UiState
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 
 data class BookDetailUiState(

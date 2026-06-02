@@ -5,8 +5,8 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
-import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.book.data.mapper
 
-import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromSlate
+import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromSlate
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition

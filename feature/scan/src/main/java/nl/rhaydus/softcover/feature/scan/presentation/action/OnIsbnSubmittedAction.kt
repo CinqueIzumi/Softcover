@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent

@@ -9,7 +9,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies

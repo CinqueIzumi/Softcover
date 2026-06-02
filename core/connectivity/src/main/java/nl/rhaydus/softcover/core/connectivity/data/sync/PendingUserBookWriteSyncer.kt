@@ -10,9 +10,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
-import nl.rhaydus.softcover.core.data.database.dao.PendingUserBookWriteDao
-import nl.rhaydus.softcover.core.data.database.model.PendingUserBookWriteEntity
-import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromJson
+import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
+import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromJson
+import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer

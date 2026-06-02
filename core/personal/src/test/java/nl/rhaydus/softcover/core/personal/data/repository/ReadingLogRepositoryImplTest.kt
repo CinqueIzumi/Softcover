@@ -9,7 +9,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.data.database.model.ReadingLogEntryEntity
+import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
 import org.junit.jupiter.api.BeforeEach

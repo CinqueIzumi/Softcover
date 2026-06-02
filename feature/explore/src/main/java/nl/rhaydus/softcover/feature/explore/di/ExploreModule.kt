@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.di
 
-import nl.rhaydus.softcover.core.data.database.SoftcoverDatabase
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSourceImpl
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSource
