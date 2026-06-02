@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class CompleteAppUpdateUseCaseTest {
-
     private lateinit var appUpdateRepository: AppUpdateRepository
     private lateinit var useCase: CompleteAppUpdateUseCase
 
@@ -20,7 +19,6 @@ class CompleteAppUpdateUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository completeUpdate`() {
             // ----- Arrange -----

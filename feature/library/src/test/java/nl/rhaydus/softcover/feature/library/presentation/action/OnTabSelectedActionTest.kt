@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnTabSelectedActionTest {
-
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -33,7 +32,6 @@ class OnTabSelectedActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `updates selectedTabId to the new tab`() = runTest {
             // ----- Arrange -----

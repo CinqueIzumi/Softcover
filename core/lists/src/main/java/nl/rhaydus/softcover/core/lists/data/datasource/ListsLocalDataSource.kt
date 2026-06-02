@@ -80,7 +80,10 @@ class ListsLocalDataSourceImpl(
         bookId: Int,
     ): ListBook? {
         return dao
-            .getListBookByListAndBook(listId = listId, bookId = bookId)
+            .getListBookByListAndBook(
+                listId = listId,
+                bookId = bookId,
+            )
             ?.toModel(isOwnedList = false)
     }
 
@@ -127,6 +130,9 @@ class ListsLocalDataSourceImpl(
         listId: Int,
         ranked: Boolean,
     ) {
-        dao.setBookListRanked(listId = listId, ranked = ranked)
+        dao.setBookListRanked(
+            listId = listId,
+            ranked = ranked,
+        )
     }
 }

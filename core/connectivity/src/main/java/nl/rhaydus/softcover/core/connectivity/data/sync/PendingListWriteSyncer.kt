@@ -72,7 +72,10 @@ class PendingListWriteSyncer(
             replayed
                 .onSuccess { dao.delete(entity.localId) }
                 .onFailure { error ->
-                    Timber.w(error, "Pending list write ${entity.localId} failed; halting drain")
+                    Timber.w(
+                        error,
+                        "Pending list write ${entity.localId} failed; halting drain",
+                    )
 
                     dao.incrementAttempts(entity.localId)
 
@@ -134,7 +137,10 @@ class PendingListWriteSyncer(
             editionId = editionId,
         )
 
-        listsLocalDataSource.removeOptimisticListBook(listId = listId, bookId = bookId)
+        listsLocalDataSource.removeOptimisticListBook(
+            listId = listId,
+            bookId = bookId,
+        )
         listsLocalDataSource.cacheListBook(book = real)
     }
 

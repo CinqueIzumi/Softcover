@@ -26,9 +26,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ListEntityMapperTest {
-
     // region Shared stubs for UI -> Entity section
-
     private fun stubBookList(
         id: Int = 20,
         name: String = "My List",
@@ -62,11 +60,8 @@ class ListEntityMapperTest {
         every { this@mockk.book } returns book
         every { this@mockk.edition } returns edition
     }
-
     // endregion
-
     // region Shared stubs for Entity -> Model section
-
     private fun stubBookEditionEntity(
         id: Int = 10,
         canonicalId: Int? = null,
@@ -248,16 +243,13 @@ class ListEntityMapperTest {
         bookList = bookList,
         listBooks = listBooks,
     )
-
     // endregion
-
     // =========================================================
     // UI -> Entity mappers
     // =========================================================
 
     @Nested
     inner class BookListToEntity {
-
         @Test
         fun `maps all fields from BookList to BookListEntity`() {
             // ----- Arrange -----
@@ -303,7 +295,6 @@ class ListEntityMapperTest {
 
     @Nested
     inner class ListBookToEntity {
-
         @Test
         fun `maps listId, bookId, editionId and listBookId directly from ListBook fields`() {
             // ----- Arrange -----
@@ -379,7 +370,6 @@ class ListEntityMapperTest {
 
     @Nested
     inner class ListBookFullToModel {
-
         @Test
         fun `maps listId, listBookId, bookId and editionId from ListBookEntity`() {
             // ----- Arrange -----
@@ -421,9 +411,18 @@ class ListEntityMapperTest {
         @Test
         fun `populates book and edition from Room join data`() {
             // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = 10)
-            val editionEntity = stubBookEditionEntity(id = 10, bookId = 1)
-            val editionView = stubBookEditionView(entity = editionEntity, isOwned = false)
+            val listBookEntity = stubListBookEntity(
+                bookId = 1,
+                editionId = 10,
+            )
+            val editionEntity = stubBookEditionEntity(
+                id = 10,
+                bookId = 1,
+            )
+            val editionView = stubBookEditionView(
+                entity = editionEntity,
+                isOwned = false,
+            )
             val editionWithAuthors = stubBookEditionWithAuthors(editionView = editionView)
             val bookFullEntity = stubBookFullEntity(
                 book = stubBookEntity(id = 1),
@@ -572,25 +571,43 @@ class ListEntityMapperTest {
             val defaultEditionId = 99
             val topLevelEditionId = 10
 
-            val userBookEditionEntity = stubBookEditionEntity(id = userBookEditionId, bookId = 1)
-            val userBookEditionView = stubBookEditionView(entity = userBookEditionEntity, isOwned = false)
+            val userBookEditionEntity = stubBookEditionEntity(
+                id = userBookEditionId,
+                bookId = 1,
+            )
+            val userBookEditionView = stubBookEditionView(
+                entity = userBookEditionEntity,
+                isOwned = false,
+            )
             val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
 
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionEntity = stubBookEditionEntity(
+                id = topLevelEditionId,
+                bookId = 1,
+            )
+            val topLevelEditionView = stubBookEditionView(
+                entity = topLevelEditionEntity,
+                isOwned = false,
+            )
             val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
 
             val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
             val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
 
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = defaultEditionId)
+            val bookEntity = stubBookEntity(
+                id = 1,
+                defaultEditionId = defaultEditionId,
+            )
             val bookFullEntity = stubBookFullEntity(
                 book = bookEntity,
                 editions = listOf(userBookEditionWithAuthors),
                 userBookWithJournals = userBookWithJournals,
             )
 
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookEntity = stubListBookEntity(
+                bookId = 1,
+                editionId = topLevelEditionId,
+            )
             val listBookFull = stubListBookFull(
                 listBook = listBookEntity,
                 book = bookFullEntity,
@@ -611,22 +628,40 @@ class ListEntityMapperTest {
             val defaultEditionId = 77
             val topLevelEditionId = 10
 
-            val defaultEditionEntity = stubBookEditionEntity(id = defaultEditionId, bookId = 1)
-            val defaultEditionView = stubBookEditionView(entity = defaultEditionEntity, isOwned = false)
+            val defaultEditionEntity = stubBookEditionEntity(
+                id = defaultEditionId,
+                bookId = 1,
+            )
+            val defaultEditionView = stubBookEditionView(
+                entity = defaultEditionEntity,
+                isOwned = false,
+            )
             val defaultEditionWithAuthors = stubBookEditionWithAuthors(editionView = defaultEditionView)
 
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionEntity = stubBookEditionEntity(
+                id = topLevelEditionId,
+                bookId = 1,
+            )
+            val topLevelEditionView = stubBookEditionView(
+                entity = topLevelEditionEntity,
+                isOwned = false,
+            )
             val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
 
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = defaultEditionId)
+            val bookEntity = stubBookEntity(
+                id = 1,
+                defaultEditionId = defaultEditionId,
+            )
             val bookFullEntity = stubBookFullEntity(
                 book = bookEntity,
                 editions = listOf(defaultEditionWithAuthors),
                 userBookWithJournals = null,
             )
 
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookEntity = stubListBookEntity(
+                bookId = 1,
+                editionId = topLevelEditionId,
+            )
             val listBookFull = stubListBookFull(
                 listBook = listBookEntity,
                 book = bookFullEntity,
@@ -646,19 +681,31 @@ class ListEntityMapperTest {
             // ----- Arrange -----
             val topLevelEditionId = 10
 
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionEntity = stubBookEditionEntity(
+                id = topLevelEditionId,
+                bookId = 1,
+            )
+            val topLevelEditionView = stubBookEditionView(
+                entity = topLevelEditionEntity,
+                isOwned = false,
+            )
             val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
 
             // defaultEditionId 99 is not present in the editions list, triggering fallback
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = 99)
+            val bookEntity = stubBookEntity(
+                id = 1,
+                defaultEditionId = 99,
+            )
             val bookFullEntity = stubBookFullEntity(
                 book = bookEntity,
                 editions = emptyList(),
                 userBookWithJournals = null,
             )
 
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookEntity = stubListBookEntity(
+                bookId = 1,
+                editionId = topLevelEditionId,
+            )
             val listBookFull = stubListBookFull(
                 listBook = listBookEntity,
                 book = bookFullEntity,
@@ -679,25 +726,43 @@ class ListEntityMapperTest {
             val topLevelEditionId = 10
             val userBookEditionId = 55
 
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionEntity = stubBookEditionEntity(
+                id = topLevelEditionId,
+                bookId = 1,
+            )
+            val topLevelEditionView = stubBookEditionView(
+                entity = topLevelEditionEntity,
+                isOwned = false,
+            )
             val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
 
-            val userBookEditionEntity = stubBookEditionEntity(id = userBookEditionId, bookId = 1)
-            val userBookEditionView = stubBookEditionView(entity = userBookEditionEntity, isOwned = false)
+            val userBookEditionEntity = stubBookEditionEntity(
+                id = userBookEditionId,
+                bookId = 1,
+            )
+            val userBookEditionView = stubBookEditionView(
+                entity = userBookEditionEntity,
+                isOwned = false,
+            )
             val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
 
             val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
             val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
 
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = userBookEditionId)
+            val bookEntity = stubBookEntity(
+                id = 1,
+                defaultEditionId = userBookEditionId,
+            )
             val bookFullEntity = stubBookFullEntity(
                 book = bookEntity,
                 editions = listOf(topLevelEditionWithAuthors, userBookEditionWithAuthors),
                 userBookWithJournals = userBookWithJournals,
             )
 
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookEntity = stubListBookEntity(
+                bookId = 1,
+                editionId = topLevelEditionId,
+            )
             val listBookFull = stubListBookFull(
                 listBook = listBookEntity,
                 book = bookFullEntity,
@@ -718,22 +783,40 @@ class ListEntityMapperTest {
             val topLevelEditionId = 10
             val defaultEditionId = 77
 
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionEntity = stubBookEditionEntity(
+                id = topLevelEditionId,
+                bookId = 1,
+            )
+            val topLevelEditionView = stubBookEditionView(
+                entity = topLevelEditionEntity,
+                isOwned = false,
+            )
             val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
 
-            val defaultEditionEntity = stubBookEditionEntity(id = defaultEditionId, bookId = 1)
-            val defaultEditionView = stubBookEditionView(entity = defaultEditionEntity, isOwned = false)
+            val defaultEditionEntity = stubBookEditionEntity(
+                id = defaultEditionId,
+                bookId = 1,
+            )
+            val defaultEditionView = stubBookEditionView(
+                entity = defaultEditionEntity,
+                isOwned = false,
+            )
             val defaultEditionWithAuthors = stubBookEditionWithAuthors(editionView = defaultEditionView)
 
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = defaultEditionId)
+            val bookEntity = stubBookEntity(
+                id = 1,
+                defaultEditionId = defaultEditionId,
+            )
             val bookFullEntity = stubBookFullEntity(
                 book = bookEntity,
                 editions = listOf(topLevelEditionWithAuthors, defaultEditionWithAuthors),
                 userBookWithJournals = null,
             )
 
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookEntity = stubListBookEntity(
+                bookId = 1,
+                editionId = topLevelEditionId,
+            )
             val listBookFull = stubListBookFull(
                 listBook = listBookEntity,
                 book = bookFullEntity,
@@ -751,7 +834,6 @@ class ListEntityMapperTest {
 
     @Nested
     inner class BookListWithBooksToModel {
-
         @Test
         fun `maps id, name and slug from BookListEntity`() {
             // ----- Arrange -----
@@ -809,10 +891,16 @@ class ListEntityMapperTest {
         fun `sorts list books by addedAt descending`() {
             // ----- Arrange -----
             val older = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 1, addedAt = "2024-01-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 1,
+                    addedAt = "2024-01-01",
+                ),
             )
             val newer = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 2, addedAt = "2024-06-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 2,
+                    addedAt = "2024-06-01",
+                ),
             )
             val wrapper = stubBookListWithBooks(listBooks = listOf(older, newer))
 
@@ -828,10 +916,16 @@ class ListEntityMapperTest {
         fun `places null addedAt entries last`() {
             // ----- Arrange -----
             val withDate = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 1, addedAt = "2024-01-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 1,
+                    addedAt = "2024-01-01",
+                ),
             )
             val nullDate = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 2, addedAt = null),
+                listBook = stubListBookEntity(
+                    listBookId = 2,
+                    addedAt = null,
+                ),
             )
             val wrapper = stubBookListWithBooks(listBooks = listOf(nullDate, withDate))
 
@@ -847,10 +941,16 @@ class ListEntityMapperTest {
         fun `uses listBookId descending as tiebreaker when addedAt values are equal`() {
             // ----- Arrange -----
             val lowerIdEntry = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 10, addedAt = "2024-03-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 10,
+                    addedAt = "2024-03-01",
+                ),
             )
             val higherIdEntry = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 20, addedAt = "2024-03-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 20,
+                    addedAt = "2024-03-01",
+                ),
             )
             val wrapper = stubBookListWithBooks(listBooks = listOf(lowerIdEntry, higherIdEntry))
 
@@ -893,10 +993,17 @@ class ListEntityMapperTest {
         fun `positioned books come before unpositioned ones regardless of addedAt`() {
             // ----- Arrange -----
             val unpositioned = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 1, addedAt = "2024-12-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 1,
+                    addedAt = "2024-12-01",
+                ),
             )
             val positioned = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 2, position = 0, addedAt = "2023-01-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 2,
+                    position = 0,
+                    addedAt = "2023-01-01",
+                ),
             )
             val wrapper = stubBookListWithBooks(listBooks = listOf(unpositioned, positioned))
 
@@ -912,13 +1019,22 @@ class ListEntityMapperTest {
         fun `multiple positioned books are ordered by ascending position`() {
             // ----- Arrange -----
             val pos2 = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 10, position = 2),
+                listBook = stubListBookEntity(
+                    listBookId = 10,
+                    position = 2,
+                ),
             )
             val pos0 = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 11, position = 0),
+                listBook = stubListBookEntity(
+                    listBookId = 11,
+                    position = 0,
+                ),
             )
             val pos1 = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 12, position = 1),
+                listBook = stubListBookEntity(
+                    listBookId = 12,
+                    position = 1,
+                ),
             )
             val wrapper = stubBookListWithBooks(listBooks = listOf(pos2, pos0, pos1))
 
@@ -935,13 +1051,23 @@ class ListEntityMapperTest {
         fun `unpositioned books fall back to addedAt descending after all positioned books`() {
             // ----- Arrange -----
             val positioned = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 1, position = 0, addedAt = "2023-01-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 1,
+                    position = 0,
+                    addedAt = "2023-01-01",
+                ),
             )
             val newerUnpositioned = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 2, addedAt = "2024-06-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 2,
+                    addedAt = "2024-06-01",
+                ),
             )
             val olderUnpositioned = stubListBookFull(
-                listBook = stubListBookEntity(listBookId = 3, addedAt = "2023-03-01"),
+                listBook = stubListBookEntity(
+                    listBookId = 3,
+                    addedAt = "2023-03-01",
+                ),
             )
             val wrapper = stubBookListWithBooks(
                 listBooks = listOf(olderUnpositioned, newerUnpositioned, positioned),
@@ -962,25 +1088,43 @@ class ListEntityMapperTest {
             val topLevelEditionId = 10
             val userBookEditionId = 55
 
-            val topLevelEditionEntity = stubBookEditionEntity(id = topLevelEditionId, bookId = 1)
-            val topLevelEditionView = stubBookEditionView(entity = topLevelEditionEntity, isOwned = false)
+            val topLevelEditionEntity = stubBookEditionEntity(
+                id = topLevelEditionId,
+                bookId = 1,
+            )
+            val topLevelEditionView = stubBookEditionView(
+                entity = topLevelEditionEntity,
+                isOwned = false,
+            )
             val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
 
-            val userBookEditionEntity = stubBookEditionEntity(id = userBookEditionId, bookId = 1)
-            val userBookEditionView = stubBookEditionView(entity = userBookEditionEntity, isOwned = false)
+            val userBookEditionEntity = stubBookEditionEntity(
+                id = userBookEditionId,
+                bookId = 1,
+            )
+            val userBookEditionView = stubBookEditionView(
+                entity = userBookEditionEntity,
+                isOwned = false,
+            )
             val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
 
             val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
             val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
 
-            val bookEntity = stubBookEntity(id = 1, defaultEditionId = userBookEditionId)
+            val bookEntity = stubBookEntity(
+                id = 1,
+                defaultEditionId = userBookEditionId,
+            )
             val bookFullEntity = stubBookFullEntity(
                 book = bookEntity,
                 editions = listOf(topLevelEditionWithAuthors, userBookEditionWithAuthors),
                 userBookWithJournals = userBookWithJournals,
             )
 
-            val listBookEntity = stubListBookEntity(bookId = 1, editionId = topLevelEditionId)
+            val listBookEntity = stubListBookEntity(
+                bookId = 1,
+                editionId = topLevelEditionId,
+            )
             val listBookFull = stubListBookFull(
                 listBook = listBookEntity,
                 book = bookFullEntity,

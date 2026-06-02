@@ -16,7 +16,10 @@ interface SoftcoverNotifier {
     /** True when the runtime POST_NOTIFICATIONS permission is granted (always true on API < 33). */
     fun hasPostPermission(): Boolean
 
-    fun notify(id: Int, content: SoftcoverNotificationContent)
+    fun notify(
+        id: Int,
+        content: SoftcoverNotificationContent,
+    )
 
     fun cancel(id: Int)
 }
@@ -26,7 +29,6 @@ class SoftcoverNotifierImpl(
     @param:DrawableRes private val smallIcon: Int,
     @param:ColorRes private val accentColor: Int,
 ) : SoftcoverNotifier {
-
     override fun hasPostPermission(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
 
@@ -41,20 +43,29 @@ class SoftcoverNotifierImpl(
     // The notify() call is guarded by the hasPostPermission() early-return below; lint can't trace
     // that custom check, so the runtime-permission warning is suppressed here rather than at the call.
     @SuppressLint("MissingPermission")
-    override fun notify(id: Int, content: SoftcoverNotificationContent) {
+    override fun notify(
+        id: Int,
+        content: SoftcoverNotificationContent,
+    ) {
         if (hasPostPermission().not()) {
             Timber.w("Skipping notify(id=$id) — POST_NOTIFICATIONS not granted")
 
             return
         }
 
-        val builder = NotificationCompat.Builder(context, content.channel.id)
+        val builder = NotificationCompat.Builder(
+            context,
+            content.channel.id,
+        )
             .setSmallIcon(smallIcon)
             .setContentTitle(content.title)
             .setContentText(content.body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(content.body))
             .setAutoCancel(true)
-            .setColor(ContextCompat.getColor(context, accentColor))
+            .setColor(ContextCompat.getColor(
+                context,
+                accentColor,
+            ),)
             .setColorized(false)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
@@ -66,7 +77,10 @@ class SoftcoverNotifierImpl(
             builder.setContentIntent(content.pendingIntent)
         }
 
-        NotificationManagerCompat.from(context).notify(id, builder.build())
+        NotificationManagerCompat.from(context).notify(
+            id,
+            builder.build(),
+        )
     }
 
     override fun cancel(id: Int) {

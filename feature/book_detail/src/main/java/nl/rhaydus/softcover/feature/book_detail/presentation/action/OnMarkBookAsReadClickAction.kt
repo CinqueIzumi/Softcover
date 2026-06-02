@@ -23,7 +23,10 @@ class OnMarkBookAsReadClickAction(
         val editionId = scope.currentState.previewEdition?.id ?: scope.currentState.scannedEditionId
 
         val job = dependencies.launch {
-            dependencies.markBookAsReadUseCase(book = book, editionId = editionId)
+            dependencies.markBookAsReadUseCase(
+                book = book,
+                editionId = editionId,
+            )
                 .onSuccess { outcome ->
                     // Celebrate only on a real transition — re-tapping the active "Read" chip
                     // must not replay the burst or rewrite finished_at.

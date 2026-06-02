@@ -73,7 +73,10 @@ fun EditionDetailFragment.toBookEdition(): BookEdition {
     val authors = contributions.mapNotNull { contribution ->
         val author = contribution.author ?: return@mapNotNull null
 
-        Author(name = author.name, id = author.id)
+        Author(
+            name = author.name,
+            id = author.id,
+        )
     }
     return (this as EditionFragment).toBookEdition(authors = authors)
 }
@@ -113,7 +116,7 @@ private fun UserBookFragment.toUserBook(): UserBook {
         reviewedAt = reviewed_at,
         updatedAt = updated_at,
         createdAt = created_at,
-        journals = journals
+        journals = journals,
     )
 }
 
@@ -129,7 +132,10 @@ private fun UserBookReadFragment.toUserBookRead(): UserBookRead = UserBookRead(
 private fun BookListFragment.authors(): List<Author> = contributions.mapNotNull { contribution ->
     val author = contribution.author ?: return@mapNotNull null
 
-    Author(name = author.name, id = author.id)
+    Author(
+        name = author.name,
+        id = author.id,
+    )
 }
 
 private fun BookListFragment.bookSeries(): BookSeries? =
@@ -138,7 +144,10 @@ private fun BookListFragment.bookSeries(): BookSeries? =
 private fun BookListFragment.positionsInSeries(): List<Double> {
     val first = book_series.firstOrNull()?.bookSeriesFragment() ?: return emptyList()
 
-    return parsePositionDetails(details = first.details, fallback = first.position)
+    return parsePositionDetails(
+        details = first.details,
+        fallback = first.position,
+    )
 }
 
 private fun parsePositionDetails(

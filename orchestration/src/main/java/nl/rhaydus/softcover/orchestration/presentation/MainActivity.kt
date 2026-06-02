@@ -52,7 +52,6 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
-
     private val viewModel: MainActivityViewModel by viewModel()
     private val observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase by inject()
     private val checkForAppUpdateUseCase: CheckForAppUpdateUseCase by inject()
@@ -180,7 +179,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleFocusModeIntent(intent: Intent?) {
-        if (intent?.getBooleanExtra(EXTRA_OPEN_FOCUS_MODE, false) != true) return
+        if (intent?.getBooleanExtra(
+            EXTRA_OPEN_FOCUS_MODE,
+            false,
+        ) != true) return
 
         activeSessionController.requestFocusMode()
 
@@ -207,7 +209,7 @@ private fun ClearFocusOnTapScreen(content: @Composable () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .noRippleClickable { focusManager.clearFocus() }
+            .noRippleClickable { focusManager.clearFocus() },
     ) {
         content()
     }

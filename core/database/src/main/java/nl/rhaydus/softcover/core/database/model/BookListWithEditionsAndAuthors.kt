@@ -15,8 +15,8 @@ data class BookListWithEditions(
         associateBy = Junction(
             value = ListBookEntity::class,
             parentColumn = "listId",
-            entityColumn = "editionId"
-        )
+            entityColumn = "editionId",
+        ),
     )
     val editions: List<BookEditionView>,
 )

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnToggleSearchActionTest {
-
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -33,7 +32,6 @@ class OnToggleSearchActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets isSearchActive to true when it was false`() = runTest {
             // ----- Arrange -----
@@ -69,7 +67,10 @@ class OnToggleSearchActionTest {
         @Test
         fun `clears searchQuery to empty string when closing search`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isSearchActive = true, searchQuery = "tolkien")
+            stateFlow.value = LibraryUiState(
+                isSearchActive = true,
+                searchQuery = "tolkien",
+            )
             val action = OnToggleSearchAction()
 
             // ----- Act -----
@@ -85,7 +86,10 @@ class OnToggleSearchActionTest {
         @Test
         fun `preserves searchQuery when opening search`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isSearchActive = false, searchQuery = "tolkien")
+            stateFlow.value = LibraryUiState(
+                isSearchActive = false,
+                searchQuery = "tolkien",
+            )
             val action = OnToggleSearchAction()
 
             // ----- Act -----
@@ -101,7 +105,10 @@ class OnToggleSearchActionTest {
         @Test
         fun `searchQuery remains empty when opening search with no prior query`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isSearchActive = false, searchQuery = "")
+            stateFlow.value = LibraryUiState(
+                isSearchActive = false,
+                searchQuery = "",
+            )
             val action = OnToggleSearchAction()
 
             // ----- Act -----

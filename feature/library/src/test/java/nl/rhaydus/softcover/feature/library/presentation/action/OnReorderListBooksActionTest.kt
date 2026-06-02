@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnReorderListBooksActionTest {
-
     private lateinit var reorderListBooksUseCase: ReorderListBooksUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -54,7 +53,6 @@ class OnReorderListBooksActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes use case and shows no snackbar when result is success`() = runTest {
             // ----- Arrange -----

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookDetailUiStateTest {
-
     private fun stubEdition(id: Int = 1): BookEdition = mockk<BookEdition>().also { mock ->
         every { mock.id } returns id
     }
@@ -38,13 +37,15 @@ class BookDetailUiStateTest {
 
     @Nested
     inner class DisplayedEdition {
-
         @Test
         fun `returns previewEdition when book has no user book and previewEdition is set`() {
             // ----- Arrange -----
             val preview = stubEdition(id = 5)
             val bookEdition = stubEdition(id = 10)
-            val book = stubBook(userBook = null, currentEdition = bookEdition)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = bookEdition,
+            )
             val state = BookDetailUiState(
                 book = book,
                 previewEdition = preview,
@@ -61,7 +62,10 @@ class BookDetailUiStateTest {
         fun `falls back to book currentEdition when off-shelf and no preview`() {
             // ----- Arrange -----
             val bookEdition = stubEdition(id = 10)
-            val book = stubBook(userBook = null, currentEdition = bookEdition)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = bookEdition,
+            )
             val state = BookDetailUiState(
                 book = book,
                 previewEdition = null,
@@ -102,7 +106,10 @@ class BookDetailUiStateTest {
             val preview = stubEdition(id = 5)
             val bookEdition = stubEdition(id = 10)
             val userBook = mockk<UserBook>()
-            val book = stubBook(userBook = userBook, currentEdition = bookEdition)
+            val book = stubBook(
+                userBook = userBook,
+                currentEdition = bookEdition,
+            )
             val state = BookDetailUiState(
                 book = book,
                 previewEdition = preview,
@@ -143,7 +150,10 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val bookEdition = stubEdition(id = 10)
             val userBook = stubUserBook(editionId = 10)
-            val book = stubBook(userBook = userBook, currentEdition = bookEdition)
+            val book = stubBook(
+                userBook = userBook,
+                currentEdition = bookEdition,
+            )
             val state = BookDetailUiState(
                 book = book,
                 scannedEditionId = null,
@@ -182,12 +192,14 @@ class BookDetailUiStateTest {
 
     @Nested
     inner class ShowScanEditionUpdateBanner {
-
         @Test
         fun `is true when on-shelf with a different edition and not dismissed`() {
             // ----- Arrange -----
             val userBook = stubUserBook(editionId = 10)
-            val book = stubBook(userBook = userBook, currentEdition = null)
+            val book = stubBook(
+                userBook = userBook,
+                currentEdition = null,
+            )
             val state = BookDetailUiState(
                 book = book,
                 scannedEditionId = 42,
@@ -205,7 +217,10 @@ class BookDetailUiStateTest {
         fun `is false when banner is dismissed`() {
             // ----- Arrange -----
             val userBook = stubUserBook(editionId = 10)
-            val book = stubBook(userBook = userBook, currentEdition = null)
+            val book = stubBook(
+                userBook = userBook,
+                currentEdition = null,
+            )
             val state = BookDetailUiState(
                 book = book,
                 scannedEditionId = 42,
@@ -222,7 +237,10 @@ class BookDetailUiStateTest {
         @Test
         fun `is false when book has no userBook`() {
             // ----- Arrange -----
-            val book = stubBook(userBook = null, currentEdition = null)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+            )
             val state = BookDetailUiState(
                 book = book,
                 scannedEditionId = 42,
@@ -240,7 +258,10 @@ class BookDetailUiStateTest {
         fun `is false when shelved editionId matches scannedEditionId`() {
             // ----- Arrange -----
             val userBook = stubUserBook(editionId = 42)
-            val book = stubBook(userBook = userBook, currentEdition = null)
+            val book = stubBook(
+                userBook = userBook,
+                currentEdition = null,
+            )
             val state = BookDetailUiState(
                 book = book,
                 scannedEditionId = 42,
@@ -258,7 +279,10 @@ class BookDetailUiStateTest {
         fun `is false when scannedEditionId is null`() {
             // ----- Arrange -----
             val userBook = stubUserBook(editionId = 10)
-            val book = stubBook(userBook = userBook, currentEdition = null)
+            val book = stubBook(
+                userBook = userBook,
+                currentEdition = null,
+            )
             val state = BookDetailUiState(
                 book = book,
                 scannedEditionId = null,
@@ -275,7 +299,6 @@ class BookDetailUiStateTest {
 
     @Nested
     inner class FilteredEditions {
-
         private val editionWithIsbn = PreviewData.baseEdition.copy(
             id = 1,
             isbn10 = "0385333498",
@@ -532,7 +555,6 @@ class BookDetailUiStateTest {
 
     @Nested
     inner class IsEditionOwned {
-
         private fun listBook(editionId: Int): ListBook = ListBook(
             listBookId = editionId * 10,
             listId = 1,
@@ -551,7 +573,10 @@ class BookDetailUiStateTest {
         fun `ownedEditionIds returns expected set from the owned list`() {
             // ----- Arrange -----
             val state = BookDetailUiState(
-                userLists = listOf(ownedList(77, 88)),
+                userLists = listOf(ownedList(
+                    77,
+                    88,
+                ),),
             )
 
             // ----- Act -----

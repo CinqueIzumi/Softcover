@@ -29,8 +29,14 @@ class BookDeadlineRepositoryImpl(
         unit: DeadlineUnit,
         today: LocalDate,
     ) {
-        val remaining = max(0, total - current)
-        val daysUntilDeadline = ChronoUnit.DAYS.between(today, deadlineDate)
+        val remaining = max(
+            0,
+            total - current,
+        )
+        val daysUntilDeadline = ChronoUnit.DAYS.between(
+            today,
+            deadlineDate,
+        )
 
         val initialPerDay = when {
             remaining == 0 -> 0f

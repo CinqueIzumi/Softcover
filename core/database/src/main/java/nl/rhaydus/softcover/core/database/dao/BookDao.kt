@@ -55,7 +55,7 @@ interface BookDao {
                 (ub.createdAt IS NULL) ASC,
                 ub.createdAt DESC,
                 ub.id DESC
-            """
+            """,
     )
     fun observeBooks(): Flow<List<BookFullEntity>>
 
@@ -125,7 +125,7 @@ interface BookDao {
                     (rj.latestEvent IS NULL) ASC,
                     rj.latestEvent DESC,
                     ub.id DESC
-            """
+            """,
     )
     fun getBooksByStatusAndEvents(
         statusCode: Int,
@@ -147,7 +147,7 @@ interface BookDao {
                     (ub.createdAt IS NULL) ASC,
                     ub.createdAt DESC,
                     ub.id DESC
-            """
+            """,
     )
     fun getBooksByStatusSortedByCreatedAt(statusCode: Int): Flow<List<BookFullEntity>>
 
@@ -184,7 +184,7 @@ interface BookDao {
                     (rj.latestReadFinished IS NULL) ASC,
                     rj.latestReadFinished DESC,
                     ub.id DESC
-            """
+            """,
     )
     fun getReadBooks(statusCode: Int): Flow<List<BookFullEntity>>
 
@@ -228,7 +228,7 @@ interface BookDao {
             INNER JOIN edition_author_cross_ref ea 
             ON a.id = ea.authorId
             WHERE ea.editionId = :editionId
-        """
+        """,
     )
     suspend fun getAuthorsForEdition(editionId: Int): List<AuthorEntity>
 
@@ -239,7 +239,7 @@ interface BookDao {
         FROM list_books lb
         INNER JOIN book_lists bl ON lb.listId = bl.id
         WHERE lb.editionId = :editionId AND bl.slug = 'owned'
-    """
+    """,
     )
     suspend fun getOwnedListBookByEditionId(editionId: Int): ListBookFull?
 
@@ -253,14 +253,13 @@ interface BookDao {
         FROM list_books lb
         WHERE lb.listId = :listId AND lb.bookId = :bookId
         LIMIT 1
-    """
+    """,
     )
     suspend fun getListBookByListAndBook(
         listId: Int,
         bookId: Int,
     ): ListBookFull?
     // endregion
-
     // region Data insertions
     @Transaction
     suspend fun cacheBooks(books: List<Book>) {
@@ -300,7 +299,10 @@ interface BookDao {
 
         // Resolve IDs
         val authorEntities = getAuthorsByName(allAuthors.map { it.name })
-        val authorIdsByName = authorEntities.associateBy({ it.name }, { it.id })
+        val authorIdsByName = authorEntities.associateBy(
+            { it.name },
+            { it.id },
+        )
 
         // Cross references
         clearBookAuthors(book.id)
@@ -417,7 +419,10 @@ interface BookDao {
 
         insertAuthors(allAuthors.map { it.toEntity() })
         val authorEntities = getAuthorsByName(allAuthors.map { it.name })
-        val authorIdsByName = authorEntities.associateBy({ it.name }, { it.id })
+        val authorIdsByName = authorEntities.associateBy(
+            { it.name },
+            { it.id },
+        )
 
         val crossRefs = editions.flatMap { edition -> edition.toEditionAuthorRefs(authorIdsByName) }
         insertEditionAuthors(crossRefs)
@@ -462,7 +467,6 @@ interface BookDao {
     @Upsert
     suspend fun insertBookTags(refs: List<BookTagCrossRef>)
     // endregion
-
     // region Data removers
     @Query("DELETE FROM books")
     suspend fun deleteAllBooks()
@@ -523,7 +527,7 @@ interface BookDao {
         DELETE FROM list_books
         WHERE editionId = :editionId
           AND listId IN (SELECT id FROM book_lists WHERE slug = 'owned')
-        """
+        """,
     )
     suspend fun deleteOwnedListBookByEditionId(editionId: Int)
 
@@ -534,7 +538,7 @@ interface BookDao {
         """
         DELETE FROM list_books
         WHERE listId = :listId AND bookId = :bookId AND listBookId = :listBookId
-        """
+        """,
     )
     suspend fun deleteListBookByComposite(
         listId: Int,
@@ -550,7 +554,7 @@ interface BookDao {
         SELECT b.id FROM books b
         WHERE b.id NOT IN (SELECT bookId FROM user_books)
           AND b.id NOT IN (SELECT bookId FROM list_books)
-        """
+        """,
     )
     suspend fun getOrphanBookIds(): List<Int>
 
@@ -566,18 +570,33 @@ interface BookDao {
     }
 
     @Query("UPDATE user_books SET bookId = :newId WHERE bookId = :oldId")
-    suspend fun redirectUserBooksBookId(oldId: Int, newId: Int)
+    suspend fun redirectUserBooksBookId(
+        oldId: Int,
+        newId: Int,
+    )
 
     @Query("UPDATE OR REPLACE list_books SET bookId = :newId WHERE bookId = :oldId")
-    suspend fun redirectListBooksBookId(oldId: Int, newId: Int)
+    suspend fun redirectListBooksBookId(
+        oldId: Int,
+        newId: Int,
+    )
 
     @Transaction
-    suspend fun redirectBookId(oldId: Int, newId: Int) {
+    suspend fun redirectBookId(
+        oldId: Int,
+        newId: Int,
+    ) {
         if (oldId == newId) return
 
-        redirectUserBooksBookId(oldId = oldId, newId = newId)
+        redirectUserBooksBookId(
+            oldId = oldId,
+            newId = newId,
+        )
 
-        redirectListBooksBookId(oldId = oldId, newId = newId)
+        redirectListBooksBookId(
+            oldId = oldId,
+            newId = newId,
+        )
     }
 
     @Transaction
@@ -651,7 +670,7 @@ interface BookDao {
         WHERE editionId IN (
             SELECT id FROM book_editions WHERE bookId = :bookId
         )
-    """
+    """,
     )
     suspend fun clearEditionAuthors(bookId: Int)
 
@@ -667,9 +686,11 @@ interface BookDao {
     @Query("DELETE FROM tags")
     suspend fun deleteAllTags()
     // endregion
-
     @Query("UPDATE book_lists SET ranked = :ranked WHERE id = :listId")
-    suspend fun setBookListRanked(listId: Int, ranked: Boolean)
+    suspend fun setBookListRanked(
+        listId: Int,
+        ranked: Boolean,
+    )
 
     // region List book positions
     @Query(
@@ -677,18 +698,24 @@ interface BookDao {
         UPDATE list_books
         SET position = NULL
         WHERE listId = :listId AND position IN (:positions)
-        """
+        """,
     )
-    suspend fun clearListBookPositions(listId: Int, positions: List<Int>)
+    suspend fun clearListBookPositions(
+        listId: Int,
+        positions: List<Int>,
+    )
 
     @Query(
         """
         UPDATE list_books
         SET position = :position
         WHERE listBookId = :listBookId
-        """
+        """,
     )
-    suspend fun setListBookPosition(listBookId: Int, position: Int)
+    suspend fun setListBookPosition(
+        listBookId: Int,
+        position: Int,
+    )
 
     /**
      * Atomically rewrite a contiguous slice of [listId]'s positions: clears any rows currently
@@ -706,7 +733,10 @@ interface BookDao {
 
         val positions = (startPosition until startPosition + listBookIds.size).toList()
 
-        clearListBookPositions(listId = listId, positions = positions)
+        clearListBookPositions(
+            listId = listId,
+            positions = positions,
+        )
 
         listBookIds.forEachIndexed { index, listBookId ->
             setListBookPosition(
@@ -716,7 +746,6 @@ interface BookDao {
         }
     }
     // endregion
-
     // region Shelf manual order
     @Query("SELECT * FROM shelf_manual_order WHERE statusCode = :statusCode ORDER BY position ASC")
     fun observeShelfManualOrder(statusCode: Int): Flow<List<ShelfManualOrderEntity>>
@@ -725,7 +754,10 @@ interface BookDao {
     suspend fun upsertShelfManualOrder(rows: List<ShelfManualOrderEntity>)
 
     @Query("DELETE FROM shelf_manual_order WHERE statusCode = :statusCode AND position < :positionUpperBound")
-    suspend fun deleteShelfManualOrderPrefix(statusCode: Int, positionUpperBound: Int)
+    suspend fun deleteShelfManualOrderPrefix(
+        statusCode: Int,
+        positionUpperBound: Int,
+    )
 
     @Query("DELETE FROM shelf_manual_order WHERE bookId IN (:bookIds)")
     suspend fun deleteShelfManualOrderForBookIds(bookIds: List<Int>)

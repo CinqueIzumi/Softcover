@@ -13,8 +13,14 @@ class AndroidApolloConventionPlugin : Plugin<Project> {
         pluginManager.apply("com.apollographql.apollo")
 
         dependencies {
-            add("api", libs.library("apollo"))
-            add("api", libs.library("apollo-normalized-cache"))
+            add(
+                "api",
+                libs.library("apollo"),
+            )
+            add(
+                "api",
+                libs.library("apollo-normalized-cache"),
+            )
         }
     }
 }

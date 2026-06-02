@@ -234,7 +234,10 @@ class ListsRemoteDataSourceImpl(
         )
 
         val response = apolloClient
-            .safeMutation(mutation = UpdateListMutation(id = listId, list = input))
+            .safeMutation(mutation = UpdateListMutation(
+                id = listId,
+                list = input,
+            ),)
             .listResponse
             ?: throw Exception("Did not receive an update-list response")
 

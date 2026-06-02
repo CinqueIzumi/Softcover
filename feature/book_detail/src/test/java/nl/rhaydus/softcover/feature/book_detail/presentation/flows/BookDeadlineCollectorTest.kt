@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class BookDeadlineCollectorTest {
-
     private lateinit var observeBookDeadlineUseCase: ObserveBookDeadlineUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -103,28 +102,45 @@ class BookDeadlineCollectorTest {
 
     private fun buildDeadline(
         bookId: Int = 1,
-        deadlineDate: LocalDate = LocalDate.of(2026, 5, 20),
+        deadlineDate: LocalDate = LocalDate.of(
+            2026,
+            5,
+            20,
+        ),
         initialPerDay: Float = 10f,
     ) = BookDeadline(
         bookId = bookId,
         deadlineDate = deadlineDate,
-        setAt = LocalDate.of(2026, 4, 20),
+        setAt = LocalDate.of(
+            2026,
+            4,
+            20,
+        ),
         initialPerDay = initialPerDay,
         unit = nl.rhaydus.softcover.core.domain.model.DeadlineUnit.PAGES,
     )
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `sets deadlineProgress when book and deadline are present`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val book = stubBook(id = 1, pages = 300, currentPage = 0)
+            val book = stubBook(
+                id = 1,
+                pages = 300,
+                currentPage = 0,
+            )
             stateFlow.value = BookDetailUiState(book = book)
-            val deadline = buildDeadline(bookId = 1, initialPerDay = 10f)
+            val deadline = buildDeadline(
+                bookId = 1,
+                initialPerDay = 10f,
+            )
 
             val collector = BookDeadlineCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             deadlineFlow.emit(deadline)
@@ -138,11 +154,18 @@ class BookDeadlineCollectorTest {
         @Test
         fun `deadlineProgress is null when deadline emits null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val book = stubBook(id = 1, pages = 300, currentPage = 0)
+            val book = stubBook(
+                id = 1,
+                pages = 300,
+                currentPage = 0,
+            )
             stateFlow.value = BookDetailUiState(book = book)
 
             val collector = BookDeadlineCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             deadlineFlow.emit(null)
@@ -156,12 +179,19 @@ class BookDeadlineCollectorTest {
         @Test
         fun `deadlineProgress is null when book has no pages`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val book = stubBook(id = 1, pages = null, currentPage = 0)
+            val book = stubBook(
+                id = 1,
+                pages = null,
+                currentPage = 0,
+            )
             stateFlow.value = BookDetailUiState(book = book)
             val deadline = buildDeadline(bookId = 1)
 
             val collector = BookDeadlineCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             deadlineFlow.emit(deadline)
@@ -179,20 +209,34 @@ class BookDeadlineCollectorTest {
             val totalPages = 300
 
             // First book: currentPage = 0 → 300 pages remaining / 30 days = 10 p/day
-            val bookBefore = stubBook(id = bookId, pages = totalPages, currentPage = 0)
+            val bookBefore = stubBook(
+                id = bookId,
+                pages = totalPages,
+                currentPage = 0,
+            )
             stateFlow.value = BookDetailUiState(book = bookBefore)
 
-            val deadline = buildDeadline(bookId = bookId, initialPerDay = 10f)
+            val deadline = buildDeadline(
+                bookId = bookId,
+                initialPerDay = 10f,
+            )
 
             val collector = BookDeadlineCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             deadlineFlow.emit(deadline)
             val progressBefore = stateFlow.value.deadlineProgress!!.requiredPerDay
 
             // ----- Act -----
             // Simulate reading 150 pages → 150 remaining / 30 days = 5 p/day
-            val bookAfter = stubBook(id = bookId, pages = totalPages, currentPage = 150)
+            val bookAfter = stubBook(
+                id = bookId,
+                pages = totalPages,
+                currentPage = 150,
+            )
             stateFlow.value = stateFlow.value.copy(book = bookAfter)
 
             // ----- Assert -----
@@ -204,11 +248,18 @@ class BookDeadlineCollectorTest {
         @Test
         fun `state deadline and deadlineProgress are both null before any emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val book = stubBook(id = 1, pages = 300, currentPage = 0)
+            val book = stubBook(
+                id = 1,
+                pages = 300,
+                currentPage = 0,
+            )
             stateFlow.value = BookDetailUiState(book = book)
 
             val collector = BookDeadlineCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act & Assert -----
             stateFlow.value.deadline shouldBe null
@@ -222,7 +273,10 @@ class BookDeadlineCollectorTest {
             stateFlow.value = BookDetailUiState(book = null)
 
             val collector = BookDeadlineCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act & Assert -----
             stateFlow.value.deadlineProgress shouldBe null

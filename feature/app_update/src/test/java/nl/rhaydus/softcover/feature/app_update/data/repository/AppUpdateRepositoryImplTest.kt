@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AppUpdateRepositoryImplTest {
-
     private lateinit var appUpdateDataSource: AppUpdateDataSource
     private lateinit var repository: AppUpdateRepositoryImpl
 
@@ -29,7 +28,6 @@ class AppUpdateRepositoryImplTest {
 
     @Nested
     inner class UpdateState {
-
         @Test
         fun `updateState is wired to data source updateState flow`() = runTest {
             // ----- Arrange -----
@@ -51,7 +49,6 @@ class AppUpdateRepositoryImplTest {
 
     @Nested
     inner class CheckForUpdate {
-
         @Test
         fun `delegates to data source checkForUpdate`() = runTest {
             // ----- Arrange -----
@@ -69,7 +66,6 @@ class AppUpdateRepositoryImplTest {
 
     @Nested
     inner class StartUpdateFlow {
-
         @Test
         fun `delegates to data source startUpdateFlow with the provided launcher`() {
             // ----- Arrange -----
@@ -87,7 +83,6 @@ class AppUpdateRepositoryImplTest {
 
     @Nested
     inner class CompleteUpdate {
-
         @Test
         fun `delegates to data source completeUpdate`() {
             // ----- Arrange -----

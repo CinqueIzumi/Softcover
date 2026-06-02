@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ListsLocalDataSourceImplTest {
-
     private lateinit var dao: BookDao
     private lateinit var dataSource: ListsLocalDataSourceImpl
 
@@ -39,7 +38,6 @@ class ListsLocalDataSourceImplTest {
 
     @Nested
     inner class AllUserLists {
-
         @Test
         fun `emits mapped domain book lists from DAO observeBookLists`() = runTest {
             // ----- Arrange -----
@@ -78,7 +76,10 @@ class ListsLocalDataSourceImplTest {
 
             every {
                 dao.observeBookLists()
-            } returns flowOf(list, list)
+            } returns flowOf(
+                list,
+                list,
+            )
 
             // ----- Act & Assert -----
             dataSource.allUserLists.test {
@@ -90,7 +91,6 @@ class ListsLocalDataSourceImplTest {
 
     @Nested
     inner class ApplyListBookPositions {
-
         @Test
         fun `forwards to dao applyListBookPositionRange with correct arguments`() = runTest {
             // ----- Arrange -----
@@ -126,7 +126,6 @@ class ListsLocalDataSourceImplTest {
 
     @Nested
     inner class SetListRanked {
-
         @Test
         fun `forwards to dao setBookListRanked with correct arguments`() = runTest {
             // ----- Arrange -----

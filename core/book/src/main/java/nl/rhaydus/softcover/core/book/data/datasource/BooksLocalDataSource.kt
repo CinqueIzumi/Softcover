@@ -83,7 +83,10 @@ interface BooksLocalDataSource {
 
     suspend fun getBookById(id: Int): Book?
 
-    suspend fun redirectBookId(oldId: Int, newId: Int)
+    suspend fun redirectBookId(
+        oldId: Int,
+        newId: Int,
+    )
 }
 
 class BooksLocalDataSourceImpl(
@@ -124,7 +127,10 @@ class BooksLocalDataSourceImpl(
         editionId: Int,
         path: String?,
     ) {
-        dao.updateEditionLocalImagePath(editionId = editionId, path = path)
+        dao.updateEditionLocalImagePath(
+            editionId = editionId,
+            path = path,
+        )
     }
 
     override suspend fun persistEditionImage(
@@ -133,9 +139,15 @@ class BooksLocalDataSourceImpl(
     ) {
         if (editionImageStorage.exists(editionId = editionId)) return
 
-        val storedPath = editionImageStorage.copyFrom(editionId = editionId, source = source)
+        val storedPath = editionImageStorage.copyFrom(
+            editionId = editionId,
+            source = source,
+        )
 
-        dao.updateEditionLocalImagePath(editionId = editionId, path = storedPath)
+        dao.updateEditionLocalImagePath(
+            editionId = editionId,
+            path = storedPath,
+        )
     }
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
@@ -236,7 +248,10 @@ class BooksLocalDataSourceImpl(
             arrayOf(status.code)
         }
 
-        return dao.observeBooksRaw(query = SimpleSQLiteQuery(sql, args))
+        return dao.observeBooksRaw(query = SimpleSQLiteQuery(
+            sql,
+            args,
+        ),)
             .distinctUntilChanged()
             .map { list -> list.map { it.toModel() } }
     }
@@ -290,7 +305,13 @@ class BooksLocalDataSourceImpl(
         dao.deleteOrphanBooks()
     }
 
-    override suspend fun redirectBookId(oldId: Int, newId: Int) {
-        dao.redirectBookId(oldId = oldId, newId = newId)
+    override suspend fun redirectBookId(
+        oldId: Int,
+        newId: Int,
+    ) {
+        dao.redirectBookId(
+            oldId = oldId,
+            newId = newId,
+        )
     }
 }

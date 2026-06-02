@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnGridLayoutChangeActionTest {
-
     private lateinit var setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -61,7 +60,6 @@ class OnGridLayoutChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets isLayoutMenuExpanded to false on success`() = runTest {
             // ----- Arrange -----

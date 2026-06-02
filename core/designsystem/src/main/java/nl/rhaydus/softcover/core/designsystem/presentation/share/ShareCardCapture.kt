@@ -24,7 +24,6 @@ class ShareCardCapture internal constructor(
     internal val graphicsLayer: GraphicsLayer,
     private val context: Context,
 ) {
-
     // TODO: capture density follows the host device; revisit for a fixed-pixel export when share intents land.
     // TODO: inject AppDispatchers when this class moves out of scaffolding; the literal Dispatchers.IO is a temporary expedient.
     suspend fun saveToGallery(displayName: String): SaveOutcome {
@@ -33,9 +32,15 @@ class ShareCardCapture internal constructor(
 
         return withContext(Dispatchers.IO) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                saveViaScopedStorage(bitmap, filename)
+                saveViaScopedStorage(
+                    bitmap,
+                    filename,
+                )
             } else {
-                saveViaLegacyStorage(bitmap, filename)
+                saveViaLegacyStorage(
+                    bitmap,
+                    filename,
+                )
             }
         }
     }
@@ -45,13 +50,23 @@ class ShareCardCapture internal constructor(
         val filename = buildFilename(displayName = displayName)
 
         return withContext(Dispatchers.IO) {
-            val shareDir = File(context.cacheDir, SHARE_CACHE_FOLDER).apply { mkdirs() }
+            val shareDir = File(
+                context.cacheDir,
+                SHARE_CACHE_FOLDER,
+            ).apply { mkdirs() }
 
             shareDir.listFiles()?.forEach { it.delete() }
 
-            val file = File(shareDir, filename)
+            val file = File(
+                shareDir,
+                filename,
+            )
             file.outputStream().use { stream ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, /* quality = */ 100, stream)
+                bitmap.compress(
+                    Bitmap.CompressFormat.PNG, /* quality = */
+                    100,
+                    stream,
+                )
             }
 
             val uri = FileProvider.getUriForFile(
@@ -65,33 +80,66 @@ class ShareCardCapture internal constructor(
     }
 
     private fun buildFilename(displayName: String): String {
-        val sanitized = displayName.replace(Regex("[^A-Za-z0-9-_]"), "-")
+        val sanitized = displayName.replace(
+            Regex("[^A-Za-z0-9-_]"),
+            "-",
+        )
 
         return "softcover-$sanitized-${System.currentTimeMillis()}.png"
     }
 
-    private fun saveViaScopedStorage(bitmap: Bitmap, filename: String): SaveOutcome {
+    private fun saveViaScopedStorage(
+        bitmap: Bitmap,
+        filename: String,
+    ): SaveOutcome {
         val resolver = context.contentResolver
 
         val values = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "$RELATIVE_PICTURES_PATH/$GALLERY_FOLDER")
-            put(MediaStore.MediaColumns.IS_PENDING, 1)
+            put(
+                MediaStore.MediaColumns.DISPLAY_NAME,
+                filename,
+            )
+            put(
+                MediaStore.MediaColumns.MIME_TYPE,
+                "image/png",
+            )
+            put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                "$RELATIVE_PICTURES_PATH/$GALLERY_FOLDER",
+            )
+            put(
+                MediaStore.MediaColumns.IS_PENDING,
+                1,
+            )
         }
 
-        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        val uri = resolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            values,
+        )
             ?: error("MediaStore insert returned null")
 
         resolver.openOutputStream(uri).use { stream ->
             requireNotNull(stream) { "openOutputStream returned null for $uri" }
 
-            bitmap.compress(Bitmap.CompressFormat.PNG, /* quality = */ 100, stream)
+            bitmap.compress(
+                Bitmap.CompressFormat.PNG, /* quality = */
+                100,
+                stream,
+            )
         }
 
         values.clear()
-        values.put(MediaStore.MediaColumns.IS_PENDING, 0)
-        resolver.update(uri, values, null, null)
+        values.put(
+            MediaStore.MediaColumns.IS_PENDING,
+            0,
+        )
+        resolver.update(
+            uri,
+            values,
+            null,
+            null,
+        )
 
         return SaveOutcome.Saved(
             uri = uri,
@@ -100,7 +148,10 @@ class ShareCardCapture internal constructor(
     }
 
     @Suppress("DEPRECATION")
-    private fun saveViaLegacyStorage(bitmap: Bitmap, filename: String): SaveOutcome {
+    private fun saveViaLegacyStorage(
+        bitmap: Bitmap,
+        filename: String,
+    ): SaveOutcome {
         val picturesDir = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
             GALLERY_FOLDER,
@@ -108,19 +159,38 @@ class ShareCardCapture internal constructor(
 
         picturesDir.mkdirs()
 
-        val file = File(picturesDir, filename)
+        val file = File(
+            picturesDir,
+            filename,
+        )
         file.outputStream().use { stream ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, /* quality = */ 100, stream)
+            bitmap.compress(
+                Bitmap.CompressFormat.PNG, /* quality = */
+                100,
+                stream,
+            )
         }
 
         val values = ContentValues().apply {
-            put(MediaStore.Images.Media.DATA, file.absolutePath)
-            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            put(
+                MediaStore.Images.Media.DATA,
+                file.absolutePath,
+            )
+            put(
+                MediaStore.Images.Media.MIME_TYPE,
+                "image/png",
+            )
+            put(
+                MediaStore.Images.Media.DISPLAY_NAME,
+                filename,
+            )
         }
 
         val uri = context.contentResolver
-            .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            .insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                values,
+            )
             ?: Uri.fromFile(file)
 
         return SaveOutcome.Saved(
@@ -142,7 +212,10 @@ fun rememberShareCardCapture(): ShareCardCapture {
     val graphicsLayer = rememberGraphicsLayer()
     val context = LocalContext.current
 
-    return remember(graphicsLayer, context) { ShareCardCapture(graphicsLayer, context) }
+    return remember(graphicsLayer, context) { ShareCardCapture(
+        graphicsLayer,
+        context,
+    ) }
 }
 
 internal fun ContentDrawScope.recordAndDraw(graphicsLayer: GraphicsLayer) {

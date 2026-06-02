@@ -57,7 +57,10 @@ fun PillChip(
             shape = shape,
             onClick = onClick,
         ) {
-            PillChipLabel(label = label, selected = selected)
+            PillChipLabel(
+                label = label,
+                selected = selected,
+            )
         }
     } else {
         Surface(
@@ -66,7 +69,10 @@ fun PillChip(
             contentColor = content,
             shape = shape,
         ) {
-            PillChipLabel(label = label, selected = selected)
+            PillChipLabel(
+                label = label,
+                selected = selected,
+            )
         }
     }
 }

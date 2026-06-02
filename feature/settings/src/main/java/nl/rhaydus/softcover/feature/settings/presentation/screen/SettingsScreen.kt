@@ -62,7 +62,6 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUi
 import kotlinx.coroutines.launch
 
 object SettingsScreen : Screen {
-
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<SettingsScreenScreenModel>()

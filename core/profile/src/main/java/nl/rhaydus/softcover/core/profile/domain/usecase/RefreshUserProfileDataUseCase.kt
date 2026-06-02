@@ -35,7 +35,10 @@ class RefreshUserProfileDataUseCase(
             booksRead = booksRead,
             totalPagesRead = totalPagesRead,
             averageRating = averageRating,
-            readingStreak = computeStreak(activeReadingDates, today),
+            readingStreak = computeStreak(
+                activeReadingDates,
+                today,
+            ),
             activeReadingDates = windowedDates,
         )
     }
@@ -43,7 +46,10 @@ class RefreshUserProfileDataUseCase(
     // Grace day: a user who hasn't logged yet today should not see their streak break,
     // so we start counting from yesterday when today has no entry. The streak only ends
     // once we hit a day with no progress/finished journal event.
-    private fun computeStreak(activeDates: Set<LocalDate>, today: LocalDate): Int {
+    private fun computeStreak(
+        activeDates: Set<LocalDate>,
+        today: LocalDate,
+    ): Int {
         var cursor = if (today in activeDates) today else today.minusDays(1)
         var streak = 0
         while (cursor in activeDates) {

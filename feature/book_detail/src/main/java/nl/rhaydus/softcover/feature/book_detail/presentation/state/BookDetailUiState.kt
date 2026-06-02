@@ -122,9 +122,18 @@ data class BookDetailUiState(
             if (query.isEmpty()) return editions
 
             return editions.filter { edition ->
-                edition.isbn10?.contains(other = query, ignoreCase = true) == true ||
-                    edition.isbn13?.contains(other = query, ignoreCase = true) == true ||
-                    edition.publisher?.contains(other = query, ignoreCase = true) == true
+                edition.isbn10?.contains(
+                    other = query,
+                    ignoreCase = true,
+                ) == true ||
+                    edition.isbn13?.contains(
+                        other = query,
+                        ignoreCase = true,
+                    ) == true ||
+                    edition.publisher?.contains(
+                        other = query,
+                        ignoreCase = true,
+                    ) == true
             }
         }
 }

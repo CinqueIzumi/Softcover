@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnRemoveBookFromLibraryClickActionTest {
-
     private lateinit var removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
@@ -63,7 +62,6 @@ class OnRemoveBookFromLibraryClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes removeBookFromLibraryUseCase with the given book`() = runTest {
             // ----- Arrange -----

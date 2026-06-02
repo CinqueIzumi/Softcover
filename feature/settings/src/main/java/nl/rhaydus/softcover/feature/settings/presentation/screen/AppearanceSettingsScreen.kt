@@ -111,9 +111,7 @@ class AppearanceSettingsScreen : Screen {
             }
         }
     }
-
     // region Dynamic color section
-
     @Composable
     private fun DynamicColorSection(
         state: SettingsScreenUiState,
@@ -179,11 +177,8 @@ class AppearanceSettingsScreen : Screen {
             )
         }
     }
-
     // endregion
-
     // region Bottom bar section
-
     @Composable
     private fun BottomBarSection(
         state: SettingsScreenUiState,
@@ -240,11 +235,8 @@ class AppearanceSettingsScreen : Screen {
             }
         }
     }
-
     // endregion
-
     // region Date style section
-
     @Composable
     private fun DateStyleSection(
         state: SettingsScreenUiState,
@@ -347,7 +339,6 @@ class AppearanceSettingsScreen : Screen {
             }
         }
     }
-
     // endregion
 }
 

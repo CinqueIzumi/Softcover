@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 
 class EditionImageStorageImplTest {
-
     @TempDir
     lateinit var tempDir: File
 
@@ -29,7 +28,6 @@ class EditionImageStorageImplTest {
 
     @Nested
     inner class FileFor {
-
         @Test
         fun `returns a file whose parent is edition_images under filesDir`() {
             // ----- Arrange -----
@@ -58,7 +56,6 @@ class EditionImageStorageImplTest {
 
     @Nested
     inner class Exists {
-
         @Test
         fun `returns false when no file has been written for the edition`() {
             // ----- Arrange -----
@@ -88,15 +85,20 @@ class EditionImageStorageImplTest {
 
     @Nested
     inner class CopyFrom {
-
         @Test
         fun `copies bytes from source file to the edition file`() {
             // ----- Arrange -----
             val editionId = 10
-            val source = File(tempDir, "source.jpg").also { it.writeBytes(byteArrayOf(1, 2, 3)) }
+            val source = File(
+                tempDir,
+                "source.jpg",
+            ).also { it.writeBytes(byteArrayOf(1, 2, 3)) }
 
             // ----- Act -----
-            storage.copyFrom(editionId = editionId, source = source)
+            storage.copyFrom(
+                editionId = editionId,
+                source = source,
+            )
 
             // ----- Assert -----
             val dest = storage.fileFor(editionId = editionId)
@@ -107,11 +109,17 @@ class EditionImageStorageImplTest {
         fun `returns the absolute path of the written file`() {
             // ----- Arrange -----
             val editionId = 11
-            val source = File(tempDir, "source2.jpg").also { it.writeText("content") }
+            val source = File(
+                tempDir,
+                "source2.jpg",
+            ).also { it.writeText("content") }
             val expected = storage.fileFor(editionId = editionId).absolutePath
 
             // ----- Act -----
-            val result = storage.copyFrom(editionId = editionId, source = source)
+            val result = storage.copyFrom(
+                editionId = editionId,
+                source = source,
+            )
 
             // ----- Assert -----
             result shouldBe expected
@@ -121,13 +129,25 @@ class EditionImageStorageImplTest {
         fun `overwrites an existing file for the same edition`() {
             // ----- Arrange -----
             val editionId = 12
-            val source1 = File(tempDir, "v1.jpg").also { it.writeText("version-1") }
-            val source2 = File(tempDir, "v2.jpg").also { it.writeText("version-2") }
+            val source1 = File(
+                tempDir,
+                "v1.jpg",
+            ).also { it.writeText("version-1") }
+            val source2 = File(
+                tempDir,
+                "v2.jpg",
+            ).also { it.writeText("version-2") }
 
-            storage.copyFrom(editionId = editionId, source = source1)
+            storage.copyFrom(
+                editionId = editionId,
+                source = source1,
+            )
 
             // ----- Act -----
-            storage.copyFrom(editionId = editionId, source = source2)
+            storage.copyFrom(
+                editionId = editionId,
+                source = source2,
+            )
 
             // ----- Assert -----
             storage.fileFor(editionId = editionId).readText() shouldBe "version-2"
@@ -136,13 +156,18 @@ class EditionImageStorageImplTest {
 
     @Nested
     inner class Delete {
-
         @Test
         fun `removes the file at the given path when it exists`() {
             // ----- Arrange -----
             val editionId = 20
-            val source = File(tempDir, "to_delete.jpg").also { it.writeText("data") }
-            val path = storage.copyFrom(editionId = editionId, source = source)
+            val source = File(
+                tempDir,
+                "to_delete.jpg",
+            ).also { it.writeText("data") }
+            val path = storage.copyFrom(
+                editionId = editionId,
+                source = source,
+            )
 
             // ----- Act -----
             storage.delete(path = path)
@@ -154,7 +179,13 @@ class EditionImageStorageImplTest {
         @Test
         fun `is a no-op when no file exists at the given path`() {
             // ----- Arrange -----
-            val missingPath = File(File(tempDir, "edition_images"), "999").absolutePath
+            val missingPath = File(
+                File(
+                    tempDir,
+                    "edition_images",
+                ),
+                "999",
+            ).absolutePath
 
             // ----- Act & Assert -----
             storage.delete(path = missingPath)

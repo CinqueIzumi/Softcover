@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnApiKeyValueChangeActionTest {
-
     private lateinit var dependencies: OnboardingDependencies
     private lateinit var stateFlow: MutableStateFlow<OnboardingUiState>
     private lateinit var scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>
@@ -47,7 +46,6 @@ class OnApiKeyValueChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `updates apiKeyValue in state to the new value`() = runTest {
             // ----- Arrange -----

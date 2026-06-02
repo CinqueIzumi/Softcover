@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnApiKeySaveClickActionTest {
-
     private lateinit var resetUserDataUseCase: ResetUserDataUseCase
     private lateinit var updateApiKeyUseCase: UpdateApiKeyUseCase
     private lateinit var initializeUserIdAndBooksUseCase: InitializeUserIdAndBooksUseCase
@@ -86,7 +85,6 @@ class OnApiKeySaveClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets saveApiKeyButtonEnabled to false and isLoading to true on entry`() = runTest {
             // ----- Arrange -----

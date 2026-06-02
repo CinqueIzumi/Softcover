@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SetDateStyleUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: SetDateStyleUseCase
 
@@ -24,7 +23,6 @@ class SetDateStyleUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success when repository call succeeds`() = runTest {
             // ----- Arrange -----

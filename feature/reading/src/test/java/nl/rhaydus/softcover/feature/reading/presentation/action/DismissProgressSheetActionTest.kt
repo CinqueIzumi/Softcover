@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class DismissProgressSheetActionTest {
-
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
@@ -36,7 +35,6 @@ class DismissProgressSheetActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets bookToUpdate to null after execute`() = runTest {
             // ----- Arrange -----

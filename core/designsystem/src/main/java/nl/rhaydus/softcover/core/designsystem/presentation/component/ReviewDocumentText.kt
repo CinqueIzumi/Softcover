@@ -54,7 +54,11 @@ fun ReviewDocumentText(
     val spoilerRanges: List<IntRange> = remember(document) { spoilerRangesOf(document = document) }
 
     val annotated: AnnotatedString = remember(document, revealed, coverColor) {
-        buildReviewAnnotatedString(document = document, revealed = revealed, coverColor = coverColor)
+        buildReviewAnnotatedString(
+            document = document,
+            revealed = revealed,
+            coverColor = coverColor,
+        )
     }
 
     val tapModifier: Modifier = if (spoilerRanges.isNotEmpty() || onClick != null) {

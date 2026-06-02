@@ -34,13 +34,16 @@ fun ClickableText(
                     val position = layoutResult.getOffsetForPosition(tapOffset)
 
                     annotatedText
-                        .getStringAnnotations(start = position, end = position)
+                        .getStringAnnotations(
+                            start = position,
+                            end = position,
+                        )
                         .firstOrNull()
                         ?.let { annotation -> handleUrlClick(annotation.item) }
                 }
             },
         onTextLayout = { layout ->
             textLayoutResult = layout
-        }
+        },
     )
 }

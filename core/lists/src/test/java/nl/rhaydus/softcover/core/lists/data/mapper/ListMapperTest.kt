@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ListMapperTest {
-
     private fun stubListFragment(
         id: Int = 20,
         name: String = "My List",
@@ -30,7 +29,6 @@ class ListMapperTest {
 
     @Nested
     inner class ListBookFragmentToListBook {
-
         private fun stubListBookFragment(
             id: Int = 99,
             listId: Int = 20,
@@ -95,7 +93,10 @@ class ListMapperTest {
         @Test
         fun `propagates created_at into addedAt`() {
             // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = 10, createdAt = "2024-03-15")
+            val fragment = stubListBookFragment(
+                editionId = 10,
+                createdAt = "2024-03-15",
+            )
 
             // ----- Act -----
             val result = fragment.toListBook()
@@ -107,7 +108,10 @@ class ListMapperTest {
         @Test
         fun `propagates null created_at as null addedAt`() {
             // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = 10, createdAt = null)
+            val fragment = stubListBookFragment(
+                editionId = 10,
+                createdAt = null,
+            )
 
             // ----- Act -----
             val result = fragment.toListBook()
@@ -119,7 +123,10 @@ class ListMapperTest {
         @Test
         fun `propagates position when present`() {
             // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = 10, position = 3)
+            val fragment = stubListBookFragment(
+                editionId = 10,
+                position = 3,
+            )
 
             // ----- Act -----
             val result = fragment.toListBook()
@@ -131,7 +138,10 @@ class ListMapperTest {
         @Test
         fun `propagates null position as null`() {
             // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = 10, position = null)
+            val fragment = stubListBookFragment(
+                editionId = 10,
+                position = null,
+            )
 
             // ----- Act -----
             val result = fragment.toListBook()
@@ -143,7 +153,6 @@ class ListMapperTest {
 
     @Nested
     inner class ListFragmentToBookList {
-
         @Test
         fun `reads ranked=true from fragment`() {
             // ----- Arrange -----

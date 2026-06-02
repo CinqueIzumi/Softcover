@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnToggleFilterValueActionTest {
-
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -39,7 +38,6 @@ class OnToggleFilterValueActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `adds filter value when tab has no filters yet`() = runTest {
             // ----- Arrange -----
@@ -110,7 +108,10 @@ class OnToggleFilterValueActionTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(filtersByTab = emptyMap())
 
-            val tag = Tag(id = 1, name = "Fiction")
+            val tag = Tag(
+                id = 1,
+                name = "Fiction",
+            )
             val action = OnToggleFilterValueAction(
                 tabId = tabId,
                 value = LibraryFilterValue.Tag(tag),

@@ -52,7 +52,10 @@ val bookDetailModule = module {
     }
 
     factory {
-        GetUserTagsUseCase(userTagsRepository = get(), getUserIdUseCase = get())
+        GetUserTagsUseCase(
+            userTagsRepository = get(),
+            getUserIdUseCase = get(),
+        )
     }
 
     factory {

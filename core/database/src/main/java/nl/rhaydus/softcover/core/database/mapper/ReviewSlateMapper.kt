@@ -21,14 +21,29 @@ fun reviewSlateFromDocument(document: ReviewDocument): List<Map<String, Any?>> =
             .ifEmpty { listOf(ReviewRun(text = "")) }
             .map { run ->
                 buildMap {
-                    put("object", "text")
-                    put("text", run.text)
+                    put(
+                        "object",
+                        "text",
+                    )
+                    put(
+                        "text",
+                        run.text,
+                    )
 
-                    if (run.bold) put("bold", true)
+                    if (run.bold) put(
+                        "bold",
+                        true,
+                    )
 
-                    if (run.italic) put("italic", true)
+                    if (run.italic) put(
+                        "italic",
+                        true,
+                    )
 
-                    if (run.spoiler) put("spoiler", true)
+                    if (run.spoiler) put(
+                        "spoiler",
+                        true,
+                    )
                 }
             }
 
@@ -99,8 +114,14 @@ private fun runsFrom(children: List<*>): List<ReviewRun> =
     }
 
 /** Serialise a [ReviewDocument] for durable storage (Room cache, offline write queue). */
-fun ReviewDocument.toJson(): String = reviewJson.encodeToString(ReviewDocument.serializer(), this)
+fun ReviewDocument.toJson(): String = reviewJson.encodeToString(
+    ReviewDocument.serializer(),
+    this,
+)
 
 /** Restore a [ReviewDocument] persisted via [toJson]; `null` when the stored JSON is absent or invalid. */
 fun reviewDocumentFromJson(json: String?): ReviewDocument? = json
-    ?.let { runCatching { reviewJson.decodeFromString(ReviewDocument.serializer(), it) }.getOrNull() }
+    ?.let { runCatching { reviewJson.decodeFromString(
+        ReviewDocument.serializer(),
+        it,
+    ) }.getOrNull() }

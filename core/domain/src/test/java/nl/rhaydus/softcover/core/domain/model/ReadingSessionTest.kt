@@ -8,9 +8,7 @@ import java.time.Duration
 import java.time.Instant
 
 class ReadingSessionTest {
-
     // region Fixtures
-
     private val start = Instant.parse("2024-06-01T10:00:00Z")
     private val end = Instant.parse("2024-06-01T11:00:00Z")
 
@@ -31,16 +29,16 @@ class ReadingSessionTest {
         pausedSeconds = pausedSeconds,
         lastPausedAt = lastPausedAt,
     )
-
     // endregion
-
     @Nested
     inner class IsPaused {
-
         @Test
         fun `is false when session is active and lastPausedAt is null`() {
             // ----- Arrange -----
-            val session = buildSession(endedAt = null, lastPausedAt = null)
+            val session = buildSession(
+                endedAt = null,
+                lastPausedAt = null,
+            )
 
             // ----- Act & Assert -----
             session.isPaused shouldBe false
@@ -73,7 +71,10 @@ class ReadingSessionTest {
         @Test
         fun `is false when session is ended and lastPausedAt is null`() {
             // ----- Arrange -----
-            val session = buildSession(endedAt = end, lastPausedAt = null)
+            val session = buildSession(
+                endedAt = end,
+                lastPausedAt = null,
+            )
 
             // ----- Act & Assert -----
             session.isPaused shouldBe false
@@ -82,7 +83,6 @@ class ReadingSessionTest {
 
     @Nested
     inner class ReadingDuration {
-
         @Test
         fun `returns full wall-clock time for a running never-paused session`() {
             // ----- Arrange -----

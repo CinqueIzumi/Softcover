@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnDateDropdownExpandedChangeTest {
-
     private lateinit var dependencies: SettingsScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<SettingsScreenUiState>
     private lateinit var scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent, SettingsLocalVariables>
@@ -51,7 +50,6 @@ class OnDateDropdownExpandedChangeTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets dropDownExpanded to true when expanded is true`() = runTest {
             // ----- Arrange -----

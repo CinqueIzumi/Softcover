@@ -18,12 +18,10 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AppNavigatorImplTest {
-
     private val navigator = AppNavigatorImpl()
 
     @Nested
     inner class Screen {
-
         @Test
         fun `BookDetail destination maps to BookDetailScreen with matching id`() {
             // ----- Arrange -----
@@ -100,7 +98,6 @@ class AppNavigatorImplTest {
 
     @Nested
     inner class Tab {
-
         @Test
         fun `READING tab destination maps to ReadingTab singleton`() {
             // ----- Act -----

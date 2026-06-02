@@ -54,7 +54,10 @@ class OnBulkToggleListMembershipAction(
                         listId = listId,
                         bookId = book.id,
                     ).onFailure { throwable ->
-                        Timber.e(throwable, "Bulk remove from list $listId failed for book ${book.id}")
+                        Timber.e(
+                            throwable,
+                            "Bulk remove from list $listId failed for book ${book.id}",
+                        )
 
                         failureCount++
                     }
@@ -82,7 +85,10 @@ class OnBulkToggleListMembershipAction(
                         bookId = book.id,
                         edition = edition,
                     ).onFailure { throwable ->
-                        Timber.e(throwable, "Bulk add to list $listId failed for book ${book.id}")
+                        Timber.e(
+                            throwable,
+                            "Bulk add to list $listId failed for book ${book.id}",
+                        )
 
                         failureCount++
                     }

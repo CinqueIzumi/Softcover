@@ -63,31 +63,37 @@ object PreviewData {
             updatedAt = null,
             createdAt = null,
             journals = listOf(
-                ReadingJournal(updatedAt = "2026-02-16T09:30:29.670608", event = "status_stopped"),
-                ReadingJournal(updatedAt = "2026-02-18T10:30:29.670608", event = "status_stopped"),
                 ReadingJournal(
-                    updatedAt = "2026-02-17T10:30:29.670608",
-                    event = "status_want_to_read"
+                    updatedAt = "2026-02-16T09:30:29.670608",
+                    event = "status_stopped",
                 ),
                 ReadingJournal(
-                    updatedAt = "2025-02-17T10:30:29.670608",
-                    event = "user_book_read_finished"
-                ),
-                ReadingJournal(
-                    updatedAt = "2026-02-17T10:30:29.670608",
-                    event = "status_want_to_read"
-                ),
-                ReadingJournal(
-                    updatedAt = "2025-02-17T10:30:29.670608",
-                    event = "user_book_read_finished"
+                    updatedAt = "2026-02-18T10:30:29.670608",
+                    event = "status_stopped",
                 ),
                 ReadingJournal(
                     updatedAt = "2026-02-17T10:30:29.670608",
-                    event = "status_want_to_read"
+                    event = "status_want_to_read",
                 ),
                 ReadingJournal(
                     updatedAt = "2025-02-17T10:30:29.670608",
-                    event = "user_book_read_finished"
+                    event = "user_book_read_finished",
+                ),
+                ReadingJournal(
+                    updatedAt = "2026-02-17T10:30:29.670608",
+                    event = "status_want_to_read",
+                ),
+                ReadingJournal(
+                    updatedAt = "2025-02-17T10:30:29.670608",
+                    event = "user_book_read_finished",
+                ),
+                ReadingJournal(
+                    updatedAt = "2026-02-17T10:30:29.670608",
+                    event = "status_want_to_read",
+                ),
+                ReadingJournal(
+                    updatedAt = "2025-02-17T10:30:29.670608",
+                    event = "user_book_read_finished",
                 ),
             ),
         ),

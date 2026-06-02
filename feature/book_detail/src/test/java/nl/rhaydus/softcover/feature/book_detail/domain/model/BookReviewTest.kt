@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookReviewTest {
-
     private fun buildReview(reviewedAt: String?): BookReview = BookReview(
         id = 1,
         reviewDocument = ReviewDocument.EMPTY,
@@ -25,7 +24,6 @@ class BookReviewTest {
 
     @Nested
     inner class GetFormattedDate {
-
         @Test
         fun `returns null when reviewedAt is null`() {
             // ----- Arrange -----
@@ -81,7 +79,7 @@ class BookReviewTest {
 
             // ----- Act -----
             val result = review.getFormattedDate(
-                style = DateStyle.MONTH_DAY_YEAR
+                style = DateStyle.MONTH_DAY_YEAR,
             )
 
             // ----- Assert -----
@@ -95,7 +93,7 @@ class BookReviewTest {
 
             // ----- Act -----
             val result = review.getFormattedDate(
-                style = DateStyle.YEAR_MONTH_DAY
+                style = DateStyle.YEAR_MONTH_DAY,
             )
 
             // ----- Assert -----

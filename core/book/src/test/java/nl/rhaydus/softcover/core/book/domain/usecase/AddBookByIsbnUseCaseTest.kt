@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AddBookByIsbnUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var fetchBookByIdUseCase: FetchBookByIdUseCase
     private lateinit var useCase: AddBookByIsbnUseCase
@@ -36,13 +35,15 @@ class AddBookByIsbnUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `success returns Found with hydrated book and editionId from CreatedBook`() = runTest {
             // ----- Arrange -----
             coEvery {
                 booksRepository.addBookByIsbn(isbn = isbn)
-            } returns CreatedBook(bookId = bookId, editionId = editionId)
+            } returns CreatedBook(
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             coEvery { fetchBookByIdUseCase(id = bookId) } returns Result.success(book)
 
@@ -51,7 +52,10 @@ class AddBookByIsbnUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            result.getOrNull() shouldBe IsbnLookupResult.Found(book = book, editionId = editionId)
+            result.getOrNull() shouldBe IsbnLookupResult.Found(
+                book = book,
+                editionId = editionId,
+            )
 
             coVerify(exactly = 1) { booksRepository.addBookByIsbn(isbn = isbn) }
             coVerify(exactly = 1) { fetchBookByIdUseCase(id = bookId) }
@@ -62,7 +66,10 @@ class AddBookByIsbnUseCaseTest {
             // ----- Arrange -----
             coEvery {
                 booksRepository.addBookByIsbn(isbn = isbn)
-            } returns CreatedBook(bookId = bookId, editionId = null)
+            } returns CreatedBook(
+                bookId = bookId,
+                editionId = null,
+            )
 
             coEvery { fetchBookByIdUseCase(id = bookId) } returns Result.success(book)
 
@@ -73,7 +80,10 @@ class AddBookByIsbnUseCaseTest {
             result.isSuccess shouldBe true
 
             // PreviewData.baseBook.currentEdition resolves to baseEdition (id = 1) via defaultEdition
-            result.getOrNull() shouldBe IsbnLookupResult.Found(book = book, editionId = 1)
+            result.getOrNull() shouldBe IsbnLookupResult.Found(
+                book = book,
+                editionId = 1,
+            )
         }
 
         @Test
@@ -93,7 +103,10 @@ class AddBookByIsbnUseCaseTest {
             // ----- Arrange -----
             coEvery {
                 booksRepository.addBookByIsbn(isbn = isbn)
-            } returns CreatedBook(bookId = bookId, editionId = editionId)
+            } returns CreatedBook(
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             coEvery {
                 fetchBookByIdUseCase(id = bookId)

@@ -10,7 +10,7 @@ data class BookWithUserData(
     @Relation(
         entity = UserBookEntity::class,
         parentColumn = "id",
-        entityColumn = "bookId"
+        entityColumn = "bookId",
     )
     val userBook: UserBookWithRead?,
 )

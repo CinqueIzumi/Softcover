@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnDateStyleClickActionTest {
-
     private lateinit var setDateStyleUseCase: SetDateStyleUseCase
     private lateinit var dependencies: SettingsScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<SettingsScreenUiState>
@@ -61,7 +60,6 @@ class OnDateStyleClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `closes dropdown after invoking the use case on success`() = runTest {
             // ----- Arrange -----

@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ListsRepositoryImplSetListRankedTest {
-
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
     private val booksRepository = mockk<BooksRepository>()
@@ -53,7 +52,6 @@ class ListsRepositoryImplSetListRankedTest {
 
     @Nested
     inner class SetListRanked {
-
         @Test
         fun `calls local then remote then caches the refreshed list on success`() = runTest {
             // ----- Arrange -----

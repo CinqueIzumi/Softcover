@@ -30,7 +30,10 @@ internal suspend fun TagScope.commitUserTags(
     currentLocalVariables.tagSaveJob?.cancelAndJoin()
 
     val job = dependencies.launch {
-        dependencies.saveUserTagsUseCase(bookId = bookId, tags = newSet)
+        dependencies.saveUserTagsUseCase(
+            bookId = bookId,
+            tags = newSet,
+        )
             .onSuccess { saved -> setState { it.copy(userTags = saved) } }
             .onFailure { error ->
                 Timber.e("$error")

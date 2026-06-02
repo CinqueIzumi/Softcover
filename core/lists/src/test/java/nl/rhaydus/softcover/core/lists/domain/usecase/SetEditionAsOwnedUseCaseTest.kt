@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SetEditionAsOwnedUseCaseTest {
-
     private lateinit var listsRepository: ListsRepository
     private lateinit var useCase: SetEditionAsOwnedUseCase
 
@@ -32,7 +31,6 @@ class SetEditionAsOwnedUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `when owned is true calls markEditionAsOwned and nothing else`() = runTest {
             // ----- Arrange -----

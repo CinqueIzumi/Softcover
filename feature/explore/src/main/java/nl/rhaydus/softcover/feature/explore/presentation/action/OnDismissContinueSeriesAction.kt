@@ -17,7 +17,10 @@ class OnDismissContinueSeriesAction(
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
         dependencies.dismissContinueSeriesUseCase(seriesId = seriesId)
-            .onFailure { Timber.e(it, "Failed to dismiss series $seriesId") }
+            .onFailure { Timber.e(
+                it,
+                "Failed to dismiss series $seriesId",
+            ) }
             .onSuccess {
                 SnackBarManager.showSnackBar(
                     title = "\"$seriesName\" won't be suggested again",
@@ -25,7 +28,10 @@ class OnDismissContinueSeriesAction(
                     onActionClick = {
                         dependencies.launch {
                             dependencies.undoContinueSeriesDismissalUseCase(seriesId = seriesId)
-                                .onFailure { Timber.e(it, "Failed to undo series dismissal") }
+                                .onFailure { Timber.e(
+                                    it,
+                                    "Failed to undo series dismissal",
+                                ) }
                         }
                     },
                 )

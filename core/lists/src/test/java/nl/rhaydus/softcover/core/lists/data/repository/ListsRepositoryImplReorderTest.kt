@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ListsRepositoryImplReorderTest {
-
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
     private val booksRepository = mockk<BooksRepository>()
@@ -50,7 +49,6 @@ class ListsRepositoryImplReorderTest {
 
     @Nested
     inner class ReorderListBooks {
-
         @Test
         fun `does nothing when orderedListBookIds is empty`() = runTest {
             // ----- Arrange -----

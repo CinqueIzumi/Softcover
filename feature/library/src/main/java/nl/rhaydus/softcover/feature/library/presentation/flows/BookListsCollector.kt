@@ -27,7 +27,10 @@ class BookListsCollector : LibraryInitializer {
             // derive both the edition list and the addedAt lookup from that one filtered slice so
             // they cannot drift apart if either guard is later changed.
             val renderedByTab: Map<String, List<ListBook>> = enabledLists.associate { list ->
-                val tabId = LibraryTab.CustomList(listId = list.id, listName = list.name).id
+                val tabId = LibraryTab.CustomList(
+                    listId = list.id,
+                    listName = list.name,
+                ).id
 
                 tabId to list.books.filter { it.edition != null }
             }

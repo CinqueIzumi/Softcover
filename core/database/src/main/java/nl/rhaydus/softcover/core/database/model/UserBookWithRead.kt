@@ -9,7 +9,7 @@ data class UserBookWithRead(
 
     @Relation(
         parentColumn = "id",
-        entityColumn = "userBookId"
+        entityColumn = "userBookId",
     )
     val read: UserBookReadEntity?,
 )

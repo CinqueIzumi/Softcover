@@ -10,7 +10,7 @@ import androidx.room.Index
         Index("listId"),
         Index("bookId"),
         Index("editionId")
-    ]
+    ],
 )
 data class ListBookEntity(
     val listBookId: Int,

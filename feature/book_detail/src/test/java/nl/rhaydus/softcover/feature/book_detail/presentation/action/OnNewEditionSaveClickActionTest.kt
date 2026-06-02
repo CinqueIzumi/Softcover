@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnNewEditionSaveClickActionTest {
-
     private lateinit var updateBookEditionUseCase: UpdateBookEditionUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -73,18 +72,23 @@ class OnNewEditionSaveClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `closes the edit edition sheet immediately`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(book = book, showEditEditionSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                showEditEditionSheet = true,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = any())
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = any(),
+                )
             } returns Result.success(Unit)
 
             val action = OnNewEditionSaveClickAction(edition = edition)
@@ -105,11 +109,17 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(book = book, loadingBookDetails = false)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                loadingBookDetails = false,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = any())
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = any(),
+                )
             } returns Result.success(Unit)
 
             val action = OnNewEditionSaveClickAction(edition = edition)
@@ -134,7 +144,10 @@ class OnNewEditionSaveClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = 99)
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = 99,
+                )
             } returns Result.success(Unit)
 
             val action = OnNewEditionSaveClickAction(edition = edition)
@@ -147,7 +160,10 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = 99)
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = 99,
+                )
             }
         }
 
@@ -155,7 +171,10 @@ class OnNewEditionSaveClickActionTest {
         fun `does not invoke use case when book is null`() = runTest {
             // ----- Arrange -----
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(book = null, showEditEditionSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = null,
+                showEditEditionSheet = true,
+            )
             dependencies = stubDependencies(this)
 
             val action = OnNewEditionSaveClickAction(edition = edition)
@@ -168,7 +187,10 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                updateBookEditionUseCase(any(), any())
+                updateBookEditionUseCase(
+                    any(),
+                    any(),
+                )
             }
         }
 
@@ -177,7 +199,10 @@ class OnNewEditionSaveClickActionTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
             val edition = stubEdition(id = 77)
-            stateFlow.value = BookDetailUiState(book = book, showEditEditionSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                showEditEditionSheet = true,
+            )
             dependencies = stubDependencies(this)
 
             val action = OnNewEditionSaveClickAction(edition = edition)
@@ -192,7 +217,10 @@ class OnNewEditionSaveClickActionTest {
             stateFlow.value.previewEdition shouldBe edition
             stateFlow.value.showEditEditionSheet shouldBe false
             coVerify(exactly = 0) {
-                updateBookEditionUseCase(any(), any())
+                updateBookEditionUseCase(
+                    any(),
+                    any(),
+                )
             }
         }
 
@@ -234,7 +262,10 @@ class OnNewEditionSaveClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = 99)
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = 99,
+                )
             } returns Result.success(Unit)
 
             val action = OnNewEditionSaveClickAction(edition = edition)
@@ -255,11 +286,17 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(book = book, loadingBookDetails = false)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                loadingBookDetails = false,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = any())
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = any(),
+                )
             } returns Result.failure(RuntimeException("update failed"))
 
             val action = OnNewEditionSaveClickAction(edition = edition)
@@ -280,11 +317,17 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(book = book, showEditEditionSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                showEditEditionSheet = true,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = any())
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = any(),
+                )
             } returns Result.failure(RuntimeException("edition update failed"))
 
             val action = OnNewEditionSaveClickAction(edition = edition)
@@ -305,13 +348,19 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(book = book, loadingBookDetails = false)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                loadingBookDetails = false,
+            )
             dependencies = stubDependencies(this)
 
             val loadingStates = mutableListOf<Boolean>()
 
             coEvery {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = any())
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = any(),
+                )
             } coAnswers {
                 loadingStates.add(stateFlow.value.loadingBookDetails)
                 Result.success(Unit)

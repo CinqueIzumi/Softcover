@@ -284,7 +284,10 @@ private fun ReadingUpdateShareCardBody(content: ReadingUpdateShareContent) {
             Spacer(modifier = Modifier.height(16.dp))
 
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(
+                    8.dp,
+                    Alignment.CenterHorizontally,
+                ),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -559,7 +562,10 @@ private fun ReadingUpdateFinishedShareCardPreview() {
                         ReviewParagraph(
                             runs = listOf(
                                 ReviewRun(text = "A gorgeous, immersive tale that pulls you into Kvothe's world. The ending — "),
-                                ReviewRun(text = "he was the villain all along", spoiler = true),
+                                ReviewRun(
+                                    text = "he was the villain all along",
+                                    spoiler = true,
+                                ),
                                 ReviewRun(text = " — still floored me."),
                             ),
                         ),

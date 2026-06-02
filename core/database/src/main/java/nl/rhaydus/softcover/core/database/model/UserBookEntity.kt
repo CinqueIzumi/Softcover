@@ -13,13 +13,13 @@ import kotlinx.serialization.Serializable
             entity = BookEntity::class,
             parentColumns = ["id"],
             childColumns = ["bookId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.CASCADE,
         )
     ],
     indices = [
         Index("bookId"),
         Index("statusCode"),
-    ]
+    ],
 )
 @Serializable
 data class UserBookEntity(

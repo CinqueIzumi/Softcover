@@ -13,9 +13,7 @@ import java.time.Instant
 import java.time.LocalDate
 
 class PersonalMappersTest {
-
     // region Fixtures
-
     private fun buildHighlightEntity(
         id: Long = 42L,
         bookId: Int = 1,
@@ -89,12 +87,9 @@ class PersonalMappersTest {
         note = note,
         createdAt = createdAt,
     )
-
     // endregion
-
     @Nested
     inner class HighlightEntityToDomain {
-
         @Test
         fun `maps all fields correctly for a valid entity`() {
             // ----- Arrange -----
@@ -143,7 +138,6 @@ class PersonalMappersTest {
 
     @Nested
     inner class HighlightToEntity {
-
         @Test
         fun `maps all fields correctly for a valid domain model`() {
             // ----- Arrange -----
@@ -164,7 +158,6 @@ class PersonalMappersTest {
 
     @Nested
     inner class ReadingSessionEntityToDomain {
-
         @Test
         fun `maps active session (no endedAt) correctly`() {
             // ----- Arrange -----
@@ -281,7 +274,6 @@ class PersonalMappersTest {
 
     @Nested
     inner class ReadingSessionToEntity {
-
         @Test
         fun `maps all fields correctly for an active session`() {
             // ----- Arrange -----
@@ -381,7 +373,6 @@ class PersonalMappersTest {
 
     @Nested
     inner class ReadingLogEntryEntityToDomain {
-
         @Test
         fun `maps all fields correctly for a valid entity`() {
             // ----- Arrange -----
@@ -393,8 +384,16 @@ class PersonalMappersTest {
             // ----- Assert -----
             result.id shouldBe 5L
             result.bookId shouldBe 1
-            result.startedAt shouldBe LocalDate.of(2024, 1, 1)
-            result.finishedAt shouldBe LocalDate.of(2024, 1, 15)
+            result.startedAt shouldBe LocalDate.of(
+                2024,
+                1,
+                1,
+            )
+            result.finishedAt shouldBe LocalDate.of(
+                2024,
+                1,
+                15,
+            )
             result.rating shouldBe 4.5
             result.note shouldBe "Enjoyable"
             result.createdAt shouldBe Instant.parse("2024-01-16T12:00:00Z")
@@ -455,15 +454,22 @@ class PersonalMappersTest {
 
     @Nested
     inner class ReadingLogEntryToEntity {
-
         @Test
         fun `maps all fields correctly for a valid domain model`() {
             // ----- Arrange -----
             val entry = ReadingLogEntry(
                 id = 5L,
                 bookId = 1,
-                startedAt = LocalDate.of(2024, 1, 1),
-                finishedAt = LocalDate.of(2024, 1, 15),
+                startedAt = LocalDate.of(
+                    2024,
+                    1,
+                    1,
+                ),
+                finishedAt = LocalDate.of(
+                    2024,
+                    1,
+                    15,
+                ),
                 rating = 4.5,
                 note = "Enjoyable",
                 createdAt = Instant.parse("2024-01-16T12:00:00Z"),

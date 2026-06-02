@@ -10,8 +10,14 @@ private val ISO: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
 fun BookDeadlineEntity.toDomain(): BookDeadline = BookDeadline(
     bookId = bookId,
-    deadlineDate = LocalDate.parse(deadlineDate, ISO),
-    setAt = LocalDate.parse(setAt, ISO),
+    deadlineDate = LocalDate.parse(
+        deadlineDate,
+        ISO,
+    ),
+    setAt = LocalDate.parse(
+        setAt,
+        ISO,
+    ),
     initialPerDay = initialPerDay,
     unit = runCatching { DeadlineUnit.valueOf(unit) }.getOrDefault(DeadlineUnit.PAGES),
 )

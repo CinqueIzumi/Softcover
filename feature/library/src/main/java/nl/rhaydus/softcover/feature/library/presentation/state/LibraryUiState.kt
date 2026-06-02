@@ -133,8 +133,14 @@ data class LibraryUiState(
             raw
         } else {
             raw.filter { book ->
-                book.title.contains(query, ignoreCase = true) ||
-                    book.authors.any { it.name.contains(query, ignoreCase = true) }
+                book.title.contains(
+                    query,
+                    ignoreCase = true,
+                ) ||
+                    book.authors.any { it.name.contains(
+                        query,
+                        ignoreCase = true,
+                    ) }
             }
         }
 
@@ -165,8 +171,14 @@ data class LibraryUiState(
             raw
         } else {
             raw.filter { edition ->
-                edition.title.orEmpty().contains(query, ignoreCase = true) ||
-                    edition.authors.any { it.name.contains(query, ignoreCase = true) }
+                edition.title.orEmpty().contains(
+                    query,
+                    ignoreCase = true,
+                ) ||
+                    edition.authors.any { it.name.contains(
+                        query,
+                        ignoreCase = true,
+                    ) }
             }
         }
 

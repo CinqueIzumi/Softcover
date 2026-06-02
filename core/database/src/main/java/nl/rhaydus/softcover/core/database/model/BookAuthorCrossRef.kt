@@ -4,9 +4,9 @@ import androidx.room.Entity
 
 @Entity(
     tableName = "book_author_cross_ref",
-    primaryKeys = ["bookId", "authorId"]
+    primaryKeys = ["bookId", "authorId"],
 )
 data class BookAuthorCrossRef(
     val bookId: Int,
-    val authorId: Int
+    val authorId: Int,
 )

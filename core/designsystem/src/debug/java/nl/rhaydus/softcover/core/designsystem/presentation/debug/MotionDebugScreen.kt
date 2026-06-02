@@ -46,7 +46,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import kotlinx.coroutines.delay
 
 object MotionDebugScreen : Screen {
-
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow

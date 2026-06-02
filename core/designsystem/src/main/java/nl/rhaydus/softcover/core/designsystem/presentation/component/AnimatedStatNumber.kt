@@ -154,8 +154,14 @@ private fun StatPulseText(
 
             drawRect(
                 color = pulseColor.copy(alpha = currentAlpha),
-                topLeft = Offset(x = 0f, y = size.height - hairlinePx),
-                size = Size(width = size.width, height = hairlinePx),
+                topLeft = Offset(
+                    x = 0f,
+                    y = size.height - hairlinePx,
+                ),
+                size = Size(
+                    width = size.width,
+                    height = hairlinePx,
+                ),
             )
         },
     ) {

@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class ProfileRemoteDataSourceImplTest {
-
     private lateinit var apolloClient: ApolloClient
     private lateinit var dataSource: ProfileRemoteDataSourceImpl
 
@@ -90,7 +89,6 @@ class ProfileRemoteDataSourceImplTest {
 
     @Nested
     inner class GetUserProfileSnapshot {
-
         @Test
         fun `maps all fields correctly when query returns full data`() = runTest {
             // ----- Arrange -----
@@ -366,8 +364,16 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result.activeReadingDates shouldBe setOf(
-                LocalDate.of(2026, 5, 4),
-                LocalDate.of(2026, 5, 3),
+                LocalDate.of(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate.of(
+                    2026,
+                    5,
+                    3,
+                ),
             )
         }
 
@@ -407,9 +413,21 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result.activeReadingDates shouldBe setOf(
-                LocalDate.of(2026, 5, 4),
-                LocalDate.of(2026, 5, 3),
-                LocalDate.of(2026, 5, 2),
+                LocalDate.of(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate.of(
+                    2026,
+                    5,
+                    3,
+                ),
+                LocalDate.of(
+                    2026,
+                    5,
+                    2,
+                ),
             )
         }
 
@@ -444,13 +462,16 @@ class ProfileRemoteDataSourceImplTest {
             val result = dataSource.getUserProfileSnapshot(userId = 42)
 
             // ----- Assert -----
-            result.activeReadingDates shouldBe setOf(LocalDate.of(2026, 5, 4))
+            result.activeReadingDates shouldBe setOf(LocalDate.of(
+                2026,
+                5,
+                4,
+            ),)
         }
     }
 
     @Nested
     inner class TotalPagesRead {
-
         private fun arrangeQueryData(
             userBooksPages: List<GetUserProfileDataQuery.Data.Me.User_books_page>,
         ): GetUserProfileDataQuery.Data {

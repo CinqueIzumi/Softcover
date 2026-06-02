@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UndoContinueSeriesDismissalUseCaseTest {
-
     private lateinit var exploreRepository: ExploreRepository
     private lateinit var useCase: UndoContinueSeriesDismissalUseCase
 
@@ -23,7 +22,6 @@ class UndoContinueSeriesDismissalUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository undoContinueSeriesDismissal with correct seriesId`() = runTest {
             // ----- Arrange -----

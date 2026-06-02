@@ -286,7 +286,10 @@ class LibraryVisibilitySettingsScreen : Screen {
                                         if (targetIdx != currentIdx) {
                                             workingOrder = workingOrder.toMutableList().also { list ->
                                                 val moving = list.removeAt(currentIdx)
-                                                list.add(targetIdx, moving)
+                                                list.add(
+                                                    targetIdx,
+                                                    moving,
+                                                )
                                             }
 
                                             runAction(
@@ -462,11 +465,17 @@ private fun LibraryTabEntry.dispatchToggle(
 ) {
     when (this) {
         is LibraryTabEntry.Status -> if (isAlwaysOn.not()) {
-            runAction(OnStatusToggleAction(code = status.code, enabled = enabled))
+            runAction(OnStatusToggleAction(
+                code = status.code,
+                enabled = enabled,
+            ),)
         }
 
         is LibraryTabEntry.CustomList -> runAction(
-            OnListToggleAction(id = listId, enabled = enabled),
+            OnListToggleAction(
+                id = listId,
+                enabled = enabled,
+            ),
         )
     }
 }

@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnFloatingBarToggledActionTest {
-
     private lateinit var setBottomBarStyleUseCase: SetBottomBarStyleUseCase
     private lateinit var dependencies: SettingsScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<SettingsScreenUiState>
@@ -61,7 +60,6 @@ class OnFloatingBarToggledActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes use case with FLOATING when newValue is true`() = runTest {
             // ----- Arrange -----
@@ -135,7 +133,10 @@ class OnFloatingBarToggledActionTest {
         fun `does not mutate state after executing`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            stateFlow.value = SettingsScreenUiState(useFloatingBarChecked = false, dropDownExpanded = true)
+            stateFlow.value = SettingsScreenUiState(
+                useFloatingBarChecked = false,
+                dropDownExpanded = true,
+            )
 
             coEvery {
                 setBottomBarStyleUseCase(newStyle = BottomBarStyle.FLOATING)

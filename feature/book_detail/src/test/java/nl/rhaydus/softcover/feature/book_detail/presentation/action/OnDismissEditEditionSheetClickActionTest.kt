@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnDismissEditEditionSheetClickActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -33,7 +32,6 @@ class OnDismissEditEditionSheetClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets showEditEditionSheet to false when it was true`() = runTest {
             // ----- Arrange -----

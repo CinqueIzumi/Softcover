@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnOpenDeadlinePickerActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -51,7 +50,6 @@ class OnOpenDeadlinePickerActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets showDeadlinePicker to true`() = runTest {
             // ----- Arrange -----
@@ -59,7 +57,10 @@ class OnOpenDeadlinePickerActionTest {
             val action = OnOpenDeadlinePickerAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showDeadlinePicker shouldBe true
@@ -73,7 +74,10 @@ class OnOpenDeadlinePickerActionTest {
             val action = OnOpenDeadlinePickerAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.fabMenuExpanded shouldBe false
@@ -87,7 +91,10 @@ class OnOpenDeadlinePickerActionTest {
             val action = OnOpenDeadlinePickerAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.loadingBookDetails shouldBe false

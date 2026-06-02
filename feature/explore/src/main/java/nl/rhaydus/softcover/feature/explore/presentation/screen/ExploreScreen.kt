@@ -186,7 +186,7 @@ object ExploreScreen : Screen {
                         onClick = onScanClick,
                     ),
                 )
-            }
+            },
         ) { padding ->
             if (isOnline.not()) {
                 OfflineScreenContent(modifier = Modifier.padding(padding))
@@ -309,7 +309,10 @@ object ExploreScreen : Screen {
                             TrendingCard(
                                 modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
                                 book = book,
-                                onClick = { onBookClick(book, SURFACE_TRENDING) },
+                                onClick = { onBookClick(
+                                    book,
+                                    SURFACE_TRENDING,
+                                ) },
                             )
                         }
                     }
@@ -398,7 +401,10 @@ object ExploreScreen : Screen {
                             SeriesCard(
                                 modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
                                 book = book,
-                                onClick = { onBookClick(book, SURFACE_UP_NEXT) },
+                                onClick = { onBookClick(
+                                    book,
+                                    SURFACE_UP_NEXT,
+                                ) },
                                 onMenuClick = { sheetBook = book },
                             )
                         }
@@ -428,7 +434,7 @@ object ExploreScreen : Screen {
                             OnDismissContinueSeriesBookAction(
                                 bookId = book.id,
                                 bookTitle = book.title,
-                            )
+                            ),
                         )
 
                         dismiss()
@@ -440,7 +446,7 @@ object ExploreScreen : Screen {
                             OnDismissContinueSeriesAction(
                                 seriesId = series.id,
                                 seriesName = series.name,
-                            )
+                            ),
                         )
 
                         dismiss()
@@ -606,14 +612,17 @@ object ExploreScreen : Screen {
         ) {
             items(queries, key = { it }) { query ->
                 FilterChip(
-                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = query),
+                    modifier = rememberMutationAnimatedModifier(
+                        animator = animator,
+                        itemKey = query,
+                    ),
                     selected = false,
                     onClick = {
                         runAction(
                             OnQueryChangeAction(
                                 newQuery = query,
                                 searchDelay = 0.seconds,
-                            )
+                            ),
                         )
                     },
                     label = { Text(text = query) },
@@ -861,7 +870,10 @@ object ExploreScreen : Screen {
             modifier = Modifier
                 .fillMaxWidth()
                 .prefetchBookDetailOnPress(book.id)
-                .pressScaleClickable(onClick = { onBookClick(book, null) }),
+                .pressScaleClickable(onClick = { onBookClick(
+                    book,
+                    null,
+                ) },),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             EditionImage(

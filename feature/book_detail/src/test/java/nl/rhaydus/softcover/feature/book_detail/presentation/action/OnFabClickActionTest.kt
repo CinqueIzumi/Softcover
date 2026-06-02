@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnFabClickActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -33,7 +32,6 @@ class OnFabClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets fabMenuExpanded to true when it starts as false`() = runTest {
             // ----- Arrange -----
@@ -98,8 +96,14 @@ class OnFabClickActionTest {
             val action = OnFabClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.fabMenuExpanded shouldBe false

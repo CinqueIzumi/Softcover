@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnRemoveUserTagActionTest {
-
     private lateinit var saveUserTagsUseCase: SaveUserTagsUseCase
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
@@ -57,13 +56,18 @@ class OnRemoveUserTagActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `removes matching tag from userTags`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            val tagToRemove = UserTag(name = "fantasy", category = TagCategory.GENRE)
-            val otherTag = UserTag(name = "sci-fi", category = TagCategory.GENRE)
+            val tagToRemove = UserTag(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            )
+            val otherTag = UserTag(
+                name = "sci-fi",
+                category = TagCategory.GENRE,
+            )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
                 userTags = listOf(tagToRemove, otherTag),
@@ -71,13 +75,19 @@ class OnRemoveUserTagActionTest {
             val serverResponse = listOf(otherTag)
 
             coEvery {
-                saveUserTagsUseCase(bookId = 1, tags = listOf(otherTag))
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = listOf(otherTag),
+                )
             } returns Result.success(serverResponse)
 
             val action = OnRemoveUserTagAction(tag = tagToRemove)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe serverResponse
@@ -87,20 +97,29 @@ class OnRemoveUserTagActionTest {
         fun `results in empty list when removing the only tag`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            val onlyTag = UserTag(name = "mystery", category = TagCategory.GENRE)
+            val onlyTag = UserTag(
+                name = "mystery",
+                category = TagCategory.GENRE,
+            )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
                 userTags = listOf(onlyTag),
             )
 
             coEvery {
-                saveUserTagsUseCase(bookId = 1, tags = emptyList())
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = emptyList(),
+                )
             } returns Result.success(emptyList())
 
             val action = OnRemoveUserTagAction(tag = onlyTag)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe emptyList()
@@ -110,8 +129,14 @@ class OnRemoveUserTagActionTest {
         fun `does not remove a tag with the same name but a different category`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            val genreTag = UserTag(name = "cozy", category = TagCategory.GENRE)
-            val moodTag = UserTag(name = "cozy", category = TagCategory.MOOD)
+            val genreTag = UserTag(
+                name = "cozy",
+                category = TagCategory.GENRE,
+            )
+            val moodTag = UserTag(
+                name = "cozy",
+                category = TagCategory.MOOD,
+            )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
                 userTags = listOf(genreTag, moodTag),
@@ -119,13 +144,19 @@ class OnRemoveUserTagActionTest {
             val serverResponse = listOf(moodTag)
 
             coEvery {
-                saveUserTagsUseCase(bookId = 1, tags = listOf(moodTag))
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = listOf(moodTag),
+                )
             } returns Result.success(serverResponse)
 
             val action = OnRemoveUserTagAction(tag = genreTag)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe serverResponse
@@ -135,8 +166,14 @@ class OnRemoveUserTagActionTest {
         fun `rolls back to previous userTags on save failure`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            val tagToRemove = UserTag(name = "horror", category = TagCategory.GENRE)
-            val otherTag = UserTag(name = "thriller", category = TagCategory.GENRE)
+            val tagToRemove = UserTag(
+                name = "horror",
+                category = TagCategory.GENRE,
+            )
+            val otherTag = UserTag(
+                name = "thriller",
+                category = TagCategory.GENRE,
+            )
             val originalTags = listOf(tagToRemove, otherTag)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
@@ -144,13 +181,19 @@ class OnRemoveUserTagActionTest {
             )
 
             coEvery {
-                saveUserTagsUseCase(bookId = 1, tags = any())
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = any(),
+                )
             } returns Result.failure(RuntimeException("server error"))
 
             val action = OnRemoveUserTagAction(tag = tagToRemove)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe originalTags
@@ -160,7 +203,10 @@ class OnRemoveUserTagActionTest {
         fun `does nothing when book is null`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            val tag = UserTag(name = "fantasy", category = TagCategory.GENRE)
+            val tag = UserTag(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            )
             stateFlow.value = stateFlow.value.copy(
                 book = null,
                 userTags = listOf(tag),
@@ -169,7 +215,10 @@ class OnRemoveUserTagActionTest {
             val action = OnRemoveUserTagAction(tag = tag)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe initialTags

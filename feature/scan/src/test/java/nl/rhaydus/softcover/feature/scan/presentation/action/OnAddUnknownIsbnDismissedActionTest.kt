@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnAddUnknownIsbnDismissedActionTest {
-
     private lateinit var stateFlow: MutableStateFlow<ScanUiState>
     private lateinit var eventChannel: Channel<ScanEvent>
     private lateinit var scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>
@@ -53,7 +52,6 @@ class OnAddUnknownIsbnDismissedActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `clears unknownIsbn`() = runTest {
             // ----- Arrange -----
@@ -74,7 +72,10 @@ class OnAddUnknownIsbnDismissedActionTest {
         @Test
         fun `sets isAddingBook to false`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935", isAddingBook = true)
+            stateFlow.value = ScanUiState(
+                unknownIsbn = "9780451524935",
+                isAddingBook = true,
+            )
             val dependencies = stubDependencies(this)
             val action = OnAddUnknownIsbnDismissedAction()
 
@@ -91,7 +92,10 @@ class OnAddUnknownIsbnDismissedActionTest {
         @Test
         fun `does not alter isResolving`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935", isResolving = true)
+            stateFlow.value = ScanUiState(
+                unknownIsbn = "9780451524935",
+                isResolving = true,
+            )
             val dependencies = stubDependencies(this)
             val action = OnAddUnknownIsbnDismissedAction()
 
@@ -126,7 +130,10 @@ class OnAddUnknownIsbnDismissedActionTest {
         @Test
         fun `is idempotent when unknownIsbn is already null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = null, isAddingBook = false)
+            stateFlow.value = ScanUiState(
+                unknownIsbn = null,
+                isAddingBook = false,
+            )
             val dependencies = stubDependencies(this)
             val action = OnAddUnknownIsbnDismissedAction()
 
@@ -137,7 +144,10 @@ class OnAddUnknownIsbnDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value shouldBe ScanUiState(unknownIsbn = null, isAddingBook = false)
+            stateFlow.value shouldBe ScanUiState(
+                unknownIsbn = null,
+                isAddingBook = false,
+            )
         }
     }
 }

@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnListToggleActionTest {
-
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
     private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
 
@@ -51,7 +50,6 @@ class OnListToggleActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `adds id to draftEnabledListIds when enabled is true`() = runTest {
             // ----- Arrange -----
@@ -60,10 +58,16 @@ class OnListToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnListToggleAction(id = 20, enabled = true)
+            val action = OnListToggleAction(
+                id = 20,
+                enabled = true,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledListIds shouldBe setOf(10, 20)
@@ -77,10 +81,16 @@ class OnListToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnListToggleAction(id = 20, enabled = false)
+            val action = OnListToggleAction(
+                id = 20,
+                enabled = false,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledListIds shouldBe setOf(10, 30)
@@ -95,10 +105,16 @@ class OnListToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnListToggleAction(id = 99, enabled = true)
+            val action = OnListToggleAction(
+                id = 99,
+                enabled = true,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.persistedEnabledListIds shouldBe setOf(5)
@@ -113,10 +129,16 @@ class OnListToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnListToggleAction(id = 20, enabled = true)
+            val action = OnListToggleAction(
+                id = 20,
+                enabled = true,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 3)
@@ -130,10 +152,16 @@ class OnListToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnListToggleAction(id = 10, enabled = true)
+            val action = OnListToggleAction(
+                id = 10,
+                enabled = true,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledListIds shouldBe setOf(10, 20)
@@ -147,10 +175,16 @@ class OnListToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnListToggleAction(id = 999, enabled = false)
+            val action = OnListToggleAction(
+                id = 999,
+                enabled = false,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledListIds shouldBe setOf(10)

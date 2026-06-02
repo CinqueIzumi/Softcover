@@ -10,7 +10,7 @@ data class BookListWithBooks(
     @Relation(
         entity = ListBookEntity::class,
         parentColumn = "id",
-        entityColumn = "listId"
+        entityColumn = "listId",
     )
     val listBooks: List<ListBookFull>,
 )

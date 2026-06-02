@@ -60,8 +60,14 @@ fun MarkAsReadBurst(
         val current = progress.value
         if (current == 0f) return@Canvas
 
-        val centre = Offset(x = size.width / 2f, y = size.height / 2f)
-        val maxRadius = min(a = size.width, b = size.height) * 0.65f
+        val centre = Offset(
+            x = size.width / 2f,
+            y = size.height / 2f,
+        )
+        val maxRadius = min(
+            a = size.width,
+            b = size.height,
+        ) * 0.65f
 
         particles.forEach { seed ->
             val travel = maxRadius * seed.radiusFactor * easeOutCubic(current)
@@ -80,7 +86,10 @@ fun MarkAsReadBurst(
             drawCircle(
                 color = tint.copy(alpha = alpha),
                 radius = particleRadius.coerceAtLeast(minimumValue = 0f),
-                center = Offset(x = x, y = y),
+                center = Offset(
+                    x = x,
+                    y = y,
+                ),
             )
         }
     }

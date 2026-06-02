@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SetEnabledListIdsUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: SetEnabledListIdsUseCase
 
@@ -23,7 +22,6 @@ class SetEnabledListIdsUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success when repository call succeeds`() = runTest {
             // ----- Arrange -----

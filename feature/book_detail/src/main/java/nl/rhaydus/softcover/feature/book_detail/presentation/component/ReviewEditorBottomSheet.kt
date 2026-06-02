@@ -255,7 +255,10 @@ fun ReviewEditorBottomSheet(
                 enabled = textFieldValue.text.isBlank().not(),
                 onClick = {
                     onSave(
-                        editorBufferToDocument(text = textFieldValue.text, marks = marks),
+                        editorBufferToDocument(
+                            text = textFieldValue.text,
+                            marks = marks,
+                        ),
                         hasSpoilers,
                     )
                 },
@@ -287,8 +290,14 @@ private fun buildEditorAnnotatedString(
     append(text)
 
     marks.forEach { mark ->
-        val start = mark.start.coerceIn(0, text.length)
-        val end = mark.end.coerceIn(start, text.length)
+        val start = mark.start.coerceIn(
+            0,
+            text.length,
+        )
+        val end = mark.end.coerceIn(
+            start,
+            text.length,
+        )
 
         if (start >= end) return@forEach
 
@@ -300,6 +309,10 @@ private fun buildEditorAnnotatedString(
             ReviewMarkType.SPOILER -> SpanStyle(background = spoilerHighlight)
         }
 
-        addStyle(style = style, start = start, end = end)
+        addStyle(
+            style = style,
+            start = start,
+            end = end,
+        )
     }
 }

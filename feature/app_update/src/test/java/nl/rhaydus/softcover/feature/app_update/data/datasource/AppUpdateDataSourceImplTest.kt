@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AppUpdateDataSourceImplTest {
-
     private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var listenerSlot: CapturingSlot<InstallStateUpdatedListener>
     private lateinit var dataSource: AppUpdateDataSourceImpl
@@ -78,7 +77,6 @@ class AppUpdateDataSourceImplTest {
 
     @Nested
     inner class InstallListenerTranslations {
-
         @Test
         fun `listener sets Downloading state when install status is DOWNLOADING`() = runTest {
             // ----- Arrange -----
@@ -157,7 +155,6 @@ class AppUpdateDataSourceImplTest {
 
     @Nested
     inner class CheckForUpdate {
-
         @Test
         fun `sets Available state when update is available and flexible type is allowed`() = runTest {
             // ----- Arrange -----
@@ -322,7 +319,6 @@ class AppUpdateDataSourceImplTest {
 
     @Nested
     inner class StartUpdateFlow {
-
         @Test
         fun `does nothing when no AppUpdateInfo has been cached`() = runTest {
             // ----- Arrange -----
@@ -410,7 +406,6 @@ class AppUpdateDataSourceImplTest {
 
     @Nested
     inner class CompleteUpdate {
-
         @Test
         fun `delegates to appUpdateManager completeUpdate`() {
             // ----- Arrange -----
@@ -428,7 +423,6 @@ class AppUpdateDataSourceImplTest {
 
     @Nested
     inner class InitialState {
-
         @Test
         fun `initial updateState is Idle`() = runTest {
             // ----- Arrange -----

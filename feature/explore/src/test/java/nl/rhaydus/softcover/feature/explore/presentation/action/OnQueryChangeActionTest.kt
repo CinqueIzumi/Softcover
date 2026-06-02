@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.milliseconds
 
 class OnQueryChangeActionTest {
-
     private lateinit var searchForNameUseCase: SearchForNameUseCase
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
@@ -63,20 +62,25 @@ class OnQueryChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `updates searchText in state with the new query`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             val newQuery = "dune"
-            val action = OnQueryChangeAction(newQuery = newQuery, searchDelay = 0.milliseconds)
+            val action = OnQueryChangeAction(
+                newQuery = newQuery,
+                searchDelay = 0.milliseconds,
+            )
 
             coEvery {
                 searchForNameUseCase(name = any())
             } returns Result.success(Unit)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.searchText shouldBe newQuery
@@ -91,10 +95,16 @@ class OnQueryChangeActionTest {
                 searchForNameUseCase(name = any())
             } returns Result.success(Unit)
 
-            val action = OnQueryChangeAction(newQuery = "kotlin", searchDelay = 1_000_000.milliseconds)
+            val action = OnQueryChangeAction(
+                newQuery = "kotlin",
+                searchDelay = 1_000_000.milliseconds,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             // With a very large delay the launched job won't finish, so isLoading stays true
@@ -106,10 +116,16 @@ class OnQueryChangeActionTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(queriedBooks = listOf(mockk()))
-            val action = OnQueryChangeAction(newQuery = "", searchDelay = 0.milliseconds)
+            val action = OnQueryChangeAction(
+                newQuery = "",
+                searchDelay = 0.milliseconds,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.queriedBooks shouldBe emptyList()
@@ -125,10 +141,16 @@ class OnQueryChangeActionTest {
                 searchForNameUseCase(name = any())
             } returns Result.success(Unit)
 
-            val action = OnQueryChangeAction(newQuery = "android", searchDelay = 0.milliseconds)
+            val action = OnQueryChangeAction(
+                newQuery = "android",
+                searchDelay = 0.milliseconds,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
@@ -143,10 +165,16 @@ class OnQueryChangeActionTest {
                 searchForNameUseCase(name = any())
             } returns Result.success(Unit)
 
-            val action = OnQueryChangeAction(newQuery = "test", searchDelay = 1_000_000.milliseconds)
+            val action = OnQueryChangeAction(
+                newQuery = "test",
+                searchDelay = 1_000_000.milliseconds,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             localVariablesFlow.value.queryJob shouldNotBe null
@@ -156,10 +184,16 @@ class OnQueryChangeActionTest {
         fun `clears queryJob in local variables when query is empty`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            val action = OnQueryChangeAction(newQuery = "", searchDelay = 0.milliseconds)
+            val action = OnQueryChangeAction(
+                newQuery = "",
+                searchDelay = 0.milliseconds,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             localVariablesFlow.value.queryJob shouldBe null

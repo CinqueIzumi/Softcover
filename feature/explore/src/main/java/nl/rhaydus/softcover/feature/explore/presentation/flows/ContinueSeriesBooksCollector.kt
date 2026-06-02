@@ -23,7 +23,10 @@ class ContinueSeriesBooksCollector : ExploreInitializer {
                 dependencies.getContinueSeriesBooksUseCase()
             }
             .catch { error ->
-                Timber.e(error, "Failed to fetch continue-series books")
+                Timber.e(
+                    error,
+                    "Failed to fetch continue-series books",
+                )
 
                 emit(emptyList())
             }

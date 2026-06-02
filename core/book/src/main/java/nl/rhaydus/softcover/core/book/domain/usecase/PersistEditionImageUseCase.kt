@@ -11,8 +11,14 @@ class PersistEditionImageUseCase(
         editionId: Int,
         source: File,
     ): Result<Unit> = runCatching {
-        booksRepository.persistEditionImage(editionId = editionId, source = source)
+        booksRepository.persistEditionImage(
+            editionId = editionId,
+            source = source,
+        )
     }.onFailure {
-        Timber.e(it, "Failed to persist image for edition $editionId")
+        Timber.e(
+            it,
+            "Failed to persist image for edition $editionId",
+        )
     }
 }

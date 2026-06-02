@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ClearBookDeadlineUseCaseTest {
-
     private lateinit var repository: BookDeadlineRepository
     private lateinit var useCase: ClearBookDeadlineUseCase
 
@@ -23,7 +22,6 @@ class ClearBookDeadlineUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository clearDeadline with the given bookId`() = runTest {
             // ----- Arrange -----

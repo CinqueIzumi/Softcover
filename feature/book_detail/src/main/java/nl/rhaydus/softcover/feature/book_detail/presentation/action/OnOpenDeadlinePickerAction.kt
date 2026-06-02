@@ -11,6 +11,9 @@ class OnOpenDeadlinePickerAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(showDeadlinePicker = true, fabMenuExpanded = false) }
+        scope.setState { it.copy(
+            showDeadlinePicker = true,
+            fabMenuExpanded = false,
+        ) }
     }
 }

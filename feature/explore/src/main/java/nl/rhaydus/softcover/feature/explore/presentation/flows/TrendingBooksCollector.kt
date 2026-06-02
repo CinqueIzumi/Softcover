@@ -16,7 +16,10 @@ class TrendingBooksCollector : ExploreInitializer {
     ) {
         val trendingBooks: List<Book> = dependencies.getTrendingBooksUseCase()
             .onFailure { error ->
-                Timber.e(error, "Failed to fetch trending books")
+                Timber.e(
+                    error,
+                    "Failed to fetch trending books",
+                )
 
                 scope.setState { it.copy(loadingTrendingBooks = false) }
             }

@@ -16,7 +16,7 @@ class QueriedBooksCollector() : ExploreInitializer {
     ) {
         combine(
             dependencies.getAllUserBooksUseCase(),
-            dependencies.getQueriedBooksUseCase()
+            dependencies.getQueriedBooksUseCase(),
         ) { allUserBooks: List<Book>, fetchedBooks: List<Book> ->
             fetchedBooks.map {
                 allUserBooks.find { userBook -> userBook.id == it.id } ?: it

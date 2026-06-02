@@ -36,7 +36,7 @@ object ProfileCacheSerializer : Serializer<ProfileCacheEntity> {
                 json.encodeToString(
                     serializer = ProfileCacheEntity.serializer(),
                     value = t,
-                ).encodeToByteArray()
+                ).encodeToByteArray(),
             )
         }
     }

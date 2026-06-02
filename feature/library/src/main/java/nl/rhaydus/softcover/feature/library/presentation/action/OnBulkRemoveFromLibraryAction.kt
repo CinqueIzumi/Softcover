@@ -33,7 +33,10 @@ class OnBulkRemoveFromLibraryAction : LibraryAction {
 
         for (book in books) {
             dependencies.removeBookFromLibraryUseCase(book = book).onFailure { throwable ->
-                Timber.e(throwable, "Bulk remove failed for book ${book.id}")
+                Timber.e(
+                    throwable,
+                    "Bulk remove failed for book ${book.id}",
+                )
 
                 failureCount++
             }

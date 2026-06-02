@@ -17,7 +17,6 @@ abstract class SoftcoverWorker(
     appContext: Context,
     workerParameters: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParameters) {
-
     abstract suspend fun work(): Result
 
     final override suspend fun doWork(): Result {
@@ -26,7 +25,10 @@ abstract class SoftcoverWorker(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (throwable: Throwable) {
-            Timber.e(throwable, "SoftcoverWorker ${this::class.simpleName} failed")
+            Timber.e(
+                throwable,
+                "SoftcoverWorker ${this::class.simpleName} failed",
+            )
 
             Result.failure()
         }

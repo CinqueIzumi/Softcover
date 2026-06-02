@@ -37,7 +37,7 @@ abstract class ToadScreenModel<S : UiState, E : UiEvent, D : ActionDependencies,
         screenModelScope.launch {
             action.execute(
                 dependencies,
-                scope = scope
+                scope = scope,
             )
         }
     }

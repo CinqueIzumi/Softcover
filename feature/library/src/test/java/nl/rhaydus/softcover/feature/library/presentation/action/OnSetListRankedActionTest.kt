@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnSetListRankedActionTest {
-
     private lateinit var setListRankedUseCase: SetListRankedUseCase
     private lateinit var setLibrarySortUseCase: SetLibrarySortUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
@@ -66,7 +65,6 @@ class OnSetListRankedActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `ranked=true happy path — sort switched to ORDER before ranked use case, dropdown closed, no snackbar`() =
             runTest {

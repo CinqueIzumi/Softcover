@@ -21,7 +21,7 @@ class ProfileScreenScreenModel(
 ) : ToadScreenModel<ProfileUiState, ProfileEvent, ProfileDependencies, ProfileInitializer, LocalProfileVariables>(
     initializers = initializers,
     initialState = ProfileUiState(),
-    initialLocalVariables = LocalProfileVariables()
+    initialLocalVariables = LocalProfileVariables(),
 ) {
     override val dependencies: ProfileDependencies = ProfileDependencies(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,

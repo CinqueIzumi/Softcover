@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnEditionSearchQueryChangeActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -33,7 +32,6 @@ class OnEditionSearchQueryChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `writes the query into editionSearchQuery`() = runTest {
             // ----- Arrange -----

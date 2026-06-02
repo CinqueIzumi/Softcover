@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ReorderShelfBooksUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: ReorderShelfBooksUseCase
 
@@ -24,7 +23,6 @@ class ReorderShelfBooksUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository applyShelfManualOrderPrefix with the given status and bookIds`() = runTest {
             // ----- Arrange -----
@@ -32,7 +30,10 @@ class ReorderShelfBooksUseCaseTest {
             val bookIds = listOf(3, 1, 2)
 
             // ----- Act -----
-            useCase(status = status, prefixOrderedBookIds = bookIds)
+            useCase(
+                status = status,
+                prefixOrderedBookIds = bookIds,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -50,7 +51,10 @@ class ReorderShelfBooksUseCaseTest {
             val bookIds = listOf(10, 20)
 
             // ----- Act -----
-            val result = useCase(status = status, prefixOrderedBookIds = bookIds)
+            val result = useCase(
+                status = status,
+                prefixOrderedBookIds = bookIds,
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
@@ -71,7 +75,10 @@ class ReorderShelfBooksUseCaseTest {
             } throws expectedError
 
             // ----- Act -----
-            val result = useCase(status = status, prefixOrderedBookIds = bookIds)
+            val result = useCase(
+                status = status,
+                prefixOrderedBookIds = bookIds,
+            )
 
             // ----- Assert -----
             result.isFailure shouldBe true

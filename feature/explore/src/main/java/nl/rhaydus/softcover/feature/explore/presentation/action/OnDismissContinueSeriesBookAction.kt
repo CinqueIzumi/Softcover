@@ -17,7 +17,10 @@ class OnDismissContinueSeriesBookAction(
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
         dependencies.dismissContinueSeriesBookUseCase(bookId = bookId)
-            .onFailure { Timber.e(it, "Failed to dismiss book $bookId from continue-series") }
+            .onFailure { Timber.e(
+                it,
+                "Failed to dismiss book $bookId from continue-series",
+            ) }
             .onSuccess {
                 SnackBarManager.showSnackBar(
                     title = "\"$bookTitle\" won't be suggested again",
@@ -25,7 +28,10 @@ class OnDismissContinueSeriesBookAction(
                     onActionClick = {
                         dependencies.launch {
                             dependencies.undoContinueSeriesBookDismissalUseCase(bookId = bookId)
-                                .onFailure { Timber.e(it, "Failed to undo book dismissal") }
+                                .onFailure { Timber.e(
+                                    it,
+                                    "Failed to undo book dismissal",
+                                ) }
                         }
                     },
                 )

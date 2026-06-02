@@ -5,14 +5,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class TimeFormatTest {
-
     // =========================================================
     // secondsToHm
     // =========================================================
 
     @Nested
     inner class SecondsToHm {
-
         @Test
         fun `formats hours and minutes when both are non-zero`() {
             // ----- Act -----
@@ -83,7 +81,6 @@ class TimeFormatTest {
 
     @Nested
     inner class SecondsToClock {
-
         @Test
         fun `formats zero as 00_00_00`() {
             // ----- Act -----
@@ -145,7 +142,6 @@ class TimeFormatTest {
 
     @Nested
     inner class IntToHoursMinutesSeconds {
-
         @Test
         fun `converts zero to all-zero components`() {
             // ----- Act -----

@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVar
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
 class OnDateDropdownExpandedChange(
-    private val expanded: Boolean
+    private val expanded: Boolean,
 ) : SettingsAction {
     override suspend fun execute(
         dependencies: SettingsScreenDependencies,

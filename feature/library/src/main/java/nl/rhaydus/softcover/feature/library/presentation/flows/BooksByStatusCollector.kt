@@ -27,10 +27,22 @@ class BooksByStatusCollector : LibraryInitializer {
         // status; flatMapLatest re-subscribes whenever the user changes that tab's sort settings.
         combine(
             dependencies.getEnabledStatusCodesAsFlowUseCase(),
-            booksForStatus(dependencies = dependencies, status = UserBookStatus.CURRENTLY_READING),
-            booksForStatus(dependencies = dependencies, status = UserBookStatus.WANT_TO_READ),
-            booksForStatus(dependencies = dependencies, status = UserBookStatus.READ),
-            booksForStatus(dependencies = dependencies, status = UserBookStatus.DID_NOT_FINISH),
+            booksForStatus(
+                dependencies = dependencies,
+                status = UserBookStatus.CURRENTLY_READING,
+            ),
+            booksForStatus(
+                dependencies = dependencies,
+                status = UserBookStatus.WANT_TO_READ,
+            ),
+            booksForStatus(
+                dependencies = dependencies,
+                status = UserBookStatus.READ,
+            ),
+            booksForStatus(
+                dependencies = dependencies,
+                status = UserBookStatus.DID_NOT_FINISH,
+            ),
         ) { enabledStatuses: Set<Int>, currentlyReading: List<Book>, wantToRead: List<Book>, read: List<Book>, didNotFinish: List<Book> ->
             val activeCodes = UserBookStatus.activeLibraryCodes(enabledCodes = enabledStatuses)
 

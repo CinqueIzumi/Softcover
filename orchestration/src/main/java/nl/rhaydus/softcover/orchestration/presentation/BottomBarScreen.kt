@@ -72,16 +72,16 @@ object BottomBarScreen : Screen {
                             DockedBottomNavigationBar()
                         }
                     }
-                }
+                },
             ) { innerPadding ->
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .consumeWindowInsets(innerPadding)
+                        .consumeWindowInsets(innerPadding),
                 ) {
                     CompositionLocalProvider(
-                        LocalBottomBarPadding provides bottomBarPadding
+                        LocalBottomBarPadding provides bottomBarPadding,
                     ) {
                         TabRootHost()
                     }
@@ -101,7 +101,7 @@ object BottomBarScreen : Screen {
                                     interactionSource = shieldInteractionSource,
                                     indication = null,
                                     onClick = {},
-                                )
+                                ),
                         ) {
                             SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
 

@@ -26,15 +26,24 @@ class OnAddUserTagAction(
         if (trimmed.isEmpty()) return
 
         val alreadyPresent = scope.currentState.userTags.any {
-            it.category == category && it.name.equals(trimmed, ignoreCase = true)
+            it.category == category && it.name.equals(
+                trimmed,
+                ignoreCase = true,
+            )
         }
 
         if (alreadyPresent) return
 
-        val newSet = scope.currentState.userTags + UserTag(name = trimmed, category = category)
+        val newSet = scope.currentState.userTags + UserTag(
+            name = trimmed,
+            category = category,
+        )
 
         scope.setState { it.copy(tagEditorInput = "") }
 
-        scope.commitUserTags(newSet = newSet, dependencies = dependencies)
+        scope.commitUserTags(
+            newSet = newSet,
+            dependencies = dependencies,
+        )
     }
 }

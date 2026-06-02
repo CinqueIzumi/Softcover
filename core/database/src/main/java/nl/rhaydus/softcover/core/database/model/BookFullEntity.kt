@@ -14,8 +14,8 @@ data class BookFullEntity(
         associateBy = Junction(
             value = BookAuthorCrossRef::class,
             parentColumn = "bookId",
-            entityColumn = "authorId"
-        )
+            entityColumn = "authorId",
+        ),
     )
     val bookAuthors: List<AuthorEntity>,
 
@@ -28,14 +28,14 @@ data class BookFullEntity(
     @Relation(
         entity = BookEditionView::class,
         parentColumn = "id",
-        entityColumn = "bookId"
+        entityColumn = "bookId",
     )
     val editions: List<BookEditionWithAuthors>,
 
     @Relation(
         entity = UserBookEntity::class,
         parentColumn = "id",
-        entityColumn = "bookId"
+        entityColumn = "bookId",
     )
     val userBookWithJournals: UserBookWithJournals?,
 

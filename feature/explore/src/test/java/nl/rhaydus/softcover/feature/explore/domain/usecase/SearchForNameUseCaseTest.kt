@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SearchForNameUseCaseTest {
-
     private lateinit var searchRepository: ExploreRepository
     private lateinit var getUserIdUseCase: GetUserIdUseCase
     private lateinit var useCase: SearchForNameUseCase
@@ -29,7 +28,6 @@ class SearchForNameUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates searchForName to repository with retrieved userId`() = runTest {
             // ----- Arrange -----
@@ -45,7 +43,10 @@ class SearchForNameUseCaseTest {
 
             // ----- Assert -----
             coVerify {
-                searchRepository.searchForName(name = name, userId = userId)
+                searchRepository.searchForName(
+                    name = name,
+                    userId = userId,
+                )
             }
         }
 
@@ -115,7 +116,10 @@ class SearchForNameUseCaseTest {
             } returns Result.success(userId)
 
             coEvery {
-                searchRepository.searchForName(name = name, userId = userId)
+                searchRepository.searchForName(
+                    name = name,
+                    userId = userId,
+                )
             } throws expectedError
 
             // ----- Act -----
@@ -155,7 +159,10 @@ class SearchForNameUseCaseTest {
             } returns Result.success(userId)
 
             coEvery {
-                searchRepository.searchForName(name = name, userId = userId)
+                searchRepository.searchForName(
+                    name = name,
+                    userId = userId,
+                )
             } throws RuntimeException("apollo error")
 
             // ----- Act -----

@@ -200,11 +200,17 @@ class BooksRemoteDataSourceImpl(
         )
 
         result.isbn13.firstOrNull()?.let { edition ->
-            return IsbnEditionMatch(bookId = edition.book_id, editionId = edition.id)
+            return IsbnEditionMatch(
+                bookId = edition.book_id,
+                editionId = edition.id,
+            )
         }
 
         return result.isbn10.firstOrNull()?.let { edition ->
-            IsbnEditionMatch(bookId = edition.book_id, editionId = edition.id)
+            IsbnEditionMatch(
+                bookId = edition.book_id,
+                editionId = edition.id,
+            )
         }
     }
 
@@ -266,7 +272,7 @@ class BooksRemoteDataSourceImpl(
                 to = to,
                 limit = limit,
                 offset = offset,
-            )
+            ),
         )
             .books_trending
             ?.ids
@@ -353,15 +359,15 @@ class BooksRemoteDataSourceImpl(
             referrer_user_id = Optional.Present(userBook.referrerUserId),
             reviewed_at = Optional.Present(userBook.reviewedAt),
             date_added = Optional.Present(userBook.dateAdded),
-            user_date = Optional.present(currentDate)
+            user_date = Optional.present(currentDate),
         )
 
         return apolloClient
             .safeMutation(
                 mutation = MarkBookAsReadingMutation(
                     id = userBook.id,
-                    `object` = input
-                )
+                    `object` = input,
+                ),
             )
             .update_user_book
             ?.user_book
@@ -382,7 +388,7 @@ class BooksRemoteDataSourceImpl(
                 mutation = UpdateUserBookRatingMutation(
                     id = userBook.id,
                     `object` = input,
-                )
+                ),
             )
             .update_user_book
             ?.user_book
@@ -407,7 +413,7 @@ class BooksRemoteDataSourceImpl(
                 mutation = UpdateUserBookReviewMutation(
                     id = userBook.id,
                     `object` = input,
-                )
+                ),
             )
             .update_user_book
             ?.user_book
@@ -500,7 +506,7 @@ class BooksRemoteDataSourceImpl(
 
         val mutation = UpdateReadingProgressMutation(
             id = userBookRead.id,
-            datesReadInput = dataObject
+            datesReadInput = dataObject,
         )
 
         val userBookFragment = apolloClient
@@ -555,8 +561,8 @@ class BooksRemoteDataSourceImpl(
                 referrer_user_id = Optional.Present(userBook.referrerUserId),
                 review_has_spoilers = Optional.Present(userBook.reviewHasSpoilers),
                 status_id = Optional.present(userBook.status.code),
-                reviewed_at = Optional.Present(userBook.reviewedAt)
-            )
+                reviewed_at = Optional.Present(userBook.reviewedAt),
+            ),
         )
 
         val userBookFragment = apolloClient

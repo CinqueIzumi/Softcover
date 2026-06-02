@@ -116,7 +116,7 @@ class ProfileScreen : Screen {
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
             ) {
                 ProfileHeader(
                     profileImageUrl = state.userProfileData?.profileImageUrl,
@@ -364,7 +364,10 @@ class ProfileScreen : Screen {
         val shape = RoundedCornerShape(24.dp)
 
         Surface(
-            modifier = modifier.shimmer(shape = shape, isLoading = isLoading),
+            modifier = modifier.shimmer(
+                shape = shape,
+                isLoading = isLoading,
+            ),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             shape = shape,
         ) {
@@ -412,7 +415,10 @@ class ProfileScreen : Screen {
         Surface(
             modifier = modifier
                 .fillMaxWidth()
-                .shimmer(shape = shape, isLoading = isLoading),
+                .shimmer(
+                    shape = shape,
+                    isLoading = isLoading,
+                ),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = shape,
         ) {

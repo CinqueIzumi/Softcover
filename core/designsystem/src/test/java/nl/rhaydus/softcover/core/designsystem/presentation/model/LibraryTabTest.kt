@@ -7,10 +7,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryTabTest {
-
     @Nested
     inner class DefaultSortMode {
-
         @Test
         fun `returns DATE_FINISHED for the Read tab id`() {
             // ----- Arrange -----

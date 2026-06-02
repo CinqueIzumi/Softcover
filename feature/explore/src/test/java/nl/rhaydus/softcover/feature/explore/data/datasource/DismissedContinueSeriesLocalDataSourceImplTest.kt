@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class DismissedContinueSeriesLocalDataSourceImplTest {
-
     private lateinit var dao: DismissedContinueSeriesDao
     private lateinit var dataSource: DismissedContinueSeriesLocalDataSourceImpl
 
@@ -31,7 +30,6 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
 
     @Nested
     inner class DismissedBookIds {
-
         @Test
         fun `is wired to dao observeDismissedBookIds`() = runTest {
             // ----- Arrange -----
@@ -51,7 +49,6 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
 
     @Nested
     inner class DismissedSeriesIds {
-
         @Test
         fun `is wired to dao observeDismissedSeriesIds`() = runTest {
             // ----- Arrange -----
@@ -71,7 +68,6 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
 
     @Nested
     inner class DismissBook {
-
         @Test
         fun `delegates to dao with correct entity`() = runTest {
             // ----- Arrange -----
@@ -89,7 +85,6 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
 
     @Nested
     inner class DismissSeries {
-
         @Test
         fun `delegates to dao with correct entity`() = runTest {
             // ----- Arrange -----
@@ -107,7 +102,6 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
 
     @Nested
     inner class UndoBookDismissal {
-
         @Test
         fun `delegates to dao with correct bookId`() = runTest {
             // ----- Arrange -----
@@ -125,7 +119,6 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
 
     @Nested
     inner class UndoSeriesDismissal {
-
         @Test
         fun `delegates to dao with correct seriesId`() = runTest {
             // ----- Arrange -----

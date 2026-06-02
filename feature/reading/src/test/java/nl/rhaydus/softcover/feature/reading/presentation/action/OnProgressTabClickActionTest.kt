@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnProgressTabClickActionTest {
-
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
@@ -34,7 +33,6 @@ class OnProgressTabClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `updates progressSheetTab to PAGE when PAGE is provided`() = runTest {
             // ----- Arrange -----

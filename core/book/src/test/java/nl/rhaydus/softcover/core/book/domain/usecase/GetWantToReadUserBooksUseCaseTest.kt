@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetWantToReadUserBooksUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: GetWantToReadUserBooksUseCase
 
@@ -28,7 +27,6 @@ class GetWantToReadUserBooksUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository with WANT_TO_READ status`() = runTest {
             // ----- Arrange -----

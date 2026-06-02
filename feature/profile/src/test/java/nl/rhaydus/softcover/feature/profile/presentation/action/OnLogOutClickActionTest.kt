@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnLogOutClickActionTest {
-
     private lateinit var resetUserDataUseCase: ResetUserDataUseCase
     private lateinit var dependencies: ProfileDependencies
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
@@ -64,7 +63,6 @@ class OnLogOutClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sends LogOutUserEvent when use case succeeds`() = runTest {
             // ----- Arrange -----

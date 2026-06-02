@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SettingsLocalDataSourceImplTest {
-
     private lateinit var dataStore: DataStore<AppSettingsEntity>
     private lateinit var apiKeyLocalDataSource: ApiKeyLocalDataSource
     private lateinit var dataSource: SettingsLocalDataSourceImpl
@@ -52,7 +51,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class DateStyleFlow {
-
         @Test
         fun `emits the dateStyle field from each entity in the data store flow`() = runTest {
             // ----- Arrange -----
@@ -82,7 +80,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             val freshDataSource = SettingsLocalDataSourceImpl(
                 appSettingsDataStore = AppSettingsDataStore(store = dataStore),
@@ -104,7 +105,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             val freshDataSource = SettingsLocalDataSourceImpl(
                 appSettingsDataStore = AppSettingsDataStore(store = dataStore),
@@ -122,7 +126,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class SetDateStyle {
-
         @Test
         fun `calls updateData on the data store`() = runTest {
             // ----- Arrange -----
@@ -170,7 +173,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class UpdateApiKey {
-
         @Test
         fun `delegates to apiKeyLocalDataSource with the given key`() = runTest {
             // ----- Arrange -----
@@ -204,7 +206,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class GetUserId {
-
         @Test
         fun `emits the userId field from each entity in the data store flow`() = runTest {
             // ----- Arrange -----
@@ -229,7 +230,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             // ----- Act & Assert -----
             dataSource.getUserId().test {
@@ -246,7 +250,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             // ----- Act & Assert -----
             dataSource.getUserId().test {
@@ -259,7 +266,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class GetThemeConfig {
-
         @Test
         fun `emits the mapped ThemeConfiguration from each entity`() = runTest {
             // ----- Arrange -----
@@ -284,7 +290,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             // ----- Act & Assert -----
             dataSource.getThemeConfig().test {
@@ -301,7 +310,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             // ----- Act & Assert -----
             dataSource.getThemeConfig().test {
@@ -314,7 +326,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class UpdateUserId {
-
         @Test
         fun `update lambda sets userId to the given id`() = runTest {
             // ----- Arrange -----
@@ -339,7 +350,10 @@ class SettingsLocalDataSourceImplTest {
         @Test
         fun `update lambda preserves other fields when updating userId`() = runTest {
             // ----- Arrange -----
-            val existingEntity = stubEntity(apiKey = "key-abc", dateStyle = DateStyle.MONTH_DAY_YEAR)
+            val existingEntity = stubEntity(
+                apiKey = "key-abc",
+                dateStyle = DateStyle.MONTH_DAY_YEAR,
+            )
             var capturedResult: AppSettingsEntity? = null
 
             coEvery {
@@ -361,7 +375,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class LibraryGridLayoutFlow {
-
         @Test
         fun `emits the libraryGridLayout field from each entity in the data store flow`() = runTest {
             // ----- Arrange -----
@@ -391,7 +404,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             val freshDataSource = SettingsLocalDataSourceImpl(
                 appSettingsDataStore = AppSettingsDataStore(store = dataStore),
@@ -413,7 +429,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             val freshDataSource = SettingsLocalDataSourceImpl(
                 appSettingsDataStore = AppSettingsDataStore(store = dataStore),
@@ -431,7 +450,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class SetLibraryGridLayout {
-
         @Test
         fun `calls updateData on the data store`() = runTest {
             // ----- Arrange -----
@@ -507,7 +525,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class EnabledStatusCodesFlow {
-
         @Test
         fun `emits the enabledStatusCodes field from the data store flow`() = runTest {
             // ----- Arrange -----
@@ -537,7 +554,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             val freshDataSource = SettingsLocalDataSourceImpl(
                 appSettingsDataStore = AppSettingsDataStore(store = dataStore),
@@ -559,7 +579,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             val freshDataSource = SettingsLocalDataSourceImpl(
                 appSettingsDataStore = AppSettingsDataStore(store = dataStore),
@@ -577,7 +600,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class EnabledListIdsFlow {
-
         @Test
         fun `emits the enabledListIds field from the data store flow`() = runTest {
             // ----- Arrange -----
@@ -607,7 +629,10 @@ class SettingsLocalDataSourceImplTest {
 
             every {
                 dataStore.data
-            } returns flowOf(entity1, entity2)
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
 
             val freshDataSource = SettingsLocalDataSourceImpl(
                 appSettingsDataStore = AppSettingsDataStore(store = dataStore),
@@ -624,7 +649,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class ListDefaultsSeededFlow {
-
         @Test
         fun `emits the listDefaultsSeeded field from the data store flow`() = runTest {
             // ----- Arrange -----
@@ -670,11 +694,13 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class SeedEnabledListIds {
-
         @Test
         fun `update lambda merges new ids into existing enabledListIds`() = runTest {
             // ----- Arrange -----
-            val existingEntity = AppSettingsEntity(enabledListIds = setOf(1), listDefaultsSeeded = false)
+            val existingEntity = AppSettingsEntity(
+                enabledListIds = setOf(1),
+                listDefaultsSeeded = false,
+            )
             var capturedResult: AppSettingsEntity? = null
 
             coEvery {
@@ -716,7 +742,10 @@ class SettingsLocalDataSourceImplTest {
         @Test
         fun `seeding empty ids still marks listDefaultsSeeded as true`() = runTest {
             // ----- Arrange -----
-            val existingEntity = AppSettingsEntity(enabledListIds = setOf(99), listDefaultsSeeded = false)
+            val existingEntity = AppSettingsEntity(
+                enabledListIds = setOf(99),
+                listDefaultsSeeded = false,
+            )
             var capturedResult: AppSettingsEntity? = null
 
             coEvery {
@@ -738,7 +767,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class SetEnabledStatusCodes {
-
         @Test
         fun `update lambda replaces enabledStatusCodes with the given set`() = runTest {
             // ----- Arrange -----
@@ -810,7 +838,6 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class SetEnabledListIds {
-
         @Test
         fun `update lambda replaces enabledListIds with the given set`() = runTest {
             // ----- Arrange -----
@@ -882,12 +909,11 @@ class SettingsLocalDataSourceImplTest {
 
     @Nested
     inner class SetBottomBarStyle {
-
         @Test
         fun `update lambda sets bottomBarStyle inside themeConfig`() = runTest {
             // ----- Arrange -----
             val existingEntity = stubEntity(
-                themeConfig = ThemeConfigurationEntity(bottomBarStyle = BottomBarStyle.FLOATING)
+                themeConfig = ThemeConfigurationEntity(bottomBarStyle = BottomBarStyle.FLOATING),
             )
             var capturedResult: AppSettingsEntity? = null
 
@@ -910,7 +936,7 @@ class SettingsLocalDataSourceImplTest {
         fun `update lambda preserves other themeConfig fields`() = runTest {
             // ----- Arrange -----
             val existingEntity = stubEntity(
-                themeConfig = ThemeConfigurationEntity(bottomBarStyle = BottomBarStyle.DOCKED)
+                themeConfig = ThemeConfigurationEntity(bottomBarStyle = BottomBarStyle.DOCKED),
             )
             var capturedResult: AppSettingsEntity? = null
 

@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserTagsRemoteDataSourceImplTest {
-
     private lateinit var apolloClient: ApolloClient
     private lateinit var dataSource: UserTagsRemoteDataSourceImpl
 
@@ -48,7 +47,6 @@ class UserTagsRemoteDataSourceImplTest {
 
     @Nested
     inner class GetUserTags {
-
         @Test
         fun `queries with userId, type Book, and bookId as Long`() = runTest {
             // ----- Arrange -----
@@ -73,7 +71,10 @@ class UserTagsRemoteDataSourceImplTest {
             every { tagging.toUserTag() } returns userTag
 
             // ----- Act -----
-            val result = dataSource.getUserTags(userId = userId, bookId = bookId)
+            val result = dataSource.getUserTags(
+                userId = userId,
+                bookId = bookId,
+            )
 
             // ----- Assert -----
             result shouldBe listOf(userTag)
@@ -91,7 +92,10 @@ class UserTagsRemoteDataSourceImplTest {
             every { queryData.taggings } returns emptyList()
 
             // ----- Act -----
-            val result = dataSource.getUserTags(userId = 1, bookId = 1)
+            val result = dataSource.getUserTags(
+                userId = 1,
+                bookId = 1,
+            )
 
             // ----- Assert -----
             result shouldBe emptyList()
@@ -117,7 +121,10 @@ class UserTagsRemoteDataSourceImplTest {
             every { tagging2.toUserTag() } returns userTag2
 
             // ----- Act -----
-            val result = dataSource.getUserTags(userId = 1, bookId = 1)
+            val result = dataSource.getUserTags(
+                userId = 1,
+                bookId = 1,
+            )
 
             // ----- Assert -----
             result shouldBe listOf(userTag1, userTag2)
@@ -126,7 +133,6 @@ class UserTagsRemoteDataSourceImplTest {
 
     @Nested
     inner class SaveTags {
-
         @Test
         fun `mutates with bookId as Long, type Book, and mapped tags`() = runTest {
             // ----- Arrange -----
@@ -148,7 +154,10 @@ class UserTagsRemoteDataSourceImplTest {
             every { mutationTag.toUserTag() } returns expectedUserTag
 
             // ----- Act -----
-            val result = dataSource.saveTags(bookId = bookId, tags = listOf(userTag))
+            val result = dataSource.saveTags(
+                bookId = bookId,
+                tags = listOf(userTag),
+            )
 
             // ----- Assert -----
             result shouldBe listOf(expectedUserTag)
@@ -166,7 +175,10 @@ class UserTagsRemoteDataSourceImplTest {
             every { mutationData.upsertTags } returns null
 
             // ----- Act -----
-            val result = dataSource.saveTags(bookId = 1, tags = emptyList())
+            val result = dataSource.saveTags(
+                bookId = 1,
+                tags = emptyList(),
+            )
 
             // ----- Assert -----
             result shouldBe emptyList()
@@ -187,7 +199,10 @@ class UserTagsRemoteDataSourceImplTest {
             every { upsertTags.tags } returns emptyList()
 
             // ----- Act -----
-            val result = dataSource.saveTags(bookId = 1, tags = emptyList())
+            val result = dataSource.saveTags(
+                bookId = 1,
+                tags = emptyList(),
+            )
 
             // ----- Assert -----
             result shouldBe emptyList()
@@ -212,7 +227,10 @@ class UserTagsRemoteDataSourceImplTest {
             every { mutationTag.toUserTag() } returns expectedUserTag
 
             // ----- Act -----
-            val result = dataSource.saveTags(bookId = 1, tags = listOf(stubUserTag()))
+            val result = dataSource.saveTags(
+                bookId = 1,
+                tags = listOf(stubUserTag()),
+            )
 
             // ----- Assert -----
             result shouldBe listOf(expectedUserTag)

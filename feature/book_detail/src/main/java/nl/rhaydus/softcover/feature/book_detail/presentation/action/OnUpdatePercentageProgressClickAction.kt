@@ -17,7 +17,10 @@ data class OnUpdatePercentageProgressClickAction(
         val bookToUpdate: Book = scope.currentState.book ?: return
 
         val newPercentageValue: Double = newPercentage.toDoubleOrNull() ?: 0.0
-        val fraction = (newPercentageValue / 100.0).coerceIn(0.0, 1.0)
+        val fraction = (newPercentageValue / 100.0).coerceIn(
+            0.0,
+            1.0,
+        )
 
         val edition = bookToUpdate.currentEdition ?: run {
             scope.setState { it.copy(showUpdateProgressSheet = false) }

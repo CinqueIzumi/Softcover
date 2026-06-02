@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BooksRepositoryImplTest {
-
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
     private lateinit var booksLocalDataSource: BooksLocalDataSource
     private lateinit var networkAvailability: NetworkAvailabilityProvider
@@ -101,7 +100,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class Books {
-
         @Test
         fun `books property is wired to local data source allUserBooks flow`() = runTest {
             // ----- Arrange -----
@@ -130,7 +128,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class GetBooksFlowByStatus {
-
         @Test
         fun `getBooksFlowByStatus delegates to local data source with the given status`() = runTest {
             // ----- Arrange -----
@@ -151,7 +148,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class RefreshUserBooks {
-
         @Test
         fun `refreshUserBooks fetches remote books and caches them`() = runTest {
             // ----- Arrange -----
@@ -159,7 +155,10 @@ class BooksRepositoryImplTest {
             val fetchedBooks = listOf(stubBook(userBookId = 3))
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
             } returns fetchedBooks
 
             coEvery {
@@ -181,7 +180,10 @@ class BooksRepositoryImplTest {
             val userId = 20
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
             } returns emptyList()
 
             coEvery {
@@ -204,7 +206,10 @@ class BooksRepositoryImplTest {
             val userId = 20
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
             } returns emptyList()
 
             coEvery {
@@ -217,7 +222,10 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerifyOrder {
                 userBookWriteDrainer.drainPendingUpdates()
-                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
             }
         }
 
@@ -265,7 +273,10 @@ class BooksRepositoryImplTest {
                 userBook = staleUserBook,
                 userBookRead = staleUserBookRead,
             )
-            val localBook = remoteBook.copy(userBook = localUserBook, userBookRead = localUserBookRead)
+            val localBook = remoteBook.copy(
+                userBook = localUserBook,
+                userBookRead = localUserBookRead,
+            )
 
             coEvery {
                 userBookWriteDrainer.drainPendingUpdates()
@@ -276,7 +287,10 @@ class BooksRepositoryImplTest {
             } returns flowOf(listOf(localBook))
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
             } returns listOf(remoteBook)
 
             coEvery {
@@ -307,7 +321,10 @@ class BooksRepositoryImplTest {
             } returns emptySet()
 
             coEvery {
-                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = any())
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
             } returns listOf(remoteBook)
 
             coEvery {
@@ -345,7 +362,10 @@ class BooksRepositoryImplTest {
             } returns emptyList()
 
             // ----- Act -----
-            repository.refreshUserBooks(userId = userId, statusFilter = null)
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = null,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -381,11 +401,17 @@ class BooksRepositoryImplTest {
             } returns listOf(10, staleLocalId)
 
             // ----- Act -----
-            repository.refreshUserBooks(userId = userId, statusFilter = status)
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = status,
+            )
 
             // ----- Assert -----
             coVerify {
-                booksRemoteDataSource.initializeBooks(userId = userId, statusIds = setOf(status.code))
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = setOf(status.code),
+                )
             }
 
             coVerify {
@@ -419,8 +445,14 @@ class BooksRepositoryImplTest {
             } returns emptyList()
 
             // ----- Act -----
-            repository.refreshUserBooks(userId = userId, statusFilter = null)
-            repository.refreshUserBooks(userId = userId, statusFilter = null)
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = null,
+            )
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = null,
+            )
 
             // ----- Assert -----
             coVerify(atLeast = 1) {
@@ -439,7 +471,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class DeleteOrphanBooks {
-
         @Test
         fun `deleteOrphanBooks delegates to local data source`() = runTest {
             // ----- Arrange -----
@@ -457,7 +488,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class HydrateReferencedBooks {
-
         @Test
         fun `forceNetwork true fetches all bookIds regardless of what is cached`() = runTest {
             // ----- Arrange -----
@@ -466,7 +496,10 @@ class BooksRepositoryImplTest {
             val fetchedBooks = listOf(stubBook(userBookId = null), stubBook(userBookId = null))
 
             coEvery {
-                booksRemoteDataSource.fetchBooksByIds(ids = bookIds, forceNetwork = true)
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = bookIds,
+                    forceNetwork = true,
+                )
             } returns fetchedBooks
 
             // ----- Act -----
@@ -478,7 +511,10 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify {
-                booksRemoteDataSource.fetchBooksByIds(ids = bookIds, forceNetwork = true)
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = bookIds,
+                    forceNetwork = true,
+                )
             }
 
             coVerify {
@@ -500,7 +536,10 @@ class BooksRepositoryImplTest {
             } returns cachedBookIds
 
             coEvery {
-                booksRemoteDataSource.fetchBooksByIds(ids = missingBookIds, forceNetwork = false)
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = missingBookIds,
+                    forceNetwork = false,
+                )
             } returns fetchedBooks
 
             // ----- Act -----
@@ -512,7 +551,10 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify {
-                booksRemoteDataSource.fetchBooksByIds(ids = missingBookIds, forceNetwork = false)
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = missingBookIds,
+                    forceNetwork = false,
+                )
             }
 
             coVerify {
@@ -528,7 +570,10 @@ class BooksRepositoryImplTest {
             val fetchedEditions = listOf(stubBookEdition(), stubBookEdition())
 
             coEvery {
-                booksRemoteDataSource.fetchEditionsByIds(ids = editionIds, forceNetwork = true)
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = editionIds,
+                    forceNetwork = true,
+                )
             } returns fetchedEditions
 
             // ----- Act -----
@@ -540,7 +585,10 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify {
-                booksRemoteDataSource.fetchEditionsByIds(ids = editionIds, forceNetwork = true)
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = editionIds,
+                    forceNetwork = true,
+                )
             }
 
             coVerify {
@@ -562,7 +610,10 @@ class BooksRepositoryImplTest {
             } returns cachedEditionIds
 
             coEvery {
-                booksRemoteDataSource.fetchEditionsByIds(ids = missingEditionIds, forceNetwork = false)
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = missingEditionIds,
+                    forceNetwork = false,
+                )
             } returns fetchedEditions
 
             // ----- Act -----
@@ -574,7 +625,10 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify {
-                booksRemoteDataSource.fetchEditionsByIds(ids = missingEditionIds, forceNetwork = false)
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = missingEditionIds,
+                    forceNetwork = false,
+                )
             }
 
             coVerify {
@@ -596,11 +650,17 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                booksRemoteDataSource.fetchBooksByIds(ids = any(), forceNetwork = any())
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
             }
 
             coVerify(exactly = 0) {
-                booksRemoteDataSource.fetchEditionsByIds(ids = any(), forceNetwork = any())
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
             }
         }
 
@@ -611,7 +671,10 @@ class BooksRepositoryImplTest {
             val editionIds = emptyList<Int>()
 
             coEvery {
-                booksRemoteDataSource.fetchBooksByIds(ids = bookIds, forceNetwork = true)
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = bookIds,
+                    forceNetwork = true,
+                )
             } returns emptyList()
 
             // ----- Act -----
@@ -634,7 +697,10 @@ class BooksRepositoryImplTest {
             val editionIds = listOf(100)
 
             coEvery {
-                booksRemoteDataSource.fetchEditionsByIds(ids = editionIds, forceNetwork = true)
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = editionIds,
+                    forceNetwork = true,
+                )
             } returns emptyList()
 
             // ----- Act -----
@@ -653,7 +719,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class CacheBook {
-
         @Test
         fun `cacheBook delegates to local data source`() = runTest {
             // ----- Arrange -----
@@ -671,7 +736,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class RemoveBook {
-
         @Test
         fun `removeBook removes the user book id via local data source`() = runTest {
             // ----- Arrange -----
@@ -701,7 +765,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class RemoveAllBooks {
-
         @Test
         fun `removeAllBooks delegates to local data source`() = runTest {
             // ----- Arrange -----
@@ -719,7 +782,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class GetEditionsByBookId {
-
         @Test
         fun `getEditionsByBookId delegates to remote data source and returns result`() = runTest {
             // ----- Arrange -----
@@ -804,7 +866,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class FetchBookById {
-
         @Test
         fun `fetchBookById delegates to remote data source and returns result`() = runTest {
             // ----- Arrange -----
@@ -951,7 +1012,10 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerifyOrder {
                 booksLocalDataSource.cacheBook(book = canonicalBook)
-                booksLocalDataSource.redirectBookId(oldId = missingId, newId = canonicalId)
+                booksLocalDataSource.redirectBookId(
+                    oldId = missingId,
+                    newId = canonicalId,
+                )
                 booksLocalDataSource.deleteOrphanBooks()
             }
         }
@@ -997,7 +1061,10 @@ class BooksRepositoryImplTest {
             }
 
             coVerify(exactly = 0) {
-                booksLocalDataSource.redirectBookId(oldId = any(), newId = any())
+                booksLocalDataSource.redirectBookId(
+                    oldId = any(),
+                    newId = any(),
+                )
             }
 
             coVerify(exactly = 0) {
@@ -1108,7 +1175,10 @@ class BooksRepositoryImplTest {
             }
 
             coVerify(exactly = 0) {
-                booksLocalDataSource.redirectBookId(oldId = any(), newId = any())
+                booksLocalDataSource.redirectBookId(
+                    oldId = any(),
+                    newId = any(),
+                )
             }
         }
 
@@ -1207,8 +1277,10 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class MarkBookAsWantToRead {
-
-        private fun stubUserBookWithStatus(id: Int, status: BookStatus): UserBook = UserBook(
+        private fun stubUserBookWithStatus(
+            id: Int,
+            status: BookStatus,
+        ): UserBook = UserBook(
             id = id,
             status = status,
             dateAdded = "2026-01-01",
@@ -1238,7 +1310,10 @@ class BooksRepositoryImplTest {
             val remoteBook = stubBook(userBookId = 5)
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = bookId,
+                    editionId = any(),
+                )
             } returns remoteBook
 
             // ----- Act -----
@@ -1248,7 +1323,10 @@ class BooksRepositoryImplTest {
             result shouldBe remoteBook
 
             coVerify {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = bookId,
+                    editionId = any(),
+                )
             }
 
             coVerify {
@@ -1263,20 +1341,32 @@ class BooksRepositoryImplTest {
             val editionId = 55
             val book = mockk<Book>(relaxed = true) {
                 every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithStatus(id = 5, status = BookStatus.Reading)
+                every { this@mockk.userBook } returns stubUserBookWithStatus(
+                    id = 5,
+                    status = BookStatus.Reading,
+                )
             }
             val remoteBook = stubBook(userBookId = 5)
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = editionId)
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = bookId,
+                    editionId = editionId,
+                )
             } returns remoteBook
 
             // ----- Act -----
-            repository.markBookAsWantToRead(book = book, editionId = editionId)
+            repository.markBookAsWantToRead(
+                book = book,
+                editionId = editionId,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = editionId)
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = bookId,
+                    editionId = editionId,
+                )
             }
         }
 
@@ -1286,12 +1376,18 @@ class BooksRepositoryImplTest {
             val bookId = 11
             val book = mockk<Book>(relaxed = true) {
                 every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithStatus(id = 5, status = BookStatus.Reading)
+                every { this@mockk.userBook } returns stubUserBookWithStatus(
+                    id = 5,
+                    status = BookStatus.Reading,
+                )
             }
             val remoteBook = stubBook(userBookId = 5)
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = null)
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = bookId,
+                    editionId = null,
+                )
             } returns remoteBook
 
             // ----- Act -----
@@ -1299,7 +1395,10 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = null)
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = bookId,
+                    editionId = null,
+                )
             }
         }
 
@@ -1314,7 +1413,10 @@ class BooksRepositoryImplTest {
             val remoteBook = stubBook(userBookId = null)
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = bookId,
+                    editionId = any(),
+                )
             } returns remoteBook
 
             // ----- Act -----
@@ -1345,7 +1447,10 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = bookId,
+                    editionId = any(),
+                )
             } throws remoteError
 
             // ----- Act -----
@@ -1377,7 +1482,10 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(bookId = bookId, editionId = any())
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = bookId,
+                    editionId = any(),
+                )
             } throws CancellationException("cancelled")
 
             // ----- Act & Assert -----
@@ -1393,7 +1501,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class MarkBookAsReading {
-
         @Test
         fun `markBookAsReading delegates to remote data source and returns result`() = runTest {
             // ----- Arrange -----
@@ -1618,8 +1725,10 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class UpdateBookRating {
-
-        private fun stubUserBookWithRating(id: Int, rating: Double?): UserBook = UserBook(
+        private fun stubUserBookWithRating(
+            id: Int,
+            rating: Double?,
+        ): UserBook = UserBook(
             id = id,
             status = BookStatus.Read,
             dateAdded = "2026-01-01",
@@ -1642,7 +1751,10 @@ class BooksRepositoryImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                repository.updateBookRating(book = book, rating = 4.0)
+                repository.updateBookRating(
+                    book = book,
+                    rating = 4.0,
+                )
             }
         }
 
@@ -1650,7 +1762,10 @@ class BooksRepositoryImplTest {
         fun `writes optimistic book with updated rating to local cache before the remote call`() = runTest {
             // ----- Arrange -----
             val newRating = 4.5
-            val userBook = stubUserBookWithRating(id = 5, rating = 3.0)
+            val userBook = stubUserBookWithRating(
+                id = 5,
+                rating = 3.0,
+            )
 
             every { networkAvailability.isOnline } returns MutableStateFlow(true)
 
@@ -1676,7 +1791,10 @@ class BooksRepositoryImplTest {
             val capturedBooks = mutableListOf<Book>()
 
             coEvery {
-                booksRemoteDataSource.updateBookRating(userBook = any(), rating = newRating)
+                booksRemoteDataSource.updateBookRating(
+                    userBook = any(),
+                    rating = newRating,
+                )
             } returns remoteBook
 
             coEvery {
@@ -1684,14 +1802,20 @@ class BooksRepositoryImplTest {
             } returns Unit
 
             // ----- Act -----
-            repository.updateBookRating(book = book, rating = newRating)
+            repository.updateBookRating(
+                book = book,
+                rating = newRating,
+            )
 
             // ----- Assert -----
             capturedBooks.first().userBook?.rating shouldBe newRating
 
             coVerifyOrder {
                 booksLocalDataSource.cacheBook(book = any())
-                booksRemoteDataSource.updateBookRating(userBook = any(), rating = newRating)
+                booksRemoteDataSource.updateBookRating(
+                    userBook = any(),
+                    rating = newRating,
+                )
             }
         }
 
@@ -1702,14 +1826,20 @@ class BooksRepositoryImplTest {
             val newRating = 4.5
             val book = mockk<Book>(relaxed = true) {
                 every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithRating(id = 5, rating = 3.0)
+                every { this@mockk.userBook } returns stubUserBookWithRating(
+                    id = 5,
+                    rating = 3.0,
+                )
             }
             val remoteBook = stubBook(userBookId = 5)
 
             every { networkAvailability.isOnline } returns MutableStateFlow(true)
 
             coEvery {
-                booksRemoteDataSource.updateBookRating(userBook = any(), rating = newRating)
+                booksRemoteDataSource.updateBookRating(
+                    userBook = any(),
+                    rating = newRating,
+                )
             } returns remoteBook
 
             coEvery {
@@ -1717,7 +1847,10 @@ class BooksRepositoryImplTest {
             } returns Unit
 
             // ----- Act -----
-            val result = repository.updateBookRating(book = book, rating = newRating)
+            val result = repository.updateBookRating(
+                book = book,
+                rating = newRating,
+            )
 
             // ----- Assert -----
             result shouldBe remoteBook
@@ -1738,7 +1871,10 @@ class BooksRepositoryImplTest {
             val newRating = 4.5
             val book = mockk<Book>(relaxed = true) {
                 every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithRating(id = 5, rating = 3.0)
+                every { this@mockk.userBook } returns stubUserBookWithRating(
+                    id = 5,
+                    rating = 3.0,
+                )
             }
             val snapshot = stubBook(userBookId = 5)
             val remoteError = RuntimeException("network failure")
@@ -1750,11 +1886,17 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.updateBookRating(userBook = any(), rating = newRating)
+                booksRemoteDataSource.updateBookRating(
+                    userBook = any(),
+                    rating = newRating,
+                )
             } throws remoteError
 
             // ----- Act -----
-            val caught = runCatching { repository.updateBookRating(book = book, rating = newRating) }
+            val caught = runCatching { repository.updateBookRating(
+                book = book,
+                rating = newRating,
+            ) }
 
             // ----- Assert -----
             caught.exceptionOrNull() shouldBe remoteError
@@ -1771,7 +1913,10 @@ class BooksRepositoryImplTest {
             val newRating = 4.5
             val book = mockk<Book>(relaxed = true) {
                 every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithRating(id = 5, rating = 3.0)
+                every { this@mockk.userBook } returns stubUserBookWithRating(
+                    id = 5,
+                    rating = 3.0,
+                )
             }
             val snapshot = stubBook(userBookId = 5)
 
@@ -1782,12 +1927,18 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.updateBookRating(userBook = any(), rating = newRating)
+                booksRemoteDataSource.updateBookRating(
+                    userBook = any(),
+                    rating = newRating,
+                )
             } throws CancellationException("cancelled")
 
             // ----- Act & Assert -----
             shouldThrow<CancellationException> {
-                repository.updateBookRating(book = book, rating = newRating)
+                repository.updateBookRating(
+                    book = book,
+                    rating = newRating,
+                )
             }
 
             coVerify(exactly = 0) {
@@ -1816,7 +1967,10 @@ class BooksRepositoryImplTest {
                 bookSeries = null,
                 positionsInSeries = emptyList(),
                 isCompilation = false,
-                userBook = stubUserBookWithRating(id = userBookId, rating = 3.0),
+                userBook = stubUserBookWithRating(
+                    id = userBookId,
+                    rating = 3.0,
+                ),
                 userBookRead = null,
             )
             val snapshot = stubBook(userBookId = userBookId)
@@ -1828,11 +1982,17 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.updateBookRating(userBook = any(), rating = newRating)
+                booksRemoteDataSource.updateBookRating(
+                    userBook = any(),
+                    rating = newRating,
+                )
             } throws OfflineException()
 
             // ----- Act -----
-            repository.updateBookRating(book = book, rating = newRating)
+            repository.updateBookRating(
+                book = book,
+                rating = newRating,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
@@ -1875,14 +2035,20 @@ class BooksRepositoryImplTest {
                 bookSeries = null,
                 positionsInSeries = emptyList(),
                 isCompilation = false,
-                userBook = stubUserBookWithRating(id = userBookId, rating = 3.0),
+                userBook = stubUserBookWithRating(
+                    id = userBookId,
+                    rating = 3.0,
+                ),
                 userBookRead = null,
             )
 
             every { networkAvailability.isOnline } returns MutableStateFlow(false)
 
             // ----- Act -----
-            repository.updateBookRating(book = book, rating = newRating)
+            repository.updateBookRating(
+                book = book,
+                rating = newRating,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -1890,7 +2056,10 @@ class BooksRepositoryImplTest {
             }
 
             coVerify(exactly = 0) {
-                booksRemoteDataSource.updateBookRating(userBook = any(), rating = any())
+                booksRemoteDataSource.updateBookRating(
+                    userBook = any(),
+                    rating = any(),
+                )
             }
 
             coVerify {
@@ -1907,7 +2076,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class UpdateBookReview {
-
         private fun stubUserBookForReview(id: Int): UserBook = UserBook(
             id = id,
             status = BookStatus.Read,
@@ -2008,7 +2176,11 @@ class BooksRepositoryImplTest {
             every { networkAvailability.isOnline } returns MutableStateFlow(false)
 
             // ----- Act -----
-            val result = repository.updateBookReview(book = book, review = body, hasSpoilers = hasSpoilers)
+            val result = repository.updateBookReview(
+                book = book,
+                review = body,
+                hasSpoilers = hasSpoilers,
+            )
 
             // ----- Assert -----
             result.userBook?.reviewDocument shouldBe body
@@ -2086,7 +2258,11 @@ class BooksRepositoryImplTest {
             } returns Unit
 
             // ----- Act -----
-            val result = repository.updateBookReview(book = book, review = body, hasSpoilers = hasSpoilers)
+            val result = repository.updateBookReview(
+                book = book,
+                review = body,
+                hasSpoilers = hasSpoilers,
+            )
 
             // ----- Assert -----
             result.userBook?.reviewDocument shouldBe body
@@ -2143,7 +2319,11 @@ class BooksRepositoryImplTest {
             } throws remoteError
 
             // ----- Act -----
-            val caught = runCatching { repository.updateBookReview(book = book, review = body, hasSpoilers = hasSpoilers) }
+            val caught = runCatching { repository.updateBookReview(
+                book = book,
+                review = body,
+                hasSpoilers = hasSpoilers,
+            ) }
 
             // ----- Assert -----
             caught.exceptionOrNull() shouldBe remoteError
@@ -2156,7 +2336,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class RemoveBookFromLibrary {
-
         @Test
         fun `happy path — removes user_book locally, calls remote, no rollback occurs`() = runTest {
             // ----- Arrange -----
@@ -2269,7 +2448,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class UpdateBookProgress {
-
         @Test
         fun `updateBookProgress delegates to remote data source with correct arguments and returns result`() = runTest {
             // ----- Arrange -----
@@ -2278,11 +2456,17 @@ class BooksRepositoryImplTest {
             val expectedBook = stubBook(userBookId = 1)
 
             coEvery {
-                booksRemoteDataSource.updateBookProgress(book = book, newPage = newPage)
+                booksRemoteDataSource.updateBookProgress(
+                    book = book,
+                    newPage = newPage,
+                )
             } returns expectedBook
 
             // ----- Act -----
-            val result = repository.updateBookProgress(book = book, newPage = newPage)
+            val result = repository.updateBookProgress(
+                book = book,
+                newPage = newPage,
+            )
 
             // ----- Assert -----
             result shouldBe expectedBook
@@ -2353,7 +2537,10 @@ class BooksRepositoryImplTest {
             } returns Unit
 
             // ----- Act -----
-            repository.updateBookProgress(book = book, newPage = 75)
+            repository.updateBookProgress(
+                book = book,
+                newPage = 75,
+            )
 
             // ----- Assert -----
             val capturedJournals = slot.captured.userBook!!.journals
@@ -2389,7 +2576,10 @@ class BooksRepositoryImplTest {
             } throws RuntimeException("network failure")
 
             // ----- Act -----
-            runCatching { repository.updateBookProgress(book = book, newPage = 50) }
+            runCatching { repository.updateBookProgress(
+                book = book,
+                newPage = 50,
+            ) }
 
             // ----- Assert -----
             coVerify {
@@ -2425,7 +2615,10 @@ class BooksRepositoryImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<RuntimeException> {
-                repository.updateBookProgress(book = book, newPage = 50)
+                repository.updateBookProgress(
+                    book = book,
+                    newPage = 50,
+                )
             } shouldBe remoteError
         }
 
@@ -2455,7 +2648,10 @@ class BooksRepositoryImplTest {
             } throws OfflineException()
 
             // ----- Act -----
-            repository.updateBookProgress(book = book, newPage = 50)
+            repository.updateBookProgress(
+                book = book,
+                newPage = 50,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
@@ -2470,7 +2666,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class MarkBookAsRead {
-
         @Test
         fun `markBookAsRead delegates to remote data source and returns result`() = runTest {
             // ----- Arrange -----
@@ -2478,7 +2673,10 @@ class BooksRepositoryImplTest {
             val expectedBook = stubBook(userBookId = 1)
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = any())
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = any(),
+                )
             } returns expectedBook
 
             // ----- Act -----
@@ -2496,15 +2694,24 @@ class BooksRepositoryImplTest {
             val expectedBook = stubBook(userBookId = 1)
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = editionId)
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = editionId,
+                )
             } returns expectedBook
 
             // ----- Act -----
-            repository.markBookAsRead(book = book, editionId = editionId)
+            repository.markBookAsRead(
+                book = book,
+                editionId = editionId,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = editionId)
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = editionId,
+                )
             }
         }
 
@@ -2515,7 +2722,10 @@ class BooksRepositoryImplTest {
             val expectedBook = stubBook(userBookId = 1)
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = null)
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = null,
+                )
             } returns expectedBook
 
             // ----- Act -----
@@ -2523,7 +2733,10 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = null)
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = null,
+                )
             }
         }
 
@@ -2580,7 +2793,10 @@ class BooksRepositoryImplTest {
             every { networkAvailability.isOnline } returns MutableStateFlow(true)
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = any(), editionId = any())
+                booksRemoteDataSource.markBookAsRead(
+                    book = any(),
+                    editionId = any(),
+                )
             } returns stubBook(userBookId = 1)
 
             coEvery {
@@ -2618,7 +2834,10 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = any())
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = any(),
+                )
             } throws RuntimeException("network failure")
 
             // ----- Act -----
@@ -2649,7 +2868,10 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = any())
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = any(),
+                )
             } throws remoteError
 
             // ----- Act & Assert -----
@@ -2676,7 +2898,10 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = any())
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = any(),
+                )
             } throws OfflineException()
 
             // ----- Act -----
@@ -2695,7 +2920,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class UpdateBookEdition {
-
         @Test
         fun `updateBookEdition delegates to remote data source with correct arguments and returns result`() = runTest {
             // ----- Arrange -----
@@ -2704,11 +2928,17 @@ class BooksRepositoryImplTest {
             val expectedBook = stubBook(userBookId = 3)
 
             coEvery {
-                booksRemoteDataSource.updateBookEdition(userBook = userBook, newEditionId = newEditionId)
+                booksRemoteDataSource.updateBookEdition(
+                    userBook = userBook,
+                    newEditionId = newEditionId,
+                )
             } returns expectedBook
 
             // ----- Act -----
-            val result = repository.updateBookEdition(userBook = userBook, newEditionId = newEditionId)
+            val result = repository.updateBookEdition(
+                userBook = userBook,
+                newEditionId = newEditionId,
+            )
 
             // ----- Assert -----
             result shouldBe expectedBook
@@ -2717,7 +2947,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class FetchBooksByIds {
-
         @Test
         fun `fetchBooksByIds delegates to remote data source and returns result`() = runTest {
             // ----- Arrange -----
@@ -2725,7 +2954,10 @@ class BooksRepositoryImplTest {
             val expectedBooks = listOf(stubBook(userBookId = null), stubBook(userBookId = null))
 
             coEvery {
-                booksRemoteDataSource.fetchBooksByIds(ids = ids, forceNetwork = false)
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = ids,
+                    forceNetwork = false,
+                )
             } returns expectedBooks
 
             // ----- Act -----
@@ -2741,7 +2973,10 @@ class BooksRepositoryImplTest {
             val ids = listOf(99)
 
             coEvery {
-                booksRemoteDataSource.fetchBooksByIds(ids = ids, forceNetwork = false)
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = ids,
+                    forceNetwork = false,
+                )
             } returns emptyList()
 
             // ----- Act -----
@@ -2754,7 +2989,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class FetchEditionsByIds {
-
         @Test
         fun `fetchEditionsByIds delegates to remote data source and returns result`() = runTest {
             // ----- Arrange -----
@@ -2762,7 +2996,10 @@ class BooksRepositoryImplTest {
             val expectedEditions = listOf(stubBookEdition(), stubBookEdition())
 
             coEvery {
-                booksRemoteDataSource.fetchEditionsByIds(ids = ids, forceNetwork = false)
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = ids,
+                    forceNetwork = false,
+                )
             } returns expectedEditions
 
             // ----- Act -----
@@ -2778,7 +3015,10 @@ class BooksRepositoryImplTest {
             val ids = listOf(99)
 
             coEvery {
-                booksRemoteDataSource.fetchEditionsByIds(ids = ids, forceNetwork = false)
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = ids,
+                    forceNetwork = false,
+                )
             } returns emptyList()
 
             // ----- Act -----
@@ -2791,7 +3031,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class PersistEditionImage {
-
         @Test
         fun `delegates to local data source with the given editionId and source`() = runTest {
             // ----- Arrange -----
@@ -2799,27 +3038,38 @@ class BooksRepositoryImplTest {
             val source: java.io.File = mockk()
 
             coEvery {
-                booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
+                booksLocalDataSource.persistEditionImage(
+                    editionId = editionId,
+                    source = source,
+                )
             } returns Unit
 
             // ----- Act -----
-            repository.persistEditionImage(editionId = editionId, source = source)
+            repository.persistEditionImage(
+                editionId = editionId,
+                source = source,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
+                booksLocalDataSource.persistEditionImage(
+                    editionId = editionId,
+                    source = source,
+                )
             }
         }
     }
 
     @Nested
     inner class FetchEditionMatchForIsbn {
-
         @Test
         fun `online — delegates to remote and returns IsbnEditionMatch`() = runTest {
             // ----- Arrange -----
             val isbn = "9780451524935"
-            val expectedMatch = IsbnEditionMatch(bookId = 42, editionId = 99)
+            val expectedMatch = IsbnEditionMatch(
+                bookId = 42,
+                editionId = 99,
+            )
 
             coEvery {
                 booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
@@ -2876,7 +3126,6 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class OfflineBehavior {
-
         private fun stubUserBook(id: Int = 1): UserBook = mockk(relaxed = true) {
             every { this@mockk.id } returns id
             every { this@mockk.editionId } returns null
@@ -2891,7 +3140,10 @@ class BooksRepositoryImplTest {
             finishedAt = null,
         )
 
-        private fun stubBookWithUserBookRead(userBookId: Int = 1, userBookReadId: Int = 1): Book = Book(
+        private fun stubBookWithUserBookRead(
+            userBookId: Int = 1,
+            userBookReadId: Int = 1,
+        ): Book = Book(
             id = 42,
             title = "Test Book",
             editions = emptyList(),
@@ -2919,7 +3171,10 @@ class BooksRepositoryImplTest {
             val newPage = 75
 
             // ----- Act -----
-            repository.updateBookProgress(book = book, newPage = newPage)
+            repository.updateBookProgress(
+                book = book,
+                newPage = newPage,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -2933,7 +3188,11 @@ class BooksRepositoryImplTest {
             }
 
             coVerify(exactly = 0) {
-                booksRemoteDataSource.updateBookProgress(book = any(), newPage = any(), newSeconds = any())
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                )
             }
         }
 
@@ -2959,14 +3218,16 @@ class BooksRepositoryImplTest {
             }
 
             coVerify(exactly = 0) {
-                booksRemoteDataSource.markBookAsRead(book = any(), editionId = any())
+                booksRemoteDataSource.markBookAsRead(
+                    book = any(),
+                    editionId = any(),
+                )
             }
         }
     }
 
     @Nested
     inner class FetchTrendingBooks {
-
         @Test
         fun `returns list from remote data source`() = runTest {
             // ----- Arrange -----

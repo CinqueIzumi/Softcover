@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnUpdateTimeProgressClickActionTest {
-
     private lateinit var updateBookProgress: RecordBookProgressUseCase
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<ReadingLocalVariables>
@@ -63,7 +62,10 @@ class OnUpdateTimeProgressClickActionTest {
         }
     }
 
-    private fun stubBookWithAudioSeconds(audioSeconds: Int?, id: Int = 99): Book =
+    private fun stubBookWithAudioSeconds(
+        audioSeconds: Int?,
+        id: Int = 99,
+    ): Book =
         mockk<Book>().also { book ->
             val edition = mockk<BookEdition>().also { e ->
                 every { e.audioSeconds } returns audioSeconds
@@ -75,7 +77,6 @@ class OnUpdateTimeProgressClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets showProgressSheet to false after execute`() = runTest {
             // ----- Arrange -----
@@ -85,7 +86,11 @@ class OnUpdateTimeProgressClickActionTest {
                 showProgressSheet = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -103,7 +108,11 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            val action = OnUpdateTimeProgressClickAction(hours = "0", minutes = "30", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "0",
+                minutes = "30",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -120,7 +129,11 @@ class OnUpdateTimeProgressClickActionTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(bookToUpdate = null)
             val dependencies = stubDependencies(this)
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -130,7 +143,11 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                updateBookProgress(any(), any(), any())
+                updateBookProgress(
+                    any(),
+                    any(),
+                    any(),
+                )
             }
         }
 
@@ -142,7 +159,11 @@ class OnUpdateTimeProgressClickActionTest {
                 showProgressSheet = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -162,7 +183,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 1*3600 + 2*60 + 3 = 3723
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "2", seconds = "3")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "2",
+                seconds = "3",
+            )
 
             // ----- Act -----
             action.execute(
@@ -186,7 +211,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 0*3600 + 0*60 + 30 = 30
-            val action = OnUpdateTimeProgressClickAction(hours = "abc", minutes = "0", seconds = "30")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "abc",
+                minutes = "0",
+                seconds = "30",
+            )
 
             // ----- Act -----
             action.execute(
@@ -210,7 +239,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "abc", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "abc",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -234,7 +267,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "abc")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "abc",
+            )
 
             // ----- Act -----
             action.execute(
@@ -257,7 +294,11 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubBookWithAudioSeconds(audioSeconds = 3600)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            val action = OnUpdateTimeProgressClickAction(hours = "", minutes = "", seconds = "")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "",
+                minutes = "",
+                seconds = "",
+            )
 
             // ----- Act -----
             action.execute(
@@ -281,7 +322,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 0*3600 + 59*60 + 0 = 3540
-            val action = OnUpdateTimeProgressClickAction(hours = "0", minutes = "90", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "0",
+                minutes = "90",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -305,7 +350,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 0*3600 + 0*60 + 59 = 59
-            val action = OnUpdateTimeProgressClickAction(hours = "0", minutes = "0", seconds = "90")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "0",
+                minutes = "0",
+                seconds = "90",
+            )
 
             // ----- Act -----
             action.execute(
@@ -329,7 +378,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 0*3600 + 30*60 + 0 = 1800
-            val action = OnUpdateTimeProgressClickAction(hours = "-2", minutes = "30", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "-2",
+                minutes = "30",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -354,7 +407,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 2*3600 + 0 + 0 = 7200, clamped to 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "2", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "2",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -378,7 +435,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // total = 0, so (1*3600).coerceIn(0,0) = 0
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -402,7 +463,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "-10", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "-10",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -426,7 +491,11 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             // 1*3600 + 0 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "-30")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "-30",
+            )
 
             // ----- Act -----
             action.execute(
@@ -446,7 +515,10 @@ class OnUpdateTimeProgressClickActionTest {
         @Test
         fun `adds book id to failedMutationBookIds when updateBookProgress fails`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200, id = 5)
+            val book = stubBookWithAudioSeconds(
+                audioSeconds = 7200,
+                id = 5,
+            )
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -457,7 +529,11 @@ class OnUpdateTimeProgressClickActionTest {
                 )
             } returns Result.failure(RuntimeException("network error"))
 
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -472,7 +548,10 @@ class OnUpdateTimeProgressClickActionTest {
         @Test
         fun `does not add book id to failedMutationBookIds when updateBookProgress succeeds`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200, id = 5)
+            val book = stubBookWithAudioSeconds(
+                audioSeconds = 7200,
+                id = 5,
+            )
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -483,7 +562,11 @@ class OnUpdateTimeProgressClickActionTest {
                 )
             } returns Result.success(Unit)
 
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -498,7 +581,10 @@ class OnUpdateTimeProgressClickActionTest {
         @Test
         fun `stores job in bookMutationJobs after execute returns`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200, id = 5)
+            val book = stubBookWithAudioSeconds(
+                audioSeconds = 7200,
+                id = 5,
+            )
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -509,7 +595,11 @@ class OnUpdateTimeProgressClickActionTest {
                 )
             } returns Result.success(Unit)
 
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(
@@ -525,7 +615,10 @@ class OnUpdateTimeProgressClickActionTest {
         fun `cancels prior job for same book id and replaces it with a new one`() = runTest {
             // ----- Arrange -----
             val bookId = 5
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200, id = bookId)
+            val book = stubBookWithAudioSeconds(
+                audioSeconds = 7200,
+                id = bookId,
+            )
             val priorJob = Job()
 
             localVariablesFlow.value = ReadingLocalVariables(
@@ -549,7 +642,11 @@ class OnUpdateTimeProgressClickActionTest {
                 )
             } returns Result.success(Unit)
 
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
             action.execute(

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnRevealReviewSpoilerActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
@@ -35,7 +34,6 @@ class OnRevealReviewSpoilerActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `adds the reviewId to revealedSpoilerReviewIds when the set was empty`() = runTest {
             // ----- Arrange -----

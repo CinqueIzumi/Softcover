@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnClearDeadlineActionTest {
-
     private lateinit var clearBookDeadlineUseCase: ClearBookDeadlineUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -67,7 +66,6 @@ class OnClearDeadlineActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `calls clearBookDeadlineUseCase with the book id from state`() = runTest {
             // ----- Arrange -----
@@ -82,7 +80,10 @@ class OnClearDeadlineActionTest {
             val action = OnClearDeadlineAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -98,7 +99,10 @@ class OnClearDeadlineActionTest {
             val action = OnClearDeadlineAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
@@ -110,7 +114,10 @@ class OnClearDeadlineActionTest {
         fun `state is not mutated when book is present`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 5)
-            stateFlow.value = BookDetailUiState(book = book, loadingBookDetails = false)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                loadingBookDetails = false,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -120,7 +127,10 @@ class OnClearDeadlineActionTest {
             val action = OnClearDeadlineAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.loadingBookDetails shouldBe false

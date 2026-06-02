@@ -26,6 +26,9 @@ class ResolveBookByIsbnUseCase(
 
         val book = fetchBookByIdUseCase(id = match.bookId).getOrThrow()
 
-        IsbnLookupResult.Found(book = book, editionId = match.editionId)
+        IsbnLookupResult.Found(
+            book = book,
+            editionId = match.editionId,
+        )
     }
 }

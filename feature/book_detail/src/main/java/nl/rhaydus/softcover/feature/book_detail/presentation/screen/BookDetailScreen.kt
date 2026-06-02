@@ -219,7 +219,10 @@ class BookDetailScreen(
         val appNavigator = koinInject<AppNavigator>()
 
         val screenModel: BookDetailScreenScreenModel =
-            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(id, initialCover) }
+            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(
+                id,
+                initialCover,
+            ) }
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
@@ -233,11 +236,11 @@ class BookDetailScreen(
             when (it) {
                 is RefreshDetailBookEvent -> {
                     screenModel.runAction(
-                        action = InitializeBookWithIdAction(id = id)
+                        action = InitializeBookWithIdAction(id = id),
                     )
 
                     screenModel.runAction(
-                        action = FetchBookReviewsAction(bookId = id)
+                        action = FetchBookReviewsAction(bookId = id),
                     )
                 }
 
@@ -266,7 +269,7 @@ class BookDetailScreen(
                         edition = state.displayedEdition,
                         defaultEdition = book.defaultEdition,
                         fallbackCoverUrl = book.coverUrl,
-                    )
+                    ),
                 )
             },
             onCreateNewListClick = {
@@ -310,7 +313,7 @@ class BookDetailScreen(
                 Color.Transparent
             } else {
                 Color.Unspecified
-            }
+            },
         )
 
         val defaultIconButtonColors = IconButtonDefaults.iconButtonColors()
@@ -374,7 +377,7 @@ class BookDetailScreen(
                             onShakeEnd = {
                                 if (currentEditionId != null) {
                                     runAction(
-                                        OnClearMutationFailureAction(editionId = currentEditionId)
+                                        OnClearMutationFailureAction(editionId = currentEditionId),
                                     )
                                 }
                             },
@@ -558,7 +561,7 @@ class BookDetailScreen(
                             OnAddUserTagAction(
                                 name = name,
                                 category = category,
-                            )
+                            ),
                         )
                     },
                     onRemoveTag = { runAction(OnRemoveUserTagAction(tag = it)) },
@@ -578,7 +581,7 @@ class BookDetailScreen(
                             OnToggleListMembershipAction(
                                 listId = listId,
                                 isMember = membership == ListMembership.ALL,
-                            )
+                            ),
                         )
                     },
                     onCreateNewListClick = onCreateNewListClick,
@@ -597,7 +600,7 @@ class BookDetailScreen(
                                 book = reviewBook,
                                 review = document,
                                 hasSpoilers = hasSpoilers,
-                            )
+                            ),
                         )
                     },
                     onDelete = { runAction(OnDeleteReviewAction(book = reviewBook)) },
@@ -656,16 +659,14 @@ class BookDetailScreen(
                                 hours = h,
                                 minutes = m,
                                 seconds = s,
-                            )
+                            ),
                         )
                     },
                 )
             }
         }
     }
-
     // region Hero
-
     @Composable
     private fun GeneralBookInfoSection(
         edition: BookEdition?,
@@ -778,7 +779,10 @@ class BookDetailScreen(
 
                 val secondaryShadow = Shadow(
                     color = Color.Black.copy(alpha = 0.6f),
-                    offset = Offset(x = 0f, y = 1f),
+                    offset = Offset(
+                        x = 0f,
+                        y = 1f,
+                    ),
                     blurRadius = 6f,
                 )
 
@@ -887,7 +891,10 @@ class BookDetailScreen(
                                     fontWeight = FontWeight.Bold,
                                     shadow = Shadow(
                                         color = Color.Black.copy(alpha = 0.75f),
-                                        offset = Offset(x = 0f, y = 1f),
+                                        offset = Offset(
+                                            x = 0f,
+                                            y = 1f,
+                                        ),
                                         blurRadius = 8f,
                                     ),
                                 ),
@@ -1021,7 +1028,10 @@ class BookDetailScreen(
                     .height(20.dp)
                     .background(
                         color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                        shape = RoundedCornerShape(
+                            topStart = 24.dp,
+                            topEnd = 24.dp,
+                        ),
                     ),
             )
         }
@@ -1060,11 +1070,8 @@ class BookDetailScreen(
             }
         }
     }
-
     // endregion
-
     // region Shelf Action Bar
-
     @Composable
     private fun ShelfActionBar(
         state: BookDetailUiState,
@@ -1202,7 +1209,10 @@ class BookDetailScreen(
             StarRatingInput(
                 rating = book.userBook?.rating?.takeIf { it > 0.0 },
                 onRatingChange = { rating ->
-                    runAction(OnRateBookAction(book = book, rating = rating))
+                    runAction(OnRateBookAction(
+                        book = book,
+                        rating = rating,
+                    ),)
                 },
             )
         }
@@ -1397,11 +1407,8 @@ class BookDetailScreen(
             }
         }
     }
-
     // endregion
-
     // region Top Bar Overflow / Status
-
     @Composable
     private fun BookOverflowMenu(
         state: BookDetailUiState,
@@ -1503,7 +1510,10 @@ class BookDetailScreen(
                             },
                             onClick = {
                                 dismiss()
-                                runAction(OnEditionOwnedToggleAction(edition = ownedEdition, owned = isOwned.not()))
+                                runAction(OnEditionOwnedToggleAction(
+                                    edition = ownedEdition,
+                                    owned = isOwned.not(),
+                                ),)
                             },
                         )
                     }
@@ -1668,7 +1678,7 @@ class BookDetailScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             painter = painterResource(
-                                if (isAudiobook) R.drawable.ic_headset else R.drawable.ic_menu_book
+                                if (isAudiobook) R.drawable.ic_headset else R.drawable.ic_menu_book,
                             ),
                             contentDescription = "Progress icon",
                             tint = MaterialTheme.colorScheme.primary,
@@ -1707,7 +1717,10 @@ class BookDetailScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     LinearProgressIndicator(
-                        progress = { (progress / 100f).coerceIn(0f, 1f) },
+                        progress = { (progress / 100f).coerceIn(
+                            0f,
+                            1f,
+                        ) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp),
@@ -1724,7 +1737,7 @@ class BookDetailScreen(
 
                         "${secondsToHm(currentSeconds)} of ${secondsToHm(totalSeconds)} • ${
                             secondsToHm(
-                                remainingSeconds
+                                remainingSeconds,
                             )
                         } left"
                     } else {
@@ -1816,7 +1829,7 @@ class BookDetailScreen(
             ) {
                 null -> "This book has been in your library since ${
                     userBook.getFallbackDateString(
-                        style = state.dateStyle
+                        style = state.dateStyle,
                     )
                 }."
 
@@ -1835,7 +1848,7 @@ class BookDetailScreen(
             body = when (val dnfDate = userBook.getDnfDateString(style = state.dateStyle)) {
                 null -> "This book has been in your library since ${
                     userBook.getFallbackDateString(
-                        style = state.dateStyle
+                        style = state.dateStyle,
                     )
                 }."
 
@@ -1903,11 +1916,8 @@ class BookDetailScreen(
             }
         }
     }
-
     // endregion
-
     // region About
-
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     private fun ScanEditionUpdateBanner(
@@ -2264,11 +2274,8 @@ class BookDetailScreen(
             )
         }
     }
-
     // endregion
-
     // region Reviews
-
     @Composable
     private fun ReviewsSection(
         state: BookDetailUiState,
@@ -2476,11 +2483,8 @@ class BookDetailScreen(
             }
         }
     }
-
     // endregion
-
     // region Section Label
-
     @Composable
     private fun SectionLabel(
         text: String,
@@ -2529,11 +2533,8 @@ class BookDetailScreen(
             )
         }
     }
-
     // endregion
-
     // region Helpers
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun DeadlinePickerDialog(
@@ -2623,7 +2624,6 @@ class BookDetailScreen(
 
         return if (value > rounded) rounded + 1 else rounded
     }
-
     // endregion
 }
 

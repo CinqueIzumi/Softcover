@@ -48,14 +48,11 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookEntityMapperTest {
-
     @AfterEach
     fun tearDown() {
         unmockkAll()
     }
-
     // region Shared stubs for UI -> Entity section
-
     private fun stubAuthor(
         id: Int = 1,
         name: String = "Author Name",
@@ -447,15 +444,15 @@ class BookEntityMapperTest {
             this@mockk.userBookRead
         } returns userBookRead
     }
-
     // endregion
-
     // region Shared stubs for Entity -> UI section
-
     private fun stubAuthorEntity(
         id: Int = 1,
         name: String = "Author Name",
-    ): AuthorEntity = AuthorEntity(id = id, name = name)
+    ): AuthorEntity = AuthorEntity(
+        id = id,
+        name = name,
+    )
 
     private fun stubBookEditionEntity(
         id: Int = 10,
@@ -675,16 +672,13 @@ class BookEntityMapperTest {
         bookList = bookList,
         listBooks = listBooks,
     )
-
     // endregion
-
     // =========================================================
     // UI -> Entity mappers
     // =========================================================
 
     @Nested
     inner class BookSeriesToEntity {
-
         @Test
         fun `maps all fields from BookSeries to BookSeriesEntity`() {
             // ----- Arrange -----
@@ -706,7 +700,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class BookToEntity {
-
         @Test
         fun `maps all scalar fields from Book to BookEntity`() {
             // ----- Arrange -----
@@ -843,7 +836,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class UserBookReadToEntity {
-
         @Test
         fun `maps all fields from UserBookRead to UserBookReadEntity`() {
             // ----- Arrange -----
@@ -914,7 +906,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class UserBookToEntity {
-
         @Test
         fun `maps all fields from UserBook to UserBookEntity`() {
             // ----- Arrange -----
@@ -1042,7 +1033,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class ReadingJournalToEntity {
-
         @Test
         fun `maps updatedAt and non-null event from ReadingJournal to ReadingJournalEntity`() {
             // ----- Arrange -----
@@ -1075,7 +1065,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class BookEditionToEntity {
-
         @Test
         fun `maps all fields from BookEdition to BookEditionEntity`() {
             // ----- Arrange -----
@@ -1207,7 +1196,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class AuthorToEntity {
-
         @Test
         fun `maps name and id from Author to AuthorEntity`() {
             // ----- Arrange -----
@@ -1227,7 +1215,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class BookToBookAuthorRefs {
-
         @Test
         fun `produces one cross-ref per author using id from map`() {
             // ----- Arrange -----
@@ -1291,7 +1278,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class BookToEditionAuthorRefs {
-
         @Test
         fun `flattens cross-refs across all editions`() {
             // ----- Arrange -----
@@ -1366,7 +1352,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class BookEditionToEditionAuthorRefs {
-
         @Test
         fun `produces one cross-ref per author using id from map`() {
             // ----- Arrange -----
@@ -1437,7 +1422,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class AuthorEntityToModel {
-
         @Test
         fun `maps name and id from AuthorEntity to Author`() {
             // ----- Arrange -----
@@ -1457,7 +1441,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class BookEditionEntityToModel {
-
         @Test
         fun `maps all fields from BookEditionEntity to BookEdition`() {
             // ----- Arrange -----
@@ -1653,7 +1636,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class UserBookReadEntityToModel {
-
         @Test
         fun `maps all fields from UserBookReadEntity to UserBookRead`() {
             // ----- Arrange -----
@@ -1724,7 +1706,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class UserBookEntityToModel {
-
         @Test
         fun `maps all fields and resolves BookStatus from statusCode`() {
             // ----- Arrange -----
@@ -1859,7 +1840,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class ReadingJournalEntityToModel {
-
         @Test
         fun `maps updatedAt and event from ReadingJournalEntity to ReadingJournal`() {
             // ----- Arrange -----
@@ -1891,7 +1871,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class BookSeriesEntityToModel {
-
         @Test
         fun `maps all fields from BookSeriesEntity to BookSeries`() {
             // ----- Arrange -----
@@ -1913,7 +1892,6 @@ class BookEntityMapperTest {
 
     @Nested
     inner class BookFullEntityToModel {
-
         @Test
         fun `maps all scalar fields from BookEntity`() {
             // ----- Arrange -----
@@ -2236,12 +2214,28 @@ class BookEntityMapperTest {
             // ----- Arrange -----
             val tags = listOf(
                 BookTagFull(
-                    crossRef = BookTagCrossRef(bookId = 10, tagId = 1, count = 5),
-                    tag = TagEntity(id = 1, name = "Fiction", category = "GENRE"),
+                    crossRef = BookTagCrossRef(
+                        bookId = 10,
+                        tagId = 1,
+                        count = 5,
+                    ),
+                    tag = TagEntity(
+                        id = 1,
+                        name = "Fiction",
+                        category = "GENRE",
+                    ),
                 ),
                 BookTagFull(
-                    crossRef = BookTagCrossRef(bookId = 10, tagId = 2, count = 3),
-                    tag = TagEntity(id = 2, name = "Sci-Fi", category = "GENRE"),
+                    crossRef = BookTagCrossRef(
+                        bookId = 10,
+                        tagId = 2,
+                        count = 3,
+                    ),
+                    tag = TagEntity(
+                        id = 2,
+                        name = "Sci-Fi",
+                        category = "GENRE",
+                    ),
                 ),
             )
             val entity = stubBookFullEntity(tags = tags)
@@ -2274,8 +2268,16 @@ class BookEntityMapperTest {
             // ----- Arrange -----
             val tags = listOf(
                 BookTagFull(
-                    crossRef = BookTagCrossRef(bookId = 10, tagId = 1, count = 0),
-                    tag = TagEntity(id = 1, name = "Fiction", category = "GENRE"),
+                    crossRef = BookTagCrossRef(
+                        bookId = 10,
+                        tagId = 1,
+                        count = 0,
+                    ),
+                    tag = TagEntity(
+                        id = 1,
+                        name = "Fiction",
+                        category = "GENRE",
+                    ),
                 ),
             )
             val entity = stubBookFullEntity(tags = tags)
@@ -2292,8 +2294,16 @@ class BookEntityMapperTest {
             // ----- Arrange -----
             val tags = listOf(
                 BookTagFull(
-                    crossRef = BookTagCrossRef(bookId = 10, tagId = 1, count = 0),
-                    tag = TagEntity(id = 1, name = "Fiction", category = "UNKNOWN_CATEGORY"),
+                    crossRef = BookTagCrossRef(
+                        bookId = 10,
+                        tagId = 1,
+                        count = 0,
+                    ),
+                    tag = TagEntity(
+                        id = 1,
+                        name = "Fiction",
+                        category = "UNKNOWN_CATEGORY",
+                    ),
                 ),
             )
             val entity = stubBookFullEntity(tags = tags)
@@ -2310,8 +2320,16 @@ class BookEntityMapperTest {
             // ----- Arrange -----
             val tags = listOf(
                 BookTagFull(
-                    crossRef = BookTagCrossRef(bookId = 10, tagId = 1, count = 42),
-                    tag = TagEntity(id = 1, name = "Fiction", category = "GENRE"),
+                    crossRef = BookTagCrossRef(
+                        bookId = 10,
+                        tagId = 1,
+                        count = 42,
+                    ),
+                    tag = TagEntity(
+                        id = 1,
+                        name = "Fiction",
+                        category = "GENRE",
+                    ),
                 ),
             )
             val entity = stubBookFullEntity(tags = tags)
@@ -2323,5 +2341,4 @@ class BookEntityMapperTest {
             result.tags[0].count shouldBe 42
         }
     }
-
 }

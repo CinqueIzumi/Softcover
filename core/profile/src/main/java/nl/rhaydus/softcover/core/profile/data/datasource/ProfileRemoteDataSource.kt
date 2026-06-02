@@ -47,7 +47,10 @@ class ProfileRemoteDataSourceImpl(
         // the user never logged that final progress event (or imported it without a log).
         if (status_id == UserBookStatus.READ.code) {
             val fullBookPages = edition?.pages ?: book.pages ?: 0
-            return maxOf(maxProgress, fullBookPages)
+            return maxOf(
+                maxProgress,
+                fullBookPages,
+            )
         }
         return maxProgress
     }

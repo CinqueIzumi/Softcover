@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserTagsCollectorTest {
-
     private lateinit var getUserTagsUseCase: GetUserTagsUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -57,17 +56,22 @@ class UserTagsCollectorTest {
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `loads userTags when book is shelved`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 10)
-            val tags = listOf(UserTag(name = "fantasy", category = TagCategory.GENRE))
+            val tags = listOf(UserTag(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            ),)
 
             coEvery { getUserTagsUseCase(bookId = 10) } returns Result.success(tags)
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
@@ -82,7 +86,10 @@ class UserTagsCollectorTest {
             // ----- Arrange -----
             val book = stubUnshelvedBook(id = 5)
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
@@ -96,7 +103,10 @@ class UserTagsCollectorTest {
         fun `does not load userTags when book is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = null)
@@ -110,13 +120,19 @@ class UserTagsCollectorTest {
         fun `preserves existing userTags when failure occurs`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 3)
-            val existingTags = listOf(UserTag(name = "sci-fi", category = TagCategory.GENRE))
+            val existingTags = listOf(UserTag(
+                name = "sci-fi",
+                category = TagCategory.GENRE,
+            ),)
             stateFlow.value = stateFlow.value.copy(userTags = existingTags)
 
             coEvery { getUserTagsUseCase(bookId = 3) } returns Result.failure(RuntimeException("network error"))
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
@@ -131,14 +147,23 @@ class UserTagsCollectorTest {
             // ----- Arrange -----
             val bookA = stubShelvedBook(id = 1)
             val bookB = stubShelvedBook(id = 2)
-            val tagsA = listOf(UserTag(name = "horror", category = TagCategory.GENRE))
-            val tagsB = listOf(UserTag(name = "comedy", category = TagCategory.GENRE))
+            val tagsA = listOf(UserTag(
+                name = "horror",
+                category = TagCategory.GENRE,
+            ),)
+            val tagsB = listOf(UserTag(
+                name = "comedy",
+                category = TagCategory.GENRE,
+            ),)
 
             coEvery { getUserTagsUseCase(bookId = 1) } returns Result.success(tagsA)
             coEvery { getUserTagsUseCase(bookId = 2) } returns Result.success(tagsB)
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             stateFlow.value = stateFlow.value.copy(book = bookA)
             stateFlow.value.userTags shouldBe tagsA
@@ -155,12 +180,18 @@ class UserTagsCollectorTest {
         fun `does not reload tags when the same book id emits again`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 1)
-            val tags = listOf(UserTag(name = "mystery", category = TagCategory.GENRE))
+            val tags = listOf(UserTag(
+                name = "mystery",
+                category = TagCategory.GENRE,
+            ),)
 
             coEvery { getUserTagsUseCase(bookId = 1) } returns Result.success(tags)
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             stateFlow.value = stateFlow.value.copy(book = book)
             stateFlow.value.userTags shouldBe tags
@@ -179,12 +210,18 @@ class UserTagsCollectorTest {
         fun `clears userTags when book transitions from shelved to null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 1)
-            val tags = listOf(UserTag(name = "romance", category = TagCategory.GENRE))
+            val tags = listOf(UserTag(
+                name = "romance",
+                category = TagCategory.GENRE,
+            ),)
 
             coEvery { getUserTagsUseCase(bookId = 1) } returns Result.success(tags)
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             stateFlow.value = stateFlow.value.copy(book = book)
             stateFlow.value.userTags shouldBe tags

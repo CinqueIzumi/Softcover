@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookReviewsRepositoryImplTest {
-
     private lateinit var bookReviewsRemoteDataSource: BookReviewsRemoteDataSource
     private lateinit var repository: BookReviewsRepositoryImpl
 
@@ -47,7 +46,6 @@ class BookReviewsRepositoryImplTest {
 
     @Nested
     inner class GetTopReviewsForBook {
-
         @Test
         fun `delegates to remote data source with the given bookId`() = runTest {
             // ----- Arrange -----

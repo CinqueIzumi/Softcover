@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnFilterSheetExpandedChangeActionTest {
-
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -33,7 +32,6 @@ class OnFilterSheetExpandedChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets isFilterSheetExpanded to true when expanded is true`() = runTest {
             // ----- Arrange -----

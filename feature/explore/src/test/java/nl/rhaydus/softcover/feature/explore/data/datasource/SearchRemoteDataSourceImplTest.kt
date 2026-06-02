@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SearchRemoteDataSourceImplTest {
-
     private lateinit var apolloClient: ApolloClient
     private lateinit var dataSource: SearchRemoteDataSourceImpl
 
@@ -68,7 +67,6 @@ class SearchRemoteDataSourceImplTest {
 
     @Nested
     inner class QueriedBooks {
-
         @Test
         fun `emits empty list before any search is performed`() = runTest {
             // ----- Act & Assert -----
@@ -81,7 +79,6 @@ class SearchRemoteDataSourceImplTest {
 
     @Nested
     inner class SearchForName {
-
         @Test
         fun `updates queriedBooks with books sorted by id order from the search result`() = runTest {
             // ----- Arrange -----
@@ -124,7 +121,10 @@ class SearchRemoteDataSourceImplTest {
             } returns listOf(bookEntry1, bookEntry2, bookEntry3)
 
             // ----- Act -----
-            dataSource.searchForName(name = name, userId = userId)
+            dataSource.searchForName(
+                name = name,
+                userId = userId,
+            )
 
             // ----- Assert -----
             dataSource.queriedBooks.test {
@@ -149,7 +149,10 @@ class SearchRemoteDataSourceImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.searchForName(name = "something", userId = 1)
+                dataSource.searchForName(
+                    name = "something",
+                    userId = 1,
+                )
             }
         }
 
@@ -187,7 +190,10 @@ class SearchRemoteDataSourceImplTest {
             } returns emptyList()
 
             // ----- Act -----
-            dataSource.searchForName(name = name, userId = 1)
+            dataSource.searchForName(
+                name = name,
+                userId = 1,
+            )
 
             // ----- Assert -----
             dataSource.queriedBooks.test {
@@ -236,7 +242,10 @@ class SearchRemoteDataSourceImplTest {
             } returns listOf(bookEntry10, bookEntry20)
 
             // ----- Act -----
-            dataSource.searchForName(name = name, userId = userId)
+            dataSource.searchForName(
+                name = name,
+                userId = userId,
+            )
 
             // ----- Assert -----
             dataSource.queriedBooks.test {
@@ -289,7 +298,10 @@ class SearchRemoteDataSourceImplTest {
             } returns null
 
             // ----- Act -----
-            dataSource.searchForName(name = name, userId = userId)
+            dataSource.searchForName(
+                name = name,
+                userId = userId,
+            )
 
             // ----- Assert -----
             dataSource.queriedBooks.test {

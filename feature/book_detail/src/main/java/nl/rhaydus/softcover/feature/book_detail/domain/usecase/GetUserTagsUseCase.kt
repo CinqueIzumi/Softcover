@@ -15,6 +15,9 @@ class GetUserTagsUseCase(
     suspend operator fun invoke(bookId: Int): Result<List<UserTag>> = runCatching {
         val userId = getUserIdUseCase().getOrThrow()
 
-        userTagsRepository.getUserTags(userId = userId, bookId = bookId)
+        userTagsRepository.getUserTags(
+            userId = userId,
+            bookId = bookId,
+        )
     }
 }

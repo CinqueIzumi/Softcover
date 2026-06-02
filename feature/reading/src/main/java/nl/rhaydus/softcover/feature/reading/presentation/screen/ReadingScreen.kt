@@ -259,7 +259,7 @@ object ReadingScreen : Screen {
                             ) {
                                 ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
                             }
-                        }
+                        },
                     ) {
                         when {
                             state.books.isNotEmpty() -> {
@@ -318,7 +318,11 @@ object ReadingScreen : Screen {
                                 runAction(OnUpdatePageProgressClickAction(pages))
                             },
                             onUpdateTimeProgressClick = { h, m, s ->
-                                runAction(OnUpdateTimeProgressClickAction(h, m, s))
+                                runAction(OnUpdateTimeProgressClickAction(
+                                    h,
+                                    m,
+                                    s,
+                                ),)
                             },
                         )
                     }
@@ -442,7 +446,10 @@ object ReadingScreen : Screen {
                                 animator = animator,
                                 itemKey = book.id,
                             )
-                                .staggeredEntry(coordinator = entry, index = index)
+                                .staggeredEntry(
+                                    coordinator = entry,
+                                    index = index,
+                                )
                                 .then(slideModifier(book.id)),
                             book = book,
                             deadlineProgress = book.deadlineProgressFrom(state),
@@ -572,8 +579,8 @@ object ReadingScreen : Screen {
                                     listOf(
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                                         MaterialTheme.colorScheme.tertiary.copy(alpha = 0.30f),
-                                    )
-                                )
+                                    ),
+                                ),
                             ),
                     )
                 } else if (backdropRequest != null) {
@@ -600,8 +607,8 @@ object ReadingScreen : Screen {
                                     0.35f to Color.Black.copy(alpha = 0.15f),
                                     0.55f to Color.Transparent,
                                     1f to Color.Transparent,
-                                )
-                            )
+                                ),
+                            ),
                         ),
                 )
 
@@ -615,8 +622,8 @@ object ReadingScreen : Screen {
                                     0.40f to surfaceColor.copy(alpha = 0.15f),
                                     0.60f to surfaceColor.copy(alpha = 0.92f),
                                     1f to surfaceColor,
-                                )
-                            )
+                                ),
+                            ),
                         ),
                 )
 
@@ -628,7 +635,10 @@ object ReadingScreen : Screen {
                 ) {
                     val overlayShadow = Shadow(
                         color = Color.Black.copy(alpha = 0.85f),
-                        offset = Offset(x = 0f, y = 1f),
+                        offset = Offset(
+                            x = 0f,
+                            y = 1f,
+                        ),
                         blurRadius = 14f,
                     )
 
@@ -756,8 +766,8 @@ object ReadingScreen : Screen {
                                 },
                                 icon = SoftcoverIconResource.Drawable(
                                     id = R.drawable.ic_check_circle,
-                                    contentDescription = "Mark as Read icon"
-                                )
+                                    contentDescription = "Mark as Read icon",
+                                ),
                             ),
                         ),
                         label = "Update progress",
@@ -867,7 +877,10 @@ object ReadingScreen : Screen {
         Surface(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 6.dp,
+                )
                 .prefetchBookDetailOnPress(book.id)
                 .pressScale(interactionSource)
                 .shakeOnError(
@@ -984,8 +997,8 @@ object ReadingScreen : Screen {
                                 },
                                 icon = SoftcoverIconResource.Drawable(
                                     id = R.drawable.ic_check_circle,
-                                    contentDescription = "Mark as Read icon"
-                                )
+                                    contentDescription = "Mark as Read icon",
+                                ),
                             ),
                         ),
                         label = "Set progress",
@@ -1048,7 +1061,10 @@ object ReadingScreen : Screen {
             Spacer(modifier = Modifier.height(if (emphasized) 10.dp else 6.dp))
 
             LinearProgressIndicator(
-                progress = { progressFraction.coerceIn(0f, 1f) },
+                progress = { progressFraction.coerceIn(
+                    0f,
+                    1f,
+                ) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(if (emphasized) 10.dp else 6.dp),
@@ -1191,7 +1207,10 @@ object ReadingScreen : Screen {
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(
+                    16.dp,
+                    Alignment.CenterHorizontally,
+                ),
             ) {
                 books.forEach { book ->
                     PickUpNextTile(
@@ -1469,7 +1488,11 @@ private val previewBooks: List<Book> = listOf(
         pages = 534,
         currentPage = 470,
         progress = 88.014984f,
-        series = BookSeries(id = 1, name = "Dungeon Crawler Carl", amountOfBooks = 20),
+        series = BookSeries(
+            id = 1,
+            name = "Dungeon Crawler Carl",
+            amountOfBooks = 20,
+        ),
     ),
     previewBook(
         id = 2,
@@ -1478,7 +1501,11 @@ private val previewBooks: List<Book> = listOf(
         pages = 320,
         currentPage = 262,
         progress = 81.875f,
-        series = BookSeries(id = 1, name = "Dungeon Crawler Carl", amountOfBooks = 20),
+        series = BookSeries(
+            id = 1,
+            name = "Dungeon Crawler Carl",
+            amountOfBooks = 20,
+        ),
         positionsInSeries = listOf(3.0),
     ),
     previewBook(
@@ -1726,7 +1753,10 @@ private fun ReadingScreenAudiobookPreview() {
         currentSeconds = 24_650,
     ).let {
         val edition = it.editions.first().copy(format = "Audiobook")
-        it.copy(editions = listOf(edition), defaultEdition = edition)
+        it.copy(
+            editions = listOf(edition),
+            defaultEdition = edition,
+        )
     }
 
     SoftcoverTheme {

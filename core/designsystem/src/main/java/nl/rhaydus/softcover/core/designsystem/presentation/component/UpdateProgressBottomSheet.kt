@@ -253,7 +253,10 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
     val parsed = number.text.toIntOrNull() ?: 0
 
     val fraction = if (totalPages > 0) {
-        (parsed.toFloat() / totalPages).coerceIn(minimumValue = 0f, maximumValue = 1f)
+        (parsed.toFloat() / totalPages).coerceIn(
+            minimumValue = 0f,
+            maximumValue = 1f,
+        )
     } else {
         0f
     }
@@ -280,11 +283,17 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
                 }
 
                 val newNumber = newValue.text.toIntOrNull() ?: run {
-                    number = number.copy(text = "", selection = newValue.selection)
+                    number = number.copy(
+                        text = "",
+                        selection = newValue.selection,
+                    )
                     return@HeroStatNumberField
                 }
 
-                val updatedNumber = min(newNumber, totalPages)
+                val updatedNumber = min(
+                    newNumber,
+                    totalPages,
+                )
 
                 number = newValue.copy(text = updatedNumber.toString())
             },
@@ -294,7 +303,10 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
             },
             onFocusGained = {
                 number = number.copy(
-                    selection = TextRange(start = 0, end = number.text.length),
+                    selection = TextRange(
+                        start = 0,
+                        end = number.text.length,
+                    ),
                 )
             },
         )
@@ -338,7 +350,10 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
 
     val parsed = number.text.toIntOrNull() ?: 0
 
-    val fraction = (parsed.toFloat() / 100f).coerceIn(minimumValue = 0f, maximumValue = 1f)
+    val fraction = (parsed.toFloat() / 100f).coerceIn(
+        minimumValue = 0f,
+        maximumValue = 1f,
+    )
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -363,11 +378,17 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
                 }
 
                 val newNumber = newValue.text.toIntOrNull() ?: run {
-                    number = number.copy(text = "", selection = newValue.selection)
+                    number = number.copy(
+                        text = "",
+                        selection = newValue.selection,
+                    )
                     return@HeroStatNumberField
                 }
 
-                val updatedNumber = min(newNumber, 100)
+                val updatedNumber = min(
+                    newNumber,
+                    100,
+                )
 
                 number = newValue.copy(text = updatedNumber.toString())
             },
@@ -377,7 +398,10 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
             },
             onFocusGained = {
                 number = number.copy(
-                    selection = TextRange(start = 0, end = number.text.length),
+                    selection = TextRange(
+                        start = 0,
+                        end = number.text.length,
+                    ),
                 )
             },
         )
@@ -431,7 +455,10 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
         (seconds.text.toIntOrNull() ?: 0)
 
     val fraction = if (totalSeconds > 0) {
-        (currentSeconds.toFloat() / totalSeconds).coerceIn(minimumValue = 0f, maximumValue = 1f)
+        (currentSeconds.toFloat() / totalSeconds).coerceIn(
+            minimumValue = 0f,
+            maximumValue = 1f,
+        )
     } else {
         0f
     }
@@ -469,7 +496,10 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
                     newValue.text.isEmpty() -> newValue
                     parsed == null -> minutes
                     else -> newValue.copy(
-                        text = parsed.coerceIn(minimumValue = 0, maximumValue = 59).toString(),
+                        text = parsed.coerceIn(
+                            minimumValue = 0,
+                            maximumValue = 59,
+                        ).toString(),
                     )
                 }
             },
@@ -487,7 +517,10 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
                     newValue.text.isEmpty() -> newValue
                     parsed == null -> seconds
                     else -> newValue.copy(
-                        text = parsed.coerceIn(minimumValue = 0, maximumValue = 59).toString(),
+                        text = parsed.coerceIn(
+                            minimumValue = 0,
+                            maximumValue = 59,
+                        ).toString(),
                     )
                 }
             },
@@ -497,7 +530,11 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
     Spacer(modifier = Modifier.height(8.dp))
 
     EditorialSuffix(
-        text = "of %02d:%02d:%02d".format(totalHms.hours, totalHms.minutes, totalHms.seconds),
+        text = "of %02d:%02d:%02d".format(
+            totalHms.hours,
+            totalHms.minutes,
+            totalHms.seconds,
+        ),
     )
 
     Spacer(modifier = Modifier.height(28.dp))
@@ -509,7 +546,11 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
     SoftcoverButton(
         label = "Update progress",
         onClick = {
-            onUpdateTimeProgressClick(hours.text, minutes.text, seconds.text)
+            onUpdateTimeProgressClick(
+                hours.text,
+                minutes.text,
+                seconds.text,
+            )
         },
         modifier = Modifier.fillMaxWidth(),
         style = ButtonStyle.FILLED,
@@ -538,7 +579,10 @@ private fun TimeField(
 ) {
     var firstTimeFocusedGained by remember { mutableStateOf(true) }
 
-    val width = computeHeroStatFieldWidth(textStyle = textStyle, charCount = charCount)
+    val width = computeHeroStatFieldWidth(
+        textStyle = textStyle,
+        charCount = charCount,
+    )
 
     val focusManager = LocalFocusManager.current
 
@@ -574,7 +618,10 @@ private fun TimeField(
 
                 onValueChange(
                     value.copy(
-                        selection = TextRange(start = 0, end = value.text.length),
+                        selection = TextRange(
+                            start = 0,
+                            end = value.text.length,
+                        ),
                     ),
                 )
             },

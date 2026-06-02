@@ -114,10 +114,16 @@ fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     readingFormatId = readingFormat?.id,
 )
 
-fun Author.toEntity(): AuthorEntity = AuthorEntity(name = name, id = id)
+fun Author.toEntity(): AuthorEntity = AuthorEntity(
+    name = name,
+    id = id,
+)
 
 fun Book.toBookAuthorRefs(authorIdsByName: Map<String, Int>): List<BookAuthorCrossRef> =
-    authors.map { BookAuthorCrossRef(bookId = id, authorId = authorIdsByName.getValue(it.name)) }
+    authors.map { BookAuthorCrossRef(
+        bookId = id,
+        authorId = authorIdsByName.getValue(it.name),
+    ) }
 
 fun Book.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
     editions.flatMap { it.toEditionAuthorRefs(authorIdsByName) }
@@ -126,14 +132,15 @@ fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<Edi
     authors.map {
         EditionAuthorCrossRef(
             editionId = id,
-            authorId = authorIdsByName.getValue(it.name)
+            authorId = authorIdsByName.getValue(it.name),
         )
     }
-
 // endregion
-
 // region Entity -> UI mappers
-fun AuthorEntity.toModel(): Author = Author(name = name, id = id)
+fun AuthorEntity.toModel(): Author = Author(
+    name = name,
+    id = id,
+)
 
 fun BookTagFull.toModel(): Tag = Tag(
     id = tag.id,
@@ -233,7 +240,7 @@ fun BookFullEntity.toModel(): Book {
             .mapNotNull { it.toDoubleOrNull() },
         isCompilation = book.isCompilation,
         tags = tags.map { it.toModel() },
-        bookSeries = series?.toModel()
+        bookSeries = series?.toModel(),
     )
 }
 

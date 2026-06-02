@@ -47,7 +47,7 @@ object RootScreen : Screen {
             Surface(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding)
+                    .consumeWindowInsets(innerPadding),
             ) {
                 Column {
                     ConnectivityBanner(modifier = Modifier.statusBarsPadding())

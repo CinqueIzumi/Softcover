@@ -66,7 +66,10 @@ class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : 
                 }
             }
         }.onFailure {
-            Timber.e(it, "Failed to check for app update")
+            Timber.e(
+                it,
+                "Failed to check for app update",
+            )
 
             _updateState.value = AppUpdateState.Idle
         }
@@ -82,7 +85,10 @@ class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : 
                 AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build(),
             )
         }.onFailure {
-            Timber.e(it, "Failed to start app update flow")
+            Timber.e(
+                it,
+                "Failed to start app update flow",
+            )
 
             _updateState.value = AppUpdateState.Failed
         }

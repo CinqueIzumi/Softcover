@@ -76,7 +76,7 @@ fun SoftcoverSplitButton(
             Icon(
                 painter = icon.getIconPainter(),
                 contentDescription = icon.contentDescription,
-                modifier = Modifier.size(size.iconSize)
+                modifier = Modifier.size(size.iconSize),
             )
 
             Spacer(modifier = Modifier.width(size.iconSpacing))
@@ -84,7 +84,7 @@ fun SoftcoverSplitButton(
 
         Text(
             text = label,
-            style = size.textStyle
+            style = size.textStyle,
         )
     }
 
@@ -101,7 +101,7 @@ fun SoftcoverSplitButton(
                 .size(size.iconSize)
                 .graphicsLayer {
                     rotationZ = rotation
-                }
+                },
         )
     }
 
@@ -217,7 +217,7 @@ fun SoftcoverSplitButton(
                 Modifier
                     .weight(weight = 1f)
                     .height(height = size.height)
-                    .padding(end = SplitButtonDefaults.Spacing)
+                    .padding(end = SplitButtonDefaults.Spacing),
             )
 
             Box {
@@ -248,12 +248,36 @@ private fun softcoverCornersFor(buttonHeight: Dp): SoftcoverSplitButtonCorners {
     val outer = buttonHeight / 2
 
     return when (buttonHeight) {
-        ButtonSize.XS.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 4.dp, innerPressed = 8.dp)
-        ButtonSize.S.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 4.dp, innerPressed = 12.dp)
-        ButtonSize.M.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 4.dp, innerPressed = 12.dp)
-        ButtonSize.L.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 8.dp, innerPressed = 20.dp)
-        ButtonSize.XL.height -> SoftcoverSplitButtonCorners(outer = outer, inner = 12.dp, innerPressed = 20.dp)
-        else -> SoftcoverSplitButtonCorners(outer = outer, inner = 4.dp, innerPressed = 8.dp)
+        ButtonSize.XS.height -> SoftcoverSplitButtonCorners(
+            outer = outer,
+            inner = 4.dp,
+            innerPressed = 8.dp,
+        )
+        ButtonSize.S.height -> SoftcoverSplitButtonCorners(
+            outer = outer,
+            inner = 4.dp,
+            innerPressed = 12.dp,
+        )
+        ButtonSize.M.height -> SoftcoverSplitButtonCorners(
+            outer = outer,
+            inner = 4.dp,
+            innerPressed = 12.dp,
+        )
+        ButtonSize.L.height -> SoftcoverSplitButtonCorners(
+            outer = outer,
+            inner = 8.dp,
+            innerPressed = 20.dp,
+        )
+        ButtonSize.XL.height -> SoftcoverSplitButtonCorners(
+            outer = outer,
+            inner = 12.dp,
+            innerPressed = 20.dp,
+        )
+        else -> SoftcoverSplitButtonCorners(
+            outer = outer,
+            inner = 4.dp,
+            innerPressed = 8.dp,
+        )
     }
 }
 
@@ -303,7 +327,7 @@ private fun SoftcoverSplitButtonPreview() {
         Column(
             modifier = Modifier
                 .background(color = MaterialTheme.colorScheme.background)
-                .padding(all = 8.dp)
+                .padding(all = 8.dp),
         ) {
             val leadingIcon = SoftcoverIconResource.Drawable(
                 id = R.drawable.ic_palette,
@@ -324,7 +348,7 @@ private fun SoftcoverSplitButtonPreview() {
                     leadingButtonStyle = SplitButtonStyle.FILLED,
                     checked = index % 2 == 0,
                     onDismissMenuRequest = {},
-                    dropDownItems = emptyList()
+                    dropDownItems = emptyList(),
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))

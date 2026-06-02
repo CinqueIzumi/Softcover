@@ -18,7 +18,7 @@ object ReadingTab : Tab {
                 TabOptions(
                     index = 0u,
                     title = title,
-                    icon = icon
+                    icon = icon,
                 )
             }
         }

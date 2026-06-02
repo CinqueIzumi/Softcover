@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SettingsRemoteDataSourceImplTest {
-
     private lateinit var apolloClient: ApolloClient
     private lateinit var dataSource: SettingsRemoteDataSourceImpl
 
@@ -36,13 +35,15 @@ class SettingsRemoteDataSourceImplTest {
 
     @Nested
     inner class GetUserIdFromBackend {
-
         @Test
         fun `returns id from first me entry when query succeeds`() = runTest {
             // ----- Arrange -----
             val expectedId = 42
             val queryData = mockk<GetUserIdQuery.Data>()
-            val meEntry = GetUserIdQuery.Data.Me(__typename = "users", id = expectedId)
+            val meEntry = GetUserIdQuery.Data.Me(
+                __typename = "users",
+                id = expectedId,
+            )
 
             coEvery {
                 apolloClient.safeQuery(query = any<GetUserIdQuery>())

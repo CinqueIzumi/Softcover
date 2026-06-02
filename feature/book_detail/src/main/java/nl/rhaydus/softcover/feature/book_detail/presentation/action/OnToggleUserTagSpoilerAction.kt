@@ -22,6 +22,9 @@ class OnToggleUserTagSpoilerAction(
             }
         }
 
-        scope.commitUserTags(newSet = newSet, dependencies = dependencies)
+        scope.commitUserTags(
+            newSet = newSet,
+            dependencies = dependencies,
+        )
     }
 }

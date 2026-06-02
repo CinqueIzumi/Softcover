@@ -29,8 +29,14 @@ data class DeadlineProgress(
             total: Int,
             today: LocalDate = LocalDate.now(),
         ): DeadlineProgress {
-            val daysRemaining = ChronoUnit.DAYS.between(today, deadline.deadlineDate)
-            val unitsRemaining = max(0, total - current)
+            val daysRemaining = ChronoUnit.DAYS.between(
+                today,
+                deadline.deadlineDate,
+            )
+            val unitsRemaining = max(
+                0,
+                total - current,
+            )
             val isExpired = daysRemaining < 0 || (daysRemaining == 0L && unitsRemaining > 0)
 
             val requiredPerDay = when {

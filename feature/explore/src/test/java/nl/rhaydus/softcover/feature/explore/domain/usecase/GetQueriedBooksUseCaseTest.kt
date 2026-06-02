@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetQueriedBooksUseCaseTest {
-
     private lateinit var searchRepository: ExploreRepository
     private lateinit var useCase: GetQueriedBooksUseCase
 
@@ -28,7 +27,6 @@ class GetQueriedBooksUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns flow from repository queriedBooks`() = runTest {
             // ----- Arrange -----

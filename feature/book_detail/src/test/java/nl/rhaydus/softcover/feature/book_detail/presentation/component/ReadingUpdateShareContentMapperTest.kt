@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ReadingUpdateShareContentMapperTest {
-
     // ----- Fixtures -----
 
     private fun buildEdition(
@@ -100,7 +99,10 @@ class ReadingUpdateShareContentMapperTest {
     private fun buildBook(
         title: String = "Test Book",
         coverUrl: String = "https://book.cover/img.jpg",
-        authors: List<Author> = listOf(Author(id = 1, name = "Jane Austen")),
+        authors: List<Author> = listOf(Author(
+            id = 1,
+            name = "Jane Austen",
+        ),),
         defaultEdition: BookEdition? = null,
         userBook: UserBook? = buildUserBook(),
         userBookRead: UserBookRead? = null,
@@ -129,7 +131,6 @@ class ReadingUpdateShareContentMapperTest {
 
     @Nested
     inner class UsernameGuards {
-
         @Test
         fun `returns null when username is null`() {
             // ----- Arrange -----
@@ -167,7 +168,6 @@ class ReadingUpdateShareContentMapperTest {
 
     @Nested
     inner class UserBookStatusGuards {
-
         @Test
         fun `returns null when userBook is null`() {
             // ----- Arrange -----
@@ -237,7 +237,6 @@ class ReadingUpdateShareContentMapperTest {
 
     @Nested
     inner class FinishedBook {
-
         @Test
         fun `kind is FINISHED when status is Read`() {
             // ----- Arrange -----
@@ -323,7 +322,6 @@ class ReadingUpdateShareContentMapperTest {
 
     @Nested
     inner class ReadingBook {
-
         @Test
         fun `kind is READING when status is Reading`() {
             // ----- Arrange -----
@@ -343,7 +341,10 @@ class ReadingUpdateShareContentMapperTest {
         @Test
         fun `ratingStars is null for reading book`() {
             // ----- Arrange -----
-            val book = buildBook(userBook = buildUserBook(status = BookStatus.Reading, rating = 3.0))
+            val book = buildBook(userBook = buildUserBook(
+                status = BookStatus.Reading,
+                rating = 3.0,
+            ),)
 
             // ----- Act -----
             val result = book.toReadingUpdateContent(
@@ -360,7 +361,10 @@ class ReadingUpdateShareContentMapperTest {
         fun `review is null for reading book`() {
             // ----- Arrange -----
             val review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great so far")))))
-            val book = buildBook(userBook = buildUserBook(status = BookStatus.Reading, reviewDocument = review))
+            val book = buildBook(userBook = buildUserBook(
+                status = BookStatus.Reading,
+                reviewDocument = review,
+            ),)
 
             // ----- Act -----
             val result = book.toReadingUpdateContent(
@@ -379,7 +383,10 @@ class ReadingUpdateShareContentMapperTest {
             val edition = buildEdition(pages = 400)
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(currentPage = 100, progress = 25f),
+                userBookRead = buildUserBookRead(
+                    currentPage = 100,
+                    progress = 25f,
+                ),
             )
 
             // ----- Act -----
@@ -399,7 +406,10 @@ class ReadingUpdateShareContentMapperTest {
             val edition = buildEdition(pages = 300)
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(currentPage = 150, progress = 50f),
+                userBookRead = buildUserBookRead(
+                    currentPage = 150,
+                    progress = 50f,
+                ),
             )
 
             // ----- Act -----
@@ -419,7 +429,10 @@ class ReadingUpdateShareContentMapperTest {
             val edition = buildEdition(pages = 195)
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(currentPage = 61, progress = 31f),
+                userBookRead = buildUserBookRead(
+                    currentPage = 61,
+                    progress = 31f,
+                ),
             )
 
             // ----- Act -----
@@ -439,7 +452,10 @@ class ReadingUpdateShareContentMapperTest {
             val edition = buildEdition(pages = 400)
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(currentPage = null, progress = 31f),
+                userBookRead = buildUserBookRead(
+                    currentPage = null,
+                    progress = 31f,
+                ),
             )
 
             // ----- Act -----
@@ -459,7 +475,10 @@ class ReadingUpdateShareContentMapperTest {
             val edition = buildEdition(pages = null)
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(currentPage = 50, progress = 40f),
+                userBookRead = buildUserBookRead(
+                    currentPage = 50,
+                    progress = 40f,
+                ),
             )
 
             // ----- Act -----
@@ -478,7 +497,10 @@ class ReadingUpdateShareContentMapperTest {
             // ----- Arrange -----
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(currentPage = 10, progress = 10f),
+                userBookRead = buildUserBookRead(
+                    currentPage = 10,
+                    progress = 10f,
+                ),
             )
 
             // ----- Act -----
@@ -497,7 +519,10 @@ class ReadingUpdateShareContentMapperTest {
             // ----- Arrange -----
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(currentPage = null, progress = 100f),
+                userBookRead = buildUserBookRead(
+                    currentPage = null,
+                    progress = 100f,
+                ),
             )
 
             // ----- Act -----
@@ -517,7 +542,10 @@ class ReadingUpdateShareContentMapperTest {
             val edition = buildEdition(pages = 100)
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(currentPage = 33, progress = 33f),
+                userBookRead = buildUserBookRead(
+                    currentPage = 33,
+                    progress = 33f,
+                ),
             )
 
             // ----- Act -----
@@ -557,7 +585,10 @@ class ReadingUpdateShareContentMapperTest {
             val edition = buildAudiobookEdition(audioSeconds = 7200)
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(currentSeconds = null, progress = 40f),
+                userBookRead = buildUserBookRead(
+                    currentSeconds = null,
+                    progress = 40f,
+                ),
             )
 
             // ----- Act -----
@@ -595,7 +626,6 @@ class ReadingUpdateShareContentMapperTest {
 
     @Nested
     inner class Review {
-
         @Test
         fun `review equals the ReviewDocument unchanged for finished book`() {
             // ----- Arrange -----
@@ -619,10 +649,13 @@ class ReadingUpdateShareContentMapperTest {
             val reviewDoc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(
                     ReviewRun("Great story"),
-                    ReviewRun(" — spoiler here", spoiler = true),
+                    ReviewRun(
+                        " — spoiler here",
+                        spoiler = true,
+                    ),
                     ReviewRun(" with a lovely ending"),
-                )),
-            ))
+                ),),
+            ),)
             val book = buildBook(
                 userBook = buildUserBook(
                     reviewDocument = reviewDoc,
@@ -701,7 +734,6 @@ class ReadingUpdateShareContentMapperTest {
 
     @Nested
     inner class AvatarUrl {
-
         @Test
         fun `avatarUrl is passed through when non-blank`() {
             // ----- Arrange -----
@@ -755,7 +787,6 @@ class ReadingUpdateShareContentMapperTest {
 
     @Nested
     inner class CoverResolution {
-
         @Test
         fun `cover prefers edition localImagePath over edition url`() {
             // ----- Arrange -----

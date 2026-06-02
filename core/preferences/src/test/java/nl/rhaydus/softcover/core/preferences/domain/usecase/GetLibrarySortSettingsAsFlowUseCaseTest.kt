@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetLibrarySortSettingsAsFlowUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: GetLibrarySortSettingsAsFlowUseCase
 
@@ -27,7 +26,6 @@ class GetLibrarySortSettingsAsFlowUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns settingsRepository librarySortSettingsByTab as-is`() = runTest {
             // ----- Arrange -----

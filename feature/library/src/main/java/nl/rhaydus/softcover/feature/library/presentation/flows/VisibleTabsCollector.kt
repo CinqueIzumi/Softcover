@@ -39,7 +39,10 @@ class VisibleTabsCollector : LibraryInitializer {
             val listTabs = lists
                 .filter { it.id in enabledListIds }
                 .sortedBy { it.name.lowercase() }
-                .map { LibraryTab.CustomList(listId = it.id, listName = it.name) }
+                .map { LibraryTab.CustomList(
+                    listId = it.id,
+                    listName = it.name,
+                ) }
 
             val defaultOrdered = buildList<LibraryTab> {
                 add(LibraryTab.All)

@@ -20,7 +20,7 @@ object AppSettingsSerializer : Serializer<AppSettingsEntity> {
         return try {
             json.decodeFromString(
                 deserializer = AppSettingsEntity.serializer(),
-                string = input.readBytes().decodeToString()
+                string = input.readBytes().decodeToString(),
             )
         } catch (e: SerializationException) {
             defaultValue
@@ -35,8 +35,8 @@ object AppSettingsSerializer : Serializer<AppSettingsEntity> {
             output.write(
                 json.encodeToString(
                     serializer = AppSettingsEntity.serializer(),
-                    value = t
-                ).encodeToByteArray()
+                    value = t,
+                ).encodeToByteArray(),
             )
         }
     }

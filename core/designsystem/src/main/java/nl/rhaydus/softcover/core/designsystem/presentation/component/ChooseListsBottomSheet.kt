@@ -83,7 +83,10 @@ fun ChooseListsBottomSheet(
                             isPending = isPending,
                             onClick = {
                                 if (isPending.not()) {
-                                    onToggleMembership(list.id, membership)
+                                    onToggleMembership(
+                                        list.id,
+                                        membership,
+                                    )
                                 }
                             },
                         )

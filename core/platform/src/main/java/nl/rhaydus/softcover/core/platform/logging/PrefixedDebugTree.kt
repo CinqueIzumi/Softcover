@@ -15,6 +15,11 @@ class PrefixedDebugTree(
             .lineSequence()
             .joinToString(separator = "\n") { line -> "$prefix $line" }
 
-        super.log(priority, tag, prefixed, t)
+        super.log(
+            priority,
+            tag,
+            prefixed,
+            t,
+        )
     }
 }

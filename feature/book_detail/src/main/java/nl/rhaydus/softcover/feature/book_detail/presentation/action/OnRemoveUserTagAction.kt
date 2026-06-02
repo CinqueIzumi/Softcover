@@ -18,6 +18,9 @@ class OnRemoveUserTagAction(
             it.category == tag.category && it.name == tag.name
         }
 
-        scope.commitUserTags(newSet = newSet, dependencies = dependencies)
+        scope.commitUserTags(
+            newSet = newSet,
+            dependencies = dependencies,
+        )
     }
 }

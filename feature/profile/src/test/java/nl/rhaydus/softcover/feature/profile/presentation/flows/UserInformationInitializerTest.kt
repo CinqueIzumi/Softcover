@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserInformationInitializerTest {
-
     private lateinit var observeUserProfileDataUseCase: ObserveUserProfileDataUseCase
     private lateinit var refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
@@ -88,14 +87,16 @@ class UserInformationInitializerTest {
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `invokes refreshUserProfileDataUseCase on launch`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val initializer = UserInformationInitializer()
-            val job = launch { initializer.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { initializer.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             // (refresh is triggered immediately on launch via dependencies.launch { ... })
@@ -112,7 +113,10 @@ class UserInformationInitializerTest {
             val profileData = buildProfileData()
             val dependencies = stubDependencies(this)
             val initializer = UserInformationInitializer()
-            val job = launch { initializer.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { initializer.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             profileDataFlow.emit(profileData)
@@ -129,7 +133,10 @@ class UserInformationInitializerTest {
             coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val initializer = UserInformationInitializer()
-            val job = launch { initializer.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { initializer.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             profileDataFlow.emit(null)
@@ -149,7 +156,10 @@ class UserInformationInitializerTest {
             val profileData = buildProfileData()
             val dependencies = stubDependencies(this)
             val initializer = UserInformationInitializer()
-            val job = launch { initializer.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { initializer.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             profileDataFlow.emit(profileData)

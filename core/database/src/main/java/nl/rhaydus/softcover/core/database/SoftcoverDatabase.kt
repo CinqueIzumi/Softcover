@@ -91,7 +91,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 .databaseBuilder(
                     context = context,
                     klass = SoftcoverDatabase::class.java,
-                    name = "books.db"
+                    name = "books.db",
                 )
                 .addMigrations(MIGRATION_3_4)
                 .addMigrations(MIGRATION_4_5)
@@ -140,7 +140,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     """
             ALTER TABLE book_editions 
             ADD COLUMN format TEXT NOT NULL DEFAULT ''
-        """.trimIndent()
+        """.trimIndent(),
                 )
             }
         }
@@ -156,7 +156,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 event TEXT NOT NULL,
                 updatedAt TEXT NOT NULL
             )
-        """.trimIndent()
+        """.trimIndent(),
                 )
             }
         }
@@ -180,7 +180,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             updatedAt TEXT,
                             FOREIGN KEY(bookId) REFERENCES books(id) ON DELETE CASCADE
                         )
-                    """
+                    """,
                 )
 
                 db.execSQL("CREATE INDEX index_user_books_bookId ON user_books(bookId)")
@@ -197,7 +197,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             finishedAt TEXT,
                             FOREIGN KEY(userBookId) REFERENCES user_books(id) ON DELETE CASCADE
                         )
-                    """
+                    """,
                 )
 
                 db.execSQL("CREATE INDEX index_user_book_reads_userBookId ON user_book_reads(userBookId)")
@@ -233,7 +233,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             userBook_updatedAt
                         FROM books
                         WHERE userBook_id IS NOT NULL
-                    """
+                    """,
                 )
 
                 db.execSQL(
@@ -255,7 +255,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             userBookRead_finishedAt
                         FROM books
                         WHERE userBookRead_id IS NOT NULL
-                    """
+                    """,
                 )
 
                 db.execSQL(
@@ -270,7 +270,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             coverUrl TEXT NOT NULL,
                             usersCount INTEGER NOT NULL
                         )
-                    """
+                    """,
                 )
 
                 db.execSQL(
@@ -295,7 +295,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             coverUrl,
                             usersCount
                         FROM books
-                    """
+                    """,
                 )
 
                 db.execSQL("DROP TABLE books")
@@ -312,7 +312,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             name TEXT NOT NULL,
                             slug TEXT NOT NULL DEFAULT ''
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 try {
@@ -329,7 +329,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             FOREIGN KEY(bookListId) REFERENCES book_lists(id) ON DELETE CASCADE,
                             FOREIGN KEY(editionId) REFERENCES book_editions(id) ON DELETE CASCADE
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_bookListId ON book_list_edition_cross_ref(bookListId)")
@@ -351,7 +351,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         AND bl.slug = 'owned'
                     ) AS isOwned
                 FROM book_editions edition
-            """.trimIndent()
+            """.trimIndent(),
                 )
             }
         }
@@ -376,7 +376,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     FOREIGN KEY(bookId) REFERENCES books(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
                     FOREIGN KEY(editionId) REFERENCES book_editions(id) ON UPDATE NO ACTION ON DELETE NO ACTION
                 )
-            """.trimIndent()
+            """.trimIndent(),
                 )
 
                 db.execSQL(
@@ -385,7 +385,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 SELECT bler.bookListId, be.bookId, bler.editionId
                 FROM book_list_edition_cross_ref bler
                 JOIN book_editions be ON bler.editionId = be.id
-            """.trimIndent()
+            """.trimIndent(),
                 )
 
                 db.execSQL("DROP VIEW IF EXISTS book_edition_view")
@@ -401,7 +401,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             AND bl.slug = 'owned'
                         ) AS isOwned
                     FROM book_editions edition
-            """.trimIndent()
+            """.trimIndent(),
                 )
 
                 db.execSQL("DROP TABLE IF EXISTS book_list_edition_cross_ref")
@@ -424,14 +424,14 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             position INTEGER,
                             PRIMARY KEY(listId, bookId, editionId, listBookId)
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
                     """
                         INSERT INTO list_books_new (listBookId, listId, bookId, editionId, position)
                         SELECT listBookId, listId, bookId, editionId, position FROM list_books
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL("DROP TABLE list_books")
@@ -454,14 +454,14 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         AND id NOT IN (
                             SELECT editionId FROM list_books
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
                     """
                         DELETE FROM edition_author_cross_ref
                         WHERE editionId NOT IN (SELECT id FROM book_editions)
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
@@ -469,7 +469,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         DELETE FROM authors
                         WHERE id NOT IN (SELECT authorId FROM book_author_cross_ref)
                         AND id NOT IN (SELECT authorId FROM edition_author_cross_ref)
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -489,7 +489,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         "            WHERE lb.editionId = edition.id\n" +
                         "            AND bl.slug = 'owned'\n" +
                         "        ) AS isOwned\n" +
-                        "    FROM book_editions edition"
+                        "    FROM book_editions edition",
                 )
             }
         }
@@ -518,7 +518,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                                     )
                                 ) AS isOwned
                             FROM book_editions edition
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -533,7 +533,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             setAt TEXT NOT NULL,
                             initialPagesPerDay REAL NOT NULL
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -552,14 +552,14 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             initialPerDay REAL NOT NULL,
                             unit TEXT NOT NULL DEFAULT 'PAGES'
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
                 db.execSQL(
                     """
                         INSERT INTO book_deadlines_new (bookId, deadlineDate, setAt, initialPerDay, unit)
                         SELECT bookId, deadlineDate, setAt, initialPagesPerDay, 'PAGES'
                         FROM book_deadlines
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
                 db.execSQL("DROP TABLE book_deadlines")
                 db.execSQL("ALTER TABLE book_deadlines_new RENAME TO book_deadlines")
@@ -584,7 +584,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                                     )
                                 ) AS isOwned
                             FROM book_editions edition
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -599,7 +599,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 amountOfBooks INTEGER NOT NULL, 
                 PRIMARY KEY(id)
             )
-            """.trimIndent()
+            """.trimIndent(),
                 )
 
                 db.execSQL("ALTER TABLE books ADD COLUMN seriesId INTEGER DEFAULT NULL")
@@ -642,7 +642,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             positionInSeries REAL,
                             seriesId INTEGER
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
@@ -673,7 +673,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             CAST(positionInSeries AS REAL),
                             seriesId
                         FROM books
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL("DROP TABLE books")
@@ -699,7 +699,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             isCompilation INTEGER NOT NULL DEFAULT 0,
                             seriesId INTEGER
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
@@ -732,7 +732,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             0,
                             seriesId
                         FROM books
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL("DROP TABLE books")
@@ -747,7 +747,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         CREATE TABLE IF NOT EXISTS dismissed_continue_series_books (
                             bookId INTEGER NOT NULL PRIMARY KEY
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
@@ -755,7 +755,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         CREATE TABLE IF NOT EXISTS dismissed_continue_series (
                             seriesId INTEGER NOT NULL PRIMARY KEY
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -785,7 +785,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                                     )
                                 ) AS isOwned
                             FROM book_editions edition
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -801,7 +801,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             isDraft INTEGER NOT NULL,
                             updatedAt TEXT NOT NULL
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
@@ -814,7 +814,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             note TEXT,
                             createdAt TEXT NOT NULL
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_book_highlights_bookId ON book_highlights(bookId)")
 
@@ -830,7 +830,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             startSeconds INTEGER,
                             endSeconds INTEGER
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_reading_sessions_bookId ON reading_sessions(bookId)")
 
@@ -845,7 +845,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             note TEXT,
                             createdAt TEXT NOT NULL
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_reading_log_entries_bookId ON reading_log_entries(bookId)")
             }
@@ -869,10 +869,10 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             enqueuedAt TEXT NOT NULL,
                             attempts INTEGER NOT NULL DEFAULT 0
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
                 db.execSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_progress_updates_userBookId_kind ON pending_progress_updates(userBookId, kind)"
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_progress_updates_userBookId_kind ON pending_progress_updates(userBookId, kind)",
                 )
             }
         }
@@ -887,7 +887,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             position INTEGER NOT NULL,
                             PRIMARY KEY(statusCode, bookId)
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_shelf_manual_order_statusCode ON shelf_manual_order(statusCode)")
@@ -916,7 +916,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL("DROP INDEX IF EXISTS index_pending_progress_updates_userBookId_kind")
 
                 db.execSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)"
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)",
                 )
             }
         }
@@ -975,7 +975,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             PRIMARY KEY(id),
                             FOREIGN KEY(bookId) REFERENCES books(id) ON UPDATE NO ACTION ON DELETE CASCADE
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
@@ -990,7 +990,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             editionId, lastReadDate, rating, referrerUserId, NULL, reviewedAt,
                             updatedAt, createdAt
                         FROM user_books
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL("DROP TABLE user_books")
@@ -1020,7 +1020,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             enqueuedAt TEXT NOT NULL,
                             attempts INTEGER NOT NULL DEFAULT 0
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
@@ -1035,7 +1035,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             progressSeconds, startedAt, finishedAt, rating, NULL,
                             reviewHasSpoilers, enqueuedAt, attempts
                         FROM pending_user_book_writes
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL("DROP TABLE pending_user_book_writes")
@@ -1043,7 +1043,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE pending_user_book_writes_new RENAME TO pending_user_book_writes")
 
                 db.execSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)"
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)",
                 )
             }
         }
@@ -1087,7 +1087,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                                     )
                                 ) AS isOwned
                             FROM book_editions edition
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -1126,7 +1126,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             enqueuedAt TEXT NOT NULL,
                             attempts INTEGER NOT NULL DEFAULT 0
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -1155,7 +1155,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                                     )
                                 ) AS isOwned
                             FROM book_editions edition
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -1168,7 +1168,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             id INTEGER NOT NULL PRIMARY KEY,
                             name TEXT NOT NULL
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL(
@@ -1178,7 +1178,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             tagId INTEGER NOT NULL,
                             PRIMARY KEY(bookId, tagId)
                         )
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_book_tag_cross_ref_tagId ON book_tag_cross_ref(tagId)")

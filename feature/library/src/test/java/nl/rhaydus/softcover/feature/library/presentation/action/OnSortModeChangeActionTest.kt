@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnSortModeChangeActionTest {
-
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -38,7 +37,6 @@ class OnSortModeChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `tapping active mode flips direction from ASCENDING to DESCENDING`() = runTest {
             // ----- Arrange -----

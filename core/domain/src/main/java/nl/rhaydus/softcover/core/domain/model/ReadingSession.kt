@@ -20,7 +20,10 @@ data class ReadingSession(
     val isPaused: Boolean get() = isActive && lastPausedAt != null
 
     val duration: Duration?
-        get() = endedAt?.let { Duration.between(startedAt, it) }
+        get() = endedAt?.let { Duration.between(
+            startedAt,
+            it,
+        ) }
 
     val pageDelta: Int?
         get() = if (startPage != null && endPage != null) endPage - startPage else null
@@ -35,8 +38,14 @@ data class ReadingSession(
      */
     fun readingDuration(now: Instant = Instant.now()): Duration {
         val end = endedAt ?: now
-        val openPause = lastPausedAt?.let { Duration.between(it, end).seconds } ?: 0L
-        val wall = Duration.between(startedAt, end).seconds
+        val openPause = lastPausedAt?.let { Duration.between(
+            it,
+            end,
+        ).seconds } ?: 0L
+        val wall = Duration.between(
+            startedAt,
+            end,
+        ).seconds
 
         return Duration.ofSeconds((wall - pausedSeconds - openPause).coerceAtLeast(0L))
     }

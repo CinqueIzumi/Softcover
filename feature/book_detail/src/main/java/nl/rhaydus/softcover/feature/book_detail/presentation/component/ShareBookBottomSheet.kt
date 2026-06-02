@@ -209,7 +209,11 @@ fun ShareBookBottomSheet(
                             "Couldn't save to gallery"
                         }
 
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            message,
+                            Toast.LENGTH_SHORT,
+                        ).show()
 
                         isSavingToGallery = false
                     }
@@ -277,7 +281,11 @@ private fun ShareCardPreview(
 
                 val widthScale = maxPreviewWidth.toPx() / placeable.width
                 val heightScale = maxPreviewHeight.toPx() / placeable.height
-                val scale = minOf(widthScale, heightScale, 1f)
+                val scale = minOf(
+                    widthScale,
+                    heightScale,
+                    1f,
+                )
 
                 val scaledWidth = (placeable.width * scale).roundToInt()
                 val scaledHeight = (placeable.height * scale).roundToInt()
@@ -321,12 +329,21 @@ private fun Context.launchShareImageChooser(
 ) {
     val sendIntent = Intent(Intent.ACTION_SEND).apply {
         type = "image/png"
-        putExtra(Intent.EXTRA_STREAM, uri)
-        putExtra(Intent.EXTRA_SUBJECT, bookTitle)
+        putExtra(
+            Intent.EXTRA_STREAM,
+            uri,
+        )
+        putExtra(
+            Intent.EXTRA_SUBJECT,
+            bookTitle,
+        )
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    val chooser = Intent.createChooser(sendIntent, "Share $bookTitle").apply {
+    val chooser = Intent.createChooser(
+        sendIntent,
+        "Share $bookTitle",
+    ).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 

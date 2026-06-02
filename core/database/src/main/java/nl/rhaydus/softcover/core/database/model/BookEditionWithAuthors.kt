@@ -14,8 +14,8 @@ data class BookEditionWithAuthors(
         associateBy = Junction(
             value = EditionAuthorCrossRef::class,
             parentColumn = "editionId",
-            entityColumn = "authorId"
-        )
+            entityColumn = "authorId",
+        ),
     )
     val authors: List<AuthorEntity>,
 )

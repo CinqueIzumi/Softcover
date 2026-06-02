@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnUpdatePageProgressClickActionTest {
-
     private lateinit var updateBookProgress: RecordBookProgressUseCase
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<ReadingLocalVariables>
@@ -68,7 +67,6 @@ class OnUpdatePageProgressClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets showProgressSheet to false after execute`() = runTest {
             // ----- Arrange -----
@@ -195,7 +193,11 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                updateBookProgress(any(), any(), any())
+                updateBookProgress(
+                    any(),
+                    any(),
+                    any(),
+                )
             }
         }
 

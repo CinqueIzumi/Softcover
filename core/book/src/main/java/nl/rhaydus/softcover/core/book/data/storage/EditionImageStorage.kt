@@ -19,11 +19,17 @@ interface EditionImageStorage {
 class EditionImageStorageImpl(
     context: Context,
 ) : EditionImageStorage {
-    private val rootDir: File = File(context.filesDir, DIRECTORY_NAME).apply {
-        if (!exists()) mkdirs()
+    private val rootDir: File = File(
+        context.filesDir,
+        DIRECTORY_NAME,
+    ).apply {
+        if (exists().not()) mkdirs()
     }
 
-    override fun fileFor(editionId: Int): File = File(rootDir, "$editionId")
+    override fun fileFor(editionId: Int): File = File(
+        rootDir,
+        "$editionId",
+    )
 
     override fun exists(editionId: Int): Boolean = fileFor(editionId).exists()
 
@@ -32,7 +38,10 @@ class EditionImageStorageImpl(
         source: File,
     ): String {
         val target = fileFor(editionId)
-        source.copyTo(target = target, overwrite = true)
+        source.copyTo(
+            target = target,
+            overwrite = true,
+        )
 
         return target.absolutePath
     }

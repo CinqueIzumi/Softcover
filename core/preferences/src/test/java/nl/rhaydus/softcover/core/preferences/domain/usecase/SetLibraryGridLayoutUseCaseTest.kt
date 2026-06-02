@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SetLibraryGridLayoutUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: SetLibraryGridLayoutUseCase
 
@@ -24,7 +23,6 @@ class SetLibraryGridLayoutUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success when repository call succeeds`() = runTest {
             // ----- Arrange -----

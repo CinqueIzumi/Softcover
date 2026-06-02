@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnRemoveSearchQueryClickedActionTest {
-
     private lateinit var removeSearchQueryUseCase: RemoveSearchQueryUseCase
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
@@ -60,7 +59,6 @@ class OnRemoveSearchQueryClickedActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes removeSearchQueryUseCase with the given query`() = runTest {
             // ----- Arrange -----

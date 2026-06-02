@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnAddBookToLibraryClickActionTest {
-
     private lateinit var markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
@@ -68,7 +67,6 @@ class OnAddBookToLibraryClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes markBookAsWantToReadUseCase with the book`() = runTest {
             // ----- Arrange -----

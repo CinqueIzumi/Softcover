@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnOpenTagEditorActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -33,7 +32,6 @@ class OnOpenTagEditorActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets showTagEditorSheet to true`() = runTest {
             // ----- Arrange -----
@@ -41,7 +39,10 @@ class OnOpenTagEditorActionTest {
             val action = OnOpenTagEditorAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showTagEditorSheet shouldBe true
@@ -54,7 +55,10 @@ class OnOpenTagEditorActionTest {
             val action = OnOpenTagEditorAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.tagEditorInput shouldBe ""
@@ -67,7 +71,10 @@ class OnOpenTagEditorActionTest {
             val action = OnOpenTagEditorAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState.copy(

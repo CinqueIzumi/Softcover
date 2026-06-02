@@ -10,21 +10,31 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryVisibilitySettingsUiStateTest {
-
-    private fun stubBookList(id: Int, name: String): BookList = mockk {
+    private fun stubBookList(
+        id: Int,
+        name: String,
+    ): BookList = mockk {
         every { this@mockk.id } returns id
         every { this@mockk.name } returns name
     }
 
     @Nested
     inner class OrderedEntries {
-
         @Test
         fun `returns default status order followed by lists sorted by name when draftTabOrder is empty`() {
             // ----- Arrange -----
-            val listZ = stubBookList(id = 3, name = "Zebra")
-            val listA = stubBookList(id = 1, name = "Alpha")
-            val listM = stubBookList(id = 2, name = "Middle")
+            val listZ = stubBookList(
+                id = 3,
+                name = "Zebra",
+            )
+            val listA = stubBookList(
+                id = 1,
+                name = "Alpha",
+            )
+            val listM = stubBookList(
+                id = 2,
+                name = "Middle",
+            )
 
             val state = LibraryVisibilitySettingsUiState(
                 availableLists = listOf(listZ, listA, listM),
@@ -51,7 +61,10 @@ class LibraryVisibilitySettingsUiStateTest {
         fun `status entries always precede list entries in default order`() {
             // ----- Arrange -----
             val state = LibraryVisibilitySettingsUiState(
-                availableLists = listOf(stubBookList(id = 1, name = "MyList")),
+                availableLists = listOf(stubBookList(
+                    id = 1,
+                    name = "MyList",
+                ),),
                 draftTabOrder = emptyList(),
             )
 
@@ -67,8 +80,14 @@ class LibraryVisibilitySettingsUiStateTest {
         @Test
         fun `draftTabOrder with known ids reorders entries accordingly`() {
             // ----- Arrange -----
-            val listA = stubBookList(id = 1, name = "Alpha")
-            val listB = stubBookList(id = 2, name = "Beta")
+            val listA = stubBookList(
+                id = 1,
+                name = "Alpha",
+            )
+            val listB = stubBookList(
+                id = 2,
+                name = "Beta",
+            )
             val readId = "status-${UserBookStatus.READ.code}"
             val listBId = "list-2"
             val listAId = "list-1"
@@ -106,8 +125,14 @@ class LibraryVisibilitySettingsUiStateTest {
         @Test
         fun `entries not in draftTabOrder are appended at end in default order`() {
             // ----- Arrange -----
-            val listA = stubBookList(id = 1, name = "Alpha")
-            val listB = stubBookList(id = 2, name = "Beta")
+            val listA = stubBookList(
+                id = 1,
+                name = "Alpha",
+            )
+            val listB = stubBookList(
+                id = 2,
+                name = "Beta",
+            )
             val listBId = "list-2"
 
             val state = LibraryVisibilitySettingsUiState(
@@ -127,7 +152,6 @@ class LibraryVisibilitySettingsUiStateTest {
 
     @Nested
     inner class IsDirty {
-
         @Test
         fun `is false when not initialized`() {
             // ----- Arrange -----

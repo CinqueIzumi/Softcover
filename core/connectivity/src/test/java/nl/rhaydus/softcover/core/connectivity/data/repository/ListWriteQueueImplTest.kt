@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ListWriteQueueImplTest {
-
     private lateinit var dao: PendingListWriteDao
     private lateinit var queue: ListWriteQueueImpl
 
@@ -49,7 +48,6 @@ class ListWriteQueueImplTest {
 
     @Nested
     inner class CreateList {
-
         @Test
         fun `serializes CREATE_LIST with listName and null id fields`() = runTest {
             // ----- Arrange -----
@@ -84,7 +82,6 @@ class ListWriteQueueImplTest {
 
     @Nested
     inner class AddListBook {
-
         @Test
         fun `serializes ADD_LIST_BOOK with listId, bookId, editionId and null name and csv fields`() = runTest {
             // ----- Arrange -----
@@ -121,7 +118,6 @@ class ListWriteQueueImplTest {
 
     @Nested
     inner class RemoveListBook {
-
         @Test
         fun `serializes REMOVE_LIST_BOOK with listId, bookId, editionId, listBookId and null csv`() = runTest {
             // ----- Arrange -----
@@ -159,7 +155,6 @@ class ListWriteQueueImplTest {
 
     @Nested
     inner class ReorderListBooks {
-
         @Test
         fun `serializes REORDER_LIST_BOOKS — joins orderedListBookIds as CSV`() = runTest {
             // ----- Arrange -----

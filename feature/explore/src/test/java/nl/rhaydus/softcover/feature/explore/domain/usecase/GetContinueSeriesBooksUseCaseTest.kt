@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetContinueSeriesBooksUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var exploreRepository: ExploreRepository
     private lateinit var useCase: GetContinueSeriesBooksUseCase
@@ -68,7 +67,6 @@ class GetContinueSeriesBooksUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns empty list when books flow emits empty list`() = runTest {
             // ----- Arrange -----
@@ -159,7 +157,10 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(any(), any()) }
+            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
+                any(),
+                any(),
+            ) }
         }
 
         @Test
@@ -180,7 +181,10 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(any(), any()) }
+            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
+                any(),
+                any(),
+            ) }
         }
 
         @Test
@@ -201,7 +205,10 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(any(), any()) }
+            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
+                any(),
+                any(),
+            ) }
         }
 
         @Test
@@ -221,7 +228,10 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(any(), any()) }
+            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
+                any(),
+                any(),
+            ) }
         }
 
         @Test
@@ -229,7 +239,11 @@ class GetContinueSeriesBooksUseCaseTest {
             // ----- Arrange -----
             val noPositionBook = PreviewData.baseBook.copy(
                 id = 1,
-                bookSeries = BookSeries(id = 600, name = "Series", amountOfBooks = 5),
+                bookSeries = BookSeries(
+                    id = 600,
+                    name = "Series",
+                    amountOfBooks = 5,
+                ),
                 positionsInSeries = emptyList(),
                 userBook = stubUserBook(BookStatus.Read),
             )
@@ -241,7 +255,10 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(any(), any()) }
+            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
+                any(),
+                any(),
+            ) }
         }
 
         @Test
@@ -536,7 +553,10 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(any(), any()) }
+            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
+                any(),
+                any(),
+            ) }
         }
 
         @Test
@@ -558,7 +578,10 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(any(), any()) }
+            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
+                any(),
+                any(),
+            ) }
         }
 
         @Test

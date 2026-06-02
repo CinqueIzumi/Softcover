@@ -37,7 +37,10 @@ class OnIsbnSubmittedAction(
                     }
 
                     is IsbnLookupResult.UnknownEdition -> {
-                        scope.setState { it.copy(isResolving = false, unknownIsbn = result.normalizedIsbn) }
+                        scope.setState { it.copy(
+                            isResolving = false,
+                            unknownIsbn = result.normalizedIsbn,
+                        ) }
                     }
 
                     is IsbnLookupResult.InvalidIsbn -> {
@@ -48,7 +51,10 @@ class OnIsbnSubmittedAction(
                 }
             }
             .onFailure { error ->
-                Timber.e(error, "Failed to resolve scanned ISBN $isbn")
+                Timber.e(
+                    error,
+                    "Failed to resolve scanned ISBN $isbn",
+                )
 
                 scope.setState { it.copy(isResolving = false) }
 

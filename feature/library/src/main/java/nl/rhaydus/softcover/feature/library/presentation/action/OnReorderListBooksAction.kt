@@ -38,7 +38,10 @@ class OnReorderListBooksAction(
             startPosition = startPosition,
             orderedListBookIds = orderedListBookIds,
         ).onFailure { throwable ->
-            Timber.e(throwable, "Reorder failed for list $listId")
+            Timber.e(
+                throwable,
+                "Reorder failed for list $listId",
+            )
 
             val suffix = listName?.let { " in \"$it\"" }.orEmpty()
 

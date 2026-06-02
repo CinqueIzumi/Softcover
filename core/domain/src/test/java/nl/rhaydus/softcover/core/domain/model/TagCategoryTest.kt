@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class TagCategoryTest {
-
     @Nested
     inner class FromApiString {
-
         @Test
         fun `Genre maps to GENRE`() {
             // ----- Arrange -----
@@ -89,7 +87,6 @@ class TagCategoryTest {
 
     @Nested
     inner class ApiValueRoundTrip {
-
         @Test
         fun `GENRE round-trips via apiValue`() {
             // ----- Arrange -----
@@ -148,7 +145,6 @@ class TagCategoryTest {
 
     @Nested
     inner class FromName {
-
         @Test
         fun `GENRE maps to GENRE`() {
             // ----- Arrange -----

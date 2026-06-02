@@ -15,7 +15,6 @@ import java.time.LocalDate
  * Edition sort still happens in memory — that path is exercised here.
  */
 class LibrarySortTest {
-
     private fun buildEdition(
         id: Int = 1,
         pages: Int? = null,
@@ -43,16 +42,23 @@ class LibrarySortTest {
 
     @Nested
     inner class ApplyEditionSort {
-
         @Nested
         inner class Title {
-
             @Test
             fun `sorts editions by title ascending case-insensitively`() {
                 val editions = listOf(
-                    buildEdition(id = 1, title = "Zebra Edition"),
-                    buildEdition(id = 2, title = "alpha Edition"),
-                    buildEdition(id = 3, title = "Middle Edition"),
+                    buildEdition(
+                        id = 1,
+                        title = "Zebra Edition",
+                    ),
+                    buildEdition(
+                        id = 2,
+                        title = "alpha Edition",
+                    ),
+                    buildEdition(
+                        id = 3,
+                        title = "Middle Edition",
+                    ),
                 )
 
                 val result = editions.applyEditionSort(mode = LibrarySortMode.TITLE)
@@ -65,8 +71,14 @@ class LibrarySortTest {
             @Test
             fun `null title sorts before non-null`() {
                 val editions = listOf(
-                    buildEdition(id = 1, title = "Some Title"),
-                    buildEdition(id = 2, title = null),
+                    buildEdition(
+                        id = 1,
+                        title = "Some Title",
+                    ),
+                    buildEdition(
+                        id = 2,
+                        title = null,
+                    ),
                 )
 
                 val result = editions.applyEditionSort(mode = LibrarySortMode.TITLE)
@@ -78,9 +90,18 @@ class LibrarySortTest {
             @Test
             fun `sorts editions by title descending when direction is DESCENDING`() {
                 val editions = listOf(
-                    buildEdition(id = 1, title = "alpha Edition"),
-                    buildEdition(id = 2, title = "Middle Edition"),
-                    buildEdition(id = 3, title = "Zebra Edition"),
+                    buildEdition(
+                        id = 1,
+                        title = "alpha Edition",
+                    ),
+                    buildEdition(
+                        id = 2,
+                        title = "Middle Edition",
+                    ),
+                    buildEdition(
+                        id = 3,
+                        title = "Zebra Edition",
+                    ),
                 )
 
                 val result = editions.applyEditionSort(
@@ -96,12 +117,23 @@ class LibrarySortTest {
 
         @Nested
         inner class Author {
-
             @Test
             fun `sorts editions by first author name ascending`() {
                 val editions = listOf(
-                    buildEdition(id = 1, authors = listOf(Author(id = 1, name = "Tolkien"))),
-                    buildEdition(id = 2, authors = listOf(Author(id = 2, name = "Adams"))),
+                    buildEdition(
+                        id = 1,
+                        authors = listOf(Author(
+                            id = 1,
+                            name = "Tolkien",
+                        ),),
+                    ),
+                    buildEdition(
+                        id = 2,
+                        authors = listOf(Author(
+                            id = 2,
+                            name = "Adams",
+                        ),),
+                    ),
                 )
 
                 val result = editions.applyEditionSort(mode = LibrarySortMode.AUTHOR)
@@ -113,8 +145,20 @@ class LibrarySortTest {
             @Test
             fun `sorts editions by first author name descending when direction is DESCENDING`() {
                 val editions = listOf(
-                    buildEdition(id = 1, authors = listOf(Author(id = 1, name = "Adams"))),
-                    buildEdition(id = 2, authors = listOf(Author(id = 2, name = "Tolkien"))),
+                    buildEdition(
+                        id = 1,
+                        authors = listOf(Author(
+                            id = 1,
+                            name = "Adams",
+                        ),),
+                    ),
+                    buildEdition(
+                        id = 2,
+                        authors = listOf(Author(
+                            id = 2,
+                            name = "Tolkien",
+                        ),),
+                    ),
                 )
 
                 val result = editions.applyEditionSort(
@@ -129,13 +173,21 @@ class LibrarySortTest {
 
         @Nested
         inner class PageCount {
-
             @Test
             fun `sorts editions by page count descending`() {
                 val editions = listOf(
-                    buildEdition(id = 1, pages = 200),
-                    buildEdition(id = 2, pages = 600),
-                    buildEdition(id = 3, pages = null),
+                    buildEdition(
+                        id = 1,
+                        pages = 200,
+                    ),
+                    buildEdition(
+                        id = 2,
+                        pages = 600,
+                    ),
+                    buildEdition(
+                        id = 3,
+                        pages = null,
+                    ),
                 )
 
                 val result = editions.applyEditionSort(mode = LibrarySortMode.PAGE_COUNT)
@@ -148,8 +200,14 @@ class LibrarySortTest {
             @Test
             fun `sorts editions by fewest pages first when direction is ASCENDING`() {
                 val editions = listOf(
-                    buildEdition(id = 1, pages = 600),
-                    buildEdition(id = 2, pages = 200),
+                    buildEdition(
+                        id = 1,
+                        pages = 600,
+                    ),
+                    buildEdition(
+                        id = 2,
+                        pages = 200,
+                    ),
                 )
 
                 val result = editions.applyEditionSort(
@@ -164,13 +222,24 @@ class LibrarySortTest {
 
         @Nested
         inner class ReleaseDate {
-
             @Test
             fun `sorts editions by release date ascending`() {
                 val editions = listOf(
-                    buildEdition(id = 1).copy(releaseDate = LocalDate.of(2023, 5, 1)),
-                    buildEdition(id = 2).copy(releaseDate = LocalDate.of(2021, 1, 15)),
-                    buildEdition(id = 3).copy(releaseDate = LocalDate.of(2022, 9, 30)),
+                    buildEdition(id = 1).copy(releaseDate = LocalDate.of(
+                        2023,
+                        5,
+                        1,
+                    ),),
+                    buildEdition(id = 2).copy(releaseDate = LocalDate.of(
+                        2021,
+                        1,
+                        15,
+                    ),),
+                    buildEdition(id = 3).copy(releaseDate = LocalDate.of(
+                        2022,
+                        9,
+                        30,
+                    ),),
                 )
 
                 val result = editions.applyEditionSort(mode = LibrarySortMode.RELEASE_DATE)
@@ -182,7 +251,11 @@ class LibrarySortTest {
 
             @Test
             fun `edition with null release date sorts last`() {
-                val withDate = buildEdition(id = 1).copy(releaseDate = LocalDate.of(2020, 1, 1))
+                val withDate = buildEdition(id = 1).copy(releaseDate = LocalDate.of(
+                    2020,
+                    1,
+                    1,
+                ),)
                 val nullDate = buildEdition(id = 2).copy(releaseDate = null)
 
                 val editions = listOf(nullDate, withDate)
@@ -196,9 +269,21 @@ class LibrarySortTest {
             @Test
             fun `sorts editions by newest release date first when direction is DESCENDING`() {
                 val editions = listOf(
-                    buildEdition(id = 1).copy(releaseDate = LocalDate.of(2021, 1, 15)),
-                    buildEdition(id = 2).copy(releaseDate = LocalDate.of(2023, 5, 1)),
-                    buildEdition(id = 3).copy(releaseDate = LocalDate.of(2022, 9, 30)),
+                    buildEdition(id = 1).copy(releaseDate = LocalDate.of(
+                        2021,
+                        1,
+                        15,
+                    ),),
+                    buildEdition(id = 2).copy(releaseDate = LocalDate.of(
+                        2023,
+                        5,
+                        1,
+                    ),),
+                    buildEdition(id = 3).copy(releaseDate = LocalDate.of(
+                        2022,
+                        9,
+                        30,
+                    ),),
                 )
 
                 val result = editions.applyEditionSort(
@@ -214,7 +299,6 @@ class LibrarySortTest {
 
         @Nested
         inner class DateAdded {
-
             @Test
             fun `default direction DESCENDING sorts newest-added first`() {
                 val editions = listOf(
@@ -349,7 +433,6 @@ class LibrarySortTest {
 
         @Nested
         inner class UnchangedModes {
-
             @Test
             fun `DATE_FINISHED returns list unchanged`() {
                 val editions = listOf(buildEdition(id = 1), buildEdition(id = 2))

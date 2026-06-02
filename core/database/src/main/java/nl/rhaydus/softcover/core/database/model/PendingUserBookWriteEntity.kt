@@ -7,7 +7,10 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "pending_user_book_writes",
     indices = [
-        Index(value = ["userBookId", "kind"], unique = true),
+        Index(
+            value = ["userBookId", "kind"],
+            unique = true,
+        ),
     ],
 )
 data class PendingUserBookWriteEntity(

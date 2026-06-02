@@ -54,11 +54,11 @@ fun SoftcoverSearchTopBar(
         searchText.isNotEmpty() -> {
             {
                 IconButton(
-                    onClick = { onSearchValueChange("") }
+                    onClick = { onSearchValueChange("") },
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_close),
-                        contentDescription = "Clear search icon"
+                        contentDescription = "Clear search icon",
                     )
                 }
             }
@@ -67,7 +67,7 @@ fun SoftcoverSearchTopBar(
         trailingFieldAction != null -> {
             {
                 IconButton(
-                    onClick = trailingFieldAction.onClick
+                    onClick = trailingFieldAction.onClick,
                 ) {
                     Icon(
                         painter = trailingFieldAction.iconResource.getIconPainter(),
@@ -104,7 +104,7 @@ fun SoftcoverSearchTopBar(
                     focusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                )
+                ),
             )
         },
         actions = {
@@ -114,7 +114,7 @@ fun SoftcoverSearchTopBar(
 
                     Icon(
                         painter = resource.getIconPainter(),
-                        contentDescription = resource.contentDescription
+                        contentDescription = resource.contentDescription,
                     )
                 }
             }
@@ -124,11 +124,11 @@ fun SoftcoverSearchTopBar(
                 IconButton(onClick = onNavigateBack) {
                     Icon(
                         painter = painterResource(R.drawable.ic_arrow_back),
-                        contentDescription = "Navigate back icon"
+                        contentDescription = "Navigate back icon",
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -147,7 +147,7 @@ fun SoftcoverTopBar(
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     painter = painterResource(R.drawable.ic_arrow_back),
-                    contentDescription = "Navigate back icon"
+                    contentDescription = "Navigate back icon",
                 )
             }
         }
@@ -161,7 +161,7 @@ fun SoftcoverTopBar(
             Text(
                 text = title,
                 autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.titleLarge.fontSize),
-                maxLines = 2
+                maxLines = 2,
             )
         },
         subtitle = givenSubtitle,
@@ -177,7 +177,7 @@ fun SoftcoverTopBar(
 
                     Icon(
                         painter = resource.getIconPainter(),
-                        contentDescription = resource.contentDescription
+                        contentDescription = resource.contentDescription,
                     )
                 }
             }
@@ -193,7 +193,7 @@ private fun SoftcoverTopBarPreview() {
     SoftcoverTheme() {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             SoftcoverTopBar(
                 title = "given title",
@@ -208,9 +208,9 @@ private fun SoftcoverTopBarPreview() {
                     SoftcoverTopBarAction(
                         iconResource = SoftcoverIconResource.Drawable(
                             id = R.drawable.ic_palette,
-                            contentDescription = ""
+                            contentDescription = "",
                         ),
-                        onClick = {}
+                        onClick = {},
                     )
                 },
             )
@@ -225,7 +225,7 @@ private fun SoftcoverSearchTopBarPreview() {
     SoftcoverTheme() {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             SoftcoverSearchTopBar(
                 searchText = "",
@@ -244,11 +244,11 @@ private fun SoftcoverSearchTopBarPreview() {
                     SoftcoverTopBarAction(
                         iconResource = SoftcoverIconResource.Drawable(
                             id = R.drawable.ic_palette,
-                            contentDescription = ""
+                            contentDescription = "",
                         ),
-                        onClick = {}
+                        onClick = {},
                     )
-                }
+                },
             )
         }
     }

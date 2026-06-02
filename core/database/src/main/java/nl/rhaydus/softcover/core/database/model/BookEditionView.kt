@@ -23,11 +23,11 @@ import androidx.room.Embedded
         ) AS isOwned
     FROM book_editions edition
     """,
-    viewName = "book_edition_view"
+    viewName = "book_edition_view",
 )
 data class BookEditionView(
     @Embedded
     val edition: BookEditionEntity,
 
-    val isOwned: Boolean
+    val isOwned: Boolean,
 )

@@ -37,7 +37,10 @@ class OnToggleListMembershipAction(
         }
 
         result.onFailure { error ->
-            Timber.e(error, "Failed to toggle list membership for list $listId")
+            Timber.e(
+                error,
+                "Failed to toggle list membership for list $listId",
+            )
         }
 
         scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated - listId) }

@@ -44,7 +44,6 @@ import java.time.Duration
  * removed only when the session ends (the [controller]'s active session goes null).
  */
 class ReadingSessionService : Service() {
-
     private val controller: ActiveSessionController by inject()
 
     private val appEntryPoint: AppEntryPoint by inject()
@@ -59,7 +58,11 @@ class ReadingSessionService : Service() {
 
     override fun onBind(intent: Intent): IBinder? = null
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         when (intent?.action) {
             ACTION_PAUSE -> controller.pause()
 
@@ -73,7 +76,10 @@ class ReadingSessionService : Service() {
         // ACTION_RESHOW (the notification's deleteIntent) re-posts after a swipe: Android 14+ ignores
         // setOngoing for FGS notifications, so the only way to keep it persistent is to bring it back.
         // If the session has ended, the collector below removes it instead.
-        startForeground(NOTIFICATION_ID, buildNotification(active = controller.activeSession.value))
+        startForeground(
+            NOTIFICATION_ID,
+            buildNotification(active = controller.activeSession.value),
+        )
 
         startCollecting()
 
@@ -92,7 +98,10 @@ class ReadingSessionService : Service() {
             .onEach { active ->
                 runCatching {
                     if (active == null) {
-                        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                        ServiceCompat.stopForeground(
+                            this,
+                            ServiceCompat.STOP_FOREGROUND_REMOVE,
+                        )
 
                         stopSelf()
 
@@ -101,7 +110,10 @@ class ReadingSessionService : Service() {
 
                     ensureCover(active = active)
 
-                    startForeground(NOTIFICATION_ID, buildNotification(active = active))
+                    startForeground(
+                        NOTIFICATION_ID,
+                        buildNotification(active = active),
+                    )
                 }.onFailure { error ->
                     Timber.e("$error")
                 }
@@ -139,7 +151,10 @@ class ReadingSessionService : Service() {
             coverBitmap = bitmap
 
             controller.activeSession.value?.let { current ->
-                startForeground(NOTIFICATION_ID, buildNotification(active = current))
+                startForeground(
+                    NOTIFICATION_ID,
+                    buildNotification(active = current),
+                )
             }
         }
     }
@@ -162,11 +177,17 @@ class ReadingSessionService : Service() {
         val isPaused = active?.session?.isPaused == true
         val elapsed = active?.session?.readingDuration() ?: Duration.ZERO
 
-        val builder = NotificationCompat.Builder(this, SoftcoverNotificationChannel.Session.id)
+        val builder = NotificationCompat.Builder(
+            this,
+            SoftcoverNotificationChannel.Session.id,
+        )
             .setSmallIcon(R.drawable.ic_reading)
             .setContentTitle(title)
             .setContentText(if (isPaused) pausedText(elapsed = elapsed) else author)
-            .setColor(ContextCompat.getColor(this, R.color.notification_accent))
+            .setColor(ContextCompat.getColor(
+                this,
+                R.color.notification_accent,
+            ),)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
@@ -230,15 +251,24 @@ class ReadingSessionService : Service() {
         return NotificationCompat.Action.Builder(
             R.drawable.ic_edit,
             getString(R.string.session_action_update),
-            servicePendingIntent(action = ACTION_UPDATE_PAGE, mutable = true),
+            servicePendingIntent(
+                action = ACTION_UPDATE_PAGE,
+                mutable = true,
+            ),
         )
             .addRemoteInput(remoteInput)
             .setAllowGeneratedReplies(false)
             .build()
     }
 
-    private fun servicePendingIntent(action: String, mutable: Boolean = false): PendingIntent {
-        val intent = Intent(this, ReadingSessionService::class.java).setAction(action)
+    private fun servicePendingIntent(
+        action: String,
+        mutable: Boolean = false,
+    ): PendingIntent {
+        val intent = Intent(
+            this,
+            ReadingSessionService::class.java,
+        ).setAction(action)
 
         val flags = if (mutable) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
@@ -246,7 +276,12 @@ class ReadingSessionService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         }
 
-        return PendingIntent.getService(this, action.hashCode(), intent, flags)
+        return PendingIntent.getService(
+            this,
+            action.hashCode(),
+            intent,
+            flags,
+        )
     }
 
     private fun focusModePendingIntent(): PendingIntent {
@@ -261,7 +296,10 @@ class ReadingSessionService : Service() {
     }
 
     private fun pausedText(elapsed: Duration): String =
-        getString(R.string.session_notification_paused, formatSessionElapsed(elapsed = elapsed))
+        getString(
+            R.string.session_notification_paused,
+            formatSessionElapsed(elapsed = elapsed),
+        )
 
     override fun onDestroy() {
         serviceScope.cancel()
@@ -283,9 +321,15 @@ class ReadingSessionService : Service() {
         private const val ACTION_RESHOW = "nl.rhaydus.softcover.session.RESHOW"
 
         fun start(context: Context) {
-            val intent = Intent(context, ReadingSessionService::class.java)
+            val intent = Intent(
+                context,
+                ReadingSessionService::class.java,
+            )
 
-            ContextCompat.startForegroundService(context, intent)
+            ContextCompat.startForegroundService(
+                context,
+                intent,
+            )
         }
     }
 }

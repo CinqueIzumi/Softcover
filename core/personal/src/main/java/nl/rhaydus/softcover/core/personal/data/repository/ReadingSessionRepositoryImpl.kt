@@ -101,8 +101,14 @@ class ReadingSessionRepositoryImpl(
 private fun ReadingSessionEntity.openPauseSeconds(now: Instant): Int {
     val pausedAt = lastPausedAt ?: return 0
 
-    val seconds = runCatching { Duration.between(Instant.parse(pausedAt), now).seconds }
+    val seconds = runCatching { Duration.between(
+        Instant.parse(pausedAt),
+        now,
+    ).seconds }
         .getOrDefault(0L)
 
-    return seconds.coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
+    return seconds.coerceIn(
+        0L,
+        Int.MAX_VALUE.toLong(),
+    ).toInt()
 }

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class FetchBookByIdUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: FetchBookByIdUseCase
 
@@ -24,7 +23,10 @@ class FetchBookByIdUseCaseTest {
         useCase = FetchBookByIdUseCase(booksRepository = booksRepository)
     }
 
-    private fun buildEdition(id: Int, owned: Boolean = false): BookEdition = BookEdition(
+    private fun buildEdition(
+        id: Int,
+        owned: Boolean = false,
+    ): BookEdition = BookEdition(
         id = id,
         canonicalId = null,
         bookId = 0,
@@ -66,7 +68,6 @@ class FetchBookByIdUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success with remote book and its fetched editions`() = runTest {
             // ----- Arrange -----

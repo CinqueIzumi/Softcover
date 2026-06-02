@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class PlanTodayNudgeTest {
-
     private fun buildProgress(
         daysRemaining: Long = 5L,
         unitsRemaining: Int = 50,
@@ -29,7 +28,6 @@ class PlanTodayNudgeTest {
 
     @Nested
     inner class PlanTodayNudgeFor {
-
         @Test
         fun `returns null when progress is null`() {
             // ----- Arrange -----

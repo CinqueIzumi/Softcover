@@ -52,7 +52,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BooksRemoteDataSourceImplTest {
-
     private lateinit var apolloClient: ApolloClient
     private lateinit var dataSource: BooksRemoteDataSourceImpl
 
@@ -206,17 +205,22 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class FetchBookById {
-
         @Test
         fun `returns mapped book when safeQuery succeeds and canonicalId is null`() = runTest {
             // ----- Arrange -----
             val bookId = 42
-            val expectedBook = stubBook(id = bookId, canonicalId = null)
+            val expectedBook = stubBook(
+                id = bookId,
+                canonicalId = null,
+            )
             val queryData = mockk<GetBookByIdQuery.Data>()
             val dataBook = mockk<GetBookByIdQuery.Data.Book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetBookByIdQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -239,9 +243,18 @@ class BooksRemoteDataSourceImplTest {
             // ----- Arrange -----
             val bookId = 42
             val canonicalId = 99
-            val firstBook = stubBook(id = bookId, canonicalId = canonicalId)
-            val canonicalBook = stubBook(id = canonicalId, canonicalId = null)
-            val canonicalBookCleared = stubBook(id = canonicalId, canonicalId = null)
+            val firstBook = stubBook(
+                id = bookId,
+                canonicalId = canonicalId,
+            )
+            val canonicalBook = stubBook(
+                id = canonicalId,
+                canonicalId = null,
+            )
+            val canonicalBookCleared = stubBook(
+                id = canonicalId,
+                canonicalId = null,
+            )
 
             val firstQueryData = mockk<GetBookByIdQuery.Data>()
             val canonicalQueryData = mockk<GetBookByIdQuery.Data>()
@@ -249,11 +262,17 @@ class BooksRemoteDataSourceImplTest {
             val canonicalDataBook = mockk<GetBookByIdQuery.Data.Book>()
 
             coEvery {
-                apolloClient.safeQuery(query = GetBookByIdQuery(id = bookId), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = GetBookByIdQuery(id = bookId),
+                    fetchPolicy = any(),
+                )
             } returns firstQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = GetBookByIdQuery(id = canonicalId), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = GetBookByIdQuery(id = canonicalId),
+                    fetchPolicy = any(),
+                )
             } returns canonicalQueryData
 
             every {
@@ -282,7 +301,10 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe canonicalBookCleared
             coVerify {
-                apolloClient.safeQuery(query = GetBookByIdQuery(id = canonicalId), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = GetBookByIdQuery(id = canonicalId),
+                    fetchPolicy = any(),
+                )
             }
         }
 
@@ -290,12 +312,18 @@ class BooksRemoteDataSourceImplTest {
         fun `does not refetch when canonicalId equals book id`() = runTest {
             // ----- Arrange -----
             val bookId = 42
-            val book = stubBook(id = bookId, canonicalId = bookId)
+            val book = stubBook(
+                id = bookId,
+                canonicalId = bookId,
+            )
             val queryData = mockk<GetBookByIdQuery.Data>()
             val dataBook = mockk<GetBookByIdQuery.Data.Book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetBookByIdQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -312,7 +340,10 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe book
             coVerify(exactly = 1) {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetBookByIdQuery>(),
+                    fetchPolicy = any(),
+                )
             }
         }
 
@@ -323,7 +354,10 @@ class BooksRemoteDataSourceImplTest {
             val dataBook = mockk<GetBookByIdQuery.Data.Book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetBookByIdQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -347,7 +381,10 @@ class BooksRemoteDataSourceImplTest {
             val queryData = mockk<GetBookByIdQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBookByIdQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetBookByIdQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -365,7 +402,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class FetchBookIdForEdition {
-
         @Test
         fun `returns book_id from the first edition row`() = runTest {
             // ----- Arrange -----
@@ -431,7 +467,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class FetchBooksByIds {
-
         @Test
         fun `returns empty list immediately when ids input is empty`() = runTest {
             // ----- Arrange -----
@@ -443,7 +478,10 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe emptyList()
             coVerify(exactly = 0) {
-                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetBooksByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
             }
         }
 
@@ -460,7 +498,10 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetBooksByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -500,7 +541,10 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetBooksByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -530,7 +574,10 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetBooksByIdsQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetBooksByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -563,7 +610,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class GetEditionsByBookId {
-
         @Test
         fun `returns mapped editions for each edition entry returned by the query`() = runTest {
             // ----- Arrange -----
@@ -575,7 +621,10 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetEditionsByBookIdQuery.Data.Edition.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByBookIdQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByBookIdQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -606,7 +655,10 @@ class BooksRemoteDataSourceImplTest {
             val queryData = mockk<GetEditionsByBookIdQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByBookIdQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByBookIdQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -630,7 +682,10 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetEditionsByBookIdQuery.Data.Edition.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByBookIdQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByBookIdQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -653,7 +708,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class FetchEditionsByIds {
-
         @Test
         fun `returns empty list immediately when ids input is empty`() = runTest {
             // ----- Arrange -----
@@ -665,7 +719,10 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe emptyList()
             coVerify(exactly = 0) {
-                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
             }
         }
 
@@ -682,7 +739,10 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetEditionsByIdsQuery.Data.Edition.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -723,7 +783,10 @@ class BooksRemoteDataSourceImplTest {
             val queryData = mockk<GetEditionsByIdsQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -747,7 +810,10 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetEditionsByIdsQuery.Data.Edition.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetEditionsByIdsQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -766,12 +832,10 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe emptyList()
         }
-
     }
 
     @Nested
     inner class MarkBookAsWantToRead {
-
         @Test
         fun `throws when mutation returns null insert_user_book wrapper`() = runTest {
             // ----- Arrange -----
@@ -878,7 +942,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            dataSource.markBookAsWantToRead(bookId = bookId, editionId = editionId)
+            dataSource.markBookAsWantToRead(
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -916,7 +983,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            dataSource.markBookAsWantToRead(bookId = bookId, editionId = null)
+            dataSource.markBookAsWantToRead(
+                bookId = bookId,
+                editionId = null,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -931,7 +1001,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class MarkBookAsReading {
-
         @Test
         fun `returns mapped book when mutation succeeds`() = runTest {
             // ----- Arrange -----
@@ -1043,7 +1112,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class UpdateBookRating {
-
         @Test
         fun `returns mapped book when mutation succeeds`() = runTest {
             // ----- Arrange -----
@@ -1071,7 +1139,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            val result = dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+            val result = dataSource.updateBookRating(
+                userBook = userBook,
+                rating = 4.5,
+            )
 
             // ----- Assert -----
             result shouldBe expectedBook
@@ -1104,7 +1175,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+            dataSource.updateBookRating(
+                userBook = userBook,
+                rating = 4.5,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -1130,7 +1204,10 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+                dataSource.updateBookRating(
+                    userBook = userBook,
+                    rating = 4.5,
+                )
             }
         }
 
@@ -1160,14 +1237,16 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.updateBookRating(userBook = userBook, rating = 4.5)
+                dataSource.updateBookRating(
+                    userBook = userBook,
+                    rating = 4.5,
+                )
             }
         }
     }
 
     @Nested
     inner class RemoveBookFromLibrary {
-
         @Test
         fun `calls safeMutation with the user book id from the given book`() = runTest {
             // ----- Arrange -----
@@ -1203,7 +1282,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class InitializeBooks {
-
         @Test
         fun `returns mapped books for each user_book entry returned by the query`() = runTest {
             // ----- Arrange -----
@@ -1214,7 +1292,10 @@ class BooksRemoteDataSourceImplTest {
             val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBooksQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetUserBooksQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -1242,7 +1323,10 @@ class BooksRemoteDataSourceImplTest {
             val queryData = mockk<GetUserBooksQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBooksQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetUserBooksQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -1264,7 +1348,10 @@ class BooksRemoteDataSourceImplTest {
             val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBooksQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetUserBooksQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -1290,13 +1377,19 @@ class BooksRemoteDataSourceImplTest {
         fun `skips GetBooksByIdsQuery call when no user book has a differing canonicalId`() = runTest {
             // ----- Arrange -----
             val userId = 1
-            val bookWithoutCanonical = stubBook(id = 10, canonicalId = null)
+            val bookWithoutCanonical = stubBook(
+                id = 10,
+                canonicalId = null,
+            )
             val queryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
             val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
 
             coEvery {
-                apolloClient.safeQuery(query = any<GetUserBooksQuery>(), fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = any<GetUserBooksQuery>(),
+                    fetchPolicy = any(),
+                )
             } returns queryData
 
             every {
@@ -1317,7 +1410,10 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe listOf(bookWithoutCanonical)
             coVerify(exactly = 0) {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             }
         }
 
@@ -1326,9 +1422,15 @@ class BooksRemoteDataSourceImplTest {
             // ----- Arrange -----
             val userId = 1
             val canonicalId = 20
-            val originalBook = stubBook(id = 10, canonicalId = canonicalId)
+            val originalBook = stubBook(
+                id = 10,
+                canonicalId = canonicalId,
+            )
             val canonicalBook = stubCanonicalBook(id = canonicalId)
-            val mergedBook = stubBook(id = canonicalId, canonicalId = null)
+            val mergedBook = stubBook(
+                id = canonicalId,
+                canonicalId = null,
+            )
             val userBooksQueryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
             val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
@@ -1338,11 +1440,17 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery },
+                    fetchPolicy = any(),
+                )
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {
@@ -1408,7 +1516,10 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe listOf(mergedBook)
             coVerify(exactly = 1) {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             }
         }
 
@@ -1418,12 +1529,27 @@ class BooksRemoteDataSourceImplTest {
             val userId = 1
             val canonicalId1 = 20
             val canonicalId2 = 30
-            val originalBook1 = stubBook(id = 10, canonicalId = canonicalId1)
-            val originalBook2 = stubBook(id = 11, canonicalId = canonicalId2)
+            val originalBook1 = stubBook(
+                id = 10,
+                canonicalId = canonicalId1,
+            )
+            val originalBook2 = stubBook(
+                id = 11,
+                canonicalId = canonicalId2,
+            )
             val canonicalBook1 = stubCanonicalBook(id = canonicalId1)
-            val canonicalBook2 = stubCanonicalBook(id = canonicalId2, title = "Other Canonical")
-            val mergedBook1 = stubBook(id = canonicalId1, canonicalId = null)
-            val mergedBook2 = stubBook(id = canonicalId2, canonicalId = null)
+            val canonicalBook2 = stubCanonicalBook(
+                id = canonicalId2,
+                title = "Other Canonical",
+            )
+            val mergedBook1 = stubBook(
+                id = canonicalId1,
+                canonicalId = null,
+            )
+            val mergedBook2 = stubBook(
+                id = canonicalId2,
+                canonicalId = null,
+            )
             val userBooksQueryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
             val userBookEntry1 = mockk<GetUserBooksQuery.Data.Me.User_book>()
@@ -1435,11 +1561,17 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery },
+                    fetchPolicy = any(),
+                )
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {
@@ -1550,7 +1682,10 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result shouldBe listOf(mergedBook1, mergedBook2)
             coVerify(exactly = 1) {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             }
         }
 
@@ -1559,11 +1694,23 @@ class BooksRemoteDataSourceImplTest {
             // ----- Arrange -----
             val userId = 1
             val sharedCanonicalId = 20
-            val originalBook1 = stubBook(id = 10, canonicalId = sharedCanonicalId)
-            val originalBook2 = stubBook(id = 11, canonicalId = sharedCanonicalId)
+            val originalBook1 = stubBook(
+                id = 10,
+                canonicalId = sharedCanonicalId,
+            )
+            val originalBook2 = stubBook(
+                id = 11,
+                canonicalId = sharedCanonicalId,
+            )
             val canonicalBook = stubCanonicalBook(id = sharedCanonicalId)
-            val mergedBook1 = stubBook(id = sharedCanonicalId, canonicalId = null)
-            val mergedBook2 = stubBook(id = sharedCanonicalId, canonicalId = null)
+            val mergedBook1 = stubBook(
+                id = sharedCanonicalId,
+                canonicalId = null,
+            )
+            val mergedBook2 = stubBook(
+                id = sharedCanonicalId,
+                canonicalId = null,
+            )
             val userBooksQueryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
             val userBookEntry1 = mockk<GetUserBooksQuery.Data.Me.User_book>()
@@ -1574,11 +1721,17 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery },
+                    fetchPolicy = any(),
+                )
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {
@@ -1666,7 +1819,10 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             }
         }
 
@@ -1675,10 +1831,19 @@ class BooksRemoteDataSourceImplTest {
             // ----- Arrange -----
             val userId = 1
             val canonicalId = 20
-            val originalCanonicalBook = stubBook(id = 10, canonicalId = canonicalId)
-            val nonCanonicalBook = stubBook(id = 11, canonicalId = null)
+            val originalCanonicalBook = stubBook(
+                id = 10,
+                canonicalId = canonicalId,
+            )
+            val nonCanonicalBook = stubBook(
+                id = 11,
+                canonicalId = null,
+            )
             val canonicalBook = stubCanonicalBook(id = canonicalId)
-            val mergedBook = stubBook(id = canonicalId, canonicalId = null)
+            val mergedBook = stubBook(
+                id = canonicalId,
+                canonicalId = null,
+            )
             val userBooksQueryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
             val canonicalUserBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
@@ -1689,11 +1854,17 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery },
+                    fetchPolicy = any(),
+                )
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {
@@ -1768,7 +1939,10 @@ class BooksRemoteDataSourceImplTest {
         fun `preserves pre-merge metadata when canonical id is not present in fetchBooksByIds response`() = runTest {
             // ----- Arrange -----
             val userId = 1
-            val bookWithMissingCanonical = stubBook(id = 10, canonicalId = 20)
+            val bookWithMissingCanonical = stubBook(
+                id = 10,
+                canonicalId = 20,
+            )
             val userBooksQueryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
             val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
@@ -1777,11 +1951,17 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery },
+                    fetchPolicy = any(),
+                )
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {
@@ -1812,9 +1992,18 @@ class BooksRemoteDataSourceImplTest {
             // ----- Arrange -----
             val userId = 1
             val canonicalId = 20
-            val originalBook = stubBook(id = 10, canonicalId = canonicalId)
-            val canonicalBook = stubCanonicalBook(id = canonicalId, ratingsCount = 999)
-            val mergedBook = stubBook(id = canonicalId, canonicalId = null)
+            val originalBook = stubBook(
+                id = 10,
+                canonicalId = canonicalId,
+            )
+            val canonicalBook = stubCanonicalBook(
+                id = canonicalId,
+                ratingsCount = 999,
+            )
+            val mergedBook = stubBook(
+                id = canonicalId,
+                canonicalId = null,
+            )
             val userBooksQueryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
             val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
@@ -1824,11 +2013,17 @@ class BooksRemoteDataSourceImplTest {
             mockkObject(GetBooksByIdsQuery.Data.Book.Companion)
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery },
+                    fetchPolicy = any(),
+                )
             } returns userBooksQueryData
 
             coEvery {
-                apolloClient.safeQuery(query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery }, fetchPolicy = any())
+                apolloClient.safeQuery(
+                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    fetchPolicy = any(),
+                )
             } returns booksQueryData
 
             every {
@@ -1919,15 +2114,20 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class UpdateBookProgress {
-
         @Test
         fun `throws when book has no userBook`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(userBook = null, userBookRead = stubUserBookRead())
+            val book = stubBook(
+                userBook = null,
+                userBookRead = stubUserBookRead(),
+            )
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.updateBookProgress(book = book, newPage = 50)
+                dataSource.updateBookProgress(
+                    book = book,
+                    newPage = 50,
+                )
             }
         }
 
@@ -1935,11 +2135,17 @@ class BooksRemoteDataSourceImplTest {
         fun `throws when book has no userBookRead`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 3)
-            val book = stubBook(userBook = userBook, userBookRead = null)
+            val book = stubBook(
+                userBook = userBook,
+                userBookRead = null,
+            )
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.updateBookProgress(book = book, newPage = 50)
+                dataSource.updateBookProgress(
+                    book = book,
+                    newPage = 50,
+                )
             }
         }
 
@@ -1948,7 +2154,10 @@ class BooksRemoteDataSourceImplTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 3)
             val userBookRead = stubUserBookRead(id = 5)
-            val book = stubBook(userBook = userBook, userBookRead = userBookRead)
+            val book = stubBook(
+                userBook = userBook,
+                userBookRead = userBookRead,
+            )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
@@ -1983,7 +2192,10 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.updateBookProgress(book = book, newPage = 50)
+                dataSource.updateBookProgress(
+                    book = book,
+                    newPage = 50,
+                )
             }
         }
 
@@ -1991,10 +2203,19 @@ class BooksRemoteDataSourceImplTest {
         fun `returns updated book copy with new page and appended journal entry on success`() = runTest {
             // ----- Arrange -----
             val newPage = 120
-            val existingJournals = listOf(ReadingJournal(updatedAt = "2024-01-01T00:00:00.000000", event = "status_updated"))
-            val userBook = stubUserBook(id = 3, journals = existingJournals)
+            val existingJournals = listOf(ReadingJournal(
+                updatedAt = "2024-01-01T00:00:00.000000",
+                event = "status_updated",
+            ),)
+            val userBook = stubUserBook(
+                id = 3,
+                journals = existingJournals,
+            )
             val userBookRead = stubUserBookRead(id = 5)
-            val book = stubBook(userBook = userBook, userBookRead = userBookRead)
+            val book = stubBook(
+                userBook = userBook,
+                userBookRead = userBookRead,
+            )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
@@ -2026,7 +2247,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            val result = dataSource.updateBookProgress(book = book, newPage = newPage)
+            val result = dataSource.updateBookProgress(
+                book = book,
+                newPage = newPage,
+            )
 
             // ----- Assert -----
             result shouldBe expectedBook
@@ -2038,7 +2262,10 @@ class BooksRemoteDataSourceImplTest {
             val newSeconds = 3600
             val userBook = stubUserBook(id = 3)
             val userBookRead = stubUserBookRead(id = 5)
-            val book = stubBook(userBook = userBook, userBookRead = userBookRead)
+            val book = stubBook(
+                userBook = userBook,
+                userBookRead = userBookRead,
+            )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
@@ -2070,7 +2297,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            dataSource.updateBookProgress(book = book, newSeconds = newSeconds)
+            dataSource.updateBookProgress(
+                book = book,
+                newSeconds = newSeconds,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -2079,7 +2309,7 @@ class BooksRemoteDataSourceImplTest {
                         val input = mutation.datesReadInput
                         input.progress_pages is Optional.Absent &&
                             input.progress_seconds.getOrNull() == newSeconds
-                    }
+                    },
                 )
             }
         }
@@ -2090,7 +2320,10 @@ class BooksRemoteDataSourceImplTest {
             val newPage = 75
             val userBook = stubUserBook(id = 3)
             val userBookRead = stubUserBookRead(id = 5)
-            val book = stubBook(userBook = userBook, userBookRead = userBookRead)
+            val book = stubBook(
+                userBook = userBook,
+                userBookRead = userBookRead,
+            )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
@@ -2122,7 +2355,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            dataSource.updateBookProgress(book = book, newPage = newPage)
+            dataSource.updateBookProgress(
+                book = book,
+                newPage = newPage,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -2131,7 +2367,7 @@ class BooksRemoteDataSourceImplTest {
                         val input = mutation.datesReadInput
                         input.progress_pages.getOrNull() == newPage &&
                             input.progress_seconds is Optional.Absent
-                    }
+                    },
                 )
             }
         }
@@ -2140,15 +2376,27 @@ class BooksRemoteDataSourceImplTest {
         fun `returns updated book with currentSeconds set when newSeconds is provided`() = runTest {
             // ----- Arrange -----
             val newSeconds = 3600
-            val existingJournals = listOf(ReadingJournal(updatedAt = "2024-01-01T00:00:00.000000", event = "status_updated"))
-            val userBook = stubUserBook(id = 3, journals = existingJournals)
+            val existingJournals = listOf(ReadingJournal(
+                updatedAt = "2024-01-01T00:00:00.000000",
+                event = "status_updated",
+            ),)
+            val userBook = stubUserBook(
+                id = 3,
+                journals = existingJournals,
+            )
             val userBookRead = stubUserBookRead(id = 5)
-            val book = stubBook(userBook = userBook, userBookRead = userBookRead)
+            val book = stubBook(
+                userBook = userBook,
+                userBookRead = userBookRead,
+            )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
-            val updatedUserBookReadMock = stubUserBookRead(id = 5, currentSeconds = newSeconds)
+            val updatedUserBookReadMock = stubUserBookRead(
+                id = 5,
+                currentSeconds = newSeconds,
+            )
             val expectedBook = stubBook(userBookRead = updatedUserBookReadMock)
 
             every {
@@ -2176,7 +2424,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            val result = dataSource.updateBookProgress(book = book, newSeconds = newSeconds)
+            val result = dataSource.updateBookProgress(
+                book = book,
+                newSeconds = newSeconds,
+            )
 
             // ----- Assert -----
             result.userBookRead?.currentSeconds shouldBe newSeconds
@@ -2185,7 +2436,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class MarkBookAsRead {
-
         @Test
         fun `throws when mutation returns null insert_user_book wrapper`() = runTest {
             // ----- Arrange -----
@@ -2340,7 +2590,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            dataSource.markBookAsRead(book = book, editionId = editionId)
+            dataSource.markBookAsRead(
+                book = book,
+                editionId = editionId,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -2382,7 +2635,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            dataSource.markBookAsRead(book = book, editionId = null)
+            dataSource.markBookAsRead(
+                book = book,
+                editionId = null,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -2397,7 +2653,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class UpdateBookEdition {
-
         @Test
         fun `returns mapped book when mutation succeeds`() = runTest {
             // ----- Arrange -----
@@ -2455,7 +2710,10 @@ class BooksRemoteDataSourceImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            val result = dataSource.updateBookEdition(userBook = userBook, newEditionId = newEditionId)
+            val result = dataSource.updateBookEdition(
+                userBook = userBook,
+                newEditionId = newEditionId,
+            )
 
             // ----- Assert -----
             result shouldBe expectedBook
@@ -2513,7 +2771,10 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.updateBookEdition(userBook = userBook, newEditionId = newEditionId)
+                dataSource.updateBookEdition(
+                    userBook = userBook,
+                    newEditionId = newEditionId,
+                )
             }
         }
 
@@ -2574,14 +2835,16 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.updateBookEdition(userBook = userBook, newEditionId = newEditionId)
+                dataSource.updateBookEdition(
+                    userBook = userBook,
+                    newEditionId = newEditionId,
+                )
             }
         }
     }
 
     @Nested
     inner class ReplayUpdateBookRating {
-
         @Test
         fun `issues UpdateUserBookRatingMutation with the correct userBookId and rating`() = runTest {
             // ----- Arrange -----
@@ -2593,7 +2856,10 @@ class BooksRemoteDataSourceImplTest {
             } returns mockk(relaxed = true)
 
             // ----- Act -----
-            dataSource.replayUpdateBookRating(userBookId = userBookId, rating = rating)
+            dataSource.replayUpdateBookRating(
+                userBookId = userBookId,
+                rating = rating,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
@@ -2606,7 +2872,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class UpdateBookReview {
-
         @Test
         fun `returns mapped book when mutation succeeds`() = runTest {
             // ----- Arrange -----
@@ -2750,7 +3015,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class FetchEditionMatchForIsbn {
-
         @Test
         fun `isbn13 match — returns IsbnEditionMatch from first isbn13 row`() = runTest {
             // ----- Arrange -----
@@ -2774,7 +3038,10 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
 
             // ----- Assert -----
-            result shouldBe IsbnEditionMatch(bookId = 10, editionId = 110)
+            result shouldBe IsbnEditionMatch(
+                bookId = 10,
+                editionId = 110,
+            )
         }
 
         @Test
@@ -2800,7 +3067,10 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
 
             // ----- Assert -----
-            result shouldBe IsbnEditionMatch(bookId = 20, editionId = 220)
+            result shouldBe IsbnEditionMatch(
+                bookId = 20,
+                editionId = 220,
+            )
         }
 
         @Test
@@ -2829,7 +3099,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class ReplayUpdateBookReview {
-
         @Test
         fun `issues UpdateUserBookReviewMutation with the correct userBookId`() = runTest {
             // ----- Arrange -----
@@ -2858,7 +3127,6 @@ class BooksRemoteDataSourceImplTest {
 
     @Nested
     inner class AddBookByIsbn {
-
         @Test
         fun `returns CreatedBook with bookId and editionId when mutation succeeds`() = runTest {
             // ----- Arrange -----
@@ -2900,7 +3168,10 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.addBookByIsbn(isbn = isbn)
 
             // ----- Assert -----
-            result shouldBe CreatedBook(bookId = 42, editionId = 110)
+            result shouldBe CreatedBook(
+                bookId = 42,
+                editionId = 110,
+            )
         }
 
         @Test
@@ -2939,7 +3210,10 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.addBookByIsbn(isbn = isbn)
 
             // ----- Assert -----
-            result shouldBe CreatedBook(bookId = 42, editionId = null)
+            result shouldBe CreatedBook(
+                bookId = 42,
+                editionId = null,
+            )
         }
 
         @Test
@@ -2996,5 +3270,4 @@ class BooksRemoteDataSourceImplTest {
             }
         }
     }
-
 }

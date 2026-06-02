@@ -15,7 +15,10 @@ fun htmlToAnnotatedString(html: String): AnnotatedString {
         val char = html[index]
 
         if (char == '<') {
-            val closingBracket = html.indexOf(char = '>', startIndex = index)
+            val closingBracket = html.indexOf(
+                char = '>',
+                startIndex = index,
+            )
 
             if (closingBracket < 0) {
                 builder.append(char)
@@ -23,7 +26,10 @@ fun htmlToAnnotatedString(html: String): AnnotatedString {
                 continue
             }
 
-            val tag = html.substring(startIndex = index + 1, endIndex = closingBracket)
+            val tag = html.substring(
+                startIndex = index + 1,
+                endIndex = closingBracket,
+            )
                 .trim()
                 .trimEnd('/')
                 .trim()
@@ -51,7 +57,10 @@ fun htmlToAnnotatedString(html: String): AnnotatedString {
         }
 
         if (char == '&') {
-            val semicolon = html.indexOf(char = ';', startIndex = index)
+            val semicolon = html.indexOf(
+                char = ';',
+                startIndex = index,
+            )
 
             if (semicolon < 0 || semicolon - index > 10) {
                 builder.append(char)
@@ -59,7 +68,10 @@ fun htmlToAnnotatedString(html: String): AnnotatedString {
                 continue
             }
 
-            val entity = html.substring(startIndex = index + 1, endIndex = semicolon)
+            val entity = html.substring(
+                startIndex = index + 1,
+                endIndex = semicolon,
+            )
 
             val decoded = decodeEntity(entity = entity)
 
@@ -86,7 +98,10 @@ fun htmlToAnnotatedString(html: String): AnnotatedString {
 
     if (trimEnd == result.text.length) return result
 
-    return result.subSequence(startIndex = 0, endIndex = trimEnd)
+    return result.subSequence(
+        startIndex = 0,
+        endIndex = trimEnd,
+    )
 }
 
 private fun decodeEntity(entity: String): String? {

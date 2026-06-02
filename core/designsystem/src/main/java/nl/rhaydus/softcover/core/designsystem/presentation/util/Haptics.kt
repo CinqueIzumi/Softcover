@@ -35,7 +35,6 @@ interface Haptics {
 }
 
 private class ViewHaptics(private val view: View) : Haptics {
-
     override fun commit() {
         view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
@@ -109,7 +108,6 @@ private class ViewHaptics(private val view: View) : Haptics {
 }
 
 private object NoOpHaptics : Haptics {
-
     override fun commit() = Unit
 
     override fun reject() = Unit

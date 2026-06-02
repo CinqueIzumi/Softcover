@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ResetUserDataUseCaseImplTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var booksRepository: BooksRepository
     private lateinit var profileRepository: ProfileRepository
@@ -34,7 +33,6 @@ class ResetUserDataUseCaseImplTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success when all repository calls succeed`() = runTest {
             // ----- Arrange -----

@@ -8,23 +8,31 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ReviewSlateMapperTest {
-
     // ----- Shared fixture — the golden document from the spec -----
 
     private val goldenDocument = ReviewDocument(
         paragraphs = listOf(
             ReviewParagraph(runs = listOf(
-                ReviewRun(text = "Loved", bold = true),
+                ReviewRun(
+                    text = "Loved",
+                    bold = true,
+                ),
                 ReviewRun(text = " it a ton. "),
-            )),
+            ),),
             ReviewParagraph(runs = listOf(
                 ReviewRun(text = "Will be reading more by "),
-                ReviewRun(text = "Kylie Lee Baker", italic = true),
+                ReviewRun(
+                    text = "Kylie Lee Baker",
+                    italic = true,
+                ),
                 ReviewRun(text = "."),
-            )),
+            ),),
             ReviewParagraph(runs = listOf(
-                ReviewRun(text = "Test", spoiler = true),
-            )),
+                ReviewRun(
+                    text = "Test",
+                    spoiler = true,
+                ),
+            ),),
         ),
     )
 
@@ -62,7 +70,6 @@ class ReviewSlateMapperTest {
 
     @Nested
     inner class ReviewSlateFromDocument {
-
         @Test
         fun `golden document produces the exact golden slate`() {
             // ----- Act & Assert -----
@@ -99,10 +106,13 @@ class ReviewSlateMapperTest {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(
-                    ReviewRun(text = "Bold", bold = true),
+                    ReviewRun(
+                        text = "Bold",
+                        bold = true,
+                    ),
                     ReviewRun(text = "Plain"),
-                )),
-            ))
+                ),),
+            ),)
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -119,10 +129,13 @@ class ReviewSlateMapperTest {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(
-                    ReviewRun(text = "Italic", italic = true),
+                    ReviewRun(
+                        text = "Italic",
+                        italic = true,
+                    ),
                     ReviewRun(text = "Plain"),
-                )),
-            ))
+                ),),
+            ),)
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -139,10 +152,13 @@ class ReviewSlateMapperTest {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(
-                    ReviewRun(text = "Spoiler", spoiler = true),
+                    ReviewRun(
+                        text = "Spoiler",
+                        spoiler = true,
+                    ),
                     ReviewRun(text = "Plain"),
-                )),
-            ))
+                ),),
+            ),)
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -176,7 +192,7 @@ class ReviewSlateMapperTest {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(ReviewRun("Hello"), ReviewRun("World"))),
-            ))
+            ),)
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -193,7 +209,7 @@ class ReviewSlateMapperTest {
                 ReviewParagraph(listOf(ReviewRun("P1"))),
                 ReviewParagraph(listOf(ReviewRun("P2"))),
                 ReviewParagraph(listOf(ReviewRun("P3"))),
-            ))
+            ),)
 
             // ----- Act -----
             val result = reviewSlateFromDocument(doc)
@@ -213,7 +229,6 @@ class ReviewSlateMapperTest {
 
     @Nested
     inner class ReviewDocumentFromSlate {
-
         @Test
         fun `parses golden slate back to the expected canonical document`() {
             // ----- Act & Assert -----
@@ -376,7 +391,6 @@ class ReviewSlateMapperTest {
 
     @Nested
     inner class RoundTrip {
-
         @Test
         fun `golden document round-trips through slate without loss`() {
             // ----- Act & Assert -----
@@ -406,7 +420,6 @@ class ReviewSlateMapperTest {
 
     @Nested
     inner class JsonSerialization {
-
         @Test
         fun `toJson then reviewDocumentFromJson round-trips the golden document`() {
             // ----- Act & Assert -----

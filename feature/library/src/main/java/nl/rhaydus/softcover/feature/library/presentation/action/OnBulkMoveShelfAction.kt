@@ -45,7 +45,10 @@ class OnBulkMoveShelfAction(
             }
 
             result.onFailure { throwable ->
-                Timber.e(throwable, "Bulk move-shelf failed for book ${book.id}")
+                Timber.e(
+                    throwable,
+                    "Bulk move-shelf failed for book ${book.id}",
+                )
 
                 failureCount++
             }

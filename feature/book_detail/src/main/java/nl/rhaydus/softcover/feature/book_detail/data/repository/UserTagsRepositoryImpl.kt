@@ -10,10 +10,16 @@ class UserTagsRepositoryImpl(
     override suspend fun getUserTags(
         userId: Int,
         bookId: Int,
-    ): List<UserTag> = userTagsRemoteDataSource.getUserTags(userId = userId, bookId = bookId)
+    ): List<UserTag> = userTagsRemoteDataSource.getUserTags(
+        userId = userId,
+        bookId = bookId,
+    )
 
     override suspend fun saveTags(
         bookId: Int,
         tags: List<UserTag>,
-    ): List<UserTag> = userTagsRemoteDataSource.saveTags(bookId = bookId, tags = tags)
+    ): List<UserTag> = userTagsRemoteDataSource.saveTags(
+        bookId = bookId,
+        tags = tags,
+    )
 }

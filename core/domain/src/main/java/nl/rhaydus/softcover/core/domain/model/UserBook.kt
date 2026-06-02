@@ -27,7 +27,10 @@ data class UserBook(
         )
     }
 
-    fun getReadDateString(style: DateStyle, finishedAt: String? = null): String? {
+    fun getReadDateString(
+        style: DateStyle,
+        finishedAt: String? = null,
+    ): String? {
         finishedAt?.let {
             runCatching { LocalDate.parse(it).format(style.formatter) }
                 .getOrNull()
@@ -44,7 +47,10 @@ data class UserBook(
         val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val outputFormatter = style.formatter
 
-        val date = LocalDate.parse(dateAdded, inputFormatter)
+        val date = LocalDate.parse(
+            dateAdded,
+            inputFormatter,
+        )
         val result = date.format(outputFormatter)
 
         return result

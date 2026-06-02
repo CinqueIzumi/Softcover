@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class BooksLocalDataSourceImplTest {
-
     private lateinit var dao: BookDao
     private lateinit var editionImageStorage: EditionImageStorage
     private lateinit var dataSource: BooksLocalDataSourceImpl
@@ -64,7 +63,10 @@ class BooksLocalDataSourceImplTest {
         seriesId = null,
     )
 
-    private fun stubEditionEntity(id: Int = 10, bookId: Int = 1): BookEditionEntity = BookEditionEntity(
+    private fun stubEditionEntity(
+        id: Int = 10,
+        bookId: Int = 1,
+    ): BookEditionEntity = BookEditionEntity(
         id = id,
         canonicalId = null,
         bookId = bookId,
@@ -107,7 +109,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class AllUserBooks {
-
         @Test
         fun `emits mapped domain books from DAO observeBooks`() = runTest {
             // ----- Arrange -----
@@ -163,7 +164,10 @@ class BooksLocalDataSourceImplTest {
 
             every {
                 dao.observeBooks()
-            } returns flowOf(list, list)
+            } returns flowOf(
+                list,
+                list,
+            )
 
             // ----- Act & Assert -----
             dataSource.allUserBooks.test {
@@ -175,7 +179,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class GetBooksFlowByStatus {
-
         @Test
         fun `CURRENTLY_READING dispatches to getBooksByStatusAndEvents with progress_updated and user_book_read_started`() = runTest {
             // ----- Arrange -----
@@ -279,7 +282,10 @@ class BooksLocalDataSourceImplTest {
                     statusCode = status.code,
                     events = listOf("progress_updated", "user_book_read_started"),
                 )
-            } returns flowOf(list, list)
+            } returns flowOf(
+                list,
+                list,
+            )
 
             // ----- Act & Assert -----
             dataSource.getBooksFlowByStatus(status = status).test {
@@ -307,7 +313,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class GetAllUserBookIds {
-
         @Test
         fun `delegates to DAO and returns the id list`() = runTest {
             // ----- Arrange -----
@@ -341,7 +346,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class GetExistingBookIds {
-
         @Test
         fun `returns empty list immediately when ids input is empty`() = runTest {
             // ----- Arrange -----
@@ -393,7 +397,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class GetExistingEditionIds {
-
         @Test
         fun `returns empty list immediately when ids input is empty`() = runTest {
             // ----- Arrange -----
@@ -445,7 +448,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class CacheEditions {
-
         @Test
         fun `delegates to DAO with the given editions`() = runTest {
             // ----- Arrange -----
@@ -477,7 +479,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class CacheBook {
-
         @Test
         fun `delegates to DAO with the given book`() = runTest {
             // ----- Arrange -----
@@ -495,7 +496,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class CacheBooks {
-
         @Test
         fun `delegates to DAO with the given book list`() = runTest {
             // ----- Arrange -----
@@ -527,7 +527,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class RemoveUserBooksById {
-
         @Test
         fun `delegates to DAO deleteUserBooksByIds with the given ids`() = runTest {
             // ----- Arrange -----
@@ -571,7 +570,10 @@ class BooksLocalDataSourceImplTest {
 
             coEvery {
                 dao.getLocalImagePathsByBookId(bookId = bookId)
-            } returns listOf(EditionLocalImagePath(id = 10, localImagePath = imagePath))
+            } returns listOf(EditionLocalImagePath(
+                id = 10,
+                localImagePath = imagePath,
+            ),)
 
             // ----- Act -----
             dataSource.removeUserBooksById(ids = listOf(userBookId))
@@ -597,7 +599,10 @@ class BooksLocalDataSourceImplTest {
 
             coEvery {
                 dao.getLocalImagePathsByBookId(bookId = bookId)
-            } returns listOf(EditionLocalImagePath(id = 20, localImagePath = null))
+            } returns listOf(EditionLocalImagePath(
+                id = 20,
+                localImagePath = null,
+            ),)
 
             // ----- Act -----
             dataSource.removeUserBooksById(ids = listOf(userBookId))
@@ -629,7 +634,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class RemoveAllBooks {
-
         @Test
         fun `delegates to DAO deleteAllUserBooksAndData`() = runTest {
             // ----- Arrange -----
@@ -653,8 +657,14 @@ class BooksLocalDataSourceImplTest {
             coEvery {
                 dao.getAllLocalImagePaths()
             } returns listOf(
-                EditionLocalImagePath(id = 1, localImagePath = path1),
-                EditionLocalImagePath(id = 2, localImagePath = path2),
+                EditionLocalImagePath(
+                    id = 1,
+                    localImagePath = path1,
+                ),
+                EditionLocalImagePath(
+                    id = 2,
+                    localImagePath = path2,
+                ),
             )
 
             // ----- Act -----
@@ -674,7 +684,10 @@ class BooksLocalDataSourceImplTest {
             // ----- Arrange -----
             coEvery {
                 dao.getAllLocalImagePaths()
-            } returns listOf(EditionLocalImagePath(id = 3, localImagePath = null))
+            } returns listOf(EditionLocalImagePath(
+                id = 3,
+                localImagePath = null,
+            ),)
 
             // ----- Act -----
             dataSource.removeAllBooks()
@@ -688,7 +701,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class UpdateEditionLocalImagePath {
-
         @Test
         fun `delegates to DAO with the given editionId and path`() = runTest {
             // ----- Arrange -----
@@ -696,11 +708,17 @@ class BooksLocalDataSourceImplTest {
             val path = "/data/user/0/edition_images/10"
 
             // ----- Act -----
-            dataSource.updateEditionLocalImagePath(editionId = editionId, path = path)
+            dataSource.updateEditionLocalImagePath(
+                editionId = editionId,
+                path = path,
+            )
 
             // ----- Assert -----
             coVerify {
-                dao.updateEditionLocalImagePath(editionId = editionId, path = path)
+                dao.updateEditionLocalImagePath(
+                    editionId = editionId,
+                    path = path,
+                )
             }
         }
 
@@ -710,18 +728,23 @@ class BooksLocalDataSourceImplTest {
             val editionId = 20
 
             // ----- Act -----
-            dataSource.updateEditionLocalImagePath(editionId = editionId, path = null)
+            dataSource.updateEditionLocalImagePath(
+                editionId = editionId,
+                path = null,
+            )
 
             // ----- Assert -----
             coVerify {
-                dao.updateEditionLocalImagePath(editionId = editionId, path = null)
+                dao.updateEditionLocalImagePath(
+                    editionId = editionId,
+                    path = null,
+                )
             }
         }
     }
 
     @Nested
     inner class PersistEditionImage {
-
         @Test
         fun `skips copy and DAO update when storage already has the file`() = runTest {
             // ----- Arrange -----
@@ -733,15 +756,24 @@ class BooksLocalDataSourceImplTest {
             } returns true
 
             // ----- Act -----
-            dataSource.persistEditionImage(editionId = editionId, source = source)
+            dataSource.persistEditionImage(
+                editionId = editionId,
+                source = source,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                editionImageStorage.copyFrom(editionId = any(), source = any())
+                editionImageStorage.copyFrom(
+                    editionId = any(),
+                    source = any(),
+                )
             }
 
             coVerify(exactly = 0) {
-                dao.updateEditionLocalImagePath(editionId = any(), path = any())
+                dao.updateEditionLocalImagePath(
+                    editionId = any(),
+                    path = any(),
+                )
             }
         }
 
@@ -757,26 +789,37 @@ class BooksLocalDataSourceImplTest {
             } returns false
 
             every {
-                editionImageStorage.copyFrom(editionId = editionId, source = source)
+                editionImageStorage.copyFrom(
+                    editionId = editionId,
+                    source = source,
+                )
             } returns storedPath
 
             // ----- Act -----
-            dataSource.persistEditionImage(editionId = editionId, source = source)
+            dataSource.persistEditionImage(
+                editionId = editionId,
+                source = source,
+            )
 
             // ----- Assert -----
             coVerify {
-                editionImageStorage.copyFrom(editionId = editionId, source = source)
+                editionImageStorage.copyFrom(
+                    editionId = editionId,
+                    source = source,
+                )
             }
 
             coVerify {
-                dao.updateEditionLocalImagePath(editionId = editionId, path = storedPath)
+                dao.updateEditionLocalImagePath(
+                    editionId = editionId,
+                    path = storedPath,
+                )
             }
         }
     }
 
     @Nested
     inner class ReplaceShelfManualOrder {
-
         @Test
         fun `forwards status code and bookIds to the DAO`() = runTest {
             // ----- Arrange -----
@@ -784,7 +827,10 @@ class BooksLocalDataSourceImplTest {
             val bookIds = listOf(3, 1, 2)
 
             // ----- Act -----
-            dataSource.applyShelfManualOrderPrefix(status = status, prefixBookIds = bookIds)
+            dataSource.applyShelfManualOrderPrefix(
+                status = status,
+                prefixBookIds = bookIds,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -802,7 +848,10 @@ class BooksLocalDataSourceImplTest {
             val bookIds = emptyList<Int>()
 
             // ----- Act -----
-            dataSource.applyShelfManualOrderPrefix(status = status, prefixBookIds = bookIds)
+            dataSource.applyShelfManualOrderPrefix(
+                status = status,
+                prefixBookIds = bookIds,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -816,7 +865,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class RemoveUserBooksByIdWithManualOrder {
-
         @Test
         fun `calls deleteShelfManualOrderForBookIds with resolved bookIds when bookIds is non-empty`() = runTest {
             // ----- Arrange -----
@@ -861,7 +909,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class GetSortedBooksByStatus {
-
         @Test
         fun `MANUAL mode builds SQL containing shelf_manual_order and binds statusCode twice`() = runTest {
             // ----- Arrange -----
@@ -912,5 +959,4 @@ class BooksLocalDataSourceImplTest {
             sql shouldNotContain "shelf_manual_order"
         }
     }
-
 }

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ResolveBookByIsbnUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var fetchBookByIdUseCase: FetchBookByIdUseCase
     private lateinit var useCase: ResolveBookByIsbnUseCase
@@ -36,13 +35,15 @@ class ResolveBookByIsbnUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `valid ISBN with matching bookId returns Found with hydrated book`() = runTest {
             // ----- Arrange -----
             coEvery {
                 booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn)
-            } returns IsbnEditionMatch(bookId = bookId, editionId = editionId)
+            } returns IsbnEditionMatch(
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             coEvery { fetchBookByIdUseCase(id = bookId) } returns Result.success(book)
 
@@ -51,7 +52,10 @@ class ResolveBookByIsbnUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            result.getOrNull() shouldBe IsbnLookupResult.Found(book = book, editionId = editionId)
+            result.getOrNull() shouldBe IsbnLookupResult.Found(
+                book = book,
+                editionId = editionId,
+            )
 
             coVerify(exactly = 1) { booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn) }
             coVerify(exactly = 1) { fetchBookByIdUseCase(id = bookId) }
@@ -102,7 +106,10 @@ class ResolveBookByIsbnUseCaseTest {
             // ----- Arrange -----
             coEvery {
                 booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn)
-            } returns IsbnEditionMatch(bookId = bookId, editionId = editionId)
+            } returns IsbnEditionMatch(
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             coEvery { fetchBookByIdUseCase(id = bookId) } returns Result.failure(RuntimeException("hydration failed"))
 

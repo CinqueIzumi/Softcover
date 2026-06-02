@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnUpdatePercentageProgressClickActionTest {
-
     private lateinit var updateBookProgress: RecordBookProgressUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -71,7 +70,10 @@ class OnUpdatePercentageProgressClickActionTest {
         every { isAudiobook } returns true
     }
 
-    private fun stubBook(currentEditionPages: Int?, defaultEditionPages: Int? = null): Book = mockk {
+    private fun stubBook(
+        currentEditionPages: Int?,
+        defaultEditionPages: Int? = null,
+    ): Book = mockk {
         val edition = stubEdition(currentEditionPages)
         val defaultEdition = defaultEditionPages?.let { stubEdition(it) }
 
@@ -87,18 +89,23 @@ class OnUpdatePercentageProgressClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `hides the update progress sheet after execution`() = runTest {
             // ----- Arrange -----
             val book = stubBook(currentEditionPages = 300)
-            stateFlow.value = BookDetailUiState(book = book, showUpdateProgressSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                showUpdateProgressSheet = true,
+            )
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe false
@@ -107,17 +114,27 @@ class OnUpdatePercentageProgressClickActionTest {
         @Test
         fun `does nothing when book in state is null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null, showUpdateProgressSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = null,
+                showUpdateProgressSheet = true,
+            )
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe true
-            coVerify(exactly = 0) { updateBookProgress(any(), any(), any()) }
+            coVerify(exactly = 0) { updateBookProgress(
+                any(),
+                any(),
+                any(),
+            ) }
         }
 
         @Test
@@ -131,18 +148,27 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 100)
+                updateBookProgress(
+                    book = book,
+                    newPage = 100,
+                )
             }
         }
 
         @Test
         fun `falls back to defaultEdition pages when currentEdition has no page count`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(currentEditionPages = null, defaultEditionPages = 400)
+            val book = stubBook(
+                currentEditionPages = null,
+                defaultEditionPages = 400,
+            )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
 
@@ -150,29 +176,44 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "25")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 100)
+                updateBookProgress(
+                    book = book,
+                    newPage = 100,
+                )
             }
         }
 
         @Test
         fun `uses zero pages when both currentEdition and defaultEdition have no page count`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(currentEditionPages = null, defaultEditionPages = null)
+            val book = stubBook(
+                currentEditionPages = null,
+                defaultEditionPages = null,
+            )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "75")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0)
+                updateBookProgress(
+                    book = book,
+                    newPage = 0,
+                )
             }
         }
 
@@ -186,11 +227,17 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "not-a-number")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0)
+                updateBookProgress(
+                    book = book,
+                    newPage = 0,
+                )
             }
         }
 
@@ -204,11 +251,17 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0)
+                updateBookProgress(
+                    book = book,
+                    newPage = 0,
+                )
             }
         }
 
@@ -223,11 +276,17 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "10")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 33)
+                updateBookProgress(
+                    book = book,
+                    newPage = 33,
+                )
             }
         }
 
@@ -241,11 +300,18 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "-10")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0, newSeconds = null)
+                updateBookProgress(
+                    book = book,
+                    newPage = 0,
+                    newSeconds = null,
+                )
             }
         }
 
@@ -259,11 +325,18 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "150")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 200, newSeconds = null)
+                updateBookProgress(
+                    book = book,
+                    newPage = 200,
+                    newSeconds = null,
+                )
             }
         }
 
@@ -277,11 +350,17 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 1800)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 1800,
+                )
             }
         }
 
@@ -295,11 +374,18 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "25")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = null, newSeconds = 900)
+                updateBookProgress(
+                    book = book,
+                    newPage = null,
+                    newSeconds = 900,
+                )
             }
         }
 
@@ -313,11 +399,17 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "150")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                )
             }
         }
 
@@ -331,11 +423,17 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "-50")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 0)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 0,
+                )
             }
         }
 
@@ -349,11 +447,17 @@ class OnUpdatePercentageProgressClickActionTest {
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 0)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 0,
+                )
             }
         }
 
@@ -361,13 +465,19 @@ class OnUpdatePercentageProgressClickActionTest {
         fun `hides the update progress sheet for audiobook edition`() = runTest {
             // ----- Arrange -----
             val book = stubAudiobook(audioSeconds = 3600)
-            stateFlow.value = BookDetailUiState(book = book, showUpdateProgressSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                showUpdateProgressSheet = true,
+            )
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe false

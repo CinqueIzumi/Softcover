@@ -37,7 +37,10 @@ object SoftcoverCacheResolver : CacheResolver {
         parentId: String,
     ): Any? {
         if (parentId == ROOT_QUERY && field.name in redirectableFields) {
-            resolveById(field = field, variables = variables)?.let { return it }
+            resolveById(
+                field = field,
+                variables = variables,
+            )?.let { return it }
         }
 
         return FieldPolicyCacheResolver.resolveField(
@@ -52,7 +55,10 @@ object SoftcoverCacheResolver : CacheResolver {
         field: CompiledField,
         variables: Executable.Variables,
     ): List<CacheKey>? {
-        val where = field.argumentValue(name = "where", variables = variables).getOrNull() as? Map<*, *>
+        val where = field.argumentValue(
+            name = "where",
+            variables = variables,
+        ).getOrNull() as? Map<*, *>
             ?: return null
 
         val idArg = where["id"] as? Map<*, *> ?: return null
@@ -60,11 +66,17 @@ object SoftcoverCacheResolver : CacheResolver {
         val typeName = field.type.rawType().name
 
         idArg["_eq"]?.let { id ->
-            return listOf(CacheKey(typeName, id.toString()))
+            return listOf(CacheKey(
+                typeName,
+                id.toString(),
+            ),)
         }
 
         (idArg["_in"] as? List<*>)?.let { ids ->
-            return ids.filterNotNull().map { id -> CacheKey(typeName, id.toString()) }
+            return ids.filterNotNull().map { id -> CacheKey(
+                typeName,
+                id.toString(),
+            ) }
         }
 
         return null

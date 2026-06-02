@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UpdateBookReviewUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: UpdateBookReviewUseCase
 
@@ -30,7 +29,6 @@ class UpdateBookReviewUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success without touching the repository when book has no userBook`() = runTest {
             // ----- Arrange -----
@@ -48,7 +46,11 @@ class UpdateBookReviewUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
 
-            coVerify(exactly = 0) { booksRepository.updateBookReview(book = any(), review = any(), hasSpoilers = any()) }
+            coVerify(exactly = 0) { booksRepository.updateBookReview(
+                book = any(),
+                review = any(),
+                hasSpoilers = any(),
+            ) }
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
@@ -64,7 +66,11 @@ class UpdateBookReviewUseCaseTest {
             every { inputBook.userBook } returns userBook
 
             coEvery {
-                booksRepository.updateBookReview(book = inputBook, review = review, hasSpoilers = hasSpoilers)
+                booksRepository.updateBookReview(
+                    book = inputBook,
+                    review = review,
+                    hasSpoilers = hasSpoilers,
+                )
             } returns updatedBook
 
             coJustRun {
@@ -72,11 +78,19 @@ class UpdateBookReviewUseCaseTest {
             }
 
             // ----- Act -----
-            val result = useCase(inputBook, review = review, hasSpoilers = hasSpoilers)
+            val result = useCase(
+                inputBook,
+                review = review,
+                hasSpoilers = hasSpoilers,
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 1) { booksRepository.updateBookReview(book = inputBook, review = review, hasSpoilers = hasSpoilers) }
+            coVerify(exactly = 1) { booksRepository.updateBookReview(
+                book = inputBook,
+                review = review,
+                hasSpoilers = hasSpoilers,
+            ) }
             coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
     }

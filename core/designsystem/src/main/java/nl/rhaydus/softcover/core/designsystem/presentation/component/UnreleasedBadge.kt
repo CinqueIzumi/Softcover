@@ -14,10 +14,16 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 private val COMPACT_FORMATTER: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("MMM d", Locale.getDefault())
+    DateTimeFormatter.ofPattern(
+        "MMM d",
+        Locale.getDefault(),
+    )
 
 private val LONG_FORMATTER: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.getDefault())
+    DateTimeFormatter.ofPattern(
+        "MMMM d, yyyy",
+        Locale.getDefault(),
+    )
 
 fun LocalDate.formatCompactRelease(): String {
     val base = format(COMPACT_FORMATTER)

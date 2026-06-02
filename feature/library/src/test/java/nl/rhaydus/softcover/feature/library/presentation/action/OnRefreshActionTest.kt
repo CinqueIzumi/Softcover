@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnRefreshActionTest {
-
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -62,7 +61,6 @@ class OnRefreshActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets isLoading to true then false when use case succeeds`() = runTest {
             // ----- Arrange -----

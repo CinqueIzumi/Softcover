@@ -41,17 +41,47 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         }
 
         dependencies {
-            add("implementation", libs.library("kotlinx-coroutines-android"))
-            add("implementation", libs.library("koin-android"))
-            add("implementation", libs.library("timber"))
+            add(
+                "implementation",
+                libs.library("kotlinx-coroutines-android"),
+            )
+            add(
+                "implementation",
+                libs.library("koin-android"),
+            )
+            add(
+                "implementation",
+                libs.library("timber"),
+            )
 
-            add("testImplementation", libs.library("junit-api"))
-            add("testImplementation", libs.library("junit-params"))
-            add("testRuntimeOnly", libs.library("junit-engine"))
-            add("testImplementation", libs.library("mockk"))
-            add("testImplementation", libs.library("kotest"))
-            add("testImplementation", libs.library("coroutines-test"))
-            add("testImplementation", libs.library("turbine"))
+            add(
+                "testImplementation",
+                libs.library("junit-api"),
+            )
+            add(
+                "testImplementation",
+                libs.library("junit-params"),
+            )
+            add(
+                "testRuntimeOnly",
+                libs.library("junit-engine"),
+            )
+            add(
+                "testImplementation",
+                libs.library("mockk"),
+            )
+            add(
+                "testImplementation",
+                libs.library("kotest"),
+            )
+            add(
+                "testImplementation",
+                libs.library("coroutines-test"),
+            )
+            add(
+                "testImplementation",
+                libs.library("turbine"),
+            )
         }
 
         tasks.withType<Test> {

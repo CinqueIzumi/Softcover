@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnLayoutMenuExpandedChangeActionTest {
-
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -34,7 +33,6 @@ class OnLayoutMenuExpandedChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets isLayoutMenuExpanded to true when expanded is true`() = runTest {
             // ----- Arrange -----

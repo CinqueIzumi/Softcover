@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class InitializeBookWithIdActionTest {
-
     private lateinit var fetchBookByIdUseCase: FetchBookByIdUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -72,13 +71,15 @@ class InitializeBookWithIdActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets book and clears loadingBookDetails flag when use case succeeds`() = runTest {
             // ----- Arrange -----
             val bookId = 42
             val expectedEditions = listOf<BookEdition>(mockk(), mockk())
-            val expectedBook = stubBook(id = bookId, editions = expectedEditions)
+            val expectedBook = stubBook(
+                id = bookId,
+                editions = expectedEditions,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnUpdatePageProgressClickActionTest {
-
     private lateinit var updateBookProgress: RecordBookProgressUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -62,12 +61,14 @@ class OnUpdatePageProgressClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `hides the update progress sheet after execution`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book, showUpdateProgressSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                showUpdateProgressSheet = true,
+            )
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePageProgressClickAction(newPage = "100")
@@ -99,7 +100,10 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 250)
+                updateBookProgress(
+                    book = book,
+                    newPage = 250,
+                )
             }
         }
 
@@ -120,7 +124,10 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0)
+                updateBookProgress(
+                    book = book,
+                    newPage = 0,
+                )
             }
         }
 
@@ -141,14 +148,20 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0)
+                updateBookProgress(
+                    book = book,
+                    newPage = 0,
+                )
             }
         }
 
         @Test
         fun `does nothing when book in state is null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null, showUpdateProgressSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = null,
+                showUpdateProgressSheet = true,
+            )
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePageProgressClickAction(newPage = "50")
@@ -161,7 +174,11 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe true
-            coVerify(exactly = 0) { updateBookProgress(any(), any(), any()) }
+            coVerify(exactly = 0) { updateBookProgress(
+                any(),
+                any(),
+                any(),
+            ) }
         }
 
         @Test
@@ -181,7 +198,10 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = 0)
+                updateBookProgress(
+                    book = book,
+                    newPage = 0,
+                )
             }
         }
 
@@ -202,7 +222,10 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newPage = -5)
+                updateBookProgress(
+                    book = book,
+                    newPage = -5,
+                )
             }
         }
     }

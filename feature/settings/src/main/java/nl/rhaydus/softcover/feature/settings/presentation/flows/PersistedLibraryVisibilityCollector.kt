@@ -18,7 +18,11 @@ class PersistedLibraryVisibilityCollector : LibraryVisibilityInitializer {
             dependencies.getEnabledListIdsAsFlowUseCase(),
             dependencies.getLibraryTabOrderAsFlowUseCase(),
         ) { codes: Set<Int>, ids: Set<Int>, order: List<String> ->
-            Triple(codes, ids, order)
+            Triple(
+                codes,
+                ids,
+                order,
+            )
         }.collectLatest { (codes, ids, order) ->
             scope.setState { state ->
                 state.copy(

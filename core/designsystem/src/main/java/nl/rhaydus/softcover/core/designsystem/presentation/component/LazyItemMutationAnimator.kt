@@ -82,7 +82,10 @@ fun LazyItemScope.rememberMutationAnimatedModifier(
 ): Modifier {
     val animateItemModifier = if (animator.playMotion) Modifier.animateItem() else Modifier
 
-    return animateItemModifier.then(newlyInsertedAccentPulseModifier(animator, itemKey))
+    return animateItemModifier.then(newlyInsertedAccentPulseModifier(
+        animator,
+        itemKey,
+    ),)
 }
 
 @Composable
@@ -92,7 +95,10 @@ fun LazyGridItemScope.rememberMutationAnimatedModifier(
 ): Modifier {
     val animateItemModifier = if (animator.playMotion) Modifier.animateItem() else Modifier
 
-    return animateItemModifier.then(newlyInsertedAccentPulseModifier(animator, itemKey))
+    return animateItemModifier.then(newlyInsertedAccentPulseModifier(
+        animator,
+        itemKey,
+    ),)
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -118,9 +124,15 @@ private fun newlyInsertedAccentPulseModifier(
     val alpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
-        alpha.animateTo(1f, animationSpec = fadeSpec)
+        alpha.animateTo(
+            1f,
+            animationSpec = fadeSpec,
+        )
         delay(200L)
-        alpha.animateTo(0f, animationSpec = fadeSpec)
+        alpha.animateTo(
+            0f,
+            animationSpec = fadeSpec,
+        )
     }
 
     return Modifier.drawWithContent {
@@ -146,7 +158,13 @@ private fun DrawScope.drawAccentBar(
 
     drawRect(
         color = color.copy(alpha = alpha),
-        topLeft = Offset(x, 0f),
-        size = Size(widthPx, heightPx),
+        topLeft = Offset(
+            x,
+            0f,
+        ),
+        size = Size(
+            widthPx,
+            heightPx,
+        ),
     )
 }

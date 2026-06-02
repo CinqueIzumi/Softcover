@@ -10,7 +10,6 @@ package nl.rhaydus.softcover.core.domain.util
  * rejected here so it never reaches the lookup query.
  */
 object IsbnNormalizer {
-
     private val ISBN_10_REGEX = Regex("^\\d{9}[\\dX]$")
     private val ISBN_13_REGEX = Regex("^\\d{13}$")
 

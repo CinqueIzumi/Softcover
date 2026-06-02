@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AuthInterceptorTest {
-
     private lateinit var apiKeyFlow: MutableStateFlow<String?>
     private lateinit var authTokenProvider: AuthTokenProvider
     private lateinit var chain: Interceptor.Chain
@@ -54,7 +53,6 @@ class AuthInterceptorTest {
 
     @Nested
     inner class Intercept {
-
         @Test
         fun `adds Authorization Bearer header when source emits a non-blank key`() {
             // ----- Arrange -----
@@ -130,7 +128,6 @@ class AuthInterceptorTest {
 
     @Nested
     inner class TokenObservation {
-
         @Test
         fun `updates header when flow emits a new distinct key after construction`() {
             // ----- Arrange -----

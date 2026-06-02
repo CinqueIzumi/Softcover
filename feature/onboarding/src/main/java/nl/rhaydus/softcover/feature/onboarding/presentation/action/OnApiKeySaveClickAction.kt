@@ -54,6 +54,7 @@ class OnApiKeySaveClickAction() : OnboardingAction {
             val initializedUserDataSuccessfully = dependencies.initializeUserIdAndBooksUseCase()
                 .onFailure {
                     Timber.e("Initialize user id use case $it")
+
                     // TODO: Snack bar message is no longer shown when modal loader is active...
                     SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")
                 }

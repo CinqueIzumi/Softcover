@@ -23,7 +23,10 @@ fun normalizeMarks(marks: List<ReviewMark>): List<ReviewMark> = marks
             val last = merged.lastOrNull()
 
             if (last != null && mark.start <= last.end) {
-                merged[merged.lastIndex] = last.copy(end = maxOf(last.end, mark.end))
+                merged[merged.lastIndex] = last.copy(end = maxOf(
+                    last.end,
+                    mark.end,
+                ),)
             } else {
                 merged.add(mark.copy(type = type))
             }
@@ -31,7 +34,10 @@ fun normalizeMarks(marks: List<ReviewMark>): List<ReviewMark> = marks
 
         merged
     }
-    .sortedWith(compareBy({ it.start }, { it.type }))
+    .sortedWith(compareBy(
+        { it.start },
+        { it.type },
+    ),)
 
 /**
  * Shift the marks to track a text edit. The edited span is found by diffing the common prefix and
@@ -47,9 +53,15 @@ fun applyEditToMarks(
 ): List<ReviewMark> {
     if (oldText == newText) return normalizeMarks(marks)
 
-    val prefix = commonPrefixLength(a = oldText, b = newText)
+    val prefix = commonPrefixLength(
+        a = oldText,
+        b = newText,
+    )
 
-    val maxSuffix = minOf(oldText.length - prefix, newText.length - prefix)
+    val maxSuffix = minOf(
+        oldText.length - prefix,
+        newText.length - prefix,
+    )
 
     var suffix = 0
 
@@ -105,7 +117,12 @@ fun toggleMark(
 
     val normalized = normalizeMarks(marks = marks)
 
-    if (isRangeMarked(marks = normalized, start = start, end = end, type = type)) {
+    if (isRangeMarked(
+        marks = normalized,
+        start = start,
+        end = end,
+        type = type,
+    )) {
         val cleared = normalized.flatMap { mark ->
             if (mark.type != type || mark.end <= start || mark.start >= end) {
                 listOf(mark)
@@ -120,7 +137,11 @@ fun toggleMark(
         return normalizeMarks(marks = cleared)
     }
 
-    return normalizeMarks(marks = normalized + ReviewMark(start = start, end = end, type = type))
+    return normalizeMarks(marks = normalized + ReviewMark(
+        start = start,
+        end = end,
+        type = type,
+    ),)
 }
 
 /** Build the structured [ReviewDocument] from the editor's plain text and marks. */
@@ -135,7 +156,10 @@ fun editorBufferToDocument(
     var lineStart = 0
 
     while (true) {
-        val newline = text.indexOf(char = '\n', startIndex = lineStart)
+        val newline = text.indexOf(
+            char = '\n',
+            startIndex = lineStart,
+        )
         val lineEnd = if (newline < 0) text.length else newline
 
         paragraphs.add(
@@ -172,15 +196,30 @@ fun documentToEditorBuffer(document: ReviewDocument): ReviewEditorBuffer {
 
             val end = builder.length
 
-            if (run.bold) marks.add(ReviewMark(start = start, end = end, type = ReviewMarkType.BOLD))
+            if (run.bold) marks.add(ReviewMark(
+                start = start,
+                end = end,
+                type = ReviewMarkType.BOLD,
+            ),)
 
-            if (run.italic) marks.add(ReviewMark(start = start, end = end, type = ReviewMarkType.ITALIC))
+            if (run.italic) marks.add(ReviewMark(
+                start = start,
+                end = end,
+                type = ReviewMarkType.ITALIC,
+            ),)
 
-            if (run.spoiler) marks.add(ReviewMark(start = start, end = end, type = ReviewMarkType.SPOILER))
+            if (run.spoiler) marks.add(ReviewMark(
+                start = start,
+                end = end,
+                type = ReviewMarkType.SPOILER,
+            ),)
         }
     }
 
-    return ReviewEditorBuffer(text = builder.toString(), marks = normalizeMarks(marks = marks))
+    return ReviewEditorBuffer(
+        text = builder.toString(),
+        marks = normalizeMarks(marks = marks),
+    )
 }
 
 private fun runsForLine(
@@ -195,8 +234,14 @@ private fun runsForLine(
 
     marks.forEach { mark ->
         if (mark.end > lineStart && mark.start < lineEnd) {
-            boundaries.add(mark.start.coerceIn(lineStart, lineEnd))
-            boundaries.add(mark.end.coerceIn(lineStart, lineEnd))
+            boundaries.add(mark.start.coerceIn(
+                lineStart,
+                lineEnd,
+            ),)
+            boundaries.add(mark.end.coerceIn(
+                lineStart,
+                lineEnd,
+            ),)
         }
     }
 
@@ -209,10 +254,28 @@ private fun runsForLine(
         if (from >= to) return@mapNotNull null
 
         ReviewRun(
-            text = text.substring(startIndex = from, endIndex = to),
-            bold = covers(marks = marks, from = from, to = to, type = ReviewMarkType.BOLD),
-            italic = covers(marks = marks, from = from, to = to, type = ReviewMarkType.ITALIC),
-            spoiler = covers(marks = marks, from = from, to = to, type = ReviewMarkType.SPOILER),
+            text = text.substring(
+                startIndex = from,
+                endIndex = to,
+            ),
+            bold = covers(
+                marks = marks,
+                from = from,
+                to = to,
+                type = ReviewMarkType.BOLD,
+            ),
+            italic = covers(
+                marks = marks,
+                from = from,
+                to = to,
+                type = ReviewMarkType.ITALIC,
+            ),
+            spoiler = covers(
+                marks = marks,
+                from = from,
+                to = to,
+                type = ReviewMarkType.SPOILER,
+            ),
         )
     }
 }
@@ -224,8 +287,14 @@ private fun covers(
     type: ReviewMarkType,
 ): Boolean = marks.any { it.type == type && it.start <= from && it.end >= to }
 
-private fun commonPrefixLength(a: String, b: String): Int {
-    val max = minOf(a.length, b.length)
+private fun commonPrefixLength(
+    a: String,
+    b: String,
+): Int {
+    val max = minOf(
+        a.length,
+        b.length,
+    )
 
     var index = 0
 

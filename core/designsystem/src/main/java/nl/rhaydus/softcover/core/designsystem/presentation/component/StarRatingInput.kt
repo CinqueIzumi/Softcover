@@ -57,11 +57,17 @@ fun StarRatingInput(
     val ratingForX: (Float) -> Double = remember(starSizePx, spacingPx, starCount) {
         { x ->
             val slot = starSizePx + spacingPx
-            val index = (x / slot).toInt().coerceIn(0, starCount - 1)
+            val index = (x / slot).toInt().coerceIn(
+                0,
+                starCount - 1,
+            )
             val localX = x - index * slot
             val isHalf = localX < starSizePx / 2f
 
-            (index + if (isHalf) 0.5 else 1.0).coerceIn(0.5, starCount.toDouble())
+            (index + if (isHalf) 0.5 else 1.0).coerceIn(
+                0.5,
+                starCount.toDouble(),
+            )
         }
     }
 
@@ -125,7 +131,10 @@ fun StarRatingInput(
         horizontalArrangement = Arrangement.spacedBy(spacing),
     ) {
         repeat(starCount) { index ->
-            val fill = (displayRating - index).coerceIn(0.0, 1.0).toFloat()
+            val fill = (displayRating - index).coerceIn(
+                0.0,
+                1.0,
+            ).toFloat()
 
             Box(modifier = Modifier.size(starSize)) {
                 Icon(

@@ -80,7 +80,7 @@ fun SoftcoverIconToggleButton(
             IconButtonDefaults.toggleableShapes(
                 shape = if (roundShapeDefault) roundShape else squareShape,
                 checkedShape = if (roundShapeDefault) squareShape else roundShape,
-                pressedShape = IconButtonDefaults.extraSmallPressedShape
+                pressedShape = IconButtonDefaults.extraSmallPressedShape,
             )
         }
 
@@ -91,7 +91,7 @@ fun SoftcoverIconToggleButton(
             IconButtonDefaults.toggleableShapes(
                 shape = if (roundShapeDefault) roundShape else squareShape,
                 checkedShape = if (roundShapeDefault) squareShape else roundShape,
-                pressedShape = IconButtonDefaults.smallPressedShape
+                pressedShape = IconButtonDefaults.smallPressedShape,
             )
         }
 
@@ -102,7 +102,7 @@ fun SoftcoverIconToggleButton(
             IconButtonDefaults.toggleableShapes(
                 shape = if (roundShapeDefault) roundShape else squareShape,
                 checkedShape = if (roundShapeDefault) squareShape else roundShape,
-                pressedShape = IconButtonDefaults.mediumPressedShape
+                pressedShape = IconButtonDefaults.mediumPressedShape,
             )
         }
 
@@ -113,7 +113,7 @@ fun SoftcoverIconToggleButton(
             IconButtonDefaults.toggleableShapes(
                 shape = if (roundShapeDefault) roundShape else squareShape,
                 checkedShape = if (roundShapeDefault) squareShape else roundShape,
-                pressedShape = IconButtonDefaults.largePressedShape
+                pressedShape = IconButtonDefaults.largePressedShape,
             )
         }
 
@@ -124,7 +124,7 @@ fun SoftcoverIconToggleButton(
             IconButtonDefaults.toggleableShapes(
                 shape = if (roundShapeDefault) roundShape else squareShape,
                 checkedShape = if (roundShapeDefault) squareShape else roundShape,
-                pressedShape = IconButtonDefaults.extraLargePressedShape
+                pressedShape = IconButtonDefaults.extraLargePressedShape,
             )
         }
     }
@@ -602,7 +602,7 @@ private fun SoftcoverIconToggleButtonFilledPreview() {
                         onCheckedChange = {},
                         checked = false,
                         enabled = index % 2 == 0,
-                        style = IconToggleButtonStyle.FILLED
+                        style = IconToggleButtonStyle.FILLED,
                     )
                 }
             }
@@ -632,7 +632,7 @@ private fun SoftcoverIconToggleButtonTonalPreview() {
                         onCheckedChange = {},
                         checked = true,
                         enabled = index % 2 == 0,
-                        style = IconToggleButtonStyle.TONAL
+                        style = IconToggleButtonStyle.TONAL,
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -646,7 +646,7 @@ private fun SoftcoverIconToggleButtonTonalPreview() {
                         onCheckedChange = {},
                         checked = false,
                         enabled = index % 2 == 0,
-                        style = IconToggleButtonStyle.TONAL
+                        style = IconToggleButtonStyle.TONAL,
                     )
                 }
             }
@@ -676,7 +676,7 @@ private fun SoftcoverIconToggleButtonOutlinedPreview() {
                         onCheckedChange = {},
                         checked = true,
                         enabled = index % 2 == 0,
-                        style = IconToggleButtonStyle.OUTLINED
+                        style = IconToggleButtonStyle.OUTLINED,
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -690,7 +690,7 @@ private fun SoftcoverIconToggleButtonOutlinedPreview() {
                         onCheckedChange = {},
                         checked = false,
                         enabled = index % 2 == 0,
-                        style = IconToggleButtonStyle.OUTLINED
+                        style = IconToggleButtonStyle.OUTLINED,
                     )
                 }
             }

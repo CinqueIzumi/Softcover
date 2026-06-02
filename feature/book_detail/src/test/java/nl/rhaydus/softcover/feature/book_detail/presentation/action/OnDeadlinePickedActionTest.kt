@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class OnDeadlinePickedActionTest {
-
     private lateinit var setBookDeadlineUseCase: SetBookDeadlineUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -114,14 +113,21 @@ class OnDeadlinePickedActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `calls setBookDeadlineUseCase with bookId total current and PAGES unit for regular edition`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(id = 7, pages = 250, currentPage = 75)
+            val book = stubBook(
+                id = 7,
+                pages = 250,
+                currentPage = 75,
+            )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(2026, 6, 1)
+            val date = LocalDate.of(
+                2026,
+                6,
+                1,
+            )
 
             coEvery {
                 setBookDeadlineUseCase(
@@ -136,7 +142,10 @@ class OnDeadlinePickedActionTest {
             val action = OnDeadlinePickedAction(date = date)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -153,10 +162,18 @@ class OnDeadlinePickedActionTest {
         @Test
         fun `uses zero for total when currentEdition pages is null for regular edition`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(id = 1, pages = null, currentPage = 10)
+            val book = stubBook(
+                id = 1,
+                pages = null,
+                currentPage = 10,
+            )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(2026, 6, 1)
+            val date = LocalDate.of(
+                2026,
+                6,
+                1,
+            )
 
             coEvery {
                 setBookDeadlineUseCase(
@@ -171,7 +188,10 @@ class OnDeadlinePickedActionTest {
             val action = OnDeadlinePickedAction(date = date)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -188,10 +208,19 @@ class OnDeadlinePickedActionTest {
         @Test
         fun `uses zero for current when userBookRead is null for regular edition`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(id = 3, pages = 200, currentPage = null, currentSeconds = null)
+            val book = stubBook(
+                id = 3,
+                pages = 200,
+                currentPage = null,
+                currentSeconds = null,
+            )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(2026, 6, 1)
+            val date = LocalDate.of(
+                2026,
+                6,
+                1,
+            )
 
             coEvery {
                 setBookDeadlineUseCase(
@@ -206,7 +235,10 @@ class OnDeadlinePickedActionTest {
             val action = OnDeadlinePickedAction(date = date)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -223,10 +255,21 @@ class OnDeadlinePickedActionTest {
         @Test
         fun `sets showDeadlinePicker to false after calling use case`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(id = 5, pages = 100, currentPage = 0)
-            stateFlow.value = BookDetailUiState(book = book, showDeadlinePicker = true)
+            val book = stubBook(
+                id = 5,
+                pages = 100,
+                currentPage = 0,
+            )
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                showDeadlinePicker = true,
+            )
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(2026, 7, 1)
+            val date = LocalDate.of(
+                2026,
+                7,
+                1,
+            )
 
             coEvery {
                 setBookDeadlineUseCase(
@@ -241,7 +284,10 @@ class OnDeadlinePickedActionTest {
             val action = OnDeadlinePickedAction(date = date)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showDeadlinePicker shouldBe false
@@ -250,13 +296,23 @@ class OnDeadlinePickedActionTest {
         @Test
         fun `does nothing when state has no book`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null, showDeadlinePicker = true)
+            stateFlow.value = BookDetailUiState(
+                book = null,
+                showDeadlinePicker = true,
+            )
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(2026, 7, 1)
+            val date = LocalDate.of(
+                2026,
+                7,
+                1,
+            )
             val action = OnDeadlinePickedAction(date = date)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showDeadlinePicker shouldBe true
@@ -274,10 +330,18 @@ class OnDeadlinePickedActionTest {
         @Test
         fun `calls setBookDeadlineUseCase with currentSeconds and audioSeconds and SECONDS unit for audiobook edition`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(id = 8, audioSeconds = 18000, currentSeconds = 3600)
+            val book = stubBook(
+                id = 8,
+                audioSeconds = 18000,
+                currentSeconds = 3600,
+            )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(2026, 6, 1)
+            val date = LocalDate.of(
+                2026,
+                6,
+                1,
+            )
 
             coEvery {
                 setBookDeadlineUseCase(
@@ -292,7 +356,10 @@ class OnDeadlinePickedActionTest {
             val action = OnDeadlinePickedAction(date = date)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -330,7 +397,11 @@ class OnDeadlinePickedActionTest {
             }
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(2026, 6, 1)
+            val date = LocalDate.of(
+                2026,
+                6,
+                1,
+            )
 
             coEvery {
                 setBookDeadlineUseCase(
@@ -345,7 +416,10 @@ class OnDeadlinePickedActionTest {
             val action = OnDeadlinePickedAction(date = date)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -374,7 +448,11 @@ class OnDeadlinePickedActionTest {
             }
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(2026, 6, 1)
+            val date = LocalDate.of(
+                2026,
+                6,
+                1,
+            )
 
             coEvery {
                 setBookDeadlineUseCase(
@@ -389,7 +467,10 @@ class OnDeadlinePickedActionTest {
             val action = OnDeadlinePickedAction(date = date)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {

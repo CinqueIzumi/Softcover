@@ -8,10 +8,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class HtmlToAnnotatedStringTest {
-
     @Nested
     inner class HtmlToAnnotatedString {
-
         @Test
         fun `plain text passes through unchanged`() {
             // ----- Act -----

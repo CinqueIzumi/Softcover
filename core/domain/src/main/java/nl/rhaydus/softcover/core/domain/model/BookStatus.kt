@@ -2,7 +2,10 @@ package nl.rhaydus.softcover.core.domain.model
 
 import timber.log.Timber
 
-enum class BookStatus(val code: Int, val label: String) {
+enum class BookStatus(
+    val code: Int,
+    val label: String,
+) {
     WantToRead(code = 1, label = "Want to Read"),
     Reading(code = 2, label = "Currently Reading"),
     Read(code = 3, label = "Read"),

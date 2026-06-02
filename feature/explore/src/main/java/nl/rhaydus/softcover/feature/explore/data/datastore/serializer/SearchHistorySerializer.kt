@@ -25,7 +25,7 @@ object SearchHistorySerializer : Serializer<SearchHistoryEntity> {
         return try {
             json.decodeFromString(
                 deserializer = SearchHistoryEntity.serializer(),
-                string = input.readBytes().decodeToString()
+                string = input.readBytes().decodeToString(),
             )
         } catch (e: SerializationException) {
             defaultValue
@@ -40,8 +40,8 @@ object SearchHistorySerializer : Serializer<SearchHistoryEntity> {
             output.write(
                 json.encodeToString(
                     serializer = SearchHistoryEntity.serializer(),
-                    value = t
-                ).encodeToByteArray()
+                    value = t,
+                ).encodeToByteArray(),
             )
         }
     }

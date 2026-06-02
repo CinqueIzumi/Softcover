@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnAddUserTagActionTest {
-
     private lateinit var saveUserTagsUseCase: SaveUserTagsUseCase
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
@@ -57,17 +56,22 @@ class OnAddUserTagActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `does nothing when name is blank`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(book = stubBook())
             val initialState = stateFlow.value
-            val action = OnAddUserTagAction(name = "   ", category = TagCategory.TAG)
+            val action = OnAddUserTagAction(
+                name = "   ",
+                category = TagCategory.TAG,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
@@ -79,10 +83,16 @@ class OnAddUserTagActionTest {
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(book = stubBook())
             val initialState = stateFlow.value
-            val action = OnAddUserTagAction(name = "", category = TagCategory.TAG)
+            val action = OnAddUserTagAction(
+                name = "",
+                category = TagCategory.TAG,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
@@ -94,13 +104,22 @@ class OnAddUserTagActionTest {
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
-                userTags = listOf(UserTag(name = "Horror", category = TagCategory.GENRE)),
+                userTags = listOf(UserTag(
+                    name = "Horror",
+                    category = TagCategory.GENRE,
+                ),),
             )
             val initialTags = stateFlow.value.userTags
-            val action = OnAddUserTagAction(name = "Horror", category = TagCategory.GENRE)
+            val action = OnAddUserTagAction(
+                name = "Horror",
+                category = TagCategory.GENRE,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe initialTags
@@ -112,13 +131,22 @@ class OnAddUserTagActionTest {
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
-                userTags = listOf(UserTag(name = "horror", category = TagCategory.GENRE)),
+                userTags = listOf(UserTag(
+                    name = "horror",
+                    category = TagCategory.GENRE,
+                ),),
             )
             val initialTags = stateFlow.value.userTags
-            val action = OnAddUserTagAction(name = "HORROR", category = TagCategory.GENRE)
+            val action = OnAddUserTagAction(
+                name = "HORROR",
+                category = TagCategory.GENRE,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe initialTags
@@ -128,21 +156,36 @@ class OnAddUserTagActionTest {
         fun `allows adding tag with same name in a different category`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            val existingTag = UserTag(name = "cozy", category = TagCategory.GENRE)
+            val existingTag = UserTag(
+                name = "cozy",
+                category = TagCategory.GENRE,
+            )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
                 userTags = listOf(existingTag),
             )
-            val savedResult = listOf(existingTag, UserTag(name = "cozy", category = TagCategory.MOOD))
+            val savedResult = listOf(existingTag, UserTag(
+                name = "cozy",
+                category = TagCategory.MOOD,
+            ),)
 
             coEvery {
-                saveUserTagsUseCase(bookId = 1, tags = any())
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = any(),
+                )
             } returns Result.success(savedResult)
 
-            val action = OnAddUserTagAction(name = "cozy", category = TagCategory.MOOD)
+            val action = OnAddUserTagAction(
+                name = "cozy",
+                category = TagCategory.MOOD,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe savedResult
@@ -153,16 +196,28 @@ class OnAddUserTagActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(book = stubBook(id = 1))
-            val savedResult = listOf(UserTag(name = "epic", category = TagCategory.TAG))
+            val savedResult = listOf(UserTag(
+                name = "epic",
+                category = TagCategory.TAG,
+            ),)
 
             coEvery {
-                saveUserTagsUseCase(bookId = 1, tags = any())
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = any(),
+                )
             } returns Result.success(savedResult)
 
-            val action = OnAddUserTagAction(name = "  epic  ", category = TagCategory.TAG)
+            val action = OnAddUserTagAction(
+                name = "  epic  ",
+                category = TagCategory.TAG,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe savedResult
@@ -178,13 +233,22 @@ class OnAddUserTagActionTest {
             )
 
             coEvery {
-                saveUserTagsUseCase(bookId = 1, tags = any())
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = any(),
+                )
             } returns Result.success(emptyList())
 
-            val action = OnAddUserTagAction(name = "epic", category = TagCategory.TAG)
+            val action = OnAddUserTagAction(
+                name = "epic",
+                category = TagCategory.TAG,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.tagEditorInput shouldBe ""
@@ -196,17 +260,30 @@ class OnAddUserTagActionTest {
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(book = stubBook(id = 42))
             val serverCanonical = listOf(
-                UserTag(name = "fantasy", category = TagCategory.GENRE, count = 5),
+                UserTag(
+                    name = "fantasy",
+                    category = TagCategory.GENRE,
+                    count = 5,
+                ),
             )
 
             coEvery {
-                saveUserTagsUseCase(bookId = 42, tags = any())
+                saveUserTagsUseCase(
+                    bookId = 42,
+                    tags = any(),
+                )
             } returns Result.success(serverCanonical)
 
-            val action = OnAddUserTagAction(name = "fantasy", category = TagCategory.GENRE)
+            val action = OnAddUserTagAction(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe serverCanonical
@@ -216,20 +293,32 @@ class OnAddUserTagActionTest {
         fun `rolls back to previous userTags on save failure`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            val originalTags = listOf(UserTag(name = "sci-fi", category = TagCategory.GENRE))
+            val originalTags = listOf(UserTag(
+                name = "sci-fi",
+                category = TagCategory.GENRE,
+            ),)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
                 userTags = originalTags,
             )
 
             coEvery {
-                saveUserTagsUseCase(bookId = 1, tags = any())
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = any(),
+                )
             } returns Result.failure(RuntimeException("network error"))
 
-            val action = OnAddUserTagAction(name = "thriller", category = TagCategory.GENRE)
+            val action = OnAddUserTagAction(
+                name = "thriller",
+                category = TagCategory.GENRE,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe originalTags
@@ -241,10 +330,16 @@ class OnAddUserTagActionTest {
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(book = null)
             val initialState = stateFlow.value
-            val action = OnAddUserTagAction(name = "epic", category = TagCategory.TAG)
+            val action = OnAddUserTagAction(
+                name = "epic",
+                category = TagCategory.TAG,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe initialState.userTags

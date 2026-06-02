@@ -27,10 +27,16 @@ class SearchLocalDataSourceImpl(
             val updatedList = currentData.previousQueries.toMutableList().apply {
                 remove(name)
 
-                add(0, name)
+                add(
+                    0,
+                    name,
+                )
 
                 if (size > maxListSize) {
-                    subList(maxListSize, size).clear()
+                    subList(
+                        maxListSize,
+                        size,
+                    ).clear()
                 }
             }
 

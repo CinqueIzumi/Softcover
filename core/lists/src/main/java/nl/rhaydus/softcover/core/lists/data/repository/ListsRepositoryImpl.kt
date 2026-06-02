@@ -63,7 +63,10 @@ class ListsRepositoryImpl(
 
             val started: Deferred<List<BookList>> = applicationScope.scope.async {
                 try {
-                    listsRemoteDataSource.fetchUserLists(userId = userId, listIds = listIds)
+                    listsRemoteDataSource.fetchUserLists(
+                        userId = userId,
+                        listIds = listIds,
+                    )
                 } finally {
                     inflightMutex.withLock { inflightFetches.remove(listIds) }
                 }
@@ -103,7 +106,10 @@ class ListsRepositoryImpl(
             )
         }
 
-        hydrateReferencedBook(bookId = edition.bookId, editionId = edition.id)
+        hydrateReferencedBook(
+            bookId = edition.bookId,
+            editionId = edition.id,
+        )
 
         val real: ListBook = runCatching {
             listsRemoteDataSource.markEditionAsOwned(edition = edition)
@@ -135,7 +141,10 @@ class ListsRepositoryImpl(
             ),
         )
 
-        hydrateReferencedBook(bookId = bookId, editionId = edition.id)
+        hydrateReferencedBook(
+            bookId = bookId,
+            editionId = edition.id,
+        )
 
         val real: ListBook = runCatching {
             listsRemoteDataSource.addBookToList(
@@ -275,14 +284,23 @@ class ListsRepositoryImpl(
         listId: Int,
         ranked: Boolean,
     ) {
-        listsLocalDataSource.setListRanked(listId = listId, ranked = ranked)
+        listsLocalDataSource.setListRanked(
+            listId = listId,
+            ranked = ranked,
+        )
 
         val refreshed: BookList = runCatching {
-            listsRemoteDataSource.setListRanked(listId = listId, ranked = ranked)
+            listsRemoteDataSource.setListRanked(
+                listId = listId,
+                ranked = ranked,
+            )
         }.getOrElse { error ->
             if (error is CancellationException) throw error
 
-            listsLocalDataSource.setListRanked(listId = listId, ranked = ranked.not())
+            listsLocalDataSource.setListRanked(
+                listId = listId,
+                ranked = ranked.not(),
+            )
 
             throw error
         }

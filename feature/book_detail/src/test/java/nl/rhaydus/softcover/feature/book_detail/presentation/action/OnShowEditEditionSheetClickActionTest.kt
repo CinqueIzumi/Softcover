@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnShowEditEditionSheetClickActionTest {
-
     private lateinit var getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -70,7 +69,6 @@ class OnShowEditEditionSheetClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets showEditEditionSheet to true immediately on first open`() = runTest {
             // ----- Arrange -----
@@ -86,7 +84,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showEditEditionSheet shouldBe true
@@ -108,7 +109,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.editions shouldBe listOf(edition)
@@ -130,7 +134,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             localVariablesFlow.value.editionsLoadedForBookId shouldBe bookId
@@ -156,7 +163,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             loadingAtInvocation shouldBe true
@@ -175,7 +185,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
@@ -188,14 +201,20 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 5
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book, showEditEditionSheet = false)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                showEditEditionSheet = false,
+            )
             localVariablesFlow.value = BookDetailLocalVariables(editionsLoadedForBookId = bookId)
             dependencies = stubDependencies(this)
 
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showEditEditionSheet shouldBe true
@@ -206,14 +225,20 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 5
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book, loadingEditions = false)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                loadingEditions = false,
+            )
             localVariablesFlow.value = BookDetailLocalVariables(editionsLoadedForBookId = bookId)
             dependencies = stubDependencies(this)
 
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.loadingEditions shouldBe false
@@ -234,7 +259,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.loadingEditions shouldBe false
@@ -246,7 +274,10 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 99
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book, editions = emptyList())
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                editions = emptyList(),
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -256,7 +287,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.editions shouldBe emptyList()
@@ -277,7 +311,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             localVariablesFlow.value.editionsLoadedForBookId shouldBe null
@@ -292,7 +329,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showEditEditionSheet shouldBe false
@@ -310,7 +350,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             localVariablesFlow.value shouldBe BookDetailLocalVariables()
@@ -331,7 +374,10 @@ class OnShowEditEditionSheetClickActionTest {
             val action = OnShowEditEditionSheetClickAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {

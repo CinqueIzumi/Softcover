@@ -19,7 +19,10 @@ interface BooksRepository {
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
     /** Library-screen path: all user books sorted via SQL `ORDER BY`. */
-    fun getSortedAllUserBooks(mode: LibrarySortMode, direction: SortDirection): Flow<List<Book>>
+    fun getSortedAllUserBooks(
+        mode: LibrarySortMode,
+        direction: SortDirection,
+    ): Flow<List<Book>>
 
     /** Library-screen path: user books for [status], sorted via SQL `ORDER BY`. */
     fun getSortedBooksByStatus(

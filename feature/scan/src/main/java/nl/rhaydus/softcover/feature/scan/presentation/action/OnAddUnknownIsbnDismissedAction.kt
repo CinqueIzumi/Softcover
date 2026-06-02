@@ -11,6 +11,9 @@ class OnAddUnknownIsbnDismissedAction : ScanAction {
         dependencies: ScanDependencies,
         scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>,
     ) {
-        scope.setState { it.copy(unknownIsbn = null, isAddingBook = false) }
+        scope.setState { it.copy(
+            unknownIsbn = null,
+            isAddingBook = false,
+        ) }
     }
 }

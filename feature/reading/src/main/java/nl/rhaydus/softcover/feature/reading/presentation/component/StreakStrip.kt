@@ -142,7 +142,10 @@ private fun StreakStripSheetContent(activity: List<ReadingDayActivity>) {
     ) {
         EditorialSectionHeader(
             eyebrow = "Last ${activity.size} days",
-            headline = readDaysSummary(readDays = readDays, totalDays = activity.size),
+            headline = readDaysSummary(
+                readDays = readDays,
+                totalDays = activity.size,
+            ),
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -182,7 +185,10 @@ private fun StreakStripSheetRow(
         Spacer(modifier = Modifier.width(16.dp))
 
         Text(
-            text = sheetDayLabel(date = day.date, today = today),
+            text = sheetDayLabel(
+                date = day.date,
+                today = today,
+            ),
             style = MaterialTheme.editorialTypography.body,
             color = if (day.didRead) {
                 MaterialTheme.colorScheme.onSurface

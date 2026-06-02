@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class PersistEditionImageUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: PersistEditionImageUseCase
 
@@ -24,7 +23,6 @@ class PersistEditionImageUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success and delegates to repository when call succeeds`() = runTest {
             // ----- Arrange -----
@@ -32,11 +30,17 @@ class PersistEditionImageUseCaseTest {
             val source: File = mockk()
 
             coEvery {
-                booksRepository.persistEditionImage(editionId = editionId, source = source)
+                booksRepository.persistEditionImage(
+                    editionId = editionId,
+                    source = source,
+                )
             } returns Unit
 
             // ----- Act -----
-            val result = useCase(editionId = editionId, source = source)
+            val result = useCase(
+                editionId = editionId,
+                source = source,
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
@@ -49,15 +53,24 @@ class PersistEditionImageUseCaseTest {
             val source: File = mockk()
 
             coEvery {
-                booksRepository.persistEditionImage(editionId = editionId, source = source)
+                booksRepository.persistEditionImage(
+                    editionId = editionId,
+                    source = source,
+                )
             } returns Unit
 
             // ----- Act -----
-            useCase(editionId = editionId, source = source)
+            useCase(
+                editionId = editionId,
+                source = source,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksRepository.persistEditionImage(editionId = editionId, source = source)
+                booksRepository.persistEditionImage(
+                    editionId = editionId,
+                    source = source,
+                )
             }
         }
 
@@ -69,11 +82,17 @@ class PersistEditionImageUseCaseTest {
             val error = RuntimeException("disk full")
 
             coEvery {
-                booksRepository.persistEditionImage(editionId = editionId, source = source)
+                booksRepository.persistEditionImage(
+                    editionId = editionId,
+                    source = source,
+                )
             } throws error
 
             // ----- Act -----
-            val result = useCase(editionId = editionId, source = source)
+            val result = useCase(
+                editionId = editionId,
+                source = source,
+            )
 
             // ----- Assert -----
             result.isFailure shouldBe true

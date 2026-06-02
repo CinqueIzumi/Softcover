@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 
 class HighlightRepositoryImplTest {
-
     private lateinit var localDataSource: HighlightLocalDataSource
     private lateinit var repository: HighlightRepositoryImpl
 
@@ -62,7 +61,6 @@ class HighlightRepositoryImplTest {
 
     @Nested
     inner class ObserveByBookId {
-
         @Test
         fun `emits empty list when data source emits empty list`() = runTest {
             // ----- Arrange -----
@@ -108,7 +106,6 @@ class HighlightRepositoryImplTest {
 
     @Nested
     inner class ObserveAll {
-
         @Test
         fun `maps all entities to domain models`() = runTest {
             // ----- Arrange -----
@@ -140,7 +137,6 @@ class HighlightRepositoryImplTest {
 
     @Nested
     inner class ObserveById {
-
         @Test
         fun `emits null when data source emits null`() = runTest {
             // ----- Arrange -----
@@ -179,7 +175,6 @@ class HighlightRepositoryImplTest {
 
     @Nested
     inner class Add {
-
         @Test
         fun `inserts entity and returns generated id`() = runTest {
             // ----- Arrange -----
@@ -208,7 +203,6 @@ class HighlightRepositoryImplTest {
 
     @Nested
     inner class Update {
-
         @Test
         fun `delegates update to local data source with converted entity`() = runTest {
             // ----- Arrange -----
@@ -233,7 +227,6 @@ class HighlightRepositoryImplTest {
 
     @Nested
     inner class Delete {
-
         @Test
         fun `delegates delete to local data source`() = runTest {
             // ----- Arrange -----

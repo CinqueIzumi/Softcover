@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class MarkBookAsReadingUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: MarkBookAsReadingUseCase
 
@@ -27,7 +26,6 @@ class MarkBookAsReadingUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `marks book as reading then caches the updated book`() = runTest {
             // ----- Arrange -----

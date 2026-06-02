@@ -43,7 +43,10 @@ fun HeroStatNumberField(
 ) {
     val style = MaterialTheme.editorialTypography.statLarge
 
-    val width = computeHeroStatFieldWidth(textStyle = style, charCount = charCount)
+    val width = computeHeroStatFieldWidth(
+        textStyle = style,
+        charCount = charCount,
+    )
 
     val focusManager = LocalFocusManager.current
 

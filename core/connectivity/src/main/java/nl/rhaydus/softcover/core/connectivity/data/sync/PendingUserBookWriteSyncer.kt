@@ -62,7 +62,10 @@ class PendingUserBookWriteSyncer(
                     }
                 }
                 .onFailure { error ->
-                    Timber.w(error, "Pending user-book write ${entity.localId} failed; halting drain")
+                    Timber.w(
+                        error,
+                        "Pending user-book write ${entity.localId} failed; halting drain",
+                    )
                     dao.incrementAttempts(entity.localId)
                     return
                 }

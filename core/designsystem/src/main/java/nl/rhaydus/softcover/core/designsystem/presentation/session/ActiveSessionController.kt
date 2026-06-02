@@ -46,7 +46,10 @@ class ActiveSessionController(
             session ?: return@combine null
 
             books.firstOrNull { it.id == session.bookId }
-                ?.let { book -> ActiveSession(session = session, book = book) }
+                ?.let { book -> ActiveSession(
+                    session = session,
+                    book = book,
+                ) }
         }.stateIn(
             scope = applicationScope.scope,
             started = SharingStarted.Eagerly,

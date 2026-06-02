@@ -67,7 +67,6 @@ import kotlin.math.roundToInt
  * [ActiveSessionController] directly and pops itself the moment no session is active.
  */
 object FocusModeScreen : Screen {
-
     override val key: String = "focus-mode"
 
     @Composable
@@ -334,12 +333,18 @@ private fun FocusPageEditor(
                 }
 
                 val newNumber = newValue.text.toIntOrNull() ?: run {
-                    number = number.copy(text = "", selection = newValue.selection)
+                    number = number.copy(
+                        text = "",
+                        selection = newValue.selection,
+                    )
 
                     return@HeroStatNumberField
                 }
 
-                number = newValue.copy(text = min(newNumber, totalPages).toString())
+                number = newValue.copy(text = min(
+                    newNumber,
+                    totalPages,
+                ).toString(),)
             },
             onFocusReset = {
                 firstTimeFocusGained = true
@@ -349,7 +354,10 @@ private fun FocusPageEditor(
                 number.text.toIntOrNull()?.takeIf { it != initialPage }?.let(onCommit)
             },
             onFocusGained = {
-                number = number.copy(selection = TextRange(start = 0, end = number.text.length))
+                number = number.copy(selection = TextRange(
+                    start = 0,
+                    end = number.text.length,
+                ),)
             },
         )
     }
@@ -360,13 +368,19 @@ private fun FocusPageEditor(
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    FocusProgressBar(fraction = (parsed.toFloat() / totalPages).coerceIn(0f, 1f))
+    FocusProgressBar(fraction = (parsed.toFloat() / totalPages).coerceIn(
+        0f,
+        1f,
+    ),)
 }
 
 @Composable
 private fun FocusProgressBar(fraction: Float) {
     LinearProgressIndicator(
-        progress = { fraction.coerceIn(0f, 1f) },
+        progress = { fraction.coerceIn(
+            0f,
+            1f,
+        ) },
         modifier = Modifier
             .fillMaxWidth()
             .height(10.dp),

@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserTagsRepositoryImplTest {
-
     private lateinit var userTagsRemoteDataSource: UserTagsRemoteDataSource
     private lateinit var repository: UserTagsRepositoryImpl
 
@@ -34,7 +33,6 @@ class UserTagsRepositoryImplTest {
 
     @Nested
     inner class GetUserTags {
-
         @Test
         fun `delegates to remote data source with the given userId and bookId`() = runTest {
             // ----- Arrange -----
@@ -42,15 +40,24 @@ class UserTagsRepositoryImplTest {
             val bookId = 42
 
             coEvery {
-                userTagsRemoteDataSource.getUserTags(userId = userId, bookId = bookId)
+                userTagsRemoteDataSource.getUserTags(
+                    userId = userId,
+                    bookId = bookId,
+                )
             } returns emptyList()
 
             // ----- Act -----
-            repository.getUserTags(userId = userId, bookId = bookId)
+            repository.getUserTags(
+                userId = userId,
+                bookId = bookId,
+            )
 
             // ----- Assert -----
             coVerify {
-                userTagsRemoteDataSource.getUserTags(userId = userId, bookId = bookId)
+                userTagsRemoteDataSource.getUserTags(
+                    userId = userId,
+                    bookId = bookId,
+                )
             }
         }
 
@@ -62,11 +69,17 @@ class UserTagsRepositoryImplTest {
             val expected = listOf(stubUserTag("Cozy"), stubUserTag("Dark"))
 
             coEvery {
-                userTagsRemoteDataSource.getUserTags(userId = userId, bookId = bookId)
+                userTagsRemoteDataSource.getUserTags(
+                    userId = userId,
+                    bookId = bookId,
+                )
             } returns expected
 
             // ----- Act -----
-            val result = repository.getUserTags(userId = userId, bookId = bookId)
+            val result = repository.getUserTags(
+                userId = userId,
+                bookId = bookId,
+            )
 
             // ----- Assert -----
             result shouldBe expected
@@ -75,7 +88,6 @@ class UserTagsRepositoryImplTest {
 
     @Nested
     inner class SaveTags {
-
         @Test
         fun `delegates to remote data source with the given bookId and tags`() = runTest {
             // ----- Arrange -----
@@ -83,15 +95,24 @@ class UserTagsRepositoryImplTest {
             val tags = listOf(stubUserTag())
 
             coEvery {
-                userTagsRemoteDataSource.saveTags(bookId = bookId, tags = tags)
+                userTagsRemoteDataSource.saveTags(
+                    bookId = bookId,
+                    tags = tags,
+                )
             } returns emptyList()
 
             // ----- Act -----
-            repository.saveTags(bookId = bookId, tags = tags)
+            repository.saveTags(
+                bookId = bookId,
+                tags = tags,
+            )
 
             // ----- Assert -----
             coVerify {
-                userTagsRemoteDataSource.saveTags(bookId = bookId, tags = tags)
+                userTagsRemoteDataSource.saveTags(
+                    bookId = bookId,
+                    tags = tags,
+                )
             }
         }
 
@@ -103,11 +124,17 @@ class UserTagsRepositoryImplTest {
             val expected = listOf(stubUserTag("Cozy"), stubUserTag("Dark"))
 
             coEvery {
-                userTagsRemoteDataSource.saveTags(bookId = bookId, tags = tags)
+                userTagsRemoteDataSource.saveTags(
+                    bookId = bookId,
+                    tags = tags,
+                )
             } returns expected
 
             // ----- Act -----
-            val result = repository.saveTags(bookId = bookId, tags = tags)
+            val result = repository.saveTags(
+                bookId = bookId,
+                tags = tags,
+            )
 
             // ----- Assert -----
             result shouldBe expected

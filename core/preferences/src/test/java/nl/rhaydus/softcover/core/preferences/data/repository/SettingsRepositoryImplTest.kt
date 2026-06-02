@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SettingsRepositoryImplTest {
-
     private lateinit var settingsLocalDataSource: SettingsLocalDataSource
     private lateinit var settingsRemoteDataSource: SettingsRemoteDataSource
     private lateinit var repository: SettingsRepositoryImpl
@@ -37,7 +36,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class DateStyleProperty {
-
         @Test
         fun `dateStyle property is wired to local data source dateStyle flow`() = runTest {
             // ----- Arrange -----
@@ -60,7 +58,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class LibraryGridLayoutProperty {
-
         @Test
         fun `libraryGridLayout property is wired to local data source libraryGridLayout flow`() = runTest {
             // ----- Arrange -----
@@ -83,7 +80,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class SetLibraryGridLayout {
-
         @Test
         fun `delegates to local data source with the given layout`() = runTest {
             // ----- Arrange -----
@@ -101,7 +97,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class SetDateStyle {
-
         @Test
         fun `delegates to local data source with the given style`() = runTest {
             // ----- Arrange -----
@@ -119,7 +114,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class UpdateApiKey {
-
         @Test
         fun `delegates to local data source with the given key`() = runTest {
             // ----- Arrange -----
@@ -137,7 +131,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class GetUserId {
-
         @Test
         fun `getUserId is wired to local data source getUserId flow`() = runTest {
             // ----- Arrange -----
@@ -155,7 +148,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class GetThemeConfig {
-
         @Test
         fun `getThemeConfig is wired to local data source getThemeConfig flow`() = runTest {
             // ----- Arrange -----
@@ -175,7 +167,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class UpdateUserId {
-
         @Test
         fun `delegates to local data source with the given id`() = runTest {
             // ----- Arrange -----
@@ -193,7 +184,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class SetBottomBarStyle {
-
         @Test
         fun `delegates to local data source with the given style`() = runTest {
             // ----- Arrange -----
@@ -211,7 +201,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class GetUserIdFromBackend {
-
         @Test
         fun `delegates to remote data source and returns the result`() = runTest {
             // ----- Arrange -----
@@ -231,7 +220,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class EnabledStatusCodesProperty {
-
         @Test
         fun `enabledStatusCodes is wired to local data source enabledStatusCodes flow`() = runTest {
             // ----- Arrange -----
@@ -254,7 +242,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class EnabledListIdsProperty {
-
         @Test
         fun `enabledListIds is wired to local data source enabledListIds flow`() = runTest {
             // ----- Arrange -----
@@ -277,7 +264,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class ListDefaultsSeededProperty {
-
         @Test
         fun `listDefaultsSeeded is wired to local data source listDefaultsSeeded flow`() = runTest {
             // ----- Arrange -----
@@ -300,7 +286,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class SeedEnabledListIds {
-
         @Test
         fun `delegates to local data source with the given ids`() = runTest {
             // ----- Arrange -----
@@ -332,7 +317,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class GetUserIdFromBackendError {
-
         @Test
         fun `propagates exception thrown by remote data source`() = runTest {
             // ----- Arrange -----
@@ -352,7 +336,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class SetEnabledStatusCodes {
-
         @Test
         fun `delegates to local data source with the given codes`() = runTest {
             // ----- Arrange -----
@@ -384,7 +367,6 @@ class SettingsRepositoryImplTest {
 
     @Nested
     inner class SetEnabledListIds {
-
         @Test
         fun `delegates to local data source with the given ids`() = runTest {
             // ----- Arrange -----

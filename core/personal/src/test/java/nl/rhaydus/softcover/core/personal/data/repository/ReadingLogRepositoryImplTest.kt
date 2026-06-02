@@ -19,7 +19,6 @@ import java.time.Instant
 import java.time.LocalDate
 
 class ReadingLogRepositoryImplTest {
-
     private lateinit var localDataSource: ReadingLogLocalDataSource
     private lateinit var repository: ReadingLogRepositoryImpl
 
@@ -50,8 +49,16 @@ class ReadingLogRepositoryImplTest {
     private fun buildEntry(
         id: Long = 1L,
         bookId: Int = 10,
-        startedAt: LocalDate? = LocalDate.of(2024, 1, 1),
-        finishedAt: LocalDate? = LocalDate.of(2024, 1, 10),
+        startedAt: LocalDate? = LocalDate.of(
+            2024,
+            1,
+            1,
+        ),
+        finishedAt: LocalDate? = LocalDate.of(
+            2024,
+            1,
+            10,
+        ),
         rating: Double? = 4.0,
         note: String? = "Good",
         createdAt: Instant = Instant.parse("2024-01-11T08:00:00Z"),
@@ -67,7 +74,6 @@ class ReadingLogRepositoryImplTest {
 
     @Nested
     inner class ObserveByBookId {
-
         @Test
         fun `emits empty list when data source emits empty list`() = runTest {
             // ----- Arrange -----
@@ -113,7 +119,6 @@ class ReadingLogRepositoryImplTest {
 
     @Nested
     inner class ObserveCountByBookId {
-
         @Test
         fun `emits zero when no entries`() = runTest {
             // ----- Arrange -----
@@ -145,7 +150,6 @@ class ReadingLogRepositoryImplTest {
 
     @Nested
     inner class Add {
-
         @Test
         fun `inserts entity and returns generated id`() = runTest {
             // ----- Arrange -----
@@ -158,8 +162,16 @@ class ReadingLogRepositoryImplTest {
             // ----- Act -----
             val result = repository.add(
                 bookId = 10,
-                startedAt = LocalDate.of(2024, 2, 1),
-                finishedAt = LocalDate.of(2024, 2, 20),
+                startedAt = LocalDate.of(
+                    2024,
+                    2,
+                    1,
+                ),
+                finishedAt = LocalDate.of(
+                    2024,
+                    2,
+                    20,
+                ),
                 rating = 3.5,
                 note = "Fine read",
             )
@@ -199,7 +211,6 @@ class ReadingLogRepositoryImplTest {
 
     @Nested
     inner class Update {
-
         @Test
         fun `delegates update to local data source with converted entity`() = runTest {
             // ----- Arrange -----
@@ -224,7 +235,6 @@ class ReadingLogRepositoryImplTest {
 
     @Nested
     inner class Delete {
-
         @Test
         fun `delegates delete to local data source`() = runTest {
             // ----- Arrange -----

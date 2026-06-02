@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ListsRepositoryImplOwnedEditionTest {
-
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
     private val booksRepository = mockk<BooksRepository>()
@@ -58,7 +57,10 @@ class ListsRepositoryImplOwnedEditionTest {
         )
     }
 
-    private fun stubEdition(id: Int, bookId: Int = 1): BookEdition = mockk {
+    private fun stubEdition(
+        id: Int,
+        bookId: Int = 1,
+    ): BookEdition = mockk {
         every {
             this@mockk.id
         } returns id
@@ -89,15 +91,22 @@ class ListsRepositoryImplOwnedEditionTest {
 
     @Nested
     inner class MarkEditionAsOwned {
-
         @Test
         fun `optimistically caches placeholder with OPTIMISTIC_LIST_BOOK_ID when getOwnedListId returns non-null`() = runTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
             val ownedListId = 99
-            val edition = stubEdition(id = editionId, bookId = bookId)
-            val realListBook = stubListBook(listBookId = 42, listId = ownedListId, bookId = bookId, editionId = editionId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
+            val realListBook = stubListBook(
+                listBookId = 42,
+                listId = ownedListId,
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             coEvery {
                 listsLocalDataSource.findOwnedListBookByEditionId(editionId = editionId)
@@ -140,8 +149,15 @@ class ListsRepositoryImplOwnedEditionTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
-            val edition = stubEdition(id = editionId, bookId = bookId)
-            val realListBook = stubListBook(listBookId = 42, bookId = bookId, editionId = editionId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
+            val realListBook = stubListBook(
+                listBookId = 42,
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             coEvery {
                 listsLocalDataSource.findOwnedListBookByEditionId(editionId = editionId)
@@ -179,8 +195,16 @@ class ListsRepositoryImplOwnedEditionTest {
             val editionId = 10
             val bookId = 5
             val ownedListId = 99
-            val edition = stubEdition(id = editionId, bookId = bookId)
-            val realListBook = stubListBook(listBookId = 42, listId = ownedListId, bookId = bookId, editionId = editionId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
+            val realListBook = stubListBook(
+                listBookId = 42,
+                listId = ownedListId,
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             coEvery {
                 listsLocalDataSource.findOwnedListBookByEditionId(editionId = editionId)
@@ -212,8 +236,15 @@ class ListsRepositoryImplOwnedEditionTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
-            val edition = stubEdition(id = editionId, bookId = bookId)
-            val snapshot = stubListBook(listBookId = 7, bookId = bookId, editionId = editionId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
+            val snapshot = stubListBook(
+                listBookId = 7,
+                bookId = bookId,
+                editionId = editionId,
+            )
             val remoteError = RuntimeException("network error")
 
             coEvery {
@@ -248,7 +279,10 @@ class ListsRepositoryImplOwnedEditionTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
-            val edition = stubEdition(id = editionId, bookId = bookId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
             val remoteError = RuntimeException("network error")
 
             coEvery {
@@ -277,7 +311,10 @@ class ListsRepositoryImplOwnedEditionTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
-            val edition = stubEdition(id = editionId, bookId = bookId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
 
             coEvery {
                 listsLocalDataSource.findOwnedListBookByEditionId(editionId = editionId)
@@ -304,12 +341,14 @@ class ListsRepositoryImplOwnedEditionTest {
 
     @Nested
     inner class RemoveOwnedEdition {
-
         @Test
         fun `happy path — removes locally, calls remote, caches updated BookList`() = runTest {
             // ----- Arrange -----
             val editionId = 10
-            val snapshot = stubListBook(listBookId = 5, editionId = editionId)
+            val snapshot = stubListBook(
+                listBookId = 5,
+                editionId = editionId,
+            )
             val updatedBookList = stubBookList()
 
             coEvery {
@@ -359,7 +398,10 @@ class ListsRepositoryImplOwnedEditionTest {
         fun `on failure enqueues REMOVE_LIST_BOOK with snapshot fields and rethrows`() = runTest {
             // ----- Arrange -----
             val editionId = 10
-            val snapshot = stubListBook(listBookId = 5, editionId = editionId)
+            val snapshot = stubListBook(
+                listBookId = 5,
+                editionId = editionId,
+            )
             val remoteError = RuntimeException("network error")
 
             coEvery {
@@ -389,7 +431,10 @@ class ListsRepositoryImplOwnedEditionTest {
         fun `cancellation — rethrows CancellationException without re-caching snapshot`() = runTest {
             // ----- Arrange -----
             val editionId = 10
-            val snapshot = stubListBook(listBookId = 5, editionId = editionId)
+            val snapshot = stubListBook(
+                listBookId = 5,
+                editionId = editionId,
+            )
 
             coEvery {
                 listsLocalDataSource.findOwnedListBookByEditionId(editionId = editionId)

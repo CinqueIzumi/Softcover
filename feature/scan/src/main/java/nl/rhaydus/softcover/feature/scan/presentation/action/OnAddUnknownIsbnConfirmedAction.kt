@@ -22,7 +22,10 @@ class OnAddUnknownIsbnConfirmedAction : ScanAction {
 
         dependencies.addBookByIsbnUseCase(isbn = isbn)
             .onSuccess { result ->
-                scope.setState { it.copy(unknownIsbn = null, isAddingBook = false) }
+                scope.setState { it.copy(
+                    unknownIsbn = null,
+                    isAddingBook = false,
+                ) }
 
                 scope.sendEvent(
                     event = BookResolvedEvent(
@@ -32,7 +35,10 @@ class OnAddUnknownIsbnConfirmedAction : ScanAction {
                 )
             }
             .onFailure { error ->
-                Timber.e(error, "Failed to add scanned ISBN $isbn to Hardcover")
+                Timber.e(
+                    error,
+                    "Failed to add scanned ISBN $isbn to Hardcover",
+                )
 
                 scope.setState { it.copy(isAddingBook = false) }
 

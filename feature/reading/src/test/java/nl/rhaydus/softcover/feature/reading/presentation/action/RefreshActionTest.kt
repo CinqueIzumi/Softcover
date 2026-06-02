@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RefreshActionTest {
-
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
@@ -45,7 +44,6 @@ class RefreshActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets isLoading to true then false around the use case call`() = runTest {
             // ----- Arrange -----

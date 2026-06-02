@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ListsRepositoryImplCreateListTest {
-
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
     private val booksRepository = mockk<BooksRepository>()
@@ -49,21 +48,29 @@ class ListsRepositoryImplCreateListTest {
         )
     }
 
-    private fun stubBookList(id: Int = 1, name: String = "My List"): BookList = BookList(
+    private fun stubBookList(
+        id: Int = 1,
+        name: String = "My List",
+    ): BookList = BookList(
         id = id,
         name = name,
-        slug = name.lowercase().replace(" ", "-"),
+        slug = name.lowercase().replace(
+            " ",
+            "-",
+        ),
         books = emptyList(),
     )
 
     @Nested
     inner class CreateList {
-
         @Test
         fun `returns the BookList produced by the remote data source`() = runTest {
             // ----- Arrange -----
             val name = "My List"
-            val created = stubBookList(id = 7, name = name)
+            val created = stubBookList(
+                id = 7,
+                name = name,
+            )
 
             coEvery {
                 listsRemoteDataSource.createList(name = name)
@@ -80,7 +87,10 @@ class ListsRepositoryImplCreateListTest {
         fun `caches the created list as a single-element list`() = runTest {
             // ----- Arrange -----
             val name = "Favourites"
-            val created = stubBookList(id = 3, name = name)
+            val created = stubBookList(
+                id = 3,
+                name = name,
+            )
 
             coEvery {
                 listsRemoteDataSource.createList(name = name)
@@ -177,7 +187,6 @@ class ListsRepositoryImplCreateListTest {
 
     @Nested
     inner class FetchUserLists {
-
         @Test
         fun `drains pending writes exactly once before calling remote fetchUserLists`() = runTest {
             // ----- Arrange -----
@@ -195,7 +204,10 @@ class ListsRepositoryImplCreateListTest {
             } returns emptyList()
 
             // ----- Act -----
-            repository.fetchUserLists(userId = userId, listIds = null)
+            repository.fetchUserLists(
+                userId = userId,
+                listIds = null,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {

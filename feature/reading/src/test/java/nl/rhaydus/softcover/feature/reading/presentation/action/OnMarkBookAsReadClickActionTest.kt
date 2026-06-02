@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnMarkBookAsReadClickActionTest {
-
     private lateinit var markBookAsReadUseCase: MarkBookAsReadUseCase
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<ReadingLocalVariables>
@@ -69,7 +68,6 @@ class OnMarkBookAsReadClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes markBookAsReadUseCase with the provided book`() = runTest {
             // ----- Arrange -----

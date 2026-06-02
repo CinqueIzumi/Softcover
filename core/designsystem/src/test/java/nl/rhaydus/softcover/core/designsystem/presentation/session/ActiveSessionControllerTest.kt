@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 
 class ActiveSessionControllerTest {
-
     private val sessionFlow = MutableStateFlow<ReadingSession?>(null)
     private val booksFlow = MutableStateFlow<List<Book>>(emptyList())
 
@@ -66,7 +65,10 @@ class ActiveSessionControllerTest {
         )
     }
 
-    private fun stubSession(id: Long = 1L, bookId: Int = 42): ReadingSession = ReadingSession(
+    private fun stubSession(
+        id: Long = 1L,
+        bookId: Int = 42,
+    ): ReadingSession = ReadingSession(
         id = id,
         bookId = bookId,
         startedAt = Instant.EPOCH,
@@ -109,7 +111,6 @@ class ActiveSessionControllerTest {
 
     @Nested
     inner class ActiveSessionFlow {
-
         @Test
         fun `emits null when session flow emits null`() = runTest {
             // ----- Arrange -----
@@ -150,7 +151,10 @@ class ActiveSessionControllerTest {
             // ----- Assert -----
             val active = controller.activeSession.value
 
-            active shouldBe ActiveSession(session = session, book = book)
+            active shouldBe ActiveSession(
+                session = session,
+                book = book,
+            )
         }
 
         @Test
@@ -172,12 +176,14 @@ class ActiveSessionControllerTest {
 
     @Nested
     inner class Pause {
-
         @Test
         fun `invokes pauseReadingSessionUseCase with the active session id`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
-            val session = stubSession(id = 7L, bookId = 42)
+            val session = stubSession(
+                id = 7L,
+                bookId = 42,
+            )
 
             booksFlow.value = listOf(stubBook(id = 42))
             sessionFlow.value = session
@@ -204,12 +210,14 @@ class ActiveSessionControllerTest {
 
     @Nested
     inner class Resume {
-
         @Test
         fun `invokes resumeReadingSessionUseCase with the active session id`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
-            val session = stubSession(id = 11L, bookId = 42)
+            val session = stubSession(
+                id = 11L,
+                bookId = 42,
+            )
 
             booksFlow.value = listOf(stubBook(id = 42))
             sessionFlow.value = session
@@ -236,13 +244,19 @@ class ActiveSessionControllerTest {
 
     @Nested
     inner class Stop {
-
         @Test
         fun `invokes stopReadingSessionUseCase with id and book progress`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
-            val book = stubBook(id = 42, currentPage = 150, currentSeconds = null)
-            val session = stubSession(id = 3L, bookId = 42)
+            val book = stubBook(
+                id = 42,
+                currentPage = 150,
+                currentSeconds = null,
+            )
+            val session = stubSession(
+                id = 3L,
+                bookId = 42,
+            )
 
             booksFlow.value = listOf(book)
             sessionFlow.value = session
@@ -269,13 +283,16 @@ class ActiveSessionControllerTest {
             controller.stop()
 
             // ----- Assert -----
-            coVerify(exactly = 0) { stopReadingSessionUseCase(any(), any(), any()) }
+            coVerify(exactly = 0) { stopReadingSessionUseCase(
+                any(),
+                any(),
+                any(),
+            ) }
         }
     }
 
     @Nested
     inner class UpdatePage {
-
         @Test
         fun `invokes recordBookProgressUseCase with the active book and newPage`() = runTest {
             // ----- Arrange -----
@@ -290,7 +307,10 @@ class ActiveSessionControllerTest {
             controller.updatePage(newPage = 200)
 
             // ----- Assert -----
-            coVerify(exactly = 1) { recordBookProgressUseCase(book = book, newPage = 200) }
+            coVerify(exactly = 1) { recordBookProgressUseCase(
+                book = book,
+                newPage = 200,
+            ) }
         }
 
         @Test
@@ -302,13 +322,15 @@ class ActiveSessionControllerTest {
             controller.updatePage(newPage = 50)
 
             // ----- Assert -----
-            coVerify(exactly = 0) { recordBookProgressUseCase(any(), any()) }
+            coVerify(exactly = 0) { recordBookProgressUseCase(
+                any(),
+                any(),
+            ) }
         }
     }
 
     @Nested
     inner class FocusMode {
-
         @Test
         fun `pendingFocusMode starts as false`() = runTest {
             // ----- Arrange & Act -----

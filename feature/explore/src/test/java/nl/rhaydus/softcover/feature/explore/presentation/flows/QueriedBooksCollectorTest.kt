@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class QueriedBooksCollectorTest {
-
     private lateinit var getAllUserBooksUseCase: GetAllUserBooksUseCase
     private lateinit var getQueriedBooksUseCase: GetQueriedBooksUseCase
     private lateinit var dependencies: ExploreDependencies
@@ -69,13 +68,15 @@ class QueriedBooksCollectorTest {
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `updates queriedBooks when both flows emit`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val fetchedBook = stubBook(id = 1)
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             allUserBooksFlow.emit(emptyList())
@@ -92,7 +93,10 @@ class QueriedBooksCollectorTest {
             val fetchedBook = stubBook(id = 5)
             val userBook = stubBook(id = 5)
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             allUserBooksFlow.emit(listOf(userBook))
@@ -109,7 +113,10 @@ class QueriedBooksCollectorTest {
             val fetchedBook = stubBook(id = 10)
             val userBook = stubBook(id = 99)
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             allUserBooksFlow.emit(listOf(userBook))
@@ -125,7 +132,10 @@ class QueriedBooksCollectorTest {
             // ----- Arrange -----
             val userBook = stubBook(id = 1)
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             allUserBooksFlow.emit(listOf(userBook))
@@ -143,7 +153,10 @@ class QueriedBooksCollectorTest {
             val fetchedBook2 = stubBook(id = 2)
             val userBook1 = stubBook(id = 1)
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             allUserBooksFlow.emit(listOf(userBook1))
@@ -160,7 +173,10 @@ class QueriedBooksCollectorTest {
         fun `does not change queriedBooks before both flows emit`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             allUserBooksFlow.emit(listOf(stubBook(id = 1)))
@@ -177,7 +193,10 @@ class QueriedBooksCollectorTest {
             val fetchedBook = stubBook(id = 3)
             val updatedUserBook = stubBook(id = 3)
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             allUserBooksFlow.emit(emptyList())
             queriedBooksFlow.emit(listOf(fetchedBook))
@@ -199,7 +218,10 @@ class QueriedBooksCollectorTest {
                 previousSearchQueries = listOf("old"),
             )
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             allUserBooksFlow.emit(emptyList())

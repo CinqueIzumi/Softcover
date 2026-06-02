@@ -57,15 +57,24 @@ class FullScreenCoverScreen(
         var offset by remember { mutableStateOf(Offset.Zero) }
         var containerSize by remember { mutableStateOf(IntSize.Zero) }
 
-        fun clampOffset(target: Offset, currentScale: Float): Offset {
+        fun clampOffset(
+            target: Offset,
+            currentScale: Float,
+        ): Offset {
             if (currentScale <= MIN_SCALE) return Offset.Zero
 
             val maxX = (containerSize.width * (currentScale - 1f)) / 2f
             val maxY = (containerSize.height * (currentScale - 1f)) / 2f
 
             return Offset(
-                x = target.x.coerceIn(-maxX, maxX),
-                y = target.y.coerceIn(-maxY, maxY),
+                x = target.x.coerceIn(
+                    -maxX,
+                    maxX,
+                ),
+                y = target.y.coerceIn(
+                    -maxY,
+                    maxY,
+                ),
             )
         }
 
@@ -102,7 +111,10 @@ class FullScreenCoverScreen(
                     }
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, zoom, _ ->
-                            val newScale = (scale * zoom).coerceIn(MIN_SCALE, MAX_SCALE)
+                            val newScale = (scale * zoom).coerceIn(
+                                MIN_SCALE,
+                                MAX_SCALE,
+                            )
                             scale = newScale
                             offset = clampOffset(
                                 target = offset + pan,

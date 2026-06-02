@@ -19,7 +19,10 @@ class OnRateBookAction(
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
         val job = dependencies.launch {
-            dependencies.updateBookRatingUseCase(book = book, rating = rating).onFailure { error ->
+            dependencies.updateBookRatingUseCase(
+                book = book,
+                rating = rating,
+            ).onFailure { error ->
                 Timber.e("$error")
 
                 scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }

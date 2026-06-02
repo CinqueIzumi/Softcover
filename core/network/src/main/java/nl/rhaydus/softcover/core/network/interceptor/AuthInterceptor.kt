@@ -13,7 +13,6 @@ import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 class AuthInterceptor(
     authTokenProvider: AuthTokenProvider,
 ) : Interceptor {
-
     @Volatile
     private var cachedToken: String? = null
 
@@ -27,7 +26,10 @@ class AuthInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = if (cachedToken != null) {
             chain.request().newBuilder()
-                .addHeader("Authorization", "Bearer $cachedToken")
+                .addHeader(
+                    "Authorization",
+                    "Bearer $cachedToken",
+                )
                 .build()
         } else {
             chain.request()

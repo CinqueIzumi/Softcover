@@ -29,7 +29,10 @@ data object OnRefreshAction : ExploreAction {
                 scope.setState { it.copy(trendingBooks = overlaid) }
             }
             .onFailure { error ->
-                Timber.e(error, "Failed to refresh trending books")
+                Timber.e(
+                    error,
+                    "Failed to refresh trending books",
+                )
             }
 
         scope.setState { it.copy(isRefreshing = false) }

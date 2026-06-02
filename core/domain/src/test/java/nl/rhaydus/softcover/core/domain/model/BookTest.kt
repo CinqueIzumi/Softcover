@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class BookTest {
-
     // ----- Fixtures -----
 
     private fun buildEdition(
@@ -70,7 +69,6 @@ class BookTest {
 
     @Nested
     inner class CurrentEdition {
-
         @Test
         fun `returns edition from editions list when userBook editionId matches`() {
             // ----- Arrange -----
@@ -92,8 +90,14 @@ class BookTest {
         @Test
         fun `returns merged edition from editions list when userBook is null and defaultEdition id matches`() {
             // ----- Arrange -----
-            val editionInList = buildEdition(id = 10, owned = true)
-            val staleDefaultEdition = buildEdition(id = 10, owned = false)
+            val editionInList = buildEdition(
+                id = 10,
+                owned = true,
+            )
+            val staleDefaultEdition = buildEdition(
+                id = 10,
+                owned = false,
+            )
             val book = buildBook(
                 editions = listOf(editionInList),
                 defaultEdition = staleDefaultEdition,
@@ -146,8 +150,14 @@ class BookTest {
         @Test
         fun `returns merged edition from editions list when userBook editionId does not match and defaultEdition id matches`() {
             // ----- Arrange -----
-            val editionInList = buildEdition(id = 10, owned = true)
-            val staleDefaultEdition = buildEdition(id = 10, owned = false)
+            val editionInList = buildEdition(
+                id = 10,
+                owned = true,
+            )
+            val staleDefaultEdition = buildEdition(
+                id = 10,
+                owned = false,
+            )
             val userBook = buildUserBook(editionId = 999)
             val book = buildBook(
                 editions = listOf(editionInList),
@@ -165,7 +175,10 @@ class BookTest {
         @Test
         fun `returns owned edition when userBook is null and no edition id matches defaultEdition id`() {
             // ----- Arrange -----
-            val ownedEdition = buildEdition(id = 10, owned = true)
+            val ownedEdition = buildEdition(
+                id = 10,
+                owned = true,
+            )
             val defaultEdition = buildEdition(id = 99)
             val book = buildBook(
                 editions = listOf(ownedEdition),
@@ -183,8 +196,14 @@ class BookTest {
         @Test
         fun `returns first owned edition when userBook is null and multiple editions are owned`() {
             // ----- Arrange -----
-            val firstOwnedEdition = buildEdition(id = 10, owned = true)
-            val secondOwnedEdition = buildEdition(id = 20, owned = true)
+            val firstOwnedEdition = buildEdition(
+                id = 10,
+                owned = true,
+            )
+            val secondOwnedEdition = buildEdition(
+                id = 20,
+                owned = true,
+            )
             val book = buildBook(
                 editions = listOf(firstOwnedEdition, secondOwnedEdition),
                 userBook = null,
@@ -200,8 +219,14 @@ class BookTest {
         @Test
         fun `returns owned edition over defaultEdition-by-id match when userBook is null`() {
             // ----- Arrange -----
-            val ownedEdition = buildEdition(id = 10, owned = true)
-            val defaultEditionMatchingEdition = buildEdition(id = 20, owned = false)
+            val ownedEdition = buildEdition(
+                id = 10,
+                owned = true,
+            )
+            val defaultEditionMatchingEdition = buildEdition(
+                id = 20,
+                owned = false,
+            )
             val defaultEdition = buildEdition(id = 20)
             val book = buildBook(
                 editions = listOf(ownedEdition, defaultEditionMatchingEdition),
@@ -219,8 +244,14 @@ class BookTest {
         @Test
         fun `returns userBook matched edition over owned edition when userBook editionId matches a non-owned edition`() {
             // ----- Arrange -----
-            val userSelectedEdition = buildEdition(id = 10, owned = false)
-            val ownedEdition = buildEdition(id = 20, owned = true)
+            val userSelectedEdition = buildEdition(
+                id = 10,
+                owned = false,
+            )
+            val ownedEdition = buildEdition(
+                id = 20,
+                owned = true,
+            )
             val userBook = buildUserBook(editionId = 10)
             val book = buildBook(
                 editions = listOf(userSelectedEdition, ownedEdition),
@@ -237,8 +268,14 @@ class BookTest {
         @Test
         fun `falls through to defaultEdition when userBook is null and no edition is owned and no edition id matches defaultEdition id`() {
             // ----- Arrange -----
-            val editionInList = buildEdition(id = 10, owned = false)
-            val defaultEdition = buildEdition(id = 99, owned = false)
+            val editionInList = buildEdition(
+                id = 10,
+                owned = false,
+            )
+            val defaultEdition = buildEdition(
+                id = 99,
+                owned = false,
+            )
             val book = buildBook(
                 editions = listOf(editionInList),
                 defaultEdition = defaultEdition,
@@ -257,11 +294,13 @@ class BookTest {
 
     @Nested
     inner class Status {
-
         @Test
         fun `returns None when userBook is null`() {
             // ----- Arrange -----
-            val book = buildBook(editions = listOf(buildEdition(id = 1)), userBook = null)
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 1)),
+                userBook = null,
+            )
 
             // ----- Act -----
             val result = book.status
@@ -276,7 +315,10 @@ class BookTest {
             val userBook = buildUserBook(editionId = null).also {
                 every { it.status } returns BookStatus.Read
             }
-            val book = buildBook(editions = listOf(buildEdition(id = 1)), userBook = userBook)
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 1)),
+                userBook = userBook,
+            )
 
             // ----- Act -----
             val result = book.status
@@ -290,7 +332,6 @@ class BookTest {
 
     @Nested
     inner class SeriesText {
-
         @Test
         fun `returns null when bookSeries is null`() {
             // ----- Arrange -----
@@ -309,7 +350,11 @@ class BookTest {
         @Test
         fun `returns series name when positionsInSeries is empty`() {
             // ----- Arrange -----
-            val series = BookSeries(id = 1, name = "The Stormlight Archive", amountOfBooks = 5)
+            val series = BookSeries(
+                id = 1,
+                name = "The Stormlight Archive",
+                amountOfBooks = 5,
+            )
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = series,
                 positionsInSeries = emptyList(),
@@ -325,7 +370,11 @@ class BookTest {
         @Test
         fun `returns position and series name when positionsInSeries is set`() {
             // ----- Arrange -----
-            val series = BookSeries(id = 1, name = "The Stormlight Archive", amountOfBooks = 5)
+            val series = BookSeries(
+                id = 1,
+                name = "The Stormlight Archive",
+                amountOfBooks = 5,
+            )
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = series,
                 positionsInSeries = listOf(2.0),
@@ -341,7 +390,11 @@ class BookTest {
         @Test
         fun `returns position text with positionsInSeries of 1`() {
             // ----- Arrange -----
-            val series = BookSeries(id = 1, name = "Mistborn", amountOfBooks = 3)
+            val series = BookSeries(
+                id = 1,
+                name = "Mistborn",
+                amountOfBooks = 3,
+            )
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = series,
                 positionsInSeries = listOf(1.0),
@@ -357,7 +410,11 @@ class BookTest {
         @Test
         fun `returns fractional position in seriesText when positionsInSeries is 1-5`() {
             // ----- Arrange -----
-            val series = BookSeries(id = 1, name = "Wheel of Time", amountOfBooks = 14)
+            val series = BookSeries(
+                id = 1,
+                name = "Wheel of Time",
+                amountOfBooks = 14,
+            )
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = series,
                 positionsInSeries = listOf(1.5),
@@ -375,7 +432,6 @@ class BookTest {
 
     @Nested
     inner class PositionInSeriesDisplay {
-
         @Test
         fun `returns null when positionsInSeries is empty`() {
             // ----- Arrange -----
@@ -451,16 +507,34 @@ class BookTest {
 
     @Nested
     inner class ReleaseInfo {
-
         @Test
         fun `effectiveReleaseDate prefers currentEdition release date when present`() {
             // ----- Arrange -----
-            val editionDate = LocalDate.of(2025, 1, 1)
-            val defaultDate = LocalDate.of(2020, 6, 1)
-            val bookDate = LocalDate.of(2015, 3, 15)
+            val editionDate = LocalDate.of(
+                2025,
+                1,
+                1,
+            )
+            val defaultDate = LocalDate.of(
+                2020,
+                6,
+                1,
+            )
+            val bookDate = LocalDate.of(
+                2015,
+                3,
+                15,
+            )
 
-            val currentEdition = buildEdition(id = 10, owned = true, releaseDate = editionDate)
-            val defaultEdition = buildEdition(id = 20, releaseDate = defaultDate)
+            val currentEdition = buildEdition(
+                id = 10,
+                owned = true,
+                releaseDate = editionDate,
+            )
+            val defaultEdition = buildEdition(
+                id = 20,
+                releaseDate = defaultDate,
+            )
             val book = buildBook(
                 editions = listOf(currentEdition),
                 defaultEdition = defaultEdition,
@@ -477,11 +551,26 @@ class BookTest {
         @Test
         fun `effectiveReleaseDate falls back to defaultEdition release date when currentEdition has none`() {
             // ----- Arrange -----
-            val defaultDate = LocalDate.of(2020, 6, 1)
-            val bookDate = LocalDate.of(2015, 3, 15)
+            val defaultDate = LocalDate.of(
+                2020,
+                6,
+                1,
+            )
+            val bookDate = LocalDate.of(
+                2015,
+                3,
+                15,
+            )
 
-            val currentEdition = buildEdition(id = 10, owned = true, releaseDate = null)
-            val defaultEdition = buildEdition(id = 20, releaseDate = defaultDate)
+            val currentEdition = buildEdition(
+                id = 10,
+                owned = true,
+                releaseDate = null,
+            )
+            val defaultEdition = buildEdition(
+                id = 20,
+                releaseDate = defaultDate,
+            )
             val book = buildBook(
                 editions = listOf(currentEdition),
                 defaultEdition = defaultEdition,
@@ -498,10 +587,21 @@ class BookTest {
         @Test
         fun `effectiveReleaseDate falls back to book releaseDate when neither edition supplies one`() {
             // ----- Arrange -----
-            val bookDate = LocalDate.of(2015, 3, 15)
+            val bookDate = LocalDate.of(
+                2015,
+                3,
+                15,
+            )
 
-            val currentEdition = buildEdition(id = 10, owned = true, releaseDate = null)
-            val defaultEdition = buildEdition(id = 20, releaseDate = null)
+            val currentEdition = buildEdition(
+                id = 10,
+                owned = true,
+                releaseDate = null,
+            )
+            val defaultEdition = buildEdition(
+                id = 20,
+                releaseDate = null,
+            )
             val book = buildBook(
                 editions = listOf(currentEdition),
                 defaultEdition = defaultEdition,
@@ -519,7 +619,10 @@ class BookTest {
         fun `effectiveReleaseDate is null when no source supplies one`() {
             // ----- Arrange -----
             val book = buildBook(
-                editions = listOf(buildEdition(id = 10, releaseDate = null)),
+                editions = listOf(buildEdition(
+                    id = 10,
+                    releaseDate = null,
+                ),),
                 releaseDate = null,
             )
 
@@ -535,7 +638,10 @@ class BookTest {
             // ----- Arrange -----
             val futureDate = LocalDate.now().plusDays(7)
 
-            val edition = buildEdition(id = 10, releaseDate = futureDate)
+            val edition = buildEdition(
+                id = 10,
+                releaseDate = futureDate,
+            )
             val book = buildBook(editions = listOf(edition))
 
             // ----- Act -----
@@ -550,7 +656,10 @@ class BookTest {
             // ----- Arrange -----
             val today = LocalDate.now()
 
-            val edition = buildEdition(id = 10, releaseDate = today)
+            val edition = buildEdition(
+                id = 10,
+                releaseDate = today,
+            )
             val book = buildBook(editions = listOf(edition))
 
             // ----- Act -----
@@ -563,9 +672,16 @@ class BookTest {
         @Test
         fun `isUnreleased is false for a past effectiveReleaseDate`() {
             // ----- Arrange -----
-            val pastDate = LocalDate.of(2020, 1, 1)
+            val pastDate = LocalDate.of(
+                2020,
+                1,
+                1,
+            )
 
-            val edition = buildEdition(id = 10, releaseDate = pastDate)
+            val edition = buildEdition(
+                id = 10,
+                releaseDate = pastDate,
+            )
             val book = buildBook(editions = listOf(edition))
 
             // ----- Act -----
@@ -579,7 +695,10 @@ class BookTest {
         fun `isUnreleased is false when effectiveReleaseDate is null`() {
             // ----- Arrange -----
             val book = buildBook(
-                editions = listOf(buildEdition(id = 10, releaseDate = null)),
+                editions = listOf(buildEdition(
+                    id = 10,
+                    releaseDate = null,
+                ),),
                 releaseDate = null,
             )
 

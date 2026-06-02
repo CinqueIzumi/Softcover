@@ -113,7 +113,10 @@ fun Modifier.pressScaleCombinedClickable(
 }
 
 @Composable
-fun Modifier.shimmer(shape: Shape = RectangleShape, isLoading: Boolean): Modifier {
+fun Modifier.shimmer(
+    shape: Shape = RectangleShape,
+    isLoading: Boolean,
+): Modifier {
     return if (isLoading) this.shimmer(shape = shape) else this
 }
 
@@ -141,9 +144,15 @@ fun Modifier.shimmer(shape: Shape = RectangleShape): Modifier {
     return this.drawWithCache {
         val brush = Brush.linearGradient(
             colors = shimmerColors,
-            start = Offset(translateAnim, 0f),
+            start = Offset(
+                translateAnim,
+                0f,
+            ),
             // wider gradient
-            end = Offset(translateAnim + size.width / 1.5f, size.height),
+            end = Offset(
+                translateAnim + size.width / 1.5f,
+                size.height,
+            ),
         )
 
         val outline = shape.createOutline(
@@ -153,7 +162,10 @@ fun Modifier.shimmer(shape: Shape = RectangleShape): Modifier {
         )
 
         onDrawWithContent {
-            drawOutline(outline, brush = brush)
+            drawOutline(
+                outline,
+                brush = brush,
+            )
         }
     }
 }
@@ -161,13 +173,19 @@ fun Modifier.shimmer(shape: Shape = RectangleShape): Modifier {
 fun Modifier.grayscale(): Modifier {
     val paint = Paint().apply {
         colorFilter = ColorFilter.colorMatrix(
-            ColorMatrix().apply { setToSaturation(0f) }
+            ColorMatrix().apply { setToSaturation(0f) },
         )
     }
 
     return this.drawWithContent {
         drawIntoCanvas { canvas ->
-            canvas.saveLayer(bounds = Rect(Offset.Zero, size), paint = paint)
+            canvas.saveLayer(
+                bounds = Rect(
+                    Offset.Zero,
+                    size,
+                ),
+                paint = paint,
+            )
             drawContent()
             canvas.restore()
         }

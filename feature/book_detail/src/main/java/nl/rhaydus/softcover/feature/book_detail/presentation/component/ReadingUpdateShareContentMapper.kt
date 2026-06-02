@@ -61,7 +61,10 @@ internal fun Book.toReadingUpdateContent(
         },
 
         progressLabel = if (kind == ReadingUpdateKind.READING) {
-            buildProgressLabel(userBookRead = userBookRead, edition = resolvedEdition)
+            buildProgressLabel(
+                userBookRead = userBookRead,
+                edition = resolvedEdition,
+            )
         } else {
             null
         },
@@ -85,7 +88,10 @@ private fun buildProgressLabel(
         val totalSeconds = edition.audioSeconds?.takeIf { it > 0 }
 
         if (currentSeconds != null && totalSeconds != null) {
-            val percent = (currentSeconds.toFloat() / totalSeconds * 100).roundToInt().coerceIn(0, 100)
+            val percent = (currentSeconds.toFloat() / totalSeconds * 100).roundToInt().coerceIn(
+                0,
+                100,
+            )
 
             return "${secondsToHm(currentSeconds)} / ${secondsToHm(totalSeconds)} · $percent%"
         }
@@ -97,7 +103,10 @@ private fun buildProgressLabel(
     val totalPages = edition?.pages?.takeIf { it > 0 }
 
     if (currentPage != null && totalPages != null) {
-        val percent = (currentPage.toFloat() / totalPages * 100).roundToInt().coerceIn(0, 100)
+        val percent = (currentPage.toFloat() / totalPages * 100).roundToInt().coerceIn(
+            0,
+            100,
+        )
 
         return "page $currentPage / $totalPages · $percent%"
     }
@@ -106,7 +115,10 @@ private fun buildProgressLabel(
 }
 
 private fun UserBookRead.fallbackPercentLabel(): String {
-    val percent = progress.roundToInt().coerceIn(0, 100)
+    val percent = progress.roundToInt().coerceIn(
+        0,
+        100,
+    )
 
     return "$percent%"
 }

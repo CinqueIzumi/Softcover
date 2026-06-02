@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnUpdateTimeProgressClickActionTest {
-
     private lateinit var updateBookProgress: RecordBookProgressUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -68,18 +67,27 @@ class OnUpdateTimeProgressClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `hides the update progress sheet after execution`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = BookDetailUiState(book = book, showUpdateProgressSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                showUpdateProgressSheet = true,
+            )
             dependencies = stubDependencies(this)
 
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe false
@@ -88,17 +96,31 @@ class OnUpdateTimeProgressClickActionTest {
         @Test
         fun `does nothing when book in state is null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null, showUpdateProgressSheet = true)
+            stateFlow.value = BookDetailUiState(
+                book = null,
+                showUpdateProgressSheet = true,
+            )
             dependencies = stubDependencies(this)
 
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe true
-            coVerify(exactly = 0) { updateBookProgress(any(), any(), any()) }
+            coVerify(exactly = 0) { updateBookProgress(
+                any(),
+                any(),
+                any(),
+            ) }
         }
 
         @Test
@@ -109,14 +131,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 1*3600 + 2*60 + 3 = 3723
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "2", seconds = "3")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "2",
+                seconds = "3",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3723)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3723,
+                )
             }
         }
 
@@ -128,14 +160,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 0*3600 + 0*60 + 30 = 30
-            val action = OnUpdateTimeProgressClickAction(hours = "abc", minutes = "0", seconds = "30")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "abc",
+                minutes = "0",
+                seconds = "30",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 30)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 30,
+                )
             }
         }
 
@@ -147,14 +189,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "abc", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "abc",
+                seconds = "0",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                )
             }
         }
 
@@ -166,14 +218,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "abc")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "abc",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                )
             }
         }
 
@@ -184,14 +246,24 @@ class OnUpdateTimeProgressClickActionTest {
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
 
-            val action = OnUpdateTimeProgressClickAction(hours = "", minutes = "", seconds = "")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "",
+                minutes = "",
+                seconds = "",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 0)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 0,
+                )
             }
         }
 
@@ -203,14 +275,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 0*3600 + 59*60 + 0 = 3540
-            val action = OnUpdateTimeProgressClickAction(hours = "0", minutes = "90", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "0",
+                minutes = "90",
+                seconds = "0",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3540)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3540,
+                )
             }
         }
 
@@ -222,14 +304,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 0*3600 + 0*60 + 59 = 59
-            val action = OnUpdateTimeProgressClickAction(hours = "0", minutes = "0", seconds = "90")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "0",
+                minutes = "0",
+                seconds = "90",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 59)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 59,
+                )
             }
         }
 
@@ -241,14 +333,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 0*3600 + 30*60 + 0 = 1800
-            val action = OnUpdateTimeProgressClickAction(hours = "-2", minutes = "30", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "-2",
+                minutes = "30",
+                seconds = "0",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 1800)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 1800,
+                )
             }
         }
 
@@ -260,14 +362,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 2*3600 = 7200, clamped to 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "2", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "2",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                )
             }
         }
 
@@ -279,14 +391,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // total = 0, so (1*3600).coerceIn(0,0) = 0
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 0)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 0,
+                )
             }
         }
 
@@ -298,14 +420,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "-10", seconds = "0")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "-10",
+                seconds = "0",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                )
             }
         }
 
@@ -317,14 +449,24 @@ class OnUpdateTimeProgressClickActionTest {
             dependencies = stubDependencies(this)
 
             // 1*3600 + 0 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(hours = "1", minutes = "0", seconds = "-30")
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "-30",
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
-                updateBookProgress(book = book, newSeconds = 3600)
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                )
             }
         }
     }

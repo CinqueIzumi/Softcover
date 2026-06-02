@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UpdateBookEditionUseCaseTest {
-
     private lateinit var repository: BooksRepository
     private lateinit var useCase: UpdateBookEditionUseCase
 
@@ -26,7 +25,6 @@ class UpdateBookEditionUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `updates edition then caches the returned book`() = runTest {
             // ----- Arrange -----

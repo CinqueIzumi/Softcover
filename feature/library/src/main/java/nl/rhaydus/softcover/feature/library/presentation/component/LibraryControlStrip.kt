@@ -76,7 +76,10 @@ fun LibraryControlStrip(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        if (canRearrange(state = state, tab = currentTab) || state.isRearranging) {
+        if (canRearrange(
+            state = state,
+            tab = currentTab,
+        ) || state.isRearranging) {
             RearrangeAction(
                 isRearranging = state.isRearranging,
                 runAction = runAction,
@@ -205,7 +208,10 @@ private fun SortPill(
                         )
                     },
                     onClick = {
-                        runAction(OnSetListRankedAction(listId = tab.listId, ranked = true))
+                        runAction(OnSetListRankedAction(
+                            listId = tab.listId,
+                            ranked = true,
+                        ),)
                     },
                 )
             }

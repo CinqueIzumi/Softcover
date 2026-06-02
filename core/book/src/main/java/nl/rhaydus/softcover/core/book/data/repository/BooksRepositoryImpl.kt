@@ -95,7 +95,10 @@ class BooksRepositoryImpl(
     ) {
         runOrJoin(statusFilter = statusFilter) {
             withContext(Dispatchers.IO) {
-                refreshUserBooksInternal(userId = userId, statusFilter = statusFilter)
+                refreshUserBooksInternal(
+                    userId = userId,
+                    statusFilter = statusFilter,
+                )
             }
         }
     }
@@ -258,7 +261,10 @@ class BooksRepositoryImpl(
             throw BookNotFoundException(bookId = missingBookId)
         }
 
-        persistCanonicalRedirect(oldId = missingBookId, canonical = canonical)
+        persistCanonicalRedirect(
+            oldId = missingBookId,
+            canonical = canonical,
+        )
 
         return canonical
     }
@@ -269,7 +275,10 @@ class BooksRepositoryImpl(
     ) {
         booksLocalDataSource.cacheBook(book = canonical)
 
-        booksLocalDataSource.redirectBookId(oldId = oldId, newId = canonical.id)
+        booksLocalDataSource.redirectBookId(
+            oldId = oldId,
+            newId = canonical.id,
+        )
 
         booksLocalDataSource.deleteOrphanBooks()
     }
@@ -325,7 +334,10 @@ class BooksRepositoryImpl(
         }
 
         return runCatching {
-            booksRemoteDataSource.markBookAsWantToRead(bookId = book.id, editionId = editionId)
+            booksRemoteDataSource.markBookAsWantToRead(
+                bookId = book.id,
+                editionId = editionId,
+            )
         }.getOrElse { error ->
             if (error is CancellationException) throw error
 
@@ -363,13 +375,19 @@ class BooksRepositoryImpl(
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
-                booksRemoteDataSource.updateBookRating(userBook = userBook, rating = rating)
+                booksRemoteDataSource.updateBookRating(
+                    userBook = userBook,
+                    rating = rating,
+                )
             }.getOrElse { error ->
                 when (error) {
                     is CancellationException -> throw error
 
                     is OfflineException -> {
-                        enqueueRatingUpdate(book = optimistic, rating = rating)
+                        enqueueRatingUpdate(
+                            book = optimistic,
+                            rating = rating,
+                        )
                         optimistic
                     }
 
@@ -381,7 +399,10 @@ class BooksRepositoryImpl(
             }
         }
 
-        enqueueRatingUpdate(book = optimistic, rating = rating)
+        enqueueRatingUpdate(
+            book = optimistic,
+            rating = rating,
+        )
 
         return optimistic
     }
@@ -396,7 +417,10 @@ class BooksRepositoryImpl(
         val reviewedAt: String = LocalDate.now().toString()
 
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = book.withReview(review = review, hasSpoilers = hasSpoilers)
+        val optimistic = book.withReview(
+            review = review,
+            hasSpoilers = hasSpoilers,
+        )
         booksLocalDataSource.cacheBook(book = optimistic)
 
         if (networkAvailability.isOnline.value) {
@@ -412,7 +436,11 @@ class BooksRepositoryImpl(
                     is CancellationException -> throw error
 
                     is OfflineException -> {
-                        enqueueReviewUpdate(book = optimistic, review = review, hasSpoilers = hasSpoilers)
+                        enqueueReviewUpdate(
+                            book = optimistic,
+                            review = review,
+                            hasSpoilers = hasSpoilers,
+                        )
                         optimistic
                     }
 
@@ -424,7 +452,11 @@ class BooksRepositoryImpl(
             }
         }
 
-        enqueueReviewUpdate(book = optimistic, review = review, hasSpoilers = hasSpoilers)
+        enqueueReviewUpdate(
+            book = optimistic,
+            review = review,
+            hasSpoilers = hasSpoilers,
+        )
 
         return optimistic
     }
@@ -505,7 +537,10 @@ class BooksRepositoryImpl(
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = editionId)
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = editionId,
+                )
             }.getOrElse { error ->
                 when (error) {
                     is CancellationException -> throw error
@@ -547,7 +582,7 @@ class BooksRepositoryImpl(
                 startedAt = userBookRead.startedAt,
                 finishedAt = userBookRead.finishedAt,
                 enqueuedAt = Instant.now().toString(),
-            )
+            ),
         )
     }
 
@@ -567,7 +602,7 @@ class BooksRepositoryImpl(
                 startedAt = userBookRead.startedAt,
                 finishedAt = userBookRead.finishedAt,
                 enqueuedAt = Instant.now().toString(),
-            )
+            ),
         )
     }
 
@@ -592,7 +627,7 @@ class BooksRepositoryImpl(
                 finishedAt = null,
                 rating = rating,
                 enqueuedAt = Instant.now().toString(),
-            )
+            ),
         )
     }
 
@@ -619,7 +654,7 @@ class BooksRepositoryImpl(
                 reviewSlateJson = review.toJson(),
                 reviewHasSpoilers = hasSpoilers,
                 enqueuedAt = Instant.now().toString(),
-            )
+            ),
         )
     }
 
@@ -676,10 +711,16 @@ class BooksRepositoryImpl(
 
         val progress: Float = when {
             newSeconds != null && totalSeconds != null && totalSeconds > 0 ->
-                (newSeconds.toFloat() / totalSeconds.toFloat() * 100f).coerceIn(0f, 100f)
+                (newSeconds.toFloat() / totalSeconds.toFloat() * 100f).coerceIn(
+                    0f,
+                    100f,
+                )
 
             newPage != null && totalPages != null && totalPages > 0 ->
-                (newPage.toFloat() / totalPages.toFloat() * 100f).coerceIn(0f, 100f)
+                (newPage.toFloat() / totalPages.toFloat() * 100f).coerceIn(
+                    0f,
+                    100f,
+                )
 
             else -> existingRead.progress
         }
@@ -788,6 +829,9 @@ class BooksRepositoryImpl(
         editionId: Int,
         source: File,
     ) {
-        booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
+        booksLocalDataSource.persistEditionImage(
+            editionId = editionId,
+            source = source,
+        )
     }
 }

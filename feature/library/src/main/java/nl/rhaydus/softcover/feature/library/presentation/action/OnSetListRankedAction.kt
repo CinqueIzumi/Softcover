@@ -61,7 +61,10 @@ class OnSetListRankedAction(
             listId = listId,
             ranked = ranked,
         ).onFailure { throwable ->
-            Timber.e(throwable, "Set list ranked=$ranked failed for list $listId")
+            Timber.e(
+                throwable,
+                "Set list ranked=$ranked failed for list $listId",
+            )
 
             if (ranked) {
                 dependencies.setLibrarySortUseCase(

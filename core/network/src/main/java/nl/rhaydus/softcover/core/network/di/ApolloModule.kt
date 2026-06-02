@@ -21,8 +21,14 @@ val apolloModule = module {
     single {
         OkHttpClient.Builder()
             .addInterceptor(get<AuthInterceptor>())
-            .connectTimeout(60, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
+            .connectTimeout(
+                60,
+                TimeUnit.SECONDS,
+            )
+            .readTimeout(
+                60,
+                TimeUnit.SECONDS,
+            )
             .build()
     }
 

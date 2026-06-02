@@ -97,7 +97,7 @@ object OnboardingScreen : Screen {
                 }
 
                 text
-            }
+            },
         )
     }
 
@@ -120,11 +120,11 @@ object OnboardingScreen : Screen {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .imePadding()
+                    .imePadding(),
             ) {
                 HorizontalPager(
                     state = pagerState,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) { page ->
                     val currentIntroScreen: IntroScreen = pages[page]
 
@@ -133,7 +133,7 @@ object OnboardingScreen : Screen {
                             .fillMaxSize()
                             .weight(1f)
                             .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
                     ) {
                         when (currentIntroScreen) {
                             IntroScreen.FIRST -> {
@@ -152,7 +152,7 @@ object OnboardingScreen : Screen {
                                         scope.launch {
                                             pagerState.animateScrollToPage(page = page + 1)
                                         }
-                                    }
+                                    },
                                 )
                             }
 

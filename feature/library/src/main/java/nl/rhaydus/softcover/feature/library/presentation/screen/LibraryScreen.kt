@@ -315,7 +315,10 @@ object LibraryScreen : Screen {
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = topAppBarState)
 
         val collapseFraction = if (topAppBarState.heightOffsetLimit < 0f) {
-            (topAppBarState.heightOffset / topAppBarState.heightOffsetLimit).coerceIn(0f, 1f)
+            (topAppBarState.heightOffset / topAppBarState.heightOffsetLimit).coerceIn(
+                0f,
+                1f,
+            )
         } else {
             0f
         }
@@ -334,7 +337,7 @@ object LibraryScreen : Screen {
             contentWindowInsets = WindowInsets.statusBars,
         ) {
             Column(
-                modifier = Modifier.padding(it)
+                modifier = Modifier.padding(it),
             ) {
                 if (state.selectionMode) {
                     SelectionHeader(
@@ -373,7 +376,10 @@ object LibraryScreen : Screen {
                             if (measured > 0 && newLimit != topAppBarState.heightOffsetLimit) {
                                 val previousFraction = if (topAppBarState.heightOffsetLimit < 0f) {
                                     (topAppBarState.heightOffset / topAppBarState.heightOffsetLimit)
-                                        .coerceIn(0f, 1f)
+                                        .coerceIn(
+                                            0f,
+                                            1f,
+                                        )
                                 } else {
                                     0f
                                 }
@@ -599,9 +605,7 @@ object LibraryScreen : Screen {
             )
         }
     }
-
     // region Editorial header
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun EditorialHeader(
@@ -636,7 +640,7 @@ object LibraryScreen : Screen {
                 IconButton(onClick = onToggleSearchClick) {
                     Icon(
                         painter = painterResource(
-                            if (isSearchActive) R.drawable.ic_close else R.drawable.ic_search
+                            if (isSearchActive) R.drawable.ic_close else R.drawable.ic_search,
                         ),
                         contentDescription = if (isSearchActive) "Close library search" else "Search in library",
                     )
@@ -654,7 +658,10 @@ object LibraryScreen : Screen {
                             .toInt()
                             .coerceAtLeast(0)
                         layout(placeable.width, visibleHeight) {
-                            placeable.place(0, 0)
+                            placeable.place(
+                                0,
+                                0,
+                            )
                         }
                     },
             ) {
@@ -691,11 +698,8 @@ object LibraryScreen : Screen {
             }
         }
     }
-
     // endregion
-
     // region Search field
-
     @Composable
     private fun EditorialSearchField(
         query: String,
@@ -740,7 +744,7 @@ object LibraryScreen : Screen {
                         textStyle = LocalTextStyle.current.merge(
                             MaterialTheme.typography.bodyLarge.copy(
                                 color = MaterialTheme.colorScheme.onSurface,
-                            )
+                            ),
                         ),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         modifier = Modifier.fillMaxWidth(),
@@ -765,11 +769,8 @@ object LibraryScreen : Screen {
             }
         }
     }
-
     // endregion
-
     // region Tabs
-
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun ShelfTabRow(
@@ -875,9 +876,7 @@ object LibraryScreen : Screen {
             )
         }
     }
-
     // endregion
-
     @Composable
     private fun ReadYearChipRow(
         years: List<Int>,
@@ -1055,17 +1054,31 @@ object LibraryScreen : Screen {
 
             if (fromIndex == -1 || toIndex == -1) return@rememberReorderableLazyGridState
 
-            orderedIds.add(toIndex, orderedIds.removeAt(fromIndex))
+            orderedIds.add(
+                toIndex,
+                orderedIds.removeAt(fromIndex),
+            )
 
             val current = minTouchedIndex.intValue
 
             minTouchedIndex.intValue = if (current == -1) {
-                minOf(fromIndex, toIndex)
+                minOf(
+                    fromIndex,
+                    toIndex,
+                )
             } else {
-                minOf(current, fromIndex, toIndex)
+                minOf(
+                    current,
+                    fromIndex,
+                    toIndex,
+                )
             }
 
-            maxTouchedIndex.intValue = maxOf(maxTouchedIndex.intValue, fromIndex, toIndex)
+            maxTouchedIndex.intValue = maxOf(
+                maxTouchedIndex.intValue,
+                fromIndex,
+                toIndex,
+            )
         }
 
         // Display mode renders the canonical list directly; only while rearranging do we render the
@@ -1102,7 +1115,10 @@ object LibraryScreen : Screen {
                             }
 
                             val orderedListBookIds = orderedIds
-                                .subList(min, max + 1)
+                                .subList(
+                                    min,
+                                    max + 1,
+                                )
                                 .mapNotNull { editionId -> listBookIdByEditionId[editionId] }
 
                             if (orderedListBookIds.size != max - min + 1) {
@@ -1124,8 +1140,14 @@ object LibraryScreen : Screen {
                     // Drag-only while rearranging: tapping a cover doesn't open the edition with the
                     // handle live (matches the built-in shelf grid).
                     LayoutEditionEntry(
-                        modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = edition.id)
-                            .staggeredEntry(coordinator = entry, index = index),
+                        modifier = rememberMutationAnimatedModifier(
+                            animator = animator,
+                            itemKey = edition.id,
+                        )
+                            .staggeredEntry(
+                                coordinator = entry,
+                                index = index,
+                            ),
                         edition = edition,
                         layout = state.gridLayout,
                         onEditionClick = if (isRearranging) {
@@ -1237,9 +1259,16 @@ object LibraryScreen : Screen {
 
             if (fromIndex == -1 || toIndex == -1) return@rememberReorderableLazyGridState
 
-            orderedIds.add(toIndex, orderedIds.removeAt(fromIndex))
+            orderedIds.add(
+                toIndex,
+                orderedIds.removeAt(fromIndex),
+            )
 
-            maxTouchedIndex.intValue = maxOf(maxTouchedIndex.intValue, fromIndex, toIndex)
+            maxTouchedIndex.intValue = maxOf(
+                maxTouchedIndex.intValue,
+                fromIndex,
+                toIndex,
+            )
         }
 
         // Display mode renders the canonical list directly (byte-identical to before); only while
@@ -1310,8 +1339,14 @@ object LibraryScreen : Screen {
                     }
 
                     LayoutBookEntry(
-                        modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = book.id)
-                            .staggeredEntry(coordinator = entry, index = index),
+                        modifier = rememberMutationAnimatedModifier(
+                            animator = animator,
+                            itemKey = book.id,
+                        )
+                            .staggeredEntry(
+                                coordinator = entry,
+                                index = index,
+                            ),
                         book = book,
                         layout = state.gridLayout,
                         onClick = onClick,
@@ -1372,7 +1407,11 @@ object LibraryScreen : Screen {
         // haven't updated yet — scrolling now would race with LazyGrid's "follow the focused item
         // by key" behavior once the new visible list lands and silently undo the scroll.
         LaunchedEffect(tabId, sortMode, sortDirection, filters) {
-            val current = Triple(sortMode, sortDirection, filters)
+            val current = Triple(
+                sortMode,
+                sortDirection,
+                filters,
+            )
             val prior = previousKey
 
             if (prior != null && prior != current) {
@@ -1744,7 +1783,10 @@ object LibraryScreen : Screen {
             modifier
                 .fillMaxWidth()
                 .aspectRatio(ratio = 2f / 3f)
-                .pressScaleCombinedClickable(onClick = onClick, onLongClick = onLongClick)
+                .pressScaleCombinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                ),
         )
     }
 
@@ -1758,12 +1800,15 @@ object LibraryScreen : Screen {
         cover: @Composable (Modifier) -> Unit,
     ) {
         Column(
-            modifier = modifier.pressScaleCombinedClickable(onClick = onClick, onLongClick = onLongClick)
+            modifier = modifier.pressScaleCombinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
         ) {
             cover(
                 Modifier
                     .fillMaxWidth()
-                    .aspectRatio(ratio = 2f / 3f)
+                    .aspectRatio(ratio = 2f / 3f),
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -1807,7 +1852,10 @@ object LibraryScreen : Screen {
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .pressScaleCombinedClickable(onClick = onClick, onLongClick = onLongClick),
+                .pressScaleCombinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                ),
         ) {
             Row(
                 modifier = Modifier
@@ -1881,7 +1929,10 @@ object LibraryScreen : Screen {
         Surface(
             modifier = modifier
                 .fillMaxWidth()
-                .pressScaleCombinedClickable(onClick = onClick, onLongClick = onLongClick),
+                .pressScaleCombinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                ),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(20.dp),
         ) {
@@ -1894,7 +1945,7 @@ object LibraryScreen : Screen {
                 cover(
                     Modifier
                         .width(96.dp)
-                        .aspectRatio(ratio = 2f / 3f)
+                        .aspectRatio(ratio = 2f / 3f),
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -1980,9 +2031,7 @@ object LibraryScreen : Screen {
             }
         }
     }
-
     // region Selection mode
-
     @Composable
     private fun SelectionHeader(
         selectedCount: Int,
@@ -2195,9 +2244,7 @@ object LibraryScreen : Screen {
     )
 
     private const val UNSELECTED_COVER_ALPHA = 0.55f
-
     // endregion
-
     @Composable
     private fun EmptyListScreen(tab: LibraryContentTab) {
         val isDnf = tab is LibraryContentTab.Status &&
@@ -2268,7 +2315,7 @@ private fun LibraryScreenPreview() {
                         PreviewData.baseBook.copy(title = "Last to Leave the room"),
                         PreviewData.baseBook.copy(title = "Futility"),
                         PreviewData.baseBook.copy(title = "We call them witches"),
-                    )
+                    ),
                 ),
             ),
             onBookClick = {},

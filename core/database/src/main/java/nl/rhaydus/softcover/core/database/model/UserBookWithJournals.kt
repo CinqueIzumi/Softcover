@@ -9,7 +9,7 @@ data class UserBookWithJournals(
 
     @Relation(
         parentColumn = "id",
-        entityColumn = "userBookId"
+        entityColumn = "userBookId",
     )
     val journals: List<ReadingJournalEntity>,
 

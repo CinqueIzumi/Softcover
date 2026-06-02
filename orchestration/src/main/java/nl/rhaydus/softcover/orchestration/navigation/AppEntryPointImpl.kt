@@ -11,7 +11,13 @@ import nl.rhaydus.softcover.orchestration.presentation.MainActivity
  */
 class AppEntryPointImpl : AppEntryPoint {
     override fun focusModeIntent(context: Context): Intent =
-        Intent(context, MainActivity::class.java)
+        Intent(
+            context,
+            MainActivity::class.java,
+        )
             .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .putExtra(MainActivity.EXTRA_OPEN_FOCUS_MODE, true)
+            .putExtra(
+                MainActivity.EXTRA_OPEN_FOCUS_MODE,
+                true,
+            )
 }

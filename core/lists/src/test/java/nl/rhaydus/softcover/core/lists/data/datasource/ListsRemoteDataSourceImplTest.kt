@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ListsRemoteDataSourceImplTest {
-
     private lateinit var apolloClient: ApolloClient
     private lateinit var dataSource: ListsRemoteDataSourceImpl
 
@@ -78,7 +77,6 @@ class ListsRemoteDataSourceImplTest {
 
     @Nested
     inner class FetchUserLists {
-
         @Test
         fun `returns mapped book lists for each list entry returned by the query`() = runTest {
             // ----- Arrange -----
@@ -170,7 +168,6 @@ class ListsRemoteDataSourceImplTest {
 
     @Nested
     inner class RemoveListBook {
-
         @Test
         fun `throws when mutation returns null delete_list_book wrapper`() = runTest {
             // ----- Arrange -----
@@ -264,7 +261,6 @@ class ListsRemoteDataSourceImplTest {
 
     @Nested
     inner class CreateList {
-
         @Test
         fun `returns mapped BookList when response has a populated list and no errors`() = runTest {
             // ----- Arrange -----
@@ -495,7 +491,6 @@ class ListsRemoteDataSourceImplTest {
 
     @Nested
     inner class MarkEditionAsOwned {
-
         @Test
         fun `returns mapped ListBook when mutation succeeds`() = runTest {
             // ----- Arrange -----
@@ -606,7 +601,6 @@ class ListsRemoteDataSourceImplTest {
 
     @Nested
     inner class UpdateListBookPositions {
-
         @Test
         fun `returns without calling Apollo when orderedListBookIds is empty`() = runTest {
             // ----- Arrange -----
@@ -673,7 +667,6 @@ class ListsRemoteDataSourceImplTest {
 
     @Nested
     inner class AddBookToList {
-
         @Test
         fun `returns mapped ListBook when mutation succeeds`() = runTest {
             // ----- Arrange -----
@@ -815,7 +808,6 @@ class ListsRemoteDataSourceImplTest {
 
     @Nested
     inner class SetListRanked {
-
         @Test
         fun `returns mapped BookList and passes correct mutation arguments`() = runTest {
             // ----- Arrange -----

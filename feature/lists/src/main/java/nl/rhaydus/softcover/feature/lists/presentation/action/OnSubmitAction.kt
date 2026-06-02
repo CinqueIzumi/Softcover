@@ -34,7 +34,10 @@ class OnSubmitAction : CreateListAction {
                 ),
             )
         }.onFailure { error ->
-            Timber.e(error, "Failed to create list $error")
+            Timber.e(
+                error,
+                "Failed to create list $error",
+            )
 
             scope.setState { it.copy(isSubmitting = false) }
 

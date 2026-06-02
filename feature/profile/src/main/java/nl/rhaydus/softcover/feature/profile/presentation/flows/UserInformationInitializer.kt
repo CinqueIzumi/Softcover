@@ -21,7 +21,10 @@ class UserInformationInitializer() : ProfileInitializer {
         dependencies.observeUserProfileDataUseCase()
             .filterNotNull()
             .collect { profileData ->
-                scope.setState { it.copy(userProfileData = profileData, isLoading = false) }
+                scope.setState { it.copy(
+                    userProfileData = profileData,
+                    isLoading = false,
+                ) }
             }
     }
 }

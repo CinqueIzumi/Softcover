@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserBooksFlowCollectorTest {
-
     private lateinit var getAllUserBooksUseCase: GetAllUserBooksUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -55,7 +54,10 @@ class UserBooksFlowCollectorTest {
     // Builder helpers — use real data-class instances so overlay/.copy() works
     // -------------------------------------------------------------------------
 
-    private fun buildEdition(id: Int, owned: Boolean = false): BookEdition = BookEdition(
+    private fun buildEdition(
+        id: Int,
+        owned: Boolean = false,
+    ): BookEdition = BookEdition(
         id = id,
         canonicalId = null,
         bookId = 0,
@@ -129,14 +131,16 @@ class UserBooksFlowCollectorTest {
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `does not change state when book in state is null and flow emits a list`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val emittedBook = buildBook(id = 3)
             stateFlow.value = BookDetailUiState(book = null)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(emittedBook))
@@ -150,11 +154,20 @@ class UserBooksFlowCollectorTest {
         fun `overlays userBook from local book onto state book when ids match`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val localUserBook = buildUserBook()
-            val remoteBook = buildBook(id = 10, userBook = null)
-            val localBook = buildBook(id = 10, userBook = localUserBook)
+            val remoteBook = buildBook(
+                id = 10,
+                userBook = null,
+            )
+            val localBook = buildBook(
+                id = 10,
+                userBook = localUserBook,
+            )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -168,11 +181,20 @@ class UserBooksFlowCollectorTest {
         fun `overlays userBookRead from local book onto state book when ids match`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val localUserBookRead = buildUserBookRead()
-            val remoteBook = buildBook(id = 10, userBookRead = null)
-            val localBook = buildBook(id = 10, userBookRead = localUserBookRead)
+            val remoteBook = buildBook(
+                id = 10,
+                userBookRead = null,
+            )
+            val localBook = buildBook(
+                id = 10,
+                userBookRead = localUserBookRead,
+            )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -200,7 +222,10 @@ class UserBooksFlowCollectorTest {
             )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -217,11 +242,23 @@ class UserBooksFlowCollectorTest {
         fun `preserves remote editions list size after overlay`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val remoteEditions = listOf(buildEdition(id = 1), buildEdition(id = 2), buildEdition(id = 3))
-            val remoteBook = buildBook(id = 8, editions = remoteEditions)
-            val localBook = buildBook(id = 8, editions = listOf(buildEdition(id = 1, owned = true)))
+            val remoteBook = buildBook(
+                id = 8,
+                editions = remoteEditions,
+            )
+            val localBook = buildBook(
+                id = 8,
+                editions = listOf(buildEdition(
+                    id = 1,
+                    owned = true,
+                ),),
+            )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -234,13 +271,28 @@ class UserBooksFlowCollectorTest {
         @Test
         fun `sets owned true on a remote edition whose id appears in local owned editions`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val remoteEdition = buildEdition(id = 10, owned = false)
-            val remoteBook = buildBook(id = 1, editions = listOf(remoteEdition))
-            val localEdition = buildEdition(id = 10, owned = true)
-            val localBook = buildBook(id = 1, editions = listOf(localEdition))
+            val remoteEdition = buildEdition(
+                id = 10,
+                owned = false,
+            )
+            val remoteBook = buildBook(
+                id = 1,
+                editions = listOf(remoteEdition),
+            )
+            val localEdition = buildEdition(
+                id = 10,
+                owned = true,
+            )
+            val localBook = buildBook(
+                id = 1,
+                editions = listOf(localEdition),
+            )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -253,13 +305,28 @@ class UserBooksFlowCollectorTest {
         @Test
         fun `leaves owned false on a remote edition whose id is not in local owned editions`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val remoteEdition = buildEdition(id = 20, owned = false)
-            val remoteBook = buildBook(id = 2, editions = listOf(remoteEdition))
-            val localEdition = buildEdition(id = 99, owned = true)
-            val localBook = buildBook(id = 2, editions = listOf(localEdition))
+            val remoteEdition = buildEdition(
+                id = 20,
+                owned = false,
+            )
+            val remoteBook = buildBook(
+                id = 2,
+                editions = listOf(remoteEdition),
+            )
+            val localEdition = buildEdition(
+                id = 99,
+                owned = true,
+            )
+            val localBook = buildBook(
+                id = 2,
+                editions = listOf(localEdition),
+            )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -273,13 +340,28 @@ class UserBooksFlowCollectorTest {
         fun `overlay is authoritative - flips a previously-owned edition to false when it is no longer in local owned set`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             // Start: remote edition is marked owned (e.g. from a prior emission)
-            val remoteEdition = buildEdition(id = 30, owned = true)
-            val remoteBook = buildBook(id = 3, editions = listOf(remoteEdition))
+            val remoteEdition = buildEdition(
+                id = 30,
+                owned = true,
+            )
+            val remoteBook = buildBook(
+                id = 3,
+                editions = listOf(remoteEdition),
+            )
             // Local book no longer has any owned editions
-            val localBook = buildBook(id = 3, editions = listOf(buildEdition(id = 30, owned = false)))
+            val localBook = buildBook(
+                id = 3,
+                editions = listOf(buildEdition(
+                    id = 30,
+                    owned = false,
+                ),),
+            )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -294,13 +376,34 @@ class UserBooksFlowCollectorTest {
             // ----- Arrange -----
             val ownedId = 41
             val unownedId = 42
-            val remoteEditions = listOf(buildEdition(id = ownedId, owned = false), buildEdition(id = unownedId, owned = false))
-            val remoteBook = buildBook(id = 4, editions = remoteEditions)
-            val localEditions = listOf(buildEdition(id = ownedId, owned = true), buildEdition(id = unownedId, owned = false))
-            val localBook = buildBook(id = 4, editions = localEditions)
+            val remoteEditions = listOf(buildEdition(
+                id = ownedId,
+                owned = false,
+            ), buildEdition(
+                id = unownedId,
+                owned = false,
+            ),)
+            val remoteBook = buildBook(
+                id = 4,
+                editions = remoteEditions,
+            )
+            val localEditions = listOf(buildEdition(
+                id = ownedId,
+                owned = true,
+            ), buildEdition(
+                id = unownedId,
+                owned = false,
+            ),)
+            val localBook = buildBook(
+                id = 4,
+                editions = localEditions,
+            )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -319,7 +422,10 @@ class UserBooksFlowCollectorTest {
             val unrelatedBook = buildBook(id = 99)
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(unrelatedBook))
@@ -335,7 +441,10 @@ class UserBooksFlowCollectorTest {
             val remoteBook = buildBook(id = 5)
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(emptyList())
@@ -352,11 +461,17 @@ class UserBooksFlowCollectorTest {
             val secondLocalUserBook = buildUserBook()
             val secondBook = buildBook(id = 200)
             val localFirstBook = buildBook(id = 100)
-            val localSecondBook = buildBook(id = 200, userBook = secondLocalUserBook)
+            val localSecondBook = buildBook(
+                id = 200,
+                userBook = secondLocalUserBook,
+            )
 
             stateFlow.value = BookDetailUiState(book = firstBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // Emit initial user books list containing both
             userBooksFlow.emit(listOf(localFirstBook, localSecondBook))
@@ -377,7 +492,10 @@ class UserBooksFlowCollectorTest {
         fun `preserves all other UiState fields when performing overlay`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val remoteBook = buildBook(id = 4)
-            val localBook = buildBook(id = 4, userBook = buildUserBook())
+            val localBook = buildBook(
+                id = 4,
+                userBook = buildUserBook(),
+            )
             stateFlow.value = BookDetailUiState(
                 book = remoteBook,
                 loadingBookDetails = false,
@@ -385,7 +503,10 @@ class UserBooksFlowCollectorTest {
                 showEditEditionSheet = true,
             )
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))

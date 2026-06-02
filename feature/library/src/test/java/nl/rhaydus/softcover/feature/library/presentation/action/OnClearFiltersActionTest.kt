@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnClearFiltersActionTest {
-
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -37,7 +36,6 @@ class OnClearFiltersActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `removes the tab's entry from filtersByTab`() = runTest {
             // ----- Arrange -----

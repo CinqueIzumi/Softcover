@@ -75,7 +75,10 @@ fun BarcodeScanner(
     val barcodeScanner = remember {
         BarcodeScanning.getClient(
             BarcodeScannerOptions.Builder()
-                .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_EAN_8)
+                .setBarcodeFormats(
+                    Barcode.FORMAT_EAN_13,
+                    Barcode.FORMAT_EAN_8,
+                )
                 .build(),
         )
     }
@@ -119,7 +122,10 @@ fun BarcodeScanner(
                         analysis,
                     )
                 } catch (error: Exception) {
-                    Timber.e(error, "Failed to bind camera use cases for barcode scanning")
+                    Timber.e(
+                        error,
+                        "Failed to bind camera use cases for barcode scanning",
+                    )
                 }
             },
             ContextCompat.getMainExecutor(context),
@@ -203,16 +209,25 @@ private fun scanFrame(
         return
     }
 
-    val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+    val inputImage = InputImage.fromMediaImage(
+        mediaImage,
+        imageProxy.imageInfo.rotationDegrees,
+    )
 
     scanner.process(inputImage)
         .addOnSuccessListener { barcodes ->
             val isbn = barcodes.firstNotNullOfOrNull { it.rawValue }
 
-            if (isbn != null && hasEmitted.compareAndSet(false, true)) {
+            if (isbn != null && hasEmitted.compareAndSet(
+                false,
+                true,
+            )) {
                 onIsbnDetected(isbn)
             }
         }
-        .addOnFailureListener { Timber.e(it, "ML Kit failed to process a camera frame") }
+        .addOnFailureListener { Timber.e(
+            it,
+            "ML Kit failed to process a camera frame",
+        ) }
         .addOnCompleteListener { imageProxy.close() }
 }

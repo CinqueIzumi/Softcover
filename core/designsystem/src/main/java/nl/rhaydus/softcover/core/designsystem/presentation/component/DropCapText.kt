@@ -39,13 +39,24 @@ fun DropCapText(
     val firstLetterIndex = text.text.indexOfFirst { it.isLetter() }
 
     if (firstLetterIndex < 0) {
-        Text(text = text, style = bodyStyle, color = bodyColor, modifier = modifier)
+        Text(
+            text = text,
+            style = bodyStyle,
+            color = bodyColor,
+            modifier = modifier,
+        )
         return
     }
 
-    val leading = text.subSequence(startIndex = 0, endIndex = firstLetterIndex)
+    val leading = text.subSequence(
+        startIndex = 0,
+        endIndex = firstLetterIndex,
+    )
     val firstLetter = text.text[firstLetterIndex].toString()
-    val remainder = text.subSequence(startIndex = firstLetterIndex + 1, endIndex = text.length)
+    val remainder = text.subSequence(
+        startIndex = firstLetterIndex + 1,
+        endIndex = text.length,
+    )
 
     val dropCapStyle = bodyStyle.copy(
         fontFamily = displayFontFamily,
@@ -86,7 +97,10 @@ fun DropCapText(
         val splitLineIndex = (dropCapLines - 1).coerceAtMost(maximumValue = indentedMeasurement.lineCount - 1)
 
         val splitOffset = if (splitLineIndex >= 0) {
-            indentedMeasurement.getLineEnd(lineIndex = splitLineIndex, visibleEnd = false)
+            indentedMeasurement.getLineEnd(
+                lineIndex = splitLineIndex,
+                visibleEnd = false,
+            )
         } else {
             combinedFirst.length
         }
@@ -97,13 +111,19 @@ fun DropCapText(
         )
 
         val secondPart = if (splitOffset < combinedFirst.length) {
-            combinedFirst.subSequence(startIndex = splitOffset, endIndex = combinedFirst.length)
+            combinedFirst.subSequence(
+                startIndex = splitOffset,
+                endIndex = combinedFirst.length,
+            )
         } else {
             null
         }
 
         val capPlaceable = subcompose(slotId = "cap") {
-            Text(text = firstLetter, style = dropCapStyle)
+            Text(
+                text = firstLetter,
+                style = dropCapStyle,
+            )
         }.first().measure(constraints = Constraints())
 
         val firstPlaceable = subcompose(slotId = "first") {
@@ -134,13 +154,25 @@ fun DropCapText(
             )
         }
 
-        val topRowHeight = maxOf(capHeight, firstPlaceable.height)
+        val topRowHeight = maxOf(
+            capHeight,
+            firstPlaceable.height,
+        )
         val totalHeight = topRowHeight + (secondPlaceable?.height ?: 0)
 
         layout(width = totalWidth, height = totalHeight) {
-            capPlaceable.placeRelative(x = 0, y = 0)
-            firstPlaceable.placeRelative(x = capWidth + gapPx, y = 0)
-            secondPlaceable?.placeRelative(x = 0, y = topRowHeight)
+            capPlaceable.placeRelative(
+                x = 0,
+                y = 0,
+            )
+            firstPlaceable.placeRelative(
+                x = capWidth + gapPx,
+                y = 0,
+            )
+            secondPlaceable?.placeRelative(
+                x = 0,
+                y = topRowHeight,
+            )
         }
     }
 }

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class ObserveBookDeadlineUseCaseTest {
-
     private lateinit var repository: BookDeadlineRepository
     private lateinit var useCase: ObserveBookDeadlineUseCase
 
@@ -27,15 +26,22 @@ class ObserveBookDeadlineUseCaseTest {
 
     private fun buildDeadline(bookId: Int = 1) = BookDeadline(
         bookId = bookId,
-        deadlineDate = LocalDate.of(2026, 5, 1),
-        setAt = LocalDate.of(2026, 4, 1),
+        deadlineDate = LocalDate.of(
+            2026,
+            5,
+            1,
+        ),
+        setAt = LocalDate.of(
+            2026,
+            4,
+            1,
+        ),
         initialPerDay = 10f,
         unit = nl.rhaydus.softcover.core.domain.model.DeadlineUnit.PAGES,
     )
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository observe with the given bookId`() = runTest {
             // ----- Arrange -----

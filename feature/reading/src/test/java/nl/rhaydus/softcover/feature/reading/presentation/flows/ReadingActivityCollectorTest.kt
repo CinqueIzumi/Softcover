@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class ReadingActivityCollectorTest {
-
     private lateinit var observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase
     private lateinit var refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
@@ -62,20 +61,26 @@ class ReadingActivityCollectorTest {
     }
 
     private fun stubActivity(): ReadingDayActivity = ReadingDayActivity(
-        date = LocalDate.of(2026, 5, 31),
+        date = LocalDate.of(
+            2026,
+            5,
+            31,
+        ),
         didRead = true,
     )
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `invokes refreshUserProfileDataUseCase on launch`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             // (refresh is triggered immediately on launch via dependencies.launch { ... })
@@ -92,7 +97,10 @@ class ReadingActivityCollectorTest {
             val activity = listOf(stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             activityFlow.emit(activity)
@@ -110,7 +118,10 @@ class ReadingActivityCollectorTest {
             val secondList = listOf(stubActivity(), stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             activityFlow.emit(firstList)
@@ -128,7 +139,10 @@ class ReadingActivityCollectorTest {
             stateFlow.value = ReadingScreenUiState(recentReadingActivity = listOf(stubActivity()))
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             activityFlow.emit(emptyList())
@@ -146,7 +160,10 @@ class ReadingActivityCollectorTest {
             stateFlow.value = ReadingScreenUiState(recentReadingActivity = initialActivity)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act & Assert -----
             stateFlow.value.recentReadingActivity shouldBe initialActivity
@@ -162,7 +179,10 @@ class ReadingActivityCollectorTest {
             val activity = listOf(stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             activityFlow.emit(activity)
@@ -180,7 +200,10 @@ class ReadingActivityCollectorTest {
             val activity = listOf(stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             activityFlow.emit(activity)
@@ -198,7 +221,10 @@ class ReadingActivityCollectorTest {
             val activity = listOf(stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
             activityFlow.emit(activity)
             job.cancel()
 

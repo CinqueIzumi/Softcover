@@ -10,7 +10,7 @@ val onboardingModule = module {
             resetUserDataUseCase = get(),
             updateApiKeyUseCase = get(),
             dispatchers = get(),
-            initializers = getAll()
+            initializers = getAll(),
         )
     }
 }

@@ -17,13 +17,16 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 
 class ObserveRecentReadingActivityUseCaseTest {
-
     // Fixed today: 2026-05-04, so window is 2026-04-14 … 2026-05-04
     private val fixedClock: Clock = Clock.fixed(
         Instant.parse("2026-05-04T12:00:00Z"),
         ZoneOffset.UTC,
     )
-    private val today: LocalDate = LocalDate.of(2026, 5, 4)
+    private val today: LocalDate = LocalDate.of(
+        2026,
+        5,
+        4,
+    )
 
     private lateinit var profileRepository: ProfileRepository
     private lateinit var useCase: ObserveRecentReadingActivityUseCase
@@ -51,7 +54,6 @@ class ObserveRecentReadingActivityUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `emits exactly 21 entries`() = runTest {
             // ----- Arrange -----

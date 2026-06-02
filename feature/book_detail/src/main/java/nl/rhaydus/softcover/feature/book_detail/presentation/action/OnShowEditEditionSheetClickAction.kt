@@ -34,6 +34,7 @@ class OnShowEditEditionSheetClickAction : BookDetailAction {
                 }
                 .onFailure { throwable ->
                     Timber.e("Failed to fetch editions for book $bookId: $throwable")
+
                     scope.setState { it.copy(loadingEditions = false) }
                 }
         }

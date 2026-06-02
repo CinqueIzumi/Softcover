@@ -12,7 +12,11 @@ fun secondsToClock(seconds: Int): String {
     val hours = safe / 3600
     val minutes = (safe % 3600) / 60
     val secs = safe % 60
-    return "%02d:%02d:%02d".format(hours, minutes, secs)
+    return "%02d:%02d:%02d".format(
+        hours,
+        minutes,
+        secs,
+    )
 }
 
 fun Int.toHoursMinutesSeconds(): HoursMinutesSeconds {

@@ -47,7 +47,6 @@ import timber.log.Timber
 import kotlinx.coroutines.launch
 
 object ShareCardDebugScreen : Screen {
-
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -94,7 +93,10 @@ object ShareCardDebugScreen : Screen {
                         is SaveOutcome.Cached -> Unit
                     }
                 } catch (throwable: Throwable) {
-                    Timber.e(throwable, "Failed to save share card $filenameHint to gallery")
+                    Timber.e(
+                        throwable,
+                        "Failed to save share card $filenameHint to gallery",
+                    )
 
                     snackbarHostState.showSnackbar("Save failed: ${throwable.message}")
                 }
@@ -133,7 +135,10 @@ object ShareCardDebugScreen : Screen {
                     label = "Book",
                     capture = bookCapture,
                     content = SampleBook,
-                    onSaveClick = { onSaveClick(bookCapture, "book") },
+                    onSaveClick = { onSaveClick(
+                        bookCapture,
+                        "book",
+                    ) },
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -142,7 +147,10 @@ object ShareCardDebugScreen : Screen {
                     label = "Stat",
                     capture = statCapture,
                     content = SampleStat,
-                    onSaveClick = { onSaveClick(statCapture, "stat") },
+                    onSaveClick = { onSaveClick(
+                        statCapture,
+                        "stat",
+                    ) },
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -151,7 +159,10 @@ object ShareCardDebugScreen : Screen {
                     label = "Quote",
                     capture = quoteCapture,
                     content = SampleQuote,
-                    onSaveClick = { onSaveClick(quoteCapture, "quote") },
+                    onSaveClick = { onSaveClick(
+                        quoteCapture,
+                        "quote",
+                    ) },
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -160,7 +171,10 @@ object ShareCardDebugScreen : Screen {
                     label = "Year recap",
                     capture = recapCapture,
                     content = SampleRecap,
-                    onSaveClick = { onSaveClick(recapCapture, "year-recap") },
+                    onSaveClick = { onSaveClick(
+                        recapCapture,
+                        "year-recap",
+                    ) },
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))

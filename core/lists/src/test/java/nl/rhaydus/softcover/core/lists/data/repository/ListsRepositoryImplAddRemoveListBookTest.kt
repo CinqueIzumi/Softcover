@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test
 import kotlin.coroutines.cancellation.CancellationException
 
 class ListsRepositoryImplAddRemoveListBookTest {
-
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
     private lateinit var listsLocalDataSource: ListsLocalDataSource
     private val booksRepository = mockk<BooksRepository>()
@@ -60,7 +59,10 @@ class ListsRepositoryImplAddRemoveListBookTest {
         )
     }
 
-    private fun stubEdition(id: Int, bookId: Int = 1): BookEdition = mockk {
+    private fun stubEdition(
+        id: Int,
+        bookId: Int = 1,
+    ): BookEdition = mockk {
         every {
             this@mockk.id
         } returns id
@@ -91,15 +93,22 @@ class ListsRepositoryImplAddRemoveListBookTest {
 
     @Nested
     inner class AddBookToList {
-
         @Test
         fun `optimistically caches placeholder with OPTIMISTIC_LIST_BOOK_ID before calling remote`() = runTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
             val editionId = 10
-            val edition = stubEdition(id = editionId, bookId = bookId)
-            val realListBook = stubListBook(listBookId = 99, listId = listId, bookId = bookId, editionId = editionId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
+            val realListBook = stubListBook(
+                listBookId = 99,
+                listId = listId,
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             coEvery {
                 listsRemoteDataSource.addBookToList(
@@ -143,8 +152,16 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val listId = 5
             val bookId = 3
             val editionId = 10
-            val edition = stubEdition(id = editionId, bookId = bookId)
-            val realListBook = stubListBook(listBookId = 99, listId = listId, bookId = bookId, editionId = editionId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
+            val realListBook = stubListBook(
+                listBookId = 99,
+                listId = listId,
+                bookId = bookId,
+                editionId = editionId,
+            )
 
             coEvery {
                 listsRemoteDataSource.addBookToList(
@@ -180,7 +197,10 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val listId = 5
             val bookId = 3
             val editionId = 10
-            val edition = stubEdition(id = editionId, bookId = bookId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
             val remoteError = RuntimeException("network error")
 
             coEvery {
@@ -217,7 +237,10 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val listId = 5
             val bookId = 3
             val editionId = 10
-            val edition = stubEdition(id = editionId, bookId = bookId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
             val remoteError = RuntimeException("network error")
 
             coEvery {
@@ -264,7 +287,10 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val listId = 5
             val bookId = 3
             val editionId = 10
-            val edition = stubEdition(id = editionId, bookId = bookId)
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
 
             coEvery {
                 listsRemoteDataSource.addBookToList(
@@ -298,7 +324,6 @@ class ListsRepositoryImplAddRemoveListBookTest {
 
     @Nested
     inner class RemoveBookFromList {
-
         @Test
         fun `returns early without calling remote when book is not in the list`() = runTest {
             // ----- Arrange -----
@@ -329,7 +354,11 @@ class ListsRepositoryImplAddRemoveListBookTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
-            val snapshot = stubListBook(listBookId = 42, listId = listId, bookId = bookId)
+            val snapshot = stubListBook(
+                listBookId = 42,
+                listId = listId,
+                bookId = bookId,
+            )
             val updatedBookList = stubBookList()
 
             coEvery {
@@ -360,7 +389,11 @@ class ListsRepositoryImplAddRemoveListBookTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
-            val snapshot = stubListBook(listBookId = 42, listId = listId, bookId = bookId)
+            val snapshot = stubListBook(
+                listBookId = 42,
+                listId = listId,
+                bookId = bookId,
+            )
             val updatedBookList = stubBookList()
 
             coEvery {
@@ -391,7 +424,11 @@ class ListsRepositoryImplAddRemoveListBookTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
-            val snapshot = stubListBook(listBookId = 42, listId = listId, bookId = bookId)
+            val snapshot = stubListBook(
+                listBookId = 42,
+                listId = listId,
+                bookId = bookId,
+            )
             val remoteError = RuntimeException("network error")
 
             coEvery {
@@ -482,7 +519,11 @@ class ListsRepositoryImplAddRemoveListBookTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
-            val snapshot = stubListBook(listBookId = 42, listId = listId, bookId = bookId)
+            val snapshot = stubListBook(
+                listBookId = 42,
+                listId = listId,
+                bookId = bookId,
+            )
 
             coEvery {
                 listsLocalDataSource.findListBookByListAndBook(

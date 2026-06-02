@@ -20,11 +20,20 @@ data class OnUpdateTimeProgressClickAction(
         val bookToUpdate: Book = scope.currentState.bookToUpdate ?: return
 
         val h = hours.toIntOrNull()?.coerceAtLeast(0) ?: 0
-        val m = minutes.toIntOrNull()?.coerceIn(0, 59) ?: 0
-        val s = seconds.toIntOrNull()?.coerceIn(0, 59) ?: 0
+        val m = minutes.toIntOrNull()?.coerceIn(
+            0,
+            59,
+        ) ?: 0
+        val s = seconds.toIntOrNull()?.coerceIn(
+            0,
+            59,
+        ) ?: 0
 
         val total = bookToUpdate.currentEdition?.audioSeconds ?: 0
-        val newSeconds = (h * 3600 + m * 60 + s).coerceIn(0, total)
+        val newSeconds = (h * 3600 + m * 60 + s).coerceIn(
+            0,
+            total,
+        )
 
         scope.currentLocalVariables.bookMutationJobs[bookToUpdate.id]?.cancel()
 
