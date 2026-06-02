@@ -22,7 +22,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.flows.ReadingInitialize
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
-class ReadingScreenScreenModel(
+internal class ReadingScreenScreenModel(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,

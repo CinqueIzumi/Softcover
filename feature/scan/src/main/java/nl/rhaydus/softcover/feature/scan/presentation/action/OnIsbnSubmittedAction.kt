@@ -11,7 +11,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import timber.log.Timber
 
-class OnIsbnSubmittedAction(
+internal class OnIsbnSubmittedAction(
     val isbn: String,
 ) : ScanAction {
     override suspend fun execute(

@@ -31,7 +31,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValu
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 
 @Composable
-fun LibraryFilterChipRow(
+internal fun LibraryFilterChipRow(
     filters: LibraryFilters,
     onRemove: (LibraryFilterValue) -> Unit,
     onClearAll: () -> Unit,

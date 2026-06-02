@@ -11,7 +11,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
  * the user commits it via [OnAddUserTagAction] — the upsert reuses an existing tag of the same name
  * or mints a new one server-side, so there is no search step.
  */
-class OnTagDraftChangeAction(
+internal class OnTagDraftChangeAction(
     private val input: String,
 ) : BookDetailAction {
     override suspend fun execute(

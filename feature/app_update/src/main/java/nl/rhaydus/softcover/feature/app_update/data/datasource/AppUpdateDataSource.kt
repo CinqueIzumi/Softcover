@@ -26,7 +26,7 @@ interface AppUpdateDataSource {
     fun completeUpdate()
 }
 
-class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : AppUpdateDataSource {
+internal class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : AppUpdateDataSource {
     private val _updateState = MutableStateFlow<AppUpdateState>(AppUpdateState.Idle)
     override val updateState = _updateState.asStateFlow()
 

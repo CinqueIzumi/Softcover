@@ -18,7 +18,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AllBooksCollector : LibraryInitializer {
+internal class AllBooksCollector : LibraryInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,

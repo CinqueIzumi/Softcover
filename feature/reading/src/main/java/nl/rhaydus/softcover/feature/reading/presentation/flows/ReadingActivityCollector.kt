@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import timber.log.Timber
 
-class ReadingActivityCollector : ReadingInitializer {
+internal class ReadingActivityCollector : ReadingInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
         dependencies: ReadingScreenDependencies,

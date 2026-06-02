@@ -10,7 +10,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 
-class AuthInterceptor(
+internal class AuthInterceptor(
     authTokenProvider: AuthTokenProvider,
 ) : Interceptor {
     @Volatile

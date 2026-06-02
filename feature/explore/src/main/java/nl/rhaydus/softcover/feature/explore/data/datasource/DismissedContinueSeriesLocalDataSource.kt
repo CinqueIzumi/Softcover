@@ -18,7 +18,7 @@ interface DismissedContinueSeriesLocalDataSource {
     suspend fun undoSeriesDismissal(seriesId: Int)
 }
 
-class DismissedContinueSeriesLocalDataSourceImpl(
+internal class DismissedContinueSeriesLocalDataSourceImpl(
     private val dao: DismissedContinueSeriesDao,
 ) : DismissedContinueSeriesLocalDataSource {
     override val dismissedBookIds = dao.observeDismissedBookIds()

@@ -284,7 +284,7 @@ class BookDetailScreen(
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
         onNavigateBack: () -> Unit,

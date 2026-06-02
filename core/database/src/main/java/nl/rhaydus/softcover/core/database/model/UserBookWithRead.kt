@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.core.database.model
 import androidx.room.Embedded
 import androidx.room.Relation
 
-data class UserBookWithRead(
+internal data class UserBookWithRead(
     @Embedded
     val userBook: UserBookEntity,
 

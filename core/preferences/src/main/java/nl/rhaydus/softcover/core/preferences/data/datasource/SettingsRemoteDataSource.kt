@@ -8,7 +8,7 @@ interface SettingsRemoteDataSource {
     suspend fun getUserIdFromBackend(): Int
 }
 
-class SettingsRemoteDataSourceImpl(
+internal class SettingsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : SettingsRemoteDataSource {
     override suspend fun getUserIdFromBackend(): Int {

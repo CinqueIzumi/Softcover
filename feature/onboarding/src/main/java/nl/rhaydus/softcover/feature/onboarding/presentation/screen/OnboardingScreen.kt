@@ -103,7 +103,7 @@ object OnboardingScreen : Screen {
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: OnboardingUiState,
         runAction: (action: OnboardingAction) -> Unit,
         openUrl: (String) -> Unit,

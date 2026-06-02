@@ -90,7 +90,7 @@ class ProfileScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: ProfileUiState,
         runAction: (ProfileAction) -> Unit,
         onNavigateUp: () -> Unit,

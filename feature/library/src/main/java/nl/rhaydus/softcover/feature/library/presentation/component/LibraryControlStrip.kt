@@ -47,7 +47,7 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChange
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @Composable
-fun LibraryControlStrip(
+internal fun LibraryControlStrip(
     state: LibraryUiState,
     tab: LibraryTab?,
     runAction: (LibraryAction) -> Unit,

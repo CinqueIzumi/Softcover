@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-sealed interface LibraryAction : UiAction<
+internal sealed interface LibraryAction : UiAction<
         LibraryDependencies,
         LibraryUiState,
         LibraryEvent,

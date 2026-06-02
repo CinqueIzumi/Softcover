@@ -25,7 +25,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun SoftcoverLoadingDialog(isLoading: Boolean) {
+internal fun SoftcoverLoadingDialog(isLoading: Boolean) {
     if (isLoading) {
         Dialog(onDismissRequest = {}) {
             ContainedLoadingIndicator()

@@ -15,7 +15,7 @@ import com.apollographql.apollo.cache.normalized.api.FieldPolicyCacheResolver
 // Only safe for filters that uniquely identify rows (id._eq / id._in). Filters
 // by foreign key (e.g. editions.where.book_id) can return partial lists, so
 // they fall through to the default resolver and incur a network call.
-object SoftcoverCacheResolver : CacheResolver {
+internal object SoftcoverCacheResolver : CacheResolver {
     private const val ROOT_QUERY = "QUERY_ROOT"
 
     private val redirectableFields = setOf(

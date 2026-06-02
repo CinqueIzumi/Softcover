@@ -4,7 +4,7 @@ import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
 
-data class BookListWithEditions(
+internal data class BookListWithEditions(
     @Embedded
     val bookList: BookListEntity,
 

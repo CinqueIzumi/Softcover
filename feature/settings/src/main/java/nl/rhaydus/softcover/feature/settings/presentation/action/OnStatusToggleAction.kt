@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVis
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
-class OnStatusToggleAction(
+internal class OnStatusToggleAction(
     private val code: Int,
     private val enabled: Boolean,
 ) : LibraryVisibilityAction {

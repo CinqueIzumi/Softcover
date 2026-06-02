@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import timber.log.Timber
 
-class OnDismissPlanTodayAction(
+internal class OnDismissPlanTodayAction(
     private val bookId: Int,
 ) : ReadingAction {
     override suspend fun execute(

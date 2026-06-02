@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 
-data class LibraryVisibilitySettingsUiState(
+internal data class LibraryVisibilitySettingsUiState(
     val persistedEnabledStatusCodes: Set<Int> = emptySet(),
     val persistedEnabledListIds: Set<Int> = emptySet(),
     val persistedTabOrder: List<String> = emptyList(),

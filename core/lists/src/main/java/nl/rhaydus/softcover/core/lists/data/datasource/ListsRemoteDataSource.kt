@@ -78,7 +78,7 @@ interface ListsRemoteDataSource {
 private const val DEFAULT_LIST_VIEW: String = "card"
 private const val NAME_TAKEN_MARKER: String = "already been taken"
 
-class ListsRemoteDataSourceImpl(
+internal class ListsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : ListsRemoteDataSource {
     override suspend fun fetchUserLists(

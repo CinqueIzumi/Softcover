@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScre
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
-data class OnShowProgressSheetClickAction(val book: Book) : ReadingAction {
+internal data class OnShowProgressSheetClickAction(val book: Book) : ReadingAction {
     override suspend fun execute(
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,

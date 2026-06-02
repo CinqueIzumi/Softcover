@@ -17,7 +17,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDism
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
-data class ReadingScreenDependencies(
+internal data class ReadingScreenDependencies(
     val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
     val updateBookProgressUseCase: UpdateBookProgressUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,

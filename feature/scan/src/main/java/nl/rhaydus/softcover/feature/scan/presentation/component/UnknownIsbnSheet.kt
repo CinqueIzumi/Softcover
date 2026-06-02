@@ -27,7 +27,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UnknownIsbnSheet(
+internal fun UnknownIsbnSheet(
     isbn: String,
     isAdding: Boolean,
     onConfirm: () -> Unit,

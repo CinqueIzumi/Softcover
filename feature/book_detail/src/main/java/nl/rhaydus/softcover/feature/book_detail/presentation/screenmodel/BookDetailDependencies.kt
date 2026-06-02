@@ -27,7 +27,7 @@ import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviews
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
 
-class BookDetailDependencies(
+internal class BookDetailDependencies(
     val recordBookProgressUseCase: RecordBookProgressUseCase,
     val updateBookEditionUseCase: UpdateBookEditionUseCase,
     val fetchBookByIdUseCase: FetchBookByIdUseCase,

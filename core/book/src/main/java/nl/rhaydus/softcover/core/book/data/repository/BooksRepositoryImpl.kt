@@ -44,7 +44,7 @@ private const val TRENDING_LIMIT = 10
 private const val TRENDING_OFFSET = 0
 private const val TRENDING_WINDOW_DAYS = 7L
 
-class BooksRepositoryImpl(
+internal class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
     private val booksLocalDataSource: BooksLocalDataSource,
     private val networkAvailability: NetworkAvailabilityProvider,

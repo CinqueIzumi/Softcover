@@ -13,7 +13,7 @@ import timber.log.Timber
  * the toggle from the authoritative owned source (the local "Owned" list), so this action never
  * infers it from the edition's overlay flag (which isn't populated for off-shelf editions).
  */
-class OnEditionOwnedToggleAction(
+internal class OnEditionOwnedToggleAction(
     private val edition: BookEdition,
     private val owned: Boolean,
 ) : BookDetailAction {

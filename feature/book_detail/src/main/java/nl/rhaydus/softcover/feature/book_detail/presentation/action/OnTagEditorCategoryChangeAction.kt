@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-class OnTagEditorCategoryChangeAction(
+internal class OnTagEditorCategoryChangeAction(
     private val category: TagCategory,
 ) : BookDetailAction {
     override suspend fun execute(

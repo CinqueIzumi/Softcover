@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.share
 
-data class YearRecapShareContent(
+internal data class YearRecapShareContent(
     val year: Int,
     val eyebrow: String,
     val headline: String,

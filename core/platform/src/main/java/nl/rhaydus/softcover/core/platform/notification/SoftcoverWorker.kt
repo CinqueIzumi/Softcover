@@ -13,7 +13,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * catch so a thrown worker doesn't silently fail. No concrete workers exist yet — this is the
  * shared shape future deadline/release/recap workers will adopt.
  */
-abstract class SoftcoverWorker(
+internal abstract class SoftcoverWorker(
     appContext: Context,
     workerParameters: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParameters) {

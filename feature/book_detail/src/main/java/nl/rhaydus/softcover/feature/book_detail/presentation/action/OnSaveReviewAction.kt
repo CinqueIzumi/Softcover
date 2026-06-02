@@ -11,7 +11,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import timber.log.Timber
 
-class OnSaveReviewAction(
+internal class OnSaveReviewAction(
     private val book: Book,
     private val review: ReviewDocument,
     private val hasSpoilers: Boolean,

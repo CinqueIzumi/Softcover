@@ -7,7 +7,7 @@ fun secondsToHm(seconds: Int): String {
     return "${hours}h ${minutes}m"
 }
 
-fun secondsToClock(seconds: Int): String {
+internal fun secondsToClock(seconds: Int): String {
     val safe = seconds.coerceAtLeast(0)
     val hours = safe / 3600
     val minutes = (safe % 3600) / 60
@@ -19,7 +19,7 @@ fun secondsToClock(seconds: Int): String {
     )
 }
 
-fun Int.toHoursMinutesSeconds(): HoursMinutesSeconds {
+internal fun Int.toHoursMinutesSeconds(): HoursMinutesSeconds {
     val safe = coerceAtLeast(0)
     return HoursMinutesSeconds(
         hours = safe / 3600,

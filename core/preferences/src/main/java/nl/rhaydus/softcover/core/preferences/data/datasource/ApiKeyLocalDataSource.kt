@@ -32,7 +32,7 @@ interface ApiKeyLocalDataSource : AuthTokenProvider {
     suspend fun clear()
 }
 
-class ApiKeyLocalDataSourceImpl(
+internal class ApiKeyLocalDataSourceImpl(
     private val context: Context,
     private val appSettingsDataStore: AppSettingsDataStore,
     private val dispatchers: AppDispatchers,

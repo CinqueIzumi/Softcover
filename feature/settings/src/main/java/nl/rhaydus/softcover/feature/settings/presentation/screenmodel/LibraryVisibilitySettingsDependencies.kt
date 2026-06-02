@@ -13,7 +13,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUse
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 
-class LibraryVisibilitySettingsDependencies(
+internal class LibraryVisibilitySettingsDependencies(
     val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
     val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,

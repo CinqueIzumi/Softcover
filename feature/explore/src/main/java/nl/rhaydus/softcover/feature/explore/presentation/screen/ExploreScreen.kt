@@ -161,7 +161,7 @@ object ExploreScreen : Screen {
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: ExploreScreenUiState,
         runAction: (ExploreAction) -> Unit,
         onBookClick: (Book, String?) -> Unit,

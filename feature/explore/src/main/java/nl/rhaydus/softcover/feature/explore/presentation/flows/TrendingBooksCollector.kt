@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVaria
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import timber.log.Timber
 
-class TrendingBooksCollector : ExploreInitializer {
+internal class TrendingBooksCollector : ExploreInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
         dependencies: ExploreDependencies,

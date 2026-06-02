@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import nl.rhaydus.softcover.core.personal.domain.repository.HighlightRepository
 import java.time.Instant
 
-class HighlightRepositoryImpl(
+internal class HighlightRepositoryImpl(
     private val localDataSource: HighlightLocalDataSource,
 ) : HighlightRepository {
     override fun observeByBookId(bookId: Int): Flow<List<Highlight>> =

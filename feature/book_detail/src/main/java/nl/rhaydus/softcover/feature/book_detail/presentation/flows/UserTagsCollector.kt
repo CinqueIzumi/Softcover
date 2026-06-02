@@ -16,7 +16,7 @@ import timber.log.Timber
  * state directly from the save response, so this only handles the initial load (and a reload should
  * the user shelve a different book within the same screen).
  */
-class UserTagsCollector : BookDetailInitializer {
+internal class UserTagsCollector : BookDetailInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
         dependencies: BookDetailDependencies,

@@ -52,7 +52,7 @@ import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditionBottomSheetSelector(
+internal fun EditionBottomSheetSelector(
     bookTitle: String,
     currentEdition: BookEdition,
     defaultEdition: BookEdition?,

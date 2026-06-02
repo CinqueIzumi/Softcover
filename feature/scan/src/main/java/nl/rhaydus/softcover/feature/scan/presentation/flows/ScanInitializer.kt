@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependenci
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
-sealed interface ScanInitializer : Initializer<
+internal sealed interface ScanInitializer : Initializer<
         ScanUiState,
         ScanEvent,
         ScanDependencies,

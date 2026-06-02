@@ -19,7 +19,7 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBookDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
 
-data class ExploreDependencies(
+internal data class ExploreDependencies(
     val getPreviousSearchQueriesUseCase: GetPreviousSearchQueriesUseCase,
     val getQueriedBooksUseCase: GetQueriedBooksUseCase,
     val searchForNameUseCase: SearchForNameUseCase,

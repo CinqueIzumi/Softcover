@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.data.datasource.AppUpdateDataSourceImpl
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CheckForAppUpdateUseCase
 
-class DebugAppUpdateSimulator(
+internal class DebugAppUpdateSimulator(
     private val fakeAppUpdateManager: FakeAppUpdateManager,
     private val appUpdateDataSource: AppUpdateDataSourceImpl,
     private val checkForAppUpdateUseCase: CheckForAppUpdateUseCase,

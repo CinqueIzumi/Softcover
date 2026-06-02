@@ -91,7 +91,7 @@ suspend fun <T : Query.Data> ApolloClient.safeQuery(
         ?: responses.last()
 }
 
-fun <T : Query.Data> ApolloClient.safeQueryFlow(
+internal fun <T : Query.Data> ApolloClient.safeQueryFlow(
     query: Query<T>,
     fetchPolicy: FetchPolicy = FetchPolicy.CacheAndNetwork,
 ): Flow<T> = flow {

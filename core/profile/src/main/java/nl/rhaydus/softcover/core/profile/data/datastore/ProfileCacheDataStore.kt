@@ -7,9 +7,9 @@ import nl.rhaydus.softcover.core.profile.data.datastore.serializer.ProfileCacheS
 import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
 
 @JvmInline
-value class ProfileCacheDataStore(val store: DataStore<ProfileCacheEntity>)
+internal value class ProfileCacheDataStore(val store: DataStore<ProfileCacheEntity>)
 
-val Context.profileCache by dataStore(
+internal val Context.profileCache by dataStore(
     fileName = "profile_cache.json",
     serializer = ProfileCacheSerializer,
 )

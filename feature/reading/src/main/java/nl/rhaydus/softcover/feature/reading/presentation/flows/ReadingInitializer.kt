@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScre
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
-sealed interface ReadingInitializer : Initializer<
+internal sealed interface ReadingInitializer : Initializer<
         ReadingScreenUiState,
         ReadingScreenEvent,
         ReadingScreenDependencies,

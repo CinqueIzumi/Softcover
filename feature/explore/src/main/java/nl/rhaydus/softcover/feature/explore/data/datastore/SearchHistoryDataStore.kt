@@ -7,9 +7,9 @@ import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHist
 import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHistorySerializer
 
 @JvmInline
-value class SearchHistoryDataStore(val store: DataStore<SearchHistoryEntity>)
+internal value class SearchHistoryDataStore(val store: DataStore<SearchHistoryEntity>)
 
-val Context.searchHistory by dataStore(
+internal val Context.searchHistory by dataStore(
     fileName = "search_history.json",
     serializer = SearchHistorySerializer,
 )

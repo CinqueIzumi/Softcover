@@ -44,7 +44,7 @@ private val DOT_GAP = 10.dp
 private val sheetDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE d MMM")
 
 @Composable
-fun StreakStrip(
+internal fun StreakStrip(
     activity: List<ReadingDayActivity>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -114,7 +114,7 @@ fun StreakStrip(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StreakStripSheet(
+internal fun StreakStripSheet(
     activity: List<ReadingDayActivity>,
     onDismiss: () -> Unit,
 ) {

@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 import java.io.InputStream
 import java.io.OutputStream
 
-object AppSettingsSerializer : Serializer<AppSettingsEntity> {
+internal object AppSettingsSerializer : Serializer<AppSettingsEntity> {
     override val defaultValue: AppSettingsEntity
         get() = AppSettingsEntity()
 

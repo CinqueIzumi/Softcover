@@ -18,7 +18,7 @@ import timber.log.Timber
  * matching Step 2.7's "Hardcover is authoritative" spec. The toast surfaces the divergence so
  * the user knows the reorder hasn't synced yet.
  */
-class OnReorderListBooksAction(
+internal class OnReorderListBooksAction(
     private val listId: Int,
     private val startPosition: Int,
     private val orderedListBookIds: List<Int>,

@@ -15,7 +15,7 @@ interface SearchLocalDataSource {
     suspend fun removeAllSearchQueries()
 }
 
-class SearchLocalDataSourceImpl(
+internal class SearchLocalDataSourceImpl(
     private val dataStore: SearchHistoryDataStore,
 ) : SearchLocalDataSource {
     override val previousSearchQueries = dataStore.store.data.map { it.previousQueries }

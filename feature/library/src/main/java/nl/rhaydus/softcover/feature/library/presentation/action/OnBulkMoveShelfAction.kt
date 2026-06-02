@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import timber.log.Timber
 
-class OnBulkMoveShelfAction(
+internal class OnBulkMoveShelfAction(
     private val status: UserBookStatus,
 ) : LibraryAction {
     override suspend fun execute(

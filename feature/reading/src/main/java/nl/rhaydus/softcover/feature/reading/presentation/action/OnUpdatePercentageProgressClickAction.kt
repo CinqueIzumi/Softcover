@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import timber.log.Timber
 
-data class OnUpdatePercentageProgressClickAction(
+internal data class OnUpdatePercentageProgressClickAction(
     val newPercentage: String,
 ) : ReadingAction {
     override suspend fun execute(

@@ -73,9 +73,9 @@ val bodyFontFamily = FontFamily(
 )
 
 // Default Material 3 typography values
-val baseline = Typography()
+internal val baseline = Typography()
 
-val AppTypography = Typography(
+internal val AppTypography = Typography(
     displayLarge = baseline.displayLarge.copy(fontFamily = displayFontFamily),
     displayMedium = baseline.displayMedium.copy(fontFamily = displayFontFamily),
     displaySmall = baseline.displaySmall.copy(fontFamily = displayFontFamily),

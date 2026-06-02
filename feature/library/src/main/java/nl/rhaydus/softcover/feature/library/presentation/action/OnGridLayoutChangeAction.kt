@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import timber.log.Timber
 
-class OnGridLayoutChangeAction(
+internal class OnGridLayoutChangeAction(
     private val newLayout: LibraryGridLayout,
 ) : LibraryAction {
     override suspend fun execute(

@@ -56,7 +56,7 @@ private val EDITABLE_CATEGORIES: List<TagCategory> = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun TagEditorBottomSheet(
+internal fun TagEditorBottomSheet(
     userTags: List<UserTag>,
     selectedCategory: TagCategory,
     draft: String,

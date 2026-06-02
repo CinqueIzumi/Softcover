@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
  * attribute the update to the reader. Sourced from the cached profile, so it resolves before the
  * share sheet is opened in practice.
  */
-class CurrentUserCollector : BookDetailInitializer {
+internal class CurrentUserCollector : BookDetailInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
         dependencies: BookDetailDependencies,

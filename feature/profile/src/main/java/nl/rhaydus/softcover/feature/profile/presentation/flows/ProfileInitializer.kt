@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDepe
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
-sealed interface ProfileInitializer : Initializer<
+internal sealed interface ProfileInitializer : Initializer<
         ProfileUiState,
         ProfileEvent,
         ProfileDependencies,

@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDepe
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
-sealed interface ExploreAction : UiAction<
+internal sealed interface ExploreAction : UiAction<
         ExploreDependencies,
         ExploreScreenUiState,
         ExploreEvent,

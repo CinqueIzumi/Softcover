@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import timber.log.Timber
 
-class OnSortModeChangeAction(
+internal class OnSortModeChangeAction(
     private val tabId: String,
     private val mode: LibrarySortMode,
 ) : LibraryAction {

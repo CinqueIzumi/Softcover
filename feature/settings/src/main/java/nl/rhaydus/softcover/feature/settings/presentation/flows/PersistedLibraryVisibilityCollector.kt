@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVis
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
-class PersistedLibraryVisibilityCollector : LibraryVisibilityInitializer {
+internal class PersistedLibraryVisibilityCollector : LibraryVisibilityInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>,
         dependencies: LibraryVisibilitySettingsDependencies,

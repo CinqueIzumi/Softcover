@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import timber.log.Timber
 
-data class OnUpdateTimeProgressClickAction(
+internal data class OnUpdateTimeProgressClickAction(
     val hours: String,
     val minutes: String,
     val seconds: String,

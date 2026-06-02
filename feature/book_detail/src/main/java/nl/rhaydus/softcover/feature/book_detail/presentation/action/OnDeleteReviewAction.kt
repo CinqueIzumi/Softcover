@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import timber.log.Timber
 
-class OnDeleteReviewAction(
+internal class OnDeleteReviewAction(
     private val book: Book,
 ) : BookDetailAction {
     override suspend fun execute(

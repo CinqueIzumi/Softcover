@@ -61,7 +61,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewEditorBottomSheet(
+internal fun ReviewEditorBottomSheet(
     initialDocument: ReviewDocument,
     initialHasSpoilers: Boolean,
     canDelete: Boolean,

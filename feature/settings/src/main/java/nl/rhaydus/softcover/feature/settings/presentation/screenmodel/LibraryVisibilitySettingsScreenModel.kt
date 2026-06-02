@@ -18,7 +18,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilit
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
-class LibraryVisibilitySettingsScreenModel(
+internal class LibraryVisibilitySettingsScreenModel(
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     private val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
     private val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,

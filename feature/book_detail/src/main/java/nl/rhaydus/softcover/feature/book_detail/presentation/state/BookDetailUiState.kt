@@ -14,7 +14,7 @@ import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 
-data class BookDetailUiState(
+internal data class BookDetailUiState(
     val loadingBookDetails: Boolean = true,
     val book: Book? = null,
     val initialCover: BookInitialCover? = null,

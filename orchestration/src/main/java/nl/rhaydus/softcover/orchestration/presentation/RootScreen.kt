@@ -32,7 +32,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalShare
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 
-object RootScreen : Screen {
+internal object RootScreen : Screen {
     @OptIn(ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Content() {

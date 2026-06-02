@@ -78,7 +78,7 @@ private fun rememberLibraryPulseScale(): Float {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun DockedBottomNavigationBar() {
+internal fun DockedBottomNavigationBar() {
     val screens = remember { bottomBarScreens }
     val showSettingsBadge = LocalAppUpdateState.current != AppUpdateState.Idle
 
@@ -128,7 +128,7 @@ fun DockedBottomNavigationBar() {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun BottomFloatingBar(modifier: Modifier = Modifier) {
+internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
     val screens = remember { bottomBarScreens }
     val showSettingsBadge = LocalAppUpdateState.current != AppUpdateState.Idle
 

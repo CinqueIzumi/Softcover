@@ -11,7 +11,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.flows.ScanInitializer
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
-class ScanScreenModel(
+internal class ScanScreenModel(
     private val resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase,
     private val addBookByIsbnUseCase: AddBookByIsbnUseCase,
     dispatchers: AppDispatchers,

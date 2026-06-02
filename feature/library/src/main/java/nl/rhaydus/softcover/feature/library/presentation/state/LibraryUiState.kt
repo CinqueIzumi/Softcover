@@ -15,7 +15,7 @@ import nl.rhaydus.softcover.feature.library.presentation.sort.applyEditionSort
 import nl.rhaydus.softcover.feature.library.presentation.util.availableFinishedYears
 import nl.rhaydus.softcover.feature.library.presentation.util.finishedYear
 
-data class LibraryUiState(
+internal data class LibraryUiState(
     val visibleTabs: List<LibraryTab> = listOf(
         LibraryTab.All,
         LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING),

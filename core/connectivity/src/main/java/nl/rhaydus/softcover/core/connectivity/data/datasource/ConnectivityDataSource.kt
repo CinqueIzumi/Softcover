@@ -9,11 +9,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-interface ConnectivityDataSource {
+internal interface ConnectivityDataSource {
     val isOnline: StateFlow<Boolean>
 }
 
-class ConnectivityDataSourceImpl(
+internal class ConnectivityDataSourceImpl(
     context: Context,
 ) : ConnectivityDataSource {
     private val connectivityManager: ConnectivityManager? = context.getSystemService()

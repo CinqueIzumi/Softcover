@@ -4,7 +4,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.Tag
 
-data class LibraryFilters(
+internal data class LibraryFilters(
     val tags: Set<Tag> = emptySet(),
     val formats: Set<String> = emptySet(),
     val releaseYears: Set<Int> = emptySet(),

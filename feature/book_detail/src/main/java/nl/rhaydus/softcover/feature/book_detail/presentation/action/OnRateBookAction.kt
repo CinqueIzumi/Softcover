@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import timber.log.Timber
 
-class OnRateBookAction(
+internal class OnRateBookAction(
     private val book: Book,
     private val rating: Double,
 ) : BookDetailAction {

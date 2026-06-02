@@ -19,7 +19,7 @@ private val statusOrder: List<UserBookStatus> = listOf(
     UserBookStatus.DID_NOT_FINISH,
 )
 
-class VisibleTabsCollector : LibraryInitializer {
+internal class VisibleTabsCollector : LibraryInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,

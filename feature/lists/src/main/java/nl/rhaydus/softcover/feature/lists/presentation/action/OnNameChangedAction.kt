@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListDep
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVariables
 
-class OnNameChangedAction(
+internal class OnNameChangedAction(
     private val newName: String,
 ) : CreateListAction {
     override suspend fun execute(

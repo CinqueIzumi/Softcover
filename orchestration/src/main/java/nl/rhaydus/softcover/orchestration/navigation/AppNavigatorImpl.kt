@@ -20,7 +20,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsTab
  * Orchestration-tier resolution of [AppNavigator]. This is the single place that depends on every
  * feature's `Screen`/`Tab`, so the feature graph below it stays acyclic.
  */
-class AppNavigatorImpl : AppNavigator {
+internal class AppNavigatorImpl : AppNavigator {
     override fun screen(destination: ScreenDestination): Screen = when (destination) {
         is ScreenDestination.BookDetail -> BookDetailScreen(
             id = destination.id,

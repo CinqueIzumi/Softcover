@@ -13,7 +13,7 @@ interface ProfileRemoteDataSource {
     suspend fun getUserProfileSnapshot(userId: Int): UserProfileSnapshot
 }
 
-class ProfileRemoteDataSourceImpl(
+internal class ProfileRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : ProfileRemoteDataSource {
     override suspend fun getUserProfileSnapshot(userId: Int): UserProfileSnapshot {

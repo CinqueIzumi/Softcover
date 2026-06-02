@@ -51,7 +51,7 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScr
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : ComponentActivity() {
+internal class MainActivity : ComponentActivity() {
     private val viewModel: MainActivityViewModel by viewModel()
     private val observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase by inject()
     private val checkForAppUpdateUseCase: CheckForAppUpdateUseCase by inject()

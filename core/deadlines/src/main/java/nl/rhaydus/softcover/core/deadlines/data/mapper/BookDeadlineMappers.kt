@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 
 private val ISO: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
-fun BookDeadlineEntity.toDomain(): BookDeadline = BookDeadline(
+internal fun BookDeadlineEntity.toDomain(): BookDeadline = BookDeadline(
     bookId = bookId,
     deadlineDate = LocalDate.parse(
         deadlineDate,
@@ -22,7 +22,7 @@ fun BookDeadlineEntity.toDomain(): BookDeadline = BookDeadline(
     unit = runCatching { DeadlineUnit.valueOf(unit) }.getOrDefault(DeadlineUnit.PAGES),
 )
 
-fun BookDeadline.toEntity(): BookDeadlineEntity = BookDeadlineEntity(
+internal fun BookDeadline.toEntity(): BookDeadlineEntity = BookDeadlineEntity(
     bookId = bookId,
     deadlineDate = deadlineDate.format(ISO),
     setAt = setAt.format(ISO),

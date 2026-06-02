@@ -13,7 +13,7 @@ import nl.rhaydus.softcover.core.domain.model.canonical
  */
 
 /** Drop empty marks and merge overlapping or touching marks of the same type into the fewest ranges. */
-fun normalizeMarks(marks: List<ReviewMark>): List<ReviewMark> = marks
+internal fun normalizeMarks(marks: List<ReviewMark>): List<ReviewMark> = marks
     .filter { it.start < it.end }
     .groupBy { it.type }
     .flatMap { (type, group) ->
@@ -46,7 +46,7 @@ fun normalizeMarks(marks: List<ReviewMark>): List<ReviewMark> = marks
  * that strictly straddles a pure insertion grows to cover the inserted text, while one ending exactly
  * at the insertion point does not — so typing just after a bold word stays unbolded.
  */
-fun applyEditToMarks(
+internal fun applyEditToMarks(
     marks: List<ReviewMark>,
     oldText: String,
     newText: String,
@@ -92,7 +92,7 @@ fun applyEditToMarks(
 }
 
 /** Whether the whole selection [[start], [end]) is already covered by a mark of [type]. */
-fun isRangeMarked(
+internal fun isRangeMarked(
     marks: List<ReviewMark>,
     start: Int,
     end: Int,
@@ -107,7 +107,7 @@ fun isRangeMarked(
  * Toggle [type] over the selection [[start], [end]): when the selection is already fully marked the
  * mark is cleared across it (splitting any straddling mark), otherwise a mark is added over it.
  */
-fun toggleMark(
+internal fun toggleMark(
     marks: List<ReviewMark>,
     start: Int,
     end: Int,
@@ -145,7 +145,7 @@ fun toggleMark(
 }
 
 /** Build the structured [ReviewDocument] from the editor's plain text and marks. */
-fun editorBufferToDocument(
+internal fun editorBufferToDocument(
     text: String,
     marks: List<ReviewMark>,
 ): ReviewDocument {
@@ -182,7 +182,7 @@ fun editorBufferToDocument(
 }
 
 /** Build the editor's plain text and marks from a structured [ReviewDocument]. */
-fun documentToEditorBuffer(document: ReviewDocument): ReviewEditorBuffer {
+internal fun documentToEditorBuffer(document: ReviewDocument): ReviewEditorBuffer {
     val builder = StringBuilder()
     val marks = mutableListOf<ReviewMark>()
 

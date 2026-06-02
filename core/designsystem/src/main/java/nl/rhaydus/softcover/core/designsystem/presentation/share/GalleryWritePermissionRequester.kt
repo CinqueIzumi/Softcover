@@ -15,7 +15,7 @@ import androidx.core.content.ContextCompat
  * the gallery on API ≤ 28. On API 29+ the permission is unnecessary (scoped storage handles it),
  * so [request] fires [onResult] synchronously with `granted = true`.
  */
-class GalleryWritePermissionRequester internal constructor(
+internal class GalleryWritePermissionRequester internal constructor(
     private val launchRequest: () -> Unit,
     private val isAlreadyGranted: Boolean,
     private val onResult: (Boolean) -> Unit,
@@ -30,7 +30,7 @@ class GalleryWritePermissionRequester internal constructor(
 }
 
 @Composable
-fun rememberGalleryWritePermissionRequester(
+internal fun rememberGalleryWritePermissionRequester(
     onResult: (Boolean) -> Unit,
 ): GalleryWritePermissionRequester {
     val context = LocalContext.current

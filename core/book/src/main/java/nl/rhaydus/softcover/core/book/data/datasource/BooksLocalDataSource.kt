@@ -89,7 +89,7 @@ interface BooksLocalDataSource {
     )
 }
 
-class BooksLocalDataSourceImpl(
+internal class BooksLocalDataSourceImpl(
     private val dao: BookDao,
     private val editionImageStorage: EditionImageStorage,
 ) : BooksLocalDataSource {

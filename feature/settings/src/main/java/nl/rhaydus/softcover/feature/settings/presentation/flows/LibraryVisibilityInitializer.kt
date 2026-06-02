@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVis
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
-sealed interface LibraryVisibilityInitializer : Initializer<
+internal sealed interface LibraryVisibilityInitializer : Initializer<
     LibraryVisibilitySettingsUiState,
     LibraryVisibilitySettingsEvent,
     LibraryVisibilitySettingsDependencies,

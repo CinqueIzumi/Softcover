@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.core.personal.domain.repository.ReadingSessionReposi
 import java.time.Duration
 import java.time.Instant
 
-class ReadingSessionRepositoryImpl(
+internal class ReadingSessionRepositoryImpl(
     private val localDataSource: ReadingSessionLocalDataSource,
 ) : ReadingSessionRepository {
     override fun observeByBookId(bookId: Int): Flow<List<ReadingSession>> =

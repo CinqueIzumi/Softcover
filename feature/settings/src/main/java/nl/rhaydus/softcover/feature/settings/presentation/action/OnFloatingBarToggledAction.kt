@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVar
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import timber.log.Timber
 
-class OnFloatingBarToggledAction(val newValue: Boolean) : SettingsAction {
+internal class OnFloatingBarToggledAction(val newValue: Boolean) : SettingsAction {
     override suspend fun execute(
         dependencies: SettingsScreenDependencies,
         scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent, SettingsLocalVariables>,

@@ -14,7 +14,7 @@ import timber.log.Timber
  * cached user book reflects the new edition, [BookDetailUiState.showScanEditionUpdateBanner] turns
  * false on its own, so the scanned edition stays visible throughout without flicker.
  */
-class OnUpdateToScannedEditionClickAction : BookDetailAction {
+internal class OnUpdateToScannedEditionClickAction : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,

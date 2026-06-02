@@ -23,7 +23,7 @@ interface UserTagsRemoteDataSource {
     ): List<UserTag>
 }
 
-class UserTagsRemoteDataSourceImpl(
+internal class UserTagsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : UserTagsRemoteDataSource {
     override suspend fun getUserTags(

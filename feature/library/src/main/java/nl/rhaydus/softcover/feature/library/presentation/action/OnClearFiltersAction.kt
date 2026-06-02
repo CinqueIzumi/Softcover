@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-class OnClearFiltersAction(
+internal class OnClearFiltersAction(
     private val tabId: String,
 ) : LibraryAction {
     override suspend fun execute(

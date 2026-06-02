@@ -54,7 +54,7 @@ interface ListsLocalDataSource {
 
 private const val OPTIMISTIC_LIST_BOOK_ID: Int = 0
 
-class ListsLocalDataSourceImpl(
+internal class ListsLocalDataSourceImpl(
     private val dao: BookDao,
 ) : ListsLocalDataSource {
     override val allUserLists: Flow<List<BookList>>

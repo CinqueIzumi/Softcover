@@ -144,7 +144,7 @@ class BarcodeScannerScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun Screen(
+    private fun Screen(
         state: ScanUiState,
         manualMode: Boolean,
         cameraGranted: Boolean,

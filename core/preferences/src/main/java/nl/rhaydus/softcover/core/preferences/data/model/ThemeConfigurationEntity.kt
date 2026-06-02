@@ -5,12 +5,12 @@ import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 
 @Serializable
-data class ThemeConfigurationEntity(
+internal data class ThemeConfigurationEntity(
     val bottomBarStyle: BottomBarStyle = BottomBarStyle.FLOATING,
     val useDynamicColor: Boolean = false,
 )
 
-fun ThemeConfigurationEntity.toModel(): ThemeConfiguration {
+internal fun ThemeConfigurationEntity.toModel(): ThemeConfiguration {
     return ThemeConfiguration(
         bottomBarStyle = this.bottomBarStyle,
         useDynamicColor = this.useDynamicColor,

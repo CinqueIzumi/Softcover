@@ -98,7 +98,7 @@ fun EditorialSuffix(
 
 /** Approximate width for a hero stat field of [charCount] glyphs in [textStyle]. */
 @Composable
-fun computeHeroStatFieldWidth(
+internal fun computeHeroStatFieldWidth(
     textStyle: TextStyle,
     charCount: Int,
 ): Dp {

@@ -48,7 +48,7 @@ import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBa
 private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
 private val TAB_ROOT_DRIFT = 12.dp
 
-object BottomBarScreen : Screen {
+internal object BottomBarScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     override fun Content() {

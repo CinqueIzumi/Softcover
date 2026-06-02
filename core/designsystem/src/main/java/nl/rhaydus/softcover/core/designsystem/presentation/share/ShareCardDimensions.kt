@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.core.designsystem.presentation.share
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-data class ShareCardDimensions(
+internal data class ShareCardDimensions(
     val width: Dp,
     val fixedHeight: Dp?,
     val minHeight: Dp,

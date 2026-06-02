@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-data class OnUpdatePageProgressClickAction(
+internal data class OnUpdatePageProgressClickAction(
     val newPage: String,
 ) : BookDetailAction {
     override suspend fun execute(

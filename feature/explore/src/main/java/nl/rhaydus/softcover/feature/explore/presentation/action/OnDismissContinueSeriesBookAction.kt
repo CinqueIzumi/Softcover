@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVaria
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import timber.log.Timber
 
-class OnDismissContinueSeriesBookAction(
+internal class OnDismissContinueSeriesBookAction(
     val bookId: Int,
     val bookTitle: String,
 ) : ExploreAction {

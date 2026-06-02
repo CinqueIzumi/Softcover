@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.Onboardi
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 
-sealed interface OnboardingInitializer : Initializer<
+internal sealed interface OnboardingInitializer : Initializer<
         OnboardingUiState,
         OnboardingEvent,
         OnboardingDependencies,

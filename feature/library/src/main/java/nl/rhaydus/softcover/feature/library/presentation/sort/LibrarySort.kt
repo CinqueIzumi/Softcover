@@ -46,7 +46,7 @@ private fun BookEdition.firstAuthor(): String =
 // after the asReversed() pass).
 private const val MISSING_ADDED_AT_SENTINEL: String = "￿"
 
-fun List<BookEdition>.applyEditionSort(
+internal fun List<BookEdition>.applyEditionSort(
     mode: LibrarySortMode,
     direction: SortDirection = mode.defaultDirection,
     addedAtByEditionId: Map<Int, String?> = emptyMap(),

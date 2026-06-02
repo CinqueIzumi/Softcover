@@ -156,7 +156,7 @@ private const val BATCH_ID_LIMIT: Int = 200
 /** Hardcover's ISBN external-book provider platform — `upsert_book` uses the ISBN as the external id. */
 private const val HARDCOVER_ISBN_PLATFORM_ID: Int = 8
 
-class BooksRemoteDataSourceImpl(
+internal class BooksRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : BooksRemoteDataSource {
     override suspend fun fetchBookById(id: Int): Book {

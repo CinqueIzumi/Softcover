@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.core.book.data.storage
 import android.content.Context
 import java.io.File
 
-interface EditionImageStorage {
+internal interface EditionImageStorage {
     fun fileFor(editionId: Int): File
 
     fun exists(editionId: Int): Boolean
@@ -16,7 +16,7 @@ interface EditionImageStorage {
     fun delete(path: String)
 }
 
-class EditionImageStorageImpl(
+internal class EditionImageStorageImpl(
     context: Context,
 ) : EditionImageStorage {
     private val rootDir: File = File(

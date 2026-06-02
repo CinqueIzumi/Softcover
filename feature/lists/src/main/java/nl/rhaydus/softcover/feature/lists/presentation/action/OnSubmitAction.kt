@@ -11,7 +11,7 @@ import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVariables
 import timber.log.Timber
 
-class OnSubmitAction : CreateListAction {
+internal class OnSubmitAction : CreateListAction {
     override suspend fun execute(
         dependencies: CreateListDependencies,
         scope: ActionScope<CreateListUiState, CreateListEvent, LocalCreateListVariables>,

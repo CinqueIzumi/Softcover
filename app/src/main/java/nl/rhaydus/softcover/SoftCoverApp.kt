@@ -18,7 +18,7 @@ import nl.rhaydus.softcover.core.platform.notification.NotificationChannelInitia
 import nl.rhaydus.softcover.di.appModule
 import nl.rhaydus.softcover.orchestration.di.softcoverModules
 
-class SoftCoverApp : Application() {
+internal class SoftCoverApp : Application() {
     override fun onCreate() {
         super.onCreate()
 

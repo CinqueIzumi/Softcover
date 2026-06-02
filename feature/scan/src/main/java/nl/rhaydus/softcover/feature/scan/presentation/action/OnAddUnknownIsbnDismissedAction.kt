@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependenci
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
-class OnAddUnknownIsbnDismissedAction : ScanAction {
+internal class OnAddUnknownIsbnDismissedAction : ScanAction {
     override suspend fun execute(
         dependencies: ScanDependencies,
         scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>,

@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsSc
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
-sealed interface SettingsAction : UiAction<
+internal sealed interface SettingsAction : UiAction<
         SettingsScreenDependencies,
         SettingsScreenUiState,
         SettingsScreenEvent,

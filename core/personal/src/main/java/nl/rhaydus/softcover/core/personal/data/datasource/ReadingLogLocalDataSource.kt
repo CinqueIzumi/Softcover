@@ -16,7 +16,7 @@ interface ReadingLogLocalDataSource {
     suspend fun delete(id: Long)
 }
 
-class ReadingLogLocalDataSourceImpl(
+internal class ReadingLogLocalDataSourceImpl(
     private val dao: ReadingLogDao,
 ) : ReadingLogLocalDataSource {
     override fun observeByBookId(bookId: Int): Flow<List<ReadingLogEntryEntity>> =

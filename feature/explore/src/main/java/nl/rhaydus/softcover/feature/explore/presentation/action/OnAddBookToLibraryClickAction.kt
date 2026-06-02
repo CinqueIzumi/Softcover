@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVaria
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import timber.log.Timber
 
-class OnAddBookToLibraryClickAction(val book: Book) : ExploreAction {
+internal class OnAddBookToLibraryClickAction(val book: Book) : ExploreAction {
     override suspend fun execute(
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,

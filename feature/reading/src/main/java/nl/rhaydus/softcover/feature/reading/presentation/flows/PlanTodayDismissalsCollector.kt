@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScre
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
-class PlanTodayDismissalsCollector : ReadingInitializer {
+internal class PlanTodayDismissalsCollector : ReadingInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
         dependencies: ReadingScreenDependencies,

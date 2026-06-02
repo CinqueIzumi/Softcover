@@ -21,7 +21,7 @@ import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 
-class ListsRepositoryImpl(
+internal class ListsRepositoryImpl(
     private val listsRemoteDataSource: ListsRemoteDataSource,
     private val listsLocalDataSource: ListsLocalDataSource,
     private val booksRepository: BooksRepository,

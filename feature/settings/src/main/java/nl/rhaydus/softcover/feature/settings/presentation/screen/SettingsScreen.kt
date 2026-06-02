@@ -97,7 +97,7 @@ object SettingsScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: SettingsScreenUiState,
         runAction: (SettingsAction) -> Unit,
         navigateToProfile: () -> Unit,

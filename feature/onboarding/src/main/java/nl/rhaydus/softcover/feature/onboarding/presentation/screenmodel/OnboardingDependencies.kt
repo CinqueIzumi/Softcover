@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.identity.domain.usecase.UpdateApiKeyUseCase
 
-class OnboardingDependencies(
+internal class OnboardingDependencies(
     val initializeUserIdAndBooksUseCase: InitializeUserIdAndBooksUseCase,
     val resetUserDataUseCase: ResetUserDataUseCase,
     val updateApiKeyUseCase: UpdateApiKeyUseCase,

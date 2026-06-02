@@ -56,7 +56,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShareBookBottomSheet(
+internal fun ShareBookBottomSheet(
     book: Book,
     edition: BookEdition?,
     currentUsername: String?,

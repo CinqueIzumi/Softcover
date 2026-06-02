@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.flows.ProfileInitialize
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
-class ProfileScreenScreenModel(
+internal class ProfileScreenScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,

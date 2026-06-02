@@ -21,7 +21,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.buildEditionFilte
  * during composition the first time the sheet opens, which on large libraries stalls the slide-up
  * animation by enough to feel laggy.
  */
-class FilterOptionsCollector : LibraryInitializer {
+internal class FilterOptionsCollector : LibraryInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,

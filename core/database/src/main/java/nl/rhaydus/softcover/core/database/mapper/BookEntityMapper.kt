@@ -40,13 +40,13 @@ private fun String?.toLocalDateOrNull(): LocalDate? {
 }
 
 // region UI -> Entity mappers
-fun BookSeries.toEntity(): BookSeriesEntity = BookSeriesEntity(
+internal fun BookSeries.toEntity(): BookSeriesEntity = BookSeriesEntity(
     id = id,
     name = name,
     amountOfBooks = amountOfBooks,
 )
 
-fun Book.toEntity(): BookEntity = BookEntity(
+internal fun Book.toEntity(): BookEntity = BookEntity(
     id = id,
     title = title,
     rating = rating,
@@ -63,7 +63,7 @@ fun Book.toEntity(): BookEntity = BookEntity(
     seriesId = bookSeries?.id,
 )
 
-fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity = UserBookReadEntity(
+internal fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity = UserBookReadEntity(
     id = id,
     currentPage = currentPage,
     currentSeconds = currentSeconds,
@@ -73,7 +73,7 @@ fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity = UserBookReadEnt
     userBookId = userBookId,
 )
 
-fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
+internal fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
     id = id,
     statusCode = status.code,
     dateAdded = dateAdded,
@@ -90,13 +90,13 @@ fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
     bookId = bookId,
 )
 
-fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity = ReadingJournalEntity(
+internal fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity = ReadingJournalEntity(
     event = event ?: "",
     updatedAt = updatedAt,
     userBookId = userBookId,
 )
 
-fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
+internal fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     id = id,
     canonicalId = canonicalId,
     bookId = bookId,
@@ -114,21 +114,21 @@ fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     readingFormatId = readingFormat?.id,
 )
 
-fun Author.toEntity(): AuthorEntity = AuthorEntity(
+internal fun Author.toEntity(): AuthorEntity = AuthorEntity(
     name = name,
     id = id,
 )
 
-fun Book.toBookAuthorRefs(authorIdsByName: Map<String, Int>): List<BookAuthorCrossRef> =
+internal fun Book.toBookAuthorRefs(authorIdsByName: Map<String, Int>): List<BookAuthorCrossRef> =
     authors.map { BookAuthorCrossRef(
         bookId = id,
         authorId = authorIdsByName.getValue(it.name),
     ) }
 
-fun Book.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
+internal fun Book.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
     editions.flatMap { it.toEditionAuthorRefs(authorIdsByName) }
 
-fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
+internal fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
     authors.map {
         EditionAuthorCrossRef(
             editionId = id,

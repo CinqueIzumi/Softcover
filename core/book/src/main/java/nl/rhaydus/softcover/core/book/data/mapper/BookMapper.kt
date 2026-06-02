@@ -47,7 +47,7 @@ private fun String?.toLocalDateOrNull(): LocalDate? {
 }
 
 // region DTO -> UI mappers
-fun EditionFragment.toBookEdition(
+internal fun EditionFragment.toBookEdition(
     authors: List<Author> = emptyList(),
 ): BookEdition = BookEdition(
     id = id,
@@ -69,7 +69,7 @@ fun EditionFragment.toBookEdition(
     owned = false,
 )
 
-fun EditionDetailFragment.toBookEdition(): BookEdition {
+internal fun EditionDetailFragment.toBookEdition(): BookEdition {
     val authors = contributions.mapNotNull { contribution ->
         val author = contribution.author ?: return@mapNotNull null
 
@@ -81,7 +81,7 @@ fun EditionDetailFragment.toBookEdition(): BookEdition {
     return (this as EditionFragment).toBookEdition(authors = authors)
 }
 
-fun ReadingJournalFragment.toReadingJournal(): ReadingJournal = ReadingJournal(
+internal fun ReadingJournalFragment.toReadingJournal(): ReadingJournal = ReadingJournal(
     updatedAt = updated_at,
     event = event,
 )
@@ -201,7 +201,7 @@ private fun BookListFragment.tags(): List<Tag> =
         )
     }
 
-fun UserBookFragment.toBook(): Book? {
+internal fun UserBookFragment.toBook(): Book? {
     val listFragment = book.bookListFragment() ?: return null
 
     val bookAuthors = listFragment.authors()

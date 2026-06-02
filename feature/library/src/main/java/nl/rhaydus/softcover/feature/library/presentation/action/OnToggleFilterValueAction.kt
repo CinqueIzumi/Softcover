@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.toggle
 
-class OnToggleFilterValueAction(
+internal class OnToggleFilterValueAction(
     private val tabId: String,
     private val value: LibraryFilterValue,
 ) : LibraryAction {

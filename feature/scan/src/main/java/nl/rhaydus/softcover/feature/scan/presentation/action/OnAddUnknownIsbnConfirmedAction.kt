@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import timber.log.Timber
 
-class OnAddUnknownIsbnConfirmedAction : ScanAction {
+internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
     override suspend fun execute(
         dependencies: ScanDependencies,
         scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>,

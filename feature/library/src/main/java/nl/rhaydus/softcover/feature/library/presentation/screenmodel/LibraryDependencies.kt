@@ -26,7 +26,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 
-class LibraryDependencies(
+internal class LibraryDependencies(
     val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,
     val getSortedBooksByStatusUseCase: GetSortedBooksByStatusUseCase,
     val refreshLibraryUseCase: RefreshLibraryUseCase,

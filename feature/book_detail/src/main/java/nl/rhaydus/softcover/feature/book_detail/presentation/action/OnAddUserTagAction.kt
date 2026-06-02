@@ -13,7 +13,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
  * new one server-side). The text input is cleared so the editor is ready for the next tag, then the
  * full set is committed.
  */
-class OnAddUserTagAction(
+internal class OnAddUserTagAction(
     private val name: String,
     private val category: TagCategory,
 ) : BookDetailAction {

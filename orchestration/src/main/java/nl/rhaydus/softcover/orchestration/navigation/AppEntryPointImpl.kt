@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.orchestration.presentation.MainActivity
  * Orchestration-tier resolution of [AppEntryPoint]. The only place that references the launcher
  * [MainActivity] when building deep-link intents for features.
  */
-class AppEntryPointImpl : AppEntryPoint {
+internal class AppEntryPointImpl : AppEntryPoint {
     override fun focusModeIntent(context: Context): Intent =
         Intent(
             context,

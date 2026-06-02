@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-class OnRemoveUserTagAction(
+internal class OnRemoveUserTagAction(
     private val tag: UserTag,
 ) : BookDetailAction {
     override suspend fun execute(

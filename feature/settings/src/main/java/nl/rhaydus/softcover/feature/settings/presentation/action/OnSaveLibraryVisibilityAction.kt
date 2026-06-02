@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilit
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import timber.log.Timber
 
-class OnSaveLibraryVisibilityAction : LibraryVisibilityAction {
+internal class OnSaveLibraryVisibilityAction : LibraryVisibilityAction {
     override suspend fun execute(
         dependencies: LibraryVisibilitySettingsDependencies,
         scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>,

@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.Tag
  * derived (not raw values) because per-book ratings are continuous; the buckets express the
  * common "show me ≥X★" question instead of forcing the user to pick a precise threshold.
  */
-data class LibraryFilterOptions(
+internal data class LibraryFilterOptions(
     val tags: List<Tag> = emptyList(),
     val formats: List<String> = emptyList(),
     val releaseYears: List<Int> = emptyList(),

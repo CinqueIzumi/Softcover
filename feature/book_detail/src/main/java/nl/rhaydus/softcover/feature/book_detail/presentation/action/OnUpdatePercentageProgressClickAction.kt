@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-data class OnUpdatePercentageProgressClickAction(
+internal data class OnUpdatePercentageProgressClickAction(
     val newPercentage: String,
 ) : BookDetailAction {
     override suspend fun execute(

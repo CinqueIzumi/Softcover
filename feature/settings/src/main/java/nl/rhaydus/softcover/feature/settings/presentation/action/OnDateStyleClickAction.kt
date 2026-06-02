@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVar
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import timber.log.Timber
 
-class OnDateStyleClickAction(
+internal class OnDateStyleClickAction(
     val style: DateStyle,
 ) : SettingsAction {
     override suspend fun execute(

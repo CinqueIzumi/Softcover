@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-class OnBulkRemoveDialogExpandedChangeAction(
+internal class OnBulkRemoveDialogExpandedChangeAction(
     private val shown: Boolean,
 ) : LibraryAction {
     override suspend fun execute(

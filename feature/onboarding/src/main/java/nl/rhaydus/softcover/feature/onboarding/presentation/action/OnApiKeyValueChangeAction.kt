@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.Onboardi
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 
-class OnApiKeyValueChangeAction(val newValue: String) : OnboardingAction {
+internal class OnApiKeyValueChangeAction(val newValue: String) : OnboardingAction {
     override suspend fun execute(
         dependencies: OnboardingDependencies,
         scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>,

@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVaria
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import timber.log.Timber
 
-class OnRemoveSearchQueryClickedAction(val query: String) : ExploreAction {
+internal class OnRemoveSearchQueryClickedAction(val query: String) : ExploreAction {
     override suspend fun execute(
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,

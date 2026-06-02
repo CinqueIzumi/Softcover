@@ -161,7 +161,7 @@ fun SoftcoverIconToggleButton(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun SoftcoverToggleButton(
+internal fun SoftcoverToggleButton(
     checked: Boolean,
     label: String,
     style: ToggleButtonStyle,

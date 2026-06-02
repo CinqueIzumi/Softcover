@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 import timber.log.Timber
 import java.time.LocalDate
 
-class OnDeadlinePickedAction(
+internal class OnDeadlinePickedAction(
     private val date: LocalDate,
 ) : BookDetailAction {
     override suspend fun execute(

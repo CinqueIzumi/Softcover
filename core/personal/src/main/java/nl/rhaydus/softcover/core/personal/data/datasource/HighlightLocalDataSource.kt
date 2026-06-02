@@ -18,7 +18,7 @@ interface HighlightLocalDataSource {
     suspend fun delete(id: Long)
 }
 
-class HighlightLocalDataSourceImpl(
+internal class HighlightLocalDataSourceImpl(
     private val dao: HighlightDao,
 ) : HighlightLocalDataSource {
     override fun observeByBookId(bookId: Int): Flow<List<HighlightEntity>> =

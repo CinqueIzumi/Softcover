@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.math.max
 
-class BookDeadlineRepositoryImpl(
+internal class BookDeadlineRepositoryImpl(
     private val localDataSource: BookDeadlineLocalDataSource,
 ) : BookDeadlineRepository {
     override fun observe(bookId: Int): Flow<BookDeadline?> =

@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import timber.log.Timber
 
-class OnMarkBookAsReadClickAction(
+internal class OnMarkBookAsReadClickAction(
     private val book: Book,
 ) : BookDetailAction {
     override suspend fun execute(

@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSo
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
-class SettingsRepositoryImpl(
+internal class SettingsRepositoryImpl(
     private val settingsLocalDataSource: SettingsLocalDataSource,
     private val settingsRemoteDataSource: SettingsRemoteDataSource,
 ) : SettingsRepository {

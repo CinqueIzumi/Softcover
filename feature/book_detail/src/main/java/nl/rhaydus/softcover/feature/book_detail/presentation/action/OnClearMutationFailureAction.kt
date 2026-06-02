@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-class OnClearMutationFailureAction(
+internal class OnClearMutationFailureAction(
     private val bookId: Int? = null,
     private val editionId: Int? = null,
 ) : BookDetailAction {

@@ -23,7 +23,7 @@ import timber.log.Timber
  * switch lives in DataStore and must be unwound here so the screen doesn't strand the user on an
  * ORDER tab that no longer has server backing.
  */
-class OnSetListRankedAction(
+internal class OnSetListRankedAction(
     private val listId: Int,
     private val ranked: Boolean,
 ) : LibraryAction {

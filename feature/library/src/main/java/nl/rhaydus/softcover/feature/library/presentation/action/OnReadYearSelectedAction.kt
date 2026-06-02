@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-class OnReadYearSelectedAction(
+internal class OnReadYearSelectedAction(
     private val year: Int?,
 ) : LibraryAction {
     override suspend fun execute(

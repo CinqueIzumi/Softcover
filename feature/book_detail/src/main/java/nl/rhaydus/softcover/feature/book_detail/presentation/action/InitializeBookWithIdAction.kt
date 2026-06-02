@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import timber.log.Timber
 
-class InitializeBookWithIdAction(
+internal class InitializeBookWithIdAction(
     val id: Int,
 ) : BookDetailAction {
     override suspend fun execute(

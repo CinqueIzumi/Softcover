@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiState
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 
-data class SettingsScreenUiState(
+internal data class SettingsScreenUiState(
     val useFloatingBarChecked: Boolean = true,
     val useDynamicColorChecked: Boolean = false,
     val userDateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,

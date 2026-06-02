@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVaria
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import timber.log.Timber
 
-class ContinueSeriesBooksCollector : ExploreInitializer {
+internal class ContinueSeriesBooksCollector : ExploreInitializer {
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun onLaunch(
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,

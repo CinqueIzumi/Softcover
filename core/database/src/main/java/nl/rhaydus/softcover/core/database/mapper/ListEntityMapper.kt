@@ -9,14 +9,14 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 
 private const val OWNED_LIST_SLUG: String = "owned"
 
-fun BookList.toEntity(): BookListEntity = BookListEntity(
+internal fun BookList.toEntity(): BookListEntity = BookListEntity(
     id = id,
     name = name,
     slug = slug,
     ranked = ranked,
 )
 
-fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
+internal fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
     listId = listId,
     bookId = bookId,
     editionId = editionId,

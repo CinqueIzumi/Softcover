@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUse
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
 
-data class SettingsScreenDependencies(
+internal data class SettingsScreenDependencies(
     val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     val setBottomBarStyleUseCase: SetBottomBarStyleUseCase,
     val setDynamicColorUseCase: SetDynamicColorUseCase,

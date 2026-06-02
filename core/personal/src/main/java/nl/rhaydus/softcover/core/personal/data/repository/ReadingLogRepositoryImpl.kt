@@ -11,7 +11,7 @@ import nl.rhaydus.softcover.core.personal.domain.repository.ReadingLogRepository
 import java.time.Instant
 import java.time.LocalDate
 
-class ReadingLogRepositoryImpl(
+internal class ReadingLogRepositoryImpl(
     private val localDataSource: ReadingLogLocalDataSource,
 ) : ReadingLogRepository {
     override fun observeByBookId(bookId: Int): Flow<List<ReadingLogEntry>> =

@@ -35,7 +35,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailIni
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-class BookDetailScreenScreenModel(
+internal class BookDetailScreenScreenModel(
     private val bookId: Int,
     initialCover: BookInitialCover?,
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,

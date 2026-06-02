@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsSc
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
-class DateStyleCollector : SettingsInitializer {
+internal class DateStyleCollector : SettingsInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent, SettingsLocalVariables>,
         dependencies: SettingsScreenDependencies,

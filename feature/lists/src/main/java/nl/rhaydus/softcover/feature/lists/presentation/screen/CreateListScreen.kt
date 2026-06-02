@@ -86,7 +86,7 @@ class CreateListScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: CreateListUiState,
         runAction: (CreateListAction) -> Unit,
         onNavigateBack: () -> Unit,

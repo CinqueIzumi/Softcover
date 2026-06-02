@@ -36,7 +36,7 @@ data class EditorialTypography(
     val quoteGlyph: TextStyle,
 )
 
-val DefaultEditorialTypography: EditorialTypography = EditorialTypography(
+internal val DefaultEditorialTypography: EditorialTypography = EditorialTypography(
     eyebrow = AppTypography.labelMedium.copy(
         letterSpacing = 2.5.sp,
         fontWeight = FontWeight.SemiBold,
@@ -108,7 +108,7 @@ val DefaultEditorialTypography: EditorialTypography = EditorialTypography(
     ),
 )
 
-val LocalEditorialTypography = staticCompositionLocalOf { DefaultEditorialTypography }
+internal val LocalEditorialTypography = staticCompositionLocalOf { DefaultEditorialTypography }
 
 val MaterialTheme.editorialTypography: EditorialTypography
     @Composable

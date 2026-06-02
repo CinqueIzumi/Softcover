@@ -231,7 +231,7 @@ object LibraryScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: LibraryUiState,
         runAction: (LibraryAction) -> Unit,
         onBookClick: (Book) -> Unit,

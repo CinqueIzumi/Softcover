@@ -43,7 +43,7 @@ import java.time.Duration
  * chip, and never touches media buttons. Being a foreground service makes it non-dismissable; it is
  * removed only when the session ends (the [controller]'s active session goes null).
  */
-class ReadingSessionService : Service() {
+internal class ReadingSessionService : Service() {
     private val controller: ActiveSessionController by inject()
 
     private val appEntryPoint: AppEntryPoint by inject()

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.util
 
-data class HoursMinutesSeconds(
+internal data class HoursMinutesSeconds(
     val hours: Int,
     val minutes: Int,
     val seconds: Int,

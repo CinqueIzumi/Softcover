@@ -33,11 +33,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconRe
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 
-data class SoftcoverTopBarAction(
-    val iconResource: SoftcoverIconResource,
-    val onClick: () -> Unit,
-)
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoftcoverSearchTopBar(

@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
 import java.io.InputStream
 import java.io.OutputStream
 
-object ProfileCacheSerializer : Serializer<ProfileCacheEntity> {
+internal object ProfileCacheSerializer : Serializer<ProfileCacheEntity> {
     override val defaultValue: ProfileCacheEntity
         get() = ProfileCacheEntity()
 

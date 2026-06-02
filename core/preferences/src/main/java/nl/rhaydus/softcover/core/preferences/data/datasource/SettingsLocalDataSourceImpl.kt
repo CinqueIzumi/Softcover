@@ -14,7 +14,7 @@ import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 import nl.rhaydus.softcover.core.preferences.data.model.toModel
 
-class SettingsLocalDataSourceImpl(
+internal class SettingsLocalDataSourceImpl(
     private val appSettingsDataStore: AppSettingsDataStore,
     private val apiKeyLocalDataSource: ApiKeyLocalDataSource,
 ) : SettingsLocalDataSource {

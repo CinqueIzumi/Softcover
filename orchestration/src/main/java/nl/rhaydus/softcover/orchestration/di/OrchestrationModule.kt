@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.orchestration.navigation.AppNavigatorImpl
 import nl.rhaydus.softcover.orchestration.usecase.InitializeUserIdAndBooksUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ResetUserDataUseCaseImpl
 
-val orchestrationModule = module {
+internal val orchestrationModule = module {
     single<AppNavigator> { AppNavigatorImpl() }
 
     single<AppEntryPoint> { AppEntryPointImpl() }

@@ -4,7 +4,7 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
 
-class UserTagsRepositoryImpl(
+internal class UserTagsRepositoryImpl(
     private val userTagsRemoteDataSource: UserTagsRemoteDataSource,
 ) : UserTagsRepository {
     override suspend fun getUserTags(

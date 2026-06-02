@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
-data class ProfileDependencies(
+internal data class ProfileDependencies(
     val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     val resetUserDataUseCase: ResetUserDataUseCase,

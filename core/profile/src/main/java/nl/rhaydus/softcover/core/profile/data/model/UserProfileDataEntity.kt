@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import java.time.LocalDate
 
 @Serializable
-data class UserProfileDataEntity(
+internal data class UserProfileDataEntity(
     val profileImageUrl: String,
     val name: String,
     val username: String = "",
@@ -17,7 +17,7 @@ data class UserProfileDataEntity(
     val activeReadingDates: List<String> = emptyList(),
 )
 
-fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
+internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
     profileImageUrl = profileImageUrl,
     name = name,
     username = username,
@@ -31,7 +31,7 @@ fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
         .toSet(),
 )
 
-fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileDataEntity(
+internal fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileDataEntity(
     profileImageUrl = profileImageUrl,
     name = name,
     username = username,

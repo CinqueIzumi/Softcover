@@ -12,7 +12,7 @@ import timber.log.Timber
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-class OnQueryChangeAction(
+internal class OnQueryChangeAction(
     val newQuery: String,
     val searchDelay: Duration = 1.seconds,
 ) :

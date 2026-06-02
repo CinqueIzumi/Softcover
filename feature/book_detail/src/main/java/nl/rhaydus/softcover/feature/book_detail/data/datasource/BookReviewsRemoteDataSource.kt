@@ -12,7 +12,7 @@ interface BookReviewsRemoteDataSource {
     suspend fun getTopReviewsForBook(bookId: Int): List<BookReview>
 }
 
-class BookReviewsRemoteDataSourceImpl(
+internal class BookReviewsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : BookReviewsRemoteDataSource {
     override suspend fun getTopReviewsForBook(bookId: Int): List<BookReview> {

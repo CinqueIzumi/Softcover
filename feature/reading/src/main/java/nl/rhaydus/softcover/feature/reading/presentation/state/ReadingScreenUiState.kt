@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 
-data class ReadingScreenUiState(
+internal data class ReadingScreenUiState(
     val books: List<Book> = emptyList(),
     val isLoading: Boolean = true,
     val bookToUpdate: Book? = null,

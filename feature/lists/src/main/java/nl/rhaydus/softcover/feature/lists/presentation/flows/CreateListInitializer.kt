@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListDep
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVariables
 
-sealed interface CreateListInitializer : Initializer<
+internal sealed interface CreateListInitializer : Initializer<
         CreateListUiState,
         CreateListEvent,
         CreateListDependencies,

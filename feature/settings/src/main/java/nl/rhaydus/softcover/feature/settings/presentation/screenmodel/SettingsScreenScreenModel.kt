@@ -15,7 +15,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitiali
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
-class SettingsScreenScreenModel(
+internal class SettingsScreenScreenModel(
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val setDateStyleUseCase: SetDateStyleUseCase,
     private val setBottomBarStyleUseCase: SetBottomBarStyleUseCase,

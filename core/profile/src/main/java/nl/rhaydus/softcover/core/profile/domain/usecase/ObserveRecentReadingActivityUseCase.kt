@@ -8,7 +8,7 @@ import java.time.Clock
 import java.time.LocalDate
 
 /** Number of days surfaced by the Reading-screen streak strip (and persisted for it). */
-const val READING_ACTIVITY_WINDOW_DAYS = 21
+internal const val READING_ACTIVITY_WINDOW_DAYS = 21
 
 class ObserveRecentReadingActivityUseCase(
     private val profileRepository: ProfileRepository,

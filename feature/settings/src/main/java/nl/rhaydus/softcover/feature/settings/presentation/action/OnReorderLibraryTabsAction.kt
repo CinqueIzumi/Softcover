@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVis
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
-class OnReorderLibraryTabsAction(
+internal class OnReorderLibraryTabsAction(
     private val newOrderedIds: List<String>,
 ) : LibraryVisibilityAction {
     override suspend fun execute(

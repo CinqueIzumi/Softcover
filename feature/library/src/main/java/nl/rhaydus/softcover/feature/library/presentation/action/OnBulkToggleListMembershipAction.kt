@@ -21,7 +21,7 @@ import timber.log.Timber
  * The action does **not** exit selection mode — the user may want to add the same selection to
  * several lists in sequence.
  */
-class OnBulkToggleListMembershipAction(
+internal class OnBulkToggleListMembershipAction(
     private val listId: Int,
     private val currentMembership: ListMembership,
 ) : LibraryAction {

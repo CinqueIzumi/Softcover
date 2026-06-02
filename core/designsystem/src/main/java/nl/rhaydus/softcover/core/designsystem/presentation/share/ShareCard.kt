@@ -45,7 +45,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 private const val TABULAR_NUMS = "tnum"
 
 @Composable
-fun ShareCard(
+internal fun ShareCard(
     content: ShareContent,
     modifier: Modifier = Modifier,
 ) {

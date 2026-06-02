@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import timber.log.Timber
 
-class OnBulkRemoveFromLibraryAction : LibraryAction {
+internal class OnBulkRemoveFromLibraryAction : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,

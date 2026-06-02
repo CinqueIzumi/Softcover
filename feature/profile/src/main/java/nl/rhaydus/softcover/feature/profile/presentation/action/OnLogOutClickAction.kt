@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVaria
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import timber.log.Timber
 
-class OnLogOutClickAction : ProfileAction {
+internal class OnLogOutClickAction : ProfileAction {
     override suspend fun execute(
         dependencies: ProfileDependencies,
         scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,

@@ -7,9 +7,9 @@ import nl.rhaydus.softcover.core.preferences.data.datastore.serializer.AppSettin
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 
 @JvmInline
-value class AppSettingsDataStore(val store: DataStore<AppSettingsEntity>)
+internal value class AppSettingsDataStore(val store: DataStore<AppSettingsEntity>)
 
-val Context.appSettings by dataStore(
+internal val Context.appSettings by dataStore(
     fileName = "app_settings.json",
     serializer = AppSettingsSerializer,
 )

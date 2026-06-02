@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-sealed interface BookDetailInitializer : Initializer<
+internal sealed interface BookDetailInitializer : Initializer<
         BookDetailUiState,
         BookDetailEvent,
         BookDetailDependencies,

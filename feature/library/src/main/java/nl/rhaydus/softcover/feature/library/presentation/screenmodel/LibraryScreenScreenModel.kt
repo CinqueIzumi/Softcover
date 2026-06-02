@@ -33,7 +33,7 @@ import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitialize
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-class LibraryScreenScreenModel(
+internal class LibraryScreenScreenModel(
     private val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,
     private val getSortedBooksByStatusUseCase: GetSortedBooksByStatusUseCase,
     private val refreshLibraryUseCase: RefreshLibraryUseCase,

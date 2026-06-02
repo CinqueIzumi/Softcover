@@ -23,7 +23,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.flows.ExploreInitialize
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
-class ExploreScreenScreenModel(
+internal class ExploreScreenScreenModel(
     private val getPreviousSearchQueriesUseCase: GetPreviousSearchQueriesUseCase,
     private val getQueriedBooksUseCase: GetQueriedBooksUseCase,
     private val searchForNameUseCase: SearchForNameUseCase,

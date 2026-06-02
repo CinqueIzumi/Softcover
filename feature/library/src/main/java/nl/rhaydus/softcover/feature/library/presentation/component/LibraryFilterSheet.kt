@@ -30,7 +30,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryFilterSheet(
+internal fun LibraryFilterSheet(
     filters: LibraryFilters,
     options: LibraryFilterOptions,
     onToggle: (LibraryFilterValue) -> Unit,

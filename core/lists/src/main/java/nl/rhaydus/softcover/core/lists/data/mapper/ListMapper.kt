@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ListFragment
 import nl.rhaydus.softcover.fragment.ListFragment.List_book.Companion.listBookFragment
 
-fun ListFragment.toBookList(): BookList {
+internal fun ListFragment.toBookList(): BookList {
     val listBooks = list_books.mapNotNull { it.listBookFragment()?.toListBook() }
 
     return BookList(
@@ -18,7 +18,7 @@ fun ListFragment.toBookList(): BookList {
     )
 }
 
-fun ListBookFragment.toListBook(): ListBook? {
+internal fun ListBookFragment.toListBook(): ListBook? {
     val editionId = edition_id ?: return null
 
     return ListBook(

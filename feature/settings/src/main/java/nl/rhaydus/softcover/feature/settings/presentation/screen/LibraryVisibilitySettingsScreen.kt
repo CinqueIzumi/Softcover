@@ -89,7 +89,7 @@ class LibraryVisibilitySettingsScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: LibraryVisibilitySettingsUiState,
         runAction: (LibraryVisibilityAction) -> Unit,
         onNavigateBack: () -> Unit,

@@ -14,7 +14,7 @@ import timber.log.Timber
  * intentionally left untouched so new entries fetched from the API still surface at the top of the
  * unsorted region rather than being pinned to the tail.
  */
-class OnReorderShelfBooksAction(
+internal class OnReorderShelfBooksAction(
     private val status: UserBookStatus,
     private val prefixOrderedBookIds: List<Int>,
 ) : LibraryAction {

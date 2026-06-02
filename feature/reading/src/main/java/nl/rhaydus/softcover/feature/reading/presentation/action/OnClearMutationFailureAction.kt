@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScre
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
-class OnClearMutationFailureAction(
+internal class OnClearMutationFailureAction(
     private val bookId: Int,
 ) : ReadingAction {
     override suspend fun execute(

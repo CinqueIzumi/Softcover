@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.database.dao.BookDeadlineDao
 import nl.rhaydus.softcover.core.database.model.BookDeadlineEntity
 
-interface BookDeadlineLocalDataSource {
+internal interface BookDeadlineLocalDataSource {
     fun observe(bookId: Int): Flow<BookDeadlineEntity?>
 
     fun observeAll(): Flow<List<BookDeadlineEntity>>
@@ -14,7 +14,7 @@ interface BookDeadlineLocalDataSource {
     suspend fun delete(bookId: Int)
 }
 
-class BookDeadlineLocalDataSourceImpl(
+internal class BookDeadlineLocalDataSourceImpl(
     private val dao: BookDeadlineDao,
 ) : BookDeadlineLocalDataSource {
     override fun observe(bookId: Int): Flow<BookDeadlineEntity?> =

@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.flows.OnboardingInit
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 
-class OnboardingScreenScreenModel(
+internal class OnboardingScreenScreenModel(
     val initializeUserIdAndBooksUseCase: InitializeUserIdAndBooksUseCase,
     val resetUserDataUseCase: ResetUserDataUseCase,
     val updateApiKeyUseCase: UpdateApiKeyUseCase,

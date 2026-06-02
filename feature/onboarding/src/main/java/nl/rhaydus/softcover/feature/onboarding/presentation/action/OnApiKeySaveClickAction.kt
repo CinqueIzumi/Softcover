@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardin
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 import timber.log.Timber
 
-class OnApiKeySaveClickAction() : OnboardingAction {
+internal class OnApiKeySaveClickAction() : OnboardingAction {
     private lateinit var scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>
 
     override suspend fun execute(

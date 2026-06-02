@@ -16,7 +16,7 @@ interface ProfileLocalDataSource {
     suspend fun clear()
 }
 
-class ProfileLocalDataSourceImpl(
+internal class ProfileLocalDataSourceImpl(
     private val profileCacheDataStore: ProfileCacheDataStore,
 ) : ProfileLocalDataSource {
     override fun observeUserProfileData(): Flow<UserProfileData?> =

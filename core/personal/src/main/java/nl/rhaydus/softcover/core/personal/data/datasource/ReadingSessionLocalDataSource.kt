@@ -20,7 +20,7 @@ interface ReadingSessionLocalDataSource {
     suspend fun delete(id: Long)
 }
 
-class ReadingSessionLocalDataSourceImpl(
+internal class ReadingSessionLocalDataSourceImpl(
     private val dao: ReadingSessionDao,
 ) : ReadingSessionLocalDataSource {
     override fun observeByBookId(bookId: Int): Flow<List<ReadingSessionEntity>> =
