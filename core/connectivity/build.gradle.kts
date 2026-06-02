@@ -7,9 +7,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:domain"))
-    implementation(project(":core:database"))
-    implementation(project(":core:network"))
-    implementation(project(":core:book"))
-    implementation(project(":core:lists"))
+    api(project(":core:domain"))
+    api(project(":core:database"))
+    api(project(":core:book"))
+    api(project(":core:lists"))
 }

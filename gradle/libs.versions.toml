@@ -32,6 +32,7 @@ cameraX = "1.4.2"
 mlkitBarcode = "17.3.0"
 coroutines = "1.10.2"
 detekt = "1.23.8"
+dependencyAnalysis = "3.14.1"
 
 [libraries]
 # ktlint rule-engine — consumed by the :ktlint-rules module to drive the custom autofix ruleset
@@ -106,3 +107,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }

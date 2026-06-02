@@ -9,26 +9,23 @@ android {
 
 dependencies {
     api(project(":core:domain"))
-    implementation(project(":core:book"))
-    implementation(project(":core:library"))
-    implementation(project(":core:profile"))
-    implementation(project(":core:identity"))
-    implementation(project(":core:personal"))
-    implementation(project(":core:preferences"))
-    implementation(project(":core:deadlines"))
+    api(project(":core:book"))
+    api(project(":core:library"))
+    api(project(":core:profile"))
+    api(project(":core:identity"))
+    api(project(":core:personal"))
+    api(project(":core:preferences"))
     implementation(project(":core:platform"))
 
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.compose.ui.text.google.fonts)
+    api(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.material.components)
 
     implementation(libs.koin.compose)
 
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.koin)
-    implementation(libs.voyager.tabNavigator)
-    implementation(libs.voyager.transitions)
+    api(libs.voyager.tabNavigator)
 
     api(libs.coil)
 

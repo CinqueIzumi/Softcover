@@ -9,9 +9,9 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:domain"))
-    implementation(project(":core:book"))
-    implementation(project(":core:identity"))
+    api(project(":core:domain"))
+    api(project(":core:book"))
+    api(project(":core:identity"))
     implementation(project(":core:database"))
     implementation(project(":core:network"))
     implementation(project(":core:designsystem"))
@@ -23,5 +23,5 @@ dependencies {
 
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.koin)
-    implementation(libs.voyager.tabNavigator)
+    api(libs.voyager.tabNavigator)
 }

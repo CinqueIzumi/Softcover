@@ -9,9 +9,8 @@ android {
 
 dependencies {
     api(project(":core:domain"))
-    implementation(project(":core:database"))
+    api(project(":core:identity"))
     implementation(project(":core:network"))
-    implementation(project(":core:identity"))
 
     implementation(libs.dataStore)
     implementation(libs.kotlinx.serialization.json)

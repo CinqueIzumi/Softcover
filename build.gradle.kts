@@ -11,11 +11,13 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.dependency.analysis)
 }
 
 // Apply detekt uniformly to every Kotlin module (no baseline — gates from zero on the shared config).
 // Wired centrally here, alongside the ktlint/styleCheck/checkModuleGraph gates, rather than per module.
 subprojects {
+    apply(plugin = "com.autonomousapps.dependency-analysis")
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
     configure<DetektExtension> {
@@ -65,6 +67,73 @@ fun tierOf(path: String): String? = when {
     path == ":orchestration" -> "orchestration"
     path == ":app" -> "app"
     else -> null
+}
+
+// dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
+// unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
+// staying out of the way of the convention-plugin design: the uniform runtime + test bundle provided
+// by AndroidLibraryConventionPlugin (coroutines, koin, timber, JUnit5/Kotest/MockK/Turbine) is
+// intentionally declared centrally, not per module, so it is excluded from the "unused" check. The
+// "declare transitive dependencies directly" advice is BOM/convention-managed completeness noise and
+// is treated as informational (ignored), not a gate.
+dependencyAnalysis {
+    issues {
+        all {
+            onUnusedDependencies {
+                severity("fail")
+                exclude(
+                    // Uniform runtime + test bundle provided by AndroidLibraryConventionPlugin.
+                    "com.jakewharton.timber:timber",
+                    "io.insert-koin:koin-android",
+                    "org.jetbrains.kotlinx:kotlinx-coroutines-android",
+                    "org.junit.jupiter:junit-jupiter-api",
+                    "org.junit.jupiter:junit-jupiter-params",
+                    "io.kotest:kotest-assertions-core",
+                    "io.mockk:mockk",
+                    "app.cash.turbine:turbine",
+                    // Provided uniformly by the Compose / Room convention plugins (not per-module deps).
+                    "androidx.activity:activity-compose",
+                    "androidx.compose.ui:ui-tooling-preview",
+                    "androidx.compose.material3:material3",
+                    "androidx.compose.ui:ui-graphics",
+                    "androidx.room:room-ktx",
+                    // False positives: genuinely used via mechanisms DA can't see without type resolution.
+                    "io.insert-koin:koin-androidx-compose", // koinInject(...)
+                    "cafe.adriel.voyager:voyager-koin", // ScreenModel / screenModelScope (ToadScreenModel)
+                    "org.jetbrains.kotlinx:kotlinx-serialization-json", // @Serializable / Json
+                    "androidx.work:work-runtime-ktx", // CoroutineWorker
+                )
+            }
+
+            onIncorrectConfiguration {
+                severity("fail")
+                exclude(
+                    // api/impl of convention-plugin-provided deps is managed centrally, not per module.
+                    "androidx.compose.material3:material3",
+                    "androidx.compose.ui:ui",
+                    "androidx.compose.ui:ui-graphics",
+                    "com.jakewharton.timber:timber",
+                    // Intentional public exposure: designsystem returns a Coil ImageRequest (§10).
+                    "io.coil-kt:coil-compose",
+                )
+            }
+
+            onUsedTransitiveDependencies {
+                severity("ignore")
+            }
+
+            // Compile-vs-runtime classpath splitting is a micro-optimisation entangled with the
+            // convention bundle (it wants coroutines-android demoted to runtimeOnly in every module);
+            // not a correctness/structure concern, so it does not gate.
+            onRuntimeOnly {
+                severity("ignore")
+            }
+
+            onRedundantPlugins {
+                severity("ignore")
+            }
+        }
+    }
 }
 
 tasks.register("checkModuleGraph") {

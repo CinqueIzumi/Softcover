@@ -8,8 +8,8 @@ android {
 
 dependencies {
     api(project(":core:domain"))
-    implementation(project(":core:book"))
-    implementation(project(":core:lists"))
-    implementation(project(":core:preferences"))
-    implementation(project(":core:identity"))
+    api(project(":core:book"))
+    api(project(":core:lists"))
+    api(project(":core:preferences"))
+    api(project(":core:identity"))
 }

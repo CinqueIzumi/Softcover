@@ -4,8 +4,7 @@ plugins {
 
 dependencies {
     implementation(libs.ktlint.ruleEngine)
-    implementation(libs.ktlint.ruleEngineCore)
-    implementation(libs.ktlint.cliRulesetCore)
+    api(libs.ktlint.ruleEngineCore)
 
     // ktlint's rule-engine logs via slf4j; provide the api + a no-op binding at runtime
     implementation("org.slf4j:slf4j-api:2.0.16")

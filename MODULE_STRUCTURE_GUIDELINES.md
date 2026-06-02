@@ -299,7 +299,11 @@ Build wiring conventions:
 - **Each module declares the `project(":core:x")` deps its own code imports** — never rely on a
   transitive dep. A module whose *public API* exposes a type from a library (e.g. `:core:designsystem`
   returning a coil `ImageRequest`) declares that library `api`, so consumers get it transitively; all
-  other deps are `implementation`.
+  other deps are `implementation`. This is **gated** by the `dependency-analysis` plugin: run
+  `./gradlew buildHealth` (it fails on a genuinely unused dependency or a wrong `api`/`implementation`).
+  The convention-plugin-provided bundle (coroutines/Koin/Timber/test stack, Compose, Room) is excluded
+  from the check in the root `dependencyAnalysis {}` config, as are a few type-resolution false
+  positives; the "declare transitive deps directly" advice is treated as informational, not a gate.
 - **Manifests merge upward.** Library modules contribute components via their own
   `src/main/AndroidManifest.xml` (`:orchestration` the launcher `MainActivity`, `:feature:session` the
   `ReadingSessionService`); `:app` owns the `<application>` element, permissions, FileProvider, and
