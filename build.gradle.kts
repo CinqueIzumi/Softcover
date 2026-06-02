@@ -6,4 +6,31 @@ plugins {
     alias(libs.plugins.apollo) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+}
+
+// Wire the custom ktlint ruleset (:ktlint-rules) into the build so style is enforced for every
+// developer with zero setup: `./gradlew ktlintCheck` (the gate, also run by `check`) and
+// `./gradlew ktlintFormat` (autofix). The rules run via ktlint's rule-engine directly from the
+// :ktlint-rules module, so there is no Spotless/plugin version coupling.
+subprojects {
+    tasks.matching { it.name == "check" }.configureEach {
+        dependsOn(":ktlint-rules:ktlintCheck")
+    }
+}
+
+// Runs the deterministic mechanical-style checks (scripts/style-check.sh) so CI / pre-commit can
+// gate on them. By default the script checks the changed .kt files; pass files via -PstyleCheckFiles
+// to scope it. Fails the build only on ERROR-tier findings (see the script header for the tiers).
+tasks.register<Exec>("styleCheck") {
+    group = "verification"
+    description = "Runs scripts/style-check.sh over changed Kotlin files (mechanical style rules)."
+
+    val script = "${rootProject.projectDir}/scripts/style-check.sh"
+    val extraFiles = (project.findProperty("styleCheckFiles") as String?)
+        ?.split(Regex("\\s+"))
+        ?.filter { it.isNotBlank() }
+        ?: emptyList()
+
+    commandLine(listOf("bash", script) + extraFiles)
 }

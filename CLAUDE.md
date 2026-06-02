@@ -33,17 +33,12 @@ Always consult [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) before designing or modifyin
 
 Always follow the project's code formatting rules in [CODE_STYLE_GUIDE.md](CODE_STYLE_GUIDE.md). Read it before writing or modifying any Kotlin code in this repository — it is the source of truth for naming, layout, and whitespace conventions.
 
-The repo has no ktlint/detekt configured, so style is enforced by review, not by tooling. Two-step compliance discipline:
+The mechanical style rules are enforced by tooling, not manual vigilance — for every developer, with zero setup, via the Gradle `check` lifecycle (so CI gates on them too):
 
-**Before declaring small Kotlin edits done, run the self-check below.** "Small" = a localized edit to an existing file (a few lines, a new helper, a rename, a state-flag addition). The rules below are the ones that are easy to miss because they are not idiomatic Kotlin and are not flagged by the compiler:
+- **Custom ktlint rules** in the `:ktlint-rules` module **auto-fix and gate** the mechanizable layout rules. Run `./gradlew ktlintFormat` to auto-fix, `./gradlew ktlintCheck` to gate (also run by `check`). The rules: multi-arg one-per-line wrapping (2+ args/params, even when they fit — exempting collection factories, `Modifier.…` chains, trailing-lambda calls), trailing comma on multi-line lists, blank line after `super.*()` / `Timber.e(...)`, `// region`/`// endregion` flush, no blank line after `{` / before `}`, blank line between sibling composables, and boolean `!` → `.not()` (gate-only; fix by hand).
+- **The remaining greppable rules** — inline fully-qualified references, one-type-per-file, project-import ordering — are flagged by `scripts/style-check.sh` (run `./gradlew styleCheck`, or pass files). Examine each candidate; the advisory recipes have documented false positives.
 
-- Boolean negation uses `.not()`, never `!` (e.g. `isLoading.not()`, not `!isLoading`).
-- Every sibling composable inside a layout scope (`Column`, `Row`, `Box`, `LazyRow` content, etc.) is separated by a blank line — including `Spacer`.
-- Multi-line constructs (multi-arg calls, multi-line `if`/`when`, mockk stubs, `coEvery { }`) are paragraphs: blank line before and after.
-- A `Timber.e(...)` log is its own paragraph: blank line before the next statement.
-- Imports are grouped androidx → third-party → project (`nl.rhaydus.*`) → kotlin/java, alphabetical within each group, no fully-qualified inline references.
-- Multi-argument calls, declarations, and data-class instantiations break one-per-line with a trailing comma as soon as they have ≥2 arguments.
-- Optional UI rows (rating, badge, etc.) inside fixed-width carousel/list cards must reserve their space (e.g. fixed `Modifier.height(...)`) so cards do not jump as content scrolls in.
+The subjective rules no tool can mechanize — blank line between sibling composables (incl. `Spacer`), paragraph spacing around multi-line constructs, a `Timber.e(...)` log as its own paragraph, reserved fixed height for optional card rows — live in `CODE_STYLE_GUIDE.md` and are caught in review.
 
 **For substantial Kotlin changes, delegate to the `code-reviewer` agent before reporting work done.** "Substantial" = a new file, a new feature module, a change spanning multiple files, or any change touching layout/state/data flow. The reviewer audits against the full current `CODE_STYLE_GUIDE.md` and catches both new violations and pre-existing ones in the touched files (per the on-touch compliance policy). Run it after the build succeeds and before the wrap-up message.
 
@@ -73,48 +68,14 @@ Consult [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) for how
 
 The app follows **Clean Architecture** with a custom **TOAD** state management framework. It is a multi-module Gradle build: `:app` (application shell) → `:orchestration` (nav host + cross-feature use cases) → `:feature:*` → `:core:*`.
 
-### Core vs Feature
+### Quick reference
 
-- `:core:*` — Shared kernels consumed by ≥2 features: Room database (`:core:database`), Apollo GraphQL client (`:core:network`), shared domain model (`:core:domain`), operation services (`:core:book`, `:core:lists`, `:core:deadlines`, `:core:personal`, `:core:profile`, `:core:library`), preferences/identity, platform infra (`:core:platform`), and the design system — reusable Compose components, Material 3 theming, and the TOAD framework itself (`:core:designsystem`).
-- `:feature:*` — Self-contained leaf features: `lists`, `profile`, `onboarding`, `explore`, `library`, `book_detail`, `reading`, `session`, `scan`, `settings`, `app_update`. A feature never imports a sibling feature.
-- `:orchestration` — The nav host and cross-feature orchestration use cases; `:app` is a thin application shell on top. See `MODULE_STRUCTURE_GUIDELINES.md` for the full roster and tier rules.
+The detail lives in the two docs above; this is just the orientation.
 
-### Layer Structure (per feature)
-
-Each feature has three layers with strict dependency rules:
-
-- **domain/** — Repository interfaces and use cases. Depends on nothing.
-- **data/** — Repository implementations, data sources (local/remote), Room DAOs, entities, and mappers. Implements domain interfaces.
-- **presentation/** — Screens, ScreenModels, actions, events, state. Depends on domain only (never data directly).
-- **di/** — Koin module wiring up the feature's dependencies.
-
-### TOAD State Management
-
-Custom framework on Voyager's `ScreenModel`. Each screen has:
-
-- **UiState** — Immutable data class exposed as `StateFlow`.
-- **UiAction** — Sealed interface; each action handles a user interaction, receives dependencies and scope to read/update state.
-- **UiEvent** — One-time events via `Channel` (navigation, toasts).
-- **LocalVariables** — Mutable state not affecting UI (e.g. Job tracking).
-- **ActionDependencies** — Container for injected use cases and dispatchers.
-- **Initializers** (in `flows/`) — Flow collectors that launch on screen creation, collecting repository flows and updating state.
-
-Data flow: `User → UiAction.execute() → use cases via Dependencies → setState() → StateFlow → Compose recomposes`.
-
-### Key Patterns
-
-- **Apollo GraphQL** for all API communication. Queries/mutations live in `core/network/src/main/graphql/`. Use `safeQuery()` / `safeMutation()` extension functions for error handling.
-- **Room** for local book/user data caching with migrations in `:core:database`.
-- **DataStore** for key-value preferences (settings, search history).
-- **Koin** for DI. Each feature has its own module; top-level `di/` aggregates them.
-- **Voyager** for navigation: `Navigator` for screen stacks, `TabNavigator` for bottom bar tabs.
-- **AppDispatchers** abstraction provides Main/IO/Default dispatchers via DI.
-- **Result\<T>** pattern with `.onSuccess()` / `.onFailure()` for error handling.
-- **Timber** for logging (never `println` or `Log.*`).
-
-### Naming Conventions
-
-Domain models are plain nouns (`Book`, `Author`). Suffixes indicate layer/role: `*Entity` (data), `*DataSource`/`*DataSourceImpl`, `*Repository`/`*RepositoryImpl`, `*UseCase`, `*Screen`, `*ScreenModel`, `*Action`, `*Event`, `*UiState`, `*LocalVariables`, `*Dependencies`.
+- **Layers (per feature):** `domain/` (repository interfaces + use cases, depends on nothing) → `data/` (impls, data sources, mappers — Room entities/DAOs live in `:core:database`, not the feature) → `presentation/` (screens, ScreenModels, actions, events, state; depends on domain only) → `di/` (Koin module). A feature never imports a sibling feature.
+- **TOAD** (custom framework on Voyager's `ScreenModel`): each screen has `UiState` (immutable, exposed as `StateFlow`), `UiAction` (sealed; one per interaction), `UiEvent` (one-time via `Channel`), `LocalVariables`, `ActionDependencies`, and `Initializers` in `flows/`. Flow: `UiAction.execute() → use cases via Dependencies → setState() → StateFlow → recompose`.
+- **Always:** Apollo via `safeQuery()` / `safeMutation()` (queries in `core/network/src/main/graphql/`); Room + migrations in `:core:database`; DataStore for preferences; Koin DI; Voyager nav (`Navigator`, `TabNavigator`); `AppDispatchers` for Main/IO/Default; `Result<T>` with `.onSuccess()` / `.onFailure()`; Timber for logging (never `println` / `Log.*`).
+- **Naming:** domain models are plain nouns (`Book`, `Author`); suffixes mark role — `*Entity`, `*DataSource(Impl)`, `*Repository(Impl)`, `*UseCase`, `*Screen`, `*ScreenModel`, `*Action`, `*Event`, `*UiState`, `*LocalVariables`, `*Dependencies`.
 
 ## Dependency Management
 
