@@ -110,6 +110,30 @@ if (!state.hasFocus) { ... }
 !book.editions.isEmpty()
 ```
 
+## Visibility
+
+The build is a fully split multi-module graph (`:app → :orchestration → :feature:* → :core:*`), so every module is its own compilation unit. **A top-level declaration that is referenced only within its own module must be `internal`** (or `private`) — never public-by-default. Public is reserved for the deliberate cross-module surface. Making something `public` is a decision to export it; if no other module imports it, that decision is wrong.
+
+**Default to `internal` for these (module-internal by nature):**
+
+- **TOAD plumbing** in a feature's `presentation/`: `*ScreenModel`, the sealed `*Action` and every subclass, `*UiState`, the `*Event` type and its subclasses, `*Dependencies`, `*LocalVariables`, and the `flows/` initializers/collectors. Mark a whole sealed hierarchy consistently (parent + all variants).
+- **Data-layer implementations**: `*RepositoryImpl`, `*DataSourceImpl`, `*StorageImpl`, `*QueueImpl`, DataStore serializers/entities, and `*Mapper` functions/classes used only within their own module.
+- **Module-private helpers**: top-level helper functions, extension functions, and `@Composable` helper components not referenced from another module.
+- **The `:app` shell** (the `Application`, `appModule`, version-provider impl — nothing depends on `:app`) and **orchestration nav-host internals** (`AppNavigatorImpl`, root/bottom-bar screens, cross-feature use-case impls bound to a `core/domain` contract).
+
+**Stays `public` (the cross-module surface):**
+
+- Domain contracts: `*Repository` / `*DataSource` **interfaces**, all `*UseCase` classes.
+- Domain models, enums, value types, and sealed result types in `core:domain` (and feature-local models exposed through a public use case's signature).
+- `*Screen` / `*Tab` navigation classes and navigation contracts.
+- The Koin `val *Module` aggregated in `:orchestration`.
+- Shared `core:designsystem` components/theme/models/TOAD contracts, and any impl that realises a `core` contract consumed elsewhere.
+- A mapper or other helper genuinely called from another module (confirm with a cross-module reference before keeping it public).
+
+**Cascade rule.** A `public` member that exposes a now-`internal` type must itself become `internal` (e.g. a `Screen(state: FooUiState, …)` member composable whose `FooUiState` is internal). The compiler enforces this — fix it at the member, do not re-widen the type.
+
+This is partly **tool-enforced**: the `softcover:visibility-modifier` ktlint rule (run by `ktlintCheck` / `check`) gates the uniformly-internal categories above (the `*Action` / `*Event` / `*UiState` / `*LocalVariables` / `*ScreenModel` / `*Dependencies` / `flows` / `*Impl` suffixes in their packages). It is deliberately conservative — the remaining cases (cross-module mappers, shared components, anything subtler) are caught in review.
+
 ## If / Else
 
 - A single-line `if` / `else` expression (one where the whole statement fits on one line) may omit braces: `val x = if (a) b else c`.

@@ -22,6 +22,7 @@ private val ruleProviders: Set<RuleProvider> =
         RuleProvider { RegionCommentFlushRule() },
         RuleProvider { BraceBlankLineRule() },
         RuleProvider { SiblingComposableBlankLineRule() },
+        RuleProvider { VisibilityModifierRule() },
     )
 
 fun main(args: Array<String>) {
