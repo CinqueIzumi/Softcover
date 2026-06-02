@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVaria
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import timber.log.Timber
 
-internal class UserInformationInitializer() : ProfileInitializer {
+internal class UserInformationInitializer : ProfileInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
         dependencies: ProfileDependencies,

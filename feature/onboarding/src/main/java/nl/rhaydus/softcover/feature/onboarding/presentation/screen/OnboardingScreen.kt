@@ -339,7 +339,8 @@ object OnboardingScreen : Screen {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "If you already have the Hardcover app installed, this key can also be found there: Profile → Settings → Hardcover API.",
+                text = "If you already have the Hardcover app installed, this key can also be found " +
+                    "there: Profile → Settings → Hardcover API.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

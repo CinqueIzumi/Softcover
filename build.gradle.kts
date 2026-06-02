@@ -1,4 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
@@ -7,6 +10,31 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.detekt) apply false
+}
+
+// Apply detekt uniformly to every Kotlin module (no baseline — gates from zero on the shared config).
+// Wired centrally here, alongside the ktlint/styleCheck/checkModuleGraph gates, rather than per module.
+subprojects {
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+
+    configure<DetektExtension> {
+        buildUponDefaultConfig = true
+        config.setFrom(rootProject.files("config/detekt/detekt.yml"))
+        parallel = true
+    }
+
+    tasks.withType<Detekt>().configureEach {
+        jvmTarget = "11"
+        // Analyse production code only; test sources follow their own (looser) patterns.
+        setSource(project.files("src/main/java", "src/main/kotlin"))
+        reports {
+            html.required.set(true)
+            xml.required.set(true)
+            txt.required.set(false)
+            sarif.required.set(false)
+        }
+    }
 }
 
 // Wire the custom ktlint ruleset (:ktlint-rules) into the build so style is enforced for every

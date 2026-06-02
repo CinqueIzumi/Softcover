@@ -28,7 +28,8 @@ class NotificationPermissionRequester internal constructor(
     }
 }
 
-// POST_NOTIFICATIONS is API 33, but the lambda only runs when SDK_INT >= TIRAMISU (guarded via isPreTiramisu in request()); the String constant inlines safely.
+// POST_NOTIFICATIONS is API 33, but the lambda only runs when SDK_INT >= TIRAMISU (guarded via isPreTiramisu in
+// request()); the String constant inlines safely.
 @SuppressLint("InlinedApi")
 @Composable
 fun rememberNotificationPermissionRequester(

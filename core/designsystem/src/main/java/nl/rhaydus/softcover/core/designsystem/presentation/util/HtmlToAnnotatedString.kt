@@ -5,6 +5,9 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 
+// Single-pass HTML parser: each `continue` advances past a distinct token class (tag, entity, plain char); collapsing
+// them would obscure the per-branch index bookkeeping.
+@Suppress("LoopWithTooManyJumpStatements")
 fun htmlToAnnotatedString(html: String): AnnotatedString {
     val builder = AnnotatedString.Builder()
     val openSpans = ArrayDeque<Int>()

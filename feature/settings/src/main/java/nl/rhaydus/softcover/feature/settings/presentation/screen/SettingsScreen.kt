@@ -56,7 +56,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpd
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
-import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import kotlinx.coroutines.launch
@@ -75,7 +74,6 @@ object SettingsScreen : Screen {
 
         Screen(
             state = state,
-            runAction = screenModel::runAction,
             navigateToProfile = {
                 navigator.parent?.push(appNavigator.screen(ScreenDestination.Profile))
             },
@@ -99,7 +97,6 @@ object SettingsScreen : Screen {
     @Composable
     internal fun Screen(
         state: SettingsScreenUiState,
-        runAction: (SettingsAction) -> Unit,
         navigateToProfile: () -> Unit,
         navigateToAppearanceSettings: () -> Unit,
         navigateToLibraryVisibility: () -> Unit,
@@ -448,7 +445,6 @@ object SettingsScreen : Screen {
 private fun SettingsScreenPreview() {
     SoftcoverTheme {
         SettingsScreen.Screen(
-            runAction = {},
             state = SettingsScreenUiState(),
             navigateToProfile = {},
             navigateToAppearanceSettings = {},

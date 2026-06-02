@@ -57,6 +57,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 @SuppressLint("MissingPermission")
 @OptIn(markerClass = [ExperimentalGetImage::class])
+// Camera binding can throw a variety of vendor/IllegalState/IllegalArgument exceptions; we log and must not crash the UI.
+@Suppress("TooGenericExceptionCaught")
 @Composable
 fun BarcodeScanner(
     onIsbnDetected: (String) -> Unit,

@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDepe
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
-internal class QueriedBooksCollector() : ExploreInitializer {
+internal class QueriedBooksCollector : ExploreInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
         dependencies: ExploreDependencies,

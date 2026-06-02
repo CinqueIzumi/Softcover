@@ -256,7 +256,10 @@ internal class BooksRepositoryImpl(
         val canonical: Book = try {
             booksRemoteDataSource.fetchBookById(id = canonicalBookId)
         } catch (canonicalMissing: BookNotFoundException) {
-            Timber.w("Canonical $canonicalBookId also missing while recovering $missingBookId")
+            Timber.e(
+                canonicalMissing,
+                "Canonical $canonicalBookId also missing while recovering $missingBookId",
+            )
 
             throw BookNotFoundException(bookId = missingBookId)
         }

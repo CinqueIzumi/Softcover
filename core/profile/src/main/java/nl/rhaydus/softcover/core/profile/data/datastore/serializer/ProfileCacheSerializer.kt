@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
+import timber.log.Timber
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -23,6 +24,11 @@ internal object ProfileCacheSerializer : Serializer<ProfileCacheEntity> {
                 string = input.readBytes().decodeToString(),
             )
         } catch (e: SerializationException) {
+            Timber.e(
+                e,
+                "Failed to deserialize ProfileCache; falling back to default",
+            )
+
             defaultValue
         }
     }

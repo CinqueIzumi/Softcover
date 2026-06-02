@@ -19,6 +19,8 @@ internal abstract class SoftcoverWorker(
 ) : CoroutineWorker(appContext, workerParameters) {
     abstract suspend fun work(): Result
 
+    // A scheduled worker must never crash the process; any subclass failure is logged and reported as a failed Result.
+    @Suppress("TooGenericExceptionCaught")
     final override suspend fun doWork(): Result {
         return try {
             work()

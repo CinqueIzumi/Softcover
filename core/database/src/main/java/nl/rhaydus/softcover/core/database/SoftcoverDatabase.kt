@@ -332,8 +332,15 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     """.trimIndent(),
                 )
 
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_bookListId ON book_list_edition_cross_ref(bookListId)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_editionId ON book_list_edition_cross_ref(editionId)")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_bookListId " +
+                        "ON book_list_edition_cross_ref(bookListId)",
+                )
+
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_editionId " +
+                        "ON book_list_edition_cross_ref(editionId)",
+                )
             }
         }
 
@@ -872,7 +879,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     """.trimIndent(),
                 )
                 db.execSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_progress_updates_userBookId_kind ON pending_progress_updates(userBookId, kind)",
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_progress_updates_userBookId_kind " +
+                        "ON pending_progress_updates(userBookId, kind)",
                 )
             }
         }
@@ -916,7 +924,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL("DROP INDEX IF EXISTS index_pending_progress_updates_userBookId_kind")
 
                 db.execSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)",
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind " +
+                        "ON pending_user_book_writes(userBookId, kind)",
                 )
             }
         }
@@ -1043,7 +1052,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE pending_user_book_writes_new RENAME TO pending_user_book_writes")
 
                 db.execSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind ON pending_user_book_writes(userBookId, kind)",
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind " +
+                        "ON pending_user_book_writes(userBookId, kind)",
                 )
             }
         }

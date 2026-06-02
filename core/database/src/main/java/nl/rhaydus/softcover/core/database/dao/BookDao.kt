@@ -355,7 +355,8 @@ interface BookDao {
 
         if (skipped > 0) {
             Timber.w(
-                "cacheBookList: skipped $skipped of ${bookList.books.size} list_books for listId=${bookList.id} due to missing book/edition rows",
+                "cacheBookList: skipped $skipped of ${bookList.books.size} list_books " +
+                    "for listId=${bookList.id} due to missing book/edition rows",
             )
         }
 
@@ -368,7 +369,8 @@ interface BookDao {
     suspend fun cacheListBook(listBook: ListBook) {
         if (canCacheListBook(listBook = listBook).not()) {
             Timber.w(
-                "cacheListBook: skipped insert for listBookId=${listBook.listBookId} (bookId=${listBook.bookId}, editionId=${listBook.editionId}) — missing book/edition rows",
+                "cacheListBook: skipped insert for listBookId=${listBook.listBookId} " +
+                    "(bookId=${listBook.bookId}, editionId=${listBook.editionId}) — missing book/edition rows",
             )
 
             return

@@ -517,7 +517,9 @@ private fun BookShareCardPreview() {
                 userRating = 9,
                 releaseYear = 1962,
                 pageCount = 214,
-                description = "Merricat Blackwood lives with her sister Constance and their uncle Julian in the family mansion outside the village. A quiet gothic tale of isolation, ritual, and the slow-burning aftermath of a single, devastating poisoning.",
+                description = "Merricat Blackwood lives with her sister Constance and their uncle Julian in the family " +
+                    "mansion outside the village. A quiet gothic tale of isolation, ritual, and the slow-burning " +
+                    "aftermath of a single, devastating poisoning.",
                 quote = "Merricat, said Connie, would you like a cup of tea?",
             ),
         )
