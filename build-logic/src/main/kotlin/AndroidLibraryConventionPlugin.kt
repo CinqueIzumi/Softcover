@@ -32,6 +32,12 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 sourceCompatibility = JavaVersion.VERSION_11
                 targetCompatibility = JavaVersion.VERSION_11
             }
+
+            lint {
+                warningsAsErrors = true
+                abortOnError = true
+                lintConfig = target.rootProject.file("lint.xml")
+            }
         }
 
         extensions.configure<KotlinAndroidProjectExtension> {

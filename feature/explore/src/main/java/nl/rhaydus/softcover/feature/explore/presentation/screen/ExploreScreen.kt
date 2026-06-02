@@ -72,7 +72,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTo
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberMutationAnimatedModifier
+import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
@@ -612,7 +612,8 @@ object ExploreScreen : Screen {
         ) {
             items(queries, key = { it }) { query ->
                 FilterChip(
-                    modifier = rememberMutationAnimatedModifier(
+                    modifier = Modifier.mutationAnimated(
+                        scope = this,
                         animator = animator,
                         itemKey = query,
                     ),

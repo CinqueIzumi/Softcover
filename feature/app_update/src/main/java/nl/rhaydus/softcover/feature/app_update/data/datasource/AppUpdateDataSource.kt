@@ -38,6 +38,8 @@ internal class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateMa
             InstallStatus.DOWNLOADED -> _updateState.value = AppUpdateState.Downloaded
             InstallStatus.FAILED -> _updateState.value = AppUpdateState.Failed
             InstallStatus.CANCELED -> _updateState.value = AppUpdateState.Idle
+            InstallStatus.INSTALLED -> _updateState.value = AppUpdateState.Idle
+            else -> Unit
         }
     }
 

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.platform.notification
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,6 +28,8 @@ class NotificationPermissionRequester internal constructor(
     }
 }
 
+// POST_NOTIFICATIONS is API 33, but the lambda only runs when SDK_INT >= TIRAMISU (guarded via isPreTiramisu in request()); the String constant inlines safely.
+@SuppressLint("InlinedApi")
 @Composable
 fun rememberNotificationPermissionRequester(
     onResult: (Boolean) -> Unit,

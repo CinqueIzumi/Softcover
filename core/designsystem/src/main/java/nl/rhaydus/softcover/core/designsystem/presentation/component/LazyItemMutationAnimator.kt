@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -37,7 +38,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMo
  * When the user has disabled system animations, [playMotion] is `false`, no items
  * register for placement / fade animation, and the accent-bar pulse is suppressed.
  *
- * Apply the modifier returned by [rememberMutationAnimatedModifier] (or the grid-scope
+ * Apply [Modifier.mutationAnimated] (or the grid-scope
  * overload) directly to the outermost composable of each lazy item — never wrap the
  * item in an extra `Box` to host `Modifier.animateItem()`, since that intermediate
  * layout node has been observed to cause stale lazy-item measurements (bottom of item
@@ -76,40 +77,42 @@ fun rememberLazyItemMutationAnimator(keys: List<Any>): LazyItemMutationAnimator 
 }
 
 @Composable
-fun LazyItemScope.rememberMutationAnimatedModifier(
+fun Modifier.mutationAnimated(
+    scope: LazyItemScope,
     animator: LazyItemMutationAnimator,
     itemKey: Any,
 ): Modifier {
-    val animateItemModifier = if (animator.playMotion) Modifier.animateItem() else Modifier
+    val animateItemModifier = if (animator.playMotion) with(scope) { Modifier.animateItem() } else Modifier
 
-    return animateItemModifier.then(newlyInsertedAccentPulseModifier(
+    return then(animateItemModifier).newlyInsertedAccentPulse(
         animator,
         itemKey,
-    ),)
+    )
 }
 
 @Composable
-fun LazyGridItemScope.rememberMutationAnimatedModifier(
+fun Modifier.mutationAnimated(
+    scope: LazyGridItemScope,
     animator: LazyItemMutationAnimator,
     itemKey: Any,
 ): Modifier {
-    val animateItemModifier = if (animator.playMotion) Modifier.animateItem() else Modifier
+    val animateItemModifier = if (animator.playMotion) with(scope) { Modifier.animateItem() } else Modifier
 
-    return animateItemModifier.then(newlyInsertedAccentPulseModifier(
+    return then(animateItemModifier).newlyInsertedAccentPulse(
         animator,
         itemKey,
-    ),)
+    )
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun newlyInsertedAccentPulseModifier(
+private fun Modifier.newlyInsertedAccentPulse(
     animator: LazyItemMutationAnimator,
     itemKey: Any,
 ): Modifier {
     val isNewlyInserted = animator.isNewlyInserted(itemKey)
 
-    if (isNewlyInserted.not()) return Modifier
+    if (isNewlyInserted.not()) return this
 
     val pulseColor = MaterialTheme.colorScheme.primary
 
@@ -135,7 +138,7 @@ private fun newlyInsertedAccentPulseModifier(
         )
     }
 
-    return Modifier.drawWithContent {
+    return drawWithContent {
         drawContent()
         if (alpha.value > 0f) {
             drawAccentBar(
@@ -149,7 +152,7 @@ private fun newlyInsertedAccentPulseModifier(
 }
 
 private fun DrawScope.drawAccentBar(
-    color: androidx.compose.ui.graphics.Color,
+    color: Color,
     alpha: Float,
     widthPx: Float,
     heightPx: Float,

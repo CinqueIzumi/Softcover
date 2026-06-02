@@ -89,7 +89,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSp
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberMutationAnimatedModifier
+import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
@@ -442,7 +442,8 @@ object ReadingScreen : Screen {
 
                     itemsIndexed(rest, key = { _, book -> book.id }) { index, book ->
                         CompactBookEntry(
-                            modifier = rememberMutationAnimatedModifier(
+                            modifier = Modifier.mutationAnimated(
+                                scope = this,
                                 animator = animator,
                                 itemKey = book.id,
                             )

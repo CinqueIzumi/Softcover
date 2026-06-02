@@ -38,6 +38,11 @@ android {
     buildFeatures {
         buildConfig = true
     }
+    lint {
+        warningsAsErrors = true
+        abortOnError = true
+        lintConfig = rootProject.file("lint.xml")
+    }
 }
 
 dependencies {

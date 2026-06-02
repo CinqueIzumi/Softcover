@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -173,7 +174,7 @@ class LibraryVisibilitySettingsScreen : Screen {
         var workingOrder by remember(state.initialized) { mutableStateOf(entries) }
 
         var draggingId by remember { mutableStateOf<String?>(null) }
-        var dragOffsetY by remember { mutableStateOf(0f) }
+        var dragOffsetY by remember { mutableFloatStateOf(0f) }
         val itemHeightsPx = remember { mutableStateMapOf<String, Int>() }
 
         LaunchedEffect(entries) {
@@ -258,7 +259,7 @@ class LibraryVisibilitySettingsScreen : Screen {
                                 runAction = runAction,
                             )
                         },
-                        dragHandleModifier = run {
+                        modifier = run {
                             val draggableState = rememberDraggableState { delta ->
                                 dragOffsetY += delta
                             }
@@ -319,7 +320,7 @@ class LibraryVisibilitySettingsScreen : Screen {
         checked: Boolean,
         isDragging: Boolean,
         onCheckedChange: (Boolean) -> Unit,
-        dragHandleModifier: Modifier,
+        modifier: Modifier = Modifier,
     ) {
         val isAlwaysOn = entry is LibraryTabEntry.Status && entry.isAlwaysOn
 
@@ -333,7 +334,7 @@ class LibraryVisibilitySettingsScreen : Screen {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = dragHandleModifier
+                modifier = modifier
                     .size(40.dp),
                 contentAlignment = Alignment.Center,
             ) {

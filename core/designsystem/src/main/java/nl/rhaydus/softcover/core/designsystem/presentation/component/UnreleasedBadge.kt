@@ -13,26 +13,26 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val COMPACT_FORMATTER: DateTimeFormatter =
-    DateTimeFormatter.ofPattern(
+fun LocalDate.formatCompactRelease(): String {
+    val formatter = DateTimeFormatter.ofPattern(
         "MMM d",
         Locale.getDefault(),
     )
 
-private val LONG_FORMATTER: DateTimeFormatter =
-    DateTimeFormatter.ofPattern(
-        "MMMM d, yyyy",
-        Locale.getDefault(),
-    )
-
-fun LocalDate.formatCompactRelease(): String {
-    val base = format(COMPACT_FORMATTER)
+    val base = format(formatter)
     val now = LocalDate.now()
 
     return if (year == now.year) base else "$base, $year"
 }
 
-fun LocalDate.formatLongRelease(): String = format(LONG_FORMATTER)
+fun LocalDate.formatLongRelease(): String {
+    val formatter = DateTimeFormatter.ofPattern(
+        "MMMM d, yyyy",
+        Locale.getDefault(),
+    )
+
+    return format(formatter)
+}
 
 @Composable
 fun UnreleasedBadge(

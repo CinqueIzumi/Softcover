@@ -85,8 +85,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -114,7 +114,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSum
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PullToRefreshEyebrow
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberMutationAnimatedModifier
+import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
@@ -246,7 +246,9 @@ object LibraryScreen : Screen {
 
         val pullToRefreshState = rememberPullToRefreshState()
 
-        val screenWidthDp = LocalConfiguration.current.screenWidthDp.dp
+        val density = LocalDensity.current
+        val containerSize = LocalWindowInfo.current.containerSize
+        val screenWidthDp = with(density) { containerSize.width.toDp() }
         val maxTabLabelWidth = (screenWidthDp - 168.dp).coerceAtLeast(120.dp)
 
         val initialPage = remember(state.tabsLoaded) {
@@ -1091,6 +1093,8 @@ object LibraryScreen : Screen {
             gridState = gridState,
         ) {
             itemsIndexed(renderIds, key = { _, id -> id }) { index, id ->
+                val gridItemScope = this
+
                 val edition = editionsById[id] ?: return@itemsIndexed
 
                 ReorderableItem(state = reorderableState, key = id) {
@@ -1140,7 +1144,8 @@ object LibraryScreen : Screen {
                     // Drag-only while rearranging: tapping a cover doesn't open the edition with the
                     // handle live (matches the built-in shelf grid).
                     LayoutEditionEntry(
-                        modifier = rememberMutationAnimatedModifier(
+                        modifier = Modifier.mutationAnimated(
+                            scope = gridItemScope,
                             animator = animator,
                             itemKey = edition.id,
                         )
@@ -1282,6 +1287,8 @@ object LibraryScreen : Screen {
             gridState = gridState,
         ) {
             itemsIndexed(renderIds, key = { _, id -> id }) { index, id ->
+                val gridItemScope = this
+
                 val book = booksById[id] ?: return@itemsIndexed
 
                 ReorderableItem(state = reorderableState, key = id) {
@@ -1339,7 +1346,8 @@ object LibraryScreen : Screen {
                     }
 
                     LayoutBookEntry(
-                        modifier = rememberMutationAnimatedModifier(
+                        modifier = Modifier.mutationAnimated(
+                            scope = gridItemScope,
                             animator = animator,
                             itemKey = book.id,
                         )
@@ -1487,10 +1495,10 @@ object LibraryScreen : Screen {
         onLongClick: (() -> Unit)?,
         isSelectionMode: Boolean,
         isSelected: Boolean,
+        modifier: Modifier = Modifier,
         deadline: BookDeadline? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
         dragHandle: (@Composable () -> Unit)? = null,
-        modifier: Modifier = Modifier,
     ) {
         // Prefetch only makes sense when the tap opens book detail. In selection mode the tap
         // toggles selection, so skip the prefetch to avoid spending bandwidth on a navigation
@@ -1674,8 +1682,8 @@ object LibraryScreen : Screen {
         edition: BookEdition,
         layout: LibraryGridLayout,
         onEditionClick: (BookEdition) -> Unit,
-        dragHandle: (@Composable () -> Unit)? = null,
         modifier: Modifier = Modifier,
+        dragHandle: (@Composable () -> Unit)? = null,
     ) {
         val entryModifier = modifier.prefetchBookDetailOnPress(edition.bookId)
 
@@ -1842,12 +1850,12 @@ object LibraryScreen : Screen {
         title: String,
         authorName: String,
         onClick: () -> Unit,
+        modifier: Modifier = Modifier,
         onLongClick: (() -> Unit)? = null,
         isSelectionMode: Boolean = false,
         isSelected: Boolean = false,
         deadlineProgress: DeadlineProgress? = null,
         trailing: (@Composable () -> Unit)? = null,
-        modifier: Modifier = Modifier,
     ) {
         Column(
             modifier = modifier
@@ -1915,6 +1923,7 @@ object LibraryScreen : Screen {
         title: String,
         authorName: String,
         onClick: () -> Unit,
+        modifier: Modifier = Modifier,
         onLongClick: (() -> Unit)? = null,
         seriesText: String? = null,
         releaseYear: Int? = null,
@@ -1923,7 +1932,6 @@ object LibraryScreen : Screen {
         deadlineProgress: DeadlineProgress? = null,
         dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
         trailing: (@Composable () -> Unit)? = null,
-        modifier: Modifier = Modifier,
         cover: @Composable (Modifier) -> Unit,
     ) {
         Surface(

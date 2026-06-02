@@ -12,6 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,7 +54,7 @@ class FullScreenCoverScreen(
             fallbackCoverUrl = fallbackCoverUrl,
         )
 
-        var scale by remember { mutableStateOf(MIN_SCALE) }
+        var scale by remember { mutableFloatStateOf(MIN_SCALE) }
         var offset by remember { mutableStateOf(Offset.Zero) }
         var containerSize by remember { mutableStateOf(IntSize.Zero) }
 

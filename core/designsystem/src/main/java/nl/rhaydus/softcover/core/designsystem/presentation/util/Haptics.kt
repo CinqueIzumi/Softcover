@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.util
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -36,11 +37,23 @@ interface Haptics {
 
 private class ViewHaptics(private val view: View) : Haptics {
     override fun commit() {
-        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+        val constant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            HapticFeedbackConstants.CONFIRM
+        } else {
+            HapticFeedbackConstants.LONG_PRESS
+        }
+
+        view.performHapticFeedback(constant)
     }
 
     override fun reject() {
-        view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+        val constant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            HapticFeedbackConstants.REJECT
+        } else {
+            HapticFeedbackConstants.CONTEXT_CLICK
+        }
+
+        view.performHapticFeedback(constant)
     }
 
     override fun select() {
@@ -73,6 +86,8 @@ private class ViewHaptics(private val view: View) : Haptics {
         view.performHapticFeedback(constant)
     }
 
+    // SDK_INT >= R guards the API 30 constant; the int is safely inlined on older APIs.
+    @SuppressLint("InlinedApi")
     override fun lift() {
         val constant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             HapticFeedbackConstants.DRAG_START
@@ -94,10 +109,16 @@ private class ViewHaptics(private val view: View) : Haptics {
     }
 
     override fun milestone() {
-        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+        val constant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            HapticFeedbackConstants.CONFIRM
+        } else {
+            HapticFeedbackConstants.LONG_PRESS
+        }
+
+        view.performHapticFeedback(constant)
 
         view.postDelayed(
-            { view.performHapticFeedback(HapticFeedbackConstants.CONFIRM) },
+            { view.performHapticFeedback(constant) },
             MILESTONE_GAP_MS,
         )
     }
