@@ -9,29 +9,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
+import kotlinx.datetime.todayIn
 
 fun LocalDate.formatCompactRelease(): String {
-    val formatter = DateTimeFormatter.ofPattern(
-        "MMM d",
-        Locale.getDefault(),
-    )
+    val formatter = LocalDate.Format {
+        monthName(MonthNames.ENGLISH_ABBREVIATED)
+        char(' ')
+        dayOfMonth(Padding.NONE)
+    }
 
-    val base = format(formatter)
-    val now = LocalDate.now()
+    val base = formatter.format(this)
+    val now = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
     return if (year == now.year) base else "$base, $year"
 }
 
 fun LocalDate.formatLongRelease(): String {
-    val formatter = DateTimeFormatter.ofPattern(
-        "MMMM d, yyyy",
-        Locale.getDefault(),
-    )
+    val formatter = LocalDate.Format {
+        monthName(MonthNames.ENGLISH_FULL)
+        char(' ')
+        dayOfMonth(Padding.NONE)
+        char(',')
+        char(' ')
+        year()
+    }
 
-    return format(formatter)
+    return formatter.format(this)
 }
 
 @Composable

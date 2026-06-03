@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
 import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
-import java.time.Instant
-import java.time.LocalDate
 
 private fun String.toInstantOrEpoch(): Instant =
-    runCatching { Instant.parse(this) }.getOrDefault(Instant.EPOCH)
+    runCatching { Instant.parse(this) }.getOrDefault(Instant.fromEpochMilliseconds(0))
 
 private fun String?.toInstantOrNull(): Instant? =
     this?.let { runCatching { Instant.parse(it) }.getOrNull() }

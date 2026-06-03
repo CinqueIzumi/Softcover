@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -20,10 +24,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class BookDeadlineCollectorTest {
     private lateinit var observeBookDeadlineUseCase: ObserveBookDeadlineUseCase
@@ -102,7 +102,7 @@ class BookDeadlineCollectorTest {
 
     private fun buildDeadline(
         bookId: Int = 1,
-        deadlineDate: LocalDate = LocalDate.of(
+        deadlineDate: LocalDate = LocalDate(
             2026,
             5,
             20,
@@ -111,7 +111,7 @@ class BookDeadlineCollectorTest {
     ) = BookDeadline(
         bookId = bookId,
         deadlineDate = deadlineDate,
-        setAt = LocalDate.of(
+        setAt = LocalDate(
             2026,
             4,
             20,

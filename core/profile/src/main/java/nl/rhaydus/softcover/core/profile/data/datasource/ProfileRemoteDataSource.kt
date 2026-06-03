@@ -1,13 +1,14 @@
 package nl.rhaydus.softcover.core.profile.data.datasource
 
 import com.apollographql.apollo.ApolloClient
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.softcover.GetUserProfileDataQuery
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 interface ProfileRemoteDataSource {
     suspend fun getUserProfileSnapshot(userId: Int): UserProfileSnapshot
@@ -60,7 +61,7 @@ internal class ProfileRemoteDataSourceImpl(
     // before extracting the date so non-UTC offsets don't shift entries to the wrong day.
     private fun parseDateOrNull(value: String): LocalDate? = runCatching {
         if (value.contains('T')) {
-            OffsetDateTime.parse(value).withOffsetSameInstant(ZoneOffset.UTC).toLocalDate()
+            Instant.parse(value).toLocalDateTime(TimeZone.UTC).date
         } else {
             LocalDate.parse(value)
         }

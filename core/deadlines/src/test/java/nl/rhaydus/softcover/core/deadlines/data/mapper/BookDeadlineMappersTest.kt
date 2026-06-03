@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.core.deadlines.data.mapper
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.database.model.BookDeadlineEntity
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class BookDeadlineMappersTest {
     private fun buildEntity(
@@ -25,12 +25,12 @@ class BookDeadlineMappersTest {
 
     private fun buildDomain(
         bookId: Int = 1,
-        deadlineDate: LocalDate = LocalDate.of(
+        deadlineDate: LocalDate = LocalDate(
             2026,
             5,
             1,
         ),
-        setAt: LocalDate = LocalDate.of(
+        setAt: LocalDate = LocalDate(
             2026,
             4,
             1,
@@ -63,12 +63,12 @@ class BookDeadlineMappersTest {
 
             // ----- Assert -----
             result.bookId shouldBe 42
-            result.deadlineDate shouldBe LocalDate.of(
+            result.deadlineDate shouldBe LocalDate(
                 2026,
                 7,
                 15,
             )
-            result.setAt shouldBe LocalDate.of(
+            result.setAt shouldBe LocalDate(
                 2026,
                 4,
                 20,
@@ -137,7 +137,7 @@ class BookDeadlineMappersTest {
             val result = entity.toDomain()
 
             // ----- Assert -----
-            result.deadlineDate shouldBe LocalDate.of(
+            result.deadlineDate shouldBe LocalDate(
                 2024,
                 2,
                 29,
@@ -156,12 +156,12 @@ class BookDeadlineMappersTest {
             val result = entity.toDomain()
 
             // ----- Assert -----
-            result.deadlineDate shouldBe LocalDate.of(
+            result.deadlineDate shouldBe LocalDate(
                 2025,
                 12,
                 31,
             )
-            result.setAt shouldBe LocalDate.of(
+            result.setAt shouldBe LocalDate(
                 2025,
                 12,
                 1,
@@ -180,12 +180,12 @@ class BookDeadlineMappersTest {
             val result = entity.toDomain()
 
             // ----- Assert -----
-            result.deadlineDate shouldBe LocalDate.of(
+            result.deadlineDate shouldBe LocalDate(
                 2026,
                 1,
                 1,
             )
-            result.setAt shouldBe LocalDate.of(
+            result.setAt shouldBe LocalDate(
                 2025,
                 12,
                 31,
@@ -200,12 +200,12 @@ class BookDeadlineMappersTest {
             // ----- Arrange -----
             val domain = buildDomain(
                 bookId = 7,
-                deadlineDate = LocalDate.of(
+                deadlineDate = LocalDate(
                     2026,
                     8,
                     10,
                 ),
-                setAt = LocalDate.of(
+                setAt = LocalDate(
                     2026,
                     4,
                     5,
@@ -253,12 +253,12 @@ class BookDeadlineMappersTest {
         fun `formats a leap-day date correctly`() {
             // ----- Arrange -----
             val domain = buildDomain(
-                deadlineDate = LocalDate.of(
+                deadlineDate = LocalDate(
                     2024,
                     2,
                     29,
                 ),
-                setAt = LocalDate.of(
+                setAt = LocalDate(
                     2024,
                     1,
                     1,
@@ -276,12 +276,12 @@ class BookDeadlineMappersTest {
         fun `formats a year-boundary date correctly`() {
             // ----- Arrange -----
             val domain = buildDomain(
-                deadlineDate = LocalDate.of(
+                deadlineDate = LocalDate(
                     2025,
                     12,
                     31,
                 ),
-                setAt = LocalDate.of(
+                setAt = LocalDate(
                     2025,
                     12,
                     1,
@@ -340,12 +340,12 @@ class BookDeadlineMappersTest {
             // ----- Arrange -----
             val original = buildDomain(
                 bookId = 55,
-                deadlineDate = LocalDate.of(
+                deadlineDate = LocalDate(
                     2026,
                     3,
                     31,
                 ),
-                setAt = LocalDate.of(
+                setAt = LocalDate(
                     2026,
                     1,
                     15,
@@ -366,12 +366,12 @@ class BookDeadlineMappersTest {
             // ----- Arrange -----
             val original = buildDomain(
                 bookId = 56,
-                deadlineDate = LocalDate.of(
+                deadlineDate = LocalDate(
                     2026,
                     3,
                     31,
                 ),
-                setAt = LocalDate.of(
+                setAt = LocalDate(
                     2026,
                     1,
                     15,

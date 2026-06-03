@@ -1,10 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.util
 
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeParseException
 
 private fun Book.pagesForStats(): Int = currentEdition?.pages ?: defaultEdition?.pages ?: 0
 
@@ -35,7 +34,7 @@ internal fun Book.finishedYear(): Int? {
 
     return try {
         LocalDateTime.parse(updatedAt).year
-    } catch (_: DateTimeParseException) {
+    } catch (_: IllegalArgumentException) {
         null
     }
 }

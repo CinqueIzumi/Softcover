@@ -8,15 +8,17 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
-import nl.rhaydus.softcover.core.domain.model.ReadingSession
-import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.Instant
+import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
+import nl.rhaydus.softcover.core.domain.model.ReadingSession
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
 
 class ReadingSessionRepositoryImplTest {
     private lateinit var localDataSource: ReadingSessionLocalDataSource
@@ -251,7 +253,7 @@ class ReadingSessionRepositoryImplTest {
         @Test
         fun `folds open pause into pausedSeconds and clears lastPausedAt`() = runTest {
             // ----- Arrange -----
-            val knownPausedAt = Instant.now().minusSeconds(60).toString()
+            val knownPausedAt = (Clock.System.now() - 60.seconds).toString()
             val existingEntity = buildEntity(
                 id = 4L,
                 pausedSeconds = 100,
@@ -372,7 +374,7 @@ class ReadingSessionRepositoryImplTest {
         @Test
         fun `accumulates pausedSeconds and clears lastPausedAt`() = runTest {
             // ----- Arrange -----
-            val knownPausedAt = Instant.now().minusSeconds(60).toString()
+            val knownPausedAt = (Clock.System.now() - 60.seconds).toString()
             val existingEntity = buildEntity(
                 id = 6L,
                 pausedSeconds = 50,

@@ -8,14 +8,14 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class ProfileRepositoryImplTest {
     private lateinit var profileRemoteDataSource: ProfileRemoteDataSource
@@ -40,7 +40,7 @@ class ProfileRepositoryImplTest {
         booksRead = 42,
         totalPagesRead = 12345,
         averageRating = 4.2,
-        activeReadingDates = setOf(LocalDate.of(
+        activeReadingDates = setOf(LocalDate(
             2026,
             5,
             4,

@@ -9,14 +9,14 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.GetUserProfileDataQuery
-import nl.rhaydus.softcover.core.network.helper.safeQuery
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.GetUserProfileDataQuery
+import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 
 class ProfileRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
@@ -364,12 +364,12 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result.activeReadingDates shouldBe setOf(
-                LocalDate.of(
+                LocalDate(
                     2026,
                     5,
                     4,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2026,
                     5,
                     3,
@@ -413,17 +413,17 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result.activeReadingDates shouldBe setOf(
-                LocalDate.of(
+                LocalDate(
                     2026,
                     5,
                     4,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2026,
                     5,
                     3,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2026,
                     5,
                     2,
@@ -462,7 +462,7 @@ class ProfileRemoteDataSourceImplTest {
             val result = dataSource.getUserProfileSnapshot(userId = 42)
 
             // ----- Assert -----
-            result.activeReadingDates shouldBe setOf(LocalDate.of(
+            result.activeReadingDates shouldBe setOf(LocalDate(
                 2026,
                 5,
                 4,

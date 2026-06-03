@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.deadlines.domain.usecase
 
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
-import java.time.LocalDate
 
 class SetBookDeadlineUseCase(
     private val repository: BookDeadlineRepository,

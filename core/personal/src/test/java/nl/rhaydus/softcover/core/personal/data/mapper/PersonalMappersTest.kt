@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
 import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.Instant
-import java.time.LocalDate
 
 class PersonalMappersTest {
     // region Fixtures
@@ -132,7 +132,7 @@ class PersonalMappersTest {
             val result = entity.toDomain()
 
             // ----- Assert -----
-            result.createdAt shouldBe Instant.EPOCH
+            result.createdAt shouldBe Instant.fromEpochMilliseconds(0)
         }
     }
 
@@ -200,7 +200,7 @@ class PersonalMappersTest {
             val result = entity.toDomain()
 
             // ----- Assert -----
-            result.startedAt shouldBe Instant.EPOCH
+            result.startedAt shouldBe Instant.fromEpochMilliseconds(0)
         }
 
         @Test
@@ -212,7 +212,7 @@ class PersonalMappersTest {
             val result = entity.toDomain()
 
             // ----- Assert -----
-            result.endedAt shouldBe Instant.EPOCH
+            result.endedAt shouldBe Instant.fromEpochMilliseconds(0)
         }
 
         @Test
@@ -384,12 +384,12 @@ class PersonalMappersTest {
             // ----- Assert -----
             result.id shouldBe 5L
             result.bookId shouldBe 1
-            result.startedAt shouldBe LocalDate.of(
+            result.startedAt shouldBe LocalDate(
                 2024,
                 1,
                 1,
             )
-            result.finishedAt shouldBe LocalDate.of(
+            result.finishedAt shouldBe LocalDate(
                 2024,
                 1,
                 15,
@@ -448,7 +448,7 @@ class PersonalMappersTest {
             val result = entity.toDomain()
 
             // ----- Assert -----
-            result.createdAt shouldBe Instant.EPOCH
+            result.createdAt shouldBe Instant.fromEpochMilliseconds(0)
         }
     }
 
@@ -460,12 +460,12 @@ class PersonalMappersTest {
             val entry = ReadingLogEntry(
                 id = 5L,
                 bookId = 1,
-                startedAt = LocalDate.of(
+                startedAt = LocalDate(
                     2024,
                     1,
                     1,
                 ),
-                finishedAt = LocalDate.of(
+                finishedAt = LocalDate(
                     2024,
                     1,
                     15,

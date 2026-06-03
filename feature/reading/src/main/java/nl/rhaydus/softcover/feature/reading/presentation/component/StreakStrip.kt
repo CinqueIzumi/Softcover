@@ -27,6 +27,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.DayOfWeekNames
+import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -34,14 +45,18 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 private val DOT_ROW_HEIGHT = 18.dp
 private val DOT = 9.dp
 private val TODAY_DOT = 12.dp
 private val DOT_GAP = 10.dp
-private val sheetDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE d MMM")
+private val sheetDateFormatter = LocalDate.Format {
+    dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
+    char(' ')
+    dayOfMonth(Padding.NONE)
+    char(' ')
+    monthName(MonthNames.ENGLISH_ABBREVIATED)
+}
 
 @Composable
 internal fun StreakStrip(
@@ -222,17 +237,26 @@ private fun sheetDayLabel(
     today: LocalDate?,
 ): String = when (date) {
     today -> "Today"
-    today?.minusDays(1) -> "Yesterday"
-    else -> date.format(sheetDateFormatter)
+    today?.minus(
+        1,
+        DateTimeUnit.DAY,
+    ) -> "Yesterday"
+    else -> sheetDateFormatter.format(date)
 }
 
 private fun previewActivity(litOffsets: Set<Int>): List<ReadingDayActivity> {
-    val today = LocalDate.now()
-    val firstDay = today.minusDays(20)
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val firstDay = today.minus(
+        20,
+        DateTimeUnit.DAY,
+    )
 
     return (0..20).map { offset ->
         ReadingDayActivity(
-            date = firstDay.plusDays(offset.toLong()),
+            date = firstDay.plus(
+                offset,
+                DateTimeUnit.DAY,
+            ),
             didRead = offset in litOffsets,
         )
     }

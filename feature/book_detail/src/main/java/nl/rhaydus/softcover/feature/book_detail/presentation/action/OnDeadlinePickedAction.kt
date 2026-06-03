@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit

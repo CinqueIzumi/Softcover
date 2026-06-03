@@ -14,6 +14,7 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import coil.imageLoader
 import coil.request.ImageRequest
+import kotlin.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import java.time.Duration
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.resolveEditionImageSource
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppEntryPoint
@@ -207,7 +207,7 @@ internal class ReadingSessionService : Service() {
 
             builder.setUsesChronometer(true)
 
-            builder.setWhen(System.currentTimeMillis() - elapsed.toMillis())
+            builder.setWhen(System.currentTimeMillis() - elapsed.inWholeMilliseconds)
         }
 
         if (isPaused) {

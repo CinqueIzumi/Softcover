@@ -12,6 +12,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
@@ -20,10 +24,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEven
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class ReadingActivityCollectorTest {
     private lateinit var observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase
@@ -61,7 +61,7 @@ class ReadingActivityCollectorTest {
     }
 
     private fun stubActivity(): ReadingDayActivity = ReadingDayActivity(
-        date = LocalDate.of(
+        date = LocalDate(
             2026,
             5,
             31,

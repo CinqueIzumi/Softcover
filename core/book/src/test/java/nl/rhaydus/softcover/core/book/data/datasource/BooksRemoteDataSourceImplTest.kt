@@ -15,6 +15,11 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
@@ -46,10 +51,6 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class BooksRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
@@ -135,7 +136,7 @@ class BooksRemoteDataSourceImplTest {
         rating: Double = 4.5,
         description: String = "Canonical description",
         releaseYear: Int = 2020,
-        releaseDate: java.time.LocalDate? = null,
+        releaseDate: LocalDate? = null,
         coverUrl: String = "https://covers.example.com/canonical.jpg",
         usersCount: Int = 500,
         ratingsCount: Int = 200,

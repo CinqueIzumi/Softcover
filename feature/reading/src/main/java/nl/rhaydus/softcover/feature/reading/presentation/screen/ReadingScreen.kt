@@ -77,6 +77,14 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import coil.compose.AsyncImage
+import kotlin.math.roundToInt
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
@@ -87,9 +95,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.PullToRefre
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
@@ -143,9 +151,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import java.time.LocalDate
-import java.time.LocalTime
-import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
     private val booksListState = LazyListState()
@@ -369,7 +374,7 @@ object ReadingScreen : Screen {
         val density = LocalDensity.current
         val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
 
-        val today = remember { LocalDate.now().toString() }
+        val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()).toString() }
 
         val slideModifier: (Int) -> Modifier = { bookId ->
             if (bookId == slidingBookId) {
@@ -1406,7 +1411,7 @@ private fun PlanTodayNudge(
 }
 
 private fun greetingForNow(): String {
-    val hour = LocalTime.now().hour
+    val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
     return when (hour) {
         in 5..11 -> "Good morning."
         in 12..17 -> "Good afternoon."
@@ -1624,13 +1629,19 @@ private fun ReadingScreenPreview() {
 }
 
 private fun previewReadingActivity(): List<ReadingDayActivity> {
-    val today = LocalDate.now()
-    val firstDay = today.minusDays(20)
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val firstDay = today.minus(
+        20,
+        DateTimeUnit.DAY,
+    )
     val litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20)
 
     return (0..20).map { offset ->
         ReadingDayActivity(
-            date = firstDay.plusDays(offset.toLong()),
+            date = firstDay.plus(
+                offset,
+                DateTimeUnit.DAY,
+            ),
             didRead = offset in litOffsets,
         )
     }
@@ -1656,22 +1667,34 @@ private fun ReadingScreenWithStreakStripPreview() {
 @StandardPreview
 @Composable
 private fun ReadingScreenWithDeadlineAndNudgePreview() {
-    val today = LocalDate.now()
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     val featured = previewBooks.first()
     val behindBook = previewBooks[2]
 
     val deadlines = mapOf(
         featured.id to BookDeadline(
             bookId = featured.id,
-            deadlineDate = today.plusDays(5),
-            setAt = today.minusDays(10),
+            deadlineDate = today.plus(
+                5,
+                DateTimeUnit.DAY,
+            ),
+            setAt = today.minus(
+                10,
+                DateTimeUnit.DAY,
+            ),
             initialPerDay = 30f,
             unit = DeadlineUnit.PAGES,
         ),
         behindBook.id to BookDeadline(
             bookId = behindBook.id,
-            deadlineDate = today.plusDays(3),
-            setAt = today.minusDays(20),
+            deadlineDate = today.plus(
+                3,
+                DateTimeUnit.DAY,
+            ),
+            setAt = today.minus(
+                20,
+                DateTimeUnit.DAY,
+            ),
             initialPerDay = 15f,
             unit = DeadlineUnit.PAGES,
         ),
@@ -1694,14 +1717,20 @@ private fun ReadingScreenWithDeadlineAndNudgePreview() {
 @StandardPreview
 @Composable
 private fun ReadingScreenExpiredDeadlinePreview() {
-    val today = LocalDate.now()
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     val featured = previewBooks.first()
 
     val deadlines = mapOf(
         featured.id to BookDeadline(
             bookId = featured.id,
-            deadlineDate = today.minusDays(2),
-            setAt = today.minusDays(30),
+            deadlineDate = today.minus(
+                2,
+                DateTimeUnit.DAY,
+            ),
+            setAt = today.minus(
+                30,
+                DateTimeUnit.DAY,
+            ),
             initialPerDay = 20f,
             unit = DeadlineUnit.PAGES,
         ),

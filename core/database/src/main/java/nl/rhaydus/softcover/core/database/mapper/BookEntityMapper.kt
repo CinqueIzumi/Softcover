@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.database.mapper
 
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromJson
 import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
@@ -24,8 +25,6 @@ import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import java.time.LocalDate
-import java.time.format.DateTimeParseException
 
 private fun String?.toLocalDateOrNull(): LocalDate? {
     val raw = this?.trim().orEmpty()
@@ -34,7 +33,7 @@ private fun String?.toLocalDateOrNull(): LocalDate? {
 
     return try {
         LocalDate.parse(raw)
-    } catch (_: DateTimeParseException) {
+    } catch (_: IllegalArgumentException) {
         null
     }
 }

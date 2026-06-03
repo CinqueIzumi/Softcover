@@ -5,8 +5,9 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.cache.normalized.FetchPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragment
@@ -345,9 +346,9 @@ internal class BooksRemoteDataSourceImpl(
         val userBook = book.userBook
             ?: throw Exception("User did not have a user book")
 
-        val currentDate = LocalDate
-            .now()
-            .format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val currentDate = Clock.System
+            .todayIn(TimeZone.currentSystemDefault())
+            .toString()
 
         val input = UserBookUpdateInput(
             edition_id = Optional.Present(book.currentEdition?.id),
@@ -524,7 +525,7 @@ internal class BooksRemoteDataSourceImpl(
         book: Book,
         editionId: Int?,
     ): Book {
-        val currentDate = LocalDate.now().toString()
+        val currentDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
         val dataObject = UserBookCreateInput(
             book_id = book.id,

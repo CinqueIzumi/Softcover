@@ -4,9 +4,14 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class BookTest {
     // ----- Fixtures -----
@@ -510,17 +515,17 @@ class BookTest {
         @Test
         fun `effectiveReleaseDate prefers currentEdition release date when present`() {
             // ----- Arrange -----
-            val editionDate = LocalDate.of(
+            val editionDate = LocalDate(
                 2025,
                 1,
                 1,
             )
-            val defaultDate = LocalDate.of(
+            val defaultDate = LocalDate(
                 2020,
                 6,
                 1,
             )
-            val bookDate = LocalDate.of(
+            val bookDate = LocalDate(
                 2015,
                 3,
                 15,
@@ -551,12 +556,12 @@ class BookTest {
         @Test
         fun `effectiveReleaseDate falls back to defaultEdition release date when currentEdition has none`() {
             // ----- Arrange -----
-            val defaultDate = LocalDate.of(
+            val defaultDate = LocalDate(
                 2020,
                 6,
                 1,
             )
-            val bookDate = LocalDate.of(
+            val bookDate = LocalDate(
                 2015,
                 3,
                 15,
@@ -587,7 +592,7 @@ class BookTest {
         @Test
         fun `effectiveReleaseDate falls back to book releaseDate when neither edition supplies one`() {
             // ----- Arrange -----
-            val bookDate = LocalDate.of(
+            val bookDate = LocalDate(
                 2015,
                 3,
                 15,
@@ -636,7 +641,10 @@ class BookTest {
         @Test
         fun `isUnreleased is true for a future effectiveReleaseDate`() {
             // ----- Arrange -----
-            val futureDate = LocalDate.now().plusDays(7)
+            val futureDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).plus(
+                7,
+                DateTimeUnit.DAY,
+            )
 
             val edition = buildEdition(
                 id = 10,
@@ -654,7 +662,7 @@ class BookTest {
         @Test
         fun `isUnreleased is false for today's effectiveReleaseDate`() {
             // ----- Arrange -----
-            val today = LocalDate.now()
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
             val edition = buildEdition(
                 id = 10,
@@ -672,7 +680,7 @@ class BookTest {
         @Test
         fun `isUnreleased is false for a past effectiveReleaseDate`() {
             // ----- Arrange -----
-            val pastDate = LocalDate.of(
+            val pastDate = LocalDate(
                 2020,
                 1,
                 1,

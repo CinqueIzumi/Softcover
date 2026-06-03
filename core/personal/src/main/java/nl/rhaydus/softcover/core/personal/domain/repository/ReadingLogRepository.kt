@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.personal.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
-import java.time.LocalDate
 
 interface ReadingLogRepository {
     fun observeByBookId(bookId: Int): Flow<List<ReadingLogEntry>>

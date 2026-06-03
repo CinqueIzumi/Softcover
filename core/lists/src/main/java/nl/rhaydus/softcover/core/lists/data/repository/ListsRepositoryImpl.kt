@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.core.lists.data.repository
 
-import java.time.Instant
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.Clock
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
@@ -320,7 +320,7 @@ internal class ListsRepositoryImpl(
                     listBookId = null,
                     startPosition = null,
                     orderedListBookIds = null,
-                    enqueuedAt = Instant.now().toString(),
+                    enqueuedAt = Clock.System.now().toString(),
                 ),
             )
         }
@@ -342,7 +342,7 @@ internal class ListsRepositoryImpl(
                     listBookId = null,
                     startPosition = null,
                     orderedListBookIds = null,
-                    enqueuedAt = Instant.now().toString(),
+                    enqueuedAt = Clock.System.now().toString(),
                 ),
             )
         }
@@ -360,7 +360,7 @@ internal class ListsRepositoryImpl(
                     listBookId = snapshot.listBookId,
                     startPosition = null,
                     orderedListBookIds = null,
-                    enqueuedAt = Instant.now().toString(),
+                    enqueuedAt = Clock.System.now().toString(),
                 ),
             )
         }
@@ -382,7 +382,7 @@ internal class ListsRepositoryImpl(
                     listBookId = null,
                     startPosition = startPosition,
                     orderedListBookIds = orderedListBookIds,
-                    enqueuedAt = Instant.now().toString(),
+                    enqueuedAt = Clock.System.now().toString(),
                 ),
             )
         }

@@ -2,14 +2,14 @@ package nl.rhaydus.softcover.core.personal.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.mapper.toDomain
 import nl.rhaydus.softcover.core.personal.data.mapper.toEntity
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
 import nl.rhaydus.softcover.core.personal.domain.repository.ReadingLogRepository
-import java.time.Instant
-import java.time.LocalDate
 
 internal class ReadingLogRepositoryImpl(
     private val localDataSource: ReadingLogLocalDataSource,
@@ -33,7 +33,7 @@ internal class ReadingLogRepositoryImpl(
             finishedAt = finishedAt?.toString(),
             rating = rating,
             note = note,
-            createdAt = Instant.now().toString(),
+            createdAt = Clock.System.now().toString(),
         ),
     )
 

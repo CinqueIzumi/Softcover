@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.profile.data.model
 
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
-import java.time.LocalDate
 
 @Serializable
 internal data class UserProfileDataEntity(

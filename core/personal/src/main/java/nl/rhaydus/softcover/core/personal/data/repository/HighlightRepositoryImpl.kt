@@ -2,13 +2,13 @@ package nl.rhaydus.softcover.core.personal.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.Clock
 import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.mapper.toDomain
 import nl.rhaydus.softcover.core.personal.data.mapper.toEntity
 import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import nl.rhaydus.softcover.core.personal.domain.repository.HighlightRepository
-import java.time.Instant
 
 internal class HighlightRepositoryImpl(
     private val localDataSource: HighlightLocalDataSource,
@@ -33,7 +33,7 @@ internal class HighlightRepositoryImpl(
                 quote = quote,
                 page = page,
                 note = note,
-                createdAt = Instant.now().toString(),
+                createdAt = Clock.System.now().toString(),
             ),
         )
 

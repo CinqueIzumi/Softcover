@@ -9,14 +9,14 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
-import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
-import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.Instant
-import java.time.LocalDate
+import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
+import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
 
 class ReadingLogRepositoryImplTest {
     private lateinit var localDataSource: ReadingLogLocalDataSource
@@ -49,12 +49,12 @@ class ReadingLogRepositoryImplTest {
     private fun buildEntry(
         id: Long = 1L,
         bookId: Int = 10,
-        startedAt: LocalDate? = LocalDate.of(
+        startedAt: LocalDate? = LocalDate(
             2024,
             1,
             1,
         ),
-        finishedAt: LocalDate? = LocalDate.of(
+        finishedAt: LocalDate? = LocalDate(
             2024,
             1,
             10,
@@ -162,12 +162,12 @@ class ReadingLogRepositoryImplTest {
             // ----- Act -----
             val result = repository.add(
                 bookId = 10,
-                startedAt = LocalDate.of(
+                startedAt = LocalDate(
                     2024,
                     2,
                     1,
                 ),
-                finishedAt = LocalDate.of(
+                finishedAt = LocalDate(
                     2024,
                     2,
                     20,

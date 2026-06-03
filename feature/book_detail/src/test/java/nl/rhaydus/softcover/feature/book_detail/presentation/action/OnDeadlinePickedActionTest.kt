@@ -9,6 +9,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -19,10 +23,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class OnDeadlinePickedActionTest {
     private lateinit var setBookDeadlineUseCase: SetBookDeadlineUseCase
@@ -123,7 +123,7 @@ class OnDeadlinePickedActionTest {
             )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(
+            val date = LocalDate(
                 2026,
                 6,
                 1,
@@ -169,7 +169,7 @@ class OnDeadlinePickedActionTest {
             )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(
+            val date = LocalDate(
                 2026,
                 6,
                 1,
@@ -216,7 +216,7 @@ class OnDeadlinePickedActionTest {
             )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(
+            val date = LocalDate(
                 2026,
                 6,
                 1,
@@ -265,7 +265,7 @@ class OnDeadlinePickedActionTest {
                 showDeadlinePicker = true,
             )
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(
+            val date = LocalDate(
                 2026,
                 7,
                 1,
@@ -301,7 +301,7 @@ class OnDeadlinePickedActionTest {
                 showDeadlinePicker = true,
             )
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(
+            val date = LocalDate(
                 2026,
                 7,
                 1,
@@ -337,7 +337,7 @@ class OnDeadlinePickedActionTest {
             )
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(
+            val date = LocalDate(
                 2026,
                 6,
                 1,
@@ -397,7 +397,7 @@ class OnDeadlinePickedActionTest {
             }
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(
+            val date = LocalDate(
                 2026,
                 6,
                 1,
@@ -448,7 +448,7 @@ class OnDeadlinePickedActionTest {
             }
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
-            val date = LocalDate.of(
+            val date = LocalDate(
                 2026,
                 6,
                 1,

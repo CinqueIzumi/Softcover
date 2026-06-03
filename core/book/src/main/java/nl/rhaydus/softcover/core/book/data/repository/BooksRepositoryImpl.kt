@@ -1,9 +1,6 @@
 package nl.rhaydus.softcover.core.book.data.repository
 
 import java.io.File
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +10,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
@@ -303,10 +306,13 @@ internal class BooksRepositoryImpl(
     }
 
     override suspend fun fetchTrendingBooks(): List<Book> {
-        val today = LocalDate.now()
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
         return booksRemoteDataSource.fetchTrendingBooks(
-            from = today.minusDays(TRENDING_WINDOW_DAYS).toString(),
+            from = today.minus(
+                TRENDING_WINDOW_DAYS.toInt(),
+                DateTimeUnit.DAY,
+            ).toString(),
             to = today.toString(),
             limit = TRENDING_LIMIT,
             offset = TRENDING_OFFSET,
@@ -417,7 +423,7 @@ internal class BooksRepositoryImpl(
     ): Book {
         val userBook = book.userBook ?: throw Exception("User did not have a user book")
 
-        val reviewedAt: String = LocalDate.now().toString()
+        val reviewedAt: String = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withReview(
@@ -584,7 +590,7 @@ internal class BooksRepositoryImpl(
                 progressSeconds = newSeconds,
                 startedAt = userBookRead.startedAt,
                 finishedAt = userBookRead.finishedAt,
-                enqueuedAt = Instant.now().toString(),
+                enqueuedAt = Clock.System.now().toString(),
             ),
         )
     }
@@ -604,7 +610,7 @@ internal class BooksRepositoryImpl(
                 progressSeconds = userBookRead.currentSeconds,
                 startedAt = userBookRead.startedAt,
                 finishedAt = userBookRead.finishedAt,
-                enqueuedAt = Instant.now().toString(),
+                enqueuedAt = Clock.System.now().toString(),
             ),
         )
     }
@@ -629,7 +635,7 @@ internal class BooksRepositoryImpl(
                 startedAt = null,
                 finishedAt = null,
                 rating = rating,
-                enqueuedAt = Instant.now().toString(),
+                enqueuedAt = Clock.System.now().toString(),
             ),
         )
     }
@@ -656,7 +662,7 @@ internal class BooksRepositoryImpl(
                 finishedAt = null,
                 reviewSlateJson = review.toJson(),
                 reviewHasSpoilers = hasSpoilers,
-                enqueuedAt = Instant.now().toString(),
+                enqueuedAt = Clock.System.now().toString(),
             ),
         )
     }
@@ -794,7 +800,7 @@ internal class BooksRepositoryImpl(
         val existingUserBook = userBook ?: return this
         val existingRead = userBookRead
 
-        val today = LocalDate.now().toString()
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
         val updatedUserBook: UserBook = existingUserBook
             .copy(status = BookStatus.Read)
@@ -811,7 +817,7 @@ internal class BooksRepositoryImpl(
 
     private fun UserBook.withAppendedJournal(event: JournalEventType): UserBook {
         val entry = ReadingJournal(
-            updatedAt = LocalDateTime.now().toString(),
+            updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
             event = event.eventName,
         )
 

@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.core.profile.data.model
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 
 class UserProfileDataEntityTest {
     private fun minimalModel(dates: Set<LocalDate> = emptySet()): UserProfileData = UserProfileData(
@@ -38,17 +38,17 @@ class UserProfileDataEntityTest {
         fun `toEntity then toModel preserves a non-empty active dates set`() {
             // ----- Arrange -----
             val dates = setOf(
-                LocalDate.of(
+                LocalDate(
                     2026,
                     4,
                     14,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2026,
                     4,
                     20,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2026,
                     5,
                     4,
@@ -79,17 +79,17 @@ class UserProfileDataEntityTest {
         fun `toEntity serialises dates as ascending ISO strings`() {
             // ----- Arrange -----
             val dates = setOf(
-                LocalDate.of(
+                LocalDate(
                     2026,
                     5,
                     4,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2026,
                     4,
                     14,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2026,
                     4,
                     30,
@@ -180,12 +180,12 @@ class UserProfileDataEntityTest {
 
             // ----- Assert -----
             model.activeReadingDates shouldBe setOf(
-                LocalDate.of(
+                LocalDate(
                     2026,
                     5,
                     4,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2026,
                     4,
                     14,

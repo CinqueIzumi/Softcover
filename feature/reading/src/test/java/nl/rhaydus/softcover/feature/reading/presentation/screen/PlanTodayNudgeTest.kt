@@ -1,11 +1,13 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 
 class PlanTodayNudgeTest {
     private fun buildProgress(
@@ -15,7 +17,14 @@ class PlanTodayNudgeTest {
         isExpired: Boolean = false,
         unit: DeadlineUnit = DeadlineUnit.PAGES,
     ) = DeadlineProgress(
-        deadline = LocalDate.now().plusDays(daysRemaining),
+        deadline = LocalDate(
+            2026,
+            6,
+            1,
+        ).plus(
+            daysRemaining.toInt(),
+            DateTimeUnit.DAY,
+        ),
         daysRemaining = daysRemaining,
         unitsRemaining = unitsRemaining,
         requiredPerDay = requiredPerDay,

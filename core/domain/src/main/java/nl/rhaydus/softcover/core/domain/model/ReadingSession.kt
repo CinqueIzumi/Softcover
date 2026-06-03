@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import java.time.Duration
-import java.time.Instant
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 data class ReadingSession(
     val id: Long,
@@ -20,10 +22,7 @@ data class ReadingSession(
     val isPaused: Boolean get() = isActive && lastPausedAt != null
 
     val duration: Duration?
-        get() = endedAt?.let { Duration.between(
-            startedAt,
-            it,
-        ) }
+        get() = endedAt?.let { it - startedAt }
 
     val pageDelta: Int?
         get() = if (startPage != null && endPage != null) endPage - startPage else null
@@ -36,17 +35,11 @@ data class ReadingSession(
      * [now]. This is the honest reading time and the single source of truth for the live timer
      * (peek bar, Focus Mode, and the lock-screen chronometer all derive from it).
      */
-    fun readingDuration(now: Instant = Instant.now()): Duration {
+    fun readingDuration(now: Instant = Clock.System.now()): Duration {
         val end = endedAt ?: now
-        val openPause = lastPausedAt?.let { Duration.between(
-            it,
-            end,
-        ).seconds } ?: 0L
-        val wall = Duration.between(
-            startedAt,
-            end,
-        ).seconds
+        val openPause = lastPausedAt?.let { (end - it).inWholeSeconds } ?: 0L
+        val wall = (end - startedAt).inWholeSeconds
 
-        return Duration.ofSeconds((wall - pausedSeconds - openPause).coerceAtLeast(0L))
+        return (wall - pausedSeconds - openPause).coerceAtLeast(0L).seconds
     }
 }

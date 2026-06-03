@@ -40,7 +40,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
@@ -55,9 +58,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
-import java.time.Instant
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * Distraction-free full-screen reading surface for the active session. An editorial hero on the page
@@ -110,11 +110,11 @@ private fun FocusModeContent(
     val haptics = rememberHaptics()
     val isPaused = active.session.isPaused
 
-    var now by remember { mutableStateOf(Instant.now()) }
+    var now by remember { mutableStateOf(Clock.System.now()) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            now = Instant.now()
+            now = Clock.System.now()
 
             delay(timeMillis = 1_000)
         }

@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.sort
 
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
-import java.time.LocalDate
 
 /**
  * Decorate-sort-undecorate: extract the comparable key once per item (O(n)), then sort by the
@@ -57,7 +57,11 @@ internal fun List<BookEdition>.applyEditionSort(
         LibrarySortMode.TITLE -> sortedByCachedKey { it.title.orEmpty().lowercase() }
         LibrarySortMode.AUTHOR -> sortedByCachedKey { it.firstAuthor() }
         LibrarySortMode.PAGE_COUNT -> sortedByCachedKey { it.pages ?: 0 }
-        LibrarySortMode.RELEASE_DATE -> sortedByCachedKey { it.releaseDate ?: LocalDate.MAX }
+        LibrarySortMode.RELEASE_DATE -> sortedByCachedKey { it.releaseDate ?: LocalDate(
+            9999,
+            12,
+            31,
+        ) }
         LibrarySortMode.DATE_ADDED -> sortedByCachedKey {
             addedAtByEditionId[it.id] ?: MISSING_ADDED_AT_SENTINEL
         }

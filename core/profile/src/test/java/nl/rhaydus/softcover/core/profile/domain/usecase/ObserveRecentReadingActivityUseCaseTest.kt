@@ -6,23 +6,24 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
-import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.Clock
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
+import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
 class ObserveRecentReadingActivityUseCaseTest {
     // Fixed today: 2026-05-04, so window is 2026-04-14 … 2026-05-04
-    private val fixedClock: Clock = Clock.fixed(
-        Instant.parse("2026-05-04T12:00:00Z"),
-        ZoneOffset.UTC,
-    )
-    private val today: LocalDate = LocalDate.of(
+    private val fixedClock: Clock = object : Clock {
+        override fun now(): Instant = Instant.parse("2026-05-04T12:00:00Z")
+    }
+    private val today: LocalDate = LocalDate(
         2026,
         5,
         4,
@@ -74,7 +75,7 @@ class ObserveRecentReadingActivityUseCaseTest {
             // ----- Act & Assert -----
             useCase().test {
                 val items = awaitItem()
-                items.zipWithNext { a, b -> a.date.isBefore(b.date) shouldBe true }
+                items.zipWithNext { a, b -> (a.date < b.date) shouldBe true }
                 items.last().date shouldBe today
                 awaitComplete()
             }
@@ -88,7 +89,10 @@ class ObserveRecentReadingActivityUseCaseTest {
             // ----- Act & Assert -----
             useCase().test {
                 val items = awaitItem()
-                items.first().date shouldBe today.minusDays(20)
+                items.first().date shouldBe today.minus(
+                    20,
+                    DateTimeUnit.DAY,
+                )
                 awaitComplete()
             }
         }
@@ -122,7 +126,13 @@ class ObserveRecentReadingActivityUseCaseTest {
         @Test
         fun `dates in the cached set within the window have didRead true`() = runTest {
             // ----- Arrange -----
-            val activeDates = setOf(today, today.minusDays(3), today.minusDays(10))
+            val activeDates = setOf(today, today.minus(
+                3,
+                DateTimeUnit.DAY,
+            ), today.minus(
+                10,
+                DateTimeUnit.DAY,
+            ),)
 
             every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(activeDates))
 
@@ -139,14 +149,32 @@ class ObserveRecentReadingActivityUseCaseTest {
         fun `gapped active set — gap day has didRead false and surrounding days have didRead true`() = runTest {
             // ----- Arrange -----
             // Read 17 days (offset 0–16), gap on offset 17, then 3 more (offset 18–20)
-            val windowStart = today.minusDays(20)
-            val activeDates = (0..16).map { windowStart.plusDays(it.toLong()) }.toSet() +
+            val windowStart = today.minus(
+                20,
+                DateTimeUnit.DAY,
+            )
+            val activeDates = (0..16).map { windowStart.plus(
+                it,
+                DateTimeUnit.DAY,
+            ) }.toSet() +
                 setOf(
-                    windowStart.plusDays(18),
-                    windowStart.plusDays(19),
-                    windowStart.plusDays(20),
+                    windowStart.plus(
+                        18,
+                        DateTimeUnit.DAY,
+                    ),
+                    windowStart.plus(
+                        19,
+                        DateTimeUnit.DAY,
+                    ),
+                    windowStart.plus(
+                        20,
+                        DateTimeUnit.DAY,
+                    ),
                 )
-            val gapDate = windowStart.plusDays(17)
+            val gapDate = windowStart.plus(
+                17,
+                DateTimeUnit.DAY,
+            )
 
             every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(activeDates))
 
@@ -156,8 +184,14 @@ class ObserveRecentReadingActivityUseCaseTest {
                 val byDate = items.associateBy { it.date }
 
                 byDate[gapDate]?.didRead shouldBe false
-                byDate[windowStart.plusDays(16)]?.didRead shouldBe true
-                byDate[windowStart.plusDays(18)]?.didRead shouldBe true
+                byDate[windowStart.plus(
+                    16,
+                    DateTimeUnit.DAY,
+                )]?.didRead shouldBe true
+                byDate[windowStart.plus(
+                    18,
+                    DateTimeUnit.DAY,
+                )]?.didRead shouldBe true
                 awaitComplete()
             }
         }
@@ -166,7 +200,10 @@ class ObserveRecentReadingActivityUseCaseTest {
         fun `dates outside the 21-day window present in the set do not produce true entries`() = runTest {
             // ----- Arrange -----
             // A date 22 days ago is outside the window, so it must not light up any strip dot.
-            val outsideDate = today.minusDays(22)
+            val outsideDate = today.minus(
+                22,
+                DateTimeUnit.DAY,
+            )
             val activeDates = setOf(outsideDate)
 
             every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(activeDates))

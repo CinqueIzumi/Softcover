@@ -1,6 +1,9 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import java.time.LocalDate
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 data class Book(
     val id: Int,
@@ -32,7 +35,11 @@ data class Book(
         get() = currentEdition?.releaseDate ?: defaultEdition?.releaseDate ?: releaseDate
 
     val isUnreleased: Boolean
-        get() = effectiveReleaseDate?.isAfter(LocalDate.now()) == true
+        get() {
+            val release = effectiveReleaseDate ?: return false
+
+            return release > Clock.System.todayIn(TimeZone.currentSystemDefault())
+        }
 
     val currentEdition: BookEdition?
         get() {

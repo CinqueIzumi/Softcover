@@ -5,23 +5,24 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.Clock
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
 
 class RefreshUserProfileDataUseCaseTest {
-    private val fixedClock: Clock = Clock.fixed(
-        Instant.parse("2026-05-04T12:00:00Z"),
-        ZoneOffset.UTC,
-    )
+    private val fixedClock: Clock = object : Clock {
+        override fun now(): Instant = Instant.parse("2026-05-04T12:00:00Z")
+    }
 
     private lateinit var profileRepository: ProfileRepository
     private lateinit var getUserIdUseCase: GetUserIdUseCase
@@ -163,7 +164,7 @@ class RefreshUserProfileDataUseCaseTest {
         fun `returns 1 when only today has an active reading date`() = runTest {
             // ----- Act & Assert -----
             streakFor(
-                activeReadingDates = setOf(LocalDate.of(
+                activeReadingDates = setOf(LocalDate(
                     2026,
                     5,
                     4,
@@ -176,17 +177,17 @@ class RefreshUserProfileDataUseCaseTest {
             // ----- Act & Assert -----
             streakFor(
                 activeReadingDates = setOf(
-                    LocalDate.of(
+                    LocalDate(
                         2026,
                         5,
                         4,
                     ),
-                    LocalDate.of(
+                    LocalDate(
                         2026,
                         5,
                         3,
                     ),
-                    LocalDate.of(
+                    LocalDate(
                         2026,
                         5,
                         2,
@@ -200,12 +201,12 @@ class RefreshUserProfileDataUseCaseTest {
             // ----- Act & Assert -----
             streakFor(
                 activeReadingDates = setOf(
-                    LocalDate.of(
+                    LocalDate(
                         2026,
                         5,
                         3,
                     ),
-                    LocalDate.of(
+                    LocalDate(
                         2026,
                         5,
                         2,
@@ -219,12 +220,12 @@ class RefreshUserProfileDataUseCaseTest {
             // ----- Act & Assert -----
             streakFor(
                 activeReadingDates = setOf(
-                    LocalDate.of(
+                    LocalDate(
                         2026,
                         5,
                         4,
                     ),
-                    LocalDate.of(
+                    LocalDate(
                         2026,
                         5,
                         2,
@@ -237,7 +238,7 @@ class RefreshUserProfileDataUseCaseTest {
         fun `returns 0 when only an older date outside the grace window is present`() = runTest {
             // ----- Act & Assert -----
             streakFor(
-                activeReadingDates = setOf(LocalDate.of(
+                activeReadingDates = setOf(LocalDate(
                     2026,
                     5,
                     1,
@@ -256,29 +257,29 @@ class RefreshUserProfileDataUseCaseTest {
         fun `cached activeReadingDates does not contain dates older than 20 days`() = runTest {
             // ----- Arrange -----
             val insideWindow = setOf(
-                LocalDate.of(
+                LocalDate(
                     2026,
                     4,
                     14,
                 ), // exactly the window start — must be kept
-                LocalDate.of(
+                LocalDate(
                     2026,
                     4,
                     20,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2026,
                     5,
                     4,
                 ),
             )
             val outsideWindow = setOf(
-                LocalDate.of(
+                LocalDate(
                     2026,
                     4,
                     13,
                 ), // one day before window start — must be dropped
-                LocalDate.of(
+                LocalDate(
                     2026,
                     3,
                     1,
@@ -295,13 +296,19 @@ class RefreshUserProfileDataUseCaseTest {
         @Test
         fun `cached activeReadingDates does not contain future dates`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(
+            val today = LocalDate(
                 2026,
                 5,
                 4,
             )
-            val futureDate = today.plusDays(1)
-            val validDate = today.minusDays(1)
+            val futureDate = today.plus(
+                1,
+                DateTimeUnit.DAY,
+            )
+            val validDate = today.minus(
+                1,
+                DateTimeUnit.DAY,
+            )
 
             // ----- Act -----
             val cached = capturedDataFor(
@@ -317,12 +324,15 @@ class RefreshUserProfileDataUseCaseTest {
             // ----- Arrange -----
             // Build 30 consecutive days ending on today (2026-05-04).
             // Only the last 21 days fall within the window, but the streak is 30.
-            val today = LocalDate.of(
+            val today = LocalDate(
                 2026,
                 5,
                 4,
             )
-            val thirtyDays = (0L until 30L).map { today.minusDays(it) }.toSet()
+            val thirtyDays = (0 until 30).map { today.minus(
+                it,
+                DateTimeUnit.DAY,
+            ) }.toSet()
 
             // ----- Act -----
             val cached = capturedDataFor(activeReadingDates = thirtyDays)
@@ -337,12 +347,12 @@ class RefreshUserProfileDataUseCaseTest {
         fun `cached activeReadingDates is empty when all snapshot dates are outside the window`() = runTest {
             // ----- Arrange -----
             val oldDates = setOf(
-                LocalDate.of(
+                LocalDate(
                     2026,
                     1,
                     1,
                 ),
-                LocalDate.of(
+                LocalDate(
                     2025,
                     12,
                     15,

@@ -89,6 +89,15 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlin.math.abs
+import kotlin.math.roundToInt
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import nl.rhaydus.softcover.core.designsystem.R
@@ -199,11 +208,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalL
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import kotlin.math.abs
-import kotlin.math.roundToInt
 
 private const val REVIEW_COLLAPSED_LINES = 8
 
@@ -1793,7 +1797,7 @@ class BookDetailScreen(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
-                        text = "Finish by ${progress.deadline.format(dateStyle.formatter)}",
+                        text = "Finish by ${dateStyle.formatter.format(progress.deadline)}",
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -2543,10 +2547,9 @@ class BookDetailScreen(
         onConfirm: (LocalDate) -> Unit,
     ) {
         val initialMillis = remember(initialDate) {
-            (initialDate ?: LocalDate.now())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
+            (initialDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault()))
+                .atStartOfDayIn(TimeZone.currentSystemDefault())
+                .toEpochMilliseconds()
         }
 
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
@@ -2558,9 +2561,9 @@ class BookDetailScreen(
                     onClick = {
                         val millis = pickerState.selectedDateMillis
                         if (millis != null) {
-                            val picked = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate()
+                            val picked = Instant.fromEpochMilliseconds(millis)
+                                .toLocalDateTime(TimeZone.currentSystemDefault())
+                                .date
 
                             onConfirm(picked)
                         } else {

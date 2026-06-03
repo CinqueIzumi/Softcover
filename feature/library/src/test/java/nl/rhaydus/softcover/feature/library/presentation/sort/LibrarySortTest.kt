@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.feature.library.presentation.sort
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 /**
  * Book sort moved into SQL `ORDER BY` at the DAO layer (see `BooksLocalDataSource` +
@@ -225,17 +225,17 @@ class LibrarySortTest {
             @Test
             fun `sorts editions by release date ascending`() {
                 val editions = listOf(
-                    buildEdition(id = 1).copy(releaseDate = LocalDate.of(
+                    buildEdition(id = 1).copy(releaseDate = LocalDate(
                         2023,
                         5,
                         1,
                     ),),
-                    buildEdition(id = 2).copy(releaseDate = LocalDate.of(
+                    buildEdition(id = 2).copy(releaseDate = LocalDate(
                         2021,
                         1,
                         15,
                     ),),
-                    buildEdition(id = 3).copy(releaseDate = LocalDate.of(
+                    buildEdition(id = 3).copy(releaseDate = LocalDate(
                         2022,
                         9,
                         30,
@@ -251,7 +251,7 @@ class LibrarySortTest {
 
             @Test
             fun `edition with null release date sorts last`() {
-                val withDate = buildEdition(id = 1).copy(releaseDate = LocalDate.of(
+                val withDate = buildEdition(id = 1).copy(releaseDate = LocalDate(
                     2020,
                     1,
                     1,
@@ -269,17 +269,17 @@ class LibrarySortTest {
             @Test
             fun `sorts editions by newest release date first when direction is DESCENDING`() {
                 val editions = listOf(
-                    buildEdition(id = 1).copy(releaseDate = LocalDate.of(
+                    buildEdition(id = 1).copy(releaseDate = LocalDate(
                         2021,
                         1,
                         15,
                     ),),
-                    buildEdition(id = 2).copy(releaseDate = LocalDate.of(
+                    buildEdition(id = 2).copy(releaseDate = LocalDate(
                         2023,
                         5,
                         1,
                     ),),
-                    buildEdition(id = 3).copy(releaseDate = LocalDate.of(
+                    buildEdition(id = 3).copy(releaseDate = LocalDate(
                         2022,
                         9,
                         30,

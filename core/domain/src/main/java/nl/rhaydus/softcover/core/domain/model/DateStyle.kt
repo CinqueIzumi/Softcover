@@ -1,21 +1,41 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format.DateTimeFormat
+import kotlinx.datetime.format.char
 
 enum class DateStyle(
     val label: String,
-    val formatter: DateTimeFormatter,
+    val formatter: DateTimeFormat<LocalDate>,
 ) {
     DAY_MONTH_YEAR(
         label = "DD/MM/YYYY",
-        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+        formatter = LocalDate.Format {
+            dayOfMonth()
+            char('/')
+            monthNumber()
+            char('/')
+            year()
+        },
     ),
     MONTH_DAY_YEAR(
         label = "MM/DD/YYYY",
-        formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy"),
+        formatter = LocalDate.Format {
+            monthNumber()
+            char('/')
+            dayOfMonth()
+            char('/')
+            year()
+        },
     ),
     YEAR_MONTH_DAY(
         label = "YYYY/MM/DD",
-        formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+        formatter = LocalDate.Format {
+            year()
+            char('/')
+            monthNumber()
+            char('/')
+            dayOfMonth()
+        },
     ),
 }

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.personal.domain.model
 
-import java.time.Instant
+import kotlinx.datetime.Instant
 
 data class Highlight(
     val id: Long,

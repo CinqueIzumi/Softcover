@@ -5,11 +5,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class DismissPlanTodayUseCaseTest {
     private lateinit var settingsRepository: SettingsRepository
@@ -26,7 +26,7 @@ class DismissPlanTodayUseCaseTest {
         @Test
         fun `delegates to repository with bookId and ISO date string and returns success`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(
+            val today = LocalDate(
                 2025,
                 5,
                 13,
@@ -63,7 +63,7 @@ class DismissPlanTodayUseCaseTest {
             // ----- Act -----
             val result = useCase(
                 bookId = 1,
-                today = LocalDate.of(
+                today = LocalDate(
                     2025,
                     1,
                     1,

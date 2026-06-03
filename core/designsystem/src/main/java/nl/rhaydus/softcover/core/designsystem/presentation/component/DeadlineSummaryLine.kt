@@ -25,7 +25,7 @@ fun DeadlineSummaryLine(
     modifier: Modifier = Modifier,
 ) {
     val status = progress.status
-    val dateText = progress.deadline.format(dateStyle.formatter)
+    val dateText = dateStyle.formatter.format(progress.deadline)
 
     val paceText = if (status == DeadlineStatus.Expired) {
         status.label

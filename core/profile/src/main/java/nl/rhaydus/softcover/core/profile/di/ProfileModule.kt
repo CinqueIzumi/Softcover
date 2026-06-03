@@ -1,5 +1,8 @@
 package nl.rhaydus.softcover.core.profile.di
 
+import kotlinx.datetime.Clock
+import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.module
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSourceImpl
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
@@ -11,9 +14,6 @@ import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
-import org.koin.android.ext.koin.androidContext
-import org.koin.dsl.module
-import java.time.Clock
 
 val profileModule = module {
     single<ProfileRemoteDataSource> {
@@ -55,5 +55,5 @@ val profileModule = module {
     }
 
     // Hardcover serves action_at as a UTC calendar date, so streak comparisons must use UTC too.
-    single<Clock> { Clock.systemUTC() }
+    single<Clock> { Clock.System }
 }

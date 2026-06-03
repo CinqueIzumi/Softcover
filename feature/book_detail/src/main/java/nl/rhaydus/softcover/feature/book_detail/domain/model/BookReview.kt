@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.model
 
+import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
-import java.time.LocalDateTime
 
 data class BookReview(
     val id: Int,
@@ -17,7 +17,7 @@ data class BookReview(
         val raw = reviewedAt ?: return null
 
         return runCatching {
-            LocalDateTime.parse(raw).format(style.formatter)
+            style.formatter.format(LocalDateTime.parse(raw).date)
         }.getOrNull()
     }
 }

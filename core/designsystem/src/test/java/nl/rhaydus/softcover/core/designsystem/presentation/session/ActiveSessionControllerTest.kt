@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Instant
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
@@ -21,10 +25,6 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.PauseReadingSessionUseC
 import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.Instant
 
 class ActiveSessionControllerTest {
     private val sessionFlow = MutableStateFlow<ReadingSession?>(null)
@@ -71,7 +71,7 @@ class ActiveSessionControllerTest {
     ): ReadingSession = ReadingSession(
         id = id,
         bookId = bookId,
-        startedAt = Instant.EPOCH,
+        startedAt = Instant.fromEpochMilliseconds(0),
         endedAt = null,
         startPage = null,
         endPage = null,

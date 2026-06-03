@@ -5,12 +5,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
-import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 
 class SetBookDeadlineUseCaseTest {
     private lateinit var repository: BookDeadlineRepository
@@ -28,7 +28,7 @@ class SetBookDeadlineUseCaseTest {
         fun `delegates to repository with the provided arguments`() = runTest {
             // ----- Arrange -----
             val bookId = 42
-            val deadlineDate = LocalDate.of(
+            val deadlineDate = LocalDate(
                 2026,
                 7,
                 1,
@@ -61,7 +61,7 @@ class SetBookDeadlineUseCaseTest {
         fun `returns success when repository setDeadline completes normally`() = runTest {
             // ----- Arrange -----
             val bookId = 1
-            val deadlineDate = LocalDate.of(
+            val deadlineDate = LocalDate(
                 2026,
                 6,
                 1,
@@ -94,7 +94,7 @@ class SetBookDeadlineUseCaseTest {
         fun `returns failure when repository setDeadline throws`() = runTest {
             // ----- Arrange -----
             val bookId = 2
-            val deadlineDate = LocalDate.of(
+            val deadlineDate = LocalDate(
                 2026,
                 6,
                 1,
@@ -129,7 +129,7 @@ class SetBookDeadlineUseCaseTest {
         fun `passes SECONDS unit to repository for audiobook deadline`() = runTest {
             // ----- Arrange -----
             val bookId = 5
-            val deadlineDate = LocalDate.of(
+            val deadlineDate = LocalDate(
                 2026,
                 8,
                 1,

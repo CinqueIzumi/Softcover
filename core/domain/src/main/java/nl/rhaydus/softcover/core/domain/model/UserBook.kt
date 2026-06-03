@@ -1,8 +1,7 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 
 data class UserBook(
     val id: Int,
@@ -32,7 +31,7 @@ data class UserBook(
         finishedAt: String? = null,
     ): String? {
         finishedAt?.let {
-            runCatching { LocalDate.parse(it).format(style.formatter) }
+            runCatching { style.formatter.format(LocalDate.parse(it)) }
                 .getOrNull()
                 ?.let { formatted -> return formatted }
         }
@@ -44,16 +43,9 @@ data class UserBook(
     }
 
     fun getFallbackDateString(style: DateStyle): String {
-        val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val outputFormatter = style.formatter
+        val date = LocalDate.parse(dateAdded)
 
-        val date = LocalDate.parse(
-            dateAdded,
-            inputFormatter,
-        )
-        val result = date.format(outputFormatter)
-
-        return result
+        return style.formatter.format(date)
     }
 
     private fun getUpdatedDateForEventType(
@@ -65,8 +57,8 @@ data class UserBook(
             .firstOrNull { it.event == type.eventName }
             ?.updatedAt ?: return null
 
-        return LocalDateTime
-            .parse(mostRecentUpdatedDate)
-            .format(style.formatter)
+        val date = LocalDateTime.parse(mostRecentUpdatedDate).date
+
+        return style.formatter.format(date)
     }
 }
