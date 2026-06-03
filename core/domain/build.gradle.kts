@@ -1,15 +1,19 @@
 plugins {
-    id("softcover.android.library")
+    id("softcover.kmp.library")
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.core.domain"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.core.domain"
+    }
 
-dependencies {
-    api(libs.kotlinx.datetime)
+    sourceSets {
+        commonMain.dependencies {
+            api(libs.kotlinx.datetime)
 
-    implementation(libs.kermit)
-    implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kermit)
+            implementation(libs.kotlinx.serialization.json)
+        }
+    }
 }

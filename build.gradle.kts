@@ -50,6 +50,26 @@ subprojects {
     }
 }
 
+// Gate every KMP module's `check` on iOS compilation. The Android variant compiles common/androidMain
+// for the JVM, where JVM-only APIs resolve fine (kotlin.jvm.* default imports, Dispatchers.IO,
+// java.time) — so an Android-only build silently hides code that will not compile for iOS. Compiling
+// all declared iOS targets here fails such leaks at `check` time (per KMP_MIGRATION.md §7's per-module
+// Definition of Done) instead of at iOS bring-up in P6. Guarded to KMP modules; and to macOS hosts,
+// since Kotlin/Native iOS compilation is unavailable elsewhere (an iOS CI must use a macOS runner).
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        if (System.getProperty("os.name").startsWith("Mac")) {
+            tasks.matching { it.name == "check" }.configureEach {
+                dependsOn(
+                    "compileKotlinIosArm64",
+                    "compileKotlinIosSimulatorArm64",
+                    "compileKotlinIosX64",
+                )
+            }
+        }
+    }
+}
+
 // Enforces the module-tier DAG from MODULE_STRUCTURE_GUIDELINES §2 so the split graph cannot
 // silently regress: a module may depend only on a lower tier, and a leaf feature may never depend on
 // a sibling feature. Replaces the manual `grep` import audits with a build-time gate (wired into

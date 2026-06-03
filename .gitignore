@@ -8,6 +8,8 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
+# Kotlin Gradle plugin build artifacts (compiler sessions, error logs, metadata) — root-level dir
+.kotlin
 /build
 /buildSrc/build
 # Build outputs for every module (build-logic, :core:*, :feature:*, …)

@@ -21,6 +21,10 @@ gradlePlugin {
             id = "softcover.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
         }
+        register("kmpLibrary") {
+            id = "softcover.kmp.library"
+            implementationClass = "KmpLibraryConventionPlugin"
+        }
         register("androidCompose") {
             id = "softcover.android.compose"
             implementationClass = "AndroidComposeConventionPlugin"

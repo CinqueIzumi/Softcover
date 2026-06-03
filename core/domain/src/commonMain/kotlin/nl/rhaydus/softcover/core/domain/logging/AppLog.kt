@@ -8,6 +8,8 @@ import co.touchlab.kermit.Severity
 import co.touchlab.kermit.Tag
 import co.touchlab.kermit.loggerConfigInit
 import co.touchlab.kermit.platformLogWriter
+import nl.rhaydus.softcover.core.domain.logging.AppLog.install
+import kotlin.concurrent.Volatile
 
 /**
  * App-wide logging facade. Backed by Kermit so it logs on every Kotlin target (Logcat on Android,
@@ -62,7 +64,8 @@ object AppLog {
     )
 
     private object PrefixFormatter : MessageStringFormatter {
-        override fun formatSeverity(severity: Severity): String = DefaultFormatter.formatSeverity(severity)
+        override fun formatSeverity(severity: Severity): String =
+            DefaultFormatter.formatSeverity(severity)
 
         override fun formatTag(tag: Tag): String = DefaultFormatter.formatTag(tag)
 

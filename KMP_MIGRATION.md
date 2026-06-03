@@ -8,9 +8,11 @@ It builds on [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) §
 Multiplatform") and [ARCHITECTURE.md](ARCHITECTURE.md). Where this doc and §11 disagree on detail,
 this doc wins (it is the worked-out version); §11 stays the one-paragraph pointer.
 
-> **Status:** Phase 0 (foundation prep) **complete** — see §0. No feature/core *module* has been
-> converted to KMP source sets yet; P1 (`core:domain`) is the next step. Update the per-module
-> checklist (§7) as each module lands.
+> **Status:** Phase 0 (foundation prep) **complete** — see §0. **P1 is underway:** the
+> `softcover.kmp.library` convention plugin is authored and `core:domain` is the first module
+> converted to KMP source sets (`commonMain` + `androidHostTest`), with all declared iOS targets
+> compiling and `check` green. `core:network` / `core:preferences` / `core:identity` are the next
+> P1 modules. Update the per-module checklist (§7) as each module lands.
 
 ---
 
@@ -31,8 +33,8 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 | Logging facade (Kermit `AppLog`) | ✅ done | `core/domain/logging/AppLog.kt`; debug-gated; `-=-` prefix preserved; all 102 call sites migrated; Timber removed from catalog + convention plugin + buildHealth excludes; custom `BlankLineAfterStatementRule` retargeted to `AppLog.e` |
 | `java.time` → `kotlinx-datetime` | ✅ done | 76 files incl. 28 tests; `DateStyle.formatter` is now `DateTimeFormat<LocalDate>`, formatted via `formatter.format(value)`; code-reviewed |
 | Platform seams (§6.3) | ✅ done | `EditionImageStorage`/persist chain now takes `ByteArray` (File confined to the Android impl); `createAppSettingsDataStore`/`createProfileCacheDataStore` factories (on-disk paths preserved); `ApiKeyLocalDataSource` Keystore was already fully behind `AuthTokenProvider` — no change needed |
-| KMP convention plugins (§2.3) | ⏭️ deferred to **P1** | An unapplied convention plugin can't be validated; author `softcover.kmp.library` alongside the first real module conversion |
-| KMP catalog entries (§2.4) | ◑ partial | `kermit 2.0.6` + `kotlinx-datetime 0.6.2` added; the KMP-plugin / Compose-MP / Coil 3 / koin-compose-mp / datastore-mp entries land at P1 with the plugin |
+| KMP convention plugins (§2.3) | ✅ `softcover.kmp.library` done (validated against `core:domain`) | Applies `com.android.kotlin.multiplatform.library` + `org.jetbrains.kotlin.multiplatform`; declares `androidTarget` + `iosArm64`/`iosSimulatorArm64`/`iosX64`; SDK 36 / minSdk 26 / JVM 11; commonMain wires coroutines-core + koin-core (Kermit comes transitively from `core:domain`); test stack split — Kotest/Turbine/coroutines-test in `commonTest`, JUnit5/MockK in `androidHostTest`. `softcover.kmp.compose` still pending (P4). |
+| KMP catalog entries (§2.4) | ◑ partial (advanced) | Added: `org.jetbrains.kotlin.multiplatform` + `com.android.kotlin.multiplatform.library` plugin aliases, `kotlinx-coroutines-core` (KMP variant). Still pending: Compose-MP / Coil 3 / koin-compose-mp / datastore-mp (land at their owning module's phase). |
 
 **Known follow-up:** `UnreleasedBadge` + `StreakStrip` month/day names are now **English-only**
 (kotlinx-datetime has no locale support; was `Locale.getDefault()`). Accepted as a deliberate choice;
@@ -115,7 +117,7 @@ artifact. Decision: adopt **Kermit** (Touchlab) behind a thin app-owned logging 
   sites to the facade **as each module converts** — not all at once. Known call sites in early
   modules: `core:domain` (1 file), `core:book` (3), `core:preferences` (2).
 
-### 2.3 New KMP convention plugins — ⏭️ deferred to P1 (§0)
+### 2.3 New KMP convention plugins — ✅ `softcover.kmp.library` done (§0); `softcover.kmp.compose` pending (P4)
 
 The convention plugins in `build-logic/` hardcode `com.android.library` + `kotlin.android` and inject
 the `-android` variants of coroutines/Koin plus Timber. Add KMP-aware siblings; keep the Android-only
@@ -137,7 +139,7 @@ ones for modules that stay `androidMain` (`core:platform`, and the `androidMain`
 - **Do not** re-declare in module build files what a convention plugin already provides (existing
   rule, unchanged).
 
-### 2.4 Version-catalog prep — ◑ partial (Kermit + kotlinx-datetime added; rest at P1)
+### 2.4 Version-catalog prep — ◑ partial (Kermit + kotlinx-datetime + KMP/AGP-KMP plugins + coroutines-core added; Compose-MP/Coil3/koin-mp/datastore-mp pending)
 
 Add/adjust in `gradle/libs.versions.toml` (do this with the convention-plugin change):
 
@@ -288,6 +290,13 @@ Room 2.7 supports KMP but the setup differs from Android-only:
   advice must be re-checked per source set after the split; (b) `checkModuleGraph` derives tiers from
   paths — it keeps working since paths don't change, but confirm it tolerates the multiplatform plugin.
   The custom `:ktlint-rules` apply to all Kotlin source sets — no change expected.
+- **iOS compilation is now a `check` gate.** The root `build.gradle.kts` wires every KMP module's
+  `check` (via `plugins.withId("org.jetbrains.kotlin.multiplatform")`) to compile all three iOS targets
+  (`iosArm64`/`iosSimulatorArm64`/`iosX64`). This is what stops JVM-only leaks — `kotlin.jvm.*` default
+  imports, `Dispatchers.IO`, `java.time` — from passing on the Android variant (which compiles them fine
+  for the JVM) and silently surviving until iOS bring-up. It runs only on **macOS** (Kotlin/Native iOS
+  compilation is unavailable elsewhere), so an iOS CI must use a macOS runner. `check` runs in release
+  prep (via the `style-check` skill), so a broken iOS compile blocks the version bump.
 - **`internal` visibility** spans all source sets of a module (good — the existing `internal` seams in
   `core:book`/`core:preferences` keep working across `commonMain`/`androidMain`).
 - **`Result<T>` + coroutines + `Flow`** (the whole TOAD data-flow spine) is multiplatform with zero
@@ -343,9 +352,9 @@ they land.
 | P0 | logging facade (Kermit `AppLog`) | ✅ done |
 | P0 | kotlinx-datetime refactor | ✅ done |
 | P0 | platform seams (EditionImageStorage / DataStore factories / Keystore) | ✅ done |
-| P0 | KMP convention plugins | ⏭️ deferred to P1 |
-| P0 | version catalog prep | ◑ partial (Kermit + kotlinx-datetime done; KMP entries at P1) |
-| P1 | `core:domain` | ☐ |
+| P0 | KMP convention plugins | ✅ `softcover.kmp.library` done; `.compose` pending (P4) |
+| P0 | version catalog prep | ◑ partial (Kermit + kotlinx-datetime + KMP/AGP-KMP plugins + coroutines-core done; Compose-MP/Coil3/koin-mp/datastore-mp pending) |
+| P1 | `core:domain` | ✅ done (`commonMain` + `androidHostTest`; all iOS targets compile; `check` green) |
 | P1 | `core:network` | ☐ |
 | P1 | `core:preferences` | ☐ |
 | P1 | `core:identity` | ☐ |
