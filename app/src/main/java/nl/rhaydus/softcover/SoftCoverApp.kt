@@ -6,7 +6,6 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
-import timber.log.Timber
 import nl.rhaydus.softcover.core.connectivity.data.sync.PendingListWriteSyncer
 import nl.rhaydus.softcover.core.connectivity.data.sync.PendingUserBookWriteSyncer
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
@@ -14,7 +13,6 @@ import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
-import nl.rhaydus.softcover.core.platform.logging.PrefixedDebugTree
 import nl.rhaydus.softcover.core.platform.notification.NotificationChannelInitializer
 import nl.rhaydus.softcover.di.appModule
 import nl.rhaydus.softcover.orchestration.di.softcoverModules
@@ -24,10 +22,6 @@ internal class SoftCoverApp : Application() {
         super.onCreate()
 
         AppLog.install(debug = BuildConfig.DEBUG)
-
-        if (BuildConfig.DEBUG) {
-            Timber.plant(PrefixedDebugTree(prefix = "-=-"))
-        }
 
         startKoin {
             androidContext(this@SoftCoverApp)

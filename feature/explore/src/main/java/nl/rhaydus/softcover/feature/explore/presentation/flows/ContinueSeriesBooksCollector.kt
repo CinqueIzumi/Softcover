@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
-import timber.log.Timber
 
 internal class ContinueSeriesBooksCollector : ExploreInitializer {
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -23,7 +23,7 @@ internal class ContinueSeriesBooksCollector : ExploreInitializer {
                 dependencies.getContinueSeriesBooksUseCase()
             }
             .catch { error ->
-                Timber.e(
+                AppLog.e(
                     error,
                     "Failed to fetch continue-series books",
                 )

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import timber.log.Timber
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 enum class BookStatus(
     val code: Int,
@@ -19,7 +19,7 @@ enum class BookStatus(
             // Code 4 is Hardcover's legacy "Paused" status, which Softcover no
             // longer supports. Books stuck on that status stay hidden but are
             // worth logging so we notice if any user still has them.
-            if (code == 4) Timber.w("Encountered unsupported Paused status (code 4)")
+            if (code == 4) AppLog.w("Encountered unsupported Paused status (code 4)")
 
             return None
         }

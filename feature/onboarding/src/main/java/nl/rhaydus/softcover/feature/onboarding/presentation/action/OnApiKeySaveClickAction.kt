@@ -2,11 +2,11 @@ package nl.rhaydus.softcover.feature.onboarding.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
-import timber.log.Timber
 
 internal class OnApiKeySaveClickAction : OnboardingAction {
     private lateinit var scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>
@@ -30,7 +30,7 @@ internal class OnApiKeySaveClickAction : OnboardingAction {
 
         dependencies.launch {
             val resetDateSuccessFully = dependencies.resetUserDataUseCase()
-                .onFailure { Timber.e("Resetting failed $it") }
+                .onFailure { AppLog.e("Resetting failed $it") }
                 .isSuccess
 
             if (resetDateSuccessFully.not()) {
@@ -41,7 +41,7 @@ internal class OnApiKeySaveClickAction : OnboardingAction {
             scope.setState { it.copy(progress = 0.1f) }
 
             val updatedApiKeySuccessfully = dependencies.updateApiKeyUseCase(key = updatedKey)
-                .onFailure { Timber.e("$it") }
+                .onFailure { AppLog.e("$it") }
                 .isSuccess
 
             if (updatedApiKeySuccessfully.not()) {
@@ -53,7 +53,7 @@ internal class OnApiKeySaveClickAction : OnboardingAction {
 
             val initializedUserDataSuccessfully = dependencies.initializeUserIdAndBooksUseCase()
                 .onFailure {
-                    Timber.e("Initialize user id use case $it")
+                    AppLog.e("Initialize user id use case $it")
 
                     // TODO: Snack bar message is no longer shown when modal loader is active...
                     SnackBarManager.showSnackbar(title = "Something went wrong while trying to initialize the user's profile.")

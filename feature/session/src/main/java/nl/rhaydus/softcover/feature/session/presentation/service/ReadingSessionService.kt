@@ -24,15 +24,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import timber.log.Timber
+import java.time.Duration
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.resolveEditionImageSource
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppEntryPoint
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.platform.notification.SoftcoverNotificationChannel
-import java.time.Duration
 
 /**
  * Foreground service that surfaces the active reading session as a persistent, ongoing notification:
@@ -115,7 +115,7 @@ internal class ReadingSessionService : Service() {
                         buildNotification(active = active),
                     )
                 }.onFailure { error ->
-                    Timber.e("$error")
+                    AppLog.e("$error")
                 }
             }
             .launchIn(serviceScope)

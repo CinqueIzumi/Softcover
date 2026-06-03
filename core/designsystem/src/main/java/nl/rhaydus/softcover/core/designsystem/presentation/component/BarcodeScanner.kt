@@ -41,10 +41,10 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import timber.log.Timber
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 /**
  * Full-bleed CameraX barcode-scanning surface backed by the bundled ML Kit model (no Google Play
@@ -124,7 +124,7 @@ fun BarcodeScanner(
                         analysis,
                     )
                 } catch (error: Exception) {
-                    Timber.e(
+                    AppLog.e(
                         error,
                         "Failed to bind camera use cases for barcode scanning",
                     )
@@ -227,7 +227,7 @@ private fun scanFrame(
                 onIsbnDetected(isbn)
             }
         }
-        .addOnFailureListener { Timber.e(
+        .addOnFailureListener { AppLog.e(
             it,
             "ML Kit failed to process a camera frame",
         ) }

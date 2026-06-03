@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
 
 internal class OnRemoveBookClickAction(val book: Book) : BookDetailAction {
     override suspend fun execute(
@@ -19,7 +19,7 @@ internal class OnRemoveBookClickAction(val book: Book) : BookDetailAction {
         val job = dependencies.launch {
             dependencies.removeBookFromLibraryUseCase(book = book)
                 .onFailure { error ->
-                    Timber.e("$error")
+                    AppLog.e("$error")
 
                     scope.setState {
                         it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id)

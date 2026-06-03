@@ -72,7 +72,7 @@ fun tierOf(path: String): String? = when {
 // dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
 // unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
 // staying out of the way of the convention-plugin design: the uniform runtime + test bundle provided
-// by AndroidLibraryConventionPlugin (coroutines, koin, timber, JUnit5/Kotest/MockK/Turbine) is
+// by AndroidLibraryConventionPlugin (coroutines, koin, JUnit5/Kotest/MockK/Turbine) is
 // intentionally declared centrally, not per module, so it is excluded from the "unused" check. The
 // "declare transitive dependencies directly" advice is BOM/convention-managed completeness noise and
 // is treated as informational (ignored), not a gate.
@@ -83,7 +83,6 @@ dependencyAnalysis {
                 severity("fail")
                 exclude(
                     // Uniform runtime + test bundle provided by AndroidLibraryConventionPlugin.
-                    "com.jakewharton.timber:timber",
                     "io.insert-koin:koin-android",
                     "org.jetbrains.kotlinx:kotlinx-coroutines-android",
                     "org.junit.jupiter:junit-jupiter-api",
@@ -112,7 +111,6 @@ dependencyAnalysis {
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui",
                     "androidx.compose.ui:ui-graphics",
-                    "com.jakewharton.timber:timber",
                     // Intentional public exposure: designsystem returns a Coil ImageRequest (§10).
                     "io.coil-kt:coil-compose",
                 )

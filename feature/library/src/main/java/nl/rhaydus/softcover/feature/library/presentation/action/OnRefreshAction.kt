@@ -2,12 +2,12 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import timber.log.Timber
 
 internal class OnRefreshAction : LibraryAction {
     override suspend fun execute(
@@ -21,7 +21,7 @@ internal class OnRefreshAction : LibraryAction {
         scope.setState { it.copy(isLoading = true) }
 
         dependencies.refreshLibraryUseCase(scope = refreshScope).onFailure {
-            Timber.e("$it")
+            AppLog.e("$it")
         }
 
         scope.setState { it.copy(isLoading = false) }

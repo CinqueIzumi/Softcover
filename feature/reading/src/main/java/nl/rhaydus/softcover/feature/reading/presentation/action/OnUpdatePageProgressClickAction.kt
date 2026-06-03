@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import timber.log.Timber
 
 internal data class OnUpdatePageProgressClickAction(val newPage: String) : ReadingAction {
     override suspend fun execute(
@@ -25,7 +25,7 @@ internal data class OnUpdatePageProgressClickAction(val newPage: String) : Readi
                 newPage = newPageValue,
                 newSeconds = null,
             ).onFailure { error ->
-                Timber.e("$error")
+                AppLog.e("$error")
 
                 scope.setState {
                     it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)

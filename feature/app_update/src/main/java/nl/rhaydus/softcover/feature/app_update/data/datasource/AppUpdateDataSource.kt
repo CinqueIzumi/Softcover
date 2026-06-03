@@ -13,8 +13,8 @@ import com.google.android.play.core.ktx.requestAppUpdateInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
-import timber.log.Timber
 
 interface AppUpdateDataSource {
     val updateState: Flow<AppUpdateState>
@@ -68,7 +68,7 @@ internal class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateMa
                 }
             }
         }.onFailure {
-            Timber.e(
+            AppLog.e(
                 it,
                 "Failed to check for app update",
             )
@@ -87,7 +87,7 @@ internal class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateMa
                 AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build(),
             )
         }.onFailure {
-            Timber.e(
+            AppLog.e(
                 it,
                 "Failed to start app update flow",
             )

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -17,7 +18,6 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.PauseReadingSessionUseC
 import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
-import timber.log.Timber
 
 /**
  * App-scoped single source of truth for the active reading session. It exposes the running session
@@ -76,7 +76,7 @@ class ActiveSessionController(
             }.onSuccess {
                 readingSessionLauncher.start()
             }.onFailure { error ->
-                Timber.e("$error")
+                AppLog.e("$error")
             }
         }
     }
@@ -120,7 +120,7 @@ class ActiveSessionController(
                 book = book,
                 newPage = newPage,
             ).onFailure { error ->
-                Timber.e("$error")
+                AppLog.e("$error")
             }
         }
     }

@@ -17,7 +17,6 @@ voyager = "1.1.0-beta02"
 coilVersion = "2.7.0"
 material3ComposeVersion = "1.5.0-alpha13"
 materialComponentsVersion = "1.13.0"
-timberVersion = "5.0.1"
 kermitVersion = "2.0.6"
 koinVersion = "3.5.3"
 roomVersion = "2.7.2"
@@ -73,7 +72,6 @@ voyager-koin = { group = "cafe.adriel.voyager", name = "voyager-koin", version.r
 voyager-tabNavigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
 coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilVersion" }
-timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timberVersion" }
 kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermitVersion" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinVersion" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }

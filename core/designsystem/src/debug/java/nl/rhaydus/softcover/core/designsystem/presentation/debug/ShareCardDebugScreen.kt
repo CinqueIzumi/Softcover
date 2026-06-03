@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
@@ -43,8 +44,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.share.YearRecapShareC
 import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberGalleryWritePermissionRequester
 import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import timber.log.Timber
-import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 object ShareCardDebugScreen : Screen {
     @Composable
@@ -93,7 +93,7 @@ object ShareCardDebugScreen : Screen {
                         is SaveOutcome.Cached -> Unit
                     }
                 } catch (throwable: Throwable) {
-                    Timber.e(
+                    AppLog.e(
                         throwable,
                         "Failed to save share card $filenameHint to gallery",
                     )

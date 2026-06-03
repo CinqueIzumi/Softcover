@@ -2,7 +2,7 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import java.io.File
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import timber.log.Timber
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 class PersistEditionImageUseCase(
     private val booksRepository: BooksRepository,
@@ -16,7 +16,7 @@ class PersistEditionImageUseCase(
             source = source,
         )
     }.onFailure {
-        Timber.e(
+        AppLog.e(
             it,
             "Failed to persist image for edition $editionId",
         )

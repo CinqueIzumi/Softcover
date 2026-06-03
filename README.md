@@ -94,7 +94,7 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 | [Coroutines](https://github.com/Kotlin/kotlinx.coroutines) | 1.10.2 | Asynchronous and reactive flows |
 | [Coil](https://github.com/coil-kt/coil) | 2.7.0 | Image loading |
 | [Reorderable](https://github.com/Calvin-LL/Reorderable) | 2.4.3 | Drag-and-drop list reordering |
-| [Timber](https://github.com/JakeWharton/timber) | 5.0.1 | Logging |
+| [Kermit](https://kermit.touchlab.co/) | 2.0.6 | Multiplatform logging (via the `AppLog` facade) |
 
 #### Testing
 | Technology | Version | Purpose |

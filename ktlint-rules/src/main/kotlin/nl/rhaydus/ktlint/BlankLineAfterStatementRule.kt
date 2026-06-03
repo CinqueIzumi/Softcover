@@ -16,7 +16,7 @@ import com.pinterest.ktlint.rule.engine.core.api.ifAutocorrectAllowed
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
 /**
- * CODE_STYLE_GUIDE §Super calls and error logs: a `super.*()` inheritance call or a `Timber.e(...)`
+ * CODE_STYLE_GUIDE §Super calls and error logs: a `super.*()` inheritance call or an `AppLog.e(...)`
  * error log is its own paragraph — a blank line follows it before the next statement.
  */
 class BlankLineAfterStatementRule :
@@ -37,10 +37,10 @@ class BlankLineAfterStatementRule :
         // statement-level only (a direct child of a block)
         if (node.treeParent?.elementType != BLOCK) return
 
-        if (isSuperCall(node).not() && isTimberErrorLog(node).not()) return
+        if (isSuperCall(node).not() && isAppLogErrorLog(node).not()) return
 
         // only a violation when followed by another statement with no blank line in between;
-        // a super/Timber.e call that is the last statement in its block needs no trailing blank
+        // a super/AppLog.e call that is the last statement in its block needs no trailing blank
         val ws = node.treeNext
         if (ws?.elementType != WHITE_SPACE) return
         if (ws.treeNext == null || ws.treeNext?.elementType == RBRACE) return
@@ -48,7 +48,7 @@ class BlankLineAfterStatementRule :
 
         emit(
             node.startOffset,
-            "A super.*() / Timber.e(...) statement must be followed by a blank line",
+            "A super.*() / AppLog.e(...) statement must be followed by a blank line",
             true,
         )
             .ifAutocorrectAllowed { ensureBlankLineAfter(node) }
@@ -56,9 +56,9 @@ class BlankLineAfterStatementRule :
 
     private fun isSuperCall(node: ASTNode): Boolean = node.firstChildNode?.elementType == SUPER_EXPRESSION
 
-    private fun isTimberErrorLog(node: ASTNode): Boolean {
+    private fun isAppLogErrorLog(node: ASTNode): Boolean {
         val receiver = node.firstChildNode
-        if (receiver?.elementType != REFERENCE_EXPRESSION || receiver.text != "Timber") return false
+        if (receiver?.elementType != REFERENCE_EXPRESSION || receiver.text != "AppLog") return false
         val selector = node.children().lastOrNull { it.elementType == CALL_EXPRESSION } ?: return false
         return selector.children().firstOrNull { it.elementType == REFERENCE_EXPRESSION }?.text == "e"
     }

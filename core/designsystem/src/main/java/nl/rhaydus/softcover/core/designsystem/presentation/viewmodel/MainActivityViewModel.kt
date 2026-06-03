@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.designsystem.presentation.state.SplashState
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -16,7 +17,6 @@ import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
-import timber.log.Timber
 
 class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
@@ -75,19 +75,19 @@ class MainActivityViewModel(
             refreshLibraryUseCase(
                 scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
             ).onFailure {
-                Timber.e("$it")
+                AppLog.e("$it")
             }
         }
 
         backgroundScope.launch {
             refreshLibraryUseCase(scope = RefreshScope.All).onFailure {
-                Timber.e("$it")
+                AppLog.e("$it")
             }
         }
 
         backgroundScope.launch {
             refreshUserProfileDataUseCase().onFailure {
-                Timber.e("$it")
+                AppLog.e("$it")
             }
         }
     }

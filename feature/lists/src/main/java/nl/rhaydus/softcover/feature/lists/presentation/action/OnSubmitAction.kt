@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.lists.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
 import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreatedEvent
@@ -9,7 +10,6 @@ import nl.rhaydus.softcover.feature.lists.presentation.event.ListNameTakenEvent
 import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListDependencies
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVariables
-import timber.log.Timber
 
 internal class OnSubmitAction : CreateListAction {
     override suspend fun execute(
@@ -34,7 +34,7 @@ internal class OnSubmitAction : CreateListAction {
                 ),
             )
         }.onFailure { error ->
-            Timber.e(
+            AppLog.e(
                 error,
                 "Failed to create list $error",
             )

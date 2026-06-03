@@ -5,6 +5,8 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.cache.normalized.FetchPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragment
@@ -39,6 +41,7 @@ import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
@@ -50,9 +53,6 @@ import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
-import timber.log.Timber
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
@@ -165,7 +165,7 @@ internal class BooksRemoteDataSourceImpl(
         val canonicalId = book.canonicalId
 
         if (canonicalId != null && canonicalId != book.id) {
-            Timber.i("Book $id has canonical $canonicalId; refetching canonical.")
+            AppLog.i("Book $id has canonical $canonicalId; refetching canonical.")
             return fetchBookByIdRaw(canonicalId).copy(canonicalId = null)
         }
 
@@ -449,7 +449,7 @@ internal class BooksRemoteDataSourceImpl(
 
         if (canonicalIds.isEmpty()) return books
 
-        Timber.i("Resolving ${canonicalIds.size} canonical merge(s): $canonicalIds")
+        AppLog.i("Resolving ${canonicalIds.size} canonical merge(s): $canonicalIds")
 
         val canonicalBooks = fetchBooksByIds(ids = canonicalIds).associateBy { it.id }
 
@@ -459,7 +459,7 @@ internal class BooksRemoteDataSourceImpl(
             val canonical = canonicalBooks[canonicalId]
 
             if (canonical == null) {
-                Timber.w("Canonical $canonicalId for book ${book.id} not returned; keeping pre-merge metadata.")
+                AppLog.w("Canonical $canonicalId for book ${book.id} not returned; keeping pre-merge metadata.")
                 return@map book
             }
             book.withCanonicalMetadata(canonical = canonical)

@@ -2,11 +2,11 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import timber.log.Timber
 
 /**
  * Persists a drag-and-drop reorder for a contiguous slice of a custom list. [orderedListBookIds]
@@ -38,7 +38,7 @@ internal class OnReorderListBooksAction(
             startPosition = startPosition,
             orderedListBookIds = orderedListBookIds,
         ).onFailure { throwable ->
-            Timber.e(
+            AppLog.e(
                 throwable,
                 "Reorder failed for list $listId",
             )

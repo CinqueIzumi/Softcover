@@ -4,11 +4,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseLists
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import timber.log.Timber
 
 /**
  * Add or remove the current selection to/from a custom list. Membership semantics mirror the
@@ -54,7 +54,7 @@ internal class OnBulkToggleListMembershipAction(
                         listId = listId,
                         bookId = book.id,
                     ).onFailure { throwable ->
-                        Timber.e(
+                        AppLog.e(
                             throwable,
                             "Bulk remove from list $listId failed for book ${book.id}",
                         )
@@ -73,7 +73,7 @@ internal class OnBulkToggleListMembershipAction(
                     val edition = book.currentEdition ?: book.defaultEdition
 
                     if (edition == null) {
-                        Timber.e("Bulk add to list $listId skipped book ${book.id}: no edition available")
+                        AppLog.e("Bulk add to list $listId skipped book ${book.id}: no edition available")
 
                         failureCount++
 
@@ -85,7 +85,7 @@ internal class OnBulkToggleListMembershipAction(
                         bookId = book.id,
                         edition = edition,
                     ).onFailure { throwable ->
-                        Timber.e(
+                        AppLog.e(
                             throwable,
                             "Bulk add to list $listId failed for book ${book.id}",
                         )

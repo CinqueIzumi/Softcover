@@ -11,8 +11,9 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 /**
  * Base convention for every `:core:*` Android library module: AGP + Kotlin, JDK 11, SDK levels,
- * and the cross-cutting runtime/test dependencies every module shares (coroutines, Koin, Timber,
- * JUnit5 + Kotest + MockK + Turbine).
+ * and the cross-cutting runtime/test dependencies every module shares (coroutines, Koin,
+ * JUnit5 + Kotest + MockK + Turbine). Logging (Kermit, via `AppLog`) comes transitively from
+ * `:core:domain`.
  */
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -54,10 +55,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             add(
                 "implementation",
                 libs.library("koin-android"),
-            )
-            add(
-                "implementation",
-                libs.library("timber"),
             )
 
             add(

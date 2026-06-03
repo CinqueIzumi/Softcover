@@ -4,11 +4,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
 
 /**
  * Loads the user's own tags once a book resolves *and* is on a shelf (it has a `userBook`) — tagging
@@ -29,7 +29,7 @@ internal class UserTagsCollector : BookDetailInitializer {
 
                 dependencies.getUserTagsUseCase(bookId = shelvedBookId)
                     .onSuccess { tags -> scope.setState { it.copy(userTags = tags) } }
-                    .onFailure { error -> Timber.e("$error") }
+                    .onFailure { error -> AppLog.e("$error") }
             }
     }
 }

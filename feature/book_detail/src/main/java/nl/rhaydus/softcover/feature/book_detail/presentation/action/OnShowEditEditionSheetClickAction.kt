@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
 
 internal class OnShowEditEditionSheetClickAction : BookDetailAction {
     override suspend fun execute(
@@ -33,7 +33,7 @@ internal class OnShowEditEditionSheetClickAction : BookDetailAction {
                     }
                 }
                 .onFailure { throwable ->
-                    Timber.e("Failed to fetch editions for book $bookId: $throwable")
+                    AppLog.e("Failed to fetch editions for book $bookId: $throwable")
 
                     scope.setState { it.copy(loadingEditions = false) }
                 }

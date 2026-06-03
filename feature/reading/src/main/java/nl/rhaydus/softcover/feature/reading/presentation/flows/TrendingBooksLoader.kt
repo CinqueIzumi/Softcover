@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.reading.presentation.flows
 
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import timber.log.Timber
 
 internal class TrendingBooksLoader : ReadingInitializer {
     override suspend fun onLaunch(
@@ -17,7 +17,7 @@ internal class TrendingBooksLoader : ReadingInitializer {
                 scope.setState { it.copy(trendingBooks = books) }
             }
             .onFailure {
-                Timber.e("$it")
+                AppLog.e("$it")
             }
     }
 }

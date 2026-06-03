@@ -16,7 +16,7 @@ import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
-import timber.log.Timber
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 class PendingUserBookWriteSyncer(
     private val networkAvailability: NetworkAvailabilityProvider,
@@ -62,7 +62,7 @@ class PendingUserBookWriteSyncer(
                     }
                 }
                 .onFailure { error ->
-                    Timber.w(
+                    AppLog.w(
                         error,
                         "Pending user-book write ${entity.localId} failed; halting drain",
                     )
@@ -107,7 +107,7 @@ class PendingUserBookWriteSyncer(
                 val rating = entity.rating
 
                 if (rating == null) {
-                    Timber.w("Pending rating update ${entity.localId} has no rating; discarding")
+                    AppLog.w("Pending rating update ${entity.localId} has no rating; discarding")
 
                     ReplayOutcome.DISCARDED
                 } else {
@@ -124,7 +124,7 @@ class PendingUserBookWriteSyncer(
                 val document = reviewDocumentFromJson(json = entity.reviewSlateJson)
 
                 if (document == null) {
-                    Timber.w("Pending review update ${entity.localId} has no body; discarding")
+                    AppLog.w("Pending review update ${entity.localId} has no body; discarding")
 
                     ReplayOutcome.DISCARDED
                 } else {
@@ -140,7 +140,7 @@ class PendingUserBookWriteSyncer(
             }
 
             else -> {
-                Timber.w("Unknown pending user-book write kind: ${entity.kind}; discarding")
+                AppLog.w("Unknown pending user-book write kind: ${entity.kind}; discarding")
 
                 ReplayOutcome.DISCARDED
             }

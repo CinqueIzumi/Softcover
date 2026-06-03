@@ -13,16 +13,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
-import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
-import timber.log.Timber
 import java.io.File
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
+import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 
 interface ApiKeyLocalDataSource : AuthTokenProvider {
     override val apiKey: Flow<String?>
@@ -90,7 +90,7 @@ internal class ApiKeyLocalDataSourceImpl(
         runCatching {
             writeToDisk(value = legacyKey)
         }.onFailure { error ->
-            Timber.e(
+            AppLog.e(
                 error,
                 "Failed to migrate legacy API key to secure storage",
             )
@@ -145,7 +145,7 @@ internal class ApiKeyLocalDataSourceImpl(
                 )
             }
         }.getOrElse { error ->
-            Timber.e(
+            AppLog.e(
                 error,
                 "Failed to decrypt API key — discarding ciphertext",
             )

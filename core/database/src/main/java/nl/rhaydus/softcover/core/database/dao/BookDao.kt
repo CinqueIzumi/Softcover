@@ -29,11 +29,11 @@ import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
-import timber.log.Timber
 
 @Dao
 interface BookDao {
@@ -354,7 +354,7 @@ interface BookDao {
         val skipped = bookList.books.size - safeBooks.size
 
         if (skipped > 0) {
-            Timber.w(
+            AppLog.w(
                 "cacheBookList: skipped $skipped of ${bookList.books.size} list_books " +
                     "for listId=${bookList.id} due to missing book/edition rows",
             )
@@ -368,7 +368,7 @@ interface BookDao {
     @Transaction
     suspend fun cacheListBook(listBook: ListBook) {
         if (canCacheListBook(listBook = listBook).not()) {
-            Timber.w(
+            AppLog.w(
                 "cacheListBook: skipped insert for listBookId=${listBook.listBookId} " +
                     "(bookId=${listBook.bookId}, editionId=${listBook.editionId}) — missing book/edition rows",
             )

@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.core.platform.notification
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import timber.log.Timber
 import kotlin.coroutines.cancellation.CancellationException
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 /**
  * Base class for scheduled work that produces notifications.
@@ -27,7 +27,7 @@ internal abstract class SoftcoverWorker(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (throwable: Throwable) {
-            Timber.e(
+            AppLog.e(
                 throwable,
                 "SoftcoverWorker ${this::class.simpleName} failed",
             )

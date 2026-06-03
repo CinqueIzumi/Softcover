@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
@@ -48,11 +49,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCardCaptur
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserTag
-import timber.log.Timber
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,7 +173,7 @@ internal fun ShareBookBottomSheet(
                                     bookTitle = book.title,
                                 )
                             }.onFailure {
-                                Timber.e("$it")
+                                AppLog.e("$it")
                             }
 
                             isSharing = false
@@ -200,7 +200,7 @@ internal fun ShareBookBottomSheet(
                         val saved = runCatching {
                             capture.saveToGallery(displayName = book.title)
                         }.onFailure {
-                            Timber.e("$it")
+                            AppLog.e("$it")
                         }.getOrNull()
 
                         val message = if (saved is SaveOutcome.Saved) {

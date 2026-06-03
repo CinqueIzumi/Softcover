@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import java.time.LocalDate
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
-import java.time.LocalDate
 
 internal class OnDeadlinePickedAction(
     private val date: LocalDate,
@@ -38,7 +38,7 @@ internal class OnDeadlinePickedAction(
             total = total,
             unit = unit,
         ).onFailure {
-            Timber.e("$it")
+            AppLog.e("$it")
         }
 
         scope.setState { it.copy(showDeadlinePicker = false) }

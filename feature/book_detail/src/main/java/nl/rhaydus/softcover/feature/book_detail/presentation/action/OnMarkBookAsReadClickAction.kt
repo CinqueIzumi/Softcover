@@ -2,13 +2,13 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
 
 internal class OnMarkBookAsReadClickAction(
     private val book: Book,
@@ -35,7 +35,7 @@ internal class OnMarkBookAsReadClickAction(
                     }
                 }
                 .onFailure { error ->
-                    Timber.e("$error")
+                    AppLog.e("$error")
 
                     scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
                 }

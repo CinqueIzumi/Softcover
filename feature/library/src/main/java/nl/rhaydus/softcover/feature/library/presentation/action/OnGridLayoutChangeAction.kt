@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import timber.log.Timber
 
 internal class OnGridLayoutChangeAction(
     private val newLayout: LibraryGridLayout,
@@ -18,7 +18,7 @@ internal class OnGridLayoutChangeAction(
         scope.setState { it.copy(isLayoutMenuExpanded = false) }
 
         dependencies.setLibraryGridLayoutUseCase(newLayout = newLayout).onFailure {
-            Timber.e("$it")
+            AppLog.e("$it")
         }
     }
 }

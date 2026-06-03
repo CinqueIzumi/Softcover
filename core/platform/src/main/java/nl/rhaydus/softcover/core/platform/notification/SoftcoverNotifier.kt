@@ -10,7 +10,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import timber.log.Timber
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 interface SoftcoverNotifier {
     /** True when the runtime POST_NOTIFICATIONS permission is granted (always true on API < 33). */
@@ -48,7 +48,7 @@ class SoftcoverNotifierImpl(
         content: SoftcoverNotificationContent,
     ) {
         if (hasPostPermission().not()) {
-            Timber.w("Skipping notify(id=$id) — POST_NOTIFICATIONS not granted")
+            AppLog.w("Skipping notify(id=$id) — POST_NOTIFICATIONS not granted")
 
             return
         }

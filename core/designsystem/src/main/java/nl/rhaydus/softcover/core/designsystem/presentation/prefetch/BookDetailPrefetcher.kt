@@ -11,10 +11,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import java.util.Collections
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
-import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import org.koin.compose.koinInject
-import timber.log.Timber
+import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 
 class BookDetailPrefetcher(
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
@@ -31,7 +31,7 @@ class BookDetailPrefetcher(
 
         scope.launch {
             fetchBookByIdUseCase(id = bookId).onFailure { error ->
-                Timber.w("Book-detail prefetch failed for $bookId: $error")
+                AppLog.w("Book-detail prefetch failed for $bookId: $error")
 
                 prefetched.remove(bookId)
             }

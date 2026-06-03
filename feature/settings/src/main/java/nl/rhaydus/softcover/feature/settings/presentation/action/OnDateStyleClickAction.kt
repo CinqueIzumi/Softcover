@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
-import timber.log.Timber
 
 internal class OnDateStyleClickAction(
     val style: DateStyle,
@@ -16,7 +16,7 @@ internal class OnDateStyleClickAction(
         scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent, SettingsLocalVariables>,
     ) {
         dependencies.setDateStyleUseCase(newStyle = style).onFailure {
-            Timber.e("$it")
+            AppLog.e("$it")
         }
 
         scope.setState {
