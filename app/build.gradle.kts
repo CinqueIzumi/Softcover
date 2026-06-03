@@ -6,13 +6,13 @@ plugins {
 android {
     namespace = "nl.rhaydus.softcover"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 29
         versionName = "2.4.0"
 

@@ -16,21 +16,22 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.compose.koinInject
+import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import java.io.File
 
 class ShareCardCapture internal constructor(
     internal val graphicsLayer: GraphicsLayer,
     private val context: Context,
+    private val appDispatchers: AppDispatchers,
 ) {
     // TODO: capture density follows the host device; revisit for a fixed-pixel export when share intents land.
-    // TODO: inject AppDispatchers when this class moves out of scaffolding; the literal Dispatchers.IO is a temporary expedient.
     suspend fun saveToGallery(displayName: String): SaveOutcome {
         val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
         val filename = buildFilename(displayName = displayName)
 
-        return withContext(Dispatchers.IO) {
+        return withContext(appDispatchers.io) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 saveViaScopedStorage(
                     bitmap,
@@ -49,7 +50,7 @@ class ShareCardCapture internal constructor(
         val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
         val filename = buildFilename(displayName = displayName)
 
-        return withContext(Dispatchers.IO) {
+        return withContext(appDispatchers.io) {
             val shareDir = File(
                 context.cacheDir,
                 SHARE_CACHE_FOLDER,
@@ -211,11 +212,15 @@ class ShareCardCapture internal constructor(
 fun rememberShareCardCapture(): ShareCardCapture {
     val graphicsLayer = rememberGraphicsLayer()
     val context = LocalContext.current
+    val appDispatchers = koinInject<AppDispatchers>()
 
-    return remember(graphicsLayer, context) { ShareCardCapture(
-        graphicsLayer,
-        context,
-    ) }
+    return remember(graphicsLayer, context, appDispatchers) {
+        ShareCardCapture(
+            graphicsLayer,
+            context,
+            appDispatchers,
+        )
+    }
 }
 
 internal fun ContentDrawScope.recordAndDraw(graphicsLayer: GraphicsLayer) {
