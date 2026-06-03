@@ -12,6 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,9 +31,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.softcover.core.designsystem.R
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
+import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
-import nl.rhaydus.softcover.core.presentation.component.rememberEditionImageRequest
 
 private const val MIN_SCALE = 1f
 private const val MAX_SCALE = 5f
@@ -53,19 +54,28 @@ class FullScreenCoverScreen(
             fallbackCoverUrl = fallbackCoverUrl,
         )
 
-        var scale by remember { mutableStateOf(MIN_SCALE) }
+        var scale by remember { mutableFloatStateOf(MIN_SCALE) }
         var offset by remember { mutableStateOf(Offset.Zero) }
         var containerSize by remember { mutableStateOf(IntSize.Zero) }
 
-        fun clampOffset(target: Offset, currentScale: Float): Offset {
+        fun clampOffset(
+            target: Offset,
+            currentScale: Float,
+        ): Offset {
             if (currentScale <= MIN_SCALE) return Offset.Zero
 
             val maxX = (containerSize.width * (currentScale - 1f)) / 2f
             val maxY = (containerSize.height * (currentScale - 1f)) / 2f
 
             return Offset(
-                x = target.x.coerceIn(-maxX, maxX),
-                y = target.y.coerceIn(-maxY, maxY),
+                x = target.x.coerceIn(
+                    -maxX,
+                    maxX,
+                ),
+                y = target.y.coerceIn(
+                    -maxY,
+                    maxY,
+                ),
             )
         }
 
@@ -102,7 +112,10 @@ class FullScreenCoverScreen(
                     }
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, zoom, _ ->
-                            val newScale = (scale * zoom).coerceIn(MIN_SCALE, MAX_SCALE)
+                            val newScale = (scale * zoom).coerceIn(
+                                MIN_SCALE,
+                                MAX_SCALE,
+                            )
                             scale = newScale
                             offset = clampOffset(
                                 target = offset + pan,

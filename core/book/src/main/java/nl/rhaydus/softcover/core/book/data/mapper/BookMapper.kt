@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.book.data.mapper
 
-import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromSlate
+import kotlin.math.roundToInt
+import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromSlate
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -30,9 +32,6 @@ import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read.Companion.u
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
-import java.time.LocalDate
-import java.time.format.DateTimeParseException
-import kotlin.math.roundToInt
 
 private fun String?.toLocalDateOrNull(): LocalDate? {
     val raw = this?.trim().orEmpty()
@@ -41,13 +40,13 @@ private fun String?.toLocalDateOrNull(): LocalDate? {
 
     return try {
         LocalDate.parse(raw)
-    } catch (_: DateTimeParseException) {
+    } catch (_: IllegalArgumentException) {
         null
     }
 }
 
 // region DTO -> UI mappers
-fun EditionFragment.toBookEdition(
+internal fun EditionFragment.toBookEdition(
     authors: List<Author> = emptyList(),
 ): BookEdition = BookEdition(
     id = id,
@@ -69,16 +68,19 @@ fun EditionFragment.toBookEdition(
     owned = false,
 )
 
-fun EditionDetailFragment.toBookEdition(): BookEdition {
+internal fun EditionDetailFragment.toBookEdition(): BookEdition {
     val authors = contributions.mapNotNull { contribution ->
         val author = contribution.author ?: return@mapNotNull null
 
-        Author(name = author.name, id = author.id)
+        Author(
+            name = author.name,
+            id = author.id,
+        )
     }
     return (this as EditionFragment).toBookEdition(authors = authors)
 }
 
-fun ReadingJournalFragment.toReadingJournal(): ReadingJournal = ReadingJournal(
+internal fun ReadingJournalFragment.toReadingJournal(): ReadingJournal = ReadingJournal(
     updatedAt = updated_at,
     event = event,
 )
@@ -113,7 +115,7 @@ private fun UserBookFragment.toUserBook(): UserBook {
         reviewedAt = reviewed_at,
         updatedAt = updated_at,
         createdAt = created_at,
-        journals = journals
+        journals = journals,
     )
 }
 
@@ -129,7 +131,10 @@ private fun UserBookReadFragment.toUserBookRead(): UserBookRead = UserBookRead(
 private fun BookListFragment.authors(): List<Author> = contributions.mapNotNull { contribution ->
     val author = contribution.author ?: return@mapNotNull null
 
-    Author(name = author.name, id = author.id)
+    Author(
+        name = author.name,
+        id = author.id,
+    )
 }
 
 private fun BookListFragment.bookSeries(): BookSeries? =
@@ -138,7 +143,10 @@ private fun BookListFragment.bookSeries(): BookSeries? =
 private fun BookListFragment.positionsInSeries(): List<Double> {
     val first = book_series.firstOrNull()?.bookSeriesFragment() ?: return emptyList()
 
-    return parsePositionDetails(details = first.details, fallback = first.position)
+    return parsePositionDetails(
+        details = first.details,
+        fallback = first.position,
+    )
 }
 
 private fun parsePositionDetails(
@@ -192,7 +200,7 @@ private fun BookListFragment.tags(): List<Tag> =
         )
     }
 
-fun UserBookFragment.toBook(): Book? {
+internal fun UserBookFragment.toBook(): Book? {
     val listFragment = book.bookListFragment() ?: return null
 
     val bookAuthors = listFragment.authors()

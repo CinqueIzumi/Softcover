@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
  * the effect) rather than icons, matching the editor's editorial voice and avoiding icon assets.
  */
 @Composable
-fun ReviewFormattingToolbar(
+internal fun ReviewFormattingToolbar(
     isBold: Boolean,
     isItalic: Boolean,
     isSpoiler: Boolean,

@@ -9,15 +9,15 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
-data class ReadingScreenDependencies(
+internal data class ReadingScreenDependencies(
     val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
     val updateBookProgressUseCase: UpdateBookProgressUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,

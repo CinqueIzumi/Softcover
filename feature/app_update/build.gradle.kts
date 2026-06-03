@@ -7,7 +7,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:domain"))
+    api(project(":core:domain"))
 
     implementation(libs.play.app.update)
     implementation(libs.play.app.update.ktx)

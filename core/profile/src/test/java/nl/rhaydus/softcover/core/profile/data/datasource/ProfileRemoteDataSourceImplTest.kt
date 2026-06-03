@@ -9,17 +9,16 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.GetUserProfileDataQuery
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.GetUserProfileDataQuery
+import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 
 class ProfileRemoteDataSourceImplTest {
-
     private lateinit var apolloClient: ApolloClient
     private lateinit var dataSource: ProfileRemoteDataSourceImpl
 
@@ -28,7 +27,7 @@ class ProfileRemoteDataSourceImplTest {
         apolloClient = mockk()
         dataSource = ProfileRemoteDataSourceImpl(apolloClient = apolloClient)
 
-        mockkStatic("nl.rhaydus.softcover.core.data.network.helper.ApolloExtensionsKt")
+        mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
     }
 
     @AfterEach
@@ -90,7 +89,6 @@ class ProfileRemoteDataSourceImplTest {
 
     @Nested
     inner class GetUserProfileSnapshot {
-
         @Test
         fun `maps all fields correctly when query returns full data`() = runTest {
             // ----- Arrange -----
@@ -366,8 +364,16 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result.activeReadingDates shouldBe setOf(
-                LocalDate.of(2026, 5, 4),
-                LocalDate.of(2026, 5, 3),
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    3,
+                ),
             )
         }
 
@@ -407,9 +413,21 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result.activeReadingDates shouldBe setOf(
-                LocalDate.of(2026, 5, 4),
-                LocalDate.of(2026, 5, 3),
-                LocalDate.of(2026, 5, 2),
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    3,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    2,
+                ),
             )
         }
 
@@ -444,13 +462,16 @@ class ProfileRemoteDataSourceImplTest {
             val result = dataSource.getUserProfileSnapshot(userId = 42)
 
             // ----- Assert -----
-            result.activeReadingDates shouldBe setOf(LocalDate.of(2026, 5, 4))
+            result.activeReadingDates shouldBe setOf(LocalDate(
+                2026,
+                5,
+                4,
+            ),)
         }
     }
 
     @Nested
     inner class TotalPagesRead {
-
         private fun arrangeQueryData(
             userBooksPages: List<GetUserProfileDataQuery.Data.Me.User_books_page>,
         ): GetUserProfileDataQuery.Data {

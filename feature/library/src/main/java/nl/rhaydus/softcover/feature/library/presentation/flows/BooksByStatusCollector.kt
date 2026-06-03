@@ -7,18 +7,18 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class BooksByStatusCollector : LibraryInitializer {
+internal class BooksByStatusCollector : LibraryInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,
@@ -27,10 +27,22 @@ class BooksByStatusCollector : LibraryInitializer {
         // status; flatMapLatest re-subscribes whenever the user changes that tab's sort settings.
         combine(
             dependencies.getEnabledStatusCodesAsFlowUseCase(),
-            booksForStatus(dependencies = dependencies, status = UserBookStatus.CURRENTLY_READING),
-            booksForStatus(dependencies = dependencies, status = UserBookStatus.WANT_TO_READ),
-            booksForStatus(dependencies = dependencies, status = UserBookStatus.READ),
-            booksForStatus(dependencies = dependencies, status = UserBookStatus.DID_NOT_FINISH),
+            booksForStatus(
+                dependencies = dependencies,
+                status = UserBookStatus.CURRENTLY_READING,
+            ),
+            booksForStatus(
+                dependencies = dependencies,
+                status = UserBookStatus.WANT_TO_READ,
+            ),
+            booksForStatus(
+                dependencies = dependencies,
+                status = UserBookStatus.READ,
+            ),
+            booksForStatus(
+                dependencies = dependencies,
+                status = UserBookStatus.DID_NOT_FINISH,
+            ),
         ) { enabledStatuses: Set<Int>, currentlyReading: List<Book>, wantToRead: List<Book>, read: List<Book>, didNotFinish: List<Book> ->
             val activeCodes = UserBookStatus.activeLibraryCodes(enabledCodes = enabledStatuses)
 

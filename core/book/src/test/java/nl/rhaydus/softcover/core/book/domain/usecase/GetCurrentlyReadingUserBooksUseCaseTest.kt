@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetCurrentlyReadingUserBooksUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: GetCurrentlyReadingUserBooksUseCase
 
@@ -28,7 +27,6 @@ class GetCurrentlyReadingUserBooksUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository with CURRENTLY_READING status`() = runTest {
             // ----- Arrange -----

@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
-import nl.rhaydus.softcover.core.data.database.dao.PendingUserBookWriteDao
-import nl.rhaydus.softcover.core.data.database.model.PendingUserBookWriteEntity
-import nl.rhaydus.softcover.core.data.mapper.toJson
+import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
+import nl.rhaydus.softcover.core.database.mapper.toJson
+import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class PendingUserBookWriteSyncerTest {
-
     private lateinit var networkAvailability: NetworkAvailabilityProvider
     private lateinit var dao: PendingUserBookWriteDao
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
@@ -128,12 +127,17 @@ class PendingUserBookWriteSyncerTest {
 
     @Nested
     inner class DrainPendingUpdates {
-
         @Test
         fun `drains pending entries and returns their userBookIds`() = runTest {
             // ----- Arrange -----
-            val entityA = updateProgressEntity(localId = 1L, userBookId = 10)
-            val entityB = markAsReadEntity(localId = 2L, userBookId = 20)
+            val entityA = updateProgressEntity(
+                localId = 1L,
+                userBookId = 10,
+            )
+            val entityB = markAsReadEntity(
+                localId = 2L,
+                userBookId = 20,
+            )
 
             coEvery {
                 dao.getPending()
@@ -175,8 +179,14 @@ class PendingUserBookWriteSyncerTest {
         @Test
         fun `consumes the recently-synced buffer so a second call returns empty`() = runTest {
             // ----- Arrange -----
-            val entityA = updateProgressEntity(localId = 1L, userBookId = 10)
-            val entityB = markAsReadEntity(localId = 2L, userBookId = 20)
+            val entityA = updateProgressEntity(
+                localId = 1L,
+                userBookId = 10,
+            )
+            val entityB = markAsReadEntity(
+                localId = 2L,
+                userBookId = 20,
+            )
 
             coEvery {
                 dao.getPending()
@@ -220,7 +230,10 @@ class PendingUserBookWriteSyncerTest {
         fun `surfaces ids successfully synced by the flow-triggered drain when the queue is later empty`() = runTest {
             // ----- Arrange -----
             val isOnlineFlow = MutableStateFlow(false)
-            val entity = markAsReadEntity(localId = 5L, userBookId = 42)
+            val entity = markAsReadEntity(
+                localId = 5L,
+                userBookId = 42,
+            )
 
             coEvery {
                 networkAvailability.isOnline
@@ -258,9 +271,24 @@ class PendingUserBookWriteSyncerTest {
         @Test
         fun `does not add failed replays to the returned set and halts further drains`() = runTest {
             // ----- Arrange -----
-            val entityA = updateProgressEntity(localId = 1L, userBookId = 10, userBookReadId = 101, editionId = 201)
-            val entityB = updateProgressEntity(localId = 2L, userBookId = 20, userBookReadId = 102, editionId = 202)
-            val entityC = updateProgressEntity(localId = 3L, userBookId = 30, userBookReadId = 103, editionId = 203)
+            val entityA = updateProgressEntity(
+                localId = 1L,
+                userBookId = 10,
+                userBookReadId = 101,
+                editionId = 201,
+            )
+            val entityB = updateProgressEntity(
+                localId = 2L,
+                userBookId = 20,
+                userBookReadId = 102,
+                editionId = 202,
+            )
+            val entityC = updateProgressEntity(
+                localId = 3L,
+                userBookId = 30,
+                userBookReadId = 103,
+                editionId = 203,
+            )
 
             coEvery {
                 dao.getPending()

@@ -6,7 +6,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.TagCategory
@@ -23,12 +26,8 @@ import nl.rhaydus.softcover.fragment.UserBookFragment.Progress_updated_journal.C
 import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Companion.readingJournalFragment as statusStoppedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class BookMapperTest {
-
     @AfterEach
     fun tearDown() {
         unmockkAll()
@@ -36,7 +35,6 @@ class BookMapperTest {
 
     @Nested
     inner class EditionFragmentToBookEdition {
-
         @Test
         fun `maps all scalar fields from EditionFragment to BookEdition`() {
             // ----- Arrange -----
@@ -84,7 +82,10 @@ class BookMapperTest {
         @Test
         fun `maps authors from provided list parameter`() {
             // ----- Arrange -----
-            val author = Author(id = 7, name = "Jane Austen")
+            val author = Author(
+                id = 7,
+                name = "Jane Austen",
+            )
 
             val fragment = mockk<EditionFragment> {
                 every { id } returns 10
@@ -485,7 +486,11 @@ class BookMapperTest {
             val result = fragment.toBookEdition()
 
             // ----- Assert -----
-            result.releaseDate shouldBe LocalDate.of(2026, 5, 5)
+            result.releaseDate shouldBe LocalDate(
+                2026,
+                5,
+                5,
+            )
         }
 
         @Test
@@ -575,7 +580,6 @@ class BookMapperTest {
 
     @Nested
     inner class EditionDetailFragmentToBookEdition {
-
         @Test
         fun `extracts authors from contributions and maps them`() {
             // ----- Arrange -----
@@ -773,7 +777,6 @@ class BookMapperTest {
 
     @Nested
     inner class UserBookFragmentToBook {
-
         @Test
         fun `returns null when bookListFragment companion extension returns null`() {
             // ----- Arrange -----
@@ -1615,7 +1618,10 @@ class BookMapperTest {
             }
         }
 
-        private fun stubReadingJournalFragment(event: String, updatedAt: String = "2024-01-01"): ReadingJournalFragment = mockk {
+        private fun stubReadingJournalFragment(
+            event: String,
+            updatedAt: String = "2024-01-01",
+        ): ReadingJournalFragment = mockk {
             every { this@mockk.event } returns event
             every { this@mockk.updated_at } returns updatedAt
         }
@@ -2038,7 +2044,6 @@ class BookMapperTest {
 
     @Nested
     inner class BookDetailFragmentToBook {
-
         @Test
         fun `maps to Book with no editions when default_cover_edition is null`() {
             // ----- Arrange -----
@@ -2545,7 +2550,6 @@ class BookMapperTest {
 
     @Nested
     inner class BookEditionIsAudiobook {
-
         @Test
         fun `returns true when audioSeconds is positive`() {
             // ----- Arrange -----
@@ -2624,7 +2628,6 @@ class BookMapperTest {
 
     @Nested
     inner class PositionDetailsParsing {
-
         private fun buildBookDetailFragment(
             bookSeriesEntry: BookDetailFragment.Book_series?,
         ): BookDetailFragment {
@@ -2693,7 +2696,10 @@ class BookMapperTest {
         @Test
         fun `details "1" yields single-element list`() {
             // ----- Arrange -----
-            val entry = bookSeriesEntry(details = "1", position = null)
+            val entry = bookSeriesEntry(
+                details = "1",
+                position = null,
+            )
             val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
 
             // ----- Act -----
@@ -2706,7 +2712,10 @@ class BookMapperTest {
         @Test
         fun `details "1-3" expands to 1, 2, 3`() {
             // ----- Arrange -----
-            val entry = bookSeriesEntry(details = "1-3", position = null)
+            val entry = bookSeriesEntry(
+                details = "1-3",
+                position = null,
+            )
             val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
 
             // ----- Act -----
@@ -2719,7 +2728,10 @@ class BookMapperTest {
         @Test
         fun `details 1point5 yields single-element list`() {
             // ----- Arrange -----
-            val entry = bookSeriesEntry(details = "1.5", position = null)
+            val entry = bookSeriesEntry(
+                details = "1.5",
+                position = null,
+            )
             val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
 
             // ----- Act -----
@@ -2732,7 +2744,10 @@ class BookMapperTest {
         @Test
         fun `details "1point5-2point5" yields endpoints without fan-out`() {
             // ----- Arrange -----
-            val entry = bookSeriesEntry(details = "1.5-2.5", position = null)
+            val entry = bookSeriesEntry(
+                details = "1.5-2.5",
+                position = null,
+            )
             val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
 
             // ----- Act -----
@@ -2745,7 +2760,10 @@ class BookMapperTest {
         @Test
         fun `unparseable details falls back to position`() {
             // ----- Arrange -----
-            val entry = bookSeriesEntry(details = "abc", position = 3.0)
+            val entry = bookSeriesEntry(
+                details = "abc",
+                position = 3.0,
+            )
             val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
 
             // ----- Act -----
@@ -2758,7 +2776,10 @@ class BookMapperTest {
         @Test
         fun `null details falls back to position`() {
             // ----- Arrange -----
-            val entry = bookSeriesEntry(details = null, position = 2.0)
+            val entry = bookSeriesEntry(
+                details = null,
+                position = 2.0,
+            )
             val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
 
             // ----- Act -----
@@ -2783,7 +2804,10 @@ class BookMapperTest {
         @Test
         fun `inverted range "3-1" falls back to position`() {
             // ----- Arrange -----
-            val entry = bookSeriesEntry(details = "3-1", position = 1.0)
+            val entry = bookSeriesEntry(
+                details = "3-1",
+                position = 1.0,
+            )
             val fragment = buildBookDetailFragment(bookSeriesEntry = entry)
 
             // ----- Act -----

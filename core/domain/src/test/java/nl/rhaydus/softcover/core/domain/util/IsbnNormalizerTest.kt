@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class IsbnNormalizerTest {
-
     @Nested
     inner class Normalize {
-
         @Test
         fun `hyphenated ISBN-13 strips hyphens and returns canonical digits`() {
             // ----- Arrange -----

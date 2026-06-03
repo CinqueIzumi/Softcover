@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
 
-class OnToggleListMembershipAction(
+internal class OnToggleListMembershipAction(
     private val listId: Int,
     private val isMember: Boolean,
 ) : BookDetailAction {
@@ -37,7 +37,10 @@ class OnToggleListMembershipAction(
         }
 
         result.onFailure { error ->
-            Timber.e(error, "Failed to toggle list membership for list $listId")
+            AppLog.e(
+                error,
+                "Failed to toggle list membership for list $listId",
+            )
         }
 
         scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated - listId) }

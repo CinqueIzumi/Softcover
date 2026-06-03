@@ -14,7 +14,10 @@ class UpdateBookRatingUseCase(
 
         if (userBook.rating == rating) return@runCatching
 
-        val updatedBook: Book = booksRepository.updateBookRating(book = book, rating = rating)
+        val updatedBook: Book = booksRepository.updateBookRating(
+            book = book,
+            rating = rating,
+        )
 
         booksRepository.cacheBook(book = updatedBook)
     }

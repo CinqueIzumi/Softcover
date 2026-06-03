@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnClearDeadlineActionTest {
-
     private lateinit var clearBookDeadlineUseCase: ClearBookDeadlineUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -67,7 +66,6 @@ class OnClearDeadlineActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `calls clearBookDeadlineUseCase with the book id from state`() = runTest {
             // ----- Arrange -----
@@ -82,7 +80,10 @@ class OnClearDeadlineActionTest {
             val action = OnClearDeadlineAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -98,7 +99,10 @@ class OnClearDeadlineActionTest {
             val action = OnClearDeadlineAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
@@ -110,7 +114,10 @@ class OnClearDeadlineActionTest {
         fun `state is not mutated when book is present`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 5)
-            stateFlow.value = BookDetailUiState(book = book, loadingBookDetails = false)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                loadingBookDetails = false,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -120,7 +127,10 @@ class OnClearDeadlineActionTest {
             val action = OnClearDeadlineAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.loadingBookDetails shouldBe false

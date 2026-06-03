@@ -15,7 +15,7 @@ interface SearchLocalDataSource {
     suspend fun removeAllSearchQueries()
 }
 
-class SearchLocalDataSourceImpl(
+internal class SearchLocalDataSourceImpl(
     private val dataStore: SearchHistoryDataStore,
 ) : SearchLocalDataSource {
     override val previousSearchQueries = dataStore.store.data.map { it.previousQueries }
@@ -27,10 +27,16 @@ class SearchLocalDataSourceImpl(
             val updatedList = currentData.previousQueries.toMutableList().apply {
                 remove(name)
 
-                add(0, name)
+                add(
+                    0,
+                    name,
+                )
 
                 if (size > maxListSize) {
-                    subList(maxListSize, size).clear()
+                    subList(
+                        maxListSize,
+                        size,
+                    ).clear()
                 }
             }
 

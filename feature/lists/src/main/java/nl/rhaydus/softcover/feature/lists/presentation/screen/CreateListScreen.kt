@@ -34,13 +34,13 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnSubmitAction
@@ -86,7 +86,7 @@ class CreateListScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: CreateListUiState,
         runAction: (CreateListAction) -> Unit,
         onNavigateBack: () -> Unit,

@@ -10,13 +10,19 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryFilterOptionsBuilderTest {
-
-    private val tagFiction = Tag(id = 1, name = "Fiction", category = TagCategory.GENRE)
-    private val tagScifi = Tag(id = 2, name = "Sci-Fi", category = TagCategory.GENRE)
+    private val tagFiction = Tag(
+        id = 1,
+        name = "Fiction",
+        category = TagCategory.GENRE,
+    )
+    private val tagScifi = Tag(
+        id = 2,
+        name = "Sci-Fi",
+        category = TagCategory.GENRE,
+    )
 
     @Nested
     inner class BuildBookFilterOptions {
-
         @Test
         fun `returns empty options when book list is empty`() {
             // ----- Arrange -----
@@ -31,8 +37,14 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `returns distinct tags sorted by name lowercase`() {
             // ----- Arrange -----
-            val book1 = buildBook(id = 1, tags = listOf(tagScifi, tagFiction))
-            val book2 = buildBook(id = 2, tags = listOf(tagFiction))
+            val book1 = buildBook(
+                id = 1,
+                tags = listOf(tagScifi, tagFiction),
+            )
+            val book2 = buildBook(
+                id = 2,
+                tags = listOf(tagFiction),
+            )
 
             // ----- Act -----
             val result = buildBookFilterOptions(books = listOf(book1, book2))
@@ -47,13 +59,22 @@ class LibraryFilterOptionsBuilderTest {
             val book1 = buildBook(
                 id = 1,
                 editions = listOf(
-                    buildEdition(id = 1, format = "paperback"),
-                    buildEdition(id = 2, format = "ebook"),
+                    buildEdition(
+                        id = 1,
+                        format = "paperback",
+                    ),
+                    buildEdition(
+                        id = 2,
+                        format = "ebook",
+                    ),
                 ),
             )
             val book2 = buildBook(
                 id = 2,
-                editions = listOf(buildEdition(id = 3, format = "paperback")),
+                editions = listOf(buildEdition(
+                    id = 3,
+                    format = "paperback",
+                ),),
             )
 
             // ----- Act -----
@@ -69,8 +90,14 @@ class LibraryFilterOptionsBuilderTest {
             val book = buildBook(
                 id = 1,
                 editions = listOf(
-                    buildEdition(id = 1, format = ""),
-                    buildEdition(id = 2, format = "hardcover"),
+                    buildEdition(
+                        id = 1,
+                        format = "",
+                    ),
+                    buildEdition(
+                        id = 2,
+                        format = "hardcover",
+                    ),
                 ),
             )
 
@@ -84,9 +111,18 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `returns distinct positive release years sorted descending`() {
             // ----- Arrange -----
-            val book1 = buildBook(id = 1, releaseYear = 2019)
-            val book2 = buildBook(id = 2, releaseYear = 2021)
-            val book3 = buildBook(id = 3, releaseYear = 2019)
+            val book1 = buildBook(
+                id = 1,
+                releaseYear = 2019,
+            )
+            val book2 = buildBook(
+                id = 2,
+                releaseYear = 2021,
+            )
+            val book3 = buildBook(
+                id = 3,
+                releaseYear = 2019,
+            )
 
             // ----- Act -----
             val result = buildBookFilterOptions(books = listOf(book1, book2, book3))
@@ -98,9 +134,18 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `excludes release years that are zero or negative`() {
             // ----- Arrange -----
-            val book1 = buildBook(id = 1, releaseYear = 2021)
-            val book2 = buildBook(id = 2, releaseYear = -1)
-            val book3 = buildBook(id = 3, releaseYear = 0)
+            val book1 = buildBook(
+                id = 1,
+                releaseYear = 2021,
+            )
+            val book2 = buildBook(
+                id = 2,
+                releaseYear = -1,
+            )
+            val book3 = buildBook(
+                id = 3,
+                releaseYear = 0,
+            )
 
             // ----- Act -----
             val result = buildBookFilterOptions(books = listOf(book1, book2, book3))
@@ -114,7 +159,10 @@ class LibraryFilterOptionsBuilderTest {
             // ----- Arrange -----
             val book = buildBook(
                 id = 1,
-                editions = listOf(buildEdition(id = 1, owned = true)),
+                editions = listOf(buildEdition(
+                    id = 1,
+                    owned = true,
+                ),),
             )
 
             // ----- Act -----
@@ -129,7 +177,10 @@ class LibraryFilterOptionsBuilderTest {
             // ----- Arrange -----
             val book = buildBook(
                 id = 1,
-                editions = listOf(buildEdition(id = 1, owned = false)),
+                editions = listOf(buildEdition(
+                    id = 1,
+                    owned = false,
+                ),),
             )
 
             // ----- Act -----
@@ -142,7 +193,10 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `ratingBuckets only contains buckets at or below max rating`() {
             // ----- Arrange -----
-            val book = buildBook(id = 1, rating = 4.0)
+            val book = buildBook(
+                id = 1,
+                rating = 4.0,
+            )
 
             // ----- Act -----
             val result = buildBookFilterOptions(books = listOf(book))
@@ -154,7 +208,10 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `ratingBuckets is empty when no book has a positive rating`() {
             // ----- Arrange -----
-            val book = buildBook(id = 1, rating = 0.0)
+            val book = buildBook(
+                id = 1,
+                rating = 0.0,
+            )
 
             // ----- Act -----
             val result = buildBookFilterOptions(books = listOf(book))
@@ -166,11 +223,26 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `excludes non-Genre tags from tag facets`() {
             // ----- Arrange -----
-            val tagGenre = Tag(id = 1, name = "Fantasy", category = TagCategory.GENRE)
-            val tagMood = Tag(id = 3, name = "Hopeful", category = TagCategory.MOOD)
-            val tagWarning = Tag(id = 4, name = "Violence", category = TagCategory.CONTENT_WARNING)
+            val tagGenre = Tag(
+                id = 1,
+                name = "Fantasy",
+                category = TagCategory.GENRE,
+            )
+            val tagMood = Tag(
+                id = 3,
+                name = "Hopeful",
+                category = TagCategory.MOOD,
+            )
+            val tagWarning = Tag(
+                id = 4,
+                name = "Violence",
+                category = TagCategory.CONTENT_WARNING,
+            )
 
-            val book = buildBook(id = 1, tags = listOf(tagGenre, tagMood, tagWarning))
+            val book = buildBook(
+                id = 1,
+                tags = listOf(tagGenre, tagMood, tagWarning),
+            )
 
             // ----- Act -----
             val result = buildBookFilterOptions(books = listOf(book))
@@ -182,7 +254,6 @@ class LibraryFilterOptionsBuilderTest {
 
     @Nested
     inner class BuildEditionFilterOptions {
-
         @Test
         fun `returns empty options when edition list is empty`() {
             // ----- Arrange -----
@@ -200,8 +271,14 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `tags sourced from parent books via bookByBookId`() {
             // ----- Arrange -----
-            val edition = buildEdition(id = 1, bookId = 10)
-            val book = buildBook(id = 10, tags = listOf(tagFiction))
+            val edition = buildEdition(
+                id = 1,
+                bookId = 10,
+            )
+            val book = buildBook(
+                id = 10,
+                tags = listOf(tagFiction),
+            )
 
             // ----- Act -----
             val result = buildEditionFilterOptions(
@@ -216,12 +293,30 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `excludes non-Genre tags from tag facets`() {
             // ----- Arrange -----
-            val tagGenre = Tag(id = 1, name = "Fantasy", category = TagCategory.GENRE)
-            val tagMood = Tag(id = 3, name = "Hopeful", category = TagCategory.MOOD)
-            val tagWarning = Tag(id = 4, name = "Violence", category = TagCategory.CONTENT_WARNING)
+            val tagGenre = Tag(
+                id = 1,
+                name = "Fantasy",
+                category = TagCategory.GENRE,
+            )
+            val tagMood = Tag(
+                id = 3,
+                name = "Hopeful",
+                category = TagCategory.MOOD,
+            )
+            val tagWarning = Tag(
+                id = 4,
+                name = "Violence",
+                category = TagCategory.CONTENT_WARNING,
+            )
 
-            val book = buildBook(id = 10, tags = listOf(tagGenre, tagMood, tagWarning))
-            val edition = buildEdition(id = 1, bookId = 10)
+            val book = buildBook(
+                id = 10,
+                tags = listOf(tagGenre, tagMood, tagWarning),
+            )
+            val edition = buildEdition(
+                id = 1,
+                bookId = 10,
+            )
 
             // ----- Act -----
             val result = buildEditionFilterOptions(
@@ -236,8 +331,16 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `formats sourced from editions themselves`() {
             // ----- Arrange -----
-            val edition1 = buildEdition(id = 1, bookId = 10, format = "ebook")
-            val edition2 = buildEdition(id = 2, bookId = 10, format = "audiobook")
+            val edition1 = buildEdition(
+                id = 1,
+                bookId = 10,
+                format = "ebook",
+            )
+            val edition2 = buildEdition(
+                id = 2,
+                bookId = 10,
+                format = "audiobook",
+            )
 
             // ----- Act -----
             val result = buildEditionFilterOptions(
@@ -252,7 +355,10 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `supportsOwnedFilter is true when any edition is owned`() {
             // ----- Arrange -----
-            val edition = buildEdition(id = 1, owned = true)
+            val edition = buildEdition(
+                id = 1,
+                owned = true,
+            )
 
             // ----- Act -----
             val result = buildEditionFilterOptions(
@@ -267,8 +373,14 @@ class LibraryFilterOptionsBuilderTest {
         @Test
         fun `release years sourced from parent books when present`() {
             // ----- Arrange -----
-            val edition = buildEdition(id = 1, bookId = 10)
-            val book = buildBook(id = 10, releaseYear = 2022)
+            val edition = buildEdition(
+                id = 1,
+                bookId = 10,
+            )
+            val book = buildBook(
+                id = 10,
+                releaseYear = 2022,
+            )
 
             // ----- Act -----
             val result = buildEditionFilterOptions(
@@ -284,7 +396,10 @@ class LibraryFilterOptionsBuilderTest {
     private fun buildBook(
         id: Int,
         tags: List<Tag> = emptyList(),
-        editions: List<BookEdition> = listOf(buildEdition(id = id, bookId = id)),
+        editions: List<BookEdition> = listOf(buildEdition(
+            id = id,
+            bookId = id,
+        ),),
         releaseYear: Int = 2020,
         rating: Double = 0.0,
     ): Book = Book(
@@ -296,7 +411,10 @@ class LibraryFilterOptionsBuilderTest {
         description = "",
         releaseYear = releaseYear,
         coverUrl = "",
-        authors = listOf(Author(id = id, name = "Author $id")),
+        authors = listOf(Author(
+            id = id,
+            name = "Author $id",
+        ),),
         usersCount = 0,
         ratingsCount = 0,
         bookSeries = null,

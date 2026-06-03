@@ -6,17 +6,18 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryFilterValueTest {
-
     // region Fixtures
-
-    private val tagFiction = Tag(id = 1, name = "Fiction")
-    private val tagScifi = Tag(id = 2, name = "Sci-Fi")
-
+    private val tagFiction = Tag(
+        id = 1,
+        name = "Fiction",
+    )
+    private val tagScifi = Tag(
+        id = 2,
+        name = "Sci-Fi",
+    )
     // endregion
-
     @Nested
     inner class ToggleTag {
-
         @Test
         fun `adds tag when absent`() {
             // ----- Arrange -----
@@ -56,7 +57,6 @@ class LibraryFilterValueTest {
 
     @Nested
     inner class ToggleFormat {
-
         @Test
         fun `adds format when absent`() {
             // ----- Arrange -----
@@ -84,7 +84,6 @@ class LibraryFilterValueTest {
 
     @Nested
     inner class ToggleReleaseYear {
-
         @Test
         fun `adds year when absent`() {
             // ----- Arrange -----
@@ -112,7 +111,6 @@ class LibraryFilterValueTest {
 
     @Nested
     inner class ToggleOwned {
-
         @Test
         fun `sets owned to true when previously null`() {
             // ----- Arrange -----
@@ -152,7 +150,6 @@ class LibraryFilterValueTest {
 
     @Nested
     inner class ToggleRatingMin {
-
         @Test
         fun `sets ratingMin when previously null`() {
             // ----- Arrange -----
@@ -192,7 +189,6 @@ class LibraryFilterValueTest {
 
     @Nested
     inner class OtherFacetsPreserved {
-
         @Test
         fun `toggling one facet does not change other facets`() {
             // ----- Arrange -----

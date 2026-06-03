@@ -29,7 +29,6 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 class ApiKeyLocalDataSourceImplTest {
-
     @TempDir
     lateinit var tempDir: File
 
@@ -72,7 +71,10 @@ class ApiKeyLocalDataSourceImplTest {
         } returns keyStore
 
         every {
-            keyStore.getKey("softcover_api_key", null)
+            keyStore.getKey(
+                "softcover_api_key",
+                null,
+            )
         } returns secretKey
 
         every {
@@ -132,7 +134,6 @@ class ApiKeyLocalDataSourceImplTest {
 
     @Nested
     inner class Construction {
-
         @Test
         fun `migrates legacy plaintext key to encrypted file when legacy key is present`() = runTest {
             // ----- Arrange -----
@@ -222,7 +223,6 @@ class ApiKeyLocalDataSourceImplTest {
 
     @Nested
     inner class UpdateApiKey {
-
         @Test
         fun `emits the new key on apiKey flow when key is non-blank`() = runTest {
             // ----- Arrange -----
@@ -293,7 +293,10 @@ class ApiKeyLocalDataSourceImplTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
             val dataSource = buildDataSource()
-            val storageFile = File(tempDir, "api_key.enc")
+            val storageFile = File(
+                tempDir,
+                "api_key.enc",
+            )
 
             every {
                 Cipher.getInstance("AES/GCM/NoPadding")
@@ -311,7 +314,10 @@ class ApiKeyLocalDataSourceImplTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
             val dataSource = buildDataSource()
-            val storageFile = File(tempDir, "api_key.enc")
+            val storageFile = File(
+                tempDir,
+                "api_key.enc",
+            )
 
             every {
                 Cipher.getInstance("AES/GCM/NoPadding")
@@ -329,7 +335,6 @@ class ApiKeyLocalDataSourceImplTest {
 
     @Nested
     inner class Clear {
-
         @Test
         fun `emits null on apiKey flow after clear`() = runTest {
             // ----- Arrange -----
@@ -356,7 +361,10 @@ class ApiKeyLocalDataSourceImplTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
             val dataSource = buildDataSource()
-            val storageFile = File(tempDir, "api_key.enc")
+            val storageFile = File(
+                tempDir,
+                "api_key.enc",
+            )
 
             every {
                 Cipher.getInstance("AES/GCM/NoPadding")
@@ -373,7 +381,6 @@ class ApiKeyLocalDataSourceImplTest {
 
     @Nested
     inner class ApiKeyFlow {
-
         @Test
         fun `emits null as initial value when no key has been set`() = runTest {
             // ----- Arrange -----

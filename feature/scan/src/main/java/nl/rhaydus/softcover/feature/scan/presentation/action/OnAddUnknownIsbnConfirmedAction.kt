@@ -1,15 +1,15 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
-import timber.log.Timber
 
-class OnAddUnknownIsbnConfirmedAction : ScanAction {
+internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
     override suspend fun execute(
         dependencies: ScanDependencies,
         scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>,
@@ -22,7 +22,10 @@ class OnAddUnknownIsbnConfirmedAction : ScanAction {
 
         dependencies.addBookByIsbnUseCase(isbn = isbn)
             .onSuccess { result ->
-                scope.setState { it.copy(unknownIsbn = null, isAddingBook = false) }
+                scope.setState { it.copy(
+                    unknownIsbn = null,
+                    isAddingBook = false,
+                ) }
 
                 scope.sendEvent(
                     event = BookResolvedEvent(
@@ -32,7 +35,10 @@ class OnAddUnknownIsbnConfirmedAction : ScanAction {
                 )
             }
             .onFailure { error ->
-                Timber.e(error, "Failed to add scanned ISBN $isbn to Hardcover")
+                AppLog.e(
+                    error,
+                    "Failed to add scanned ISBN $isbn to Hardcover",
+                )
 
                 scope.setState { it.copy(isAddingBook = false) }
 

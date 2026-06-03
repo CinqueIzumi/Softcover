@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserBookStatusTest {
-
     @Nested
     inner class IsAlwaysVisibleInLibrary {
-
         @Test
         fun `CURRENTLY_READING is always visible in library`() {
             // ----- Arrange -----
@@ -60,7 +58,6 @@ class UserBookStatusTest {
 
     @Nested
     inner class TogglableInLibrary {
-
         @Test
         fun `togglableInLibrary excludes CURRENTLY_READING`() {
             // ----- Arrange & Act -----
@@ -109,7 +106,6 @@ class UserBookStatusTest {
 
     @Nested
     inner class ActiveLibraryCodes {
-
         @Test
         fun `always includes CURRENTLY_READING code even when enabledCodes is empty`() {
             // ----- Arrange -----

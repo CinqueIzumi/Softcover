@@ -1,14 +1,14 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import timber.log.Timber
 
-data class OnUpdatePercentageProgressClickAction(
+internal data class OnUpdatePercentageProgressClickAction(
     val newPercentage: String,
 ) : ReadingAction {
     override suspend fun execute(
@@ -18,7 +18,10 @@ data class OnUpdatePercentageProgressClickAction(
         val bookToUpdate: Book = scope.currentState.bookToUpdate ?: return
 
         val newPercentageValue: Double = newPercentage.toDoubleOrNull() ?: 0.0
-        val fraction = (newPercentageValue / 100.0).coerceIn(0.0, 1.0)
+        val fraction = (newPercentageValue / 100.0).coerceIn(
+            0.0,
+            1.0,
+        )
 
         val edition = bookToUpdate.currentEdition ?: run {
             scope.setState {
@@ -53,7 +56,7 @@ data class OnUpdatePercentageProgressClickAction(
                 newPage = newPage,
                 newSeconds = newSeconds,
             ).onFailure { error ->
-                Timber.e("$error")
+                AppLog.e("$error")
 
                 scope.setState {
                     it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)

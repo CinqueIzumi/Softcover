@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.core.lists.data.datasource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.data.database.dao.BookDao
-import nl.rhaydus.softcover.core.data.database.mapper.toModel
+import nl.rhaydus.softcover.core.database.dao.BookDao
+import nl.rhaydus.softcover.core.database.mapper.toModel
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 
@@ -54,7 +54,7 @@ interface ListsLocalDataSource {
 
 private const val OPTIMISTIC_LIST_BOOK_ID: Int = 0
 
-class ListsLocalDataSourceImpl(
+internal class ListsLocalDataSourceImpl(
     private val dao: BookDao,
 ) : ListsLocalDataSource {
     override val allUserLists: Flow<List<BookList>>
@@ -80,7 +80,10 @@ class ListsLocalDataSourceImpl(
         bookId: Int,
     ): ListBook? {
         return dao
-            .getListBookByListAndBook(listId = listId, bookId = bookId)
+            .getListBookByListAndBook(
+                listId = listId,
+                bookId = bookId,
+            )
             ?.toModel(isOwnedList = false)
     }
 
@@ -127,6 +130,9 @@ class ListsLocalDataSourceImpl(
         listId: Int,
         ranked: Boolean,
     ) {
-        dao.setBookListRanked(listId = listId, ranked = ranked)
+        dao.setBookListRanked(
+            listId = listId,
+            ranked = ranked,
+        )
     }
 }

@@ -48,16 +48,16 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.presentation.component.ClickableText
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverLoadingSheet
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
+import nl.rhaydus.softcover.core.designsystem.presentation.component.ClickableText
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverLoadingSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
@@ -97,13 +97,13 @@ object OnboardingScreen : Screen {
                 }
 
                 text
-            }
+            },
         )
     }
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: OnboardingUiState,
         runAction: (action: OnboardingAction) -> Unit,
         openUrl: (String) -> Unit,
@@ -120,11 +120,11 @@ object OnboardingScreen : Screen {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .imePadding()
+                    .imePadding(),
             ) {
                 HorizontalPager(
                     state = pagerState,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) { page ->
                     val currentIntroScreen: IntroScreen = pages[page]
 
@@ -133,7 +133,7 @@ object OnboardingScreen : Screen {
                             .fillMaxSize()
                             .weight(1f)
                             .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
                     ) {
                         when (currentIntroScreen) {
                             IntroScreen.FIRST -> {
@@ -152,7 +152,7 @@ object OnboardingScreen : Screen {
                                         scope.launch {
                                             pagerState.animateScrollToPage(page = page + 1)
                                         }
-                                    }
+                                    },
                                 )
                             }
 
@@ -339,7 +339,8 @@ object OnboardingScreen : Screen {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "If you already have the Hardcover app installed, this key can also be found there: Profile → Settings → Hardcover API.",
+                text = "If you already have the Hardcover app installed, this key can also be found " +
+                    "there: Profile → Settings → Hardcover API.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

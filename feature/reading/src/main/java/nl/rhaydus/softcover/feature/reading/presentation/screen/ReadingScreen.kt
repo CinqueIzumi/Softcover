@@ -77,9 +77,57 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import coil.compose.AsyncImage
+import kotlin.math.roundToInt
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
+import nl.rhaydus.softcover.core.designsystem.presentation.component.PullToRefreshEyebrow
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSplitButton
+import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
+import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
+import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
+import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
+import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverMenuItem
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SplitButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScale
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TabDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
+import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.rememberBookDetailPrefetcher
+import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.bodyFontFamily
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
+import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
+import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
+import nl.rhaydus.softcover.core.designsystem.presentation.util.secondsToHm
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -87,47 +135,7 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
-import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
-import nl.rhaydus.softcover.core.presentation.component.DeadlineCoverOverlay
-import nl.rhaydus.softcover.core.presentation.component.DeadlineSummaryLine
-import nl.rhaydus.softcover.core.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
-import nl.rhaydus.softcover.core.presentation.component.PullToRefreshEyebrow
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverSplitButton
-import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
-import nl.rhaydus.softcover.core.presentation.component.rememberEditionImageRequest
-import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
-import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
-import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.presentation.model.SoftcoverMenuItem
-import nl.rhaydus.softcover.core.presentation.model.SplitButtonStyle
-import nl.rhaydus.softcover.core.presentation.modifier.pressScale
-import nl.rhaydus.softcover.core.presentation.modifier.quoteGlyphSway
-import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
-import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
-import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
-import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
-import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.presentation.theme.bodyFontFamily
-import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.presentation.util.BottomBarPulseManager
-import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
-import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
-import nl.rhaydus.softcover.core.presentation.util.secondsToHm
+import nl.rhaydus.softcover.core.platform.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
@@ -143,9 +151,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import java.time.LocalDate
-import java.time.LocalTime
-import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
     private val booksListState = LazyListState()
@@ -181,7 +186,7 @@ object ReadingScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: ReadingScreenUiState,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
@@ -259,7 +264,7 @@ object ReadingScreen : Screen {
                             ) {
                                 ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
                             }
-                        }
+                        },
                     ) {
                         when {
                             state.books.isNotEmpty() -> {
@@ -267,7 +272,6 @@ object ReadingScreen : Screen {
                                     state = state,
                                     runAction = runAction,
                                     onBookClick = onBookClick,
-                                    onNavigateToSearch = onNavigateToSearch,
                                     onMarkAsRead = onMarkAsRead,
                                     onExpandStreak = { showStreakSheet = true },
                                     pullToRefreshState = pullToRefreshState,
@@ -318,7 +322,11 @@ object ReadingScreen : Screen {
                                 runAction(OnUpdatePageProgressClickAction(pages))
                             },
                             onUpdateTimeProgressClick = { h, m, s ->
-                                runAction(OnUpdateTimeProgressClickAction(h, m, s))
+                                runAction(OnUpdateTimeProgressClickAction(
+                                    h,
+                                    m,
+                                    s,
+                                ),)
                             },
                         )
                     }
@@ -347,7 +355,6 @@ object ReadingScreen : Screen {
         state: ReadingScreenUiState,
         runAction: (ReadingAction) -> Unit,
         onBookClick: (Book) -> Unit,
-        onNavigateToSearch: () -> Unit,
         onMarkAsRead: (Book) -> Unit,
         onExpandStreak: () -> Unit,
         pullToRefreshState: PullToRefreshState,
@@ -367,7 +374,7 @@ object ReadingScreen : Screen {
         val density = LocalDensity.current
         val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
 
-        val today = remember { LocalDate.now().toString() }
+        val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()).toString() }
 
         val slideModifier: (Int) -> Modifier = { bookId ->
             if (bookId == slidingBookId) {
@@ -438,11 +445,15 @@ object ReadingScreen : Screen {
 
                     itemsIndexed(rest, key = { _, book -> book.id }) { index, book ->
                         CompactBookEntry(
-                            modifier = rememberMutationAnimatedModifier(
+                            modifier = Modifier.mutationAnimated(
+                                scope = this,
                                 animator = animator,
                                 itemKey = book.id,
                             )
-                                .staggeredEntry(coordinator = entry, index = index)
+                                .staggeredEntry(
+                                    coordinator = entry,
+                                    index = index,
+                                )
                                 .then(slideModifier(book.id)),
                             book = book,
                             deadlineProgress = book.deadlineProgressFrom(state),
@@ -572,8 +583,8 @@ object ReadingScreen : Screen {
                                     listOf(
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                                         MaterialTheme.colorScheme.tertiary.copy(alpha = 0.30f),
-                                    )
-                                )
+                                    ),
+                                ),
                             ),
                     )
                 } else if (backdropRequest != null) {
@@ -600,8 +611,8 @@ object ReadingScreen : Screen {
                                     0.35f to Color.Black.copy(alpha = 0.15f),
                                     0.55f to Color.Transparent,
                                     1f to Color.Transparent,
-                                )
-                            )
+                                ),
+                            ),
                         ),
                 )
 
@@ -615,8 +626,8 @@ object ReadingScreen : Screen {
                                     0.40f to surfaceColor.copy(alpha = 0.15f),
                                     0.60f to surfaceColor.copy(alpha = 0.92f),
                                     1f to surfaceColor,
-                                )
-                            )
+                                ),
+                            ),
                         ),
                 )
 
@@ -628,7 +639,10 @@ object ReadingScreen : Screen {
                 ) {
                     val overlayShadow = Shadow(
                         color = Color.Black.copy(alpha = 0.85f),
-                        offset = Offset(x = 0f, y = 1f),
+                        offset = Offset(
+                            x = 0f,
+                            y = 1f,
+                        ),
                         blurRadius = 14f,
                     )
 
@@ -756,8 +770,8 @@ object ReadingScreen : Screen {
                                 },
                                 icon = SoftcoverIconResource.Drawable(
                                     id = R.drawable.ic_check_circle,
-                                    contentDescription = "Mark as Read icon"
-                                )
+                                    contentDescription = "Mark as Read icon",
+                                ),
                             ),
                         ),
                         label = "Update progress",
@@ -867,7 +881,10 @@ object ReadingScreen : Screen {
         Surface(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 6.dp,
+                )
                 .prefetchBookDetailOnPress(book.id)
                 .pressScale(interactionSource)
                 .shakeOnError(
@@ -984,8 +1001,8 @@ object ReadingScreen : Screen {
                                 },
                                 icon = SoftcoverIconResource.Drawable(
                                     id = R.drawable.ic_check_circle,
-                                    contentDescription = "Mark as Read icon"
-                                )
+                                    contentDescription = "Mark as Read icon",
+                                ),
                             ),
                         ),
                         label = "Set progress",
@@ -1048,7 +1065,10 @@ object ReadingScreen : Screen {
             Spacer(modifier = Modifier.height(if (emphasized) 10.dp else 6.dp))
 
             LinearProgressIndicator(
-                progress = { progressFraction.coerceIn(0f, 1f) },
+                progress = { progressFraction.coerceIn(
+                    0f,
+                    1f,
+                ) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(if (emphasized) 10.dp else 6.dp),
@@ -1191,7 +1211,10 @@ object ReadingScreen : Screen {
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(
+                    16.dp,
+                    Alignment.CenterHorizontally,
+                ),
             ) {
                 books.forEach { book ->
                     PickUpNextTile(
@@ -1388,7 +1411,7 @@ private fun PlanTodayNudge(
 }
 
 private fun greetingForNow(): String {
-    val hour = LocalTime.now().hour
+    val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
     return when (hour) {
         in 5..11 -> "Good morning."
         in 12..17 -> "Good afternoon."
@@ -1469,7 +1492,11 @@ private val previewBooks: List<Book> = listOf(
         pages = 534,
         currentPage = 470,
         progress = 88.014984f,
-        series = BookSeries(id = 1, name = "Dungeon Crawler Carl", amountOfBooks = 20),
+        series = BookSeries(
+            id = 1,
+            name = "Dungeon Crawler Carl",
+            amountOfBooks = 20,
+        ),
     ),
     previewBook(
         id = 2,
@@ -1478,7 +1505,11 @@ private val previewBooks: List<Book> = listOf(
         pages = 320,
         currentPage = 262,
         progress = 81.875f,
-        series = BookSeries(id = 1, name = "Dungeon Crawler Carl", amountOfBooks = 20),
+        series = BookSeries(
+            id = 1,
+            name = "Dungeon Crawler Carl",
+            amountOfBooks = 20,
+        ),
         positionsInSeries = listOf(3.0),
     ),
     previewBook(
@@ -1598,13 +1629,19 @@ private fun ReadingScreenPreview() {
 }
 
 private fun previewReadingActivity(): List<ReadingDayActivity> {
-    val today = LocalDate.now()
-    val firstDay = today.minusDays(20)
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val firstDay = today.minus(
+        20,
+        DateTimeUnit.DAY,
+    )
     val litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20)
 
     return (0..20).map { offset ->
         ReadingDayActivity(
-            date = firstDay.plusDays(offset.toLong()),
+            date = firstDay.plus(
+                offset,
+                DateTimeUnit.DAY,
+            ),
             didRead = offset in litOffsets,
         )
     }
@@ -1630,22 +1667,34 @@ private fun ReadingScreenWithStreakStripPreview() {
 @StandardPreview
 @Composable
 private fun ReadingScreenWithDeadlineAndNudgePreview() {
-    val today = LocalDate.now()
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     val featured = previewBooks.first()
     val behindBook = previewBooks[2]
 
     val deadlines = mapOf(
         featured.id to BookDeadline(
             bookId = featured.id,
-            deadlineDate = today.plusDays(5),
-            setAt = today.minusDays(10),
+            deadlineDate = today.plus(
+                5,
+                DateTimeUnit.DAY,
+            ),
+            setAt = today.minus(
+                10,
+                DateTimeUnit.DAY,
+            ),
             initialPerDay = 30f,
             unit = DeadlineUnit.PAGES,
         ),
         behindBook.id to BookDeadline(
             bookId = behindBook.id,
-            deadlineDate = today.plusDays(3),
-            setAt = today.minusDays(20),
+            deadlineDate = today.plus(
+                3,
+                DateTimeUnit.DAY,
+            ),
+            setAt = today.minus(
+                20,
+                DateTimeUnit.DAY,
+            ),
             initialPerDay = 15f,
             unit = DeadlineUnit.PAGES,
         ),
@@ -1668,14 +1717,20 @@ private fun ReadingScreenWithDeadlineAndNudgePreview() {
 @StandardPreview
 @Composable
 private fun ReadingScreenExpiredDeadlinePreview() {
-    val today = LocalDate.now()
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     val featured = previewBooks.first()
 
     val deadlines = mapOf(
         featured.id to BookDeadline(
             bookId = featured.id,
-            deadlineDate = today.minusDays(2),
-            setAt = today.minusDays(30),
+            deadlineDate = today.minus(
+                2,
+                DateTimeUnit.DAY,
+            ),
+            setAt = today.minus(
+                30,
+                DateTimeUnit.DAY,
+            ),
             initialPerDay = 20f,
             unit = DeadlineUnit.PAGES,
         ),
@@ -1726,7 +1781,10 @@ private fun ReadingScreenAudiobookPreview() {
         currentSeconds = 24_650,
     ).let {
         val edition = it.editions.first().copy(format = "Audiobook")
-        it.copy(editions = listOf(edition), defaultEdition = edition)
+        it.copy(
+            editions = listOf(edition),
+            defaultEdition = edition,
+        )
     }
 
     SoftcoverTheme {

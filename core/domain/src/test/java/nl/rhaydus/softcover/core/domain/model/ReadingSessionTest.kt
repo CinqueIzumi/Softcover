@@ -2,15 +2,16 @@ package nl.rhaydus.softcover.core.domain.model
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.Duration
-import java.time.Instant
 
 class ReadingSessionTest {
-
     // region Fixtures
-
     private val start = Instant.parse("2024-06-01T10:00:00Z")
     private val end = Instant.parse("2024-06-01T11:00:00Z")
 
@@ -31,16 +32,16 @@ class ReadingSessionTest {
         pausedSeconds = pausedSeconds,
         lastPausedAt = lastPausedAt,
     )
-
     // endregion
-
     @Nested
     inner class IsPaused {
-
         @Test
         fun `is false when session is active and lastPausedAt is null`() {
             // ----- Arrange -----
-            val session = buildSession(endedAt = null, lastPausedAt = null)
+            val session = buildSession(
+                endedAt = null,
+                lastPausedAt = null,
+            )
 
             // ----- Act & Assert -----
             session.isPaused shouldBe false
@@ -73,7 +74,10 @@ class ReadingSessionTest {
         @Test
         fun `is false when session is ended and lastPausedAt is null`() {
             // ----- Arrange -----
-            val session = buildSession(endedAt = end, lastPausedAt = null)
+            val session = buildSession(
+                endedAt = end,
+                lastPausedAt = null,
+            )
 
             // ----- Act & Assert -----
             session.isPaused shouldBe false
@@ -82,7 +86,6 @@ class ReadingSessionTest {
 
     @Nested
     inner class ReadingDuration {
-
         @Test
         fun `returns full wall-clock time for a running never-paused session`() {
             // ----- Arrange -----
@@ -98,7 +101,7 @@ class ReadingSessionTest {
             val result = session.readingDuration(now = now)
 
             // ----- Assert -----
-            result shouldBe Duration.ofMinutes(30)
+            result shouldBe 30.minutes
         }
 
         @Test
@@ -117,7 +120,7 @@ class ReadingSessionTest {
             val result = session.readingDuration(now = now)
 
             // ----- Assert -----
-            result shouldBe Duration.ofSeconds(3000)
+            result shouldBe 3000.seconds
         }
 
         @Test
@@ -138,7 +141,7 @@ class ReadingSessionTest {
 
             // ----- Assert -----
             // wall = 50 min; openPause = 30 min; reading = 20 min
-            result shouldBe Duration.ofMinutes(20)
+            result shouldBe 20.minutes
         }
 
         @Test
@@ -179,7 +182,7 @@ class ReadingSessionTest {
             val result = session.readingDuration(now = laterNow)
 
             // ----- Assert -----
-            result shouldBe Duration.ofHours(1)
+            result shouldBe 1.hours
         }
 
         @Test
@@ -200,7 +203,7 @@ class ReadingSessionTest {
 
             // ----- Assert -----
             // wall = 60 min = 3600s; accumulated = 300s; openPause = 20 min = 1200s; reading = 2100s
-            result shouldBe Duration.ofSeconds(2100)
+            result shouldBe 2100.seconds
         }
 
         @Test

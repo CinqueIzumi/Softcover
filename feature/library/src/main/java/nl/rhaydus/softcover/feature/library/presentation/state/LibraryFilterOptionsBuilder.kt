@@ -16,7 +16,7 @@ private val RATING_BUCKETS = listOf(4.5, 4.0, 3.5, 3.0)
  * (rather than as members of [LibraryUiState]) so [FilterOptionsCollector] can call them on
  * `Dispatchers.Default` without keeping a reference to the whole UI state on the worker thread.
  */
-fun buildBookFilterOptions(books: List<Book>): LibraryFilterOptions {
+internal fun buildBookFilterOptions(books: List<Book>): LibraryFilterOptions {
     if (books.isEmpty()) return LibraryFilterOptions()
 
     val tags = books
@@ -51,7 +51,7 @@ fun buildBookFilterOptions(books: List<Book>): LibraryFilterOptions {
     )
 }
 
-fun buildEditionFilterOptions(
+internal fun buildEditionFilterOptions(
     editions: List<BookEdition>,
     bookByBookId: Map<Int, Book>,
 ): LibraryFilterOptions {

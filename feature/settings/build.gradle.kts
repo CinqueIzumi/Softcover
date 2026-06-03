@@ -8,15 +8,15 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:domain"))
+    api(project(":core:domain"))
     implementation(project(":core:lists"))
     implementation(project(":core:library"))
-    implementation(project(":core:preferences"))
+    api(project(":core:preferences"))
     implementation(project(":core:designsystem"))
 
     implementation(libs.koin.compose)
 
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.koin)
-    implementation(libs.voyager.tabNavigator)
+    api(libs.voyager.tabNavigator)
 }

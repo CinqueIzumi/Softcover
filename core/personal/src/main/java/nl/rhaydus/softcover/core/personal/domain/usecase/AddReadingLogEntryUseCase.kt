@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.personal.domain.usecase
 
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.personal.domain.repository.ReadingLogRepository
-import java.time.LocalDate
 
 class AddReadingLogEntryUseCase(
     private val repository: ReadingLogRepository,

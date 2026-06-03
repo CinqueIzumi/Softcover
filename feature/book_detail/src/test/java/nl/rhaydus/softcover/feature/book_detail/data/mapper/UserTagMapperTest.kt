@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserTagMapperTest {
-
     // ----- FindTagsByUserAndTaggableQuery.Data.Tagging helpers -----
 
     private fun stubTaggingTag(
@@ -58,12 +57,15 @@ class UserTagMapperTest {
 
     @Nested
     inner class TaggingToUserTag {
-
         @Test
         fun `maps all fields correctly`() {
             // ----- Arrange -----
             val tagging = stubTagging(
-                tag = stubTaggingTag(tag = "Cozy", count = 3, tagCategoryValue = "Mood"),
+                tag = stubTaggingTag(
+                    tag = "Cozy",
+                    count = 3,
+                    tagCategoryValue = "Mood",
+                ),
                 spoiler = false,
             )
 
@@ -106,7 +108,6 @@ class UserTagMapperTest {
 
     @Nested
     inner class MutationTagToUserTag {
-
         @Test
         fun `maps all fields correctly when count is non-null`() {
             // ----- Arrange -----
@@ -168,7 +169,6 @@ class UserTagMapperTest {
 
     @Nested
     inner class UserTagToBasicTag {
-
         @Test
         fun `maps all fields correctly`() {
             // ----- Arrange -----

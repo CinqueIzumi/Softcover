@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class PersistedLibraryVisibilityCollectorTest {
-
     private lateinit var getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase
     private lateinit var getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase
     private lateinit var getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase
@@ -77,12 +76,14 @@ class PersistedLibraryVisibilityCollectorTest {
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `first emission sets both persisted and draft fields and marks initialized true`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PersistedLibraryVisibilityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             statusCodesFlow.emit(setOf(1, 3))
@@ -102,7 +103,10 @@ class PersistedLibraryVisibilityCollectorTest {
         fun `subsequent emission updates persisted fields only — draft is not touched`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PersistedLibraryVisibilityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             statusCodesFlow.emit(setOf(1, 3))
             listIdsFlow.emit(setOf(10))
@@ -131,7 +135,10 @@ class PersistedLibraryVisibilityCollectorTest {
         fun `does not change state before either flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PersistedLibraryVisibilityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act & Assert -----
             stateFlow.value.persistedEnabledStatusCodes shouldBe emptySet()
@@ -144,7 +151,10 @@ class PersistedLibraryVisibilityCollectorTest {
         fun `retains last written state after collector is cancelled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PersistedLibraryVisibilityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
             statusCodesFlow.emit(setOf(3, 5))
             listIdsFlow.emit(setOf(7))
             tabOrderFlow.emit(emptyList())
@@ -164,7 +174,10 @@ class PersistedLibraryVisibilityCollectorTest {
             }
             stateFlow.value = LibraryVisibilitySettingsUiState(availableLists = listOf(mockList))
             val collector = PersistedLibraryVisibilityCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             statusCodesFlow.emit(setOf(1))

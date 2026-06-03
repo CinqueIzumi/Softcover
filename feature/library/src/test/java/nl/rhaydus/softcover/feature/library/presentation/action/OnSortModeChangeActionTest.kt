@@ -6,9 +6,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnSortModeChangeActionTest {
-
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -38,7 +37,6 @@ class OnSortModeChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `tapping active mode flips direction from ASCENDING to DESCENDING`() = runTest {
             // ----- Arrange -----

@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.lists.domain.usecase.CreateListUseCase
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnSubmitAction
@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class CreateListScreenModelTest {
-
     private lateinit var createListUseCase: CreateListUseCase
     private lateinit var stateFlow: MutableStateFlow<CreateListUiState>
     private lateinit var eventChannel: Channel<CreateListEvent>
@@ -69,16 +68,21 @@ class CreateListScreenModelTest {
         }
     }
 
-    private fun stubBookList(id: Int = 1, name: String = "My List"): BookList = BookList(
+    private fun stubBookList(
+        id: Int = 1,
+        name: String = "My List",
+    ): BookList = BookList(
         id = id,
         name = name,
-        slug = name.lowercase().replace(" ", "-"),
+        slug = name.lowercase().replace(
+            " ",
+            "-",
+        ),
         books = emptyList(),
     )
 
     @Nested
     inner class OnNameChangedActionTests {
-
         @Test
         fun `updates state name to the new value`() = runTest {
             // ----- Arrange -----
@@ -137,7 +141,6 @@ class CreateListScreenModelTest {
 
     @Nested
     inner class OnSubmitActionTests {
-
         @Test
         fun `does not invoke use case when name is empty`() = runTest {
             // ----- Arrange -----
@@ -197,7 +200,10 @@ class CreateListScreenModelTest {
             // ----- Arrange -----
             stateFlow.value = CreateListUiState(name = "Favourites")
             val dependencies = stubDependencies(this)
-            val created = stubBookList(id = 42, name = "Favourites")
+            val created = stubBookList(
+                id = 42,
+                name = "Favourites",
+            )
 
             coEvery {
                 createListUseCase(name = "Favourites")
@@ -334,11 +340,13 @@ class CreateListScreenModelTest {
 
     @Nested
     inner class CanSubmit {
-
         @Test
         fun `is false when name is empty`() {
             // ----- Arrange & Act -----
-            val state = CreateListUiState(name = "", isSubmitting = false)
+            val state = CreateListUiState(
+                name = "",
+                isSubmitting = false,
+            )
 
             // ----- Assert -----
             state.canSubmit shouldBe false
@@ -347,7 +355,10 @@ class CreateListScreenModelTest {
         @Test
         fun `is false when name is whitespace only`() {
             // ----- Arrange & Act -----
-            val state = CreateListUiState(name = "   ", isSubmitting = false)
+            val state = CreateListUiState(
+                name = "   ",
+                isSubmitting = false,
+            )
 
             // ----- Assert -----
             state.canSubmit shouldBe false
@@ -356,7 +367,10 @@ class CreateListScreenModelTest {
         @Test
         fun `is false when isSubmitting is true`() {
             // ----- Arrange & Act -----
-            val state = CreateListUiState(name = "My List", isSubmitting = true)
+            val state = CreateListUiState(
+                name = "My List",
+                isSubmitting = true,
+            )
 
             // ----- Assert -----
             state.canSubmit shouldBe false
@@ -365,7 +379,10 @@ class CreateListScreenModelTest {
         @Test
         fun `is true when name is non-blank and not submitting`() {
             // ----- Arrange & Act -----
-            val state = CreateListUiState(name = "My List", isSubmitting = false)
+            val state = CreateListUiState(
+                name = "My List",
+                isSubmitting = false,
+            )
 
             // ----- Assert -----
             state.canSubmit shouldBe true

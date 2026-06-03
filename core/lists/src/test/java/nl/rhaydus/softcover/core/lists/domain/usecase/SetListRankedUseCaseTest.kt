@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SetListRankedUseCaseTest {
-
     private lateinit var listsRepository: ListsRepository
     private lateinit var useCase: SetListRankedUseCase
 
@@ -24,7 +23,6 @@ class SetListRankedUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success and delegates with correct arguments when repository completes`() = runTest {
             // ----- Arrange -----

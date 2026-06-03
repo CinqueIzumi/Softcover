@@ -7,7 +7,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnDismissDeadlinePickerActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -51,7 +50,6 @@ class OnDismissDeadlinePickerActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets showDeadlinePicker to false`() = runTest {
             // ----- Arrange -----
@@ -60,7 +58,10 @@ class OnDismissDeadlinePickerActionTest {
             val action = OnDismissDeadlinePickerAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showDeadlinePicker shouldBe false
@@ -69,12 +70,18 @@ class OnDismissDeadlinePickerActionTest {
         @Test
         fun `does not change other state fields`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(showDeadlinePicker = true, loadingBookDetails = false)
+            stateFlow.value = BookDetailUiState(
+                showDeadlinePicker = true,
+                loadingBookDetails = false,
+            )
             dependencies = stubDependencies(this)
             val action = OnDismissDeadlinePickerAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.loadingBookDetails shouldBe false

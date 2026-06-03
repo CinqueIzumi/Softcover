@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SortDirectionTest {
-
     @Nested
     inner class Flipped {
-
         @Test
         fun `flipped on ASCENDING returns DESCENDING`() {
             // ----- Arrange -----

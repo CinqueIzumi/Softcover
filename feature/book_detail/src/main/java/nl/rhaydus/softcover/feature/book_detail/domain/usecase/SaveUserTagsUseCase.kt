@@ -14,6 +14,9 @@ class SaveUserTagsUseCase(
         bookId: Int,
         tags: List<UserTag>,
     ): Result<List<UserTag>> = runCatching {
-        userTagsRepository.saveTags(bookId = bookId, tags = tags)
+        userTagsRepository.saveTags(
+            bookId = bookId,
+            tags = tags,
+        )
     }
 }

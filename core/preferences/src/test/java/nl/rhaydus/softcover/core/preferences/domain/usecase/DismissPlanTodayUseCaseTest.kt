@@ -5,14 +5,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class DismissPlanTodayUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: DismissPlanTodayUseCase
 
@@ -24,11 +23,14 @@ class DismissPlanTodayUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository with bookId and ISO date string and returns success`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(2025, 5, 13)
+            val today = LocalDate(
+                2025,
+                5,
+                13,
+            )
 
             // ----- Act -----
             val result = useCase(
@@ -52,13 +54,20 @@ class DismissPlanTodayUseCaseTest {
             val error = RuntimeException("write error")
 
             coEvery {
-                settingsRepository.setPlanTodayDismissed(any(), any())
+                settingsRepository.setPlanTodayDismissed(
+                    any(),
+                    any(),
+                )
             } throws error
 
             // ----- Act -----
             val result = useCase(
                 bookId = 1,
-                today = LocalDate.of(2025, 1, 1),
+                today = LocalDate(
+                    2025,
+                    1,
+                    1,
+                ),
             )
 
             // ----- Assert -----

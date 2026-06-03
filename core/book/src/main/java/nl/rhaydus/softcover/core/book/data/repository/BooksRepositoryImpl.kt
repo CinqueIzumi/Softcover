@@ -1,9 +1,5 @@
 package nl.rhaydus.softcover.core.book.data.repository
 
-import java.io.File
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -13,19 +9,26 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.data.mapper.toJson
+import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -38,13 +41,12 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
-import timber.log.Timber
 
 private const val TRENDING_LIMIT = 10
 private const val TRENDING_OFFSET = 0
 private const val TRENDING_WINDOW_DAYS = 7L
 
-class BooksRepositoryImpl(
+internal class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
     private val booksLocalDataSource: BooksLocalDataSource,
     private val networkAvailability: NetworkAvailabilityProvider,
@@ -95,7 +97,10 @@ class BooksRepositoryImpl(
     ) {
         runOrJoin(statusFilter = statusFilter) {
             withContext(Dispatchers.IO) {
-                refreshUserBooksInternal(userId = userId, statusFilter = statusFilter)
+                refreshUserBooksInternal(
+                    userId = userId,
+                    statusFilter = statusFilter,
+                )
             }
         }
     }
@@ -248,17 +253,23 @@ class BooksRepositoryImpl(
 
         if (canonicalBookId == missingBookId) return null
 
-        Timber.w("Book $missingBookId missing remotely; recovered canonical $canonicalBookId via edition $editionId")
+        AppLog.w("Book $missingBookId missing remotely; recovered canonical $canonicalBookId via edition $editionId")
 
         val canonical: Book = try {
             booksRemoteDataSource.fetchBookById(id = canonicalBookId)
         } catch (canonicalMissing: BookNotFoundException) {
-            Timber.w("Canonical $canonicalBookId also missing while recovering $missingBookId")
+            AppLog.e(
+                canonicalMissing,
+                "Canonical $canonicalBookId also missing while recovering $missingBookId",
+            )
 
             throw BookNotFoundException(bookId = missingBookId)
         }
 
-        persistCanonicalRedirect(oldId = missingBookId, canonical = canonical)
+        persistCanonicalRedirect(
+            oldId = missingBookId,
+            canonical = canonical,
+        )
 
         return canonical
     }
@@ -269,7 +280,10 @@ class BooksRepositoryImpl(
     ) {
         booksLocalDataSource.cacheBook(book = canonical)
 
-        booksLocalDataSource.redirectBookId(oldId = oldId, newId = canonical.id)
+        booksLocalDataSource.redirectBookId(
+            oldId = oldId,
+            newId = canonical.id,
+        )
 
         booksLocalDataSource.deleteOrphanBooks()
     }
@@ -291,10 +305,13 @@ class BooksRepositoryImpl(
     }
 
     override suspend fun fetchTrendingBooks(): List<Book> {
-        val today = LocalDate.now()
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
         return booksRemoteDataSource.fetchTrendingBooks(
-            from = today.minusDays(TRENDING_WINDOW_DAYS).toString(),
+            from = today.minus(
+                TRENDING_WINDOW_DAYS.toInt(),
+                DateTimeUnit.DAY,
+            ).toString(),
             to = today.toString(),
             limit = TRENDING_LIMIT,
             offset = TRENDING_OFFSET,
@@ -325,7 +342,10 @@ class BooksRepositoryImpl(
         }
 
         return runCatching {
-            booksRemoteDataSource.markBookAsWantToRead(bookId = book.id, editionId = editionId)
+            booksRemoteDataSource.markBookAsWantToRead(
+                bookId = book.id,
+                editionId = editionId,
+            )
         }.getOrElse { error ->
             if (error is CancellationException) throw error
 
@@ -363,13 +383,19 @@ class BooksRepositoryImpl(
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
-                booksRemoteDataSource.updateBookRating(userBook = userBook, rating = rating)
+                booksRemoteDataSource.updateBookRating(
+                    userBook = userBook,
+                    rating = rating,
+                )
             }.getOrElse { error ->
                 when (error) {
                     is CancellationException -> throw error
 
                     is OfflineException -> {
-                        enqueueRatingUpdate(book = optimistic, rating = rating)
+                        enqueueRatingUpdate(
+                            book = optimistic,
+                            rating = rating,
+                        )
                         optimistic
                     }
 
@@ -381,7 +407,10 @@ class BooksRepositoryImpl(
             }
         }
 
-        enqueueRatingUpdate(book = optimistic, rating = rating)
+        enqueueRatingUpdate(
+            book = optimistic,
+            rating = rating,
+        )
 
         return optimistic
     }
@@ -393,10 +422,13 @@ class BooksRepositoryImpl(
     ): Book {
         val userBook = book.userBook ?: throw Exception("User did not have a user book")
 
-        val reviewedAt: String = LocalDate.now().toString()
+        val reviewedAt: String = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = book.withReview(review = review, hasSpoilers = hasSpoilers)
+        val optimistic = book.withReview(
+            review = review,
+            hasSpoilers = hasSpoilers,
+        )
         booksLocalDataSource.cacheBook(book = optimistic)
 
         if (networkAvailability.isOnline.value) {
@@ -412,7 +444,11 @@ class BooksRepositoryImpl(
                     is CancellationException -> throw error
 
                     is OfflineException -> {
-                        enqueueReviewUpdate(book = optimistic, review = review, hasSpoilers = hasSpoilers)
+                        enqueueReviewUpdate(
+                            book = optimistic,
+                            review = review,
+                            hasSpoilers = hasSpoilers,
+                        )
                         optimistic
                     }
 
@@ -424,7 +460,11 @@ class BooksRepositoryImpl(
             }
         }
 
-        enqueueReviewUpdate(book = optimistic, review = review, hasSpoilers = hasSpoilers)
+        enqueueReviewUpdate(
+            book = optimistic,
+            review = review,
+            hasSpoilers = hasSpoilers,
+        )
 
         return optimistic
     }
@@ -505,7 +545,10 @@ class BooksRepositoryImpl(
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
-                booksRemoteDataSource.markBookAsRead(book = book, editionId = editionId)
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = editionId,
+                )
             }.getOrElse { error ->
                 when (error) {
                     is CancellationException -> throw error
@@ -546,8 +589,8 @@ class BooksRepositoryImpl(
                 progressSeconds = newSeconds,
                 startedAt = userBookRead.startedAt,
                 finishedAt = userBookRead.finishedAt,
-                enqueuedAt = Instant.now().toString(),
-            )
+                enqueuedAt = Clock.System.now().toString(),
+            ),
         )
     }
 
@@ -566,8 +609,8 @@ class BooksRepositoryImpl(
                 progressSeconds = userBookRead.currentSeconds,
                 startedAt = userBookRead.startedAt,
                 finishedAt = userBookRead.finishedAt,
-                enqueuedAt = Instant.now().toString(),
-            )
+                enqueuedAt = Clock.System.now().toString(),
+            ),
         )
     }
 
@@ -591,8 +634,8 @@ class BooksRepositoryImpl(
                 startedAt = null,
                 finishedAt = null,
                 rating = rating,
-                enqueuedAt = Instant.now().toString(),
-            )
+                enqueuedAt = Clock.System.now().toString(),
+            ),
         )
     }
 
@@ -618,14 +661,14 @@ class BooksRepositoryImpl(
                 finishedAt = null,
                 reviewSlateJson = review.toJson(),
                 reviewHasSpoilers = hasSpoilers,
-                enqueuedAt = Instant.now().toString(),
-            )
+                enqueuedAt = Clock.System.now().toString(),
+            ),
         )
     }
 
     private suspend fun restoreOptimisticWrite(snapshot: Book?) {
         if (snapshot == null) {
-            Timber.w("Optimistic rollback skipped: no prior snapshot in cache")
+            AppLog.w("Optimistic rollback skipped: no prior snapshot in cache")
             return
         }
 
@@ -676,10 +719,16 @@ class BooksRepositoryImpl(
 
         val progress: Float = when {
             newSeconds != null && totalSeconds != null && totalSeconds > 0 ->
-                (newSeconds.toFloat() / totalSeconds.toFloat() * 100f).coerceIn(0f, 100f)
+                (newSeconds.toFloat() / totalSeconds.toFloat() * 100f).coerceIn(
+                    0f,
+                    100f,
+                )
 
             newPage != null && totalPages != null && totalPages > 0 ->
-                (newPage.toFloat() / totalPages.toFloat() * 100f).coerceIn(0f, 100f)
+                (newPage.toFloat() / totalPages.toFloat() * 100f).coerceIn(
+                    0f,
+                    100f,
+                )
 
             else -> existingRead.progress
         }
@@ -750,7 +799,7 @@ class BooksRepositoryImpl(
         val existingUserBook = userBook ?: return this
         val existingRead = userBookRead
 
-        val today = LocalDate.now().toString()
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
         val updatedUserBook: UserBook = existingUserBook
             .copy(status = BookStatus.Read)
@@ -767,7 +816,7 @@ class BooksRepositoryImpl(
 
     private fun UserBook.withAppendedJournal(event: JournalEventType): UserBook {
         val entry = ReadingJournal(
-            updatedAt = LocalDateTime.now().toString(),
+            updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
             event = event.eventName,
         )
 
@@ -786,8 +835,11 @@ class BooksRepositoryImpl(
 
     override suspend fun persistEditionImage(
         editionId: Int,
-        source: File,
+        bytes: ByteArray,
     ) {
-        booksLocalDataSource.persistEditionImage(editionId = editionId, source = source)
+        booksLocalDataSource.persistEditionImage(
+            editionId = editionId,
+            bytes = bytes,
+        )
     }
 }

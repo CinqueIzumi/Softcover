@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.profile.domain.model
 
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 data class UserProfileSnapshot(
     val profileImageUrl: String,

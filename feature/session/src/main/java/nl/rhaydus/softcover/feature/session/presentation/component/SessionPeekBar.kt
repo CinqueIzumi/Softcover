@@ -31,16 +31,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.presentation.session.ActiveSession
-import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
-import java.time.Instant
 
 /**
  * Persistent live-timer bar shown above the bottom nav while a reading session is active. Tapping it
@@ -85,11 +85,11 @@ private fun SessionPeekBarContent(
 ) {
     val haptics = rememberHaptics()
 
-    var now by remember { mutableStateOf(Instant.now()) }
+    var now by remember { mutableStateOf(Clock.System.now()) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            now = Instant.now()
+            now = Clock.System.now()
 
             delay(timeMillis = 1_000)
         }

@@ -38,17 +38,17 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
+import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalBottomBarPadding
+import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
-import nl.rhaydus.softcover.core.presentation.util.LocalBottomBarPadding
-import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
 
 private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
 private val TAB_ROOT_DRIFT = 12.dp
 
-object BottomBarScreen : Screen {
+internal object BottomBarScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     override fun Content() {
@@ -72,16 +72,16 @@ object BottomBarScreen : Screen {
                             DockedBottomNavigationBar()
                         }
                     }
-                }
+                },
             ) { innerPadding ->
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .consumeWindowInsets(innerPadding)
+                        .consumeWindowInsets(innerPadding),
                 ) {
                     CompositionLocalProvider(
-                        LocalBottomBarPadding provides bottomBarPadding
+                        LocalBottomBarPadding provides bottomBarPadding,
                     ) {
                         TabRootHost()
                     }
@@ -101,7 +101,7 @@ object BottomBarScreen : Screen {
                                     interactionSource = shieldInteractionSource,
                                     indication = null,
                                     onClick = {},
-                                )
+                                ),
                         ) {
                             SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
 

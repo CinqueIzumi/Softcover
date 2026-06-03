@@ -118,9 +118,9 @@ Repository Flow  ──►  Initializer.collect()  ──►  setState()  ──
 
 ### Implementation Reference
 
-TOAD lives in `core/presentation/toad/` (`ToadContracts.kt`, `ToadScreenModel.kt`). `ToadScreenModel` has five generic parameters: `S : UiState`, `E : UiEvent`, `D : ActionDependencies`, `F : Initializer<S, E, D, V>`, `V : LocalVariables`.
+TOAD lives in `core/presentation/toad/`, one type per file (`UiState.kt`, `UiEvent.kt`, `LocalVariables.kt`, `ActionDependencies.kt`, `UiAction.kt`, `Initializer.kt`, `ActionScope.kt`, `ToadScreenModel.kt`). `ToadScreenModel` has five generic parameters: `S : UiState`, `E : UiEvent`, `D : ActionDependencies`, `F : Initializer<S, E, D, V>`, `V : LocalVariables`.
 
-#### Core contracts (`ToadContracts.kt`)
+#### Core contracts
 
 - `interface UiState` / `interface UiEvent` / `interface LocalVariables` — marker interfaces.
 - `abstract class ActionDependencies` — holds `coroutineScope: CoroutineScope` and `mainDispatcher: CoroutineDispatcher`; `fun launch(block)` launches on `coroutineScope + mainDispatcher`.

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnReorderLibraryTabsActionTest {
-
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
     private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
 
@@ -52,7 +51,6 @@ class OnReorderLibraryTabsActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `updates draftTabOrder to the supplied list`() = runTest {
             // ----- Arrange -----
@@ -65,7 +63,10 @@ class OnReorderLibraryTabsActionTest {
             val action = OnReorderLibraryTabsAction(newOrderedIds = newOrder)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftTabOrder shouldBe newOrder
@@ -83,7 +84,10 @@ class OnReorderLibraryTabsActionTest {
             val action = OnReorderLibraryTabsAction(newOrderedIds = newOrder)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftTabOrder shouldBe newOrder
@@ -100,7 +104,10 @@ class OnReorderLibraryTabsActionTest {
             val action = OnReorderLibraryTabsAction(newOrderedIds = listOf("list-1"))
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 3)
@@ -117,7 +124,10 @@ class OnReorderLibraryTabsActionTest {
             val action = OnReorderLibraryTabsAction(newOrderedIds = listOf("status-2"))
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledListIds shouldBe setOf(10, 20)
@@ -135,7 +145,10 @@ class OnReorderLibraryTabsActionTest {
             val action = OnReorderLibraryTabsAction(newOrderedIds = listOf("list-5", "status-1"))
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.persistedTabOrder shouldBe listOf("status-1", "list-5")
@@ -152,7 +165,10 @@ class OnReorderLibraryTabsActionTest {
             val action = OnReorderLibraryTabsAction(newOrderedIds = emptyList())
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftTabOrder shouldBe emptyList()

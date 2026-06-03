@@ -5,8 +5,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.presentation.model.ProgressSheetTab
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnProgressTabClickActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -34,7 +33,6 @@ class OnProgressTabClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets selectedProgressSheetTab to PAGE when tab is PAGE`() = runTest {
             // ----- Arrange -----

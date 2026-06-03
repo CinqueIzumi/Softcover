@@ -2,7 +2,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.model
 
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 
-sealed class LibraryTabEntry(
+internal sealed class LibraryTabEntry(
     val id: String,
     val label: String,
 ) {

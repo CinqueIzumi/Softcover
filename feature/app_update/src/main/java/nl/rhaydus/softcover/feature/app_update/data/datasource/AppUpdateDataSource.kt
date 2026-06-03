@@ -13,8 +13,8 @@ import com.google.android.play.core.ktx.requestAppUpdateInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
-import timber.log.Timber
 
 interface AppUpdateDataSource {
     val updateState: Flow<AppUpdateState>
@@ -26,7 +26,7 @@ interface AppUpdateDataSource {
     fun completeUpdate()
 }
 
-class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : AppUpdateDataSource {
+internal class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : AppUpdateDataSource {
     private val _updateState = MutableStateFlow<AppUpdateState>(AppUpdateState.Idle)
     override val updateState = _updateState.asStateFlow()
 
@@ -38,6 +38,8 @@ class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : 
             InstallStatus.DOWNLOADED -> _updateState.value = AppUpdateState.Downloaded
             InstallStatus.FAILED -> _updateState.value = AppUpdateState.Failed
             InstallStatus.CANCELED -> _updateState.value = AppUpdateState.Idle
+            InstallStatus.INSTALLED -> _updateState.value = AppUpdateState.Idle
+            else -> Unit
         }
     }
 
@@ -66,7 +68,10 @@ class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : 
                 }
             }
         }.onFailure {
-            Timber.e(it, "Failed to check for app update")
+            AppLog.e(
+                it,
+                "Failed to check for app update",
+            )
 
             _updateState.value = AppUpdateState.Idle
         }
@@ -82,7 +87,10 @@ class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : 
                 AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build(),
             )
         }.onFailure {
-            Timber.e(it, "Failed to start app update flow")
+            AppLog.e(
+                it,
+                "Failed to start app update flow",
+            )
 
             _updateState.value = AppUpdateState.Failed
         }

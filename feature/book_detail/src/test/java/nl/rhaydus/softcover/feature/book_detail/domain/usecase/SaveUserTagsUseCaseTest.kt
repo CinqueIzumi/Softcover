@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SaveUserTagsUseCaseTest {
-
     private lateinit var userTagsRepository: UserTagsRepository
     private lateinit var useCase: SaveUserTagsUseCase
 
@@ -32,7 +31,6 @@ class SaveUserTagsUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success with the canonical list returned by the repository`() = runTest {
             // ----- Arrange -----
@@ -41,11 +39,17 @@ class SaveUserTagsUseCaseTest {
             val savedTags = listOf(stubUserTag("Fantasy").copy(count = 99))
 
             coEvery {
-                userTagsRepository.saveTags(bookId = bookId, tags = inputTags)
+                userTagsRepository.saveTags(
+                    bookId = bookId,
+                    tags = inputTags,
+                )
             } returns savedTags
 
             // ----- Act -----
-            val result = useCase(bookId = bookId, tags = inputTags)
+            val result = useCase(
+                bookId = bookId,
+                tags = inputTags,
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
@@ -58,11 +62,17 @@ class SaveUserTagsUseCaseTest {
             val bookId = 7
 
             coEvery {
-                userTagsRepository.saveTags(bookId = bookId, tags = emptyList())
+                userTagsRepository.saveTags(
+                    bookId = bookId,
+                    tags = emptyList(),
+                )
             } returns emptyList()
 
             // ----- Act -----
-            val result = useCase(bookId = bookId, tags = emptyList())
+            val result = useCase(
+                bookId = bookId,
+                tags = emptyList(),
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
@@ -77,11 +87,17 @@ class SaveUserTagsUseCaseTest {
             val expectedError = RuntimeException("network failure")
 
             coEvery {
-                userTagsRepository.saveTags(bookId = bookId, tags = tags)
+                userTagsRepository.saveTags(
+                    bookId = bookId,
+                    tags = tags,
+                )
             } throws expectedError
 
             // ----- Act -----
-            val result = useCase(bookId = bookId, tags = tags)
+            val result = useCase(
+                bookId = bookId,
+                tags = tags,
+            )
 
             // ----- Assert -----
             result.isFailure shouldBe true
@@ -95,15 +111,24 @@ class SaveUserTagsUseCaseTest {
             val tags = listOf(stubUserTag("Cozy"), stubUserTag("Mystery"))
 
             coEvery {
-                userTagsRepository.saveTags(bookId = bookId, tags = tags)
+                userTagsRepository.saveTags(
+                    bookId = bookId,
+                    tags = tags,
+                )
             } returns tags
 
             // ----- Act -----
-            useCase(bookId = bookId, tags = tags)
+            useCase(
+                bookId = bookId,
+                tags = tags,
+            )
 
             // ----- Assert -----
             coVerify {
-                userTagsRepository.saveTags(bookId = bookId, tags = tags)
+                userTagsRepository.saveTags(
+                    bookId = bookId,
+                    tags = tags,
+                )
             }
         }
 
@@ -114,11 +139,17 @@ class SaveUserTagsUseCaseTest {
             val tags = listOf(stubUserTag())
 
             coEvery {
-                userTagsRepository.saveTags(bookId = bookId, tags = tags)
+                userTagsRepository.saveTags(
+                    bookId = bookId,
+                    tags = tags,
+                )
             } throws IllegalStateException("server error")
 
             // ----- Act -----
-            val result = runCatching { useCase(bookId = bookId, tags = tags) }
+            val result = runCatching { useCase(
+                bookId = bookId,
+                tags = tags,
+            ) }
 
             // ----- Assert -----
             result.isSuccess shouldBe true

@@ -1,2 +1,0 @@
-- [Import-rewrite pattern: core before feature](feedback_import_rewrite_ordering.md) — when feature.* imports are replaced with core.* equivalents, the new import must be re-sorted into the correct position
-- [BookEntityMapperTest class name mismatch](feedback_test_class_naming.md) — file BookEntityMapperTest.kt contains class BookMapperTest; file name must match class name

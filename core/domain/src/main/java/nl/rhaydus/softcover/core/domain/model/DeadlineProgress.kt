@@ -1,8 +1,11 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import kotlin.math.max
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.todayIn
 
 data class DeadlineProgress(
     val deadline: LocalDate,
@@ -27,10 +30,13 @@ data class DeadlineProgress(
             deadline: BookDeadline,
             current: Int,
             total: Int,
-            today: LocalDate = LocalDate.now(),
+            today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
         ): DeadlineProgress {
-            val daysRemaining = ChronoUnit.DAYS.between(today, deadline.deadlineDate)
-            val unitsRemaining = max(0, total - current)
+            val daysRemaining = today.daysUntil(deadline.deadlineDate).toLong()
+            val unitsRemaining = max(
+                0,
+                total - current,
+            )
             val isExpired = daysRemaining < 0 || (daysRemaining == 0L && unitsRemaining > 0)
 
             val requiredPerDay = when {

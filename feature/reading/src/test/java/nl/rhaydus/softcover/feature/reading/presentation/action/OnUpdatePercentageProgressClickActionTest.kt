@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnUpdatePercentageProgressClickActionTest {
-
     private lateinit var updateBookProgress: RecordBookProgressUseCase
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<ReadingLocalVariables>
@@ -75,7 +74,10 @@ class OnUpdatePercentageProgressClickActionTest {
             every { edition.audioSeconds } returns audioSeconds
         }
 
-    private fun stubBookWithCurrentEditionPages(pages: Int?, id: Int = 99): Book =
+    private fun stubBookWithCurrentEditionPages(
+        pages: Int?,
+        id: Int = 99,
+    ): Book =
         mockk<Book>().also { book ->
             val edition = stubEditionWithPages(pages = pages)
 
@@ -84,7 +86,10 @@ class OnUpdatePercentageProgressClickActionTest {
             every { book.defaultEdition } returns null
         }
 
-    private fun stubAudiobook(audioSeconds: Int?, id: Int = 99): Book =
+    private fun stubAudiobook(
+        audioSeconds: Int?,
+        id: Int = 99,
+    ): Book =
         mockk<Book>().also { book ->
             val edition = stubAudiobookEdition(audioSeconds = audioSeconds)
 
@@ -95,7 +100,6 @@ class OnUpdatePercentageProgressClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets showProgressSheet to false after execute`() = runTest {
             // ----- Arrange -----
@@ -246,7 +250,11 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                updateBookProgress(any(), any(), any())
+                updateBookProgress(
+                    any(),
+                    any(),
+                    any(),
+                )
             }
         }
 
@@ -454,7 +462,10 @@ class OnUpdatePercentageProgressClickActionTest {
         @Test
         fun `adds book id to failedMutationBookIds when updateBookProgress fails`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 200, id = 3)
+            val book = stubBookWithCurrentEditionPages(
+                pages = 200,
+                id = 3,
+            )
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -481,7 +492,10 @@ class OnUpdatePercentageProgressClickActionTest {
         @Test
         fun `does not add book id to failedMutationBookIds when updateBookProgress succeeds`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 200, id = 3)
+            val book = stubBookWithCurrentEditionPages(
+                pages = 200,
+                id = 3,
+            )
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -508,7 +522,10 @@ class OnUpdatePercentageProgressClickActionTest {
         @Test
         fun `stores job in bookMutationJobs after execute returns`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithCurrentEditionPages(pages = 200, id = 3)
+            val book = stubBookWithCurrentEditionPages(
+                pages = 200,
+                id = 3,
+            )
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -536,7 +553,10 @@ class OnUpdatePercentageProgressClickActionTest {
         fun `cancels prior job for same book id and replaces it with a new one`() = runTest {
             // ----- Arrange -----
             val bookId = 3
-            val book = stubBookWithCurrentEditionPages(pages = 200, id = bookId)
+            val book = stubBookWithCurrentEditionPages(
+                pages = 200,
+                id = bookId,
+            )
             val priorJob = Job()
 
             localVariablesFlow.value = ReadingLocalVariables(

@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSourc
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSource
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
-class ExploreRepositoryImpl(
+internal class ExploreRepositoryImpl(
     private val searchRemoteDataSource: SearchRemoteDataSource,
     private val searchLocalDataSource: SearchLocalDataSource,
     private val dismissedContinueSeriesLocalDataSource: DismissedContinueSeriesLocalDataSource,

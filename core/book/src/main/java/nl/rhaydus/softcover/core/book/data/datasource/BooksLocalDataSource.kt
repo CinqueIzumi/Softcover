@@ -5,15 +5,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.book.data.sort.toOrderByFragment
-import nl.rhaydus.softcover.core.data.database.dao.BookDao
-import nl.rhaydus.softcover.core.data.database.mapper.toModel
-import nl.rhaydus.softcover.core.data.storage.EditionImageStorage
+import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
+import nl.rhaydus.softcover.core.database.dao.BookDao
+import nl.rhaydus.softcover.core.database.mapper.toModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import java.io.File
 
 interface BooksLocalDataSource {
     val allUserBooks: Flow<List<Book>>
@@ -66,7 +65,7 @@ interface BooksLocalDataSource {
 
     suspend fun persistEditionImage(
         editionId: Int,
-        source: File,
+        bytes: ByteArray,
     )
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
@@ -83,10 +82,13 @@ interface BooksLocalDataSource {
 
     suspend fun getBookById(id: Int): Book?
 
-    suspend fun redirectBookId(oldId: Int, newId: Int)
+    suspend fun redirectBookId(
+        oldId: Int,
+        newId: Int,
+    )
 }
 
-class BooksLocalDataSourceImpl(
+internal class BooksLocalDataSourceImpl(
     private val dao: BookDao,
     private val editionImageStorage: EditionImageStorage,
 ) : BooksLocalDataSource {
@@ -124,18 +126,27 @@ class BooksLocalDataSourceImpl(
         editionId: Int,
         path: String?,
     ) {
-        dao.updateEditionLocalImagePath(editionId = editionId, path = path)
+        dao.updateEditionLocalImagePath(
+            editionId = editionId,
+            path = path,
+        )
     }
 
     override suspend fun persistEditionImage(
         editionId: Int,
-        source: File,
+        bytes: ByteArray,
     ) {
         if (editionImageStorage.exists(editionId = editionId)) return
 
-        val storedPath = editionImageStorage.copyFrom(editionId = editionId, source = source)
+        val storedPath = editionImageStorage.write(
+            editionId = editionId,
+            bytes = bytes,
+        )
 
-        dao.updateEditionLocalImagePath(editionId = editionId, path = storedPath)
+        dao.updateEditionLocalImagePath(
+            editionId = editionId,
+            path = storedPath,
+        )
     }
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
@@ -236,7 +247,10 @@ class BooksLocalDataSourceImpl(
             arrayOf(status.code)
         }
 
-        return dao.observeBooksRaw(query = SimpleSQLiteQuery(sql, args))
+        return dao.observeBooksRaw(query = SimpleSQLiteQuery(
+            sql,
+            args,
+        ),)
             .distinctUntilChanged()
             .map { list -> list.map { it.toModel() } }
     }
@@ -290,7 +304,13 @@ class BooksLocalDataSourceImpl(
         dao.deleteOrphanBooks()
     }
 
-    override suspend fun redirectBookId(oldId: Int, newId: Int) {
-        dao.redirectBookId(oldId = oldId, newId = newId)
+    override suspend fun redirectBookId(
+        oldId: Int,
+        newId: Int,
+    ) {
+        dao.redirectBookId(
+            oldId = oldId,
+            newId = newId,
+        )
     }
 }

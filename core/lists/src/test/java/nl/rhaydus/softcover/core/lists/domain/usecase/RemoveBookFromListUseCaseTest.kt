@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RemoveBookFromListUseCaseTest {
-
     private lateinit var listsRepository: ListsRepository
     private lateinit var useCase: RemoveBookFromListUseCase
 
@@ -24,7 +23,6 @@ class RemoveBookFromListUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success when repository call completes without error`() = runTest {
             // ----- Arrange -----

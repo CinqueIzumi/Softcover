@@ -2,16 +2,16 @@ package nl.rhaydus.softcover.core.personal.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.data.database.model.ReadingLogEntryEntity
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.mapper.toDomain
 import nl.rhaydus.softcover.core.personal.data.mapper.toEntity
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
 import nl.rhaydus.softcover.core.personal.domain.repository.ReadingLogRepository
-import java.time.Instant
-import java.time.LocalDate
 
-class ReadingLogRepositoryImpl(
+internal class ReadingLogRepositoryImpl(
     private val localDataSource: ReadingLogLocalDataSource,
 ) : ReadingLogRepository {
     override fun observeByBookId(bookId: Int): Flow<List<ReadingLogEntry>> =
@@ -33,7 +33,7 @@ class ReadingLogRepositoryImpl(
             finishedAt = finishedAt?.toString(),
             rating = rating,
             note = note,
-            createdAt = Instant.now().toString(),
+            createdAt = Clock.System.now().toString(),
         ),
     )
 

@@ -6,15 +6,14 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
-import nl.rhaydus.softcover.core.domain.model.BookDeadline
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
+import nl.rhaydus.softcover.core.domain.model.BookDeadline
 
 class ObserveAllBookDeadlinesUseCaseTest {
-
     private lateinit var repository: BookDeadlineRepository
     private lateinit var useCase: ObserveAllBookDeadlinesUseCase
 
@@ -26,15 +25,22 @@ class ObserveAllBookDeadlinesUseCaseTest {
 
     private fun buildDeadline(bookId: Int) = BookDeadline(
         bookId = bookId,
-        deadlineDate = LocalDate.of(2026, 5, 1),
-        setAt = LocalDate.of(2026, 4, 1),
+        deadlineDate = LocalDate(
+            2026,
+            5,
+            1,
+        ),
+        setAt = LocalDate(
+            2026,
+            4,
+            1,
+        ),
         initialPerDay = 10f,
         unit = nl.rhaydus.softcover.core.domain.model.DeadlineUnit.PAGES,
     )
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `associates deadlines by bookId`() = runTest {
             // ----- Arrange -----

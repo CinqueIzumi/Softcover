@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
-class ResetUserDataUseCaseImpl(
+internal class ResetUserDataUseCaseImpl(
     private val settingsRepository: SettingsRepository,
     private val booksRepository: BooksRepository,
     private val profileRepository: ProfileRepository,

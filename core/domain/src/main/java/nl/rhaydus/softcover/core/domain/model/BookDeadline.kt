@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 data class BookDeadline(
     val bookId: Int,

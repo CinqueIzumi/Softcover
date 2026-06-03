@@ -8,10 +8,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RefreshActionTest {
-
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
@@ -45,7 +44,6 @@ class RefreshActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets isLoading to true then false around the use case call`() = runTest {
             // ----- Arrange -----

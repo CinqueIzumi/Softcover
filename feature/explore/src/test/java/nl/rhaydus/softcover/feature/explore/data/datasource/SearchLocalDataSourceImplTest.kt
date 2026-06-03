@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SearchLocalDataSourceImplTest {
-
     private lateinit var storeDouble: DataStore<SearchHistoryEntity>
     private lateinit var dataSource: SearchLocalDataSourceImpl
 
@@ -35,7 +34,6 @@ class SearchLocalDataSourceImplTest {
 
     @Nested
     inner class PreviousSearchQueries {
-
         @Test
         fun `emits list of previous queries from datastore`() = runTest {
             // ----- Arrange -----
@@ -66,7 +64,6 @@ class SearchLocalDataSourceImplTest {
 
     @Nested
     inner class SaveSearchQuery {
-
         @Test
         fun `prepends new query to front of list`() = runTest {
             // ----- Arrange -----
@@ -151,7 +148,6 @@ class SearchLocalDataSourceImplTest {
 
     @Nested
     inner class RemoveSearchQuery {
-
         @Test
         fun `removes the specified query from the list`() = runTest {
             // ----- Arrange -----
@@ -168,7 +164,7 @@ class SearchLocalDataSourceImplTest {
 
             // ----- Assert -----
             val result = transformSlot.captured(
-                SearchHistoryEntity(previousQueries = listOf("kotlin", "android", "compose"))
+                SearchHistoryEntity(previousQueries = listOf("kotlin", "android", "compose")),
             )
             result.previousQueries shouldBe listOf("kotlin", "compose")
         }
@@ -214,7 +210,6 @@ class SearchLocalDataSourceImplTest {
 
     @Nested
     inner class RemoveAllSearchQueries {
-
         @Test
         fun `clears all queries from the list`() = runTest {
             // ----- Arrange -----

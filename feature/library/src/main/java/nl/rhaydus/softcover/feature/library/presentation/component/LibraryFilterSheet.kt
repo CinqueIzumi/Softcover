@@ -22,15 +22,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.PillChip
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryFilterSheet(
+internal fun LibraryFilterSheet(
     filters: LibraryFilters,
     options: LibraryFilterOptions,
     onToggle: (LibraryFilterValue) -> Unit,

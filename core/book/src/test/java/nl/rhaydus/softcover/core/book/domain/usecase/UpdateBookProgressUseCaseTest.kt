@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UpdateBookProgressUseCaseTest {
-
     private lateinit var repository: BooksRepository
     private lateinit var useCase: UpdateBookProgressUseCase
 
@@ -25,7 +24,6 @@ class UpdateBookProgressUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `updates progress then caches the returned book`() = runTest {
             // ----- Arrange -----

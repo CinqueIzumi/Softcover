@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 
 
 class ExploreRepositoryImplTest {
-
     private lateinit var searchRemoteDataSource: SearchRemoteDataSource
     private lateinit var searchLocalDataSource: SearchLocalDataSource
     private lateinit var dismissedContinueSeriesLocalDataSource: DismissedContinueSeriesLocalDataSource
@@ -40,7 +39,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class PreviousSearchQueries {
-
         @Test
         fun `previousSearchQueries is wired to local data source`() = runTest {
             // ----- Arrange -----
@@ -86,7 +84,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class QueriedBooks {
-
         @Test
         fun `queriedBooks is wired to remote data source`() = runTest {
             // ----- Arrange -----
@@ -112,7 +109,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class SearchForName {
-
         @Test
         fun `delegates to remote data source with correct arguments`() = runTest {
             // ----- Arrange -----
@@ -120,18 +116,23 @@ class ExploreRepositoryImplTest {
             val userId = 5
 
             // ----- Act -----
-            repository.searchForName(name = name, userId = userId)
+            repository.searchForName(
+                name = name,
+                userId = userId,
+            )
 
             // ----- Assert -----
             coVerify {
-                searchRemoteDataSource.searchForName(name = name, userId = userId)
+                searchRemoteDataSource.searchForName(
+                    name = name,
+                    userId = userId,
+                )
             }
         }
     }
 
     @Nested
     inner class SaveSearchQuery {
-
         @Test
         fun `delegates to local data source with correct name`() = runTest {
             // ----- Arrange -----
@@ -149,7 +150,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class RemoveSearchQuery {
-
         @Test
         fun `delegates to local data source with correct name`() = runTest {
             // ----- Arrange -----
@@ -167,7 +167,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class RemoveAllSearchQueries {
-
         @Test
         fun `delegates to local data source`() = runTest {
             // ----- Arrange -----
@@ -185,7 +184,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class DismissedContinueSeriesBookIds {
-
         @Test
         fun `is wired to dismissedContinueSeriesLocalDataSource dismissedBookIds`() = runTest {
             // ----- Arrange -----
@@ -211,7 +209,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class DismissedContinueSeriesIds {
-
         @Test
         fun `is wired to dismissedContinueSeriesLocalDataSource dismissedSeriesIds`() = runTest {
             // ----- Arrange -----
@@ -237,7 +234,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class DismissContinueSeriesBook {
-
         @Test
         fun `delegates to dismissedContinueSeriesLocalDataSource with correct bookId`() = runTest {
             // ----- Arrange -----
@@ -255,7 +251,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class DismissContinueSeries {
-
         @Test
         fun `delegates to dismissedContinueSeriesLocalDataSource with correct seriesId`() = runTest {
             // ----- Arrange -----
@@ -273,7 +268,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class UndoContinueSeriesBookDismissal {
-
         @Test
         fun `delegates to dismissedContinueSeriesLocalDataSource with correct bookId`() = runTest {
             // ----- Arrange -----
@@ -291,7 +285,6 @@ class ExploreRepositoryImplTest {
 
     @Nested
     inner class UndoContinueSeriesDismissal {
-
         @Test
         fun `delegates to dismissedContinueSeriesLocalDataSource with correct seriesId`() = runTest {
             // ----- Arrange -----

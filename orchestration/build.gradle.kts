@@ -40,7 +40,6 @@ dependencies {
     implementation(libs.androidx.splash)
 
     implementation(libs.voyager.navigator)
-    implementation(libs.voyager.koin)
     implementation(libs.voyager.tabNavigator)
     implementation(libs.voyager.transitions)
 }

@@ -40,24 +40,24 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.delay
-import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.presentation.component.EditorialSuffix
-import nl.rhaydus.softcover.core.presentation.component.HeroStatNumberField
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.presentation.session.ActiveSession
-import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
-import java.time.Instant
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
+import org.koin.compose.koinInject
+import nl.rhaydus.softcover.core.designsystem.R
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSuffix
+import nl.rhaydus.softcover.core.designsystem.presentation.component.HeroStatNumberField
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 
 /**
  * Distraction-free full-screen reading surface for the active session. An editorial hero on the page
@@ -67,7 +67,6 @@ import kotlin.math.roundToInt
  * [ActiveSessionController] directly and pops itself the moment no session is active.
  */
 object FocusModeScreen : Screen {
-
     override val key: String = "focus-mode"
 
     @Composable
@@ -111,11 +110,11 @@ private fun FocusModeContent(
     val haptics = rememberHaptics()
     val isPaused = active.session.isPaused
 
-    var now by remember { mutableStateOf(Instant.now()) }
+    var now by remember { mutableStateOf(Clock.System.now()) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            now = Instant.now()
+            now = Clock.System.now()
 
             delay(timeMillis = 1_000)
         }
@@ -334,12 +333,18 @@ private fun FocusPageEditor(
                 }
 
                 val newNumber = newValue.text.toIntOrNull() ?: run {
-                    number = number.copy(text = "", selection = newValue.selection)
+                    number = number.copy(
+                        text = "",
+                        selection = newValue.selection,
+                    )
 
                     return@HeroStatNumberField
                 }
 
-                number = newValue.copy(text = min(newNumber, totalPages).toString())
+                number = newValue.copy(text = min(
+                    newNumber,
+                    totalPages,
+                ).toString(),)
             },
             onFocusReset = {
                 firstTimeFocusGained = true
@@ -349,7 +354,10 @@ private fun FocusPageEditor(
                 number.text.toIntOrNull()?.takeIf { it != initialPage }?.let(onCommit)
             },
             onFocusGained = {
-                number = number.copy(selection = TextRange(start = 0, end = number.text.length))
+                number = number.copy(selection = TextRange(
+                    start = 0,
+                    end = number.text.length,
+                ),)
             },
         )
     }
@@ -360,13 +368,19 @@ private fun FocusPageEditor(
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    FocusProgressBar(fraction = (parsed.toFloat() / totalPages).coerceIn(0f, 1f))
+    FocusProgressBar(fraction = (parsed.toFloat() / totalPages).coerceIn(
+        0f,
+        1f,
+    ),)
 }
 
 @Composable
 private fun FocusProgressBar(fraction: Float) {
     LinearProgressIndicator(
-        progress = { fraction.coerceIn(0f, 1f) },
+        progress = { fraction.coerceIn(
+            0f,
+            1f,
+        ) },
         modifier = Modifier
             .fillMaxWidth()
             .height(10.dp),

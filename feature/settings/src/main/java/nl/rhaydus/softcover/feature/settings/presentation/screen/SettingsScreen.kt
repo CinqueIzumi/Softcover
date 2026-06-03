@@ -39,30 +39,28 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.R
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesSection
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
+import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpdate
+import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesSection
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
-import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
-import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
-import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
-import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import kotlinx.coroutines.launch
 
 object SettingsScreen : Screen {
-
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<SettingsScreenScreenModel>()
@@ -76,7 +74,6 @@ object SettingsScreen : Screen {
 
         Screen(
             state = state,
-            runAction = screenModel::runAction,
             navigateToProfile = {
                 navigator.parent?.push(appNavigator.screen(ScreenDestination.Profile))
             },
@@ -98,9 +95,8 @@ object SettingsScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: SettingsScreenUiState,
-        runAction: (SettingsAction) -> Unit,
         navigateToProfile: () -> Unit,
         navigateToAppearanceSettings: () -> Unit,
         navigateToLibraryVisibility: () -> Unit,
@@ -449,7 +445,6 @@ object SettingsScreen : Screen {
 private fun SettingsScreenPreview() {
     SoftcoverTheme {
         SettingsScreen.Screen(
-            runAction = {},
             state = SettingsScreenUiState(),
             navigateToProfile = {},
             navigateToAppearanceSettings = {},

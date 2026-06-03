@@ -2,17 +2,17 @@ package nl.rhaydus.softcover.feature.library.presentation.flows
 
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-class BookListsCollector : LibraryInitializer {
+internal class BookListsCollector : LibraryInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,
@@ -27,7 +27,10 @@ class BookListsCollector : LibraryInitializer {
             // derive both the edition list and the addedAt lookup from that one filtered slice so
             // they cannot drift apart if either guard is later changed.
             val renderedByTab: Map<String, List<ListBook>> = enabledLists.associate { list ->
-                val tabId = LibraryTab.CustomList(listId = list.id, listName = list.name).id
+                val tabId = LibraryTab.CustomList(
+                    listId = list.id,
+                    listName = list.name,
+                ).id
 
                 tabId to list.books.filter { it.edition != null }
             }

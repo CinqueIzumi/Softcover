@@ -10,14 +10,13 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.GetUserIdQuery
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SettingsRemoteDataSourceImplTest {
-
     private lateinit var apolloClient: ApolloClient
     private lateinit var dataSource: SettingsRemoteDataSourceImpl
 
@@ -26,7 +25,7 @@ class SettingsRemoteDataSourceImplTest {
         apolloClient = mockk()
         dataSource = SettingsRemoteDataSourceImpl(apolloClient = apolloClient)
 
-        mockkStatic("nl.rhaydus.softcover.core.data.network.helper.ApolloExtensionsKt")
+        mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
     }
 
     @AfterEach
@@ -36,13 +35,15 @@ class SettingsRemoteDataSourceImplTest {
 
     @Nested
     inner class GetUserIdFromBackend {
-
         @Test
         fun `returns id from first me entry when query succeeds`() = runTest {
             // ----- Arrange -----
             val expectedId = 42
             val queryData = mockk<GetUserIdQuery.Data>()
-            val meEntry = GetUserIdQuery.Data.Me(__typename = "users", id = expectedId)
+            val meEntry = GetUserIdQuery.Data.Me(
+                __typename = "users",
+                id = expectedId,
+            )
 
             coEvery {
                 apolloClient.safeQuery(query = any<GetUserIdQuery>())

@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
-class ProfileRepositoryImpl(
+internal class ProfileRepositoryImpl(
     private val profileRemoteDataSource: ProfileRemoteDataSource,
     private val profileLocalDataSource: ProfileLocalDataSource,
 ) : ProfileRepository {

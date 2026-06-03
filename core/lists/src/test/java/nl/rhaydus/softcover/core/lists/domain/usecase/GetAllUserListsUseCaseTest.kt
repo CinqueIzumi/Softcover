@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetAllUserListsUseCaseTest {
-
     private lateinit var listsRepository: ListsRepository
     private lateinit var useCase: GetAllUserListsUseCase
 
@@ -27,7 +26,6 @@ class GetAllUserListsUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository allUserLists flow`() = runTest {
             // ----- Arrange -----

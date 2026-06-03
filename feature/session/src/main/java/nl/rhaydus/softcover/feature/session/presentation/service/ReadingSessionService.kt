@@ -14,6 +14,7 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import coil.imageLoader
 import coil.request.ImageRequest
+import kotlin.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,15 +25,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import timber.log.Timber
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
-import nl.rhaydus.softcover.core.presentation.component.resolveEditionImageSource
-import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
-import nl.rhaydus.softcover.core.presentation.session.ActiveSession
-import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
-import java.time.Duration
+import nl.rhaydus.softcover.core.designsystem.presentation.component.resolveEditionImageSource
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppEntryPoint
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
+import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.platform.notification.SoftcoverNotificationChannel
 
 /**
  * Foreground service that surfaces the active reading session as a persistent, ongoing notification:
@@ -43,8 +43,7 @@ import java.time.Duration
  * chip, and never touches media buttons. Being a foreground service makes it non-dismissable; it is
  * removed only when the session ends (the [controller]'s active session goes null).
  */
-class ReadingSessionService : Service() {
-
+internal class ReadingSessionService : Service() {
     private val controller: ActiveSessionController by inject()
 
     private val appEntryPoint: AppEntryPoint by inject()
@@ -59,7 +58,11 @@ class ReadingSessionService : Service() {
 
     override fun onBind(intent: Intent): IBinder? = null
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         when (intent?.action) {
             ACTION_PAUSE -> controller.pause()
 
@@ -73,7 +76,10 @@ class ReadingSessionService : Service() {
         // ACTION_RESHOW (the notification's deleteIntent) re-posts after a swipe: Android 14+ ignores
         // setOngoing for FGS notifications, so the only way to keep it persistent is to bring it back.
         // If the session has ended, the collector below removes it instead.
-        startForeground(NOTIFICATION_ID, buildNotification(active = controller.activeSession.value))
+        startForeground(
+            NOTIFICATION_ID,
+            buildNotification(active = controller.activeSession.value),
+        )
 
         startCollecting()
 
@@ -92,7 +98,10 @@ class ReadingSessionService : Service() {
             .onEach { active ->
                 runCatching {
                     if (active == null) {
-                        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                        ServiceCompat.stopForeground(
+                            this,
+                            ServiceCompat.STOP_FOREGROUND_REMOVE,
+                        )
 
                         stopSelf()
 
@@ -101,9 +110,12 @@ class ReadingSessionService : Service() {
 
                     ensureCover(active = active)
 
-                    startForeground(NOTIFICATION_ID, buildNotification(active = active))
+                    startForeground(
+                        NOTIFICATION_ID,
+                        buildNotification(active = active),
+                    )
                 }.onFailure { error ->
-                    Timber.e("$error")
+                    AppLog.e("$error")
                 }
             }
             .launchIn(serviceScope)
@@ -139,7 +151,10 @@ class ReadingSessionService : Service() {
             coverBitmap = bitmap
 
             controller.activeSession.value?.let { current ->
-                startForeground(NOTIFICATION_ID, buildNotification(active = current))
+                startForeground(
+                    NOTIFICATION_ID,
+                    buildNotification(active = current),
+                )
             }
         }
     }
@@ -162,11 +177,17 @@ class ReadingSessionService : Service() {
         val isPaused = active?.session?.isPaused == true
         val elapsed = active?.session?.readingDuration() ?: Duration.ZERO
 
-        val builder = NotificationCompat.Builder(this, SoftcoverNotificationChannel.Session.id)
+        val builder = NotificationCompat.Builder(
+            this,
+            SoftcoverNotificationChannel.Session.id,
+        )
             .setSmallIcon(R.drawable.ic_reading)
             .setContentTitle(title)
             .setContentText(if (isPaused) pausedText(elapsed = elapsed) else author)
-            .setColor(ContextCompat.getColor(this, R.color.notification_accent))
+            .setColor(ContextCompat.getColor(
+                this,
+                R.color.notification_accent,
+            ),)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
@@ -186,7 +207,7 @@ class ReadingSessionService : Service() {
 
             builder.setUsesChronometer(true)
 
-            builder.setWhen(System.currentTimeMillis() - elapsed.toMillis())
+            builder.setWhen(System.currentTimeMillis() - elapsed.inWholeMilliseconds)
         }
 
         if (isPaused) {
@@ -230,15 +251,24 @@ class ReadingSessionService : Service() {
         return NotificationCompat.Action.Builder(
             R.drawable.ic_edit,
             getString(R.string.session_action_update),
-            servicePendingIntent(action = ACTION_UPDATE_PAGE, mutable = true),
+            servicePendingIntent(
+                action = ACTION_UPDATE_PAGE,
+                mutable = true,
+            ),
         )
             .addRemoteInput(remoteInput)
             .setAllowGeneratedReplies(false)
             .build()
     }
 
-    private fun servicePendingIntent(action: String, mutable: Boolean = false): PendingIntent {
-        val intent = Intent(this, ReadingSessionService::class.java).setAction(action)
+    private fun servicePendingIntent(
+        action: String,
+        mutable: Boolean = false,
+    ): PendingIntent {
+        val intent = Intent(
+            this,
+            ReadingSessionService::class.java,
+        ).setAction(action)
 
         val flags = if (mutable) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
@@ -246,7 +276,12 @@ class ReadingSessionService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         }
 
-        return PendingIntent.getService(this, action.hashCode(), intent, flags)
+        return PendingIntent.getService(
+            this,
+            action.hashCode(),
+            intent,
+            flags,
+        )
     }
 
     private fun focusModePendingIntent(): PendingIntent {
@@ -261,7 +296,10 @@ class ReadingSessionService : Service() {
     }
 
     private fun pausedText(elapsed: Duration): String =
-        getString(R.string.session_notification_paused, formatSessionElapsed(elapsed = elapsed))
+        getString(
+            R.string.session_notification_paused,
+            formatSessionElapsed(elapsed = elapsed),
+        )
 
     override fun onDestroy() {
         serviceScope.cancel()
@@ -283,9 +321,15 @@ class ReadingSessionService : Service() {
         private const val ACTION_RESHOW = "nl.rhaydus.softcover.session.RESHOW"
 
         fun start(context: Context) {
-            val intent = Intent(context, ReadingSessionService::class.java)
+            val intent = Intent(
+                context,
+                ReadingSessionService::class.java,
+            )
 
-            ContextCompat.startForegroundService(context, intent)
+            ContextCompat.startForegroundService(
+                context,
+                intent,
+            )
         }
     }
 }

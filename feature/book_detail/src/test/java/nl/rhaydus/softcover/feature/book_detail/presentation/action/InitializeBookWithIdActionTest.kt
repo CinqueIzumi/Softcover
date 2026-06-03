@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class InitializeBookWithIdActionTest {
-
     private lateinit var fetchBookByIdUseCase: FetchBookByIdUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -72,13 +71,15 @@ class InitializeBookWithIdActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets book and clears loadingBookDetails flag when use case succeeds`() = runTest {
             // ----- Arrange -----
             val bookId = 42
             val expectedEditions = listOf<BookEdition>(mockk(), mockk())
-            val expectedBook = stubBook(id = bookId, editions = expectedEditions)
+            val expectedBook = stubBook(
+                id = bookId,
+                editions = expectedEditions,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {

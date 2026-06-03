@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.feature.reading.di
 
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.BookDeadlinesCollector
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.CurrentlyReadingBooksCollector
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.DateStyleCollector
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.PlanTodayDismissalsCollector
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingActivityCollector
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.ReadingInitializer
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.TrendingBooksLoader
-import nl.rhaydus.softcover.feature.reading.presentation.initializer.WantToReadCollector
+import nl.rhaydus.softcover.feature.reading.presentation.flows.BookDeadlinesCollector
+import nl.rhaydus.softcover.feature.reading.presentation.flows.CurrentlyReadingBooksCollector
+import nl.rhaydus.softcover.feature.reading.presentation.flows.DateStyleCollector
+import nl.rhaydus.softcover.feature.reading.presentation.flows.PlanTodayDismissalsCollector
+import nl.rhaydus.softcover.feature.reading.presentation.flows.ReadingActivityCollector
+import nl.rhaydus.softcover.feature.reading.presentation.flows.ReadingInitializer
+import nl.rhaydus.softcover.feature.reading.presentation.flows.TrendingBooksLoader
+import nl.rhaydus.softcover.feature.reading.presentation.flows.WantToReadCollector
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module

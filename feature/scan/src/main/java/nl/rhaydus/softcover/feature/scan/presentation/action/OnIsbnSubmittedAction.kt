@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent
@@ -9,9 +10,8 @@ import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
-import timber.log.Timber
 
-class OnIsbnSubmittedAction(
+internal class OnIsbnSubmittedAction(
     val isbn: String,
 ) : ScanAction {
     override suspend fun execute(
@@ -37,7 +37,10 @@ class OnIsbnSubmittedAction(
                     }
 
                     is IsbnLookupResult.UnknownEdition -> {
-                        scope.setState { it.copy(isResolving = false, unknownIsbn = result.normalizedIsbn) }
+                        scope.setState { it.copy(
+                            isResolving = false,
+                            unknownIsbn = result.normalizedIsbn,
+                        ) }
                     }
 
                     is IsbnLookupResult.InvalidIsbn -> {
@@ -48,7 +51,10 @@ class OnIsbnSubmittedAction(
                 }
             }
             .onFailure { error ->
-                Timber.e(error, "Failed to resolve scanned ISBN $isbn")
+                AppLog.e(
+                    error,
+                    "Failed to resolve scanned ISBN $isbn",
+                )
 
                 scope.setState { it.copy(isResolving = false) }
 

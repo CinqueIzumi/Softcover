@@ -2,7 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.domain.model.Tag as DomainTag
 
-sealed interface LibraryFilterValue {
+internal sealed interface LibraryFilterValue {
     data class Tag(val tag: DomainTag) : LibraryFilterValue
 
     data class Format(val value: String) : LibraryFilterValue
@@ -14,7 +14,7 @@ sealed interface LibraryFilterValue {
     data class RatingMin(val threshold: Double) : LibraryFilterValue
 }
 
-fun LibraryFilters.toggle(value: LibraryFilterValue): LibraryFilters = when (value) {
+internal fun LibraryFilters.toggle(value: LibraryFilterValue): LibraryFilters = when (value) {
     is LibraryFilterValue.Tag -> copy(
         tags = tags.toggleElement(value.tag),
     )

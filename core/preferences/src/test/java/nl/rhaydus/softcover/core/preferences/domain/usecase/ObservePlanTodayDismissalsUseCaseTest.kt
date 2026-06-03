@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ObservePlanTodayDismissalsUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: ObservePlanTodayDismissalsUseCase
 
@@ -24,7 +23,6 @@ class ObservePlanTodayDismissalsUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns the dismissedPlanTodayByBook flow from the repository`() = runTest {
             // ----- Arrange -----

@@ -2,8 +2,8 @@ package nl.rhaydus.softcover.orchestration.navigation
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
@@ -18,12 +18,10 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AppNavigatorImplTest {
-
     private val navigator = AppNavigatorImpl()
 
     @Nested
     inner class Screen {
-
         @Test
         fun `BookDetail destination maps to BookDetailScreen with matching id`() {
             // ----- Arrange -----
@@ -100,7 +98,6 @@ class AppNavigatorImplTest {
 
     @Nested
     inner class Tab {
-
         @Test
         fun `READING tab destination maps to ReadingTab singleton`() {
             // ----- Act -----

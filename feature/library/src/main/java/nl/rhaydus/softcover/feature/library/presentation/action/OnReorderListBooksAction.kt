@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import timber.log.Timber
 
 /**
  * Persists a drag-and-drop reorder for a contiguous slice of a custom list. [orderedListBookIds]
@@ -18,7 +18,7 @@ import timber.log.Timber
  * matching Step 2.7's "Hardcover is authoritative" spec. The toast surfaces the divergence so
  * the user knows the reorder hasn't synced yet.
  */
-class OnReorderListBooksAction(
+internal class OnReorderListBooksAction(
     private val listId: Int,
     private val startPosition: Int,
     private val orderedListBookIds: List<Int>,
@@ -38,7 +38,10 @@ class OnReorderListBooksAction(
             startPosition = startPosition,
             orderedListBookIds = orderedListBookIds,
         ).onFailure { throwable ->
-            Timber.e(throwable, "Reorder failed for list $listId")
+            AppLog.e(
+                throwable,
+                "Reorder failed for list $listId",
+            )
 
             val suffix = listName?.let { " in \"$it\"" }.orEmpty()
 

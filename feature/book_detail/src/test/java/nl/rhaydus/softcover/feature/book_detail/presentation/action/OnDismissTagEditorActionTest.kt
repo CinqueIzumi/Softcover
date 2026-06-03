@@ -5,7 +5,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnDismissTagEditorActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -33,7 +32,6 @@ class OnDismissTagEditorActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets showTagEditorSheet to false`() = runTest {
             // ----- Arrange -----
@@ -41,7 +39,10 @@ class OnDismissTagEditorActionTest {
             val action = OnDismissTagEditorAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.showTagEditorSheet shouldBe false
@@ -54,7 +55,10 @@ class OnDismissTagEditorActionTest {
             val action = OnDismissTagEditorAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.tagEditorInput shouldBe ""
@@ -67,7 +71,10 @@ class OnDismissTagEditorActionTest {
             val action = OnDismissTagEditorAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState.copy(

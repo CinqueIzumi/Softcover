@@ -5,8 +5,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.TagCategory
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnTagEditorCategoryChangeActionTest {
-
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -34,7 +33,6 @@ class OnTagEditorCategoryChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets tagEditorCategory to the new category`() = runTest {
             // ----- Arrange -----
@@ -42,7 +40,10 @@ class OnTagEditorCategoryChangeActionTest {
             val action = OnTagEditorCategoryChangeAction(category = TagCategory.MOOD)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.tagEditorCategory shouldBe TagCategory.MOOD
@@ -56,7 +57,10 @@ class OnTagEditorCategoryChangeActionTest {
             val action = OnTagEditorCategoryChangeAction(category = TagCategory.GENRE)
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState.copy(tagEditorCategory = TagCategory.GENRE)

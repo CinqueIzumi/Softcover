@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ResumeReadingSessionUseCaseTest {
-
     private lateinit var repository: ReadingSessionRepository
     private lateinit var useCase: ResumeReadingSessionUseCase
 
@@ -21,7 +20,6 @@ class ResumeReadingSessionUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository resume with given id`() = runTest {
             // ----- Arrange -----

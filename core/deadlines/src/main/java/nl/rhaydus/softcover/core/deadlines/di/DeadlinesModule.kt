@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.deadlines.di
 
-import nl.rhaydus.softcover.core.data.database.SoftcoverDatabase
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.deadlines.data.datasource.BookDeadlineLocalDataSource
 import nl.rhaydus.softcover.core.deadlines.data.datasource.BookDeadlineLocalDataSourceImpl
 import nl.rhaydus.softcover.core.deadlines.data.repository.BookDeadlineRepositoryImpl

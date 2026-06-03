@@ -4,9 +4,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
@@ -21,7 +21,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.buildEditionFilte
  * during composition the first time the sheet opens, which on large libraries stalls the slide-up
  * animation by enough to feel laggy.
  */
-class FilterOptionsCollector : LibraryInitializer {
+internal class FilterOptionsCollector : LibraryInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,

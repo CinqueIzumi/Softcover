@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetUserTagsUseCaseTest {
-
     private lateinit var userTagsRepository: UserTagsRepository
     private lateinit var getUserIdUseCase: GetUserIdUseCase
     private lateinit var useCase: GetUserTagsUseCase
@@ -38,7 +37,6 @@ class GetUserTagsUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success with the list from the repository`() = runTest {
             // ----- Arrange -----
@@ -49,7 +47,10 @@ class GetUserTagsUseCaseTest {
             coEvery { getUserIdUseCase() } returns Result.success(userId)
 
             coEvery {
-                userTagsRepository.getUserTags(userId = userId, bookId = bookId)
+                userTagsRepository.getUserTags(
+                    userId = userId,
+                    bookId = bookId,
+                )
             } returns expectedTags
 
             // ----- Act -----
@@ -69,7 +70,10 @@ class GetUserTagsUseCaseTest {
             coEvery { getUserIdUseCase() } returns Result.success(userId)
 
             coEvery {
-                userTagsRepository.getUserTags(userId = userId, bookId = bookId)
+                userTagsRepository.getUserTags(
+                    userId = userId,
+                    bookId = bookId,
+                )
             } returns emptyList()
 
             // ----- Act -----
@@ -90,7 +94,10 @@ class GetUserTagsUseCaseTest {
             coEvery { getUserIdUseCase() } returns Result.success(userId)
 
             coEvery {
-                userTagsRepository.getUserTags(userId = userId, bookId = bookId)
+                userTagsRepository.getUserTags(
+                    userId = userId,
+                    bookId = bookId,
+                )
             } throws expectedError
 
             // ----- Act -----
@@ -116,7 +123,10 @@ class GetUserTagsUseCaseTest {
             result.isFailure shouldBe true
 
             coVerify(exactly = 0) {
-                userTagsRepository.getUserTags(any(), any())
+                userTagsRepository.getUserTags(
+                    any(),
+                    any(),
+                )
             }
         }
 
@@ -129,7 +139,10 @@ class GetUserTagsUseCaseTest {
             coEvery { getUserIdUseCase() } returns Result.success(userId)
 
             coEvery {
-                userTagsRepository.getUserTags(userId = userId, bookId = bookId)
+                userTagsRepository.getUserTags(
+                    userId = userId,
+                    bookId = bookId,
+                )
             } throws IllegalStateException("server error")
 
             // ----- Act -----

@@ -12,8 +12,8 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnMarkBookAsReadingClickActionTest {
-
     private lateinit var markBookAsReadingUseCase: MarkBookAsReadingUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -69,7 +68,6 @@ class OnMarkBookAsReadingClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes use case with the book provided to the action constructor`() = runTest {
             // ----- Arrange -----

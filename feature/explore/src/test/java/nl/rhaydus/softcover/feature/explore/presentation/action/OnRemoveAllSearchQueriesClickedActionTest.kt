@@ -9,7 +9,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveAllSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnRemoveAllSearchQueriesClickedActionTest {
-
     private lateinit var removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
@@ -60,7 +59,6 @@ class OnRemoveAllSearchQueriesClickedActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes removeAllSearchQueriesUseCase`() = runTest {
             // ----- Arrange -----

@@ -11,9 +11,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryStatsTest {
-
     // region Fixtures
-
     private fun buildEdition(
         id: Int = 1,
         pages: Int? = null,
@@ -104,12 +102,9 @@ class LibraryStatsTest {
         updatedAt = updatedAt,
         event = JournalEventType.StatusFinished.eventName,
     )
-
     // endregion
-
     @Nested
     inner class TotalPages {
-
         @Test
         fun `returns 0 for empty list`() {
             // ----- Arrange -----
@@ -175,7 +170,6 @@ class LibraryStatsTest {
 
     @Nested
     inner class FormatBookCount {
-
         @Test
         fun `returns "1 title" for count of 1`() {
             // ----- Arrange -----
@@ -212,7 +206,6 @@ class LibraryStatsTest {
 
     @Nested
     inner class FormatPageCount {
-
         @Test
         fun `returns null for 0 pages`() {
             // ----- Arrange -----
@@ -262,7 +255,6 @@ class LibraryStatsTest {
 
     @Nested
     inner class FinishedYear {
-
         @Test
         fun `returns null when userBook is null`() {
             // ----- Arrange -----
@@ -339,7 +331,6 @@ class LibraryStatsTest {
 
     @Nested
     inner class AvailableFinishedYears {
-
         @Test
         fun `returns empty list when no books have finished year`() {
             // ----- Arrange -----

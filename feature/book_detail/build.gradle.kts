@@ -8,16 +8,16 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:domain"))
+    api(project(":core:domain"))
     implementation(project(":core:book"))
     implementation(project(":core:lists"))
     implementation(project(":core:deadlines"))
     implementation(project(":core:profile"))
-    implementation(project(":core:identity"))
+    api(project(":core:identity"))
     implementation(project(":core:preferences"))
     implementation(project(":core:database"))
     implementation(project(":core:network"))
-    implementation(project(":core:designsystem"))
+    api(project(":core:designsystem"))
 
     implementation(libs.koin.compose)
 

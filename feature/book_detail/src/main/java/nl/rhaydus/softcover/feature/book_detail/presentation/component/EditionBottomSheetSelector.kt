@@ -36,23 +36,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.conditional
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
-import nl.rhaydus.softcover.core.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.modifier.conditional
-import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
-import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditionBottomSheetSelector(
+internal fun EditionBottomSheetSelector(
     bookTitle: String,
     currentEdition: BookEdition,
     defaultEdition: BookEdition?,

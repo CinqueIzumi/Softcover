@@ -1,16 +1,23 @@
 package nl.rhaydus.softcover.core.domain.model
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class DeadlineProgressTest {
-
     private fun buildDeadline(
         bookId: Int = 1,
-        deadlineDate: LocalDate = LocalDate.of(2026, 5, 1),
-        setAt: LocalDate = LocalDate.of(2026, 4, 1),
+        deadlineDate: LocalDate = LocalDate(
+            2026,
+            5,
+            1,
+        ),
+        setAt: LocalDate = LocalDate(
+            2026,
+            4,
+            1,
+        ),
         initialPerDay: Float = 10f,
         unit: DeadlineUnit = DeadlineUnit.PAGES,
     ) = BookDeadline(
@@ -23,13 +30,20 @@ class DeadlineProgressTest {
 
     @Nested
     inner class Compute {
-
         @Test
         fun `no units read — requiredPerDay equals total divided by daysRemaining`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -52,9 +66,17 @@ class DeadlineProgressTest {
         @Test
         fun `fully read — unitsRemaining is zero and requiredPerDay is zero`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -77,9 +99,17 @@ class DeadlineProgressTest {
         @Test
         fun `expired past — deadline was yesterday and units still remaining`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 4, 19),
+                deadlineDate = LocalDate(
+                    2026,
+                    4,
+                    19,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -102,9 +132,17 @@ class DeadlineProgressTest {
         @Test
         fun `expired same-day — deadline is today and units remaining`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 4, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    4,
+                    20,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -128,9 +166,17 @@ class DeadlineProgressTest {
         @Test
         fun `on track — requiredPerDay is less than or equal to initialPerDay`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -151,10 +197,18 @@ class DeadlineProgressTest {
         @Test
         fun `behind — requiredPerDay is greater than initialPerDay`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             // Initial was 10/day; now behind — need more than 10/day
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -176,9 +230,17 @@ class DeadlineProgressTest {
         @Test
         fun `deadline today with zero units remaining — not expired and requiredPerDay is zero`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 4, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    4,
+                    20,
+                ),
                 initialPerDay = 5f,
             )
 
@@ -200,9 +262,17 @@ class DeadlineProgressTest {
         @Test
         fun `total zero — unitsRemaining clamps to zero and requiredPerDay is zero`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 initialPerDay = 0f,
             )
 
@@ -224,9 +294,17 @@ class DeadlineProgressTest {
         @Test
         fun `current exceeds total — unitsRemaining clamps to zero`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 initialPerDay = 5f,
             )
 
@@ -247,8 +325,16 @@ class DeadlineProgressTest {
         @Test
         fun `output carries the deadline date from the BookDeadline`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
-            val deadlineDate = LocalDate.of(2026, 6, 15)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
+            val deadlineDate = LocalDate(
+                2026,
+                6,
+                15,
+            )
             val deadline = buildDeadline(deadlineDate = deadlineDate)
 
             // ----- Act -----
@@ -266,9 +352,17 @@ class DeadlineProgressTest {
         @Test
         fun `output carries the initialPerDay from the BookDeadline`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 initialPerDay = 7.5f,
             )
 
@@ -287,9 +381,17 @@ class DeadlineProgressTest {
         @Test
         fun `unit PAGES is carried from BookDeadline to DeadlineProgress`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 unit = DeadlineUnit.PAGES,
             )
 
@@ -308,9 +410,17 @@ class DeadlineProgressTest {
         @Test
         fun `unit SECONDS is carried from BookDeadline to DeadlineProgress`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 unit = DeadlineUnit.SECONDS,
             )
 
@@ -329,11 +439,14 @@ class DeadlineProgressTest {
 
     @Nested
     inner class ComputeWithSecondsUnit {
-
         // Mirrors Compute tests to verify SECONDS and PAGES behave symmetrically.
 
         private fun buildAudioDeadline(
-            deadlineDate: LocalDate = LocalDate.of(2026, 5, 20),
+            deadlineDate: LocalDate = LocalDate(
+                2026,
+                5,
+                20,
+            ),
             initialPerDay: Float = 600f,
         ) = buildDeadline(
             deadlineDate = deadlineDate,
@@ -344,7 +457,11 @@ class DeadlineProgressTest {
         @Test
         fun `no seconds listened — requiredPerDay equals totalSeconds divided by daysRemaining`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildAudioDeadline(initialPerDay = 600f)
 
             // ----- Act -----
@@ -367,7 +484,11 @@ class DeadlineProgressTest {
         @Test
         fun `fully listened — unitsRemaining is zero and requiredPerDay is zero`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildAudioDeadline(initialPerDay = 600f)
 
             // ----- Act -----
@@ -389,9 +510,17 @@ class DeadlineProgressTest {
         @Test
         fun `expired past — deadline was yesterday and seconds still remaining`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildAudioDeadline(
-                deadlineDate = LocalDate.of(2026, 4, 19),
+                deadlineDate = LocalDate(
+                    2026,
+                    4,
+                    19,
+                ),
                 initialPerDay = 600f,
             )
 
@@ -413,7 +542,11 @@ class DeadlineProgressTest {
         @Test
         fun `behind — requiredPerDay is greater than initialPerDay for seconds`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildAudioDeadline(initialPerDay = 600f)
 
             // ----- Act -----
@@ -434,7 +567,11 @@ class DeadlineProgressTest {
         @Test
         fun `current exceeds total seconds — unitsRemaining clamps to zero`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildAudioDeadline(initialPerDay = 600f)
 
             // ----- Act -----
@@ -454,14 +591,21 @@ class DeadlineProgressTest {
 
     @Nested
     inner class UnitsBehindSchedule {
-
         @Test
         fun `reader is exactly on schedule — unitsBehindSchedule is zero`() {
             // ----- Arrange -----
             // 20 days remaining, initialPerDay=10 → expected=200; reader has exactly 200 units left
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 10),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    10,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -482,9 +626,17 @@ class DeadlineProgressTest {
         fun `reader is behind schedule — unitsBehindSchedule matches the arithmetic`() {
             // ----- Arrange -----
             // 10 days remaining, initialPerDay=10 → expected=100; reader still has 150 units left
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 4, 30),
+                deadlineDate = LocalDate(
+                    2026,
+                    4,
+                    30,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -506,9 +658,17 @@ class DeadlineProgressTest {
         fun `reader is ahead of schedule — unitsBehindSchedule is zero not negative`() {
             // ----- Arrange -----
             // 10 days remaining, initialPerDay=10 → expected=100; reader only has 40 units left (ahead)
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 4, 30),
+                deadlineDate = LocalDate(
+                    2026,
+                    4,
+                    30,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -531,9 +691,17 @@ class DeadlineProgressTest {
             // ----- Arrange -----
             // daysRemaining < 0 → expectedRemaining collapses to 0
             // unitsBehindSchedule = max(0, unitsRemaining - 0) = unitsRemaining
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 4, 15),
+                deadlineDate = LocalDate(
+                    2026,
+                    4,
+                    15,
+                ),
                 initialPerDay = 10f,
             )
 
@@ -554,9 +722,17 @@ class DeadlineProgressTest {
         @Test
         fun `total zero — unitsBehindSchedule is zero`() {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadline = buildDeadline(
-                deadlineDate = LocalDate.of(2026, 5, 20),
+                deadlineDate = LocalDate(
+                    2026,
+                    5,
+                    20,
+                ),
                 initialPerDay = 10f,
             )
 

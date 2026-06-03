@@ -5,6 +5,9 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.cache.normalized.FetchPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragment
@@ -38,21 +41,19 @@ import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
-import nl.rhaydus.softcover.core.data.mapper.reviewSlateFromDocument
-import nl.rhaydus.softcover.core.data.network.helper.safeMutation
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
+import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.network.helper.safeMutation
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
-import timber.log.Timber
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
@@ -156,7 +157,7 @@ private const val BATCH_ID_LIMIT: Int = 200
 /** Hardcover's ISBN external-book provider platform — `upsert_book` uses the ISBN as the external id. */
 private const val HARDCOVER_ISBN_PLATFORM_ID: Int = 8
 
-class BooksRemoteDataSourceImpl(
+internal class BooksRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : BooksRemoteDataSource {
     override suspend fun fetchBookById(id: Int): Book {
@@ -165,7 +166,7 @@ class BooksRemoteDataSourceImpl(
         val canonicalId = book.canonicalId
 
         if (canonicalId != null && canonicalId != book.id) {
-            Timber.i("Book $id has canonical $canonicalId; refetching canonical.")
+            AppLog.i("Book $id has canonical $canonicalId; refetching canonical.")
             return fetchBookByIdRaw(canonicalId).copy(canonicalId = null)
         }
 
@@ -200,11 +201,17 @@ class BooksRemoteDataSourceImpl(
         )
 
         result.isbn13.firstOrNull()?.let { edition ->
-            return IsbnEditionMatch(bookId = edition.book_id, editionId = edition.id)
+            return IsbnEditionMatch(
+                bookId = edition.book_id,
+                editionId = edition.id,
+            )
         }
 
         return result.isbn10.firstOrNull()?.let { edition ->
-            IsbnEditionMatch(bookId = edition.book_id, editionId = edition.id)
+            IsbnEditionMatch(
+                bookId = edition.book_id,
+                editionId = edition.id,
+            )
         }
     }
 
@@ -266,7 +273,7 @@ class BooksRemoteDataSourceImpl(
                 to = to,
                 limit = limit,
                 offset = offset,
-            )
+            ),
         )
             .books_trending
             ?.ids
@@ -339,9 +346,9 @@ class BooksRemoteDataSourceImpl(
         val userBook = book.userBook
             ?: throw Exception("User did not have a user book")
 
-        val currentDate = LocalDate
-            .now()
-            .format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val currentDate = Clock.System
+            .todayIn(TimeZone.currentSystemDefault())
+            .toString()
 
         val input = UserBookUpdateInput(
             edition_id = Optional.Present(book.currentEdition?.id),
@@ -353,15 +360,15 @@ class BooksRemoteDataSourceImpl(
             referrer_user_id = Optional.Present(userBook.referrerUserId),
             reviewed_at = Optional.Present(userBook.reviewedAt),
             date_added = Optional.Present(userBook.dateAdded),
-            user_date = Optional.present(currentDate)
+            user_date = Optional.present(currentDate),
         )
 
         return apolloClient
             .safeMutation(
                 mutation = MarkBookAsReadingMutation(
                     id = userBook.id,
-                    `object` = input
-                )
+                    `object` = input,
+                ),
             )
             .update_user_book
             ?.user_book
@@ -382,7 +389,7 @@ class BooksRemoteDataSourceImpl(
                 mutation = UpdateUserBookRatingMutation(
                     id = userBook.id,
                     `object` = input,
-                )
+                ),
             )
             .update_user_book
             ?.user_book
@@ -407,7 +414,7 @@ class BooksRemoteDataSourceImpl(
                 mutation = UpdateUserBookReviewMutation(
                     id = userBook.id,
                     `object` = input,
-                )
+                ),
             )
             .update_user_book
             ?.user_book
@@ -443,7 +450,7 @@ class BooksRemoteDataSourceImpl(
 
         if (canonicalIds.isEmpty()) return books
 
-        Timber.i("Resolving ${canonicalIds.size} canonical merge(s): $canonicalIds")
+        AppLog.i("Resolving ${canonicalIds.size} canonical merge(s): $canonicalIds")
 
         val canonicalBooks = fetchBooksByIds(ids = canonicalIds).associateBy { it.id }
 
@@ -453,7 +460,7 @@ class BooksRemoteDataSourceImpl(
             val canonical = canonicalBooks[canonicalId]
 
             if (canonical == null) {
-                Timber.w("Canonical $canonicalId for book ${book.id} not returned; keeping pre-merge metadata.")
+                AppLog.w("Canonical $canonicalId for book ${book.id} not returned; keeping pre-merge metadata.")
                 return@map book
             }
             book.withCanonicalMetadata(canonical = canonical)
@@ -500,7 +507,7 @@ class BooksRemoteDataSourceImpl(
 
         val mutation = UpdateReadingProgressMutation(
             id = userBookRead.id,
-            datesReadInput = dataObject
+            datesReadInput = dataObject,
         )
 
         val userBookFragment = apolloClient
@@ -518,7 +525,7 @@ class BooksRemoteDataSourceImpl(
         book: Book,
         editionId: Int?,
     ): Book {
-        val currentDate = LocalDate.now().toString()
+        val currentDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
         val dataObject = UserBookCreateInput(
             book_id = book.id,
@@ -555,8 +562,8 @@ class BooksRemoteDataSourceImpl(
                 referrer_user_id = Optional.Present(userBook.referrerUserId),
                 review_has_spoilers = Optional.Present(userBook.reviewHasSpoilers),
                 status_id = Optional.present(userBook.status.code),
-                reviewed_at = Optional.Present(userBook.reviewedAt)
-            )
+                reviewed_at = Optional.Present(userBook.reviewedAt),
+            ),
         )
 
         val userBookFragment = apolloClient

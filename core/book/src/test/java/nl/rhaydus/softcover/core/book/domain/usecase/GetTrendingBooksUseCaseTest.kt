@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetTrendingBooksUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: GetTrendingBooksUseCase
 
@@ -23,7 +22,6 @@ class GetTrendingBooksUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns Result success wrapping the list returned by the repository`() = runTest {
             // ----- Arrange -----

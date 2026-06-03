@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.orchestration.navigation
 
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.Tab
-import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
@@ -20,7 +20,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsTab
  * Orchestration-tier resolution of [AppNavigator]. This is the single place that depends on every
  * feature's `Screen`/`Tab`, so the feature graph below it stays acyclic.
  */
-class AppNavigatorImpl : AppNavigator {
+internal class AppNavigatorImpl : AppNavigator {
     override fun screen(destination: ScreenDestination): Screen = when (destination) {
         is ScreenDestination.BookDetail -> BookDetailScreen(
             id = destination.id,

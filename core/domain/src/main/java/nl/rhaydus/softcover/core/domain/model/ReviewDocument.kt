@@ -20,19 +20,6 @@ data class ReviewDocument(
     }
 }
 
-@Serializable
-data class ReviewParagraph(
-    val runs: List<ReviewRun>,
-)
-
-@Serializable
-data class ReviewRun(
-    val text: String,
-    val bold: Boolean = false,
-    val italic: Boolean = false,
-    val spoiler: Boolean = false,
-)
-
 fun ReviewDocument.isBlank(): Boolean = paragraphs.all { paragraph ->
     paragraph.runs.all { it.text.isBlank() }
 }

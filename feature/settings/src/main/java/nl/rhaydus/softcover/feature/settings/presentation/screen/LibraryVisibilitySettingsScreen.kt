@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,15 +51,15 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.util.LocalHaptics
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnListToggleAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReorderLibraryTabsAction
@@ -89,7 +90,7 @@ class LibraryVisibilitySettingsScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: LibraryVisibilitySettingsUiState,
         runAction: (LibraryVisibilityAction) -> Unit,
         onNavigateBack: () -> Unit,
@@ -173,7 +174,7 @@ class LibraryVisibilitySettingsScreen : Screen {
         var workingOrder by remember(state.initialized) { mutableStateOf(entries) }
 
         var draggingId by remember { mutableStateOf<String?>(null) }
-        var dragOffsetY by remember { mutableStateOf(0f) }
+        var dragOffsetY by remember { mutableFloatStateOf(0f) }
         val itemHeightsPx = remember { mutableStateMapOf<String, Int>() }
 
         LaunchedEffect(entries) {
@@ -258,7 +259,7 @@ class LibraryVisibilitySettingsScreen : Screen {
                                 runAction = runAction,
                             )
                         },
-                        dragHandleModifier = run {
+                        modifier = run {
                             val draggableState = rememberDraggableState { delta ->
                                 dragOffsetY += delta
                             }
@@ -286,7 +287,10 @@ class LibraryVisibilitySettingsScreen : Screen {
                                         if (targetIdx != currentIdx) {
                                             workingOrder = workingOrder.toMutableList().also { list ->
                                                 val moving = list.removeAt(currentIdx)
-                                                list.add(targetIdx, moving)
+                                                list.add(
+                                                    targetIdx,
+                                                    moving,
+                                                )
                                             }
 
                                             runAction(
@@ -316,7 +320,7 @@ class LibraryVisibilitySettingsScreen : Screen {
         checked: Boolean,
         isDragging: Boolean,
         onCheckedChange: (Boolean) -> Unit,
-        dragHandleModifier: Modifier,
+        modifier: Modifier = Modifier,
     ) {
         val isAlwaysOn = entry is LibraryTabEntry.Status && entry.isAlwaysOn
 
@@ -330,7 +334,7 @@ class LibraryVisibilitySettingsScreen : Screen {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = dragHandleModifier
+                modifier = modifier
                     .size(40.dp),
                 contentAlignment = Alignment.Center,
             ) {
@@ -462,11 +466,17 @@ private fun LibraryTabEntry.dispatchToggle(
 ) {
     when (this) {
         is LibraryTabEntry.Status -> if (isAlwaysOn.not()) {
-            runAction(OnStatusToggleAction(code = status.code, enabled = enabled))
+            runAction(OnStatusToggleAction(
+                code = status.code,
+                enabled = enabled,
+            ),)
         }
 
         is LibraryTabEntry.CustomList -> runAction(
-            OnListToggleAction(id = listId, enabled = enabled),
+            OnListToggleAction(
+                id = listId,
+                enabled = enabled,
+            ),
         )
     }
 }

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UpdateApiKeyUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: UpdateApiKeyUseCase
 
@@ -23,7 +22,6 @@ class UpdateApiKeyUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success when repository call succeeds`() = runTest {
             // ----- Arrange -----

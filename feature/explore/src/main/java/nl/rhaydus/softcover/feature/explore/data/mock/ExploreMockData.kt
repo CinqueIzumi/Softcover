@@ -6,7 +6,6 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 
 internal object ExploreMockData {
-
     private fun mockEdition(
         id: Int,
         bookId: Int,
@@ -25,7 +24,10 @@ internal object ExploreMockData {
         url = "",
         localImagePath = null,
         releaseYear = releaseYear,
-        authors = listOf(Author(id = id, name = author)),
+        authors = listOf(Author(
+            id = id,
+            name = author,
+        ),),
         format = "Hardcover",
         bookId = bookId,
         owned = false,
@@ -61,7 +63,10 @@ internal object ExploreMockData {
             description = "",
             releaseYear = releaseYear,
             coverUrl = "",
-            authors = listOf(Author(id = id, name = author)),
+            authors = listOf(Author(
+                id = id,
+                name = author,
+            ),),
             usersCount = usersCount,
             ratingsCount = ratingsCount,
             bookSeries = series,
@@ -138,7 +143,11 @@ internal object ExploreMockData {
             rating = 4.5,
             usersCount = 412000,
             ratingsCount = 198000,
-            series = BookSeries(id = 9001, name = "A Court of Thorns and Roses", amountOfBooks = 5),
+            series = BookSeries(
+                id = 9001,
+                name = "A Court of Thorns and Roses",
+                amountOfBooks = 5,
+            ),
             positionsInSeries = listOf(3.0),
         ),
         mockBook(
@@ -149,7 +158,11 @@ internal object ExploreMockData {
             rating = 4.6,
             usersCount = 612000,
             ratingsCount = 332000,
-            series = BookSeries(id = 9002, name = "The Kingkiller Chronicle", amountOfBooks = 3),
+            series = BookSeries(
+                id = 9002,
+                name = "The Kingkiller Chronicle",
+                amountOfBooks = 3,
+            ),
             positionsInSeries = listOf(2.0),
         ),
         mockBook(
@@ -160,7 +173,11 @@ internal object ExploreMockData {
             rating = 4.7,
             usersCount = 521000,
             ratingsCount = 287000,
-            series = BookSeries(id = 9003, name = "The Stormlight Archive", amountOfBooks = 5),
+            series = BookSeries(
+                id = 9003,
+                name = "The Stormlight Archive",
+                amountOfBooks = 5,
+            ),
             positionsInSeries = listOf(2.0),
         ),
         mockBook(
@@ -171,7 +188,11 @@ internal object ExploreMockData {
             rating = 4.5,
             usersCount = 312000,
             ratingsCount = 168000,
-            series = BookSeries(id = 9004, name = "The Wheel of Time", amountOfBooks = 14),
+            series = BookSeries(
+                id = 9004,
+                name = "The Wheel of Time",
+                amountOfBooks = 14,
+            ),
             positionsInSeries = listOf(4.0),
         ),
     )

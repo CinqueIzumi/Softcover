@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnGridLayoutChangeActionTest {
-
     private lateinit var setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -61,7 +60,6 @@ class OnGridLayoutChangeActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets isLayoutMenuExpanded to false on success`() = runTest {
             // ----- Arrange -----

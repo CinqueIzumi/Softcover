@@ -9,11 +9,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnAddUnknownIsbnConfirmedActionTest {
-
     private lateinit var addBookByIsbnUseCase: AddBookByIsbnUseCase
     private lateinit var stateFlow: MutableStateFlow<ScanUiState>
     private lateinit var eventChannel: Channel<ScanEvent>
@@ -67,7 +66,6 @@ class OnAddUnknownIsbnConfirmedActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `does not invoke use case when unknownIsbn is null`() = runTest {
             // ----- Arrange -----
@@ -108,7 +106,10 @@ class OnAddUnknownIsbnConfirmedActionTest {
         @Test
         fun `does not invoke use case when isAddingBook is already true`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935", isAddingBook = true)
+            stateFlow.value = ScanUiState(
+                unknownIsbn = "9780451524935",
+                isAddingBook = true,
+            )
             val dependencies = stubDependencies(this)
             val action = OnAddUnknownIsbnConfirmedAction()
 
@@ -127,7 +128,10 @@ class OnAddUnknownIsbnConfirmedActionTest {
         @Test
         fun `does not change state when isAddingBook is already true`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935", isAddingBook = true)
+            stateFlow.value = ScanUiState(
+                unknownIsbn = "9780451524935",
+                isAddingBook = true,
+            )
             val dependencies = stubDependencies(this)
             val stateBefore = stateFlow.value
             val action = OnAddUnknownIsbnConfirmedAction()
@@ -153,7 +157,10 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 addBookByIsbnUseCase(isbn = any())
             } coAnswers {
                 stateAtInvocation = stateFlow.value
-                Result.success(IsbnLookupResult.Found(book = PreviewData.baseBook, editionId = null))
+                Result.success(IsbnLookupResult.Found(
+                    book = PreviewData.baseBook,
+                    editionId = null,
+                ),)
             }
 
             val action = OnAddUnknownIsbnConfirmedAction()
@@ -178,7 +185,10 @@ class OnAddUnknownIsbnConfirmedActionTest {
 
             coEvery {
                 addBookByIsbnUseCase(isbn = "9780451524935")
-            } returns Result.success(IsbnLookupResult.Found(book = book, editionId = editionId))
+            } returns Result.success(IsbnLookupResult.Found(
+                book = book,
+                editionId = editionId,
+            ),)
 
             val action = OnAddUnknownIsbnConfirmedAction()
 
@@ -206,7 +216,10 @@ class OnAddUnknownIsbnConfirmedActionTest {
 
             coEvery {
                 addBookByIsbnUseCase(isbn = "9780451524935")
-            } returns Result.success(IsbnLookupResult.Found(book = PreviewData.baseBook, editionId = null))
+            } returns Result.success(IsbnLookupResult.Found(
+                book = PreviewData.baseBook,
+                editionId = null,
+            ),)
 
             val action = OnAddUnknownIsbnConfirmedAction()
 

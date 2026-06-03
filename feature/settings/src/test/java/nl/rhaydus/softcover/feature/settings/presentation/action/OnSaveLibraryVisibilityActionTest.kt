@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnSaveLibraryVisibilityActionTest {
-
     private lateinit var setEnabledStatusCodesUseCase: SetEnabledStatusCodesUseCase
     private lateinit var setEnabledListIdsUseCase: SetEnabledListIdsUseCase
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
@@ -87,7 +86,6 @@ class OnSaveLibraryVisibilityActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `does nothing when state is not dirty`() = runTest {
             // ----- Arrange -----
@@ -102,7 +100,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
@@ -125,7 +126,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
@@ -160,7 +164,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) { setEnabledStatusCodesUseCase(codes = setOf(1, 3)) }
@@ -193,7 +200,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) { setEnabledListIdsUseCase(ids = setOf(10, 20)) }
@@ -226,7 +236,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) { refreshLibraryUseCase() }
@@ -266,7 +279,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             savingSnapshots.first() shouldBe true
@@ -300,7 +316,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) { refreshLibraryUseCase() }
@@ -333,7 +352,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) { refreshLibraryUseCase() }
@@ -366,7 +388,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            val result = runCatching { action.execute(dependencies = dependencies, scope = scope) }
+            val result = runCatching { action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            ) }
 
             // ----- Assert -----
             result.isSuccess shouldBe true
@@ -399,7 +424,10 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.isSaving shouldBe false
@@ -451,7 +479,10 @@ class OnSaveLibraryVisibilityActionTest {
             )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = callerScope)
+            action.execute(
+                dependencies = dependencies,
+                scope = callerScope,
+            )
             callerTestScope.cancel()
 
             // ----- Assert -----

@@ -9,8 +9,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.DateStyle
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnDateStyleClickActionTest {
-
     private lateinit var setDateStyleUseCase: SetDateStyleUseCase
     private lateinit var dependencies: SettingsScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<SettingsScreenUiState>
@@ -61,7 +60,6 @@ class OnDateStyleClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `closes dropdown after invoking the use case on success`() = runTest {
             // ----- Arrange -----

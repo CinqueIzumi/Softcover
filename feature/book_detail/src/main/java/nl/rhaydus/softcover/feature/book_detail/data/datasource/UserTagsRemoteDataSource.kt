@@ -3,9 +3,9 @@ package nl.rhaydus.softcover.feature.book_detail.data.datasource
 import com.apollographql.apollo.ApolloClient
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
 import nl.rhaydus.softcover.SaveTagsMutation
-import nl.rhaydus.softcover.core.data.network.helper.safeMutation
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.core.network.helper.safeMutation
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toBasicTag
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toUserTag
 
@@ -23,7 +23,7 @@ interface UserTagsRemoteDataSource {
     ): List<UserTag>
 }
 
-class UserTagsRemoteDataSourceImpl(
+internal class UserTagsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : UserTagsRemoteDataSource {
     override suspend fun getUserTags(

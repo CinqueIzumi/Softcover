@@ -27,13 +27,13 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import kotlinx.coroutines.flow.drop
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverIconToggleButton
+import nl.rhaydus.softcover.core.designsystem.presentation.model.IconToggleButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
+import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
+import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverIconToggleButton
-import nl.rhaydus.softcover.core.presentation.model.IconToggleButtonStyle
-import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.presentation.util.BottomBarPulseManager
-import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
-import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
@@ -78,7 +78,7 @@ private fun rememberLibraryPulseScale(): Float {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun DockedBottomNavigationBar() {
+internal fun DockedBottomNavigationBar() {
     val screens = remember { bottomBarScreens }
     val showSettingsBadge = LocalAppUpdateState.current != AppUpdateState.Idle
 
@@ -128,7 +128,7 @@ fun DockedBottomNavigationBar() {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun BottomFloatingBar(modifier: Modifier = Modifier) {
+internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
     val screens = remember { bottomBarScreens }
     val showSettingsBadge = LocalAppUpdateState.current != AppUpdateState.Idle
 

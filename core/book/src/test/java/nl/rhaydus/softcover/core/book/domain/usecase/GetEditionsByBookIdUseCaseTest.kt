@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetEditionsByBookIdUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: GetEditionsByBookIdUseCase
 
@@ -29,7 +28,6 @@ class GetEditionsByBookIdUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success with list of editions when repository succeeds`() = runTest {
             // ----- Arrange -----

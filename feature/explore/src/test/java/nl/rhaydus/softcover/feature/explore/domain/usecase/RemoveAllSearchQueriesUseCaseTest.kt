@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RemoveAllSearchQueriesUseCaseTest {
-
     private lateinit var searchRepository: ExploreRepository
     private lateinit var useCase: RemoveAllSearchQueriesUseCase
 
@@ -23,7 +22,6 @@ class RemoveAllSearchQueriesUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository removeAllSearchQueries`() = runTest {
             // ----- Arrange -----

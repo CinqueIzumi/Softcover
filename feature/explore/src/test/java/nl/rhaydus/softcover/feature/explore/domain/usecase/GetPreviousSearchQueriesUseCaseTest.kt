@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetPreviousSearchQueriesUseCaseTest {
-
     private lateinit var searchRepository: ExploreRepository
     private lateinit var useCase: GetPreviousSearchQueriesUseCase
 
@@ -25,7 +24,6 @@ class GetPreviousSearchQueriesUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns flow from repository previousSearchQueries`() = runTest {
             // ----- Arrange -----

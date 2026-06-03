@@ -22,5 +22,5 @@ dependencies {
 
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.koin)
-    implementation(libs.voyager.tabNavigator)
+    api(libs.voyager.tabNavigator)
 }

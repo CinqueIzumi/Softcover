@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnRemoveBookFromLibraryClickActionTest {
-
     private lateinit var removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
@@ -63,7 +62,6 @@ class OnRemoveBookFromLibraryClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes removeBookFromLibraryUseCase with the given book`() = runTest {
             // ----- Arrange -----

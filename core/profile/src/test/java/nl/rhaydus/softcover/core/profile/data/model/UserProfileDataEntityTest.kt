@@ -1,14 +1,13 @@
 package nl.rhaydus.softcover.core.profile.data.model
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 
 class UserProfileDataEntityTest {
-
     private fun minimalModel(dates: Set<LocalDate> = emptySet()): UserProfileData = UserProfileData(
         profileImageUrl = "https://example.com/avatar.png",
         name = "Jane Doe",
@@ -23,7 +22,6 @@ class UserProfileDataEntityTest {
 
     @Nested
     inner class RoundTrip {
-
         @Test
         fun `toEntity then toModel preserves an empty active dates set`() {
             // ----- Arrange -----
@@ -40,9 +38,21 @@ class UserProfileDataEntityTest {
         fun `toEntity then toModel preserves a non-empty active dates set`() {
             // ----- Arrange -----
             val dates = setOf(
-                LocalDate.of(2026, 4, 14),
-                LocalDate.of(2026, 4, 20),
-                LocalDate.of(2026, 5, 4),
+                LocalDate(
+                    2026,
+                    4,
+                    14,
+                ),
+                LocalDate(
+                    2026,
+                    4,
+                    20,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
             )
             val model = minimalModel(dates = dates)
 
@@ -69,9 +79,21 @@ class UserProfileDataEntityTest {
         fun `toEntity serialises dates as ascending ISO strings`() {
             // ----- Arrange -----
             val dates = setOf(
-                LocalDate.of(2026, 5, 4),
-                LocalDate.of(2026, 4, 14),
-                LocalDate.of(2026, 4, 30),
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate(
+                    2026,
+                    4,
+                    14,
+                ),
+                LocalDate(
+                    2026,
+                    4,
+                    30,
+                ),
             )
             val model = minimalModel(dates = dates)
 
@@ -85,7 +107,6 @@ class UserProfileDataEntityTest {
 
     @Nested
     inner class BackwardCompat {
-
         @Test
         fun `legacy JSON without activeReadingDates field decodes with empty list`() {
             // ----- Arrange -----
@@ -103,7 +124,10 @@ class UserProfileDataEntityTest {
             val lenientJson = Json { ignoreUnknownKeys = true }
 
             // ----- Act -----
-            val entity = lenientJson.decodeFromString(UserProfileDataEntity.serializer(), legacyJson)
+            val entity = lenientJson.decodeFromString(
+                UserProfileDataEntity.serializer(),
+                legacyJson,
+            )
 
             // ----- Assert -----
             entity.activeReadingDates shouldBe emptyList()
@@ -126,7 +150,10 @@ class UserProfileDataEntityTest {
             val lenientJson = Json { ignoreUnknownKeys = true }
 
             // ----- Act -----
-            val entity = lenientJson.decodeFromString(UserProfileDataEntity.serializer(), legacyJson)
+            val entity = lenientJson.decodeFromString(
+                UserProfileDataEntity.serializer(),
+                legacyJson,
+            )
             val model = entity.toModel()
 
             // ----- Assert -----
@@ -153,8 +180,16 @@ class UserProfileDataEntityTest {
 
             // ----- Assert -----
             model.activeReadingDates shouldBe setOf(
-                LocalDate.of(2026, 5, 4),
-                LocalDate.of(2026, 4, 14),
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate(
+                    2026,
+                    4,
+                    14,
+                ),
             )
         }
     }

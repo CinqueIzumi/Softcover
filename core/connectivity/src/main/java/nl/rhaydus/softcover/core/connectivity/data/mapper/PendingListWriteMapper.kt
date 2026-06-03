@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.core.connectivity.data.mapper
 
-import nl.rhaydus.softcover.core.data.database.model.PendingListWriteEntity
+import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 
 private const val ORDERED_IDS_SEPARATOR: String = ","
 
-fun PendingListWrite.toEntity(): PendingListWriteEntity = PendingListWriteEntity(
+internal fun PendingListWrite.toEntity(): PendingListWriteEntity = PendingListWriteEntity(
     kind = kind.name,
     listId = listId,
     listName = listName,
@@ -18,7 +18,7 @@ fun PendingListWrite.toEntity(): PendingListWriteEntity = PendingListWriteEntity
     enqueuedAt = enqueuedAt,
 )
 
-fun PendingListWriteEntity.toPendingListWrite(): PendingListWrite? {
+internal fun PendingListWriteEntity.toPendingListWrite(): PendingListWrite? {
     val parsedKind: PendingListWriteKind = PendingListWriteKind
         .entries
         .firstOrNull { it.name == kind }

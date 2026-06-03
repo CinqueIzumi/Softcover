@@ -10,9 +10,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnEditionOwnedToggleActionTest {
-
     private lateinit var setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -72,7 +71,6 @@ class OnEditionOwnedToggleActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes use case with owned toggled to true when edition is currently not owned`() = runTest {
             // ----- Arrange -----
@@ -80,10 +78,16 @@ class OnEditionOwnedToggleActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = true)
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = true,
+                )
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
+            val action = OnEditionOwnedToggleAction(
+                edition = edition,
+                owned = true,
+            )
 
             // ----- Act -----
             action.execute(
@@ -93,7 +97,10 @@ class OnEditionOwnedToggleActionTest {
 
             // ----- Assert -----
             coVerify {
-                setEditionAsOwnedUseCase(edition = edition, owned = true)
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = true,
+                )
             }
         }
 
@@ -104,10 +111,16 @@ class OnEditionOwnedToggleActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = false)
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = false,
+                )
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition, owned = false)
+            val action = OnEditionOwnedToggleAction(
+                edition = edition,
+                owned = false,
+            )
 
             // ----- Act -----
             action.execute(
@@ -117,21 +130,33 @@ class OnEditionOwnedToggleActionTest {
 
             // ----- Assert -----
             coVerify {
-                setEditionAsOwnedUseCase(edition = edition, owned = false)
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = false,
+                )
             }
         }
 
         @Test
         fun `does not add edition id to failedMutationEditionIds when use case succeeds`() = runTest {
             // ----- Arrange -----
-            val edition = stubEdition(id = 99, owned = false)
+            val edition = stubEdition(
+                id = 99,
+                owned = false,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = true)
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = true,
+                )
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
+            val action = OnEditionOwnedToggleAction(
+                edition = edition,
+                owned = true,
+            )
 
             // ----- Act -----
             action.execute(
@@ -146,14 +171,23 @@ class OnEditionOwnedToggleActionTest {
         @Test
         fun `adds edition id to failedMutationEditionIds when use case fails`() = runTest {
             // ----- Arrange -----
-            val edition = stubEdition(id = 99, owned = false)
+            val edition = stubEdition(
+                id = 99,
+                owned = false,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = true)
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = true,
+                )
             } returns Result.failure(RuntimeException("network error"))
 
-            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
+            val action = OnEditionOwnedToggleAction(
+                edition = edition,
+                owned = true,
+            )
 
             // ----- Act -----
             action.execute(
@@ -168,14 +202,23 @@ class OnEditionOwnedToggleActionTest {
         @Test
         fun `stores job in editionMutationJobs after execute returns`() = runTest {
             // ----- Arrange -----
-            val edition = stubEdition(id = 99, owned = false)
+            val edition = stubEdition(
+                id = 99,
+                owned = false,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = true)
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = true,
+                )
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
+            val action = OnEditionOwnedToggleAction(
+                edition = edition,
+                owned = true,
+            )
 
             // ----- Act -----
             action.execute(
@@ -191,7 +234,10 @@ class OnEditionOwnedToggleActionTest {
         fun `cancels prior job for same edition id and replaces it with a new one`() = runTest {
             // ----- Arrange -----
             val editionId = 99
-            val edition = stubEdition(id = editionId, owned = false)
+            val edition = stubEdition(
+                id = editionId,
+                owned = false,
+            )
             val priorJob = Job()
             localVariablesFlow.value = BookDetailLocalVariables(
                 editionMutationJobs = mapOf(editionId to priorJob),
@@ -206,10 +252,16 @@ class OnEditionOwnedToggleActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = true)
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = true,
+                )
             } returns Result.success(Unit)
 
-            val action = OnEditionOwnedToggleAction(edition = edition, owned = true)
+            val action = OnEditionOwnedToggleAction(
+                edition = edition,
+                owned = true,
+            )
 
             // ----- Act -----
             action.execute(
@@ -229,10 +281,16 @@ class OnEditionOwnedToggleActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                setEditionAsOwnedUseCase(edition = edition, owned = false)
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = false,
+                )
             } returns Result.failure(RuntimeException("network error"))
 
-            val action = OnEditionOwnedToggleAction(edition = edition, owned = false)
+            val action = OnEditionOwnedToggleAction(
+                edition = edition,
+                owned = false,
+            )
 
             // ----- Act & Assert -----
             action.execute(

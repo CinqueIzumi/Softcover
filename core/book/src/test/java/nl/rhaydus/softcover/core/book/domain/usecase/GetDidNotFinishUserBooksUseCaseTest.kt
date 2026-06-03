@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetDidNotFinishUserBooksUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: GetDidNotFinishUserBooksUseCase
 
@@ -28,7 +27,6 @@ class GetDidNotFinishUserBooksUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository with DID_NOT_FINISH status`() = runTest {
             // ----- Arrange -----

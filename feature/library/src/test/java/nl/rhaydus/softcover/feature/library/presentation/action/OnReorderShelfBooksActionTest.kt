@@ -9,8 +9,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnReorderShelfBooksActionTest {
-
     private lateinit var reorderShelfBooksUseCase: ReorderShelfBooksUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -43,7 +42,6 @@ class OnReorderShelfBooksActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes reorderShelfBooksUseCase with the given status and bookIds`() = runTest {
             // ----- Arrange -----

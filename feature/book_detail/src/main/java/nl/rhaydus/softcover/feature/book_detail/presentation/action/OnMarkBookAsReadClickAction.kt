@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
 
-class OnMarkBookAsReadClickAction(
+internal class OnMarkBookAsReadClickAction(
     private val book: Book,
 ) : BookDetailAction {
     override suspend fun execute(
@@ -23,7 +23,10 @@ class OnMarkBookAsReadClickAction(
         val editionId = scope.currentState.previewEdition?.id ?: scope.currentState.scannedEditionId
 
         val job = dependencies.launch {
-            dependencies.markBookAsReadUseCase(book = book, editionId = editionId)
+            dependencies.markBookAsReadUseCase(
+                book = book,
+                editionId = editionId,
+            )
                 .onSuccess { outcome ->
                     // Celebrate only on a real transition — re-tapping the active "Read" chip
                     // must not replay the burst or rewrite finished_at.
@@ -32,7 +35,7 @@ class OnMarkBookAsReadClickAction(
                     }
                 }
                 .onFailure { error ->
-                    Timber.e("$error")
+                    AppLog.e("$error")
 
                     scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
                 }

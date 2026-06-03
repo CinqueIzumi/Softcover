@@ -13,6 +13,9 @@ class SetListRankedUseCase(
         listId: Int,
         ranked: Boolean,
     ): Result<Unit> = runCatching {
-        listsRepository.setListRanked(listId = listId, ranked = ranked)
+        listsRepository.setListRanked(
+            listId = listId,
+            ranked = ranked,
+        )
     }
 }

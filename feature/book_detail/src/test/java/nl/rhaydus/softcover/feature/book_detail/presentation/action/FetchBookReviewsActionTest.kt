@@ -9,10 +9,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class FetchBookReviewsActionTest {
-
     private lateinit var getTopBookReviewsUseCase: GetTopBookReviewsUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -84,7 +83,6 @@ class FetchBookReviewsActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets loadingReviews to true and clears revealedSpoilerReviewIds before the use case is called`() = runTest {
             // ----- Arrange -----

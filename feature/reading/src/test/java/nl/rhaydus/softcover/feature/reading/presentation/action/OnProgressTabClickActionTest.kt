@@ -5,8 +5,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.presentation.model.ProgressSheetTab
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnProgressTabClickActionTest {
-
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
@@ -34,7 +33,6 @@ class OnProgressTabClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `updates progressSheetTab to PAGE when PAGE is provided`() = runTest {
             // ----- Arrange -----

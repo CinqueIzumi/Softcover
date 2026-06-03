@@ -12,9 +12,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnMarkBookAsReadClickActionTest {
-
     private lateinit var markBookAsReadUseCase: MarkBookAsReadUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -77,7 +76,6 @@ class OnMarkBookAsReadClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes use case with the book provided to the action constructor`() = runTest {
             // ----- Arrange -----
@@ -85,7 +83,10 @@ class OnMarkBookAsReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = any())
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
             } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -98,7 +99,10 @@ class OnMarkBookAsReadClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                markBookAsReadUseCase(book = book, editionId = any())
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
             }
         }
 
@@ -109,7 +113,10 @@ class OnMarkBookAsReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = any())
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
             } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -131,7 +138,10 @@ class OnMarkBookAsReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = any())
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
             } returns Result.failure(RuntimeException("api error"))
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -153,7 +163,10 @@ class OnMarkBookAsReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = any())
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
             } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -187,7 +200,10 @@ class OnMarkBookAsReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = any())
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
             } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -211,7 +227,10 @@ class OnMarkBookAsReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = any())
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
             } returns Result.failure(RuntimeException("network failure"))
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -230,7 +249,10 @@ class OnMarkBookAsReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = any())
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
             } returns Result.success(ShelfMutationOutcome.NoChange)
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -255,7 +277,10 @@ class OnMarkBookAsReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = 55)
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = 55,
+                )
             } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -268,7 +293,10 @@ class OnMarkBookAsReadClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                markBookAsReadUseCase(book = book, editionId = 55)
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = 55,
+                )
             }
         }
 
@@ -276,11 +304,17 @@ class OnMarkBookAsReadClickActionTest {
         fun `uses scannedEditionId as editionId when previewEdition is null`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
-            stateFlow.value = BookDetailUiState(previewEdition = null, scannedEditionId = 555)
+            stateFlow.value = BookDetailUiState(
+                previewEdition = null,
+                scannedEditionId = 555,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = 555)
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = 555,
+                )
             } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -293,7 +327,10 @@ class OnMarkBookAsReadClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                markBookAsReadUseCase(book = book, editionId = 555)
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = 555,
+                )
             }
         }
 
@@ -305,7 +342,10 @@ class OnMarkBookAsReadClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                markBookAsReadUseCase(book = book, editionId = null)
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = null,
+                )
             } returns Result.success(ShelfMutationOutcome.Applied)
 
             val action = OnMarkBookAsReadClickAction(book = book)
@@ -318,7 +358,10 @@ class OnMarkBookAsReadClickActionTest {
 
             // ----- Assert -----
             coVerify {
-                markBookAsReadUseCase(book = book, editionId = null)
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = null,
+                )
             }
         }
     }

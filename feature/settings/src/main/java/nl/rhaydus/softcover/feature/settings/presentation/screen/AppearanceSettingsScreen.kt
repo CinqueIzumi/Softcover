@@ -32,13 +32,13 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.DateStyle
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
-import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDateStyleClickAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDynamicColorToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnFloatingBarToggledAction
@@ -64,7 +64,7 @@ class AppearanceSettingsScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: SettingsScreenUiState,
         runAction: (SettingsAction) -> Unit,
         onNavigateBack: () -> Unit,
@@ -111,9 +111,7 @@ class AppearanceSettingsScreen : Screen {
             }
         }
     }
-
     // region Dynamic color section
-
     @Composable
     private fun DynamicColorSection(
         state: SettingsScreenUiState,
@@ -179,11 +177,8 @@ class AppearanceSettingsScreen : Screen {
             )
         }
     }
-
     // endregion
-
     // region Bottom bar section
-
     @Composable
     private fun BottomBarSection(
         state: SettingsScreenUiState,
@@ -240,11 +235,8 @@ class AppearanceSettingsScreen : Screen {
             }
         }
     }
-
     // endregion
-
     // region Date style section
-
     @Composable
     private fun DateStyleSection(
         state: SettingsScreenUiState,
@@ -347,7 +339,6 @@ class AppearanceSettingsScreen : Screen {
             }
         }
     }
-
     // endregion
 }
 

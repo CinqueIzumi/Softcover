@@ -8,12 +8,10 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:designsystem"))
+    api(project(":core:designsystem"))
     implementation(project(":core:platform"))
 
     implementation(libs.koin.compose)
-    implementation(libs.coil)
 
     implementation(libs.voyager.navigator)
-    implementation(libs.voyager.koin)
 }

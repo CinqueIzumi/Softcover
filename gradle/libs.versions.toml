@@ -1,6 +1,7 @@
 [versions]
 agp = "8.13.1"
 kotlin = "2.2.21"
+ktlint = "1.7.1"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -16,7 +17,8 @@ voyager = "1.1.0-beta02"
 coilVersion = "2.7.0"
 material3ComposeVersion = "1.5.0-alpha13"
 materialComponentsVersion = "1.13.0"
-timberVersion = "5.0.1"
+kermitVersion = "2.0.6"
+kotlinxDatetime = "0.6.2"
 koinVersion = "3.5.3"
 roomVersion = "2.7.2"
 splashVersion = "1.0.1"
@@ -30,8 +32,15 @@ reorderableVersion = "2.4.3"
 cameraX = "1.4.2"
 mlkitBarcode = "17.3.0"
 coroutines = "1.10.2"
+detekt = "1.23.8"
+dependencyAnalysis = "3.14.1"
 
 [libraries]
+# ktlint rule-engine — consumed by the :ktlint-rules module to drive the custom autofix ruleset
+ktlint-ruleEngine = { group = "com.pinterest.ktlint", name = "ktlint-rule-engine", version.ref = "ktlint" }
+ktlint-ruleEngineCore = { group = "com.pinterest.ktlint", name = "ktlint-rule-engine-core", version.ref = "ktlint" }
+ktlint-cliRulesetCore = { group = "com.pinterest.ktlint", name = "ktlint-cli-ruleset-core", version.ref = "ktlint" }
+
 # Gradle plugin artifacts — consumed by build-logic convention plugins (compileOnly)
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -64,7 +73,8 @@ voyager-koin = { group = "cafe.adriel.voyager", name = "voyager-koin", version.r
 voyager-tabNavigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
 coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilVersion" }
-timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timberVersion" }
+kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermitVersion" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinVersion" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinVersion" }
@@ -97,3 +107,6 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }

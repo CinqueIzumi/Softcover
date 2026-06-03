@@ -2,13 +2,13 @@ package nl.rhaydus.softcover.feature.settings.presentation.flows
 
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
-class PersistedLibraryVisibilityCollector : LibraryVisibilityInitializer {
+internal class PersistedLibraryVisibilityCollector : LibraryVisibilityInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>,
         dependencies: LibraryVisibilitySettingsDependencies,
@@ -18,7 +18,11 @@ class PersistedLibraryVisibilityCollector : LibraryVisibilityInitializer {
             dependencies.getEnabledListIdsAsFlowUseCase(),
             dependencies.getLibraryTabOrderAsFlowUseCase(),
         ) { codes: Set<Int>, ids: Set<Int>, order: List<String> ->
-            Triple(codes, ids, order)
+            Triple(
+                codes,
+                ids,
+                order,
+            )
         }.collectLatest { (codes, ids, order) ->
             scope.setState { state ->
                 state.copy(

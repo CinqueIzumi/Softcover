@@ -2,13 +2,13 @@ package nl.rhaydus.softcover.core.preferences.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import nl.rhaydus.softcover.GetUserIdQuery
-import nl.rhaydus.softcover.core.data.network.helper.safeQuery
+import nl.rhaydus.softcover.core.network.helper.safeQuery
 
 interface SettingsRemoteDataSource {
     suspend fun getUserIdFromBackend(): Int
 }
 
-class SettingsRemoteDataSourceImpl(
+internal class SettingsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
 ) : SettingsRemoteDataSource {
     override suspend fun getUserIdFromBackend(): Int {

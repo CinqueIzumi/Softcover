@@ -89,10 +89,60 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlin.math.abs
+import kotlin.math.roundToInt
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DropCapText
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
+import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
+import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
+import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.component.StarRatingInput
+import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
+import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
+import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.conditional
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.grayscale
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomNavigationSpacer
+import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.designsystem.presentation.util.htmlToAnnotatedString
+import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
+import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
+import nl.rhaydus.softcover.core.designsystem.presentation.util.secondsToHm
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -104,47 +154,6 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.isBlank
-import nl.rhaydus.softcover.core.presentation.component.ChooseListsBottomSheet
-import nl.rhaydus.softcover.core.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.presentation.component.DropCapText
-import nl.rhaydus.softcover.core.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.presentation.component.ListMembership
-import nl.rhaydus.softcover.core.presentation.component.MarkAsReadBurst
-import nl.rhaydus.softcover.core.presentation.component.OfflineScreenContent
-import nl.rhaydus.softcover.core.presentation.component.PillChip
-import nl.rhaydus.softcover.core.presentation.component.ReviewDocumentText
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.presentation.component.StarRatingInput
-import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
-import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadgeStyle
-import nl.rhaydus.softcover.core.presentation.component.UpdateProgressBottomSheet
-import nl.rhaydus.softcover.core.presentation.component.rememberIsOnline
-import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.modifier.conditional
-import nl.rhaydus.softcover.core.presentation.modifier.grayscale
-import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
-import nl.rhaydus.softcover.core.presentation.modifier.shakeOnError
-import nl.rhaydus.softcover.core.presentation.modifier.shimmer
-import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.theme.RatingGold
-import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.presentation.theme.displayFontFamily
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.transition.LocalNavAnimatedVisibilityScope
-import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.presentation.util.BottomNavigationSpacer
-import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.presentation.util.htmlToAnnotatedString
-import nl.rhaydus.softcover.core.presentation.util.playDecorativeMotion
-import nl.rhaydus.softcover.core.presentation.util.rememberHaptics
-import nl.rhaydus.softcover.core.presentation.util.secondsToHm
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
@@ -199,11 +208,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalL
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import kotlin.math.abs
-import kotlin.math.roundToInt
 
 private const val REVIEW_COLLAPSED_LINES = 8
 
@@ -219,7 +223,10 @@ class BookDetailScreen(
         val appNavigator = koinInject<AppNavigator>()
 
         val screenModel: BookDetailScreenScreenModel =
-            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(id, initialCover) }
+            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(
+                id,
+                initialCover,
+            ) }
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
@@ -233,11 +240,11 @@ class BookDetailScreen(
             when (it) {
                 is RefreshDetailBookEvent -> {
                     screenModel.runAction(
-                        action = InitializeBookWithIdAction(id = id)
+                        action = InitializeBookWithIdAction(id = id),
                     )
 
                     screenModel.runAction(
-                        action = FetchBookReviewsAction(bookId = id)
+                        action = FetchBookReviewsAction(bookId = id),
                     )
                 }
 
@@ -266,7 +273,7 @@ class BookDetailScreen(
                         edition = state.displayedEdition,
                         defaultEdition = book.defaultEdition,
                         fallbackCoverUrl = book.coverUrl,
-                    )
+                    ),
                 )
             },
             onCreateNewListClick = {
@@ -281,7 +288,7 @@ class BookDetailScreen(
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: BookDetailUiState,
         runAction: (BookDetailAction) -> Unit,
         onNavigateBack: () -> Unit,
@@ -310,7 +317,7 @@ class BookDetailScreen(
                 Color.Transparent
             } else {
                 Color.Unspecified
-            }
+            },
         )
 
         val defaultIconButtonColors = IconButtonDefaults.iconButtonColors()
@@ -374,7 +381,7 @@ class BookDetailScreen(
                             onShakeEnd = {
                                 if (currentEditionId != null) {
                                     runAction(
-                                        OnClearMutationFailureAction(editionId = currentEditionId)
+                                        OnClearMutationFailureAction(editionId = currentEditionId),
                                     )
                                 }
                             },
@@ -558,7 +565,7 @@ class BookDetailScreen(
                             OnAddUserTagAction(
                                 name = name,
                                 category = category,
-                            )
+                            ),
                         )
                     },
                     onRemoveTag = { runAction(OnRemoveUserTagAction(tag = it)) },
@@ -578,7 +585,7 @@ class BookDetailScreen(
                             OnToggleListMembershipAction(
                                 listId = listId,
                                 isMember = membership == ListMembership.ALL,
-                            )
+                            ),
                         )
                     },
                     onCreateNewListClick = onCreateNewListClick,
@@ -597,7 +604,7 @@ class BookDetailScreen(
                                 book = reviewBook,
                                 review = document,
                                 hasSpoilers = hasSpoilers,
-                            )
+                            ),
                         )
                     },
                     onDelete = { runAction(OnDeleteReviewAction(book = reviewBook)) },
@@ -656,16 +663,14 @@ class BookDetailScreen(
                                 hours = h,
                                 minutes = m,
                                 seconds = s,
-                            )
+                            ),
                         )
                     },
                 )
             }
         }
     }
-
     // region Hero
-
     @Composable
     private fun GeneralBookInfoSection(
         edition: BookEdition?,
@@ -778,7 +783,10 @@ class BookDetailScreen(
 
                 val secondaryShadow = Shadow(
                     color = Color.Black.copy(alpha = 0.6f),
-                    offset = Offset(x = 0f, y = 1f),
+                    offset = Offset(
+                        x = 0f,
+                        y = 1f,
+                    ),
                     blurRadius = 6f,
                 )
 
@@ -887,7 +895,10 @@ class BookDetailScreen(
                                     fontWeight = FontWeight.Bold,
                                     shadow = Shadow(
                                         color = Color.Black.copy(alpha = 0.75f),
-                                        offset = Offset(x = 0f, y = 1f),
+                                        offset = Offset(
+                                            x = 0f,
+                                            y = 1f,
+                                        ),
                                         blurRadius = 8f,
                                     ),
                                 ),
@@ -1021,7 +1032,10 @@ class BookDetailScreen(
                     .height(20.dp)
                     .background(
                         color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                        shape = RoundedCornerShape(
+                            topStart = 24.dp,
+                            topEnd = 24.dp,
+                        ),
                     ),
             )
         }
@@ -1060,11 +1074,8 @@ class BookDetailScreen(
             }
         }
     }
-
     // endregion
-
     // region Shelf Action Bar
-
     @Composable
     private fun ShelfActionBar(
         state: BookDetailUiState,
@@ -1202,7 +1213,10 @@ class BookDetailScreen(
             StarRatingInput(
                 rating = book.userBook?.rating?.takeIf { it > 0.0 },
                 onRatingChange = { rating ->
-                    runAction(OnRateBookAction(book = book, rating = rating))
+                    runAction(OnRateBookAction(
+                        book = book,
+                        rating = rating,
+                    ),)
                 },
             )
         }
@@ -1397,11 +1411,8 @@ class BookDetailScreen(
             }
         }
     }
-
     // endregion
-
     // region Top Bar Overflow / Status
-
     @Composable
     private fun BookOverflowMenu(
         state: BookDetailUiState,
@@ -1503,7 +1514,10 @@ class BookDetailScreen(
                             },
                             onClick = {
                                 dismiss()
-                                runAction(OnEditionOwnedToggleAction(edition = ownedEdition, owned = isOwned.not()))
+                                runAction(OnEditionOwnedToggleAction(
+                                    edition = ownedEdition,
+                                    owned = isOwned.not(),
+                                ),)
                             },
                         )
                     }
@@ -1668,7 +1682,7 @@ class BookDetailScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             painter = painterResource(
-                                if (isAudiobook) R.drawable.ic_headset else R.drawable.ic_menu_book
+                                if (isAudiobook) R.drawable.ic_headset else R.drawable.ic_menu_book,
                             ),
                             contentDescription = "Progress icon",
                             tint = MaterialTheme.colorScheme.primary,
@@ -1707,7 +1721,10 @@ class BookDetailScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     LinearProgressIndicator(
-                        progress = { (progress / 100f).coerceIn(0f, 1f) },
+                        progress = { (progress / 100f).coerceIn(
+                            0f,
+                            1f,
+                        ) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp),
@@ -1724,7 +1741,7 @@ class BookDetailScreen(
 
                         "${secondsToHm(currentSeconds)} of ${secondsToHm(totalSeconds)} • ${
                             secondsToHm(
-                                remainingSeconds
+                                remainingSeconds,
                             )
                         } left"
                     } else {
@@ -1780,7 +1797,7 @@ class BookDetailScreen(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
-                        text = "Finish by ${progress.deadline.format(dateStyle.formatter)}",
+                        text = "Finish by ${dateStyle.formatter.format(progress.deadline)}",
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -1816,7 +1833,7 @@ class BookDetailScreen(
             ) {
                 null -> "This book has been in your library since ${
                     userBook.getFallbackDateString(
-                        style = state.dateStyle
+                        style = state.dateStyle,
                     )
                 }."
 
@@ -1835,7 +1852,7 @@ class BookDetailScreen(
             body = when (val dnfDate = userBook.getDnfDateString(style = state.dateStyle)) {
                 null -> "This book has been in your library since ${
                     userBook.getFallbackDateString(
-                        style = state.dateStyle
+                        style = state.dateStyle,
                     )
                 }."
 
@@ -1903,11 +1920,8 @@ class BookDetailScreen(
             }
         }
     }
-
     // endregion
-
     // region About
-
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     private fun ScanEditionUpdateBanner(
@@ -2264,11 +2278,8 @@ class BookDetailScreen(
             )
         }
     }
-
     // endregion
-
     // region Reviews
-
     @Composable
     private fun ReviewsSection(
         state: BookDetailUiState,
@@ -2476,11 +2487,8 @@ class BookDetailScreen(
             }
         }
     }
-
     // endregion
-
     // region Section Label
-
     @Composable
     private fun SectionLabel(
         text: String,
@@ -2529,11 +2537,8 @@ class BookDetailScreen(
             )
         }
     }
-
     // endregion
-
     // region Helpers
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun DeadlinePickerDialog(
@@ -2542,10 +2547,9 @@ class BookDetailScreen(
         onConfirm: (LocalDate) -> Unit,
     ) {
         val initialMillis = remember(initialDate) {
-            (initialDate ?: LocalDate.now())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
+            (initialDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault()))
+                .atStartOfDayIn(TimeZone.currentSystemDefault())
+                .toEpochMilliseconds()
         }
 
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
@@ -2557,9 +2561,9 @@ class BookDetailScreen(
                     onClick = {
                         val millis = pickerState.selectedDateMillis
                         if (millis != null) {
-                            val picked = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate()
+                            val picked = Instant.fromEpochMilliseconds(millis)
+                                .toLocalDateTime(TimeZone.currentSystemDefault())
+                                .date
 
                             onConfirm(picked)
                         } else {
@@ -2623,7 +2627,6 @@ class BookDetailScreen(
 
         return if (value > rounded) rounded + 1 else rounded
     }
-
     // endregion
 }
 

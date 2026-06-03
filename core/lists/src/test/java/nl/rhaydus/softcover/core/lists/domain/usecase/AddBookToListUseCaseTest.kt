@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AddBookToListUseCaseTest {
-
     private lateinit var listsRepository: ListsRepository
     private lateinit var useCase: AddBookToListUseCase
 
@@ -32,7 +31,6 @@ class AddBookToListUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success when repository call completes without error`() = runTest {
             // ----- Arrange -----

@@ -13,16 +13,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
-import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
-import timber.log.Timber
 import java.io.File
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
+import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 
 interface ApiKeyLocalDataSource : AuthTokenProvider {
     override val apiKey: Flow<String?>
@@ -32,12 +32,11 @@ interface ApiKeyLocalDataSource : AuthTokenProvider {
     suspend fun clear()
 }
 
-class ApiKeyLocalDataSourceImpl(
+internal class ApiKeyLocalDataSourceImpl(
     private val context: Context,
     private val appSettingsDataStore: AppSettingsDataStore,
     private val dispatchers: AppDispatchers,
 ) : ApiKeyLocalDataSource {
-
     private val apiKeyFlow = MutableStateFlow<String?>(null)
     private val diskMutex = Mutex()
 
@@ -91,7 +90,10 @@ class ApiKeyLocalDataSourceImpl(
         runCatching {
             writeToDisk(value = legacyKey)
         }.onFailure { error ->
-            Timber.e(error, "Failed to migrate legacy API key to secure storage")
+            AppLog.e(
+                error,
+                "Failed to migrate legacy API key to secure storage",
+            )
 
             return
         }
@@ -101,7 +103,10 @@ class ApiKeyLocalDataSourceImpl(
 
     private fun writeToDisk(value: String) {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
+        cipher.init(
+            Cipher.ENCRYPT_MODE,
+            getOrCreateKey(),
+        )
 
         val iv = cipher.iv
         val ciphertext = cipher.doFinal(value.toByteArray(Charsets.UTF_8))
@@ -116,7 +121,7 @@ class ApiKeyLocalDataSourceImpl(
     private fun readFromDisk(): String? {
         val file = storageFile()
 
-        if (!file.exists()) return null
+        if (file.exists().not()) return null
 
         return runCatching {
             file.inputStream().use { input ->
@@ -125,12 +130,25 @@ class ApiKeyLocalDataSourceImpl(
                 val ciphertext = input.readBytes()
 
                 val cipher = Cipher.getInstance(TRANSFORMATION)
-                cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv))
+                cipher.init(
+                    Cipher.DECRYPT_MODE,
+                    getOrCreateKey(),
+                    GCMParameterSpec(
+                        GCM_TAG_LENGTH_BITS,
+                        iv,
+                    ),
+                )
 
-                String(cipher.doFinal(ciphertext), Charsets.UTF_8)
+                String(
+                    cipher.doFinal(ciphertext),
+                    Charsets.UTF_8,
+                )
             }
         }.getOrElse { error ->
-            Timber.e(error, "Failed to decrypt API key — discarding ciphertext")
+            AppLog.e(
+                error,
+                "Failed to decrypt API key — discarding ciphertext",
+            )
 
             file.delete()
 
@@ -142,16 +160,25 @@ class ApiKeyLocalDataSourceImpl(
         storageFile().delete()
     }
 
-    private fun storageFile(): File = File(context.filesDir, FILE_NAME)
+    private fun storageFile(): File = File(
+        context.filesDir,
+        FILE_NAME,
+    )
 
     private fun getOrCreateKey(): SecretKey {
         val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply { load(null) }
 
-        val existing = keyStore.getKey(KEY_ALIAS, null) as? SecretKey
+        val existing = keyStore.getKey(
+            KEY_ALIAS,
+            null,
+        ) as? SecretKey
 
         if (existing != null) return existing
 
-        val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE)
+        val generator = KeyGenerator.getInstance(
+            KeyProperties.KEY_ALGORITHM_AES,
+            ANDROID_KEY_STORE,
+        )
 
         val spec = KeyGenParameterSpec.Builder(
             KEY_ALIAS,

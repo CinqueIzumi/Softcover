@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.personal.di
 
-import nl.rhaydus.softcover.core.data.database.SoftcoverDatabase
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSourceImpl
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource

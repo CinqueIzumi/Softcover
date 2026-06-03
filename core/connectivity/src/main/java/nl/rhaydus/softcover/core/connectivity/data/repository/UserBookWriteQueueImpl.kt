@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.core.connectivity.data.repository
 
-import nl.rhaydus.softcover.core.data.database.dao.PendingUserBookWriteDao
-import nl.rhaydus.softcover.core.data.database.model.PendingUserBookWriteEntity
+import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
+import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 
-class UserBookWriteQueueImpl(
+internal class UserBookWriteQueueImpl(
     private val dao: PendingUserBookWriteDao,
 ) : UserBookWriteQueue {
     override suspend fun enqueue(update: PendingUserBookWrite) {

@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GridLayoutCollectorTest {
-
     private lateinit var getLibraryGridLayoutAsFlowUseCase: GetLibraryGridLayoutAsFlowUseCase
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
@@ -52,12 +51,14 @@ class GridLayoutCollectorTest {
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `updates gridLayout when flow emits a value`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             gridLayoutFlow.emit(LibraryGridLayout.GRID_THREE_COLUMNS)
@@ -71,7 +72,10 @@ class GridLayoutCollectorTest {
         fun `updates gridLayout to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             gridLayoutFlow.emit(LibraryGridLayout.LIST_COMPACT)
@@ -86,7 +90,10 @@ class GridLayoutCollectorTest {
         fun `does not change gridLayout before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act & Assert -----
             stateFlow.value.gridLayout shouldBe LibraryGridLayout.GRID_TWO_COLUMNS
@@ -97,7 +104,10 @@ class GridLayoutCollectorTest {
         fun `retains the last emitted layout after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
             gridLayoutFlow.emit(LibraryGridLayout.LIST_COMPACT)
             job.cancel()
 
@@ -114,7 +124,10 @@ class GridLayoutCollectorTest {
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             gridLayoutFlow.emit(LibraryGridLayout.GRID_THREE_COLUMNS)

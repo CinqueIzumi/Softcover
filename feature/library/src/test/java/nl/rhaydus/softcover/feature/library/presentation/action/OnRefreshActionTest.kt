@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnRefreshActionTest {
-
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -62,7 +61,6 @@ class OnRefreshActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sets isLoading to true then false when use case succeeds`() = runTest {
             // ----- Arrange -----

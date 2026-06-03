@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class CreateListUseCaseTest {
-
     private lateinit var listsRepository: ListsRepository
     private lateinit var useCase: CreateListUseCase
 
@@ -25,7 +24,6 @@ class CreateListUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns the BookList produced by the repository`() = runTest {
             // ----- Arrange -----

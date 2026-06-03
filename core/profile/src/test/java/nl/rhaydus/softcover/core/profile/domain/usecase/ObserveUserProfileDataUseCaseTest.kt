@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ObserveUserProfileDataUseCaseTest {
-
     private lateinit var profileRepository: ProfileRepository
     private lateinit var useCase: ObserveUserProfileDataUseCase
 
@@ -25,7 +24,6 @@ class ObserveUserProfileDataUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns the flow from the repository`() = runTest {
             // ----- Arrange -----

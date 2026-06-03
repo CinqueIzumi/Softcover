@@ -1,22 +1,25 @@
 package nl.rhaydus.softcover.feature.explore.presentation.flows
 
 import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
-import timber.log.Timber
 
-class TrendingBooksCollector : ExploreInitializer {
+internal class TrendingBooksCollector : ExploreInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
         dependencies: ExploreDependencies,
     ) {
         val trendingBooks: List<Book> = dependencies.getTrendingBooksUseCase()
             .onFailure { error ->
-                Timber.e(error, "Failed to fetch trending books")
+                AppLog.e(
+                    error,
+                    "Failed to fetch trending books",
+                )
 
                 scope.setState { it.copy(loadingTrendingBooks = false) }
             }

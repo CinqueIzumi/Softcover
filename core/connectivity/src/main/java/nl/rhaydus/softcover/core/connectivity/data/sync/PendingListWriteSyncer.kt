@@ -10,19 +10,19 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.coroutines.cancellation.CancellationException
 import nl.rhaydus.softcover.core.connectivity.data.mapper.toPendingListWrite
-import nl.rhaydus.softcover.core.data.database.dao.PendingListWriteDao
-import nl.rhaydus.softcover.core.data.database.model.PendingListWriteEntity
+import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
+import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
-import timber.log.Timber
-import kotlin.coroutines.cancellation.CancellationException
 
 private const val IN_DRAIN_RETRIES: Int = 3
 private const val INITIAL_BACKOFF_MS: Long = 250L
@@ -60,7 +60,7 @@ class PendingListWriteSyncer(
             val write: PendingListWrite? = entity.toPendingListWrite()
 
             if (write == null) {
-                Timber.w("Unknown pending list write kind: ${entity.kind}")
+                AppLog.w("Unknown pending list write kind: ${entity.kind}")
 
                 dao.incrementAttempts(entity.localId)
 
@@ -72,7 +72,10 @@ class PendingListWriteSyncer(
             replayed
                 .onSuccess { dao.delete(entity.localId) }
                 .onFailure { error ->
-                    Timber.w(error, "Pending list write ${entity.localId} failed; halting drain")
+                    AppLog.w(
+                        error,
+                        "Pending list write ${entity.localId} failed; halting drain",
+                    )
 
                     dao.incrementAttempts(entity.localId)
 
@@ -134,7 +137,10 @@ class PendingListWriteSyncer(
             editionId = editionId,
         )
 
-        listsLocalDataSource.removeOptimisticListBook(listId = listId, bookId = bookId)
+        listsLocalDataSource.removeOptimisticListBook(
+            listId = listId,
+            bookId = bookId,
+        )
         listsLocalDataSource.cacheListBook(book = real)
     }
 

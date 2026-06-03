@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetUserIdUseCaseTest {
-
     private lateinit var getUserIdAsFlowUseCase: GetUserIdAsFlowUseCase
     private lateinit var useCase: GetUserIdUseCase
 
@@ -25,7 +24,6 @@ class GetUserIdUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success with the userId when the flow emits a valid positive id`() = runTest {
             // ----- Arrange -----

@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.data.mapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import nl.rhaydus.softcover.core.data.mapper.reviewDocumentFromSlate
+import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromSlate
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookReviewMapperTest {
-
     private lateinit var fragment: BookReviewFragment
     private lateinit var user: BookReviewFragment.User
 
@@ -104,7 +103,6 @@ class BookReviewMapperTest {
 
     @Nested
     inner class ToBookReview {
-
         @Test
         fun `returns null when review_slate is empty`() {
             // ----- Arrange -----
@@ -151,7 +149,10 @@ class BookReviewMapperTest {
         @Test
         fun `maps id from fragment`() {
             // ----- Arrange -----
-            stubFragment(id = 99, reviewSlate = slateWithText("Excellent!"))
+            stubFragment(
+                id = 99,
+                reviewSlate = slateWithText("Excellent!"),
+            )
             stubUser()
 
             // ----- Act -----
@@ -177,7 +178,10 @@ class BookReviewMapperTest {
         @Test
         fun `maps hasSpoilers from review_has_spoilers field`() {
             // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("Watch out!"), hasSpoilers = true)
+            stubFragment(
+                reviewSlate = slateWithText("Watch out!"),
+                hasSpoilers = true,
+            )
             stubUser()
 
             // ----- Act -----
@@ -190,7 +194,10 @@ class BookReviewMapperTest {
         @Test
         fun `maps rating as null when fragment rating is null`() {
             // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("No stars given."), rating = null)
+            stubFragment(
+                reviewSlate = slateWithText("No stars given."),
+                rating = null,
+            )
             stubUser()
 
             // ----- Act -----
@@ -203,7 +210,10 @@ class BookReviewMapperTest {
         @Test
         fun `maps rating from fragment when present`() {
             // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("Five stars!"), rating = 5.0)
+            stubFragment(
+                reviewSlate = slateWithText("Five stars!"),
+                rating = 5.0,
+            )
             stubUser()
 
             // ----- Act -----
@@ -216,7 +226,10 @@ class BookReviewMapperTest {
         @Test
         fun `maps reviewedAt as null when fragment reviewed_at is null`() {
             // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("Timeless."), reviewedAt = null)
+            stubFragment(
+                reviewSlate = slateWithText("Timeless."),
+                reviewedAt = null,
+            )
             stubUser()
 
             // ----- Act -----
@@ -229,7 +242,10 @@ class BookReviewMapperTest {
         @Test
         fun `maps likesCount from fragment`() {
             // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("Many liked this."), likesCount = 42)
+            stubFragment(
+                reviewSlate = slateWithText("Many liked this."),
+                likesCount = 42,
+            )
             stubUser()
 
             // ----- Act -----

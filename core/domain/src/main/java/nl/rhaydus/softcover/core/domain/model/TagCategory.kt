@@ -1,6 +1,9 @@
 package nl.rhaydus.softcover.core.domain.model
 
-enum class TagCategory(val label: String, val apiValue: String) {
+enum class TagCategory(
+    val label: String,
+    val apiValue: String,
+) {
     GENRE("Genre", "Genre"),
     MOOD("Mood", "Mood"),
     TAG("Tag", "Tag"),

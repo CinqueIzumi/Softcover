@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsScreenScreenModelTest {
-
     private val dispatcher = UnconfinedTestDispatcher()
 
     @BeforeEach
@@ -33,7 +32,6 @@ class SettingsScreenScreenModelTest {
 
     @Nested
     inner class InitialState {
-
         @Test
         fun `initial state reflects version name and code from AppVersionProvider`() {
             // ----- Arrange -----
@@ -41,7 +39,10 @@ class SettingsScreenScreenModelTest {
 
             every {
                 appVersionProvider.versionInfo
-            } returns AppVersionInfo(name = "9.9.9", code = 42)
+            } returns AppVersionInfo(
+                name = "9.9.9",
+                code = 42,
+            )
 
             val appDispatchers = AppDispatchers(
                 main = dispatcher,

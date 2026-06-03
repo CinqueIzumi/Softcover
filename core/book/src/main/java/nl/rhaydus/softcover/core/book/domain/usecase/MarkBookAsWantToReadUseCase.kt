@@ -13,7 +13,10 @@ class MarkBookAsWantToReadUseCase(
     ): Result<ShelfMutationOutcome> = runCatching {
         if (book.status == BookStatus.WantToRead) return@runCatching ShelfMutationOutcome.NoChange
 
-        booksRepository.markBookAsWantToRead(book = book, editionId = editionId)
+        booksRepository.markBookAsWantToRead(
+            book = book,
+            editionId = editionId,
+        )
 
         ShelfMutationOutcome.Applied
     }

@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookListsCollectorTest {
-
     private lateinit var getAllUserListsUseCase: GetAllUserListsUseCase
     private lateinit var getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase
     private lateinit var dependencies: LibraryDependencies
@@ -78,7 +77,11 @@ class BookListsCollectorTest {
         every { this@mockk.book } returns null
     }
 
-    private fun stubBookList(id: Int, name: String, listBooks: List<ListBook>): BookList = mockk {
+    private fun stubBookList(
+        id: Int,
+        name: String,
+        listBooks: List<ListBook>,
+    ): BookList = mockk {
         every {
             this@mockk.id
         } returns id
@@ -94,16 +97,25 @@ class BookListsCollectorTest {
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `writes editions of enabled list into editionsByTab keyed by list tab id`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val edition = stubEdition()
             val listBook = stubListBook(edition = edition)
-            val list = stubBookList(id = 5, name = "Owned", listBooks = listOf(listBook))
-            val tabId = LibraryTab.CustomList(listId = 5, listName = "Owned").id
+            val list = stubBookList(
+                id = 5,
+                name = "Owned",
+                listBooks = listOf(listBook),
+            )
+            val tabId = LibraryTab.CustomList(
+                listId = 5,
+                listName = "Owned",
+            ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             listsFlow.emit(listOf(list))
@@ -119,10 +131,20 @@ class BookListsCollectorTest {
             // ----- Arrange -----
             val listBookNoEdition = stubListBook(edition = null)
             val listBookWithEdition = stubListBook(edition = stubEdition())
-            val list = stubBookList(id = 1, name = "Owned", listBooks = listOf(listBookNoEdition, listBookWithEdition))
-            val tabId = LibraryTab.CustomList(listId = 1, listName = "Owned").id
+            val list = stubBookList(
+                id = 1,
+                name = "Owned",
+                listBooks = listOf(listBookNoEdition, listBookWithEdition),
+            )
+            val tabId = LibraryTab.CustomList(
+                listId = 1,
+                listName = "Owned",
+            ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             listsFlow.emit(listOf(list))
@@ -138,10 +160,20 @@ class BookListsCollectorTest {
             // ----- Arrange -----
             val edition = stubEdition()
             val listBook = stubListBook(edition = edition)
-            val disabledList = stubBookList(id = 99, name = "Hidden", listBooks = listOf(listBook))
-            val disabledTabId = LibraryTab.CustomList(listId = 99, listName = "Hidden").id
+            val disabledList = stubBookList(
+                id = 99,
+                name = "Hidden",
+                listBooks = listOf(listBook),
+            )
+            val disabledTabId = LibraryTab.CustomList(
+                listId = 99,
+                listName = "Hidden",
+            ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             listsFlow.emit(listOf(disabledList))
@@ -157,10 +189,20 @@ class BookListsCollectorTest {
             // ----- Arrange -----
             val edition = stubEdition()
             val listBook = stubListBook(edition = edition)
-            val list = stubBookList(id = 3, name = "Owned", listBooks = listOf(listBook))
-            val tabId = LibraryTab.CustomList(listId = 3, listName = "Owned").id
+            val list = stubBookList(
+                id = 3,
+                name = "Owned",
+                listBooks = listOf(listBook),
+            )
+            val tabId = LibraryTab.CustomList(
+                listId = 3,
+                listName = "Owned",
+            ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             listsFlow.emit(listOf(list))
             enabledListIdsFlow.emit(setOf(3))
@@ -178,7 +220,10 @@ class BookListsCollectorTest {
         fun `editionsByTab is not modified before both flows emit`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act & Assert -----
             stateFlow.value.editionsByTab shouldBe emptyMap()
@@ -190,12 +235,29 @@ class BookListsCollectorTest {
             // ----- Arrange -----
             val edition1 = stubEdition()
             val edition2 = stubEdition()
-            val list1 = stubBookList(id = 10, name = "List A", listBooks = listOf(stubListBook(edition = edition1)))
-            val list2 = stubBookList(id = 11, name = "List B", listBooks = listOf(stubListBook(edition = edition2)))
-            val tabId1 = LibraryTab.CustomList(listId = 10, listName = "List A").id
-            val tabId2 = LibraryTab.CustomList(listId = 11, listName = "List B").id
+            val list1 = stubBookList(
+                id = 10,
+                name = "List A",
+                listBooks = listOf(stubListBook(edition = edition1)),
+            )
+            val list2 = stubBookList(
+                id = 11,
+                name = "List B",
+                listBooks = listOf(stubListBook(edition = edition2)),
+            )
+            val tabId1 = LibraryTab.CustomList(
+                listId = 10,
+                listName = "List A",
+            ).id
+            val tabId2 = LibraryTab.CustomList(
+                listId = 11,
+                listName = "List B",
+            ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             listsFlow.emit(listOf(list1, list2))

@@ -1,14 +1,14 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
 
-class OnMarkBookAsWantToReadClickAction(private val book: Book) : BookDetailAction {
+internal class OnMarkBookAsWantToReadClickAction(private val book: Book) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
@@ -19,8 +19,11 @@ class OnMarkBookAsWantToReadClickAction(private val book: Book) : BookDetailActi
         val editionId = scope.currentState.previewEdition?.id ?: scope.currentState.scannedEditionId
 
         val job = dependencies.launch {
-            dependencies.markBookAsWantToReadUseCase(book = book, editionId = editionId).onFailure { error ->
-                Timber.e("$error")
+            dependencies.markBookAsWantToReadUseCase(
+                book = book,
+                editionId = editionId,
+            ).onFailure { error ->
+                AppLog.e("$error")
 
                 scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
             }

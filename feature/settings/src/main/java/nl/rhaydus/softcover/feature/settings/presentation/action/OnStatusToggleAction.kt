@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
-class OnStatusToggleAction(
+internal class OnStatusToggleAction(
     private val code: Int,
     private val enabled: Boolean,
 ) : LibraryVisibilityAction {

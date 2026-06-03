@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SettingsRepositoryImplNewPathsTest {
-
     private lateinit var settingsLocalDataSource: SettingsLocalDataSource
     private lateinit var settingsRemoteDataSource: SettingsRemoteDataSource
     private lateinit var repository: SettingsRepositoryImpl
@@ -34,7 +33,6 @@ class SettingsRepositoryImplNewPathsTest {
 
     @Nested
     inner class LibrarySortSettingsByTab {
-
         @Test
         fun `librarySortSettingsByTab is wired to local data source flow`() = runTest {
             // ----- Arrange -----
@@ -83,7 +81,6 @@ class SettingsRepositoryImplNewPathsTest {
 
     @Nested
     inner class SetLibrarySortForTab {
-
         @Test
         fun `delegates to local data source with given tab id, mode, and direction`() = runTest {
             // ----- Arrange -----
@@ -108,7 +105,6 @@ class SettingsRepositoryImplNewPathsTest {
 
     @Nested
     inner class DismissedPlanTodayByBook {
-
         @Test
         fun `dismissedPlanTodayByBook is wired to local data source flow`() = runTest {
             // ----- Arrange -----
@@ -133,7 +129,6 @@ class SettingsRepositoryImplNewPathsTest {
 
     @Nested
     inner class SetPlanTodayDismissed {
-
         @Test
         fun `delegates to local data source with given bookId and isoDate`() = runTest {
             // ----- Arrange -----

@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetDateStyleAsFlowUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: GetDateStyleAsFlowUseCase
 
@@ -25,7 +24,6 @@ class GetDateStyleAsFlowUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns the dateStyle flow from the repository`() = runTest {
             // ----- Arrange -----
@@ -45,7 +43,10 @@ class GetDateStyleAsFlowUseCaseTest {
             // ----- Arrange -----
             every {
                 settingsRepository.dateStyle
-            } returns flowOf(DateStyle.DAY_MONTH_YEAR, DateStyle.YEAR_MONTH_DAY)
+            } returns flowOf(
+                DateStyle.DAY_MONTH_YEAR,
+                DateStyle.YEAR_MONTH_DAY,
+            )
 
             // ----- Act & Assert -----
             useCase().test {

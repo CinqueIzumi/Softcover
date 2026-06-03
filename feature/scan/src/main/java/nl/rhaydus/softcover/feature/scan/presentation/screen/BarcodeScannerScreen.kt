@@ -40,19 +40,19 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.permission.isCameraPermissionGranted
-import nl.rhaydus.softcover.core.permission.rememberCameraPermissionRequester
-import nl.rhaydus.softcover.core.presentation.component.BarcodeScanner
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.designsystem.presentation.component.BarcodeScanner
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.platform.permission.isCameraPermissionGranted
+import nl.rhaydus.softcover.core.platform.permission.rememberCameraPermissionRequester
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnConfirmedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction
@@ -144,7 +144,7 @@ class BarcodeScannerScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun Screen(
+    private fun Screen(
         state: ScanUiState,
         manualMode: Boolean,
         cameraGranted: Boolean,

@@ -3,16 +3,16 @@ package nl.rhaydus.softcover.core.personal.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.data.database.model.ReadingSessionEntity
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.mapper.toDomain
 import nl.rhaydus.softcover.core.personal.data.mapper.toEntity
 import nl.rhaydus.softcover.core.personal.domain.repository.ReadingSessionRepository
-import java.time.Duration
-import java.time.Instant
 
-class ReadingSessionRepositoryImpl(
+internal class ReadingSessionRepositoryImpl(
     private val localDataSource: ReadingSessionLocalDataSource,
 ) : ReadingSessionRepository {
     override fun observeByBookId(bookId: Int): Flow<List<ReadingSession>> =
@@ -34,7 +34,7 @@ class ReadingSessionRepositoryImpl(
     ): Long = localDataSource.insert(
             entity = ReadingSessionEntity(
                 bookId = bookId,
-                startedAt = Instant.now().toString(),
+                startedAt = Clock.System.now().toString(),
                 endedAt = null,
                 startPage = startPage,
                 endPage = null,
@@ -50,7 +50,7 @@ class ReadingSessionRepositoryImpl(
     ) {
         val existing = localDataSource.observeById(id = id).first() ?: return
 
-        val now = Instant.now()
+        val now = Clock.System.now()
 
         val foldedPausedSeconds = existing.pausedSeconds + existing.openPauseSeconds(now = now)
 
@@ -71,7 +71,7 @@ class ReadingSessionRepositoryImpl(
         if (existing.endedAt != null || existing.lastPausedAt != null) return
 
         localDataSource.update(
-            entity = existing.copy(lastPausedAt = Instant.now().toString()),
+            entity = existing.copy(lastPausedAt = Clock.System.now().toString()),
         )
     }
 
@@ -82,7 +82,7 @@ class ReadingSessionRepositoryImpl(
 
         localDataSource.update(
             entity = existing.copy(
-                pausedSeconds = existing.pausedSeconds + existing.openPauseSeconds(now = Instant.now()),
+                pausedSeconds = existing.pausedSeconds + existing.openPauseSeconds(now = Clock.System.now()),
                 lastPausedAt = null,
             ),
         )
@@ -101,8 +101,11 @@ class ReadingSessionRepositoryImpl(
 private fun ReadingSessionEntity.openPauseSeconds(now: Instant): Int {
     val pausedAt = lastPausedAt ?: return 0
 
-    val seconds = runCatching { Duration.between(Instant.parse(pausedAt), now).seconds }
+    val seconds = runCatching { (now - Instant.parse(pausedAt)).inWholeSeconds }
         .getOrDefault(0L)
 
-    return seconds.coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
+    return seconds.coerceIn(
+        0L,
+        Int.MAX_VALUE.toLong(),
+    ).toInt()
 }

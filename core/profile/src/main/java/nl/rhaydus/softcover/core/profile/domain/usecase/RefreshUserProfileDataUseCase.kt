@@ -1,11 +1,15 @@
 package nl.rhaydus.softcover.core.profile.domain.usecase
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
-import java.time.Clock
-import java.time.LocalDate
 
 class RefreshUserProfileDataUseCase(
     private val profileRepository: ProfileRepository,
@@ -15,7 +19,7 @@ class RefreshUserProfileDataUseCase(
     suspend operator fun invoke(): Result<Unit> = runCatching {
         val userId = getUserIdUseCase().getOrThrow()
         val snapshot = profileRepository.fetchUserProfileSnapshot(userId = userId)
-        val data = snapshot.toUserProfileData(today = LocalDate.now(clock))
+        val data = snapshot.toUserProfileData(today = clock.todayIn(TimeZone.UTC))
 
         profileRepository.cacheUserProfileData(data = data)
     }
@@ -23,9 +27,12 @@ class RefreshUserProfileDataUseCase(
     private fun UserProfileSnapshot.toUserProfileData(today: LocalDate): UserProfileData {
         // The streak is computed from the full fetched history, but only the strip's
         // window of dates is persisted — long streaks never need the old dates kept.
-        val windowStart = today.minusDays((READING_ACTIVITY_WINDOW_DAYS - 1).toLong())
+        val windowStart = today.minus(
+            READING_ACTIVITY_WINDOW_DAYS - 1,
+            DateTimeUnit.DAY,
+        )
         val windowedDates = activeReadingDates
-            .filterTo(mutableSetOf()) { it.isBefore(windowStart).not() && it.isAfter(today).not() }
+            .filterTo(mutableSetOf()) { it >= windowStart && it <= today }
 
         return UserProfileData(
             profileImageUrl = profileImageUrl,
@@ -35,7 +42,10 @@ class RefreshUserProfileDataUseCase(
             booksRead = booksRead,
             totalPagesRead = totalPagesRead,
             averageRating = averageRating,
-            readingStreak = computeStreak(activeReadingDates, today),
+            readingStreak = computeStreak(
+                activeReadingDates,
+                today,
+            ),
             activeReadingDates = windowedDates,
         )
     }
@@ -43,12 +53,21 @@ class RefreshUserProfileDataUseCase(
     // Grace day: a user who hasn't logged yet today should not see their streak break,
     // so we start counting from yesterday when today has no entry. The streak only ends
     // once we hit a day with no progress/finished journal event.
-    private fun computeStreak(activeDates: Set<LocalDate>, today: LocalDate): Int {
-        var cursor = if (today in activeDates) today else today.minusDays(1)
+    private fun computeStreak(
+        activeDates: Set<LocalDate>,
+        today: LocalDate,
+    ): Int {
+        var cursor = if (today in activeDates) today else today.minus(
+            1,
+            DateTimeUnit.DAY,
+        )
         var streak = 0
         while (cursor in activeDates) {
             streak++
-            cursor = cursor.minusDays(1)
+            cursor = cursor.minus(
+                1,
+                DateTimeUnit.DAY,
+            )
         }
         return streak
     }

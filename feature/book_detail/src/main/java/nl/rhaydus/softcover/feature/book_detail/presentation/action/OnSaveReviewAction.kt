@@ -1,17 +1,17 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.canonical
 import nl.rhaydus.softcover.core.domain.model.isBlank
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
 
-class OnSaveReviewAction(
+internal class OnSaveReviewAction(
     private val book: Book,
     private val review: ReviewDocument,
     private val hasSpoilers: Boolean,
@@ -43,7 +43,7 @@ class OnSaveReviewAction(
             review = newReview,
             hasSpoilers = hasSpoilers,
         ).onFailure { error ->
-            Timber.e("$error")
+            AppLog.e("$error")
 
             scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
         }

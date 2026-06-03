@@ -4,6 +4,6 @@ import org.koin.dsl.module
 import nl.rhaydus.softcover.AppVersionProviderImpl
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 
-val appModule = module {
+internal val appModule = module {
     single<AppVersionProvider> { AppVersionProviderImpl() }
 }

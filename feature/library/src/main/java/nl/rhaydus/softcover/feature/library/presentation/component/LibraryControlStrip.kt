@@ -30,11 +30,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.R
+import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnEnterRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
@@ -47,7 +47,7 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnSortModeChange
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @Composable
-fun LibraryControlStrip(
+internal fun LibraryControlStrip(
     state: LibraryUiState,
     tab: LibraryTab?,
     runAction: (LibraryAction) -> Unit,
@@ -76,7 +76,10 @@ fun LibraryControlStrip(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        if (canRearrange(state = state, tab = currentTab) || state.isRearranging) {
+        if (canRearrange(
+            state = state,
+            tab = currentTab,
+        ) || state.isRearranging) {
             RearrangeAction(
                 isRearranging = state.isRearranging,
                 runAction = runAction,
@@ -205,7 +208,10 @@ private fun SortPill(
                         )
                     },
                     onClick = {
-                        runAction(OnSetListRankedAction(listId = tab.listId, ranked = true))
+                        runAction(OnSetListRankedAction(
+                            listId = tab.listId,
+                            ranked = true,
+                        ),)
                     },
                 )
             }

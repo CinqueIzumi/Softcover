@@ -9,16 +9,15 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.data.database.model.BookDeadlineEntity
-import nl.rhaydus.softcover.core.deadlines.data.datasource.BookDeadlineLocalDataSource
-import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import nl.rhaydus.softcover.core.database.model.BookDeadlineEntity
+import nl.rhaydus.softcover.core.deadlines.data.datasource.BookDeadlineLocalDataSource
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 
 class BookDeadlineRepositoryImplTest {
-
     private lateinit var localDataSource: BookDeadlineLocalDataSource
     private lateinit var repository: BookDeadlineRepositoryImpl
 
@@ -44,11 +43,15 @@ class BookDeadlineRepositoryImplTest {
 
     @Nested
     inner class Observe {
-
         @Test
         fun `returns mapped domain object when data source emits an entity`() = runTest {
             // ----- Arrange -----
-            val entity = buildEntity(bookId = 42, deadlineDate = "2026-07-10", setAt = "2026-04-01", initialPerDay = 8f)
+            val entity = buildEntity(
+                bookId = 42,
+                deadlineDate = "2026-07-10",
+                setAt = "2026-04-01",
+                initialPerDay = 8f,
+            )
 
             every {
                 localDataSource.observe(bookId = 42)
@@ -58,7 +61,11 @@ class BookDeadlineRepositoryImplTest {
             repository.observe(bookId = 42).test {
                 val item = awaitItem()
                 item!!.bookId shouldBe 42
-                item.deadlineDate shouldBe LocalDate.of(2026, 7, 10)
+                item.deadlineDate shouldBe LocalDate(
+                    2026,
+                    7,
+                    10,
+                )
                 item.initialPerDay shouldBe 8f
                 awaitComplete()
             }
@@ -97,12 +104,21 @@ class BookDeadlineRepositoryImplTest {
 
     @Nested
     inner class ObserveAll {
-
         @Test
         fun `returns list of mapped domain objects`() = runTest {
             // ----- Arrange -----
-            val entity1 = buildEntity(bookId = 1, deadlineDate = "2026-05-01", setAt = "2026-04-01", initialPerDay = 10f)
-            val entity2 = buildEntity(bookId = 2, deadlineDate = "2026-06-15", setAt = "2026-04-10", initialPerDay = 5f)
+            val entity1 = buildEntity(
+                bookId = 1,
+                deadlineDate = "2026-05-01",
+                setAt = "2026-04-01",
+                initialPerDay = 10f,
+            )
+            val entity2 = buildEntity(
+                bookId = 2,
+                deadlineDate = "2026-06-15",
+                setAt = "2026-04-10",
+                initialPerDay = 5f,
+            )
 
             every {
                 localDataSource.observeAll()
@@ -135,12 +151,19 @@ class BookDeadlineRepositoryImplTest {
 
     @Nested
     inner class SetDeadline {
-
         @Test
         fun `upserts entity with correct initialPerDay for future deadline`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
-            val deadlineDate = LocalDate.of(2026, 5, 20)  // 30 days away
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
+            val deadlineDate = LocalDate(
+                2026,
+                5,
+                20,
+            )  // 30 days away
             // 300 units, current 0 → 300 remaining / 30 days = 10f
             val entitySlot = slot<BookDeadlineEntity>()
 
@@ -168,8 +191,16 @@ class BookDeadlineRepositoryImplTest {
         @Test
         fun `initialPerDay is zero when remaining is zero`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
-            val deadlineDate = LocalDate.of(2026, 5, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
+            val deadlineDate = LocalDate(
+                2026,
+                5,
+                20,
+            )
             val entitySlot = slot<BookDeadlineEntity>()
 
             coEvery {
@@ -193,7 +224,11 @@ class BookDeadlineRepositoryImplTest {
         @Test
         fun `initialPerDay equals remaining when deadlineDate equals today`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
             val deadlineDate = today  // 0 days until deadline
             // 200 units remaining, 0 days → initialPerDay = remaining.toFloat()
             val entitySlot = slot<BookDeadlineEntity>()
@@ -219,8 +254,16 @@ class BookDeadlineRepositoryImplTest {
         @Test
         fun `initialPerDay equals remaining when deadline is in the past`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
-            val deadlineDate = LocalDate.of(2026, 4, 19)  // yesterday
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
+            val deadlineDate = LocalDate(
+                2026,
+                4,
+                19,
+            )  // yesterday
             val entitySlot = slot<BookDeadlineEntity>()
 
             coEvery {
@@ -244,8 +287,16 @@ class BookDeadlineRepositoryImplTest {
         @Test
         fun `remaining clamps to zero when current exceeds total`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
-            val deadlineDate = LocalDate.of(2026, 5, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
+            val deadlineDate = LocalDate(
+                2026,
+                5,
+                20,
+            )
             val entitySlot = slot<BookDeadlineEntity>()
 
             coEvery {
@@ -269,8 +320,16 @@ class BookDeadlineRepositoryImplTest {
         @Test
         fun `unit PAGES is stored as string PAGES on the entity`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
-            val deadlineDate = LocalDate.of(2026, 5, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
+            val deadlineDate = LocalDate(
+                2026,
+                5,
+                20,
+            )
             val entitySlot = slot<BookDeadlineEntity>()
 
             coEvery {
@@ -294,8 +353,16 @@ class BookDeadlineRepositoryImplTest {
         @Test
         fun `unit SECONDS is stored as string SECONDS on the entity`() = runTest {
             // ----- Arrange -----
-            val today = LocalDate.of(2026, 4, 20)
-            val deadlineDate = LocalDate.of(2026, 5, 20)
+            val today = LocalDate(
+                2026,
+                4,
+                20,
+            )
+            val deadlineDate = LocalDate(
+                2026,
+                5,
+                20,
+            )
             val entitySlot = slot<BookDeadlineEntity>()
 
             coEvery {
@@ -319,7 +386,6 @@ class BookDeadlineRepositoryImplTest {
 
     @Nested
     inner class ClearDeadline {
-
         @Test
         fun `delegates delete to local data source with the given bookId`() = runTest {
             // ----- Arrange -----

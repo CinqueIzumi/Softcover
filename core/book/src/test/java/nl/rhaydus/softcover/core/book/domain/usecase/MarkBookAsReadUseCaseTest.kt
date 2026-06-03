@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class MarkBookAsReadUseCaseTest {
-
     private lateinit var repository: BooksRepository
     private lateinit var useCase: MarkBookAsReadUseCase
 
@@ -27,7 +26,6 @@ class MarkBookAsReadUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `marks book as read then caches the updated book`() = runTest {
             // ----- Arrange -----
@@ -37,7 +35,10 @@ class MarkBookAsReadUseCaseTest {
             every { inputBook.status } returns BookStatus.Reading
 
             coEvery {
-                repository.markBookAsRead(book = inputBook, editionId = null)
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = null,
+                )
             } returns updatedBook
 
             coJustRun {
@@ -50,7 +51,10 @@ class MarkBookAsReadUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
-            coVerify(exactly = 1) { repository.markBookAsRead(book = inputBook, editionId = null) }
+            coVerify(exactly = 1) { repository.markBookAsRead(
+                book = inputBook,
+                editionId = null,
+            ) }
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
         }
 
@@ -64,7 +68,10 @@ class MarkBookAsReadUseCaseTest {
             every { inputBook.status } returns BookStatus.Reading
 
             coEvery {
-                repository.markBookAsRead(book = inputBook, editionId = editionId)
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = editionId,
+                )
             } returns updatedBook
 
             coJustRun {
@@ -72,10 +79,16 @@ class MarkBookAsReadUseCaseTest {
             }
 
             // ----- Act -----
-            useCase(book = inputBook, editionId = editionId)
+            useCase(
+                book = inputBook,
+                editionId = editionId,
+            )
 
             // ----- Assert -----
-            coVerify(exactly = 1) { repository.markBookAsRead(book = inputBook, editionId = editionId) }
+            coVerify(exactly = 1) { repository.markBookAsRead(
+                book = inputBook,
+                editionId = editionId,
+            ) }
         }
 
         @Test
@@ -87,7 +100,10 @@ class MarkBookAsReadUseCaseTest {
             every { inputBook.status } returns BookStatus.Reading
 
             coEvery {
-                repository.markBookAsRead(book = inputBook, editionId = null)
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = null,
+                )
             } returns updatedBook
 
             coJustRun {
@@ -98,7 +114,10 @@ class MarkBookAsReadUseCaseTest {
             useCase(book = inputBook)
 
             // ----- Assert -----
-            coVerify(exactly = 1) { repository.markBookAsRead(book = inputBook, editionId = null) }
+            coVerify(exactly = 1) { repository.markBookAsRead(
+                book = inputBook,
+                editionId = null,
+            ) }
         }
 
         @Test
@@ -110,7 +129,10 @@ class MarkBookAsReadUseCaseTest {
             every { inputBook.status } returns BookStatus.Reading
 
             coEvery {
-                repository.markBookAsRead(book = inputBook, editionId = null)
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = null,
+                )
             } throws expectedError
 
             // ----- Act -----
@@ -132,7 +154,10 @@ class MarkBookAsReadUseCaseTest {
             every { inputBook.status } returns BookStatus.Reading
 
             coEvery {
-                repository.markBookAsRead(book = inputBook, editionId = null)
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = null,
+                )
             } returns updatedBook
 
             coEvery {
@@ -159,7 +184,10 @@ class MarkBookAsReadUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
-            coVerify(exactly = 0) { repository.markBookAsRead(any(), any()) }
+            coVerify(exactly = 0) { repository.markBookAsRead(
+                any(),
+                any(),
+            ) }
             coVerify(exactly = 0) { repository.cacheBook(any()) }
         }
     }

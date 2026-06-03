@@ -258,10 +258,15 @@ to the tier axis.
 
 ## 9. Review checklist
 
+The first two items are **enforced automatically** by the `checkModuleGraph` Gradle task (registered in
+the root build, wired into `check`, so CI gates on it). It derives each module's tier from its path and
+fails the build on any `project(...)` dependency that points sideways or upward — replacing the old manual
+`grep` import audits for tier violations. The remaining items still rely on review.
+
 A change is structurally correct when:
 
-- [ ] No leaf feature (T1) imports another feature.
-- [ ] No module depends sideways or upward — only on lower tiers.
+- [ ] No leaf feature (T1) imports another feature. *(gated by `checkModuleGraph`)*
+- [ ] No module depends sideways or upward — only on lower tiers. *(gated by `checkModuleGraph`)*
 - [ ] A type imported by ≥2 features lives in `core`, not in a feature.
 - [ ] Cross-feature navigation goes through a `core` contract, not a `Screen` import.
 - [ ] Cross-feature coordination lives in `:orchestration`, not inside a single feature.
@@ -294,7 +299,11 @@ Build wiring conventions:
 - **Each module declares the `project(":core:x")` deps its own code imports** — never rely on a
   transitive dep. A module whose *public API* exposes a type from a library (e.g. `:core:designsystem`
   returning a coil `ImageRequest`) declares that library `api`, so consumers get it transitively; all
-  other deps are `implementation`.
+  other deps are `implementation`. This is **gated** by the `dependency-analysis` plugin: run
+  `./gradlew buildHealth` (it fails on a genuinely unused dependency or a wrong `api`/`implementation`).
+  The convention-plugin-provided bundle (coroutines/Koin/Timber/test stack, Compose, Room) is excluded
+  from the check in the root `dependencyAnalysis {}` config, as are a few type-resolution false
+  positives; the "declare transitive deps directly" advice is treated as informational, not a gate.
 - **Manifests merge upward.** Library modules contribute components via their own
   `src/main/AndroidManifest.xml` (`:orchestration` the launcher `MainActivity`, `:feature:session` the
   `ReadingSessionService`); `:app` owns the `<application>` element, permissions, FileProvider, and

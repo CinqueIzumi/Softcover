@@ -9,11 +9,15 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryFiltersTest {
-
     // region Fixtures
-
-    private val tagFiction = Tag(id = 1, name = "Fiction")
-    private val tagScifi = Tag(id = 2, name = "Sci-Fi")
+    private val tagFiction = Tag(
+        id = 1,
+        name = "Fiction",
+    )
+    private val tagScifi = Tag(
+        id = 2,
+        name = "Sci-Fi",
+    )
 
     private fun buildEdition(
         id: Int = 1,
@@ -67,12 +71,9 @@ class LibraryFiltersTest {
         userBook = null,
         userBookRead = null,
     )
-
     // endregion
-
     @Nested
     inner class IsEmpty {
-
         @Test
         fun `returns true when all facets are at their defaults`() {
             // ----- Arrange & Act -----
@@ -130,10 +131,8 @@ class LibraryFiltersTest {
 
     @Nested
     inner class MatchesBook {
-
         @Nested
         inner class TagFacet {
-
             @Test
             fun `matches when book has at least one active tag`() {
                 // ----- Arrange -----
@@ -167,7 +166,6 @@ class LibraryFiltersTest {
 
         @Nested
         inner class FormatFacet {
-
             @Test
             fun `matches when any edition's format is in the filter set`() {
                 // ----- Arrange -----
@@ -191,7 +189,6 @@ class LibraryFiltersTest {
 
         @Nested
         inner class ReleaseYearFacet {
-
             @Test
             fun `matches when book's releaseYear is in the filter set`() {
                 // ----- Arrange -----
@@ -215,7 +212,6 @@ class LibraryFiltersTest {
 
         @Nested
         inner class OwnedFacet {
-
             @Test
             fun `owned=true matches when at least one edition is owned`() {
                 // ----- Arrange -----
@@ -259,7 +255,6 @@ class LibraryFiltersTest {
 
         @Nested
         inner class RatingMinFacet {
-
             @Test
             fun `matches when book rating equals the threshold`() {
                 // ----- Arrange -----
@@ -293,13 +288,15 @@ class LibraryFiltersTest {
 
         @Nested
         inner class CombinedFacets {
-
             @Test
             fun `all facets must pass — rejects when only one facet fails`() {
                 // ----- Arrange -----
                 val book = buildBook(
                     tags = listOf(tagFiction),
-                    editions = listOf(buildEdition(format = "paperback", owned = true)),
+                    editions = listOf(buildEdition(
+                        format = "paperback",
+                        owned = true,
+                    ),),
                     rating = 4.0,
                     releaseYear = 2020,
                 )
@@ -321,7 +318,10 @@ class LibraryFiltersTest {
                 // ----- Arrange -----
                 val book = buildBook(
                     tags = listOf(tagFiction),
-                    editions = listOf(buildEdition(format = "paperback", owned = true)),
+                    editions = listOf(buildEdition(
+                        format = "paperback",
+                        owned = true,
+                    ),),
                     rating = 4.5,
                     releaseYear = 2020,
                 )
@@ -342,10 +342,8 @@ class LibraryFiltersTest {
 
     @Nested
     inner class MatchesEdition {
-
         @Nested
         inner class TagFacet {
-
             @Test
             fun `matches when parent book has at least one active tag`() {
                 // ----- Arrange -----
@@ -354,7 +352,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(tags = setOf(tagFiction))
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = book) shouldBe true
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                ) shouldBe true
             }
 
             @Test
@@ -365,7 +366,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(tags = setOf(tagFiction))
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = book) shouldBe false
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                ) shouldBe false
             }
 
             @Test
@@ -375,7 +379,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(tags = setOf(tagFiction))
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe false
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe false
             }
 
             @Test
@@ -385,13 +392,15 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(tags = emptySet())
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe true
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe true
             }
         }
 
         @Nested
         inner class FormatFacet {
-
             @Test
             fun `matches when edition format is in the filter set`() {
                 // ----- Arrange -----
@@ -399,7 +408,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(formats = setOf("ebook"))
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe true
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe true
             }
 
             @Test
@@ -409,13 +421,15 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(formats = setOf("ebook"))
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe false
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe false
             }
         }
 
         @Nested
         inner class ReleaseYearFacet {
-
             @Test
             fun `uses book releaseYear when book is supplied`() {
                 // ----- Arrange -----
@@ -424,7 +438,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(releaseYears = setOf(2021))
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = book) shouldBe true
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                ) shouldBe true
             }
 
             @Test
@@ -434,7 +451,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(releaseYears = setOf(2021))
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe true
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe true
             }
 
             @Test
@@ -444,13 +464,15 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(releaseYears = setOf(2021))
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe false
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe false
             }
         }
 
         @Nested
         inner class OwnedFacet {
-
             @Test
             fun `owned=true matches when edition is owned`() {
                 // ----- Arrange -----
@@ -458,7 +480,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(owned = true)
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe true
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe true
             }
 
             @Test
@@ -468,7 +493,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(owned = true)
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe false
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe false
             }
 
             @Test
@@ -478,13 +506,15 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(owned = false)
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe false
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe false
             }
         }
 
         @Nested
         inner class RatingMinFacet {
-
             @Test
             fun `matches when book rating meets threshold`() {
                 // ----- Arrange -----
@@ -493,7 +523,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(ratingMin = 4.0)
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = book) shouldBe true
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                ) shouldBe true
             }
 
             @Test
@@ -504,7 +537,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(ratingMin = 4.0)
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = book) shouldBe false
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                ) shouldBe false
             }
 
             @Test
@@ -514,13 +550,15 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(ratingMin = 4.0)
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = null) shouldBe false
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                ) shouldBe false
             }
         }
 
         @Nested
         inner class CombinedFacets {
-
             @Test
             fun `rejects when one facet fails out of multiple active facets`() {
                 // ----- Arrange -----
@@ -544,7 +582,10 @@ class LibraryFiltersTest {
                 )
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = book) shouldBe false
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                ) shouldBe false
             }
 
             @Test
@@ -570,7 +611,10 @@ class LibraryFiltersTest {
                 )
 
                 // ----- Act & Assert -----
-                filters.matchesEdition(edition = edition, book = book) shouldBe true
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                ) shouldBe true
             }
         }
     }

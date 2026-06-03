@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserListsCollectorTest {
-
     private lateinit var getAllUserListsUseCase: GetAllUserListsUseCase
     private lateinit var dependencies: LibraryVisibilitySettingsDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
@@ -50,7 +49,10 @@ class UserListsCollectorTest {
         }
     }
 
-    private fun stubBookList(id: Int, name: String): BookList = mockk {
+    private fun stubBookList(
+        id: Int,
+        name: String,
+    ): BookList = mockk {
         every {
             this@mockk.id
         } returns id
@@ -62,15 +64,26 @@ class UserListsCollectorTest {
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `updates availableLists sorted by name ascending when flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val listZ = stubBookList(id = 1, name = "Zebra")
-            val listA = stubBookList(id = 2, name = "Apple")
-            val listM = stubBookList(id = 3, name = "Middle")
+            val listZ = stubBookList(
+                id = 1,
+                name = "Zebra",
+            )
+            val listA = stubBookList(
+                id = 2,
+                name = "Apple",
+            )
+            val listM = stubBookList(
+                id = 3,
+                name = "Middle",
+            )
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             listsFlow.emit(listOf(listZ, listA, listM))
@@ -83,10 +96,19 @@ class UserListsCollectorTest {
         @Test
         fun `sort is case-insensitive`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val listUpper = stubBookList(id = 1, name = "Beta")
-            val listLower = stubBookList(id = 2, name = "alpha")
+            val listUpper = stubBookList(
+                id = 1,
+                name = "Beta",
+            )
+            val listLower = stubBookList(
+                id = 2,
+                name = "alpha",
+            )
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             listsFlow.emit(listOf(listUpper, listLower))
@@ -100,7 +122,10 @@ class UserListsCollectorTest {
         fun `sets availableLists to empty list when flow emits empty`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             listsFlow.emit(emptyList())
@@ -114,7 +139,10 @@ class UserListsCollectorTest {
         fun `does not change availableLists before flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act & Assert -----
             stateFlow.value.availableLists shouldBe emptyList()
@@ -132,10 +160,16 @@ class UserListsCollectorTest {
                 initialized = true,
             )
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
-            listsFlow.emit(listOf(stubBookList(id = 5, name = "Owned")))
+            listsFlow.emit(listOf(stubBookList(
+                id = 5,
+                name = "Owned",
+            ),),)
 
             // ----- Assert -----
             stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 2)
@@ -146,10 +180,19 @@ class UserListsCollectorTest {
         @Test
         fun `updates availableLists to latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val list1 = stubBookList(id = 1, name = "Owned")
-            val list2 = stubBookList(id = 2, name = "Wishlist")
+            val list1 = stubBookList(
+                id = 1,
+                name = "Owned",
+            )
+            val list2 = stubBookList(
+                id = 2,
+                name = "Wishlist",
+            )
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             listsFlow.emit(listOf(list1))
 

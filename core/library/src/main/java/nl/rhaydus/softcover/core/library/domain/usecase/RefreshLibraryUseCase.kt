@@ -29,8 +29,14 @@ class RefreshLibraryUseCase(
         withContext(dispatchers.io) {
             when (scope) {
                 RefreshScope.All -> refreshAll(userId = userId)
-                is RefreshScope.ByStatus -> booksRepository.refreshUserBooks(userId = userId, statusFilter = scope.status)
-                is RefreshScope.ByList -> refreshSingleList(userId = userId, listId = scope.listId)
+                is RefreshScope.ByStatus -> booksRepository.refreshUserBooks(
+                    userId = userId,
+                    statusFilter = scope.status,
+                )
+                is RefreshScope.ByList -> refreshSingleList(
+                    userId = userId,
+                    listId = scope.listId,
+                )
             }
         }
     }

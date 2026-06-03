@@ -1,14 +1,14 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.component.ChooseListsBottomSheet
-import nl.rhaydus.softcover.core.presentation.component.ListMembership
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import timber.log.Timber
 
 /**
  * Add or remove the current selection to/from a custom list. Membership semantics mirror the
@@ -21,7 +21,7 @@ import timber.log.Timber
  * The action does **not** exit selection mode — the user may want to add the same selection to
  * several lists in sequence.
  */
-class OnBulkToggleListMembershipAction(
+internal class OnBulkToggleListMembershipAction(
     private val listId: Int,
     private val currentMembership: ListMembership,
 ) : LibraryAction {
@@ -54,7 +54,10 @@ class OnBulkToggleListMembershipAction(
                         listId = listId,
                         bookId = book.id,
                     ).onFailure { throwable ->
-                        Timber.e(throwable, "Bulk remove from list $listId failed for book ${book.id}")
+                        AppLog.e(
+                            throwable,
+                            "Bulk remove from list $listId failed for book ${book.id}",
+                        )
 
                         failureCount++
                     }
@@ -70,7 +73,7 @@ class OnBulkToggleListMembershipAction(
                     val edition = book.currentEdition ?: book.defaultEdition
 
                     if (edition == null) {
-                        Timber.e("Bulk add to list $listId skipped book ${book.id}: no edition available")
+                        AppLog.e("Bulk add to list $listId skipped book ${book.id}: no edition available")
 
                         failureCount++
 
@@ -82,7 +85,10 @@ class OnBulkToggleListMembershipAction(
                         bookId = book.id,
                         edition = edition,
                     ).onFailure { throwable ->
-                        Timber.e(throwable, "Bulk add to list $listId failed for book ${book.id}")
+                        AppLog.e(
+                            throwable,
+                            "Bulk add to list $listId failed for book ${book.id}",
+                        )
 
                         failureCount++
                     }

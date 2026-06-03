@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UpdateBookRatingUseCaseTest {
-
     private lateinit var booksRepository: BooksRepository
     private lateinit var useCase: UpdateBookRatingUseCase
 
@@ -27,7 +26,6 @@ class UpdateBookRatingUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success without touching the repository when book has no userBook`() = runTest {
             // ----- Arrange -----
@@ -36,11 +34,17 @@ class UpdateBookRatingUseCaseTest {
             every { inputBook.userBook } returns null
 
             // ----- Act -----
-            val result = useCase(inputBook, rating = 4.0)
+            val result = useCase(
+                inputBook,
+                rating = 4.0,
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 0) { booksRepository.updateBookRating(book = any(), rating = any()) }
+            coVerify(exactly = 0) { booksRepository.updateBookRating(
+                book = any(),
+                rating = any(),
+            ) }
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
@@ -55,11 +59,17 @@ class UpdateBookRatingUseCaseTest {
             every { userBook.rating } returns rating
 
             // ----- Act -----
-            val result = useCase(inputBook, rating = rating)
+            val result = useCase(
+                inputBook,
+                rating = rating,
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 0) { booksRepository.updateBookRating(book = any(), rating = any()) }
+            coVerify(exactly = 0) { booksRepository.updateBookRating(
+                book = any(),
+                rating = any(),
+            ) }
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
@@ -75,7 +85,10 @@ class UpdateBookRatingUseCaseTest {
             every { userBook.rating } returns 3.0
 
             coEvery {
-                booksRepository.updateBookRating(book = inputBook, rating = newRating)
+                booksRepository.updateBookRating(
+                    book = inputBook,
+                    rating = newRating,
+                )
             } returns updatedBook
 
             coJustRun {
@@ -83,11 +96,17 @@ class UpdateBookRatingUseCaseTest {
             }
 
             // ----- Act -----
-            val result = useCase(inputBook, rating = newRating)
+            val result = useCase(
+                inputBook,
+                rating = newRating,
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 1) { booksRepository.updateBookRating(book = inputBook, rating = newRating) }
+            coVerify(exactly = 1) { booksRepository.updateBookRating(
+                book = inputBook,
+                rating = newRating,
+            ) }
             coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
 
@@ -103,11 +122,17 @@ class UpdateBookRatingUseCaseTest {
             every { userBook.rating } returns 2.0
 
             coEvery {
-                booksRepository.updateBookRating(book = inputBook, rating = newRating)
+                booksRepository.updateBookRating(
+                    book = inputBook,
+                    rating = newRating,
+                )
             } throws expectedError
 
             // ----- Act -----
-            val result = useCase(inputBook, rating = newRating)
+            val result = useCase(
+                inputBook,
+                rating = newRating,
+            )
 
             // ----- Assert -----
             result.isFailure shouldBe true

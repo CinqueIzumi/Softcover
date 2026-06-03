@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -13,7 +13,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
  * new one server-side). The text input is cleared so the editor is ready for the next tag, then the
  * full set is committed.
  */
-class OnAddUserTagAction(
+internal class OnAddUserTagAction(
     private val name: String,
     private val category: TagCategory,
 ) : BookDetailAction {
@@ -26,15 +26,24 @@ class OnAddUserTagAction(
         if (trimmed.isEmpty()) return
 
         val alreadyPresent = scope.currentState.userTags.any {
-            it.category == category && it.name.equals(trimmed, ignoreCase = true)
+            it.category == category && it.name.equals(
+                trimmed,
+                ignoreCase = true,
+            )
         }
 
         if (alreadyPresent) return
 
-        val newSet = scope.currentState.userTags + UserTag(name = trimmed, category = category)
+        val newSet = scope.currentState.userTags + UserTag(
+            name = trimmed,
+            category = category,
+        )
 
         scope.setState { it.copy(tagEditorInput = "") }
 
-        scope.commitUserTags(newSet = newSet, dependencies = dependencies)
+        scope.commitUserTags(
+            newSet = newSet,
+            dependencies = dependencies,
+        )
     }
 }

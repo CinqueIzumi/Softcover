@@ -10,8 +10,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnLogOutClickActionTest {
-
     private lateinit var resetUserDataUseCase: ResetUserDataUseCase
     private lateinit var dependencies: ProfileDependencies
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
@@ -64,7 +63,6 @@ class OnLogOutClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `sends LogOutUserEvent when use case succeeds`() = runTest {
             // ----- Arrange -----

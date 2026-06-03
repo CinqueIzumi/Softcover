@@ -3,16 +3,16 @@ package nl.rhaydus.softcover.feature.explore.presentation.action
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
-import timber.log.Timber
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
-class OnQueryChangeAction(
+internal class OnQueryChangeAction(
     val newQuery: String,
     val searchDelay: Duration = 1.seconds,
 ) :
@@ -49,7 +49,7 @@ class OnQueryChangeAction(
             delay(searchDelay)
 
             dependencies.searchForNameUseCase(name = scope.currentState.searchText).onFailure {
-                Timber.e("$it")
+                AppLog.e("$it")
             }
 
             scope.setState {

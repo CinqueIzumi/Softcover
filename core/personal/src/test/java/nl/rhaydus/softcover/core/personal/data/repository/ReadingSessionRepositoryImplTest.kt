@@ -8,18 +8,19 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.data.database.model.ReadingSessionEntity
-import nl.rhaydus.softcover.core.domain.model.ReadingSession
-import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.Instant
+import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
+import nl.rhaydus.softcover.core.domain.model.ReadingSession
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
 
 class ReadingSessionRepositoryImplTest {
-
     private lateinit var localDataSource: ReadingSessionLocalDataSource
     private lateinit var repository: ReadingSessionRepositoryImpl
 
@@ -75,7 +76,6 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class ObserveByBookId {
-
         @Test
         fun `maps entities to domain models`() = runTest {
             // ----- Arrange -----
@@ -98,7 +98,6 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class ObserveAll {
-
         @Test
         fun `maps all entities to domain models`() = runTest {
             // ----- Arrange -----
@@ -121,7 +120,6 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class ObserveActive {
-
         @Test
         fun `emits null when no active session`() = runTest {
             // ----- Arrange -----
@@ -139,7 +137,10 @@ class ReadingSessionRepositoryImplTest {
         @Test
         fun `emits mapped domain session when active session exists`() = runTest {
             // ----- Arrange -----
-            val entity = buildEntity(id = 5L, endedAt = null)
+            val entity = buildEntity(
+                id = 5L,
+                endedAt = null,
+            )
 
             every {
                 localDataSource.observeActive()
@@ -157,7 +158,6 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class ObserveById {
-
         @Test
         fun `emits null when session not found`() = runTest {
             // ----- Arrange -----
@@ -175,7 +175,6 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class Start {
-
         @Test
         fun `inserts entity with null endedAt and returns generated id`() = runTest {
             // ----- Arrange -----
@@ -202,11 +201,13 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class Stop {
-
         @Test
         fun `sets endedAt on existing session when stopping`() = runTest {
             // ----- Arrange -----
-            val existingEntity = buildEntity(id = 3L, endedAt = null)
+            val existingEntity = buildEntity(
+                id = 3L,
+                endedAt = null,
+            )
             val updatedEntitySlot = slot<ReadingSessionEntity>()
 
             every {
@@ -252,7 +253,7 @@ class ReadingSessionRepositoryImplTest {
         @Test
         fun `folds open pause into pausedSeconds and clears lastPausedAt`() = runTest {
             // ----- Arrange -----
-            val knownPausedAt = Instant.now().minusSeconds(60).toString()
+            val knownPausedAt = (Clock.System.now() - 60.seconds).toString()
             val existingEntity = buildEntity(
                 id = 4L,
                 pausedSeconds = 100,
@@ -270,7 +271,11 @@ class ReadingSessionRepositoryImplTest {
             } returns Unit
 
             // ----- Act -----
-            repository.stop(id = 4L, endPage = null, endSeconds = null)
+            repository.stop(
+                id = 4L,
+                endPage = null,
+                endSeconds = null,
+            )
 
             // ----- Assert -----
             val captured = updatedEntitySlot.captured
@@ -284,11 +289,14 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class Pause {
-
         @Test
         fun `sets lastPausedAt when session is active and not yet paused`() = runTest {
             // ----- Arrange -----
-            val existingEntity = buildEntity(id = 5L, endedAt = null, lastPausedAt = null)
+            val existingEntity = buildEntity(
+                id = 5L,
+                endedAt = null,
+                lastPausedAt = null,
+            )
             val updatedEntitySlot = slot<ReadingSessionEntity>()
 
             every {
@@ -363,11 +371,10 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class Resume {
-
         @Test
         fun `accumulates pausedSeconds and clears lastPausedAt`() = runTest {
             // ----- Arrange -----
-            val knownPausedAt = Instant.now().minusSeconds(60).toString()
+            val knownPausedAt = (Clock.System.now() - 60.seconds).toString()
             val existingEntity = buildEntity(
                 id = 6L,
                 pausedSeconds = 50,
@@ -398,7 +405,10 @@ class ReadingSessionRepositoryImplTest {
         @Test
         fun `does nothing when session is not paused`() = runTest {
             // ----- Arrange -----
-            val existingEntity = buildEntity(id = 6L, lastPausedAt = null)
+            val existingEntity = buildEntity(
+                id = 6L,
+                lastPausedAt = null,
+            )
 
             every {
                 localDataSource.observeById(id = 6L)
@@ -428,11 +438,13 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class Update {
-
         @Test
         fun `delegates update to local data source with converted entity`() = runTest {
             // ----- Arrange -----
-            val session = buildSession(id = 7L, endPage = 300)
+            val session = buildSession(
+                id = 7L,
+                endPage = 300,
+            )
             val entitySlot = slot<ReadingSessionEntity>()
 
             coEvery {
@@ -450,7 +462,6 @@ class ReadingSessionRepositoryImplTest {
 
     @Nested
     inner class Delete {
-
         @Test
         fun `delegates delete to local data source`() = runTest {
             // ----- Arrange -----

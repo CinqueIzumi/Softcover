@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetThemeConfigurationUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: GetThemeConfigurationUseCase
 
@@ -26,7 +25,6 @@ class GetThemeConfigurationUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns the theme configuration flow from the repository`() = runTest {
             // ----- Arrange -----
@@ -51,7 +49,10 @@ class GetThemeConfigurationUseCaseTest {
 
             every {
                 settingsRepository.getThemeConfig()
-            } returns flowOf(first, second)
+            } returns flowOf(
+                first,
+                second,
+            )
 
             // ----- Act & Assert -----
             useCase().test {

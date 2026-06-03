@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetLibraryGridLayoutAsFlowUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: GetLibraryGridLayoutAsFlowUseCase
 
@@ -25,7 +24,6 @@ class GetLibraryGridLayoutAsFlowUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns the libraryGridLayout flow from the repository`() = runTest {
             // ----- Arrange -----
@@ -45,7 +43,10 @@ class GetLibraryGridLayoutAsFlowUseCaseTest {
             // ----- Arrange -----
             every {
                 settingsRepository.libraryGridLayout
-            } returns flowOf(LibraryGridLayout.GRID_TWO_COLUMNS, LibraryGridLayout.GRID_THREE_COLUMNS)
+            } returns flowOf(
+                LibraryGridLayout.GRID_TWO_COLUMNS,
+                LibraryGridLayout.GRID_THREE_COLUMNS,
+            )
 
             // ----- Act & Assert -----
             useCase().test {

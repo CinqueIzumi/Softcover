@@ -6,8 +6,8 @@ import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.data.database.dao.PendingListWriteDao
-import nl.rhaydus.softcover.core.data.database.model.PendingListWriteEntity
+import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
+import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class PendingListWriteSyncerTest {
-
     private lateinit var networkAvailability: NetworkAvailabilityProvider
     private lateinit var dao: PendingListWriteDao
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
@@ -117,10 +116,16 @@ class PendingListWriteSyncerTest {
         enqueuedAt = enqueuedAt,
     )
 
-    private fun stubBookList(id: Int = 1, name: String = "My List"): BookList = BookList(
+    private fun stubBookList(
+        id: Int = 1,
+        name: String = "My List",
+    ): BookList = BookList(
         id = id,
         name = name,
-        slug = name.lowercase().replace(" ", "-"),
+        slug = name.lowercase().replace(
+            " ",
+            "-",
+        ),
         books = emptyList(),
     )
 
@@ -138,7 +143,6 @@ class PendingListWriteSyncerTest {
 
     @Nested
     inner class DrainPendingWrites {
-
         @Test
         fun `empty queue is a no-op — no remote or local calls`() = runTest {
             // ----- Arrange -----
@@ -219,7 +223,12 @@ class PendingListWriteSyncerTest {
         fun `replay failure halts drain — later entries are not replayed and attempts is incremented`() = runTest {
             // ----- Arrange -----
             val entityA = createListEntity(localId = 1L)
-            val entityB = addListBookEntity(localId = 2L, listId = 10, bookId = 20, editionId = 30)
+            val entityB = addListBookEntity(
+                localId = 2L,
+                listId = 10,
+                bookId = 20,
+                editionId = 30,
+            )
             val entityC = reorderListBooksEntity(localId = 3L)
 
             coEvery {
@@ -346,12 +355,17 @@ class PendingListWriteSyncerTest {
 
     @Nested
     inner class ReplayCreateList {
-
         @Test
         fun `delegates to remote createList with listName and caches the created BookList`() = runTest {
             // ----- Arrange -----
-            val entity = createListEntity(localId = 1L, listName = "Science Fiction")
-            val createdList = stubBookList(id = 7, name = "Science Fiction")
+            val entity = createListEntity(
+                localId = 1L,
+                listName = "Science Fiction",
+            )
+            val createdList = stubBookList(
+                id = 7,
+                name = "Science Fiction",
+            )
 
             coEvery {
                 dao.getPending()
@@ -383,7 +397,6 @@ class PendingListWriteSyncerTest {
 
     @Nested
     inner class ReplayAddListBook {
-
         @Test
         fun `delegates to remote addBookToList then removes optimistic and caches real ListBook`() = runTest {
             // ----- Arrange -----
@@ -393,7 +406,12 @@ class PendingListWriteSyncerTest {
                 bookId = 20,
                 editionId = 30,
             )
-            val realListBook = stubListBook(listBookId = 99, listId = 10, bookId = 20, editionId = 30)
+            val realListBook = stubListBook(
+                listBookId = 99,
+                listId = 10,
+                bookId = 20,
+                editionId = 30,
+            )
 
             coEvery {
                 dao.getPending()
@@ -440,7 +458,6 @@ class PendingListWriteSyncerTest {
 
     @Nested
     inner class ReplayRemoveListBook {
-
         @Test
         fun `delegates to remote removeListBook with reconstructed ListBook and caches returned BookList`() = runTest {
             // ----- Arrange -----
@@ -489,7 +506,6 @@ class PendingListWriteSyncerTest {
 
     @Nested
     inner class ReplayReorderListBooks {
-
         @Test
         fun `delegates to remote updateListBookPositions — no local writes`() = runTest {
             // ----- Arrange -----

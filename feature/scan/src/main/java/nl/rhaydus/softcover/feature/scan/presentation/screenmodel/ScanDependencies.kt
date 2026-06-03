@@ -4,9 +4,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionDependencies
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionDependencies
 
-data class ScanDependencies(
+internal data class ScanDependencies(
     val resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase,
     val addBookByIsbnUseCase: AddBookByIsbnUseCase,
     override val coroutineScope: CoroutineScope,

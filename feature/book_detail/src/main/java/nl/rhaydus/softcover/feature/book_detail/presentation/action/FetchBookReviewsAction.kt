@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import timber.log.Timber
 
-class FetchBookReviewsAction(
+internal class FetchBookReviewsAction(
     val bookId: Int,
 ) : BookDetailAction {
     override suspend fun execute(
@@ -24,7 +24,7 @@ class FetchBookReviewsAction(
 
             val reviews = dependencies
                 .getTopBookReviewsUseCase(bookId = bookId)
-                .onFailure { Timber.e("$it") }
+                .onFailure { AppLog.e("$it") }
                 .getOrDefault(emptyList())
 
             scope.setState {

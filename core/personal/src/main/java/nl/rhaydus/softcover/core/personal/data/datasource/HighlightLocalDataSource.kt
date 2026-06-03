@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.personal.data.datasource
 
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.core.data.database.dao.HighlightDao
-import nl.rhaydus.softcover.core.data.database.model.HighlightEntity
+import nl.rhaydus.softcover.core.database.dao.HighlightDao
+import nl.rhaydus.softcover.core.database.model.HighlightEntity
 
 interface HighlightLocalDataSource {
     fun observeByBookId(bookId: Int): Flow<List<HighlightEntity>>
@@ -18,7 +18,7 @@ interface HighlightLocalDataSource {
     suspend fun delete(id: Long)
 }
 
-class HighlightLocalDataSourceImpl(
+internal class HighlightLocalDataSourceImpl(
     private val dao: HighlightDao,
 ) : HighlightLocalDataSource {
     override fun observeByBookId(bookId: Int): Flow<List<HighlightEntity>> =

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.toggle
 
-class OnToggleFilterValueAction(
+internal class OnToggleFilterValueAction(
     private val tabId: String,
     private val value: LibraryFilterValue,
 ) : LibraryAction {

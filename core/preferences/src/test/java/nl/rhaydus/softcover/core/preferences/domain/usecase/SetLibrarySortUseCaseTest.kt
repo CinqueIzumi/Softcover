@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SetLibrarySortUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: SetLibrarySortUseCase
 
@@ -25,7 +24,6 @@ class SetLibrarySortUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository setLibrarySortForTab and returns success`() = runTest {
             // ----- Arrange -----

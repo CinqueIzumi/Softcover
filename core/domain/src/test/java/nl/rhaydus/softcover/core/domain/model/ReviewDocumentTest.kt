@@ -5,12 +5,10 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ReviewDocumentTest {
-
     // ----- isBlank -----
 
     @Nested
     inner class IsBlank {
-
         @Test
         fun `EMPTY document is blank`() {
             // ----- Act & Assert -----
@@ -32,7 +30,7 @@ class ReviewDocumentTest {
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(ReviewRun(""), ReviewRun(""))),
                 ReviewParagraph(listOf(ReviewRun(""))),
-            ))
+            ),)
 
             // ----- Act & Assert -----
             doc.isBlank() shouldBe true
@@ -43,7 +41,7 @@ class ReviewDocumentTest {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(ReviewRun("   "), ReviewRun("\t"))),
-            ))
+            ),)
 
             // ----- Act & Assert -----
             doc.isBlank() shouldBe true
@@ -54,7 +52,7 @@ class ReviewDocumentTest {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(ReviewRun(""), ReviewRun("hello"))),
-            ))
+            ),)
 
             // ----- Act & Assert -----
             doc.isBlank() shouldBe false
@@ -74,7 +72,6 @@ class ReviewDocumentTest {
 
     @Nested
     inner class PlainText {
-
         @Test
         fun `EMPTY document produces empty string`() {
             // ----- Act & Assert -----
@@ -98,8 +95,8 @@ class ReviewDocumentTest {
                     ReviewRun("Hello"),
                     ReviewRun(", "),
                     ReviewRun("world"),
-                )),
-            ))
+                ),),
+            ),)
 
             // ----- Act & Assert -----
             doc.plainText() shouldBe "Hello, world"
@@ -111,7 +108,7 @@ class ReviewDocumentTest {
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(ReviewRun("First paragraph"))),
                 ReviewParagraph(listOf(ReviewRun("Second paragraph"))),
-            ))
+            ),)
 
             // ----- Act & Assert -----
             doc.plainText() shouldBe "First paragraph\nSecond paragraph"
@@ -124,7 +121,7 @@ class ReviewDocumentTest {
                 ReviewParagraph(listOf(ReviewRun("P1"))),
                 ReviewParagraph(listOf(ReviewRun("P2"))),
                 ReviewParagraph(listOf(ReviewRun("P3"))),
-            ))
+            ),)
 
             // ----- Act & Assert -----
             doc.plainText() shouldBe "P1\nP2\nP3"
@@ -137,7 +134,7 @@ class ReviewDocumentTest {
                 ReviewParagraph(listOf(ReviewRun("Before"))),
                 ReviewParagraph(runs = emptyList()),
                 ReviewParagraph(listOf(ReviewRun("After"))),
-            ))
+            ),)
 
             // ----- Act & Assert -----
             doc.plainText() shouldBe "Before\n\nAfter"
@@ -149,10 +146,13 @@ class ReviewDocumentTest {
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(
                     ReviewRun("Visible text"),
-                    ReviewRun(" hidden part", spoiler = true),
+                    ReviewRun(
+                        " hidden part",
+                        spoiler = true,
+                    ),
                     ReviewRun(" more visible"),
-                )),
-            ))
+                ),),
+            ),)
 
             // ----- Act & Assert -----
             doc.plainText() shouldBe "Visible text hidden part more visible"
@@ -163,7 +163,6 @@ class ReviewDocumentTest {
 
     @Nested
     inner class Canonical {
-
         @Test
         fun `empty document stays empty`() {
             // ----- Act & Assert -----
@@ -175,7 +174,7 @@ class ReviewDocumentTest {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(ReviewRun(""), ReviewRun(""))),
-            ))
+            ),)
 
             // ----- Act -----
             val result = doc.canonical()
@@ -191,8 +190,8 @@ class ReviewDocumentTest {
                 ReviewParagraph(listOf(
                     ReviewRun("Hello"),
                     ReviewRun(" world"),
-                )),
-            ))
+                ),),
+            ),)
 
             // ----- Act -----
             val result = doc.canonical()
@@ -207,10 +206,16 @@ class ReviewDocumentTest {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(
-                    ReviewRun("Foo", bold = true),
-                    ReviewRun("Bar", bold = true),
-                )),
-            ))
+                    ReviewRun(
+                        "Foo",
+                        bold = true,
+                    ),
+                    ReviewRun(
+                        "Bar",
+                        bold = true,
+                    ),
+                ),),
+            ),)
 
             // ----- Act -----
             val result = doc.canonical()
@@ -227,9 +232,12 @@ class ReviewDocumentTest {
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(
                     ReviewRun("Plain"),
-                    ReviewRun("Bold", bold = true),
-                )),
-            ))
+                    ReviewRun(
+                        "Bold",
+                        bold = true,
+                    ),
+                ),),
+            ),)
 
             // ----- Act -----
             val result = doc.canonical()
@@ -244,9 +252,12 @@ class ReviewDocumentTest {
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(
                     ReviewRun("Plain"),
-                    ReviewRun("Italic", italic = true),
-                )),
-            ))
+                    ReviewRun(
+                        "Italic",
+                        italic = true,
+                    ),
+                ),),
+            ),)
 
             // ----- Act -----
             val result = doc.canonical()
@@ -261,9 +272,12 @@ class ReviewDocumentTest {
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(
                     ReviewRun("Visible"),
-                    ReviewRun("Hidden", spoiler = true),
-                )),
-            ))
+                    ReviewRun(
+                        "Hidden",
+                        spoiler = true,
+                    ),
+                ),),
+            ),)
 
             // ----- Act -----
             val result = doc.canonical()
@@ -280,8 +294,8 @@ class ReviewDocumentTest {
                     ReviewRun("Hello"),
                     ReviewRun(""),
                     ReviewRun(" world"),
-                )),
-            ))
+                ),),
+            ),)
 
             // ----- Act -----
             val result = doc.canonical()
@@ -310,7 +324,7 @@ class ReviewDocumentTest {
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(ReviewRun("First"))),
                 ReviewParagraph(listOf(ReviewRun("Second"))),
-            ))
+            ),)
 
             // ----- Act -----
             val result = doc.canonical()
@@ -324,17 +338,26 @@ class ReviewDocumentTest {
         private fun goldenDocument() = ReviewDocument(
             paragraphs = listOf(
                 ReviewParagraph(runs = listOf(
-                    ReviewRun(text = "Loved", bold = true),
+                    ReviewRun(
+                        text = "Loved",
+                        bold = true,
+                    ),
                     ReviewRun(text = " it a ton. "),
-                )),
+                ),),
                 ReviewParagraph(runs = listOf(
                     ReviewRun(text = "Will be reading more by "),
-                    ReviewRun(text = "Kylie Lee Baker", italic = true),
+                    ReviewRun(
+                        text = "Kylie Lee Baker",
+                        italic = true,
+                    ),
                     ReviewRun(text = "."),
-                )),
+                ),),
                 ReviewParagraph(runs = listOf(
-                    ReviewRun(text = "Test", spoiler = true),
-                )),
+                    ReviewRun(
+                        text = "Test",
+                        spoiler = true,
+                    ),
+                ),),
             ),
         )
     }

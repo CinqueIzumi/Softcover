@@ -63,38 +63,38 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSearchTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBarAction
+import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
+import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
+import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
+import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
+import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
+import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
+import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.rememberBookDetailPrefetcher
+import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
-import nl.rhaydus.softcover.core.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.presentation.component.OfflineScreenContent
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverSearchTopBar
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBarAction
-import nl.rhaydus.softcover.core.presentation.component.UnreleasedBadge
-import nl.rhaydus.softcover.core.presentation.component.rememberIsOnline
-import nl.rhaydus.softcover.core.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.presentation.component.rememberMutationAnimatedModifier
-import nl.rhaydus.softcover.core.presentation.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.softcover.core.presentation.component.staggeredEntry
-import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.presentation.modifier.noRippleClickable
-import nl.rhaydus.softcover.core.presentation.modifier.pressScaleClickable
-import nl.rhaydus.softcover.core.presentation.modifier.shimmer
-import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
-import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
-import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.presentation.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
@@ -161,7 +161,7 @@ object ExploreScreen : Screen {
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: ExploreScreenUiState,
         runAction: (ExploreAction) -> Unit,
         onBookClick: (Book, String?) -> Unit,
@@ -186,7 +186,7 @@ object ExploreScreen : Screen {
                         onClick = onScanClick,
                     ),
                 )
-            }
+            },
         ) { padding ->
             if (isOnline.not()) {
                 OfflineScreenContent(modifier = Modifier.padding(padding))
@@ -309,7 +309,10 @@ object ExploreScreen : Screen {
                             TrendingCard(
                                 modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
                                 book = book,
-                                onClick = { onBookClick(book, SURFACE_TRENDING) },
+                                onClick = { onBookClick(
+                                    book,
+                                    SURFACE_TRENDING,
+                                ) },
                             )
                         }
                     }
@@ -398,7 +401,10 @@ object ExploreScreen : Screen {
                             SeriesCard(
                                 modifier = Modifier.staggeredEntry(coordinator = entry, index = index),
                                 book = book,
-                                onClick = { onBookClick(book, SURFACE_UP_NEXT) },
+                                onClick = { onBookClick(
+                                    book,
+                                    SURFACE_UP_NEXT,
+                                ) },
                                 onMenuClick = { sheetBook = book },
                             )
                         }
@@ -428,7 +434,7 @@ object ExploreScreen : Screen {
                             OnDismissContinueSeriesBookAction(
                                 bookId = book.id,
                                 bookTitle = book.title,
-                            )
+                            ),
                         )
 
                         dismiss()
@@ -440,7 +446,7 @@ object ExploreScreen : Screen {
                             OnDismissContinueSeriesAction(
                                 seriesId = series.id,
                                 seriesName = series.name,
-                            )
+                            ),
                         )
 
                         dismiss()
@@ -606,14 +612,18 @@ object ExploreScreen : Screen {
         ) {
             items(queries, key = { it }) { query ->
                 FilterChip(
-                    modifier = rememberMutationAnimatedModifier(animator = animator, itemKey = query),
+                    modifier = Modifier.mutationAnimated(
+                        scope = this,
+                        animator = animator,
+                        itemKey = query,
+                    ),
                     selected = false,
                     onClick = {
                         runAction(
                             OnQueryChangeAction(
                                 newQuery = query,
                                 searchDelay = 0.seconds,
-                            )
+                            ),
                         )
                     },
                     label = { Text(text = query) },
@@ -861,7 +871,10 @@ object ExploreScreen : Screen {
             modifier = Modifier
                 .fillMaxWidth()
                 .prefetchBookDetailOnPress(book.id)
-                .pressScaleClickable(onClick = { onBookClick(book, null) }),
+                .pressScaleClickable(onClick = { onBookClick(
+                    book,
+                    null,
+                ) },),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             EditionImage(

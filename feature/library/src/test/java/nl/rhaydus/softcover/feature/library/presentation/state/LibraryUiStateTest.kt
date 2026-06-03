@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -12,14 +13,11 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryUiStateTest {
-
     // region Fixtures
-
     private val readTabId = LibraryTab.Status.of(UserBookStatus.READ).id
     private val otherTabId = "list-99"
 
@@ -149,12 +147,9 @@ class LibraryUiStateTest {
         filtersByTab = filtersByTab,
         filterOptionsByTab = filterOptionsByTab,
     )
-
     // endregion
-
     @Nested
     inner class Defaults {
-
         @Test
         fun `tabsLoaded is false in the initial state before any flows emit`() {
             // ----- Arrange & Act -----
@@ -167,7 +162,6 @@ class LibraryUiStateTest {
 
     @Nested
     inner class SortDirectionFor {
-
         @Test
         fun `falls back to the mode's defaultDirection when not set explicitly`() {
             // ----- Arrange -----
@@ -201,7 +195,6 @@ class LibraryUiStateTest {
 
     @Nested
     inner class SortModeFor {
-
         @Test
         fun `returns DATE_FINISHED for the Read tab when sortModeByTab is empty`() {
             // ----- Arrange -----
@@ -229,7 +222,6 @@ class LibraryUiStateTest {
 
     @Nested
     inner class DisplayBooksFor {
-
         @Test
         fun `returns null when tabId is absent from booksByTab`() {
             // ----- Arrange -----
@@ -272,9 +264,18 @@ class LibraryUiStateTest {
         @Test
         fun `filters by title case-insensitively when query is non-blank`() {
             // ----- Arrange -----
-            val match = buildBook(id = 1, title = "Foundation")
-            val noMatch1 = buildBook(id = 2, title = "Dune")
-            val noMatch2 = buildBook(id = 3, title = "Neuromancer")
+            val match = buildBook(
+                id = 1,
+                title = "Foundation",
+            )
+            val noMatch1 = buildBook(
+                id = 2,
+                title = "Dune",
+            )
+            val noMatch2 = buildBook(
+                id = 3,
+                title = "Neuromancer",
+            )
 
             val state = buildState(
                 booksByTab = mapOf(otherTabId to listOf(match, noMatch1, noMatch2)),
@@ -294,12 +295,18 @@ class LibraryUiStateTest {
             val matchByAuthor = buildBook(
                 id = 1,
                 title = "Foundation",
-                authors = listOf(Author(id = 1, name = "Isaac Asimov")),
+                authors = listOf(Author(
+                    id = 1,
+                    name = "Isaac Asimov",
+                ),),
             )
             val noMatch = buildBook(
                 id = 2,
                 title = "Dune",
-                authors = listOf(Author(id = 2, name = "Frank Herbert")),
+                authors = listOf(Author(
+                    id = 2,
+                    name = "Frank Herbert",
+                ),),
             )
 
             val state = buildState(
@@ -414,9 +421,18 @@ class LibraryUiStateTest {
             // only used by the screen to look up the persisted sort to flow back into the DAO
             // subscription. The render-time pass is filter-only.
             // ----- Arrange -----
-            val bookZ = buildBook(id = 1, title = "Zebra")
-            val bookA = buildBook(id = 2, title = "Apple")
-            val bookM = buildBook(id = 3, title = "Mango")
+            val bookZ = buildBook(
+                id = 1,
+                title = "Zebra",
+            )
+            val bookA = buildBook(
+                id = 2,
+                title = "Apple",
+            )
+            val bookM = buildBook(
+                id = 3,
+                title = "Mango",
+            )
 
             val state = buildState(
                 booksByTab = mapOf(otherTabId to listOf(bookZ, bookA, bookM)),
@@ -435,7 +451,6 @@ class LibraryUiStateTest {
 
     @Nested
     inner class DisplayEditionsFor {
-
         @Test
         fun `returns null when tabId is absent from editionsByTab`() {
             // ----- Arrange -----
@@ -451,8 +466,14 @@ class LibraryUiStateTest {
         @Test
         fun `filters editions by title case-insensitively`() {
             // ----- Arrange -----
-            val match = buildEdition(id = 1, title = "Foundation")
-            val noMatch = buildEdition(id = 2, title = "Dune")
+            val match = buildEdition(
+                id = 1,
+                title = "Foundation",
+            )
+            val noMatch = buildEdition(
+                id = 2,
+                title = "Dune",
+            )
 
             val state = buildState(
                 editionsByTab = mapOf(otherTabId to listOf(match, noMatch)),
@@ -469,8 +490,14 @@ class LibraryUiStateTest {
         @Test
         fun `sorts filtered editions by TITLE mode alphabetically`() {
             // ----- Arrange -----
-            val editionZ = buildEdition(id = 1, title = "Zebra Edition")
-            val editionA = buildEdition(id = 2, title = "Alpha Edition")
+            val editionZ = buildEdition(
+                id = 1,
+                title = "Zebra Edition",
+            )
+            val editionA = buildEdition(
+                id = 2,
+                title = "Alpha Edition",
+            )
 
             val state = buildState(
                 editionsByTab = mapOf(otherTabId to listOf(editionZ, editionA)),
@@ -487,8 +514,14 @@ class LibraryUiStateTest {
         @Test
         fun `displayEditionsFor reverses ordering when direction is the opposite of default`() {
             // ----- Arrange -----
-            val editionA = buildEdition(id = 1, title = "Alpha Edition")
-            val editionZ = buildEdition(id = 2, title = "Zebra Edition")
+            val editionA = buildEdition(
+                id = 1,
+                title = "Alpha Edition",
+            )
+            val editionZ = buildEdition(
+                id = 2,
+                title = "Zebra Edition",
+            )
 
             val state = buildState(
                 editionsByTab = mapOf(otherTabId to listOf(editionA, editionZ)),
@@ -506,7 +539,6 @@ class LibraryUiStateTest {
 
     @Nested
     inner class AvailableReadYears {
-
         @Test
         fun `returns empty list when booksByTab has no Read-tab entry`() {
             // ----- Arrange -----
@@ -555,8 +587,10 @@ class LibraryUiStateTest {
 
     @Nested
     inner class DisplayBooksForFilters {
-
-        private val tagFiction = Tag(id = 1, name = "Fiction")
+        private val tagFiction = Tag(
+            id = 1,
+            name = "Fiction",
+        )
 
         @Test
         fun `applies filter chips after search and year filters`() {
@@ -636,14 +670,26 @@ class LibraryUiStateTest {
 
     @Nested
     inner class DisplayEditionsForFilters {
-
-        private val tagFiction = Tag(id = 1, name = "Fiction")
+        private val tagFiction = Tag(
+            id = 1,
+            name = "Fiction",
+        )
 
         @Test
         fun `applies filter chips after sort`() {
             // ----- Arrange -----
-            val ownedEdition = buildEditionFull(id = 1, bookId = 10, format = "ebook", owned = true)
-            val unownedEdition = buildEditionFull(id = 2, bookId = 10, format = "ebook", owned = false)
+            val ownedEdition = buildEditionFull(
+                id = 1,
+                bookId = 10,
+                format = "ebook",
+                owned = true,
+            )
+            val unownedEdition = buildEditionFull(
+                id = 2,
+                bookId = 10,
+                format = "ebook",
+                owned = false,
+            )
 
             val filters = LibraryFilters(owned = true)
 
@@ -662,8 +708,14 @@ class LibraryUiStateTest {
         @Test
         fun `resolves parent book via bookByBookId for tag facet`() {
             // ----- Arrange -----
-            val edition = buildEditionFull(id = 1, bookId = 10)
-            val book = buildBook(id = 10, tags = listOf(tagFiction))
+            val edition = buildEditionFull(
+                id = 1,
+                bookId = 10,
+            )
+            val book = buildBook(
+                id = 10,
+                tags = listOf(tagFiction),
+            )
 
             val filters = LibraryFilters(tags = setOf(tagFiction))
 
@@ -683,7 +735,10 @@ class LibraryUiStateTest {
         @Test
         fun `rejects edition when parent book is missing and tag filter is active`() {
             // ----- Arrange -----
-            val edition = buildEditionFull(id = 1, bookId = 99)
+            val edition = buildEditionFull(
+                id = 1,
+                bookId = 99,
+            )
 
             val filters = LibraryFilters(tags = setOf(tagFiction))
 
@@ -703,9 +758,11 @@ class LibraryUiStateTest {
 
     @Nested
     inner class AvailableFilterOptionsFor {
-
         private val sampleOptions = LibraryFilterOptions(
-            tags = listOf(Tag(id = 1, name = "Fiction")),
+            tags = listOf(Tag(
+                id = 1,
+                name = "Fiction",
+            ),),
             formats = listOf("ebook"),
             releaseYears = listOf(2024),
             supportsOwnedFilter = true,

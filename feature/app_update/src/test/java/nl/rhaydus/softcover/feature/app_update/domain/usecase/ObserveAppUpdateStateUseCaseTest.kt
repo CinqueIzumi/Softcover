@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ObserveAppUpdateStateUseCaseTest {
-
     private lateinit var appUpdateRepository: AppUpdateRepository
     private lateinit var useCase: ObserveAppUpdateStateUseCase
 
@@ -25,7 +24,6 @@ class ObserveAppUpdateStateUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns the updateState flow from the repository`() = runTest {
             // ----- Arrange -----

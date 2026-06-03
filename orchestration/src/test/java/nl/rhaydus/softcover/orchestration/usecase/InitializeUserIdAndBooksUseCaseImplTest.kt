@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class InitializeUserIdAndBooksUseCaseImplTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var useCase: InitializeUserIdAndBooksUseCaseImpl
@@ -31,7 +30,6 @@ class InitializeUserIdAndBooksUseCaseImplTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns success when all calls succeed`() = runTest {
             // ----- Arrange -----

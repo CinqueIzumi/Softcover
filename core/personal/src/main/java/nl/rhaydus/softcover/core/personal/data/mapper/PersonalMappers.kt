@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
-import nl.rhaydus.softcover.core.data.database.model.HighlightEntity
-import nl.rhaydus.softcover.core.data.database.model.ReadingLogEntryEntity
-import nl.rhaydus.softcover.core.data.database.model.ReadingSessionEntity
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.database.model.HighlightEntity
+import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
+import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
 import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
-import java.time.Instant
-import java.time.LocalDate
 
 private fun String.toInstantOrEpoch(): Instant =
-    runCatching { Instant.parse(this) }.getOrDefault(Instant.EPOCH)
+    runCatching { Instant.parse(this) }.getOrDefault(Instant.fromEpochMilliseconds(0))
 
 private fun String?.toInstantOrNull(): Instant? =
     this?.let { runCatching { Instant.parse(it) }.getOrNull() }
@@ -18,7 +18,7 @@ private fun String?.toInstantOrNull(): Instant? =
 private fun String?.toLocalDateOrNull(): LocalDate? =
     this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
-fun HighlightEntity.toDomain(): Highlight = Highlight(
+internal fun HighlightEntity.toDomain(): Highlight = Highlight(
     id = id,
     bookId = bookId,
     quote = quote,
@@ -27,7 +27,7 @@ fun HighlightEntity.toDomain(): Highlight = Highlight(
     createdAt = createdAt.toInstantOrEpoch(),
 )
 
-fun Highlight.toEntity(): HighlightEntity = HighlightEntity(
+internal fun Highlight.toEntity(): HighlightEntity = HighlightEntity(
     id = id,
     bookId = bookId,
     quote = quote,
@@ -36,7 +36,7 @@ fun Highlight.toEntity(): HighlightEntity = HighlightEntity(
     createdAt = createdAt.toString(),
 )
 
-fun ReadingSessionEntity.toDomain(): ReadingSession = ReadingSession(
+internal fun ReadingSessionEntity.toDomain(): ReadingSession = ReadingSession(
     id = id,
     bookId = bookId,
     startedAt = startedAt.toInstantOrEpoch(),
@@ -49,7 +49,7 @@ fun ReadingSessionEntity.toDomain(): ReadingSession = ReadingSession(
     lastPausedAt = lastPausedAt.toInstantOrNull(),
 )
 
-fun ReadingSession.toEntity(): ReadingSessionEntity = ReadingSessionEntity(
+internal fun ReadingSession.toEntity(): ReadingSessionEntity = ReadingSessionEntity(
     id = id,
     bookId = bookId,
     startedAt = startedAt.toString(),
@@ -62,7 +62,7 @@ fun ReadingSession.toEntity(): ReadingSessionEntity = ReadingSessionEntity(
     lastPausedAt = lastPausedAt?.toString(),
 )
 
-fun ReadingLogEntryEntity.toDomain(): ReadingLogEntry = ReadingLogEntry(
+internal fun ReadingLogEntryEntity.toDomain(): ReadingLogEntry = ReadingLogEntry(
     id = id,
     bookId = bookId,
     startedAt = startedAt.toLocalDateOrNull(),
@@ -72,7 +72,7 @@ fun ReadingLogEntryEntity.toDomain(): ReadingLogEntry = ReadingLogEntry(
     createdAt = createdAt.toInstantOrEpoch(),
 )
 
-fun ReadingLogEntry.toEntity(): ReadingLogEntryEntity = ReadingLogEntryEntity(
+internal fun ReadingLogEntry.toEntity(): ReadingLogEntryEntity = ReadingLogEntryEntity(
     id = id,
     bookId = bookId,
     startedAt = startedAt?.toString(),

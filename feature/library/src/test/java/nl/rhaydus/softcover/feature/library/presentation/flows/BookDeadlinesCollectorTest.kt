@@ -9,20 +9,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class BookDeadlinesCollectorTest {
-
     private lateinit var observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
@@ -53,15 +52,22 @@ class BookDeadlinesCollectorTest {
 
     private fun buildDeadline(bookId: Int) = BookDeadline(
         bookId = bookId,
-        deadlineDate = LocalDate.of(2026, 5, 1),
-        setAt = LocalDate.of(2026, 4, 1),
+        deadlineDate = LocalDate(
+            2026,
+            5,
+            1,
+        ),
+        setAt = LocalDate(
+            2026,
+            4,
+            1,
+        ),
         initialPerDay = 10f,
         unit = nl.rhaydus.softcover.core.domain.model.DeadlineUnit.PAGES,
     )
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `sets state deadlines when flow emits a map`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
@@ -70,7 +76,10 @@ class BookDeadlinesCollectorTest {
             val expectedMap = mapOf(1 to deadline1, 2 to deadline2)
 
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             deadlinesFlow.emit(expectedMap)
@@ -84,7 +93,10 @@ class BookDeadlinesCollectorTest {
         fun `sets state deadlines to empty map when flow emits empty map`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             deadlinesFlow.emit(emptyMap())
@@ -101,7 +113,10 @@ class BookDeadlinesCollectorTest {
             val secondMap = mapOf(2 to buildDeadline(bookId = 2), 3 to buildDeadline(bookId = 3))
 
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             deadlinesFlow.emit(firstMap)
@@ -116,7 +131,10 @@ class BookDeadlinesCollectorTest {
         fun `does not change deadlines before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act & Assert -----
             stateFlow.value.deadlines shouldBe emptyMap()
@@ -128,7 +146,10 @@ class BookDeadlinesCollectorTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(isLoading = false)
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             deadlinesFlow.emit(mapOf(1 to buildDeadline(bookId = 1)))

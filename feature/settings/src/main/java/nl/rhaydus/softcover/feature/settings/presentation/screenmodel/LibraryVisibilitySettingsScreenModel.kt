@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
@@ -8,7 +9,6 @@ import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
@@ -18,7 +18,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilit
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
-class LibraryVisibilitySettingsScreenModel(
+internal class LibraryVisibilitySettingsScreenModel(
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     private val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
     private val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,

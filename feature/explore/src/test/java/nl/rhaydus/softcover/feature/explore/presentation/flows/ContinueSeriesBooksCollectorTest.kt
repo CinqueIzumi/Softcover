@@ -10,8 +10,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ContinueSeriesBooksCollectorTest {
-
     private lateinit var getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase
     private lateinit var getAllUserBooksUseCase: GetAllUserBooksUseCase
     private lateinit var dependencies: ExploreDependencies
@@ -65,13 +64,15 @@ class ContinueSeriesBooksCollectorTest {
 
     @Nested
     inner class OnLaunch {
-
         @Test
         fun `updates continueSeriesBooks and clears loading flag on success`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(id = 1)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(book))
@@ -91,7 +92,10 @@ class ContinueSeriesBooksCollectorTest {
                 throw RuntimeException("use case error")
             }
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             allUserBooksFlow.emit(emptyList())
@@ -108,7 +112,10 @@ class ContinueSeriesBooksCollectorTest {
             val fetchedBook = stubBook(id = 5)
             val userBook = stubBook(id = 5)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(fetchedBook))
@@ -125,7 +132,10 @@ class ContinueSeriesBooksCollectorTest {
             val fetchedBook = stubBook(id = 10)
             val userBook = stubBook(id = 99)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(fetchedBook))
@@ -146,7 +156,10 @@ class ContinueSeriesBooksCollectorTest {
             )
             val book = stubBook(id = 2)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(book))
@@ -169,7 +182,10 @@ class ContinueSeriesBooksCollectorTest {
                 throw RuntimeException("error")
             }
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(scope = scope, dependencies = dependencies) }
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
 
             // ----- Act -----
             allUserBooksFlow.emit(emptyList())

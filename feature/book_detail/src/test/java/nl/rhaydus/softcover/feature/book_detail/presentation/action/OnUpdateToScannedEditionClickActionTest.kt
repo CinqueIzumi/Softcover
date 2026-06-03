@@ -10,9 +10,9 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBook
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnUpdateToScannedEditionClickActionTest {
-
     private lateinit var updateBookEditionUseCase: UpdateBookEditionUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -70,7 +69,6 @@ class OnUpdateToScannedEditionClickActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `invokes use case with userBook and scannedEditionId when both are set`() = runTest {
             // ----- Arrange -----
@@ -83,7 +81,10 @@ class OnUpdateToScannedEditionClickActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = 42)
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = 42,
+                )
             } returns Result.success(Unit)
 
             val action = OnUpdateToScannedEditionClickAction()
@@ -96,7 +97,10 @@ class OnUpdateToScannedEditionClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                updateBookEditionUseCase(userBook = userBook, newEditionId = 42)
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = 42,
+                )
             }
 
             scope.currentState.isUpdatingScannedEdition shouldBe false
@@ -124,7 +128,10 @@ class OnUpdateToScannedEditionClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                updateBookEditionUseCase(any(), any())
+                updateBookEditionUseCase(
+                    any(),
+                    any(),
+                )
             }
         }
 
@@ -148,7 +155,10 @@ class OnUpdateToScannedEditionClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                updateBookEditionUseCase(any(), any())
+                updateBookEditionUseCase(
+                    any(),
+                    any(),
+                )
             }
         }
 
@@ -173,7 +183,10 @@ class OnUpdateToScannedEditionClickActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                updateBookEditionUseCase(any(), any())
+                updateBookEditionUseCase(
+                    any(),
+                    any(),
+                )
             }
         }
     }

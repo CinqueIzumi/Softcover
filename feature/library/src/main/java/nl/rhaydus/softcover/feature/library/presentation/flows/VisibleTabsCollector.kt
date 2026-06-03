@@ -3,10 +3,10 @@ package nl.rhaydus.softcover.feature.library.presentation.flows
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -19,7 +19,7 @@ private val statusOrder: List<UserBookStatus> = listOf(
     UserBookStatus.DID_NOT_FINISH,
 )
 
-class VisibleTabsCollector : LibraryInitializer {
+internal class VisibleTabsCollector : LibraryInitializer {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,
@@ -39,7 +39,10 @@ class VisibleTabsCollector : LibraryInitializer {
             val listTabs = lists
                 .filter { it.id in enabledListIds }
                 .sortedBy { it.name.lowercase() }
-                .map { LibraryTab.CustomList(listId = it.id, listName = it.name) }
+                .map { LibraryTab.CustomList(
+                    listId = it.id,
+                    listName = it.name,
+                ) }
 
             val defaultOrdered = buildList<LibraryTab> {
                 add(LibraryTab.All)

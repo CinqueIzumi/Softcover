@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class StartAppUpdateFlowUseCaseTest {
-
     private lateinit var appUpdateRepository: AppUpdateRepository
     private lateinit var useCase: StartAppUpdateFlowUseCase
 
@@ -22,7 +21,6 @@ class StartAppUpdateFlowUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository startUpdateFlow with the provided launcher`() {
             // ----- Arrange -----

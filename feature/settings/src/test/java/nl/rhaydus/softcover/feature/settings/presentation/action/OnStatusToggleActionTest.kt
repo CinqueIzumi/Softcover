@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnStatusToggleActionTest {
-
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
     private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
 
@@ -51,7 +50,6 @@ class OnStatusToggleActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `adds code to draftEnabledStatusCodes when enabled is true`() = runTest {
             // ----- Arrange -----
@@ -60,10 +58,16 @@ class OnStatusToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(code = 3, enabled = true)
+            val action = OnStatusToggleAction(
+                code = 3,
+                enabled = true,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 3)
@@ -77,10 +81,16 @@ class OnStatusToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(code = 3, enabled = false)
+            val action = OnStatusToggleAction(
+                code = 3,
+                enabled = false,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 5)
@@ -95,10 +105,16 @@ class OnStatusToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(code = 5, enabled = true)
+            val action = OnStatusToggleAction(
+                code = 5,
+                enabled = true,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.persistedEnabledStatusCodes shouldBe setOf(1, 3)
@@ -113,10 +129,16 @@ class OnStatusToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(code = 3, enabled = true)
+            val action = OnStatusToggleAction(
+                code = 3,
+                enabled = true,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledListIds shouldBe setOf(99)
@@ -130,10 +152,16 @@ class OnStatusToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(code = 1, enabled = true)
+            val action = OnStatusToggleAction(
+                code = 1,
+                enabled = true,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 3)
@@ -147,10 +175,16 @@ class OnStatusToggleActionTest {
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(code = 99, enabled = false)
+            val action = OnStatusToggleAction(
+                code = 99,
+                enabled = false,
+            )
 
             // ----- Act -----
-            action.execute(dependencies = dependencies, scope = scope)
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1)

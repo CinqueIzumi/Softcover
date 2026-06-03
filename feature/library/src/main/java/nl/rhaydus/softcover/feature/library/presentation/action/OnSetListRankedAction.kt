@@ -1,15 +1,15 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
-import nl.rhaydus.softcover.core.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import timber.log.Timber
 
 /**
  * Flips a custom list's `ranked` flag (the Hardcover `lists.ranked` column). When turning a list
@@ -23,7 +23,7 @@ import timber.log.Timber
  * switch lives in DataStore and must be unwound here so the screen doesn't strand the user on an
  * ORDER tab that no longer has server backing.
  */
-class OnSetListRankedAction(
+internal class OnSetListRankedAction(
     private val listId: Int,
     private val ranked: Boolean,
 ) : LibraryAction {
@@ -61,7 +61,10 @@ class OnSetListRankedAction(
             listId = listId,
             ranked = ranked,
         ).onFailure { throwable ->
-            Timber.e(throwable, "Set list ranked=$ranked failed for list $listId")
+            AppLog.e(
+                throwable,
+                "Set list ranked=$ranked failed for list $listId",
+            )
 
             if (ranked) {
                 dependencies.setLibrarySortUseCase(

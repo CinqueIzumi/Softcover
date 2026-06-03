@@ -9,11 +9,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.PreviewData
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent
@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnIsbnSubmittedActionTest {
-
     private lateinit var resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase
     private lateinit var stateFlow: MutableStateFlow<ScanUiState>
     private lateinit var eventChannel: Channel<ScanEvent>
@@ -68,7 +67,6 @@ class OnIsbnSubmittedActionTest {
 
     @Nested
     inner class Execute {
-
         @Test
         fun `does not invoke use case when isResolving is already true`() = runTest {
             // ----- Arrange -----
@@ -140,7 +138,10 @@ class OnIsbnSubmittedActionTest {
 
             coEvery {
                 resolveBookByIsbnUseCase(isbn = "9780451524935")
-            } returns Result.success(IsbnLookupResult.Found(book = book, editionId = editionId))
+            } returns Result.success(IsbnLookupResult.Found(
+                book = book,
+                editionId = editionId,
+            ),)
 
             val action = OnIsbnSubmittedAction(isbn = "9780451524935")
 
@@ -167,7 +168,10 @@ class OnIsbnSubmittedActionTest {
 
             coEvery {
                 resolveBookByIsbnUseCase(isbn = "9780451524935")
-            } returns Result.success(IsbnLookupResult.Found(book = book, editionId = null))
+            } returns Result.success(IsbnLookupResult.Found(
+                book = book,
+                editionId = null,
+            ),)
 
             val action = OnIsbnSubmittedAction(isbn = "9780451524935")
 

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class GetUserIdAsFlowUseCaseTest {
-
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var useCase: GetUserIdAsFlowUseCase
 
@@ -24,7 +23,6 @@ class GetUserIdAsFlowUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `returns the userId flow from the repository`() = runTest {
             // ----- Arrange -----
@@ -44,7 +42,11 @@ class GetUserIdAsFlowUseCaseTest {
             // ----- Arrange -----
             every {
                 settingsRepository.getUserId()
-            } returns flowOf(1, 2, 3)
+            } returns flowOf(
+                1,
+                2,
+                3,
+            )
 
             // ----- Act & Assert -----
             useCase().test {

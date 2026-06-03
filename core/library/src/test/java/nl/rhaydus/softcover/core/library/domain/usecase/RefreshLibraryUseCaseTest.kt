@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RefreshLibraryUseCaseTest {
-
     private lateinit var getUserIdUseCase: GetUserIdUseCase
     private lateinit var booksRepository: BooksRepository
     private lateinit var listsRepository: ListsRepository
@@ -68,7 +67,10 @@ class RefreshLibraryUseCaseTest {
         books = books,
     )
 
-    private fun stubListBook(bookId: Int = 1, editionId: Int = 100): ListBook = ListBook(
+    private fun stubListBook(
+        bookId: Int = 1,
+        editionId: Int = 100,
+    ): ListBook = ListBook(
         listBookId = 1,
         listId = 0,
         bookId = bookId,
@@ -77,7 +79,6 @@ class RefreshLibraryUseCaseTest {
 
     @Nested
     inner class GetUserIdFailure {
-
         @Test
         fun `returns failure when getUserIdUseCase returns failure — no repo calls made`() = runTest {
             // ----- Arrange -----
@@ -95,18 +96,23 @@ class RefreshLibraryUseCaseTest {
             result.exceptionOrNull() shouldBe expectedError
 
             coVerify(exactly = 0) {
-                booksRepository.refreshUserBooks(userId = any(), statusFilter = any())
+                booksRepository.refreshUserBooks(
+                    userId = any(),
+                    statusFilter = any(),
+                )
             }
 
             coVerify(exactly = 0) {
-                listsRepository.fetchUserLists(userId = any(), listIds = any())
+                listsRepository.fetchUserLists(
+                    userId = any(),
+                    listIds = any(),
+                )
             }
         }
     }
 
     @Nested
     inner class AllScope {
-
         @BeforeEach
         fun setUpUserId() {
             coEvery {
@@ -128,7 +134,10 @@ class RefreshLibraryUseCaseTest {
             result.isSuccess shouldBe true
 
             coVerify {
-                booksRepository.refreshUserBooks(userId = 55, statusFilter = null)
+                booksRepository.refreshUserBooks(
+                    userId = 55,
+                    statusFilter = null,
+                )
             }
 
             coVerify {
@@ -139,8 +148,14 @@ class RefreshLibraryUseCaseTest {
         @Test
         fun `calls hydrateReferencedBooks with union of all list book and edition ids`() = runTest {
             // ----- Arrange -----
-            val listBook1 = stubListBook(bookId = 10, editionId = 100)
-            val listBook2 = stubListBook(bookId = 20, editionId = 200)
+            val listBook1 = stubListBook(
+                bookId = 10,
+                editionId = 100,
+            )
+            val listBook2 = stubListBook(
+                bookId = 20,
+                editionId = 200,
+            )
             val fetchedList = stubBookList(books = listOf(listBook1, listBook2))
 
             coEvery {
@@ -218,7 +233,10 @@ class RefreshLibraryUseCaseTest {
         @Test
         fun `seeds enabledListIds with owned list id when listDefaultsSeeded is false`() = runTest {
             // ----- Arrange -----
-            val ownedList = stubBookList(id = 42, slug = "owned")
+            val ownedList = stubBookList(
+                id = 42,
+                slug = "owned",
+            )
 
             every {
                 settingsRepository.listDefaultsSeeded
@@ -240,7 +258,10 @@ class RefreshLibraryUseCaseTest {
         @Test
         fun `does not seed enabledListIds when listDefaultsSeeded is true`() = runTest {
             // ----- Arrange -----
-            val ownedList = stubBookList(id = 42, slug = "owned")
+            val ownedList = stubBookList(
+                id = 42,
+                slug = "owned",
+            )
 
             every {
                 settingsRepository.listDefaultsSeeded
@@ -262,7 +283,10 @@ class RefreshLibraryUseCaseTest {
         @Test
         fun `seeds with empty set when no owned list is found and listDefaultsSeeded is false`() = runTest {
             // ----- Arrange -----
-            val nonOwnedList = stubBookList(id = 5, slug = "other")
+            val nonOwnedList = stubBookList(
+                id = 5,
+                slug = "other",
+            )
 
             every {
                 settingsRepository.listDefaultsSeeded
@@ -284,7 +308,6 @@ class RefreshLibraryUseCaseTest {
 
     @Nested
     inner class ByStatusScope {
-
         @Test
         fun `calls refreshUserBooks with the given statusFilter and never touches lists`() = runTest {
             // ----- Arrange -----
@@ -301,11 +324,17 @@ class RefreshLibraryUseCaseTest {
             result.isSuccess shouldBe true
 
             coVerify {
-                booksRepository.refreshUserBooks(userId = 55, statusFilter = status)
+                booksRepository.refreshUserBooks(
+                    userId = 55,
+                    statusFilter = status,
+                )
             }
 
             coVerify(exactly = 0) {
-                listsRepository.fetchUserLists(userId = any(), listIds = any())
+                listsRepository.fetchUserLists(
+                    userId = any(),
+                    listIds = any(),
+                )
             }
 
             coVerify(exactly = 0) {
@@ -328,7 +357,10 @@ class RefreshLibraryUseCaseTest {
             } returns Result.success(55)
 
             coEvery {
-                booksRepository.refreshUserBooks(userId = 55, statusFilter = status)
+                booksRepository.refreshUserBooks(
+                    userId = 55,
+                    statusFilter = status,
+                )
             } throws expectedError
 
             // ----- Act -----
@@ -342,7 +374,6 @@ class RefreshLibraryUseCaseTest {
 
     @Nested
     inner class ByListScope {
-
         @Test
         fun `fetches the single list by id and caches it without touching books refresh`() = runTest {
             // ----- Arrange -----
@@ -354,7 +385,10 @@ class RefreshLibraryUseCaseTest {
             } returns Result.success(55)
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55, listIds = setOf(listId))
+                listsRepository.fetchUserLists(
+                    userId = 55,
+                    listIds = setOf(listId),
+                )
             } returns listOf(fetchedList)
 
             // ----- Act -----
@@ -364,7 +398,10 @@ class RefreshLibraryUseCaseTest {
             result.isSuccess shouldBe true
 
             coVerify {
-                listsRepository.fetchUserLists(userId = 55, listIds = setOf(listId))
+                listsRepository.fetchUserLists(
+                    userId = 55,
+                    listIds = setOf(listId),
+                )
             }
 
             coVerify {
@@ -372,7 +409,10 @@ class RefreshLibraryUseCaseTest {
             }
 
             coVerify(exactly = 0) {
-                booksRepository.refreshUserBooks(userId = any(), statusFilter = any())
+                booksRepository.refreshUserBooks(
+                    userId = any(),
+                    statusFilter = any(),
+                )
             }
         }
 
@@ -380,15 +420,24 @@ class RefreshLibraryUseCaseTest {
         fun `calls hydrateReferencedBooks with ids from the fetched list`() = runTest {
             // ----- Arrange -----
             val listId = 7
-            val listBook = stubListBook(bookId = 10, editionId = 100)
-            val fetchedList = stubBookList(id = listId, books = listOf(listBook))
+            val listBook = stubListBook(
+                bookId = 10,
+                editionId = 100,
+            )
+            val fetchedList = stubBookList(
+                id = listId,
+                books = listOf(listBook),
+            )
 
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(55)
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55, listIds = setOf(listId))
+                listsRepository.fetchUserLists(
+                    userId = 55,
+                    listIds = setOf(listId),
+                )
             } returns listOf(fetchedList)
 
             // ----- Act -----
@@ -414,7 +463,10 @@ class RefreshLibraryUseCaseTest {
             } returns Result.success(55)
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55, listIds = setOf(listId))
+                listsRepository.fetchUserLists(
+                    userId = 55,
+                    listIds = setOf(listId),
+                )
             } returns emptyList()
 
             // ----- Act -----

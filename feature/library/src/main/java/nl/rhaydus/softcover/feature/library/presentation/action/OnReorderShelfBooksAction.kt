@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import timber.log.Timber
 
 /**
  * Persists a drag-and-drop reorder for a built-in shelf. [prefixOrderedBookIds] is the top-down
@@ -14,7 +14,7 @@ import timber.log.Timber
  * intentionally left untouched so new entries fetched from the API still surface at the top of the
  * unsorted region rather than being pinned to the tail.
  */
-class OnReorderShelfBooksAction(
+internal class OnReorderShelfBooksAction(
     private val status: UserBookStatus,
     private val prefixOrderedBookIds: List<Int>,
 ) : LibraryAction {
@@ -26,7 +26,7 @@ class OnReorderShelfBooksAction(
             status = status,
             prefixOrderedBookIds = prefixOrderedBookIds,
         ).onFailure {
-            Timber.e("$it")
+            AppLog.e("$it")
         }
     }
 }

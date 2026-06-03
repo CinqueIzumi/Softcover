@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class PauseReadingSessionUseCaseTest {
-
     private lateinit var repository: ReadingSessionRepository
     private lateinit var useCase: PauseReadingSessionUseCase
 
@@ -21,7 +20,6 @@ class PauseReadingSessionUseCaseTest {
 
     @Nested
     inner class Invoke {
-
         @Test
         fun `delegates to repository pause with given id`() = runTest {
             // ----- Arrange -----

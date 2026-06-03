@@ -8,10 +8,8 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 class SearchHistorySerializerTest {
-
     @Nested
     inner class DefaultValue {
-
         @Test
         fun `returns SearchHistoryEntity with empty previousQueries list`() {
             // ----- Arrange -----
@@ -27,7 +25,6 @@ class SearchHistorySerializerTest {
 
     @Nested
     inner class ReadFrom {
-
         @Test
         fun `deserializes valid JSON with a list of queries`() = runTest {
             // ----- Arrange -----
@@ -94,7 +91,6 @@ class SearchHistorySerializerTest {
 
     @Nested
     inner class WriteTo {
-
         @Test
         fun `serializes entity with queries to valid JSON`() = runTest {
             // ----- Arrange -----
@@ -102,7 +98,10 @@ class SearchHistorySerializerTest {
             val output = ByteArrayOutputStream()
 
             // ----- Act -----
-            SearchHistorySerializer.writeTo(t = entity, output = output)
+            SearchHistorySerializer.writeTo(
+                t = entity,
+                output = output,
+            )
 
             // ----- Assert -----
             val written = output.toByteArray().decodeToString()
@@ -117,7 +116,10 @@ class SearchHistorySerializerTest {
             val output = ByteArrayOutputStream()
 
             // ----- Act -----
-            SearchHistorySerializer.writeTo(t = entity, output = output)
+            SearchHistorySerializer.writeTo(
+                t = entity,
+                output = output,
+            )
 
             // ----- Assert -----
             val written = output.toByteArray().decodeToString()
@@ -132,7 +134,10 @@ class SearchHistorySerializerTest {
             val output = ByteArrayOutputStream()
 
             // ----- Act -----
-            SearchHistorySerializer.writeTo(t = entity, output = output)
+            SearchHistorySerializer.writeTo(
+                t = entity,
+                output = output,
+            )
             val reparsed = SearchHistorySerializer.readFrom(ByteArrayInputStream(output.toByteArray()))
 
             // ----- Assert -----

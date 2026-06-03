@@ -45,17 +45,17 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.core.presentation.component.AnimatedStatNumber
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverImage
-import nl.rhaydus.softcover.core.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.presentation.modifier.shimmer
-import nl.rhaydus.softcover.core.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.presentation.viewmodel.MainActivityViewModel
+import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedStatNumber
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
@@ -90,7 +90,7 @@ class ProfileScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    fun Screen(
+    internal fun Screen(
         state: ProfileUiState,
         runAction: (ProfileAction) -> Unit,
         onNavigateUp: () -> Unit,
@@ -116,7 +116,7 @@ class ProfileScreen : Screen {
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
             ) {
                 ProfileHeader(
                     profileImageUrl = state.userProfileData?.profileImageUrl,
@@ -364,7 +364,10 @@ class ProfileScreen : Screen {
         val shape = RoundedCornerShape(24.dp)
 
         Surface(
-            modifier = modifier.shimmer(shape = shape, isLoading = isLoading),
+            modifier = modifier.shimmer(
+                shape = shape,
+                isLoading = isLoading,
+            ),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             shape = shape,
         ) {
@@ -412,7 +415,10 @@ class ProfileScreen : Screen {
         Surface(
             modifier = modifier
                 .fillMaxWidth()
-                .shimmer(shape = shape, isLoading = isLoading),
+                .shimmer(
+                    shape = shape,
+                    isLoading = isLoading,
+                ),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = shape,
         ) {
