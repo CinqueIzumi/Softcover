@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.book.data.repository
 
-import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -836,11 +835,11 @@ internal class BooksRepositoryImpl(
 
     override suspend fun persistEditionImage(
         editionId: Int,
-        source: File,
+        bytes: ByteArray,
     ) {
         booksLocalDataSource.persistEditionImage(
             editionId = editionId,
-            source = source,
+            bytes = bytes,
         )
     }
 }

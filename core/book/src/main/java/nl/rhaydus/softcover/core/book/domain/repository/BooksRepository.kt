@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.book.domain.repository
 
-import java.io.File
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
@@ -157,6 +156,6 @@ interface BooksRepository {
 
     suspend fun persistEditionImage(
         editionId: Int,
-        source: File,
+        bytes: ByteArray,
     )
 }

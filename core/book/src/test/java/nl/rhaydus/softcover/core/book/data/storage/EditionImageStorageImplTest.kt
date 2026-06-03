@@ -27,34 +27,6 @@ class EditionImageStorageImplTest {
     }
 
     @Nested
-    inner class FileFor {
-        @Test
-        fun `returns a file whose parent is edition_images under filesDir`() {
-            // ----- Arrange -----
-            val editionId = 42
-
-            // ----- Act -----
-            val result = storage.fileFor(editionId = editionId)
-
-            // ----- Assert -----
-            result.parentFile?.name shouldBe "edition_images"
-            result.parentFile?.parentFile?.canonicalPath shouldBe tempDir.canonicalPath
-        }
-
-        @Test
-        fun `returns a file whose name equals the edition id`() {
-            // ----- Arrange -----
-            val editionId = 99
-
-            // ----- Act -----
-            val result = storage.fileFor(editionId = editionId)
-
-            // ----- Assert -----
-            result.name shouldBe "99"
-        }
-    }
-
-    @Nested
     inner class Exists {
         @Test
         fun `returns false when no file has been written for the edition`() {
@@ -69,11 +41,13 @@ class EditionImageStorageImplTest {
         }
 
         @Test
-        fun `returns true when a file for the edition exists on disk`() {
+        fun `returns true after write has been called for the edition`() {
             // ----- Arrange -----
             val editionId = 2
-            val target = storage.fileFor(editionId = editionId)
-            target.writeText("image-data")
+            storage.write(
+                editionId = editionId,
+                bytes = byteArrayOf(0),
+            )
 
             // ----- Act -----
             val result = storage.exists(editionId = editionId)
@@ -84,73 +58,58 @@ class EditionImageStorageImplTest {
     }
 
     @Nested
-    inner class CopyFrom {
+    inner class Write {
         @Test
-        fun `copies bytes from source file to the edition file`() {
+        fun `writes bytes to the edition file and they can be read back`() {
             // ----- Arrange -----
             val editionId = 10
-            val source = File(
-                tempDir,
-                "source.jpg",
-            ).also { it.writeBytes(byteArrayOf(1, 2, 3)) }
+            val bytes = byteArrayOf(1, 2, 3)
 
             // ----- Act -----
-            storage.copyFrom(
+            val path = storage.write(
                 editionId = editionId,
-                source = source,
+                bytes = bytes,
             )
 
             // ----- Assert -----
-            val dest = storage.fileFor(editionId = editionId)
-            dest.readBytes() shouldBe byteArrayOf(1, 2, 3)
+            File(path).readBytes() shouldBe bytes
         }
 
         @Test
-        fun `returns the absolute path of the written file`() {
+        fun `returns the absolute path whose parent dir is edition_images under filesDir`() {
             // ----- Arrange -----
             val editionId = 11
-            val source = File(
-                tempDir,
-                "source2.jpg",
-            ).also { it.writeText("content") }
-            val expected = storage.fileFor(editionId = editionId).absolutePath
 
             // ----- Act -----
-            val result = storage.copyFrom(
+            val path = storage.write(
                 editionId = editionId,
-                source = source,
+                bytes = byteArrayOf(9),
             )
 
             // ----- Assert -----
-            result shouldBe expected
+            val file = File(path)
+            file.name shouldBe "11"
+            file.parentFile?.name shouldBe "edition_images"
+            file.parentFile?.parentFile?.canonicalPath shouldBe tempDir.canonicalPath
         }
 
         @Test
         fun `overwrites an existing file for the same edition`() {
             // ----- Arrange -----
             val editionId = 12
-            val source1 = File(
-                tempDir,
-                "v1.jpg",
-            ).also { it.writeText("version-1") }
-            val source2 = File(
-                tempDir,
-                "v2.jpg",
-            ).also { it.writeText("version-2") }
-
-            storage.copyFrom(
+            storage.write(
                 editionId = editionId,
-                source = source1,
+                bytes = byteArrayOf(1),
             )
 
             // ----- Act -----
-            storage.copyFrom(
+            val path = storage.write(
                 editionId = editionId,
-                source = source2,
+                bytes = byteArrayOf(2, 3),
             )
 
             // ----- Assert -----
-            storage.fileFor(editionId = editionId).readText() shouldBe "version-2"
+            File(path).readBytes() shouldBe byteArrayOf(2, 3)
         }
     }
 
@@ -160,13 +119,9 @@ class EditionImageStorageImplTest {
         fun `removes the file at the given path when it exists`() {
             // ----- Arrange -----
             val editionId = 20
-            val source = File(
-                tempDir,
-                "to_delete.jpg",
-            ).also { it.writeText("data") }
-            val path = storage.copyFrom(
+            val path = storage.write(
                 editionId = editionId,
-                source = source,
+                bytes = byteArrayOf(7, 8),
             )
 
             // ----- Act -----

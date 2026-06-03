@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import java.io.File
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import org.junit.jupiter.api.BeforeEach
@@ -27,19 +26,19 @@ class PersistEditionImageUseCaseTest {
         fun `returns success and delegates to repository when call succeeds`() = runTest {
             // ----- Arrange -----
             val editionId = 42
-            val source: File = mockk()
+            val bytes = byteArrayOf(1, 2, 3)
 
             coEvery {
                 booksRepository.persistEditionImage(
                     editionId = editionId,
-                    source = source,
+                    bytes = bytes,
                 )
             } returns Unit
 
             // ----- Act -----
             val result = useCase(
                 editionId = editionId,
-                source = source,
+                bytes = bytes,
             )
 
             // ----- Assert -----
@@ -47,29 +46,29 @@ class PersistEditionImageUseCaseTest {
         }
 
         @Test
-        fun `forwards editionId and source to the repository`() = runTest {
+        fun `forwards editionId and bytes to the repository`() = runTest {
             // ----- Arrange -----
             val editionId = 7
-            val source: File = mockk()
+            val bytes = byteArrayOf(4, 5, 6)
 
             coEvery {
                 booksRepository.persistEditionImage(
                     editionId = editionId,
-                    source = source,
+                    bytes = bytes,
                 )
             } returns Unit
 
             // ----- Act -----
             useCase(
                 editionId = editionId,
-                source = source,
+                bytes = bytes,
             )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
                 booksRepository.persistEditionImage(
                     editionId = editionId,
-                    source = source,
+                    bytes = bytes,
                 )
             }
         }
@@ -78,20 +77,20 @@ class PersistEditionImageUseCaseTest {
         fun `returns failure when repository throws`() = runTest {
             // ----- Arrange -----
             val editionId = 5
-            val source: File = mockk()
+            val bytes = byteArrayOf(7, 8, 9)
             val error = RuntimeException("disk full")
 
             coEvery {
                 booksRepository.persistEditionImage(
                     editionId = editionId,
-                    source = source,
+                    bytes = bytes,
                 )
             } throws error
 
             // ----- Act -----
             val result = useCase(
                 editionId = editionId,
-                source = source,
+                bytes = bytes,
             )
 
             // ----- Assert -----

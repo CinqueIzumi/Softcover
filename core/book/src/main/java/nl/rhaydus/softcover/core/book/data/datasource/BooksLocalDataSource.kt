@@ -13,7 +13,6 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import java.io.File
 
 interface BooksLocalDataSource {
     val allUserBooks: Flow<List<Book>>
@@ -66,7 +65,7 @@ interface BooksLocalDataSource {
 
     suspend fun persistEditionImage(
         editionId: Int,
-        source: File,
+        bytes: ByteArray,
     )
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
@@ -135,13 +134,13 @@ internal class BooksLocalDataSourceImpl(
 
     override suspend fun persistEditionImage(
         editionId: Int,
-        source: File,
+        bytes: ByteArray,
     ) {
         if (editionImageStorage.exists(editionId = editionId)) return
 
-        val storedPath = editionImageStorage.copyFrom(
+        val storedPath = editionImageStorage.write(
             editionId = editionId,
-            source = source,
+            bytes = bytes,
         )
 
         dao.updateEditionLocalImagePath(

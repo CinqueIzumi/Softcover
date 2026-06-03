@@ -322,7 +322,7 @@ private fun persistFromDiskCache(
         snapshot.use {
             persistEditionImageUseCase(
                 editionId = editionId,
-                source = it.data.toFile(),
+                bytes = it.data.toFile().readBytes(),
             )
         }
     }

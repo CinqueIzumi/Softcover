@@ -3032,29 +3032,29 @@ class BooksRepositoryImplTest {
     @Nested
     inner class PersistEditionImage {
         @Test
-        fun `delegates to local data source with the given editionId and source`() = runTest {
+        fun `delegates to local data source with the given editionId and bytes`() = runTest {
             // ----- Arrange -----
             val editionId = 42
-            val source: java.io.File = mockk()
+            val bytes = byteArrayOf(1, 2, 3)
 
             coEvery {
                 booksLocalDataSource.persistEditionImage(
                     editionId = editionId,
-                    source = source,
+                    bytes = bytes,
                 )
             } returns Unit
 
             // ----- Act -----
             repository.persistEditionImage(
                 editionId = editionId,
-                source = source,
+                bytes = bytes,
             )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
                 booksLocalDataSource.persistEditionImage(
                     editionId = editionId,
-                    source = source,
+                    bytes = bytes,
                 )
             }
         }

@@ -29,7 +29,6 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class BooksLocalDataSourceImplTest {
     private lateinit var dao: BookDao
@@ -746,10 +745,10 @@ class BooksLocalDataSourceImplTest {
     @Nested
     inner class PersistEditionImage {
         @Test
-        fun `skips copy and DAO update when storage already has the file`() = runTest {
+        fun `skips write and DAO update when storage already has the file`() = runTest {
             // ----- Arrange -----
             val editionId = 42
-            val source: File = mockk()
+            val bytes = byteArrayOf(1, 2, 3)
 
             every {
                 editionImageStorage.exists(editionId = editionId)
@@ -758,14 +757,14 @@ class BooksLocalDataSourceImplTest {
             // ----- Act -----
             dataSource.persistEditionImage(
                 editionId = editionId,
-                source = source,
+                bytes = bytes,
             )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                editionImageStorage.copyFrom(
+                editionImageStorage.write(
                     editionId = any(),
-                    source = any(),
+                    bytes = any(),
                 )
             }
 
@@ -778,10 +777,10 @@ class BooksLocalDataSourceImplTest {
         }
 
         @Test
-        fun `copies the file and updates the DAO when storage does not have the file`() = runTest {
+        fun `writes bytes and updates the DAO when storage does not have the file`() = runTest {
             // ----- Arrange -----
             val editionId = 55
-            val source: File = mockk()
+            val bytes = byteArrayOf(4, 5, 6)
             val storedPath = "/data/user/0/edition_images/55"
 
             every {
@@ -789,23 +788,23 @@ class BooksLocalDataSourceImplTest {
             } returns false
 
             every {
-                editionImageStorage.copyFrom(
+                editionImageStorage.write(
                     editionId = editionId,
-                    source = source,
+                    bytes = bytes,
                 )
             } returns storedPath
 
             // ----- Act -----
             dataSource.persistEditionImage(
                 editionId = editionId,
-                source = source,
+                bytes = bytes,
             )
 
             // ----- Assert -----
             coVerify {
-                editionImageStorage.copyFrom(
+                editionImageStorage.write(
                     editionId = editionId,
-                    source = source,
+                    bytes = bytes,
                 )
             }
 

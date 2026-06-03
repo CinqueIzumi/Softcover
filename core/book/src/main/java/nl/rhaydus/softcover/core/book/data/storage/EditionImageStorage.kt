@@ -4,13 +4,11 @@ import android.content.Context
 import java.io.File
 
 internal interface EditionImageStorage {
-    fun fileFor(editionId: Int): File
-
     fun exists(editionId: Int): Boolean
 
-    fun copyFrom(
+    fun write(
         editionId: Int,
-        source: File,
+        bytes: ByteArray,
     ): String
 
     fun delete(path: String)
@@ -26,22 +24,14 @@ internal class EditionImageStorageImpl(
         if (exists().not()) mkdirs()
     }
 
-    override fun fileFor(editionId: Int): File = File(
-        rootDir,
-        "$editionId",
-    )
-
     override fun exists(editionId: Int): Boolean = fileFor(editionId).exists()
 
-    override fun copyFrom(
+    override fun write(
         editionId: Int,
-        source: File,
+        bytes: ByteArray,
     ): String {
         val target = fileFor(editionId)
-        source.copyTo(
-            target = target,
-            overwrite = true,
-        )
+        target.writeBytes(bytes)
 
         return target.absolutePath
     }
@@ -49,6 +39,11 @@ internal class EditionImageStorageImpl(
     override fun delete(path: String) {
         File(path).takeIf { it.exists() }?.delete()
     }
+
+    private fun fileFor(editionId: Int): File = File(
+        rootDir,
+        "$editionId",
+    )
 
     companion object {
         private const val DIRECTORY_NAME = "edition_images"
