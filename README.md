@@ -33,11 +33,14 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 - Track progress by page number or percentage for book editions.
 - Track listening progress in `HH:MM:SS` or percentage for audiobook editions.
 - Mark books as read in one tap.
+- Start a distraction-free **focus mode** reading session that times your reading, with pause/resume/stop controls and inline page-progress editing.
+- Resume an ongoing session from anywhere via a persistent session bar, backed by a foreground service.
 
 ### Explore
 - Browse trending books on Hardcover.
 - Pick up where you left off with a **Continue Series** shelf for series you're partway through.
 - Search the Hardcover catalogue by title and add or remove books directly from results.
+- Scan a book's barcode to look it up by ISBN and add it to your library, with manual ISBN entry and a fallback flow for unknown ISBNs.
 - Review and manage your search history.
 
 ### Book Details
@@ -47,6 +50,9 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 - Set a reading deadline with a required pages-per-day or minutes-per-day pace.
 - Switch between book and audiobook editions.
 
+### Lists
+- Create custom lists to organize your books, with duplicate-name detection.
+
 ### Profile
 - View your profile and reading statistics.
 - Log out.
@@ -54,6 +60,10 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 ### Settings
 - Toggle between a floating and docked bottom navigation bar.
 - Choose your preferred date format.
+- Receive in-app update prompts when a newer version is available on Google Play.
+
+### Onboarding
+- Connect your Hardcover account on first launch by entering your API token, after a short introductory walkthrough.
 
 ---
 
@@ -81,7 +91,9 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 |---|---|---|
 | [Voyager](https://voyager.adriel.cafe/) | 1.1.0-beta02 | Screen navigation and state holder models |
 | [Koin](https://insert-koin.io/docs/setup/koin/) | 3.5.3 | Dependency injection |
+| [Coroutines](https://github.com/Kotlin/kotlinx.coroutines) | 1.10.2 | Asynchronous and reactive flows |
 | [Coil](https://github.com/coil-kt/coil) | 2.7.0 | Image loading |
+| [Reorderable](https://github.com/Calvin-LL/Reorderable) | 2.4.3 | Drag-and-drop list reordering |
 | [Timber](https://github.com/JakeWharton/timber) | 5.0.1 | Logging |
 
 #### Testing
@@ -93,9 +105,17 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 | [kotlinx-coroutines-test](https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test) | 1.10.2 | Coroutine test utilities (`runTest`) |
 | [Turbine](https://github.com/cashapp/turbine) | 1.2.0 | Testing library for Kotlin `Flow` |
 
+#### Device & Platform
+| Technology | Version | Purpose |
+|---|---|---|
+| [CameraX](https://developer.android.com/training/camerax) | 1.4.2 | Camera preview for barcode scanning |
+| [ML Kit Barcode Scanning](https://developers.google.com/ml-kit/vision/barcode-scanning) | 17.3.0 | On-device ISBN barcode decoding |
+| [Play In-App Updates](https://developer.android.com/guide/playcore/in-app-updates) | 2.1.0 | Prompting users to update from within the app |
+| [WorkManager](https://developer.android.com/jetpack/androidx/releases/work) | 2.10.1 | Background work scheduling |
+
 #### Platform
 - **Minimum SDK:** 26 (Android 8.0)
-- **Target SDK:** 36
+- **Target SDK:** 37
 - **Java compatibility:** 11
 
 ---
