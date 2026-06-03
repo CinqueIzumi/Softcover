@@ -8,5 +8,6 @@ android {
 }
 
 dependencies {
+    implementation(libs.kermit)
     implementation(libs.kotlinx.serialization.json)
 }
