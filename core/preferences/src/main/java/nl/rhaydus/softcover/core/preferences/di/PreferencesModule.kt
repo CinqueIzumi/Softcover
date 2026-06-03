@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSo
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
-import nl.rhaydus.softcover.core.preferences.data.datastore.appSettings
+import nl.rhaydus.softcover.core.preferences.data.datastore.createAppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.repository.SettingsRepositoryImpl
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
@@ -27,7 +27,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCas
 
 val preferencesModule = module {
     single<AppSettingsDataStore> {
-        AppSettingsDataStore(store = androidContext().appSettings)
+        AppSettingsDataStore(store = createAppSettingsDataStore(context = androidContext()))
     }
 
     single<ApiKeyLocalDataSource> {

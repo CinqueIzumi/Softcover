@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSourceI
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.profile.data.datastore.ProfileCacheDataStore
-import nl.rhaydus.softcover.core.profile.data.datastore.profileCache
+import nl.rhaydus.softcover.core.profile.data.datastore.createProfileCacheDataStore
 import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
@@ -21,7 +21,7 @@ val profileModule = module {
     }
 
     single<ProfileCacheDataStore> {
-        ProfileCacheDataStore(store = androidContext().profileCache)
+        ProfileCacheDataStore(store = createProfileCacheDataStore(context = androidContext()))
     }
 
     single<ProfileLocalDataSource> {
