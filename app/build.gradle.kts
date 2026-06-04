@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,9 +7,7 @@ plugins {
 
 android {
     namespace = "nl.rhaydus.softcover"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "nl.rhaydus.softcover"
@@ -32,9 +32,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     buildFeatures {
         buildConfig = true
     }
@@ -42,6 +39,14 @@ android {
         warningsAsErrors = true
         abortOnError = true
         lintConfig = rootProject.file("lint.xml")
+    }
+}
+
+// AGP 9 ships built-in Kotlin and removes the `android.kotlinOptions { }` block; Kotlin compiler
+// options now live in the top-level `kotlin { }` DSL.
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 

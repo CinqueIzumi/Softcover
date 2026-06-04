@@ -64,6 +64,8 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
                 implementation(libs.library("junit-api"))
                 implementation(libs.library("junit-params"))
                 runtimeOnly(libs.library("junit-engine"))
+                // Gradle 9 no longer provides the JUnit Platform launcher automatically.
+                runtimeOnly(libs.library("junit-platform-launcher"))
                 implementation(libs.library("mockk"))
             }
         }

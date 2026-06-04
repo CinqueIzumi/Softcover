@@ -29,7 +29,9 @@ subprojects {
     tasks.withType<Detekt>().configureEach {
         jvmTarget = "11"
         // Analyse production code only; test sources follow their own (looser) patterns.
-        setSource(project.files("src/main/java", "src/main/kotlin"))
+        // `commonMain/kotlin` covers the KMP modules' shared production code (Android-only modules
+        // have none, so the extra path is a harmless no-op for them).
+        setSource(project.files("src/main/java", "src/main/kotlin", "src/commonMain/kotlin"))
         reports {
             html.required.set(true)
             xml.required.set(true)
@@ -131,6 +133,10 @@ dependencyAnalysis {
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui",
                     "androidx.compose.ui:ui-graphics",
+                    // KMP-variant bundle deps from KmpLibraryConventionPlugin's commonMain set — same
+                    // central-provisioning rationale as the Android `-android` variants above.
+                    "io.insert-koin:koin-core",
+                    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
                     // Intentional public exposure: designsystem returns a Coil ImageRequest (§10).
                     "io.coil-kt:coil-compose",
                 )

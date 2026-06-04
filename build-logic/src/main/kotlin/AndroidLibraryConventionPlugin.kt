@@ -14,6 +14,11 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
  * and the cross-cutting runtime/test dependencies every module shares (coroutines, Koin,
  * JUnit5 + Kotest + MockK + Turbine). Logging (Kermit, via `AppLog`) comes transitively from
  * `:core:domain`.
+ *
+ * AGP 9 ships built-in Kotlin, but it is disabled (`android.builtInKotlin=false`) because KSP — used
+ * by `:core:database` for Room — is not yet compatible with it. So the `org.jetbrains.kotlin.android`
+ * plugin is still applied explicitly, and the `kotlin` extension (`KotlinAndroidProjectExtension`) is
+ * configured as before. Revisit once KSP supports built-in Kotlin.
  */
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -68,6 +73,12 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             add(
                 "testRuntimeOnly",
                 libs.library("junit-engine"),
+            )
+            // Gradle 9 no longer puts the JUnit Platform launcher on the test runtime classpath
+            // automatically — it must be declared explicitly.
+            add(
+                "testRuntimeOnly",
+                libs.library("junit-platform-launcher"),
             )
             add(
                 "testImplementation",
