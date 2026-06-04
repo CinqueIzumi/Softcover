@@ -2,3 +2,4 @@
 - [Style conventions + style-check](style_conventions.md) — run `scripts/style-check.sh` / `./gradlew styleCheck` before sign-off; enforces multi-arg wrapping, `!` negation, FQ refs, one-type-per-file, import order
 - [Import-rewrite pattern: core before feature](feedback_import_rewrite_ordering.md) — when feature.* imports are replaced with core.* equivalents, the new import must be re-sorted into the correct position
 - [BookEntityMapperTest class name mismatch](feedback_test_class_naming.md) — file BookEntityMapperTest.kt contains class BookMapperTest; file name must match class name
+- [KMP migration patterns](project_kmp_patterns.md) — expect/actual DI, @JvmInline wrong in commonMain, androidHostTest for JUnit5/MockK, koin-core auto-provided by convention plugin

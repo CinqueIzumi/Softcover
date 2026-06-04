@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
+import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
@@ -168,7 +169,7 @@ class PersistedLibraryVisibilityCollectorTest {
         @Test
         fun `preserves availableLists when updating persisted fields`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val mockList = mockk<nl.rhaydus.softcover.core.domain.model.BookList> {
+            val mockList = mockk<BookList> {
                 every { id } returns 99
                 every { name } returns "My List"
             }

@@ -8,10 +8,12 @@ It builds on [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) §
 Multiplatform") and [ARCHITECTURE.md](ARCHITECTURE.md). Where this doc and §11 disagree on detail,
 this doc wins (it is the worked-out version); §11 stays the one-paragraph pointer.
 
-> **Status:** Phase 0 (foundation prep) **complete** — see §0. **P1 is underway:** `core:domain`
-> and `core:network` are converted to KMP source sets (`commonMain` + `androidHostTest`), with all
-> declared iOS targets compiling and `check` green. `core:preferences` / `core:identity` are the next
-> P1 modules. Update the per-module checklist (§7) as each module lands.
+> **Status:** Phase 0 (foundation prep) **complete** — see §0. **P1 is underway:** `core:domain`,
+> `core:network`, and `core:preferences` are converted to KMP source sets, with all declared iOS
+> targets compiling. `core:preferences` is the first module with a real `iosMain` (`commonMain` +
+> `androidMain` + `iosMain` + `androidHostTest`) — see §4 for the platform-Koin-module +
+> `SecureApiKeyStorage` template. `core:identity` is the next P1 module. Update the per-module
+> checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -234,17 +236,28 @@ Room 2.7 supports KMP but the setup differs from Android-only:
 - All persisted **entities + DAOs** stay here (single `@Database`), per the vertical-slice rule —
   unchanged.
 
-### `core:preferences` — Phase 1, high risk
+### `core:preferences` — Phase 1, high risk — ✅ done (Android + all 3 iOS targets compile; host tests green)
 
-- **DataStore** factory needs a path/`Context` → `expect fun createDataStore(): DataStore<…>` with the
-  Android `actual` using `context.dataStore` and iOS `actual` using a documents-dir path. Use the
-  multiplatform `datastore-core` / `datastore-preferences-core` artifacts.
-- **`ApiKeyLocalDataSource`** encrypts the API key with the **Android Keystore** (`KeyGenParameterSpec`,
-  `Cipher`, `javax.crypto`) — wholly platform-specific. Define the secure-storage contract in
-  `commonMain` (it already implements the `AuthTokenProvider` domain interface) and provide:
-  - Android `actual`: current Keystore implementation (moves verbatim to `androidMain`).
-  - iOS `actual`: Keychain-backed implementation (new — write when iOS ships; can throw `NotImplemented`
-    until then so the module compiles).
+This was the first module with a real `iosMain`. The pattern below is the **template for later
+`actual`-seam modules** (`core:profile`, `core:book`, `core:database`):
+
+- **Platform Koin module, not a bare `expect fun`.** `commonMain` holds `expect val
+  platformPreferencesModule: Module`; `preferencesModule` pulls it in via `includes(...)`, so
+  `orchestration` keeps referencing `preferencesModule` by name with no change. The two
+  non-shareable bindings live in the per-target `actual val`: the `AppSettingsDataStore` file
+  location and the `SecureApiKeyStorage` impl. This keeps `androidContext()` (koin-android) confined
+  to `androidMain` — add `implementation(libs.koin.android)` to the module's `androidMain.dependencies`.
+- **DataStore went all-in on okio (both platforms).** Catalog adds `datastore-core`,
+  `datastore-core-okio`, `okio`; `AppSettingsSerializer` is an `OkioSerializer` (`BufferedSource`/
+  `BufferedSink`); `createAppSettingsDataStore(producePath: () -> okio.Path)` builds an `OkioStorage`
+  over `FileSystem.SYSTEM`. Only the base dir differs — Android `filesDir/datastore/app_settings.json`
+  (matches the old `dataStoreFile(...)` path for store continuity), iOS `NSDocumentDirectory`.
+- **API key: real secure storage on both platforms (no stub).** `SecureApiKeyStorage` (`read`/`write`/
+  `delete`) is the `commonMain` seam; `ApiKeyLocalDataSourceImpl` (common) keeps the flow/mutex/legacy
+  migration and delegates raw I/O to it. Android `actual` = the verbatim Keystore + AES/GCM + file
+  logic (alias/transformation/file name preserved → old ciphertext still decrypts). iOS `actual` =
+  Keychain (`platform.Security`, `kSecClassGenericPassword`, `SecItemAdd/CopyMatching/Update/Delete`).
+  okio is I/O only — it cannot back the key, so this boundary is genuinely `expect`/`actual`.
 
 ### `core:book` — Phase 2, high risk
 
@@ -365,10 +378,10 @@ they land.
 | P0 | kotlinx-datetime refactor | ✅ done |
 | P0 | platform seams (EditionImageStorage / DataStore factories / Keystore) | ✅ done |
 | P0 | KMP convention plugins | ✅ `softcover.kmp.library` done; `.compose` pending (P4) |
-| P0 | version catalog prep | ◑ partial (Kermit + kotlinx-datetime + KMP/AGP-KMP plugins + coroutines-core done; Compose-MP/Coil3/koin-mp/datastore-mp pending) |
+| P0 | version catalog prep | ◑ partial (Kermit + kotlinx-datetime + KMP/AGP-KMP plugins + coroutines-core + datastore-core/-okio + okio done; Compose-MP/Coil3/koin-mp pending) |
 | P1 | `core:domain` | ✅ done (`commonMain` + `androidHostTest`; all iOS targets compile; `check` green) |
 | P1 | `core:network` | ✅ done (`commonMain` + `androidHostTest`; Apollo on its multiplatform engine + `ApolloInterceptor`; all iOS targets compile; `check` green) |
-| P1 | `core:preferences` | ☐ |
+| P1 | `core:preferences` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio DataStore + Keychain/Keystore `SecureApiKeyStorage` behind a platform Koin module; all iOS targets compile; host tests green) |
 | P1 | `core:identity` | ☐ |
 | P2 | `core:database` | ☐ |
 | P2 | `core:book` | ☐ |
