@@ -4,14 +4,13 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.apollo.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.apollo.cache.normalized.normalizedCache
-import com.apollographql.apollo.network.okHttpClient
-import okhttp3.OkHttpClient
+import com.apollographql.apollo.network.http.DefaultHttpEngine
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.network.cache.SoftcoverCacheResolver
 import nl.rhaydus.softcover.core.network.interceptor.AuthInterceptor
-import java.util.concurrent.TimeUnit
 
 private const val APOLLO_MEMORY_CACHE_BYTES = 10 * 1024 * 1024
+private const val NETWORK_TIMEOUT_MILLIS = 60_000L
 
 val apolloModule = module {
     single {
@@ -19,23 +18,10 @@ val apolloModule = module {
     }
 
     single {
-        OkHttpClient.Builder()
-            .addInterceptor(get<AuthInterceptor>())
-            .connectTimeout(
-                60,
-                TimeUnit.SECONDS,
-            )
-            .readTimeout(
-                60,
-                TimeUnit.SECONDS,
-            )
-            .build()
-    }
-
-    single {
         ApolloClient.Builder()
             .serverUrl("https://api.hardcover.app/v1/graphql")
-            .okHttpClient(get())
+            .httpEngine(DefaultHttpEngine(timeoutMillis = NETWORK_TIMEOUT_MILLIS))
+            .addInterceptor(get<AuthInterceptor>())
             .normalizedCache(
                 normalizedCacheFactory = MemoryCacheFactory(maxSizeBytes = APOLLO_MEMORY_CACHE_BYTES),
                 cacheKeyGenerator = TypePolicyCacheKeyGenerator,

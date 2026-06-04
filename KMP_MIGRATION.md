@@ -8,11 +8,20 @@ It builds on [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) §
 Multiplatform") and [ARCHITECTURE.md](ARCHITECTURE.md). Where this doc and §11 disagree on detail,
 this doc wins (it is the worked-out version); §11 stays the one-paragraph pointer.
 
-> **Status:** Phase 0 (foundation prep) **complete** — see §0. **P1 is underway:** the
-> `softcover.kmp.library` convention plugin is authored and `core:domain` is the first module
-> converted to KMP source sets (`commonMain` + `androidHostTest`), with all declared iOS targets
-> compiling and `check` green. `core:network` / `core:preferences` / `core:identity` are the next
+> **Status:** Phase 0 (foundation prep) **complete** — see §0. **P1 is underway:** `core:domain`
+> and `core:network` are converted to KMP source sets (`commonMain` + `androidHostTest`), with all
+> declared iOS targets compiling and `check` green. `core:preferences` / `core:identity` are the next
 > P1 modules. Update the per-module checklist (§7) as each module lands.
+>
+> **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
+> alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
+> cascaded a toolchain bump: **AGP 9.0.0, Gradle 9.1.0, Kotlin 2.3.21, KSP 2.3.9, JDK 17** (Kotlin
+> 2.2.x caps at AGP 8.11.1; Kotlin 2.4.0 has no KSP yet, so 2.3.21 is the ceiling). Two AGP-9 opt-outs
+> are set in `gradle.properties` until KSP supports AGP's built-in Kotlin: `android.builtInKotlin=false`
+> (KSP/Room is incompatible with built-in Kotlin) and `android.newDsl=false` (the external
+> `org.jetbrains.kotlin.android` plugin can't apply against AGP 9's new DSL). Both go away once KSP
+> ships built-in-Kotlin support. The Gradle-9 test runtime also needs an explicit
+> `junit-platform-launcher` (no longer auto-provided) — added to both convention plugins' test sets.
 
 ---
 
@@ -156,8 +165,11 @@ Add/adjust in `gradle/libs.versions.toml` (do this with the convention-plugin ch
   artifact has a multiplatform variant; `voyager-navigator`/`-tab-navigator`/`-transitions` are KMP.
 - **DataStore** 1.2.0 already has a multiplatform artifact (`androidx.datastore:datastore` /
   `datastore-preferences-core`) — confirm the multiplatform coordinates when `core:preferences` converts.
-- **Apollo** 4.3.3 is fully KMP — the runtime artifact is already multiplatform; only the build-file
-  source-set wiring changes.
+- **Apollo** is fully KMP (`apollo-runtime` is multiplatform), **but** its Gradle plugin only supports
+  the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9** — this forced the
+  toolchain bump recorded in the status block (AGP 9.0.0 / Gradle 9.1.0 / Kotlin 2.3.21 / KSP 2.3.9 /
+  JDK 17) and a bump to **Apollo 5.0.0**. The OkHttp-based client/interceptor moved to Apollo's
+  multiplatform engine + an `ApolloInterceptor` (no `okhttp3`/`java.*` in `commonMain`).
 - **Room** 2.7.2 supports KMP — needs the KMP Gradle config + `sqlite-bundled` driver (§4, Phase 2).
 
 ### 2.5 Decide the target list now
@@ -355,7 +367,7 @@ they land.
 | P0 | KMP convention plugins | ✅ `softcover.kmp.library` done; `.compose` pending (P4) |
 | P0 | version catalog prep | ◑ partial (Kermit + kotlinx-datetime + KMP/AGP-KMP plugins + coroutines-core done; Compose-MP/Coil3/koin-mp/datastore-mp pending) |
 | P1 | `core:domain` | ✅ done (`commonMain` + `androidHostTest`; all iOS targets compile; `check` green) |
-| P1 | `core:network` | ☐ |
+| P1 | `core:network` | ✅ done (`commonMain` + `androidHostTest`; Apollo on its multiplatform engine + `ApolloInterceptor`; all iOS targets compile; `check` green) |
 | P1 | `core:preferences` | ☐ |
 | P1 | `core:identity` | ☐ |
 | P2 | `core:database` | ☐ |

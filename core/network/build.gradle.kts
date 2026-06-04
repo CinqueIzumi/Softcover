@@ -1,14 +1,18 @@
 plugins {
-    id("softcover.android.library")
+    id("softcover.kmp.library")
     id("softcover.android.apollo")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.core.network"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.core.network"
+    }
 
-dependencies {
-    implementation(project(":core:domain"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:domain"))
+        }
+    }
 }
 
 apollo {
@@ -16,7 +20,10 @@ apollo {
         packageName.set("nl.rhaydus.softcover")
         addTypename.set("always")
 
-        schemaFiles.from("src/main/graphql/schema.graphqls", "src/main/graphql/extra.graphqls")
+        schemaFiles.from(
+            "src/commonMain/graphql/schema.graphqls",
+            "src/commonMain/graphql/extra.graphqls",
+        )
 
         mapScalar("numeric", "kotlin.Double")
         mapScalar("float8", "kotlin.Double")
