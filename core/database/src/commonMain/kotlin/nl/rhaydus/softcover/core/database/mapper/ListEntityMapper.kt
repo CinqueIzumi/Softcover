@@ -69,7 +69,7 @@ fun BookListWithBooks.toModel(): BookList {
         .sortedWith(
             compareBy<ListBookFull> { it.listBook.position == null }
                 .thenBy(nullsLast()) { it.listBook.position }
-                .thenComparing(
+                .then(
                     compareBy<ListBookFull, String?>(nullsLast(reverseOrder())) { it.listBook.addedAt }
                         .thenByDescending { it.listBook.listBookId },
                 ),

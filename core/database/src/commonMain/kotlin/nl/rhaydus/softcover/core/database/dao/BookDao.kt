@@ -3,9 +3,9 @@ package nl.rhaydus.softcover.core.database.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RawQuery
+import androidx.room.RoomRawQuery
 import androidx.room.Transaction
 import androidx.room.Upsert
-import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.database.mapper.toBookAuthorRefs
 import nl.rhaydus.softcover.core.database.mapper.toEditionAuthorRefs
@@ -84,7 +84,7 @@ interface BookDao {
             ShelfManualOrderEntity::class,
         ],
     )
-    fun observeBooksRaw(query: SupportSQLiteQuery): Flow<List<BookFullEntity>>
+    fun observeBooksRaw(query: RoomRawQuery): Flow<List<BookFullEntity>>
 
     @Transaction
     @Query("SELECT * FROM books WHERE id = :id LIMIT 1")

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.book.data.datasource
 
+import androidx.room.RoomRawQuery
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -912,7 +913,7 @@ class BooksLocalDataSourceImplTest {
         fun `MANUAL mode builds SQL containing shelf_manual_order and binds statusCode twice`() = runTest {
             // ----- Arrange -----
             val status = UserBookStatus.READ
-            val querySlot = slot<androidx.sqlite.db.SupportSQLiteQuery>()
+            val querySlot = slot<RoomRawQuery>()
 
             every {
                 dao.observeBooksRaw(query = capture(querySlot))
@@ -937,7 +938,7 @@ class BooksLocalDataSourceImplTest {
         fun `non-MANUAL mode builds SQL without shelf_manual_order and binds statusCode once`() = runTest {
             // ----- Arrange -----
             val status = UserBookStatus.READ
-            val querySlot = slot<androidx.sqlite.db.SupportSQLiteQuery>()
+            val querySlot = slot<RoomRawQuery>()
 
             every {
                 dao.observeBooksRaw(query = capture(querySlot))

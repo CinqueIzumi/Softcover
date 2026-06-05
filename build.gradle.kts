@@ -117,7 +117,6 @@ dependencyAnalysis {
                     "androidx.compose.ui:ui-tooling-preview",
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui-graphics",
-                    "androidx.room:room-ktx",
                     // False positives: genuinely used via mechanisms DA can't see without type resolution.
                     "io.insert-koin:koin-androidx-compose", // koinInject(...)
                     "cafe.adriel.voyager:voyager-koin", // ScreenModel / screenModelScope (ToadScreenModel)

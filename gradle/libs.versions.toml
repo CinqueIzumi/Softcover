@@ -36,6 +36,7 @@ mlkitBarcode = "17.3.0"
 coroutines = "1.10.2"
 detekt = "1.23.8"
 dependencyAnalysis = "3.14.1"
+sqlite = "2.6.2"
 
 [libraries]
 # ktlint rule-engine — consumed by the :ktlint-rules module to drive the custom autofix ruleset
@@ -85,7 +86,6 @@ koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinV
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinVersion" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVersion" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
 material-components = { group = "com.google.android.material", name = "material", version.ref = "materialComponentsVersion" }
 androidx-splash = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashVersion" }
@@ -106,6 +106,7 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

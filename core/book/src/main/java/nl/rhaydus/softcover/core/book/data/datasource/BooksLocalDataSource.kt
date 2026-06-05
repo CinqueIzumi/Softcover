@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.book.data.datasource
 
-import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -192,7 +192,7 @@ internal class BooksLocalDataSourceImpl(
             ORDER BY $orderBy, b.id DESC
         """.trimIndent()
 
-        return dao.observeBooksRaw(query = SimpleSQLiteQuery(sql))
+        return dao.observeBooksRaw(query = RoomRawQuery(sql = sql))
             .distinctUntilChanged()
             .map { list -> list.map { it.toModel() } }
     }
@@ -241,16 +241,22 @@ internal class BooksLocalDataSourceImpl(
             """.trimIndent()
         }
 
-        val args: Array<Any> = if (mode == LibrarySortMode.MANUAL) {
-            arrayOf(status.code, status.code)
+        val bindArgs: List<Int> = if (mode == LibrarySortMode.MANUAL) {
+            listOf(status.code, status.code)
         } else {
-            arrayOf(status.code)
+            listOf(status.code)
         }
 
-        return dao.observeBooksRaw(query = SimpleSQLiteQuery(
-            sql,
-            args,
-        ),)
+        return dao.observeBooksRaw(
+            query = RoomRawQuery(sql = sql) { statement ->
+                bindArgs.forEachIndexed { index, arg ->
+                    statement.bindLong(
+                        index + 1,
+                        arg.toLong(),
+                    )
+                }
+            },
+        )
             .distinctUntilChanged()
             .map { list -> list.map { it.toModel() } }
     }

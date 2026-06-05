@@ -13,8 +13,11 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > all declared iOS targets compiling. `core:preferences` is the first module with a real `iosMain`
 > (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`) — see §4 for the platform-Koin-module +
 > `SecureApiKeyStorage` template. `core:identity` was a pure `commonMain` move (no platform seam —
-> its deps `core:domain`/`core:preferences` are already KMP), tests to `androidHostTest`. **P2
-> (`core:database`, then `core:book`) is next.** Update the per-module checklist (§7) as each module lands.
+> its deps `core:domain`/`core:preferences` are already KMP), tests to `androidHostTest`. **P2 is
+> underway: `core:database` is converted** (Room KMP — `@ConstructedBy` constructor, all 37 migrations
+> on `SQLiteConnection`, `BundledSQLiteDriver` + a platform-Koin-module builder, `RoomRawQuery`); all
+> iOS targets compile and `check` is green. **`core:book` is next.** Update the per-module checklist
+> (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -221,19 +224,33 @@ and a desktop `main()`) are *added* in P6 as new thin shells — `:app` stays th
 
 ## 4. The heavy modules — concrete guidance
 
-### `core:database` (Room KMP) — Phase 2, highest risk
+### `core:database` (Room KMP) — Phase 2 — ✅ done (Android + all 3 iOS targets compile; `check` green)
 
-Room 2.7 supports KMP but the setup differs from Android-only:
+Room 2.7 supports KMP but the setup differs from Android-only. How each point landed:
 
-- The `@Database` class needs an `expect`/`actual` **`RoomDatabaseConstructor`** and a per-platform
-  `RoomDatabase.Builder` (Android: `Room.databaseBuilder(context, ...)`; iOS: `documentDirectory()`
-  path + `BundledSQLiteDriver`).
-- Add the **`androidx.sqlite:sqlite-bundled`** driver and set `.setDriver(BundledSQLiteDriver())` +
-  an explicit query coroutine context — KMP Room does not auto-pick the Android driver.
-- KSP must run for **each** target (`kspAndroid`, `kspIosArm64`, …) — the Room Gradle plugin / KSP2
-  config handles this; verify codegen runs on all targets.
-- **Raw SQL:** `BooksLocalDataSource` uses `androidx.sqlite.db.SimpleSQLiteQuery`. In KMP Room this
-  becomes `androidx.room.RoomRawQuery` (the KMP raw-query API). Rewrite that one call site.
+- The `@Database` class carries **`@ConstructedBy(SoftcoverDatabaseConstructor::class)`** with an
+  `expect object SoftcoverDatabaseConstructor : RoomDatabaseConstructor<SoftcoverDatabase>` (Room's
+  KSP generates each `actual`) — replacing the reflection-based `Room.databaseBuilder(klass)`. The
+  builder is created per platform inside `platformDatabaseModule` (the `core:preferences` platform-
+  Koin-module template): Android via `Room.databaseBuilder(context, name)`, iOS via the
+  `NSDocumentDirectory` path. **The Android `name` is the absolute `getDatabasePath("books.db")` path,
+  not a bare name** — the bundled driver opens the file directly and does not resolve names through the
+  `Context`, so the absolute path preserves the existing store.
+- The shared `SoftcoverDatabase.build(builder, queryContext)` adds the 37 migrations, sets
+  **`BundledSQLiteDriver()`** + the query coroutine context (`AppDispatchers.io`, injected), and the
+  destructive-migration fallback. The `androidx.sqlite:sqlite-bundled` dependency is provided centrally
+  by the (now KMP-aware) `softcover.android.room` convention plugin.
+- All 37 **migrations** moved from `Migration.migrate(db: SupportSQLiteDatabase)` to
+  `migrate(connection: SQLiteConnection)` + `connection.execSQL` — mechanical, since none read a
+  cursor (all are `execSQL` DDL/DML).
+- KSP runs for **each** target via the per-target `ksp<Target>` configurations the convention plugin
+  wires (`kspAndroid`, `kspIosArm64`, …); verified codegen on all targets.
+- **Raw SQL:** `BookDao.observeBooksRaw` now takes `androidx.room.RoomRawQuery` (was
+  `SupportSQLiteQuery`); the one caller in `core:book` (`BooksLocalDataSource`) builds `RoomRawQuery`
+  and binds its int args via the `onBindStatement` lambda (`SimpleSQLiteQuery` is retired). This was
+  the cross-module ripple — done in the same change even though `core:book` is not yet KMP.
+- One incidental JVM-only leak the lift-and-shift surfaced: `ListEntityMapper` used
+  `java.util.Comparator.thenComparing`, swapped to the Kotlin-stdlib common `Comparator.then`.
 - All persisted **entities + DAOs** stay here (single `@Database`), per the vertical-slice rule —
   unchanged.
 
@@ -384,7 +401,7 @@ they land.
 | P1 | `core:network` | ✅ done (`commonMain` + `androidHostTest`; Apollo on its multiplatform engine + `ApolloInterceptor`; all iOS targets compile; `check` green) |
 | P1 | `core:preferences` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio DataStore + Keychain/Keystore `SecureApiKeyStorage` behind a platform Koin module; all iOS targets compile; host tests green) |
 | P1 | `core:identity` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed; all iOS targets compile; `check` green) |
-| P2 | `core:database` | ☐ |
+| P2 | `core:database` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; Room KMP `@ConstructedBy` constructor, 37 migrations on `SQLiteConnection`, `BundledSQLiteDriver` + platform-Koin-module builder, `RoomRawQuery`; all iOS targets compile; `check` green) |
 | P2 | `core:book` | ☐ |
 | P3 | `core:deadlines` | ☐ |
 | P3 | `core:personal` | ☐ |
