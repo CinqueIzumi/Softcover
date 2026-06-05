@@ -1,12 +1,16 @@
 plugins {
-    id("softcover.android.library")
+    id("softcover.kmp.library")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.core.identity"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.core.identity"
+    }
 
-dependencies {
-    implementation(project(":core:domain"))
-    api(project(":core:preferences"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:domain"))
+            api(project(":core:preferences"))
+        }
+    }
 }

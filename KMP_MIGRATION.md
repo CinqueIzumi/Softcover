@@ -8,12 +8,13 @@ It builds on [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) §
 Multiplatform") and [ARCHITECTURE.md](ARCHITECTURE.md). Where this doc and §11 disagree on detail,
 this doc wins (it is the worked-out version); §11 stays the one-paragraph pointer.
 
-> **Status:** Phase 0 (foundation prep) **complete** — see §0. **P1 is underway:** `core:domain`,
-> `core:network`, and `core:preferences` are converted to KMP source sets, with all declared iOS
-> targets compiling. `core:preferences` is the first module with a real `iosMain` (`commonMain` +
-> `androidMain` + `iosMain` + `androidHostTest`) — see §4 for the platform-Koin-module +
-> `SecureApiKeyStorage` template. `core:identity` is the next P1 module. Update the per-module
-> checklist (§7) as each module lands.
+> **Status:** Phase 0 (foundation prep) **complete** — see §0. **P1 is complete:** `core:domain`,
+> `core:network`, `core:preferences`, and `core:identity` are all converted to KMP source sets, with
+> all declared iOS targets compiling. `core:preferences` is the first module with a real `iosMain`
+> (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`) — see §4 for the platform-Koin-module +
+> `SecureApiKeyStorage` template. `core:identity` was a pure `commonMain` move (no platform seam —
+> its deps `core:domain`/`core:preferences` are already KMP), tests to `androidHostTest`. **P2
+> (`core:database`, then `core:book`) is next.** Update the per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -382,7 +383,7 @@ they land.
 | P1 | `core:domain` | ✅ done (`commonMain` + `androidHostTest`; all iOS targets compile; `check` green) |
 | P1 | `core:network` | ✅ done (`commonMain` + `androidHostTest`; Apollo on its multiplatform engine + `ApolloInterceptor`; all iOS targets compile; `check` green) |
 | P1 | `core:preferences` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio DataStore + Keychain/Keystore `SecureApiKeyStorage` behind a platform Koin module; all iOS targets compile; host tests green) |
-| P1 | `core:identity` | ☐ |
+| P1 | `core:identity` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed; all iOS targets compile; `check` green) |
 | P2 | `core:database` | ☐ |
 | P2 | `core:book` | ☐ |
 | P3 | `core:deadlines` | ☐ |
