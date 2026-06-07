@@ -39,6 +39,8 @@ kotlin {
             api(libs.voyager.tabNavigator)
 
             api(libs.coil3)
+
+            implementation(libs.kotlinx.datetime)
         }
 
         androidMain.dependencies {

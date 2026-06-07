@@ -9,13 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
-import kotlinx.datetime.todayIn
+import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
 
 fun LocalDate.formatCompactRelease(): String {
     val formatter = LocalDate.Format {
@@ -25,7 +23,7 @@ fun LocalDate.formatCompactRelease(): String {
     }
 
     val base = formatter.format(this)
-    val now = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val now = currentLocalDate()
 
     return if (year == now.year) base else "$base, $year"
 }

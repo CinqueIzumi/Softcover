@@ -530,11 +530,19 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
     Spacer(modifier = Modifier.height(8.dp))
 
     EditorialSuffix(
-        text = "of %02d:%02d:%02d".format(
-            totalHms.hours,
-            totalHms.minutes,
-            totalHms.seconds,
-        ),
+        text = "of " +
+            "${totalHms.hours.toString().padStart(
+                2,
+                '0',
+            )}:" +
+            "${totalHms.minutes.toString().padStart(
+                2,
+                '0',
+            )}:" +
+            totalHms.seconds.toString().padStart(
+                2,
+                '0',
+            ),
     )
 
     Spacer(modifier = Modifier.height(28.dp))

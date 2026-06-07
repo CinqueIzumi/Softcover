@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.time.Clock
 import kotlinx.coroutines.delay
 import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 
@@ -64,7 +65,7 @@ fun rememberStaggeredEntryCoordinator(
     val playMotion = playDecorativeMotion()
 
     return remember(key, playMotion, stepMillis, windowMillis) {
-        val startMillis = firstEntryTimestamps.getOrPut(key) { System.currentTimeMillis() }
+        val startMillis = firstEntryTimestamps.getOrPut(key) { Clock.System.now().toEpochMilliseconds() }
 
         StaggeredEntryCoordinator(
             stepMillis = stepMillis,
@@ -83,7 +84,7 @@ fun Modifier.staggeredEntry(
 ): Modifier {
     val shouldPlay = remember(coordinator) {
         coordinator.playMotion &&
-            (System.currentTimeMillis() - coordinator.startMillis) < coordinator.windowMillis
+            (Clock.System.now().toEpochMilliseconds() - coordinator.startMillis) < coordinator.windowMillis
     }
 
     if (shouldPlay.not()) return this

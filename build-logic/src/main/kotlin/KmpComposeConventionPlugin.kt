@@ -34,6 +34,7 @@ class KmpComposeConventionPlugin : Plugin<Project> {
                 implementation(compose.animation)
                 implementation(compose.ui)
                 implementation(compose.components.resources)
+                implementation(compose.components.uiToolingPreview)
                 // CMP's stable material3 strips the M3-expressive APIs the design system uses, so
                 // pin the alpha material3 artifact explicitly (see the catalog note).
                 implementation(libs.library("compose-material3-expressive"))

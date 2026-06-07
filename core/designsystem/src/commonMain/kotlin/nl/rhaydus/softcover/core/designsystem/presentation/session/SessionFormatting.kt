@@ -10,15 +10,13 @@ fun formatSessionElapsed(elapsed: Duration): String {
     val seconds = totalSeconds % 60
 
     return if (hours > 0) {
-        "%d:%02d:%02d".format(
-            hours,
-            minutes,
-            seconds,
-        )
+        "$hours:${minutes.pad2()}:${seconds.pad2()}"
     } else {
-        "%d:%02d".format(
-            minutes,
-            seconds,
-        )
+        "$minutes:${seconds.pad2()}"
     }
 }
+
+private fun Long.pad2(): String = toString().padStart(
+    2,
+    '0',
+)
