@@ -14,10 +14,14 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`) — see §4 for the platform-Koin-module +
 > `SecureApiKeyStorage` template. `core:identity` was a pure `commonMain` move (no platform seam —
 > its deps `core:domain`/`core:preferences` are already KMP), tests to `androidHostTest`. **P2 is
-> underway: `core:database` is converted** (Room KMP — `@ConstructedBy` constructor, all 37 migrations
-> on `SQLiteConnection`, `BundledSQLiteDriver` + a platform-Koin-module builder, `RoomRawQuery`); all
-> iOS targets compile and `check` is green. **`core:book` is next.** Update the per-module checklist
-> (§7) as each module lands.
+> complete:** `core:database` is converted (Room KMP — `@ConstructedBy` constructor, all 37 migrations
+> on `SQLiteConnection`, `BundledSQLiteDriver` + a platform-Koin-module builder, `RoomRawQuery`), and
+> `core:book` is converted —
+> `EditionImageStorage` re-expressed on okio (`FileSystem`/`Path`) behind a platform Koin module
+> (`platformBookModule`, Android `filesDir` / iOS `NSDocumentDirectory`), and the two `Dispatchers.IO`
+> leaks swapped to an injected `AppDispatchers.io`; all iOS targets compile and `check` is green.
+> **P3 is next** (`core:deadlines` / `core:personal` / `core:lists` / `core:profile` / `core:library` /
+> `core:connectivity`). Update the per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -277,13 +281,25 @@ This was the first module with a real `iosMain`. The pattern below is the **temp
   Keychain (`platform.Security`, `kSecClassGenericPassword`, `SecItemAdd/CopyMatching/Update/Delete`).
   okio is I/O only — it cannot back the key, so this boundary is genuinely `expect`/`actual`.
 
-### `core:book` — Phase 2, high risk
+### `core:book` — Phase 2, high risk — ✅ done (Android + all 3 iOS targets compile; host tests + `check` green)
 
-- **`EditionImageStorage`** is a `java.io.File`-based store using `Context.filesDir`. Re-express the
-  interface in `commonMain` in terms of a path/bytes (consider **okio** `Path`/`FileSystem` for a
-  multiplatform file API), with Android/iOS `actual`s. The interface is already `internal` and small —
-  a clean seam.
-- The `BookMapper` date parsing moves to kotlinx-datetime (covered by P0 §2.1).
+Followed the `core:preferences` platform-Koin-module template. How each point landed:
+
+- **`EditionImageStorage`** was a `java.io.File` store using `Context.filesDir`. `EditionImageStorageImpl`
+  now lives in `commonMain` on **okio** (`FileSystem` + `Path`), constructed `(fileSystem, rootDir)`,
+  persisting under `<rootDir>/edition_images/<editionId>` — the on-disk layout is unchanged, so existing
+  images load. The `EditionImageStorage` binding moved out of `bookModule` into a new
+  `expect val platformBookModule` (pulled in via `includes(...)`); the `actual`s supply only the root
+  dir + `FileSystem.SYSTEM` — Android via `androidContext().filesDir` (so koin-android stays confined to
+  `androidMain.dependencies`), iOS via `NSDocumentDirectory`.
+- **`Dispatchers.IO` was the one JVM-only leak the iOS gate caught** (the §2.1 SimpleSQLiteQuery seam
+  was already retired during `core:database` via `RoomRawQuery`, so `Context`/`Dispatchers.IO` were all
+  that remained). `BooksRemoteDataSourceImpl` and `BooksRepositoryImpl` now take an injected
+  `AppDispatchers` and use `appDispatchers.io` (the project convention), wired with `get()` in `bookModule`.
+- The `BookMapper` date parsing already moved to kotlinx-datetime in P0 (§2.1).
+- **Tests** stayed in `androidHostTest` (MockK, JVM-only): the storage test drives okio via
+  `FileSystem.SYSTEM` + a JUnit `@TempDir`; the data-source/repository tests build an `AppDispatchers`
+  from a `UnconfinedTestDispatcher`.
 
 ### `core:designsystem` (Compose Multiplatform) — Phase 4, highest UI risk
 
@@ -402,7 +418,7 @@ they land.
 | P1 | `core:preferences` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio DataStore + Keychain/Keystore `SecureApiKeyStorage` behind a platform Koin module; all iOS targets compile; host tests green) |
 | P1 | `core:identity` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed; all iOS targets compile; `check` green) |
 | P2 | `core:database` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; Room KMP `@ConstructedBy` constructor, 37 migrations on `SQLiteConnection`, `BundledSQLiteDriver` + platform-Koin-module builder, `RoomRawQuery`; all iOS targets compile; `check` green) |
-| P2 | `core:book` | ☐ |
+| P2 | `core:book` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio `EditionImageStorage` behind `platformBookModule`, `Dispatchers.IO` → injected `AppDispatchers.io`; all iOS targets compile; host tests + `check` green) |
 | P3 | `core:deadlines` | ☐ |
 | P3 | `core:personal` | ☐ |
 | P3 | `core:lists` | ☐ |
