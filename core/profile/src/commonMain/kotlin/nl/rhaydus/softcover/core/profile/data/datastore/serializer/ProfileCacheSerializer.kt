@@ -1,27 +1,24 @@
 package nl.rhaydus.softcover.core.profile.data.datastore.serializer
 
-import androidx.datastore.core.Serializer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import androidx.datastore.core.okio.OkioSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import java.io.InputStream
-import java.io.OutputStream
+import okio.BufferedSink
+import okio.BufferedSource
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
 
-internal object ProfileCacheSerializer : Serializer<ProfileCacheEntity> {
+internal object ProfileCacheSerializer : OkioSerializer<ProfileCacheEntity> {
     override val defaultValue: ProfileCacheEntity
         get() = ProfileCacheEntity()
 
-    val json: Json
-        get() = Json { ignoreUnknownKeys = true }
+    private val json: Json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun readFrom(input: InputStream): ProfileCacheEntity {
+    override suspend fun readFrom(source: BufferedSource): ProfileCacheEntity {
         return try {
             json.decodeFromString(
                 deserializer = ProfileCacheEntity.serializer(),
-                string = input.readBytes().decodeToString(),
+                string = source.readUtf8(),
             )
         } catch (e: SerializationException) {
             AppLog.e(
@@ -35,15 +32,13 @@ internal object ProfileCacheSerializer : Serializer<ProfileCacheEntity> {
 
     override suspend fun writeTo(
         t: ProfileCacheEntity,
-        output: OutputStream,
+        sink: BufferedSink,
     ) {
-        withContext(Dispatchers.IO) {
-            output.write(
-                json.encodeToString(
-                    serializer = ProfileCacheEntity.serializer(),
-                    value = t,
-                ).encodeToByteArray(),
-            )
-        }
+        sink.writeUtf8(
+            json.encodeToString(
+                serializer = ProfileCacheEntity.serializer(),
+                value = t,
+            ),
+        )
     }
 }

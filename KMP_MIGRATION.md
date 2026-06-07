@@ -26,8 +26,14 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > `core:lists` is converted too — also an all-`commonMain` move, but it had the same `Dispatchers.IO`
 > leak `core:book` hit: `ListsRemoteDataSource` now takes an injected `AppDispatchers` and uses
 > `appDispatchers.io` (wired with `get()` in `listsModule`), so no JVM-only dispatcher survives into
-> `commonMain`. **Remaining P3:** `core:profile` / `core:library` / `core:connectivity`. Update the
-> per-module checklist (§7) as each module lands.
+> `commonMain`. `core:profile` is converted following the `core:preferences` okio-DataStore template:
+> `ProfileCacheSerializer` is now an `OkioSerializer` (`BufferedSource`/`BufferedSink`),
+> `createProfileCacheDataStore(producePath: () -> okio.Path)` builds an `OkioStorage`, and the
+> `ProfileCacheDataStore` binding moved out of `profileModule` into a new `expect val
+> platformProfileModule` (pulled in via `includes(...)`) — Android supplies
+> `filesDir/datastore/profile_cache.json` (store continuity preserved) and koin-android stays confined to
+> `androidMain`, iOS supplies `NSDocumentDirectory`. **Remaining P3:** `core:library` /
+> `core:connectivity`. Update the per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -428,7 +434,7 @@ they land.
 | P3 | `core:deadlines` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:identity`; all iOS targets compile; `check` green) |
 | P3 | `core:personal` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:deadlines`; all iOS targets compile; `check` green) |
 | P3 | `core:lists` | ✅ done (all-`commonMain` move + `androidHostTest`; `Dispatchers.IO` → injected `AppDispatchers.io` in `ListsRemoteDataSource` like `core:book`; all iOS targets compile; `check` green) |
-| P3 | `core:profile` | ☐ |
+| P3 | `core:profile` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio `ProfileCacheDataStore` behind `platformProfileModule` like `core:preferences`; all iOS targets compile; `check` green) |
 | P3 | `core:library` | ☐ |
 | P3 | `core:connectivity` | ☐ |
 | — | `core:platform` (stays Android) | n/a |

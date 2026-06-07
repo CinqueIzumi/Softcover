@@ -1,14 +1,11 @@
 package nl.rhaydus.softcover.core.profile.di
 
 import kotlinx.datetime.Clock
-import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSourceImpl
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSourceImpl
-import nl.rhaydus.softcover.core.profile.data.datastore.ProfileCacheDataStore
-import nl.rhaydus.softcover.core.profile.data.datastore.createProfileCacheDataStore
 import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
@@ -16,12 +13,10 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUs
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
 val profileModule = module {
+    includes(platformProfileModule)
+
     single<ProfileRemoteDataSource> {
         ProfileRemoteDataSourceImpl(apolloClient = get())
-    }
-
-    single<ProfileCacheDataStore> {
-        ProfileCacheDataStore(store = createProfileCacheDataStore(context = androidContext()))
     }
 
     single<ProfileLocalDataSource> {
