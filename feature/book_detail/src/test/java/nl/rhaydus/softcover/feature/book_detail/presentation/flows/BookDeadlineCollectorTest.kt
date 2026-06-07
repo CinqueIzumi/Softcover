@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -117,7 +118,7 @@ class BookDeadlineCollectorTest {
             20,
         ),
         initialPerDay = initialPerDay,
-        unit = nl.rhaydus.softcover.core.domain.model.DeadlineUnit.PAGES,
+        unit = DeadlineUnit.PAGES,
     )
 
     @Nested

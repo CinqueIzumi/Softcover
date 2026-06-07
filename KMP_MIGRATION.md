@@ -20,8 +20,11 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > `EditionImageStorage` re-expressed on okio (`FileSystem`/`Path`) behind a platform Koin module
 > (`platformBookModule`, Android `filesDir` / iOS `NSDocumentDirectory`), and the two `Dispatchers.IO`
 > leaks swapped to an injected `AppDispatchers.io`; all iOS targets compile and `check` is green.
-> **P3 is next** (`core:deadlines` / `core:personal` / `core:lists` / `core:profile` / `core:library` /
-> `core:connectivity`). Update the per-module checklist (§7) as each module lands.
+> **P3 is underway:** `core:deadlines` is converted — a pure `commonMain` move (no platform seam, like
+> `core:identity`): all of `domain`/`data`/`di` to `commonMain`, MockK tests to `androidHostTest`, no
+> JVM/Android imports remained; all iOS targets compile and `check` is green. **Remaining P3:**
+> `core:personal` / `core:lists` / `core:profile` / `core:library` / `core:connectivity`. Update the
+> per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -419,7 +422,7 @@ they land.
 | P1 | `core:identity` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed; all iOS targets compile; `check` green) |
 | P2 | `core:database` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; Room KMP `@ConstructedBy` constructor, 37 migrations on `SQLiteConnection`, `BundledSQLiteDriver` + platform-Koin-module builder, `RoomRawQuery`; all iOS targets compile; `check` green) |
 | P2 | `core:book` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio `EditionImageStorage` behind `platformBookModule`, `Dispatchers.IO` → injected `AppDispatchers.io`; all iOS targets compile; host tests + `check` green) |
-| P3 | `core:deadlines` | ☐ |
+| P3 | `core:deadlines` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:identity`; all iOS targets compile; `check` green) |
 | P3 | `core:personal` | ☐ |
 | P3 | `core:lists` | ☐ |
 | P3 | `core:profile` | ☐ |

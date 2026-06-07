@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -63,7 +64,7 @@ class BookDeadlinesCollectorTest {
             1,
         ),
         initialPerDay = 10f,
-        unit = nl.rhaydus.softcover.core.domain.model.DeadlineUnit.PAGES,
+        unit = DeadlineUnit.PAGES,
     )
 
     @Nested

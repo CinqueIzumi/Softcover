@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 
 class ObserveBookDeadlineUseCaseTest {
     private lateinit var repository: BookDeadlineRepository
@@ -37,7 +38,7 @@ class ObserveBookDeadlineUseCaseTest {
             1,
         ),
         initialPerDay = 10f,
-        unit = nl.rhaydus.softcover.core.domain.model.DeadlineUnit.PAGES,
+        unit = DeadlineUnit.PAGES,
     )
 
     @Nested
