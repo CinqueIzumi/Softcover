@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.notification
 
 interface SoftcoverNotifier {
-    /** True when the runtime POST_NOTIFICATIONS permission is granted (always true on API < 33). */
+    /** True when the runtime permission to post notifications is granted (always true on Android < 33). */
     fun hasPostPermission(): Boolean
 
     fun notify(

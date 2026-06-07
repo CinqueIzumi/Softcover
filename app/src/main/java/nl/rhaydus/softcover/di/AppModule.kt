@@ -4,15 +4,17 @@ import org.koin.dsl.module
 import nl.rhaydus.softcover.AppVersionProviderImpl
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
+import nl.rhaydus.softcover.core.notification.NotificationAccentColor
 import nl.rhaydus.softcover.core.notification.NotificationAppearance
+import nl.rhaydus.softcover.core.notification.NotificationIcon
 
 internal val appModule = module {
     single<AppVersionProvider> { AppVersionProviderImpl() }
 
     single {
         NotificationAppearance(
-            smallIcon = R.drawable.ic_bookmark,
-            accentColor = R.color.notification_accent,
+            smallIcon = NotificationIcon(R.drawable.ic_bookmark),
+            accentColor = NotificationAccentColor(R.color.notification_accent),
         )
     }
 }

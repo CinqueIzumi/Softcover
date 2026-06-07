@@ -404,14 +404,22 @@ Compose-MP convention (P4) because the permission requester is a `@Composable`.
 - **`iosMain`:** a notifier over `UNUserNotificationCenter` (`add(UNNotificationRequest)`), permission via
   `requestAuthorizationWithOptions`, and — for the scheduled-notification base — `UNTimeIntervalNotificationTrigger`
   / `BGTaskScheduler` in place of WorkManager.
-- **Two models hold Android types and need platform-neutral re-expression first:**
-  `SoftcoverNotificationContent.pendingIntent: PendingIntent` → a common deep-link/target abstraction the
-  Android `actual` turns into a `PendingIntent` and iOS into the notification's `userInfo`/launch route;
-  `NotificationAppearance`'s `@DrawableRes`/`@ColorRes` `Int`s → icon/color tokens resolved per platform
-  (CMP `Res.*` on the common side, or `expect`-typed handles).
+- **Two models held Android types and were re-expressed (done):**
+  `SoftcoverNotificationContent.pendingIntent: PendingIntent` was **dropped** — nothing constructed
+  content or set a tap target, and a real deep-link target needs the nav/routing layer (orchestration),
+  so it belongs to the first notification feature at P5, not to this seam. `NotificationAppearance`'s
+  `@DrawableRes`/`@ColorRes` `Int`s became `expect class` platform tokens (`NotificationIcon` /
+  `NotificationAccentColor`): the Android `actual`s wrap the res ids (so the notifier is byte-for-byte
+  the old code), the iOS `actual`s are empty (iOS uses the app icon and does not tint). This is the
+  first `expect class` in the repo, so `-Xexpect-actual-classes` was added to `KmpLibraryConventionPlugin`.
 - **Notification channels are an Android-only concept.** `SoftcoverNotificationChannel` + the initializer
-  stay `androidMain`; iOS maps the same logical categories to `UNNotificationCategory`. The common
-  contract should speak in logical categories, not channels.
+  stay `androidMain`; the common contract speaks logical `NotificationCategory`, which the Android notifier
+  maps to a channel (`SoftcoverNotificationChannel.forCategory`) and the iOS notifier carries as the
+  request's `categoryIdentifier`.
+- **iOS `hasPostPermission()` is eventually consistent.** The `SoftcoverNotifier` contract is synchronous,
+  but `UNUserNotificationCenter` reports authorization only via an async callback, so the iOS `actual`
+  caches the granted state and refreshes it (on the main queue) at construction and after each
+  authorization request.
 
 ---
 
@@ -523,7 +531,7 @@ they land.
 | P3 | `core:library` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:identity`; all iOS targets compile; `check` green) |
 | P3 | `core:connectivity` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; `ConnectivityDataSource` behind `expect val platformModule` — Android `ConnectivityManager` callback (+ `core-ktx`), iOS `NWPathMonitor`; rest a plain `commonMain` move; fixed a `PendingListWriteSyncer` DI omission; all iOS targets compile; `check` green) |
 | P4 | `core:designsystem` | ✅ done — full **Compose Multiplatform** (`org.jetbrains.compose` 1.11.0 + alpha material3 for expressive). All shared widgets live in `commonMain` and compile for `iosArm64` + `iosSimulatorArm64`; `androidResources.enable = true`. Resources → CMP `composeResources` + the `SoftcoverIcon` catalog (`Res` internal; features route through the catalog, not `R`). Platform seams via `expect`/`actual`: haptics + reduced-motion (real iOS), dynamic-color + fonts (iOS fallbacks), `currentLocalDate` (contains the CMP-forced kotlinx-datetime 0.7.1 vs Android-0.6.2 `Clock` skew). Coil 2→3 repo-wide. Hard seams (CameraX/MLKit barcode scanner, share-card capture, MediaStore gallery save + permission, local-cover files) keep full Android behaviour; iOS gets compiling stubs marked `// TODO(iOS)`. Debug routes via the `:app`-bound `DebugRoutesContent` DI seam. `:app:assembleDebug`/`assembleRelease`, `test`, and full `check` (incl. iOS compile) green. `AppEntryPoint` + `@Preview`/debug screens stay `androidMain`. |
-| P4 | `core:notification` | ☐ — real platform seam: `SoftcoverNotifier` + permission requester + content/appearance contracts in `commonMain`; Android `NotificationManagerCompat` + channels + WorkManager and iOS `UNUserNotificationCenter` + categories behind `platformNotificationModule`. Channels are Android-only; `PendingIntent` / `@DrawableRes`+`@ColorRes` models need platform-neutral re-expression first. |
+| P4 | `core:notification` | ✅ done — real platform seam: `SoftcoverNotifier` + the Compose permission requester + the content/appearance contracts in `commonMain`, behind `platformNotificationModule` (pulled into `notificationModule` via `includes(...)`, so `:orchestration` keeps the name). Android `actual`s keep the verbatim `NotificationManagerCompat` notifier + `SoftcoverNotificationChannel` + `NotificationChannelInitializer` + `SoftcoverWorker`; iOS `actual`s are a real `UNUserNotificationCenter` notifier (`addNotificationRequest`, `categoryIdentifier` = logical category, cached auth status) + `requestAuthorizationWithOptions`. Channels stayed Android-only — the common contract speaks logical `NotificationCategory`. The two Android-typed models were re-expressed: `pendingIntent` was **dropped** (no callers; a deep-link target belongs to the nav layer at P5), and `@DrawableRes`/`@ColorRes` became `expect class` platform tokens (`NotificationIcon` / `NotificationAccentColor`; only `:app`'s `AppModule` construction site changed). Added `-Xexpect-actual-classes` to `KmpLibraryConventionPlugin` (first `expect class` in the repo). All iOS targets compile; `check` + `buildHealth` green. |
 | P5 | `feature:library` | ☐ — pure leaf (commonMain move) |
 | P5 | `feature:lists` | ☐ — pure leaf |
 | P5 | `feature:onboarding` | ☐ — pure leaf |

@@ -26,4 +26,15 @@ enum class SoftcoverNotificationChannel(
         description = "The live timer and controls for your current reading session.",
         importance = NotificationManagerCompat.IMPORTANCE_LOW,
     ),
+    ;
+
+    companion object {
+        /** The delivery channel for a logical [NotificationCategory]. */
+        fun forCategory(category: NotificationCategory): SoftcoverNotificationChannel =
+            when (category) {
+                NotificationCategory.Reading -> Reading
+                NotificationCategory.Milestones -> Milestones
+                NotificationCategory.Session -> Session
+            }
+    }
 }

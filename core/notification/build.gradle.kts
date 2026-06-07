@@ -1,14 +1,22 @@
 plugins {
-    id("softcover.android.library")
-    id("softcover.android.compose")
+    id("softcover.kmp.library")
+    id("softcover.kmp.compose")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.core.notification"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.core.notification"
+    }
 
-dependencies {
-    implementation(project(":core:domain"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:domain"))
+        }
 
-    implementation(libs.androidx.work.runtime.ktx)
+        androidMain.dependencies {
+            implementation(libs.androidx.work.runtime.ktx)
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.koin.android)
+        }
+    }
 }

@@ -52,6 +52,13 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             iosArm64()
             iosSimulatorArm64()
 
+            // expect/actual classes are still flagged Beta by the compiler; the project uses them for
+            // platform-token seams (e.g. core:notification's appearance handles), so opt in once here
+            // rather than per module. Harmless for modules that don't declare any.
+            compilerOptions {
+                freeCompilerArgs.add("-Xexpect-actual-classes")
+            }
+
             sourceSets.getByName("commonMain").dependencies {
                 implementation(libs.library("kotlinx-coroutines-core"))
                 implementation(libs.library("koin-core"))

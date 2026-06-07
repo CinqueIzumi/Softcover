@@ -5,8 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -14,8 +12,7 @@ import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 internal class SoftcoverNotifierImpl(
     private val context: Context,
-    @param:DrawableRes private val smallIcon: Int,
-    @param:ColorRes private val accentColor: Int,
+    private val appearance: NotificationAppearance,
 ) : SoftcoverNotifier {
     override fun hasPostPermission(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
@@ -41,28 +38,26 @@ internal class SoftcoverNotifierImpl(
             return
         }
 
+        val channel = SoftcoverNotificationChannel.forCategory(content.category)
+
         val builder = NotificationCompat.Builder(
             context,
-            content.channel.id,
+            channel.id,
         )
-            .setSmallIcon(smallIcon)
+            .setSmallIcon(appearance.smallIcon.resId)
             .setContentTitle(content.title)
             .setContentText(content.body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(content.body))
             .setAutoCancel(true)
             .setColor(ContextCompat.getColor(
                 context,
-                accentColor,
+                appearance.accentColor.resId,
             ),)
             .setColorized(false)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         if (content.eyebrow != null) {
             builder.setSubText(content.eyebrow)
-        }
-
-        if (content.pendingIntent != null) {
-            builder.setContentIntent(content.pendingIntent)
         }
 
         NotificationManagerCompat.from(context).notify(
