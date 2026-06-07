@@ -36,7 +36,17 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > `commonMain` move (no platform seam, like `core:identity`): `LibraryModule` + `RefreshLibraryUseCase`
 > to `commonMain`, MockK test to `androidHostTest`; its deps (`core:domain`/`book`/`lists`/`preferences`/
 > `identity`) are already KMP so nothing else moved; all iOS targets compile and `check` is green.
-> **Remaining P3:** `core:connectivity`. Update the per-module checklist (§7) as each module lands.
+> `core:connectivity` is converted too — the one P3 module with a real platform seam: its
+> `ConnectivityDataSource` (a `StateFlow<Boolean>` online signal) is a `commonMain` interface whose impl
+> moved behind a new `expect val platformModule` (pulled in via `includes(...)`). The Android `actual`
+> wraps `ConnectivityManager.registerDefaultNetworkCallback` (the reified `getSystemService` needs
+> `androidx.core.content` → `core-ktx` added to `androidMain.dependencies`); the iOS `actual` uses
+> `NWPathMonitor` from `platform.Network` (online = `nw_path_status_satisfied`, on a global dispatch
+> queue). The rest of `data`/`di` (write-queue/syncers/mapper/repository) was a plain `commonMain` move,
+> MockK tests to `androidHostTest`. The iOS gate also surfaced a pre-existing DI bug — `connectivityModule`
+> constructed `PendingListWriteSyncer` without its `appDispatchers` argument — fixed in the same change.
+> All iOS targets compile and `check` is green. **P3 is complete.** Next up: P4 — `core:designsystem`
+> (Compose Multiplatform, Coil 2→3). Update the per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -97,10 +107,11 @@ Verified Android-freeness of `src/main` (imports of `android`/`androidx`):
 |--------|----------------------------------|---------|
 | `core:domain` | 0 | clean (but see **java.time**, §2.1) |
 | `core:identity` | 0 | clean |
-| `core:deadlines`, `core:personal`, `core:lists`, `core:library`, `core:connectivity` | 0 | clean |
+| `core:deadlines`, `core:personal`, `core:lists`, `core:library` | 0 | clean |
 | `core:book` | 2 (`SimpleSQLiteQuery`, `Context`) | small `actual` seams |
 | `core:preferences` | 3 (`Context`, Keystore, DataStore) | `actual` seams |
 | `core:profile` | 2 (DataStore) | `actual` seams |
+| `core:connectivity` | 0 in `src/main` | a real seam was *added* at conversion — `ConnectivityManager` / `NWPathMonitor` behind `platformModule` |
 | `core:platform`, `core:designsystem` | many (by design) | stay Android / move to CMP |
 
 No module needs to be re-split. The only *structural* changes recommended up front are small
@@ -439,7 +450,7 @@ they land.
 | P3 | `core:lists` | ✅ done (all-`commonMain` move + `androidHostTest`; `Dispatchers.IO` → injected `AppDispatchers.io` in `ListsRemoteDataSource` like `core:book`; all iOS targets compile; `check` green) |
 | P3 | `core:profile` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio `ProfileCacheDataStore` behind `platformProfileModule` like `core:preferences`; all iOS targets compile; `check` green) |
 | P3 | `core:library` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:identity`; all iOS targets compile; `check` green) |
-| P3 | `core:connectivity` | ☐ |
+| P3 | `core:connectivity` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; `ConnectivityDataSource` behind `expect val platformModule` — Android `ConnectivityManager` callback (+ `core-ktx`), iOS `NWPathMonitor`; rest a plain `commonMain` move; fixed a `PendingListWriteSyncer` DI omission; all iOS targets compile; `check` green) |
 | — | `core:platform` (stays Android) | n/a |
 | P4 | `core:designsystem` (CMP) | ☐ |
 | P5 | `feature:*` (leaves) | ☐ |
