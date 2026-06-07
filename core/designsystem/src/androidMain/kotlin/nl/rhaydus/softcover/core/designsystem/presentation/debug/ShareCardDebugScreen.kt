@@ -90,6 +90,10 @@ object ShareCardDebugScreen : Screen {
                             snackbarHostState.showSnackbar("Saved to gallery → ${outcome.displayPath}")
                         }
 
+                        is SaveOutcome.Failure -> {
+                            snackbarHostState.showSnackbar("Save failed: ${outcome.reason}")
+                        }
+
                         is SaveOutcome.Cached -> Unit
                     }
                 } catch (throwable: Throwable) {

@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
@@ -203,7 +204,11 @@ private fun BookShareCardBody(content: BookShareContent) {
 
 private fun buildBookStatsLine(content: BookShareContent): String? {
     val parts = buildList {
-        content.communityRating?.takeIf { it > 0.0 }?.let { add("★ %.1f".format(it)) }
+        content.communityRating?.takeIf { it > 0.0 }?.let {
+            val tenths = (it * 10).roundToInt()
+
+            add("★ ${tenths / 10}.${tenths % 10}")
+        }
         content.userRating?.let { add("Your $it/10") }
         content.releaseYear?.takeIf { it != -1 }?.let { add(it.toString()) }
         content.pageCount?.takeIf { it > 0 }?.let { add("$it pages") }

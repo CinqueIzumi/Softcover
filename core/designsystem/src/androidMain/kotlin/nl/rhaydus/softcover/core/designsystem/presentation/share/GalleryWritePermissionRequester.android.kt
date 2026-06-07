@@ -13,14 +13,14 @@ import androidx.core.content.ContextCompat
 /**
  * Compose-aware gate for the legacy `WRITE_EXTERNAL_STORAGE` permission needed when writing to
  * the gallery on API ≤ 28. On API 29+ the permission is unnecessary (scoped storage handles it),
- * so [request] fires [onResult] synchronously with `granted = true`.
+ * so [request] fires `onResult` synchronously with `granted = true`.
  */
-internal class GalleryWritePermissionRequester internal constructor(
+internal class AndroidGalleryWritePermissionRequester internal constructor(
     private val launchRequest: () -> Unit,
     private val isAlreadyGranted: Boolean,
     private val onResult: (Boolean) -> Unit,
-) {
-    fun request() {
+) : GalleryWritePermissionRequester {
+    override fun request() {
         if (isAlreadyGranted) {
             onResult(true)
         } else {
@@ -30,7 +30,7 @@ internal class GalleryWritePermissionRequester internal constructor(
 }
 
 @Composable
-internal fun rememberGalleryWritePermissionRequester(
+internal actual fun rememberGalleryWritePermissionRequester(
     onResult: (Boolean) -> Unit,
 ): GalleryWritePermissionRequester {
     val context = LocalContext.current
@@ -48,7 +48,7 @@ internal fun rememberGalleryWritePermissionRequester(
     )
 
     return remember(launcher, isAlreadyGranted) {
-        GalleryWritePermissionRequester(
+        AndroidGalleryWritePermissionRequester(
             launchRequest = { launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE) },
             isAlreadyGranted = isAlreadyGranted,
             onResult = onResult,

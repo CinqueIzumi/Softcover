@@ -166,12 +166,21 @@ internal fun ShareBookBottomSheet(
 
                         coroutineScope.launch {
                             runCatching {
-                                val outcome = capture.saveToCache(displayName = book.title)
+                                when (val outcome = capture.saveToCache(displayName = book.title)) {
+                                    is SaveOutcome.Cached -> context.launchShareImageChooser(
+                                        uri = Uri.parse(outcome.identifier),
+                                        bookTitle = book.title,
+                                    )
 
-                                context.launchShareImageChooser(
-                                    uri = outcome.uri,
-                                    bookTitle = book.title,
-                                )
+                                    is SaveOutcome.Saved -> context.launchShareImageChooser(
+                                        uri = Uri.parse(outcome.identifier),
+                                        bookTitle = book.title,
+                                    )
+
+                                    is SaveOutcome.Failure -> AppLog.e(
+                                        "Failed to cache share card: ${outcome.reason}",
+                                    )
+                                }
                             }.onFailure {
                                 AppLog.e("$it")
                             }

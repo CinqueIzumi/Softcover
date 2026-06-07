@@ -38,7 +38,6 @@ import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
-import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
@@ -222,13 +221,13 @@ fun rememberEditionImageRequest(
         resolution.cacheKeyUrl?.let { key ->
             builder.memoryCacheKey(MemoryCache.Key(key))
 
-            if (resolution.source is File) {
+            if (resolution.isLocal) {
                 builder.placeholderMemoryCacheKey(MemoryCache.Key(key))
             }
         }
 
         resolution.persistEditionId?.let { editionId ->
-            val sourceUrl = resolution.source as? String ?: return@let
+            val sourceUrl = resolution.source
             val useCase = persistEditionImageUseCase ?: return@let
             builder.listener(
                 onSuccess = { _, _ ->
@@ -248,23 +247,25 @@ fun rememberEditionImageRequest(
 }
 
 /**
- * Resolves the Coil image source (a local [File] or a remote URL [String]) for a book cover,
- * preferring the user's selected [edition], then the [defaultEdition], then [fallbackCoverUrl].
- * Shared so non-Composable surfaces (e.g. the reading-session notification) render the exact same
- * edition cover the in-app [EditionImage] shows. Returns null when no source is known.
+ * Resolves the Coil image source — a local-file path or a remote URL, both passed to Coil as a
+ * [String] model — for a book cover, preferring the user's selected [edition], then the
+ * [defaultEdition], then [fallbackCoverUrl]. Shared so non-Composable surfaces (e.g. the
+ * reading-session notification) render the exact same edition cover the in-app [EditionImage]
+ * shows. Returns null when no source is known.
  */
 fun resolveEditionImageSource(
     edition: BookEdition?,
     defaultEdition: BookEdition?,
     fallbackCoverUrl: String?,
-): Any? = resolveEditionImage(
+): String? = resolveEditionImage(
     edition = edition,
     defaultEdition = defaultEdition,
     fallbackCoverUrl = fallbackCoverUrl,
 )?.source
 
 private data class EditionImageResolution(
-    val source: Any,
+    val source: String,
+    val isLocal: Boolean,
     val cacheKeyUrl: String?,
     val persistEditionId: Int?,
 )
@@ -274,12 +275,13 @@ private fun resolveEditionImage(
     defaultEdition: BookEdition?,
     fallbackCoverUrl: String?,
 ): EditionImageResolution? {
-    val localEdition = edition?.takeIf { it.existingLocalFile() != null }
-        ?: defaultEdition?.takeIf { it.existingLocalFile() != null }
+    val localEdition = edition?.takeIf { it.existingLocalSource() != null }
+        ?: defaultEdition?.takeIf { it.existingLocalSource() != null }
 
     if (localEdition != null) {
         return EditionImageResolution(
-            source = localEdition.existingLocalFile()!!,
+            source = localEdition.existingLocalSource()!!,
+            isLocal = true,
             cacheKeyUrl = localEdition.url,
             persistEditionId = null,
         )
@@ -291,6 +293,7 @@ private fun resolveEditionImage(
     if (urlEdition != null) {
         return EditionImageResolution(
             source = urlEdition.url!!,
+            isLocal = false,
             cacheKeyUrl = urlEdition.url,
             persistEditionId = urlEdition.id,
         )
@@ -300,13 +303,21 @@ private fun resolveEditionImage(
 
     return EditionImageResolution(
         source = fallback,
+        isLocal = false,
         cacheKeyUrl = fallback,
         persistEditionId = null,
     )
 }
 
-private fun BookEdition.existingLocalFile(): File? =
-    localImagePath?.let(::File)?.takeIf { it.exists() }
+private fun BookEdition.existingLocalSource(): String? =
+    localImageSourceOrNull(localImagePath)
+
+/**
+ * Returns [localImagePath] when it points at a persisted local cover file that exists on disk
+ * (a model Coil can load directly), or null otherwise. Android checks the filesystem; iOS has no
+ * persisted-cover support yet.
+ */
+expect fun localImageSourceOrNull(localImagePath: String?): String?
 
 @OptIn(ExperimentalCoilApi::class)
 private fun persistFromDiskCache(

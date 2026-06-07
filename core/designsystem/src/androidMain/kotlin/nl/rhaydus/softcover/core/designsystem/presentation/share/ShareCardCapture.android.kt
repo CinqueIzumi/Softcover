@@ -10,9 +10,7 @@ import android.provider.MediaStore
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.layer.GraphicsLayer
-import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
@@ -21,13 +19,13 @@ import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import java.io.File
 
-class ShareCardCapture internal constructor(
-    internal val graphicsLayer: GraphicsLayer,
+internal class AndroidShareCardCapture internal constructor(
+    override val graphicsLayer: GraphicsLayer,
     private val context: Context,
     private val appDispatchers: AppDispatchers,
-) {
+) : ShareCardCapture {
     // TODO: capture density follows the host device; revisit for a fixed-pixel export when share intents land.
-    suspend fun saveToGallery(displayName: String): SaveOutcome {
+    override suspend fun saveToGallery(displayName: String): SaveOutcome {
         val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
         val filename = buildFilename(displayName = displayName)
 
@@ -46,7 +44,7 @@ class ShareCardCapture internal constructor(
         }
     }
 
-    suspend fun saveToCache(displayName: String): SaveOutcome.Cached {
+    override suspend fun saveToCache(displayName: String): SaveOutcome.Cached {
         val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
         val filename = buildFilename(displayName = displayName)
 
@@ -76,7 +74,7 @@ class ShareCardCapture internal constructor(
                 file,
             )
 
-            SaveOutcome.Cached(uri = uri)
+            SaveOutcome.Cached(identifier = uri.toString())
         }
     }
 
@@ -143,7 +141,7 @@ class ShareCardCapture internal constructor(
         )
 
         return SaveOutcome.Saved(
-            uri = uri,
+            identifier = uri.toString(),
             displayPath = "$RELATIVE_PICTURES_PATH/$GALLERY_FOLDER/$filename",
         )
     }
@@ -195,7 +193,7 @@ class ShareCardCapture internal constructor(
             ?: Uri.fromFile(file)
 
         return SaveOutcome.Saved(
-            uri = uri,
+            identifier = uri.toString(),
             displayPath = file.absolutePath,
         )
     }
@@ -209,22 +207,16 @@ class ShareCardCapture internal constructor(
 }
 
 @Composable
-fun rememberShareCardCapture(): ShareCardCapture {
+actual fun rememberShareCardCapture(): ShareCardCapture {
     val graphicsLayer = rememberGraphicsLayer()
     val context = LocalContext.current
     val appDispatchers = koinInject<AppDispatchers>()
 
     return remember(graphicsLayer, context, appDispatchers) {
-        ShareCardCapture(
+        AndroidShareCardCapture(
             graphicsLayer,
             context,
             appDispatchers,
         )
     }
-}
-
-internal fun ContentDrawScope.recordAndDraw(graphicsLayer: GraphicsLayer) {
-    graphicsLayer.record { this@recordAndDraw.drawContent() }
-
-    drawLayer(graphicsLayer)
 }

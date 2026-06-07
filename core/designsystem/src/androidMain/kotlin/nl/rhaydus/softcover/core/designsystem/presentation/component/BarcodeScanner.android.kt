@@ -47,22 +47,18 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 /**
- * Full-bleed CameraX barcode-scanning surface backed by the bundled ML Kit model (no Google Play
- * Services). Constrained to EAN-13 / EAN-8 — the formats printed on physical books — and emits the
- * raw value of the first barcode it reads exactly once via [onIsbnDetected], then stops analysing.
- *
- * The composable is intentionally stateless about resolution: it surfaces a raw string and nothing
- * more. Turning that string into a book — and deciding what an unknown book means — belongs to the
- * call site (see `feature/scan`), never to this leaf.
+ * Android implementation: a CameraX barcode-scanning surface backed by the bundled ML Kit model
+ * (no Google Play Services). Constrained to EAN-13 / EAN-8 and emits the first raw value exactly
+ * once via [onIsbnDetected], then stops analysing.
  */
 @SuppressLint("MissingPermission")
 @OptIn(markerClass = [ExperimentalGetImage::class])
 // Camera binding can throw a variety of vendor/IllegalState/IllegalArgument exceptions; we log and must not crash the UI.
 @Suppress("TooGenericExceptionCaught")
 @Composable
-fun BarcodeScanner(
+actual fun BarcodeScanner(
     onIsbnDetected: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
 ) {
     val context = LocalContext.current
 
