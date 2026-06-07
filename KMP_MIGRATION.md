@@ -112,7 +112,8 @@ Verified Android-freeness of `src/main` (imports of `android`/`androidx`):
 | `core:preferences` | 3 (`Context`, Keystore, DataStore) | `actual` seams |
 | `core:profile` | 2 (DataStore) | `actual` seams |
 | `core:connectivity` | 0 in `src/main` | a real seam was *added* at conversion — `ConnectivityManager` / `NWPathMonitor` behind `platformModule` |
-| `core:notification`, `core:designsystem` | many (by design) | stay Android / move to CMP |
+| `core:notification` | many (by design) | real platform seam — `commonMain` contract + Android `NotificationManagerCompat`/WorkManager & iOS `UNUserNotificationCenter` `actual`s (§4) |
+| `core:designsystem` | many (by design) | move to CMP |
 
 No module needs to be re-split. The only *structural* changes recommended up front are small
 seam-tightening refactors (§6) so each split is mechanical rather than invasive.
@@ -166,8 +167,8 @@ artifact. Decision: adopt **Kermit** (Touchlab) behind a thin app-owned logging 
 
 The convention plugins in `build-logic/` hardcode `com.android.library` + `kotlin.android` and inject
 the `-android` variants of coroutines/Koin plus Timber. Add KMP-aware siblings; keep the Android-only
-ones for modules that stay `androidMain` (`core:notification`, and the `androidMain` domains of `scan` /
-`app_update`).
+ones for the `androidMain` portions that remain (the `scan` / `app_update` Android domains and the
+Android `actual`s of seam modules like `core:notification`).
 
 - **`softcover.kmp.library`** — applies **`com.android.kotlin.multiplatform.library`** (the modern
   single Android KMP target plugin) + `org.jetbrains.kotlin.multiplatform`. Declares `androidTarget`,
@@ -237,13 +238,15 @@ everything it depends on is already KMP. Within a phase, the order is the depend
 | P3 | `core:profile` | domain, identity, network | repo, use cases | DataStore (`Context`) | Med |
 | P3 | `core:library` | book, lists, preferences, identity | all | — | Low |
 | P3 | `core:connectivity` | domain, database, book, lists | write-queue / syncers | platform connectivity check if any | Med |
-| — | `core:notification` | — | **stays Android-only** (WorkManager, notifications) | n/a | n/a |
 | **P4** | `core:designsystem` | all core above | TOAD framework, theme, components, nav contract, models | barcode scanner (CameraX/MLKit), Android-only resources | **Highest (UI)** |
-| **P5** | `feature:*` leaves | their core deps | screens, ScreenModels, actions, events, flows, state | — (mostly) | Med (per feature) |
-| P5 | `feature:book_detail`, `feature:reading` | leaves' core deps | as above | — | Med |
-| P5 | `feature:scan` | — | non-camera logic | **CameraX scan domain stays androidMain** | Med |
-| P5 | `feature:app_update` | — | `AppUpdateState` (already in core:domain) | **Play `AppUpdateManager` stays androidMain** (sanctioned) | Low |
-| P5 | `feature:settings`, `onboarding`, `explore`, `library`, `lists`, `profile`, `session` | their core deps | screens + logic | service notifications (`session`) androidMain | Med |
+| P4 | `core:notification` | domain; Compose-MP convention | `SoftcoverNotifier` contract, the (Compose) permission requester, content/appearance models | Android `NotificationManagerCompat` + channels + WorkManager; iOS `UNUserNotificationCenter` + categories — behind `platformNotificationModule` | Med |
+| **P5** | `feature:library`, `feature:lists`, `feature:onboarding`, `feature:profile`, `feature:reading` | their core deps (all P4-done) | screens, ScreenModels, actions, events, flows, state | — (pure leaves) | Med (per feature) |
+| P5 | `feature:explore` | core deps | screens + logic | one `android.content.Context` use — verify / `expect`-wrap | Med |
+| P5 | `feature:settings` | core deps | screens + logic | one `android.os.Build` SDK check → `expect`/actual | Med |
+| P5 | `feature:book_detail` | core deps | screen + logic | external-link `Intent` + `Toast` → common open-URL/notify contract | Med |
+| P5 | `feature:scan` | core deps | non-camera logic | **CameraX/MLKit scanner + camera-permission requester stay androidMain** | Med |
+| P5 | `feature:session` | core deps, `core:notification` | session UI + logic | **`ReadingSessionService` (foreground service) + media-style notification stay androidMain**; iOS = background modes / Live Activity | High |
+| P5 | `feature:app_update` | — | `AppUpdateState` (already in core:domain) | **Play `AppUpdateManager` + update flow stay androidMain** (sanctioned) | Low |
 | **P6** | `:orchestration` | everything | nav host, cross-feature use cases, Koin aggregate | launcher `MainActivity` androidMain | Med |
 | P6 | `:app` | orchestration | — | **stays `com.android.application`** (Android entry point) | Low |
 
@@ -346,6 +349,34 @@ Followed the `core:preferences` platform-Koin-module template. How each point la
 - Per the CLAUDE.md maintenance rule: any design-system change here must update `DESIGN_SYSTEM.md` in
   the same change.
 
+### `core:notification` (platform seam) — Phase 4
+
+Originally scoped as "stays Android-only," but that was wrong for a CMP app: its consumers
+(`feature:reading`'s permission gate, `feature:session`'s channel) move to `commonMain` at P5, so the
+surface they touch must be common — and iOS must post notifications too. It converts like
+`core:connectivity`: a `commonMain` contract with Android + iOS `actual`s behind a
+`platformNotificationModule` (the `core:preferences` platform-Koin-module template), pulled in via
+`includes(...)` so `orchestration` keeps referencing `notificationModule` by name. It also applies the
+Compose-MP convention (P4) because the permission requester is a `@Composable`.
+
+- **`commonMain`:** the `SoftcoverNotifier` interface, the (Compose) `rememberNotificationPermissionRequester`
+  contract, and the `SoftcoverNotificationContent` / `NotificationAppearance` models (once re-expressed
+  platform-neutrally — see below).
+- **`androidMain`:** `SoftcoverNotifierImpl` (`NotificationManagerCompat`), `NotificationChannelInitializer`
+  + `SoftcoverNotificationChannel`, `SoftcoverWorker` (WorkManager), and the `ActivityResultContracts`
+  permission launch — the verbatim current code.
+- **`iosMain`:** a notifier over `UNUserNotificationCenter` (`add(UNNotificationRequest)`), permission via
+  `requestAuthorizationWithOptions`, and — for the scheduled-notification base — `UNTimeIntervalNotificationTrigger`
+  / `BGTaskScheduler` in place of WorkManager.
+- **Two models hold Android types and need platform-neutral re-expression first:**
+  `SoftcoverNotificationContent.pendingIntent: PendingIntent` → a common deep-link/target abstraction the
+  Android `actual` turns into a `PendingIntent` and iOS into the notification's `userInfo`/launch route;
+  `NotificationAppearance`'s `@DrawableRes`/`@ColorRes` `Int`s → icon/color tokens resolved per platform
+  (CMP `Res.*` on the common side, or `expect`-typed handles).
+- **Notification channels are an Android-only concept.** `SoftcoverNotificationChannel` + the initializer
+  stay `androidMain`; iOS maps the same logical categories to `UNNotificationCategory`. The common
+  contract should speak in logical categories, not channels.
+
 ---
 
 ## 5. Cross-cutting learnings & caveats predicted
@@ -363,10 +394,10 @@ Followed the `core:preferences` platform-Koin-module template. How each point la
   `ScreenModel` injection in common.
 - **Apollo `responseBased` codegen** (current setting) is fully supported on KMP — no codegen mode
   change needed. The scalar mappings (`date`→`String`, etc.) stay; just wire the Apollo source set.
-- **Manifest merge no longer applies off-Android.** `core:notification`, `feature:session`
-  (`ReadingSessionService`), and `:orchestration` (`MainActivity`) contribute manifest entries — these
-  are inherently `androidMain`. Non-Android targets get no manifest; plan platform-equivalent entry
-  points (iOS service/background modes) separately.
+- **Manifest merge no longer applies off-Android.** The Android source sets of `core:notification`
+  (`POST_NOTIFICATIONS`), `feature:session` (`ReadingSessionService`), and `:orchestration`
+  (`MainActivity`) contribute manifest entries. Non-Android targets get no manifest; plan
+  platform-equivalent entry points (iOS notification authorization, service/background modes) separately.
 - **`BuildConfig`** is Android-only and lives in `:app` (the `AppVersionProvider` reads it). Keep
   version/config access behind the existing `AppVersionProvider` contract (already in core) so common
   code never touches `BuildConfig`.
@@ -407,10 +438,12 @@ Android-only build (improvements regardless of KMP):
      factories (on-disk paths preserved); only the path is platform-bound for a later `actual`.
 4. ✅ **`core:platform` dissolved into `core:notification`.** Its camera-permission requester moved
    into `feature:scan` (its only consumer); the remaining notification/WorkManager code became
-   `core:notification` — the Android-only notification home, which now owns its own Koin module
-   (`notificationModule`) with the notifier appearance supplied by `:app`. No other module re-split
-   is needed; the rest of the graph stays as documented in `MODULE_STRUCTURE_GUIDELINES.md`, and
-   `feature:scan` / `feature:app_update` keep their sanctioned `androidMain` domains.
+   `core:notification`, which now owns its own Koin module (`notificationModule`) with the notifier
+   appearance supplied by `:app`. `core:notification` is **not** Android-only — it converts at P4 with a
+   real platform seam (Android `NotificationManagerCompat`/WorkManager + iOS `UNUserNotificationCenter`;
+   see §4). No other module re-split is needed; the rest of the graph stays as documented in
+   `MODULE_STRUCTURE_GUIDELINES.md`, and `feature:scan` / `feature:app_update` keep their sanctioned
+   `androidMain` domains.
 
 ---
 
@@ -453,11 +486,19 @@ they land.
 | P3 | `core:profile` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio `ProfileCacheDataStore` behind `platformProfileModule` like `core:preferences`; all iOS targets compile; `check` green) |
 | P3 | `core:library` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:identity`; all iOS targets compile; `check` green) |
 | P3 | `core:connectivity` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; `ConnectivityDataSource` behind `expect val platformModule` — Android `ConnectivityManager` callback (+ `core-ktx`), iOS `NWPathMonitor`; rest a plain `commonMain` move; fixed a `PendingListWriteSyncer` DI omission; all iOS targets compile; `check` green) |
-| — | `core:notification` (stays Android) | n/a |
 | P4 | `core:designsystem` (CMP) | ☐ |
-| P5 | `feature:*` (leaves) | ☐ |
-| P5 | `feature:book_detail`, `feature:reading` | ☐ |
-| P5 | `feature:scan`, `feature:app_update` (partial) | ☐ |
+| P4 | `core:notification` | ☐ — real platform seam: `SoftcoverNotifier` + permission requester + content/appearance contracts in `commonMain`; Android `NotificationManagerCompat` + channels + WorkManager and iOS `UNUserNotificationCenter` + categories behind `platformNotificationModule`. Channels are Android-only; `PendingIntent` / `@DrawableRes`+`@ColorRes` models need platform-neutral re-expression first. |
+| P5 | `feature:library` | ☐ — pure leaf (commonMain move) |
+| P5 | `feature:lists` | ☐ — pure leaf |
+| P5 | `feature:onboarding` | ☐ — pure leaf |
+| P5 | `feature:profile` | ☐ — pure leaf |
+| P5 | `feature:reading` | ☐ — pure leaf (notification-permission requester comes from `core:notification`'s common contract) |
+| P5 | `feature:explore` | ☐ — near-leaf; one `android.content.Context` use to verify / `expect`-wrap |
+| P5 | `feature:settings` | ☐ — near-leaf; one `android.os.Build` SDK check → `expect`/actual |
+| P5 | `feature:book_detail` | ☐ — small seam: external-link `Intent` + `Toast` → common open-URL/notify contract with Android/iOS actuals |
+| P5 | `feature:scan` | ☐ — CameraX/MLKit scanner (in `core:designsystem`) + camera-permission requester stay androidMain; non-camera logic to commonMain |
+| P5 | `feature:session` | ☐ — `ReadingSessionService` (foreground service) + media-style notification stay androidMain; iOS needs a background / Live-Activity equivalent |
+| P5 | `feature:app_update` | ☐ — Play `AppUpdateManager` + in-app-update flow stay androidMain (sanctioned); shared `AppUpdateState` already in `core:domain` |
 | P6 | `:orchestration` | ☐ |
 | P6 | `:app` (stays Android shell) + iOS/desktop entry points | ☐ |
 
@@ -470,7 +511,8 @@ tasks done up front — migrate `java.time` to **kotlinx-datetime**, replace **T
 behind a facade, and add **`com.android.kotlin.multiplatform.library`-based convention plugins** —
 after which you convert modules lowest-tier-first: `domain → network → preferences → identity →
 database → book → (deadlines/personal/lists/profile/library/connectivity) → designsystem (CMP, Coil 3)
-→ features → orchestration`. `core:notification` and the Play/CameraX domains stay `androidMain`; `:app`
++ notification (Android `NotificationManagerCompat`/WorkManager + iOS `UNUserNotificationCenter` seam)
+→ features → orchestration`. The Play `AppUpdateManager` / CameraX feature domains stay `androidMain`; `:app`
 stays the Android shell with new thin iOS/desktop entry points added at the end. The sharp edges are
 `java.time` (forced by the iOS target), Room-KMP setup, the Keystore-encrypted API key, MockK being
 JVM-only in tests, and the Coil 2→3 bump in the design system.
