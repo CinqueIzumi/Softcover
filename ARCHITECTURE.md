@@ -21,7 +21,7 @@ namespace.
 :core:network         # Apollo GraphQL client, interceptors, safeQuery / safeMutation
 :core:designsystem    # TOAD framework, Material 3 theme, reusable Compose components, nav contract,
                       #   shared presentation models, app-scoped session controller, MainActivityViewModel
-:core:platform        # Logging, notifications, permission infrastructure
+:core:notification    # Notification channels, notifier, notification-permission requester, worker base
 :core:preferences     # SettingsRepository, preference readers, DataStore-backed impl
 :core:identity        # User identity / auth-credential use cases
 :core:{book,lists,deadlines,personal,profile,library}   # Operation services (repository + use cases)

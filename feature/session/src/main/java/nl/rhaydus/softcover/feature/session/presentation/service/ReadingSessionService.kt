@@ -32,7 +32,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.domain.logging.AppLog
-import nl.rhaydus.softcover.core.platform.notification.SoftcoverNotificationChannel
+import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
 
 /**
  * Foreground service that surfaces the active reading session as a persistent, ongoing notification:

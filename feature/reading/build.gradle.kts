@@ -14,7 +14,7 @@ dependencies {
     implementation(project(":core:library"))
     implementation(project(":core:preferences"))
     implementation(project(":core:profile"))
-    implementation(project(":core:platform"))
+    implementation(project(":core:notification"))
     implementation(project(":core:designsystem"))
 
     implementation(libs.koin.compose)

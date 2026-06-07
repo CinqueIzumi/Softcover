@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "nl.rhaydus.softcover.core.platform"
+    namespace = "nl.rhaydus.softcover.core.notification"
 }
 
 dependencies {

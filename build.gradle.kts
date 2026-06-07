@@ -114,6 +114,7 @@ dependencyAnalysis {
                     "app.cash.turbine:turbine",
                     // Provided uniformly by the Compose / Room convention plugins (not per-module deps).
                     "androidx.activity:activity-compose",
+                    "androidx.compose.ui:ui",
                     "androidx.compose.ui:ui-tooling-preview",
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui-graphics",

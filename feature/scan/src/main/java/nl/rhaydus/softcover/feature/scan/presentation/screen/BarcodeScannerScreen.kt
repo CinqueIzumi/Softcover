@@ -51,8 +51,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigat
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
-import nl.rhaydus.softcover.core.platform.permission.isCameraPermissionGranted
-import nl.rhaydus.softcover.core.platform.permission.rememberCameraPermissionRequester
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnConfirmedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction
@@ -61,6 +59,8 @@ import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent
+import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraPermissionGranted
+import nl.rhaydus.softcover.feature.scan.presentation.permission.rememberCameraPermissionRequester
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanScreenModel
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 

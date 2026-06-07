@@ -285,7 +285,7 @@ only on modules **below** its tier (§2).
 | T3 app shell | `:app` |
 | T3 orchestration | `:orchestration` |
 | T1 features | `:feature:{lists, profile, onboarding, explore, library, book_detail, reading, session, scan, settings, app_update}` |
-| T0 core | `:core:{domain, database, network, platform, preferences, identity, book, lists, deadlines, personal, profile, library, connectivity, designsystem}` |
+| T0 core | `:core:{domain, database, network, notification, preferences, identity, book, lists, deadlines, personal, profile, library, connectivity, designsystem}` |
 
 Build wiring conventions:
 
@@ -316,7 +316,8 @@ Build wiring conventions:
 The module boundaries are shaped so a later KMP conversion is a per-module `commonMain`/`androidMain`
 source-set split rather than a re-architecture. `:core:domain`, `:core:preferences`, `:core:identity`,
 and `:core:book` are the natural first `commonMain` candidates (their `domain` packages are Android-free
-by the layer rule). `:feature:app_update` (Play `AppUpdateManager`), `:feature:scan` (CameraX),
-notification/WorkManager code in `:core:platform`, and Room in `:core:database` stay `androidMain`. Keep
+by the layer rule). `:feature:app_update` (Play `AppUpdateManager`), `:feature:scan` (CameraX + its
+camera-permission requester), notification/WorkManager code in `:core:notification`, and Room in
+`:core:database` stay `androidMain`. Keep
 Android-only types out of `domain` packages so that boundary stays clean — `app_update` is the one
 sanctioned exception (its domain is inherently Android).

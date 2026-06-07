@@ -9,7 +9,7 @@ android {
 
 dependencies {
     api(project(":core:designsystem"))
-    implementation(project(":core:platform"))
+    implementation(project(":core:notification"))
 
     implementation(libs.koin.compose)
 

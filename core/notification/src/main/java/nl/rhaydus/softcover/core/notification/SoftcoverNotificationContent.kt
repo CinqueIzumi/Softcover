@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.platform.notification
+package nl.rhaydus.softcover.core.notification
 
 import android.app.PendingIntent
 

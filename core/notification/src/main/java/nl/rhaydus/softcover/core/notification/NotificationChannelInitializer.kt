@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.platform.notification
+package nl.rhaydus.softcover.core.notification
 
 import android.content.Context
 import androidx.core.app.NotificationChannelCompat

@@ -15,7 +15,6 @@ dependencies {
     api(project(":core:identity"))
     api(project(":core:personal"))
     api(project(":core:preferences"))
-    implementation(project(":core:platform"))
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     api(libs.androidx.compose.ui.text.google.fonts)

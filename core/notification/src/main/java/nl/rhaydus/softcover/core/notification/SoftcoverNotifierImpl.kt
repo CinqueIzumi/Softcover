@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.platform.notification
+package nl.rhaydus.softcover.core.notification
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -12,19 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 
-interface SoftcoverNotifier {
-    /** True when the runtime POST_NOTIFICATIONS permission is granted (always true on API < 33). */
-    fun hasPostPermission(): Boolean
-
-    fun notify(
-        id: Int,
-        content: SoftcoverNotificationContent,
-    )
-
-    fun cancel(id: Int)
-}
-
-class SoftcoverNotifierImpl(
+internal class SoftcoverNotifierImpl(
     private val context: Context,
     @param:DrawableRes private val smallIcon: Int,
     @param:ColorRes private val accentColor: Int,

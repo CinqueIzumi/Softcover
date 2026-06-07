@@ -21,6 +21,7 @@ dependencies {
     implementation(project(":core:profile"))
     implementation(project(":core:library"))
     implementation(project(":core:connectivity"))
+    implementation(project(":core:notification"))
     implementation(project(":core:designsystem"))
 
     // Feature modules (orchestration composes them all)

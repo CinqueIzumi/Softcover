@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.platform.permission
+package nl.rhaydus.softcover.feature.scan.presentation.permission
 
 import android.Manifest
 import android.content.Context

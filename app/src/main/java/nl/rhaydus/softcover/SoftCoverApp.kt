@@ -13,7 +13,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
-import nl.rhaydus.softcover.core.platform.notification.NotificationChannelInitializer
+import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
 import nl.rhaydus.softcover.di.appModule
 import nl.rhaydus.softcover.orchestration.di.softcoverModules
 

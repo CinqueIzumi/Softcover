@@ -10,7 +10,6 @@ android {
 dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:book"))
-    implementation(project(":core:platform"))
     implementation(project(":core:designsystem"))
 
     implementation(libs.koin.compose)

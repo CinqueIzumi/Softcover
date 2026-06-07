@@ -112,7 +112,7 @@ Verified Android-freeness of `src/main` (imports of `android`/`androidx`):
 | `core:preferences` | 3 (`Context`, Keystore, DataStore) | `actual` seams |
 | `core:profile` | 2 (DataStore) | `actual` seams |
 | `core:connectivity` | 0 in `src/main` | a real seam was *added* at conversion — `ConnectivityManager` / `NWPathMonitor` behind `platformModule` |
-| `core:platform`, `core:designsystem` | many (by design) | stay Android / move to CMP |
+| `core:notification`, `core:designsystem` | many (by design) | stay Android / move to CMP |
 
 No module needs to be re-split. The only *structural* changes recommended up front are small
 seam-tightening refactors (§6) so each split is mechanical rather than invasive.
@@ -166,7 +166,7 @@ artifact. Decision: adopt **Kermit** (Touchlab) behind a thin app-owned logging 
 
 The convention plugins in `build-logic/` hardcode `com.android.library` + `kotlin.android` and inject
 the `-android` variants of coroutines/Koin plus Timber. Add KMP-aware siblings; keep the Android-only
-ones for modules that stay `androidMain` (`core:platform`, and the `androidMain` domains of `scan` /
+ones for modules that stay `androidMain` (`core:notification`, and the `androidMain` domains of `scan` /
 `app_update`).
 
 - **`softcover.kmp.library`** — applies **`com.android.kotlin.multiplatform.library`** (the modern
@@ -237,7 +237,7 @@ everything it depends on is already KMP. Within a phase, the order is the depend
 | P3 | `core:profile` | domain, identity, network | repo, use cases | DataStore (`Context`) | Med |
 | P3 | `core:library` | book, lists, preferences, identity | all | — | Low |
 | P3 | `core:connectivity` | domain, database, book, lists | write-queue / syncers | platform connectivity check if any | Med |
-| — | `core:platform` | — | **stays Android-only** (WorkManager, notifications) | n/a | n/a |
+| — | `core:notification` | — | **stays Android-only** (WorkManager, notifications) | n/a | n/a |
 | **P4** | `core:designsystem` | all core above | TOAD framework, theme, components, nav contract, models | barcode scanner (CameraX/MLKit), Android-only resources | **Highest (UI)** |
 | **P5** | `feature:*` leaves | their core deps | screens, ScreenModels, actions, events, flows, state | — (mostly) | Med (per feature) |
 | P5 | `feature:book_detail`, `feature:reading` | leaves' core deps | as above | — | Med |
@@ -363,7 +363,7 @@ Followed the `core:preferences` platform-Koin-module template. How each point la
   `ScreenModel` injection in common.
 - **Apollo `responseBased` codegen** (current setting) is fully supported on KMP — no codegen mode
   change needed. The scalar mappings (`date`→`String`, etc.) stay; just wire the Apollo source set.
-- **Manifest merge no longer applies off-Android.** `core:platform`, `feature:session`
+- **Manifest merge no longer applies off-Android.** `core:notification`, `feature:session`
   (`ReadingSessionService`), and `:orchestration` (`MainActivity`) contribute manifest entries — these
   are inherently `androidMain`. Non-Android targets get no manifest; plan platform-equivalent entry
   points (iOS service/background modes) separately.
@@ -405,10 +405,12 @@ Android-only build (improvements regardless of KMP):
      `PersistEditionImageUseCase`) now take `ByteArray`; `java.io.File` confined to the Android impl.
    - DataStore creation — extracted `createAppSettingsDataStore` / `createProfileCacheDataStore`
      factories (on-disk paths preserved); only the path is platform-bound for a later `actual`.
-4. **No module re-split is recommended.** The graph stays as documented in
-   `MODULE_STRUCTURE_GUIDELINES.md`. `core:platform` remains the Android-only home for
-   WorkManager/notifications; `feature:scan` and `feature:app_update` keep their sanctioned
-   `androidMain` domains.
+4. ✅ **`core:platform` dissolved into `core:notification`.** Its camera-permission requester moved
+   into `feature:scan` (its only consumer); the remaining notification/WorkManager code became
+   `core:notification` — the Android-only notification home, which now owns its own Koin module
+   (`notificationModule`) with the notifier appearance supplied by `:app`. No other module re-split
+   is needed; the rest of the graph stays as documented in `MODULE_STRUCTURE_GUIDELINES.md`, and
+   `feature:scan` / `feature:app_update` keep their sanctioned `androidMain` domains.
 
 ---
 
@@ -451,7 +453,7 @@ they land.
 | P3 | `core:profile` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio `ProfileCacheDataStore` behind `platformProfileModule` like `core:preferences`; all iOS targets compile; `check` green) |
 | P3 | `core:library` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:identity`; all iOS targets compile; `check` green) |
 | P3 | `core:connectivity` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; `ConnectivityDataSource` behind `expect val platformModule` — Android `ConnectivityManager` callback (+ `core-ktx`), iOS `NWPathMonitor`; rest a plain `commonMain` move; fixed a `PendingListWriteSyncer` DI omission; all iOS targets compile; `check` green) |
-| — | `core:platform` (stays Android) | n/a |
+| — | `core:notification` (stays Android) | n/a |
 | P4 | `core:designsystem` (CMP) | ☐ |
 | P5 | `feature:*` (leaves) | ☐ |
 | P5 | `feature:book_detail`, `feature:reading` | ☐ |
@@ -468,7 +470,7 @@ tasks done up front — migrate `java.time` to **kotlinx-datetime**, replace **T
 behind a facade, and add **`com.android.kotlin.multiplatform.library`-based convention plugins** —
 after which you convert modules lowest-tier-first: `domain → network → preferences → identity →
 database → book → (deadlines/personal/lists/profile/library/connectivity) → designsystem (CMP, Coil 3)
-→ features → orchestration`. `core:platform` and the Play/CameraX domains stay `androidMain`; `:app`
+→ features → orchestration`. `core:notification` and the Play/CameraX domains stay `androidMain`; `:app`
 stays the Android shell with new thin iOS/desktop entry points added at the end. The sharp edges are
 `java.time` (forced by the iOS target), Room-KMP setup, the Keystore-encrypted API key, MockK being
 JVM-only in tests, and the Coil 2→3 bump in the design system.

@@ -59,7 +59,7 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:identity"))
     implementation(project(":core:connectivity"))
-    implementation(project(":core:platform"))
+    implementation(project(":core:notification"))
 
     // DI
     implementation(libs.koin.core)

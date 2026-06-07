@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.library.di.libraryServiceModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
+import nl.rhaydus.softcover.core.notification.di.notificationModule
 import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
@@ -50,6 +51,7 @@ val softcoverModules = listOf(
     appUpdateVariantModule,
     deadlinesModule,
     connectivityModule,
+    notificationModule,
     personalModule,
     sessionModule,
     orchestrationModule,
