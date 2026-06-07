@@ -7,7 +7,6 @@ import okio.FileSystem
 import okio.Path
 import nl.rhaydus.softcover.core.profile.data.datastore.serializer.ProfileCacheSerializer
 import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
-import okio.SYSTEM
 import kotlin.jvm.JvmInline
 
 @JvmInline
@@ -15,15 +14,19 @@ internal value class ProfileCacheDataStore(val store: DataStore<ProfileCacheEnti
 
 /**
  * Shared construction site for the profile-cache DataStore. Persistence is fully multiplatform via
- * okio; the only platform-bound piece is [producePath] — the per-target file location, supplied by
- * the platform Koin module (Android: `filesDir/datastore/profile_cache.json`; iOS: the documents
- * directory). The Android path matches the previous `dataStoreFile(...)` location, so existing
+ * okio; the platform-bound pieces are supplied by the platform Koin module — [producePath] (the
+ * per-target file location; Android: `filesDir/datastore/profile_cache.json`, iOS: the documents
+ * directory) and [fileSystem] (`FileSystem.SYSTEM`, which okio only exposes on JVM/Native, not in
+ * `commonMain`). The Android path matches the previous `dataStoreFile(...)` location, so existing
  * stores are picked up unchanged.
  */
-internal fun createProfileCacheDataStore(producePath: () -> Path): DataStore<ProfileCacheEntity> =
+internal fun createProfileCacheDataStore(
+    fileSystem: FileSystem,
+    producePath: () -> Path,
+): DataStore<ProfileCacheEntity> =
     DataStoreFactory.create(
         storage = OkioStorage(
-            fileSystem = FileSystem.SYSTEM,
+            fileSystem = fileSystem,
             serializer = ProfileCacheSerializer,
             producePath = producePath,
         ),

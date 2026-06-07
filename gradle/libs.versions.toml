@@ -15,12 +15,20 @@ dataStore = "1.2.0"
 kotlinxSerialization = "1.9.0"
 ksp = "2.3.9"
 voyager = "1.1.0-beta02"
-coilVersion = "2.7.0"
+coilVersion = "3.2.0"
+composeMultiplatform = "1.11.0"
+# CMP's stable material3 strips the M3-expressive APIs (aligned with Jetpack material3 1.4.0-beta01).
+# The design system is built on expressive (MaterialExpressiveTheme/ToggleButton/SplitButton), so it
+# pins the alpha material3 artifact for the 1.11.0 line (≈ androidx material3 1.5.0-alpha17), the CMP
+# counterpart of the Android-only androidx 1.5.0-alpha13 pin below.
+composeMaterial3Expressive = "1.11.0-alpha07"
 material3ComposeVersion = "1.5.0-alpha13"
 materialComponentsVersion = "1.13.0"
 kermitVersion = "2.0.6"
 kotlinxDatetime = "0.6.2"
 koinVersion = "3.5.3"
+# Multiplatform koin-compose is versioned separately from koin core; 1.1.x targets Koin 3.5.x.
+koinComposeMultiplatform = "1.1.2"
 roomVersion = "2.7.2"
 splashVersion = "1.0.1"
 jUnitVersion = "5.11.4"
@@ -48,6 +56,8 @@ ktlint-cliRulesetCore = { group = "com.pinterest.ktlint", name = "ktlint-cli-rul
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
+compose-multiplatform-gradlePlugin = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "composeMultiplatform" }
+compose-material3-expressive = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3Expressive" }
 apollo-gradlePlugin = { group = "com.apollographql.apollo", name = "apollo-gradle-plugin", version.ref = "apollo" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -58,6 +68,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -79,12 +90,14 @@ voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.
 voyager-koin = { group = "cafe.adriel.voyager", name = "voyager-koin", version.ref = "voyager" }
 voyager-tabNavigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
-coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilVersion" }
+coil3 = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coilVersion" }
+coil3-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coilVersion" }
 kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermitVersion" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinVersion" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinVersion" }
+koin-compose-multiplatform = { group = "io.insert-koin", name = "koin-compose", version.ref = "koinComposeMultiplatform" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
 material-components = { group = "com.google.android.material", name = "material", version.ref = "materialComponentsVersion" }
@@ -114,6 +127,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

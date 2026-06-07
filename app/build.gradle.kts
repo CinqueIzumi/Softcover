@@ -67,4 +67,9 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+
+    // Image loading — Coil 3 singleton loader + network fetcher registration (the default loader
+    // ships no network fetcher, so the Application supplies one via SingletonImageLoader.Factory)
+    implementation(libs.coil3)
+    implementation(libs.coil3.network.okhttp)
 }

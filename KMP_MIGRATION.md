@@ -77,7 +77,7 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 | Logging facade (Kermit `AppLog`) | ✅ done | `core/domain/logging/AppLog.kt`; debug-gated; `-=-` prefix preserved; all 102 call sites migrated; Timber removed from catalog + convention plugin + buildHealth excludes; custom `BlankLineAfterStatementRule` retargeted to `AppLog.e` |
 | `java.time` → `kotlinx-datetime` | ✅ done | 76 files incl. 28 tests; `DateStyle.formatter` is now `DateTimeFormat<LocalDate>`, formatted via `formatter.format(value)`; code-reviewed |
 | Platform seams (§6.3) | ✅ done | `EditionImageStorage`/persist chain now takes `ByteArray` (File confined to the Android impl); `createAppSettingsDataStore`/`createProfileCacheDataStore` factories (on-disk paths preserved); `ApiKeyLocalDataSource` Keystore was already fully behind `AuthTokenProvider` — no change needed |
-| KMP convention plugins (§2.3) | ✅ `softcover.kmp.library` done (validated against `core:domain`) | Applies `com.android.kotlin.multiplatform.library` + `org.jetbrains.kotlin.multiplatform`; declares `androidTarget` + `iosArm64`/`iosSimulatorArm64`/`iosX64`; SDK 36 / minSdk 26 / JVM 11; commonMain wires coroutines-core + koin-core (Kermit comes transitively from `core:domain`); test stack split — Kotest/Turbine/coroutines-test in `commonTest`, JUnit5/MockK in `androidHostTest`. `softcover.kmp.compose` still pending (P4). |
+| KMP convention plugins (§2.3) | ✅ `softcover.kmp.library` done (validated against `core:domain`); ✅ `softcover.kmp.compose` done (validated against `core:designsystem`) | Applies `com.android.kotlin.multiplatform.library` + `org.jetbrains.kotlin.multiplatform`; declares `androidTarget` + `iosArm64`/`iosSimulatorArm64`/`iosX64`; SDK 36 / minSdk 26 / JVM 11; commonMain wires coroutines-core + koin-core (Kermit comes transitively from `core:domain`); test stack split — Kotest/Turbine/coroutines-test in `commonTest`, JUnit5/MockK in `androidHostTest`. `softcover.kmp.compose` applies only the Kotlin Compose compiler plugin and wires AndroidX Compose into `androidMain` — Compose Multiplatform deferred (§2.3). |
 | KMP catalog entries (§2.4) | ◑ partial (advanced) | Added: `org.jetbrains.kotlin.multiplatform` + `com.android.kotlin.multiplatform.library` plugin aliases, `kotlinx-coroutines-core` (KMP variant). Still pending: Compose-MP / Coil 3 / koin-compose-mp / datastore-mp (land at their owning module's phase). |
 
 **Known follow-up:** `UnreleasedBadge` + `StreakStrip` month/day names are now **English-only**
@@ -163,7 +163,7 @@ artifact. Decision: adopt **Kermit** (Touchlab) behind a thin app-owned logging 
   sites to the facade **as each module converts** — not all at once. Known call sites in early
   modules: `core:domain` (1 file), `core:book` (3), `core:preferences` (2).
 
-### 2.3 New KMP convention plugins — ✅ `softcover.kmp.library` done (§0); `softcover.kmp.compose` pending (P4)
+### 2.3 New KMP convention plugins — ✅ `softcover.kmp.library` done (§0); ✅ `softcover.kmp.compose` done (validated against `core:designsystem`)
 
 The convention plugins in `build-logic/` hardcode `com.android.library` + `kotlin.android` and inject
 the `-android` variants of coroutines/Koin plus Timber. Add KMP-aware siblings; keep the Android-only
@@ -176,16 +176,42 @@ Android `actual`s of seam modules like `core:notification`).
   `kotlinx-coroutines-core` (not `-android`), `koin-core` (not `koin-android`), Kermit. Test stack
   goes in `commonTest` (Kotest/Turbine/coroutines-test are multiplatform; **MockK is JVM-only** — see
   §5). JDK/SDK levels match the existing plugin (compileSdk 36, minSdk 26, JVM 11).
-- **`softcover.kmp.compose`** — layers **Compose Multiplatform** (`org.jetbrains.compose` +
-  `org.jetbrains.kotlin.plugin.compose`) on top, for `core:designsystem` and feature UI. Replaces the
-  `androidx.compose.*` deps with the `org.jetbrains.compose.*` equivalents (`compose.runtime`,
-  `compose.foundation`, `compose.material3`, `compose.components.resources`).
+- **`softcover.kmp.compose`** — layers **Compose Multiplatform** onto `softcover.kmp.library` for
+  `core:designsystem` and feature UI; the KMP sibling of `softcover.android.compose`. Applies
+  `org.jetbrains.kotlin.plugin.compose` (the standalone compiler plugin) **and** `org.jetbrains.compose`
+  (CMP 1.11.0), then wires the multiplatform `compose.*` artifacts (`runtime`, `foundation`,
+  `animation`, `ui`, `components.resources`) into **`commonMain`** — on Android these resolve to the
+  AndroidX Compose libraries, so existing `androidx.compose.*` imports keep working. Android-only
+  Compose extras (`activity-compose`, `ui-tooling`/`-preview`) stay in `androidMain`. Two non-obvious
+  pins:
+  - **material3 must be the alpha artifact.** CMP's *stable* `compose.material3` strips the
+    M3-expressive APIs (aligned with Jetpack material3 1.4.0-beta01). The design system is built on
+    expressive (`MaterialExpressiveTheme`/`ToggleButton`/`SplitButton`/`MotionScheme`), so the plugin
+    pins `org.jetbrains.compose.material3:material3:1.11.0-alpha07` (≈ androidx material3 1.5.0-alpha17)
+    instead of `compose.material3` — the CMP counterpart of the Android-only `androidx…material3:1.5.0-alpha13` pin.
+  - **`koin-compose` is versioned separately.** The multiplatform `io.insert-koin:koin-compose` uses
+    the `1.1.x` line for Koin 3.5.x (catalog `koin-compose-multiplatform = 1.1.2`), distinct from the
+    `koin-androidx-compose:3.5.3` the Android feature modules still use for `koinViewModel`.
+  - **Resources are off by default.** The KMP Android library plugin does **not** package
+    `androidMain/res` unless the module opts in with `androidLibrary { androidResources.enable = true }`.
+    Required for any converted module that ships drawables/strings/themes (e.g. `core:designsystem`);
+    without it, consumers fail `processDebugResources` with "resource not found".
+  - **No build-type source sets.** The KMP Android library produces a **single variant** — only
+    `androidMain` + `androidHostTest`, no `androidDebug`/`androidRelease`. Code that previously lived in
+    `src/debug`/`src/release` (compiled out of release via build-type source sets) cannot stay in a KMP
+    module. Push the build-type split up to **`:app`** (which stays `com.android.application` and keeps
+    build types across the whole migration) via a DI seam: keep the real bodies in the library's
+    `androidMain` (so they retain `internal` access), expose an interface, and bind it per build type
+    from `app/src/debug` (real) vs `app/src/release` (no-op). `core:designsystem`'s debug routes use
+    exactly this — `DebugRoutesContent` bound by `app/.../di/DebugRoutesModule.kt`. With release
+    minification off the inert bodies still ship in the release APK (unreachable); enabling R8 strips
+    them — tracked as a follow-up.
 - Keep `softcover.android.library` / `.compose` for modules staying Android-only, and reuse
   `softcover.android.room` / `.apollo` (those plugins gain KMP config when their module converts).
 - **Do not** re-declare in module build files what a convention plugin already provides (existing
   rule, unchanged).
 
-### 2.4 Version-catalog prep — ◑ partial (Kermit + kotlinx-datetime + KMP/AGP-KMP plugins + coroutines-core added; Compose-MP/Coil3/koin-mp/datastore-mp pending)
+### 2.4 Version-catalog prep — ◑ partial (Kermit + kotlinx-datetime + KMP/AGP-KMP plugins + coroutines-core + Compose-MP 1.11.0 + Coil3 + koin-compose-mp added; datastore-mp pending)
 
 Add/adjust in `gradle/libs.versions.toml` (do this with the convention-plugin change):
 
@@ -194,10 +220,14 @@ Add/adjust in `gradle/libs.versions.toml` (do this with the convention-plugin ch
 - `org.jetbrains.compose` (Compose Multiplatform) plugin + its BOM-less artifacts.
 - ~~**Kermit** (`co.touchlab:kermit`)~~ — done (Phase 0).
 - ~~**`kotlinx-datetime`**~~ — done (Phase 0, `0.6.2`).
-- **Coil 2.7 → Coil 3.x** (`io.coil-kt.coil3:coil-compose` + `coil-network-*`). Coil 2 is Android-only;
-  CMP needs Coil 3. This is a behavioral bump — audit `ImageRequest`/`AsyncImage` call sites.
-- **Koin**: add `koin-compose-multiplatform` (replaces `koin-androidx-compose` for shared UI); keep
-  `koin-android` for the Android shell.
+- ✅ **Coil 2.7 → Coil 3.2.0** done (`io.coil-kt.coil3:coil-compose` + `coil-network-okhttp`). Repo-wide
+  package swap `coil.*`→`coil3.*`, `LocalContext`→`LocalPlatformContext`, `context.imageLoader`→
+  `SingletonImageLoader.get`, disk-cache reads via `okio.Path`; Coil 3's default loader ships **no**
+  network fetcher, so `:app`'s `SoftCoverApp` implements `SingletonImageLoader.Factory` with
+  `OkHttpNetworkFetcherFactory`. `ImageResult.drawable`→`(result as SuccessResult).image.toBitmap()`.
+- ✅ **Koin**: added `koin-compose-multiplatform` (`io.insert-koin:koin-compose:1.1.2` — the `1.1.x`
+  line targets Koin 3.5.x) for `commonMain` UI; the Android feature modules keep `koin-androidx-compose`
+  for `koinViewModel`.
 - **Voyager**: 1.1.0-beta02 is already the KMP/CMP-capable line — confirm the `-koin` integration
   artifact has a multiplatform variant; `voyager-navigator`/`-tab-navigator`/`-transitions` are KMP.
 - **DataStore** 1.2.0 already has a multiplatform artifact (`androidx.datastore:datastore` /
@@ -213,8 +243,10 @@ Add/adjust in `gradle/libs.versions.toml` (do this with the convention-plugin ch
 
 Even if iOS/desktop source sets start empty, declare the targets in the convention plugin from day
 one so each converted module is *actually* compiled for Native and the compiler catches JVM-only
-leaks (like java.time) immediately instead of at the end. Recommended initial set: `androidTarget`,
-`iosArm64`, `iosSimulatorArm64`, `iosX64`. Add `jvm()` desktop only when desktop is a real target.
+leaks (like java.time) immediately instead of at the end. Target set: `androidTarget`, `iosArm64`,
+`iosSimulatorArm64`. **`iosX64` was dropped** — Compose Multiplatform 1.11.0 no longer publishes it,
+and the Intel iOS simulator is obsolete on Apple-silicon Macs (dropping it also required trimming the
+`kspIosX64` config from `AndroidRoomConventionPlugin`). Add `jvm()` desktop only when desktop is a real target.
 
 ---
 
@@ -472,7 +504,7 @@ they land.
 | P0 | logging facade (Kermit `AppLog`) | ✅ done |
 | P0 | kotlinx-datetime refactor | ✅ done |
 | P0 | platform seams (EditionImageStorage / DataStore factories / Keystore) | ✅ done |
-| P0 | KMP convention plugins | ✅ `softcover.kmp.library` done; `.compose` pending (P4) |
+| P0 | KMP convention plugins | ✅ `softcover.kmp.library` done; ✅ `softcover.kmp.compose` done (Android-only Compose in `androidMain`; CMP deferred — §2.3) |
 | P0 | version catalog prep | ◑ partial (Kermit + kotlinx-datetime + KMP/AGP-KMP plugins + coroutines-core + datastore-core/-okio + okio done; Compose-MP/Coil3/koin-mp pending) |
 | P1 | `core:domain` | ✅ done (`commonMain` + `androidHostTest`; all iOS targets compile; `check` green) |
 | P1 | `core:network` | ✅ done (`commonMain` + `androidHostTest`; Apollo on its multiplatform engine + `ApolloInterceptor`; all iOS targets compile; `check` green) |
@@ -486,7 +518,7 @@ they land.
 | P3 | `core:profile` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio `ProfileCacheDataStore` behind `platformProfileModule` like `core:preferences`; all iOS targets compile; `check` green) |
 | P3 | `core:library` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:identity`; all iOS targets compile; `check` green) |
 | P3 | `core:connectivity` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; `ConnectivityDataSource` behind `expect val platformModule` — Android `ConnectivityManager` callback (+ `core-ktx`), iOS `NWPathMonitor`; rest a plain `commonMain` move; fixed a `PendingListWriteSyncer` DI omission; all iOS targets compile; `check` green) |
-| P4 | `core:designsystem` (CMP) | ☐ |
+| P4 | `core:designsystem` | ◑ partial — converted to a KMP shell on `softcover.kmp.library` + `softcover.kmp.compose`: all UI + AndroidX Compose in `androidMain`, `androidResources.enable = true`, host tests green, `:app:assembleDebug`/`assembleRelease` green. Debug routes moved to an `:app`-bound `DebugRoutesContent` DI seam (§2.3). **Not** full CMP (deferred). iOS/metadata compile currently **blocked** by a pre-existing `core:preferences` `commonMain` bug (`FileSystem.SYSTEM` unresolved) — fix that to get the iOS targets compiling. |
 | P4 | `core:notification` | ☐ — real platform seam: `SoftcoverNotifier` + permission requester + content/appearance contracts in `commonMain`; Android `NotificationManagerCompat` + channels + WorkManager and iOS `UNUserNotificationCenter` + categories behind `platformNotificationModule`. Channels are Android-only; `PendingIntent` / `@DrawableRes`+`@ColorRes` models need platform-neutral re-expression first. |
 | P5 | `feature:library` | ☐ — pure leaf (commonMain move) |
 | P5 | `feature:lists` | ☐ — pure leaf |

@@ -24,13 +24,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.R
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -141,8 +141,14 @@ private fun SortPill(
     Box {
         ControlPill(
             label = "Sort: ${currentMode.label}",
-            leadingIcon = R.drawable.ic_sort,
-            trailingIcon = R.drawable.ic_arrow_drop_down,
+            leadingIcon = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.Sort,
+                contentDescription = "",
+            ),
+            trailingIcon = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.ArrowDropDown,
+                contentDescription = "",
+            ),
             active = false,
             a11yLabel = "Change library sort — currently ${currentMode.label}",
             onClick = {
@@ -171,15 +177,18 @@ private fun SortPill(
                     },
                     trailingIcon = if (isActive && isPositionalSort.not()) {
                         {
-                            val arrow = if (currentDirection == SortDirection.ASCENDING) {
-                                R.drawable.ic_arrow_drop_up
-                            } else {
-                                R.drawable.ic_arrow_drop_down
-                            }
+                            val arrowIcon = SoftcoverIconResource.Drawable(
+                                icon = if (currentDirection == SortDirection.ASCENDING) {
+                                    SoftcoverIcon.ArrowDropUp
+                                } else {
+                                    SoftcoverIcon.ArrowDropDown
+                                },
+                                contentDescription = "Sorted ${currentDirection.label} — tap to reverse",
+                            )
 
                             Icon(
-                                painter = painterResource(arrow),
-                                contentDescription = "Sorted ${currentDirection.label} — tap to reverse",
+                                painter = arrowIcon.getIconPainter(),
+                                contentDescription = arrowIcon.contentDescription,
                             )
                         }
                     } else {
@@ -229,7 +238,10 @@ private fun FilterPill(
 
     ControlPill(
         label = "Filter",
-        leadingIcon = R.drawable.ic_filter_list,
+        leadingIcon = SoftcoverIconResource.Drawable(
+            icon = SoftcoverIcon.FilterList,
+            contentDescription = "",
+        ),
         trailingIcon = null,
         active = isActive,
         a11yLabel = if (isActive) "Edit library filters (filters active)" else "Add library filters",
@@ -308,9 +320,14 @@ private fun RearrangeAction(
     }
 
     val icon = @Composable {
-        Icon(
-            painter = painterResource(R.drawable.ic_drag_handle),
+        val dragHandleIcon = SoftcoverIconResource.Drawable(
+            icon = SoftcoverIcon.DragHandle,
             contentDescription = if (isRearranging) "Finish rearranging" else "Rearrange this order",
+        )
+
+        Icon(
+            painter = dragHandleIcon.getIconPainter(),
+            contentDescription = dragHandleIcon.contentDescription,
         )
     }
 
@@ -342,9 +359,14 @@ private fun LayoutAction(
                 runAction(OnLayoutMenuExpandedChangeAction(expanded = true))
             },
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_view_layout),
+            val layoutIcon = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.ViewLayout,
                 contentDescription = "Change library layout",
+            )
+
+            Icon(
+                painter = layoutIcon.getIconPainter(),
+                contentDescription = layoutIcon.contentDescription,
             )
         }
 
@@ -374,8 +396,8 @@ private fun LayoutAction(
 @Composable
 private fun ControlPill(
     label: String,
-    leadingIcon: Int,
-    trailingIcon: Int?,
+    leadingIcon: SoftcoverIconResource,
+    trailingIcon: SoftcoverIconResource?,
     active: Boolean,
     a11yLabel: String,
     onClick: () -> Unit,
@@ -410,8 +432,8 @@ private fun ControlPill(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                painter = painterResource(leadingIcon),
-                contentDescription = null,
+                painter = leadingIcon.getIconPainter(),
+                contentDescription = leadingIcon.contentDescription,
                 modifier = Modifier.size(16.dp),
             )
 
@@ -433,8 +455,8 @@ private fun ControlPill(
                 Spacer(modifier = Modifier.width(2.dp))
 
                 Icon(
-                    painter = painterResource(trailingIcon),
-                    contentDescription = null,
+                    painter = trailingIcon.getIconPainter(),
+                    contentDescription = trailingIcon.contentDescription,
                     modifier = Modifier.size(18.dp),
                 )
             }

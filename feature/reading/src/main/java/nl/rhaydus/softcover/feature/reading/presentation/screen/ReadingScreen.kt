@@ -63,7 +63,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -76,7 +75,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import kotlin.math.roundToInt
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -86,7 +85,6 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
@@ -100,6 +98,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEdi
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
@@ -769,18 +768,18 @@ object ReadingScreen : Screen {
                                     onMarkAsRead(book)
                                 },
                                 icon = SoftcoverIconResource.Drawable(
-                                    id = R.drawable.ic_check_circle,
+                                    icon = SoftcoverIcon.CheckCircle,
                                     contentDescription = "Mark as Read icon",
                                 ),
                             ),
                         ),
                         label = "Update progress",
                         leadingIcon = SoftcoverIconResource.Drawable(
-                            id = R.drawable.ic_edit,
+                            icon = SoftcoverIcon.Edit,
                             contentDescription = "Update progress icon",
                         ),
                         trailingIcon = SoftcoverIconResource.Drawable(
-                            id = R.drawable.ic_arrow_drop_down,
+                            icon = SoftcoverIcon.ArrowDropDown,
                             contentDescription = "Drop down icon",
                         ),
                         onDismissMenuRequest = { dropdownActive = false },
@@ -825,7 +824,7 @@ object ReadingScreen : Screen {
                     style = ButtonStyle.TONAL,
                     size = ButtonSize.M,
                     icon = SoftcoverIconResource.Drawable(
-                        id = R.drawable.ic_reading,
+                        icon = SoftcoverIcon.Reading,
                         contentDescription = "Focus mode icon",
                     ),
                     onClick = {
@@ -847,7 +846,7 @@ object ReadingScreen : Screen {
                     style = ButtonStyle.TONAL,
                     size = ButtonSize.M,
                     icon = SoftcoverIconResource.Drawable(
-                        id = R.drawable.ic_play,
+                        icon = SoftcoverIcon.Play,
                         contentDescription = "Start reading session icon",
                     ),
                     onClick = {
@@ -1000,14 +999,14 @@ object ReadingScreen : Screen {
                                     onMarkAsRead(book)
                                 },
                                 icon = SoftcoverIconResource.Drawable(
-                                    id = R.drawable.ic_check_circle,
+                                    icon = SoftcoverIcon.CheckCircle,
                                     contentDescription = "Mark as Read icon",
                                 ),
                             ),
                         ),
                         label = "Set progress",
                         trailingIcon = SoftcoverIconResource.Drawable(
-                            id = R.drawable.ic_arrow_drop_down,
+                            icon = SoftcoverIcon.ArrowDropDown,
                             contentDescription = "Drop down icon",
                         ),
                         onDismissMenuRequest = { dropdownActive = false },
@@ -1161,9 +1160,14 @@ object ReadingScreen : Screen {
                     modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    val searchIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.Search,
+                        contentDescription = "",
+                    )
+
                     Icon(
-                        painter = painterResource(R.drawable.ic_search),
-                        contentDescription = null,
+                        painter = searchIcon.getIconPainter(),
+                        contentDescription = searchIcon.contentDescription,
                         modifier = Modifier.size(18.dp),
                     )
 
@@ -1400,9 +1404,14 @@ private fun PlanTodayNudge(
             onClick = onDismiss,
             modifier = Modifier.size(32.dp),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_close),
+            val closeIcon = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.Close,
                 contentDescription = "Dismiss",
+            )
+
+            Icon(
+                painter = closeIcon.getIconPainter(),
+                contentDescription = closeIcon.contentDescription,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(16.dp),
             )

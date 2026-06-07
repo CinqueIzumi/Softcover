@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.preferences.di
 
+import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -14,7 +15,9 @@ import nl.rhaydus.softcover.core.preferences.data.security.SecureApiKeyStorage
 actual val platformPreferencesModule: Module = module {
     single<AppSettingsDataStore> {
         AppSettingsDataStore(
-            store = createAppSettingsDataStore { "${documentsDirectory()}/app_settings.json".toPath() },
+            store = createAppSettingsDataStore(FileSystem.SYSTEM) {
+                "${documentsDirectory()}/app_settings.json".toPath()
+            },
         )
     }
 

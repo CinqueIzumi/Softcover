@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.preferences.di
 
+import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
@@ -13,7 +14,9 @@ actual val platformPreferencesModule: Module = module {
     single<AppSettingsDataStore> {
         val filesDir = androidContext().filesDir.path
         AppSettingsDataStore(
-            store = createAppSettingsDataStore { "$filesDir/datastore/app_settings.json".toPath() },
+            store = createAppSettingsDataStore(FileSystem.SYSTEM) {
+                "$filesDir/datastore/app_settings.json".toPath()
+            },
         )
     }
 

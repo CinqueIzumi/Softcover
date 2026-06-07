@@ -52,7 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,7 +61,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
@@ -75,6 +73,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLaz
 import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
@@ -180,7 +179,7 @@ object ExploreScreen : Screen {
                     isLoading = state.isLoading,
                     trailingFieldAction = SoftcoverTopBarAction(
                         iconResource = SoftcoverIconResource.Drawable(
-                            id = R.drawable.ic_barcode_scanner,
+                            icon = SoftcoverIcon.BarcodeScanner,
                             contentDescription = "Scan a book's barcode",
                         ),
                         onClick = onScanClick,
@@ -628,9 +627,14 @@ object ExploreScreen : Screen {
                     },
                     label = { Text(text = query) },
                     trailingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_close),
+                        val closeIcon = SoftcoverIconResource.Drawable(
+                            icon = SoftcoverIcon.Close,
                             contentDescription = "Remove query icon",
+                        )
+
+                        Icon(
+                            painter = closeIcon.getIconPainter(),
+                            contentDescription = closeIcon.contentDescription,
                             modifier = Modifier
                                 .size(16.dp)
                                 .noRippleClickable {
@@ -706,9 +710,14 @@ object ExploreScreen : Screen {
                 modifier = Modifier.height(16.dp),
             ) {
                 if (book.rating != 0.0) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_star_filled),
+                    val starIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.StarFilled,
                         contentDescription = "",
+                    )
+
+                    Icon(
+                        painter = starIcon.getIconPainter(),
+                        contentDescription = starIcon.contentDescription,
                         tint = Color(0xFFFBBF23),
                         modifier = Modifier.size(14.dp),
                     )
@@ -766,9 +775,14 @@ object ExploreScreen : Screen {
                             shape = CircleShape,
                         ),
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_more_vert),
+                    val moreVertIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.MoreVert,
                         contentDescription = "More options",
+                    )
+
+                    Icon(
+                        painter = moreVertIcon.getIconPainter(),
+                        contentDescription = moreVertIcon.contentDescription,
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(14.dp),
                     )
@@ -938,9 +952,14 @@ object ExploreScreen : Screen {
                     if (book.rating != 0.0) {
                         Spacer(modifier = Modifier.width(4.dp))
 
-                        Icon(
-                            painter = painterResource(R.drawable.ic_star_filled),
+                        val starIcon = SoftcoverIconResource.Drawable(
+                            icon = SoftcoverIcon.StarFilled,
                             contentDescription = "",
+                        )
+
+                        Icon(
+                            painter = starIcon.getIconPainter(),
+                            contentDescription = starIcon.contentDescription,
                             tint = Color(0xFFFBBF23),
                             modifier = Modifier.size(16.dp),
                         )
@@ -962,8 +981,8 @@ object ExploreScreen : Screen {
                 },
             ) {
                 val iconResource = when {
-                    addedToLibrary -> R.drawable.ic_bookmark_added
-                    else -> R.drawable.ic_bookmark_add
+                    addedToLibrary -> SoftcoverIcon.BookmarkAdded
+                    else -> SoftcoverIcon.BookmarkAdd
                 }
 
                 val contentDescription = when {
@@ -971,9 +990,14 @@ object ExploreScreen : Screen {
                     else -> "Add to library icon"
                 }
 
-                Icon(
-                    painter = painterResource(iconResource),
+                val bookmarkIcon = SoftcoverIconResource.Drawable(
+                    icon = iconResource,
                     contentDescription = contentDescription,
+                )
+
+                Icon(
+                    painter = bookmarkIcon.getIconPainter(),
+                    contentDescription = bookmarkIcon.contentDescription,
                 )
             }
         }

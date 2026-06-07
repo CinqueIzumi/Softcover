@@ -87,7 +87,6 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -106,7 +105,6 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
-import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
@@ -117,8 +115,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLaz
 import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
@@ -640,11 +640,14 @@ object LibraryScreen : Screen {
                 )
 
                 IconButton(onClick = onToggleSearchClick) {
-                    Icon(
-                        painter = painterResource(
-                            if (isSearchActive) R.drawable.ic_close else R.drawable.ic_search,
-                        ),
+                    val searchToggleIcon = SoftcoverIconResource.Drawable(
+                        icon = if (isSearchActive) SoftcoverIcon.Close else SoftcoverIcon.Search,
                         contentDescription = if (isSearchActive) "Close library search" else "Search in library",
+                    )
+
+                    Icon(
+                        painter = searchToggleIcon.getIconPainter(),
+                        contentDescription = searchToggleIcon.contentDescription,
                     )
                 }
             }
@@ -721,9 +724,14 @@ object LibraryScreen : Screen {
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_search),
+                val searchIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.Search,
                     contentDescription = "Search",
+                )
+
+                Icon(
+                    painter = searchIcon.getIconPainter(),
+                    contentDescription = searchIcon.contentDescription,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp),
                 )
@@ -760,9 +768,14 @@ object LibraryScreen : Screen {
                         onClick = onClearClick,
                         modifier = Modifier.size(32.dp),
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_close),
+                        val clearSearchIcon = SoftcoverIconResource.Drawable(
+                            icon = SoftcoverIcon.Close,
                             contentDescription = "Clear search",
+                        )
+
+                        Icon(
+                            painter = clearSearchIcon.getIconPainter(),
+                            contentDescription = clearSearchIcon.contentDescription,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp),
                         )
@@ -1387,9 +1400,14 @@ object LibraryScreen : Screen {
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             shape = RoundedCornerShape(percent = 50),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_drag_handle),
+            val dragHandleIcon = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.DragHandle,
                 contentDescription = "Drag to reorder",
+            )
+
+            Icon(
+                painter = dragHandleIcon.getIconPainter(),
+                contentDescription = dragHandleIcon.contentDescription,
                 modifier = Modifier
                     .size(28.dp)
                     .padding(4.dp),
@@ -2011,9 +2029,14 @@ object LibraryScreen : Screen {
                             if (hasRating) {
                                 Spacer(modifier = Modifier.width(4.dp))
 
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_star_filled),
+                                val starIcon = SoftcoverIconResource.Drawable(
+                                    icon = SoftcoverIcon.StarFilled,
                                     contentDescription = "",
+                                )
+
+                                Icon(
+                                    painter = starIcon.getIconPainter(),
+                                    contentDescription = starIcon.contentDescription,
                                     tint = Color(0xFFFBBF23),
                                     modifier = Modifier.size(14.dp),
                                 )
@@ -2065,9 +2088,14 @@ object LibraryScreen : Screen {
                     onClick = onExit,
                     enabled = bulkActionInProgress.not(),
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
+                    val exitIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.Close,
                         contentDescription = "Exit selection mode",
+                    )
+
+                    Icon(
+                        painter = exitIcon.getIconPainter(),
+                        contentDescription = exitIcon.contentDescription,
                     )
                 }
 
@@ -2087,9 +2115,14 @@ object LibraryScreen : Screen {
                         onClick = { onMoveMenuExpandedChange(true) },
                         enabled = bulkActionInProgress.not(),
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_bookmark),
+                        val moveIcon = SoftcoverIconResource.Drawable(
+                            icon = SoftcoverIcon.Bookmark,
                             contentDescription = "Move selected books to another shelf",
+                        )
+
+                        Icon(
+                            painter = moveIcon.getIconPainter(),
+                            contentDescription = moveIcon.contentDescription,
                         )
                     }
 
@@ -2115,9 +2148,14 @@ object LibraryScreen : Screen {
                     onClick = onAddToListClick,
                     enabled = bulkActionInProgress.not(),
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_bookmark_add),
+                    val addToListIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.BookmarkAdd,
                         contentDescription = "Add selected books to a list",
+                    )
+
+                    Icon(
+                        painter = addToListIcon.getIconPainter(),
+                        contentDescription = addToListIcon.contentDescription,
                     )
                 }
 
@@ -2125,9 +2163,14 @@ object LibraryScreen : Screen {
                     onClick = onRemoveClick,
                     enabled = bulkActionInProgress.not(),
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_delete),
+                    val removeIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.Delete,
                         contentDescription = "Remove selected books from library",
+                    )
+
+                    Icon(
+                        painter = removeIcon.getIconPainter(),
+                        contentDescription = removeIcon.contentDescription,
                     )
                 }
             }
@@ -2193,9 +2236,14 @@ object LibraryScreen : Screen {
             modifier = modifier.size(24.dp),
         ) {
             if (isSelected) {
+                val checkIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.Check,
+                    contentDescription = "",
+                )
+
                 Icon(
-                    painter = painterResource(R.drawable.ic_check),
-                    contentDescription = null,
+                    painter = checkIcon.getIconPainter(),
+                    contentDescription = checkIcon.contentDescription,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(4.dp),

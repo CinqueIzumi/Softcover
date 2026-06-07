@@ -76,7 +76,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -100,7 +99,6 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
-import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DropCapText
@@ -118,9 +116,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedB
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.grayscale
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleClickable
@@ -351,9 +351,14 @@ class BookDetailScreen(
                             onClick = onNavigateBack,
                             colors = backButtonColors,
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_arrow_back),
+                            val backIcon = SoftcoverIconResource.Drawable(
+                                icon = SoftcoverIcon.ArrowBack,
                                 contentDescription = "Navigate back icon",
+                            )
+
+                            Icon(
+                                painter = backIcon.getIconPainter(),
+                                contentDescription = backIcon.contentDescription,
                             )
                         }
                     },
@@ -522,9 +527,14 @@ class BookDetailScreen(
                         onClick = onNavigateBack,
                         colors = backButtonColors,
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
+                        val backIcon = SoftcoverIconResource.Drawable(
+                            icon = SoftcoverIcon.ArrowBack,
                             contentDescription = "Navigate back icon",
+                        )
+
+                        Icon(
+                            painter = backIcon.getIconPainter(),
+                            contentDescription = backIcon.contentDescription,
                         )
                     }
                 },
@@ -973,9 +983,14 @@ class BookDetailScreen(
 
                                                 Spacer(modifier = Modifier.width(4.dp))
 
-                                                Icon(
-                                                    painter = painterResource(R.drawable.ic_star_filled),
+                                                val ratingStarIcon = SoftcoverIconResource.Drawable(
+                                                    icon = SoftcoverIcon.StarFilled,
                                                     contentDescription = "",
+                                                )
+
+                                                Icon(
+                                                    painter = ratingStarIcon.getIconPainter(),
+                                                    contentDescription = ratingStarIcon.contentDescription,
                                                     tint = RatingGold,
                                                     modifier = Modifier.size(16.dp),
                                                 )
@@ -1055,9 +1070,14 @@ class BookDetailScreen(
                 ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_check),
+                val ownedIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.Check,
                     contentDescription = "Owned",
+                )
+
+                Icon(
+                    painter = ownedIcon.getIconPainter(),
+                    contentDescription = ownedIcon.contentDescription,
                     tint = Color.White,
                     modifier = Modifier.size(14.dp),
                 )
@@ -1154,7 +1174,10 @@ class BookDetailScreen(
                             ) {
                                 ShelfChip(
                                     label = "Want to read",
-                                    iconRes = R.drawable.ic_bookmark_add,
+                                    iconRes = SoftcoverIconResource.Drawable(
+                                        icon = SoftcoverIcon.BookmarkAdd,
+                                        contentDescription = "",
+                                    ),
                                     selected = status == BookStatus.WantToRead,
                                     onClick = {
                                         haptics.select()
@@ -1165,7 +1188,10 @@ class BookDetailScreen(
 
                                 ShelfChip(
                                     label = "Reading",
-                                    iconRes = R.drawable.ic_reading,
+                                    iconRes = SoftcoverIconResource.Drawable(
+                                        icon = SoftcoverIcon.Reading,
+                                        contentDescription = "",
+                                    ),
                                     selected = status == BookStatus.Reading,
                                     onClick = {
                                         haptics.select()
@@ -1177,7 +1203,10 @@ class BookDetailScreen(
 
                                 ShelfChip(
                                     label = "Read",
-                                    iconRes = R.drawable.ic_bookmark_check,
+                                    iconRes = SoftcoverIconResource.Drawable(
+                                        icon = SoftcoverIcon.BookmarkCheck,
+                                        contentDescription = "",
+                                    ),
                                     selected = status == BookStatus.Read,
                                     onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
                                     modifier = Modifier.weight(1f),
@@ -1290,7 +1319,7 @@ class BookDetailScreen(
     @Composable
     private fun ShelfChip(
         label: String,
-        iconRes: Int,
+        iconRes: SoftcoverIconResource,
         selected: Boolean,
         onClick: () -> Unit,
         modifier: Modifier = Modifier,
@@ -1385,8 +1414,8 @@ class BookDetailScreen(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Icon(
-                    painter = painterResource(iconRes),
-                    contentDescription = null,
+                    painter = iconRes.getIconPainter(),
+                    contentDescription = iconRes.contentDescription,
                     modifier = Modifier
                         .size(22.dp)
                         .graphicsLayer {
@@ -1434,9 +1463,14 @@ class BookDetailScreen(
                 onClick = { menuOpen = true },
                 colors = iconColors,
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_edit),
+                val moreActionsIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.Edit,
                     contentDescription = "More actions",
+                )
+
+                Icon(
+                    painter = moreActionsIcon.getIconPainter(),
+                    contentDescription = moreActionsIcon.contentDescription,
                 )
             }
 
@@ -1447,9 +1481,14 @@ class BookDetailScreen(
                 DropdownMenuItem(
                     text = { Text(text = "Share") },
                     leadingIcon = {
+                        val shareIcon = SoftcoverIconResource.Drawable(
+                            icon = SoftcoverIcon.Share,
+                            contentDescription = "",
+                        )
+
                         Icon(
-                            painter = painterResource(R.drawable.ic_share),
-                            contentDescription = null,
+                            painter = shareIcon.getIconPainter(),
+                            contentDescription = shareIcon.contentDescription,
                         )
                     },
                     onClick = {
@@ -1462,9 +1501,14 @@ class BookDetailScreen(
                     DropdownMenuItem(
                         text = { Text(text = "Choose lists") },
                         leadingIcon = {
+                            val chooseListsIcon = SoftcoverIconResource.Drawable(
+                                icon = SoftcoverIcon.BookmarkAdd,
+                                contentDescription = "",
+                            )
+
                             Icon(
-                                painter = painterResource(R.drawable.ic_bookmark_add),
-                                contentDescription = null,
+                                painter = chooseListsIcon.getIconPainter(),
+                                contentDescription = chooseListsIcon.contentDescription,
                             )
                         },
                         onClick = {
@@ -1482,9 +1526,14 @@ class BookDetailScreen(
                     DropdownMenuItem(
                         text = { Text(text = "Change edition") },
                         leadingIcon = {
+                            val changeEditionIcon = SoftcoverIconResource.Drawable(
+                                icon = SoftcoverIcon.LibraryBooks,
+                                contentDescription = "",
+                            )
+
                             Icon(
-                                painter = painterResource(R.drawable.ic_library_books),
-                                contentDescription = null,
+                                painter = changeEditionIcon.getIconPainter(),
+                                contentDescription = changeEditionIcon.contentDescription,
                             )
                         },
                         onClick = {
@@ -1502,14 +1551,17 @@ class BookDetailScreen(
                         val isOwned = state.isEditionOwned(edition = ownedEdition)
 
                         val ownedLabel = if (isOwned) "Unmark as owned" else "Mark as owned"
-                        val ownedIconId = if (isOwned) R.drawable.ic_close else R.drawable.ic_check
+                        val ownedToggleIcon = SoftcoverIconResource.Drawable(
+                            icon = if (isOwned) SoftcoverIcon.Close else SoftcoverIcon.Check,
+                            contentDescription = "",
+                        )
 
                         DropdownMenuItem(
                             text = { Text(text = ownedLabel) },
                             leadingIcon = {
                                 Icon(
-                                    painter = painterResource(ownedIconId),
-                                    contentDescription = null,
+                                    painter = ownedToggleIcon.getIconPainter(),
+                                    contentDescription = ownedToggleIcon.contentDescription,
                                 )
                             },
                             onClick = {
@@ -1529,9 +1581,14 @@ class BookDetailScreen(
                     DropdownMenuItem(
                         text = { Text(text = "Set deadline") },
                         leadingIcon = {
+                            val setDeadlineIcon = SoftcoverIconResource.Drawable(
+                                icon = SoftcoverIcon.DateRange,
+                                contentDescription = "",
+                            )
+
                             Icon(
-                                painter = painterResource(R.drawable.ic_date_range),
-                                contentDescription = null,
+                                painter = setDeadlineIcon.getIconPainter(),
+                                contentDescription = setDeadlineIcon.contentDescription,
                             )
                         },
                         onClick = {
@@ -1543,9 +1600,14 @@ class BookDetailScreen(
                     DropdownMenuItem(
                         text = { Text(text = "Edit deadline") },
                         leadingIcon = {
+                            val editDeadlineIcon = SoftcoverIconResource.Drawable(
+                                icon = SoftcoverIcon.DateRange,
+                                contentDescription = "",
+                            )
+
                             Icon(
-                                painter = painterResource(R.drawable.ic_date_range),
-                                contentDescription = null,
+                                painter = editDeadlineIcon.getIconPainter(),
+                                contentDescription = editDeadlineIcon.contentDescription,
                             )
                         },
                         onClick = {
@@ -1557,9 +1619,14 @@ class BookDetailScreen(
                     DropdownMenuItem(
                         text = { Text(text = "Clear deadline") },
                         leadingIcon = {
+                            val clearDeadlineIcon = SoftcoverIconResource.Drawable(
+                                icon = SoftcoverIcon.Delete,
+                                contentDescription = "",
+                            )
+
                             Icon(
-                                painter = painterResource(R.drawable.ic_delete),
-                                contentDescription = null,
+                                painter = clearDeadlineIcon.getIconPainter(),
+                                contentDescription = clearDeadlineIcon.contentDescription,
                             )
                         },
                         onClick = {
@@ -1573,9 +1640,14 @@ class BookDetailScreen(
                     DropdownMenuItem(
                         text = { Text(text = "Remove") },
                         leadingIcon = {
+                            val removeIcon = SoftcoverIconResource.Drawable(
+                                icon = SoftcoverIcon.Delete,
+                                contentDescription = "",
+                            )
+
                             Icon(
-                                painter = painterResource(R.drawable.ic_delete),
-                                contentDescription = null,
+                                painter = removeIcon.getIconPainter(),
+                                contentDescription = removeIcon.contentDescription,
                             )
                         },
                         onClick = {
@@ -1680,11 +1752,14 @@ class BookDetailScreen(
                     ),
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(
-                                if (isAudiobook) R.drawable.ic_headset else R.drawable.ic_menu_book,
-                            ),
+                        val progressIcon = SoftcoverIconResource.Drawable(
+                            icon = if (isAudiobook) SoftcoverIcon.Headset else SoftcoverIcon.MenuBook,
                             contentDescription = "Progress icon",
+                        )
+
+                        Icon(
+                            painter = progressIcon.getIconPainter(),
+                            contentDescription = progressIcon.contentDescription,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp),
                         )
@@ -1709,9 +1784,14 @@ class BookDetailScreen(
                                 runAction(OnShowUpdateProgressSheetClickAction())
                             },
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_edit),
+                            val updateProgressIcon = SoftcoverIconResource.Drawable(
+                                icon = SoftcoverIcon.Edit,
                                 contentDescription = "Update progress",
+                            )
+
+                            Icon(
+                                painter = updateProgressIcon.getIconPainter(),
+                                contentDescription = updateProgressIcon.contentDescription,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp),
                             )
@@ -1787,9 +1867,14 @@ class BookDetailScreen(
                 ),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_date_range),
+                    val deadlineIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.DateRange,
                         contentDescription = "Deadline icon",
+                    )
+
+                    Icon(
+                        painter = deadlineIcon.getIconPainter(),
+                        contentDescription = deadlineIcon.contentDescription,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp),
                     )
@@ -1824,7 +1909,10 @@ class BookDetailScreen(
 
         StatusCallout(
             eyebrow = "Finished",
-            iconRes = R.drawable.ic_bookmark_check,
+            iconRes = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.BookmarkCheck,
+                contentDescription = "",
+            ),
             body = when (
                 val readDate = userBook.getReadDateString(
                     style = state.dateStyle,
@@ -1848,7 +1936,10 @@ class BookDetailScreen(
 
         StatusCallout(
             eyebrow = "Did not finish",
-            iconRes = R.drawable.ic_bookmark,
+            iconRes = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.Bookmark,
+                contentDescription = "",
+            ),
             body = when (val dnfDate = userBook.getDnfDateString(style = state.dateStyle)) {
                 null -> "This book has been in your library since ${
                     userBook.getFallbackDateString(
@@ -1867,7 +1958,10 @@ class BookDetailScreen(
 
         StatusCallout(
             eyebrow = "Up next",
-            iconRes = R.drawable.ic_bookmark_add,
+            iconRes = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.BookmarkAdd,
+                contentDescription = "",
+            ),
             body = "On your shelf since ${userBook.getFallbackDateString(style = state.dateStyle)}. Ready when you are.",
         )
     }
@@ -1875,7 +1969,7 @@ class BookDetailScreen(
     @Composable
     private fun StatusCallout(
         eyebrow: String,
-        iconRes: Int,
+        iconRes: SoftcoverIconResource,
         body: String,
     ) {
         Surface(
@@ -1895,8 +1989,8 @@ class BookDetailScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(iconRes),
-                        contentDescription = null,
+                        painter = iconRes.getIconPainter(),
+                        contentDescription = iconRes.contentDescription,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp),
                     )
@@ -1987,9 +2081,14 @@ class BookDetailScreen(
                     onClick = { runAction(OnDismissScanEditionBannerClickAction()) },
                     modifier = Modifier.size(32.dp),
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
+                    val dismissIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.Close,
                         contentDescription = "Dismiss",
+                    )
+
+                    Icon(
+                        painter = dismissIcon.getIconPainter(),
+                        contentDescription = dismissIcon.contentDescription,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp),
                     )
@@ -2226,8 +2325,10 @@ class BookDetailScreen(
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ExternalLinkButton(
-                    iconRes = R.drawable.ic_storefront,
-                    contentDescription = "Find on Bookshop.org",
+                    iconRes = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.Storefront,
+                        contentDescription = "Find on Bookshop.org",
+                    ),
                     onClick = {
                         runAction(
                             OnExternalLinkClickAction(
@@ -2238,8 +2339,10 @@ class BookDetailScreen(
                 )
 
                 ExternalLinkButton(
-                    iconRes = R.drawable.ic_shopping_bag,
-                    contentDescription = "Find on Amazon",
+                    iconRes = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.ShoppingBag,
+                        contentDescription = "Find on Amazon",
+                    ),
                     onClick = {
                         runAction(
                             OnExternalLinkClickAction(
@@ -2250,8 +2353,10 @@ class BookDetailScreen(
                 )
 
                 ExternalLinkButton(
-                    iconRes = R.drawable.ic_library_books,
-                    contentDescription = "Find on OpenLibrary",
+                    iconRes = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.LibraryBooks,
+                        contentDescription = "Find on OpenLibrary",
+                    ),
                     onClick = {
                         runAction(
                             OnExternalLinkClickAction(
@@ -2266,14 +2371,13 @@ class BookDetailScreen(
 
     @Composable
     private fun ExternalLinkButton(
-        iconRes: Int,
-        contentDescription: String,
+        iconRes: SoftcoverIconResource,
         onClick: () -> Unit,
     ) {
         IconButton(onClick = onClick) {
             Icon(
-                painter = painterResource(iconRes),
-                contentDescription = contentDescription,
+                painter = iconRes.getIconPainter(),
+                contentDescription = iconRes.contentDescription,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -2311,9 +2415,14 @@ class BookDetailScreen(
 
                 state.book?.let { book ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        val reviewsStarIcon = SoftcoverIconResource.Drawable(
+                            icon = SoftcoverIcon.StarFilled,
+                            contentDescription = "",
+                        )
+
                         Icon(
-                            painter = painterResource(R.drawable.ic_star_filled),
-                            contentDescription = null,
+                            painter = reviewsStarIcon.getIconPainter(),
+                            contentDescription = reviewsStarIcon.contentDescription,
                             tint = RatingGold,
                             modifier = Modifier.size(18.dp),
                         )
@@ -2463,9 +2572,14 @@ class BookDetailScreen(
                                     ),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_star_filled),
+                                    val ratingBadgeIcon = SoftcoverIconResource.Drawable(
+                                        icon = SoftcoverIcon.StarFilled,
                                         contentDescription = "Rating",
+                                    )
+
+                                    Icon(
+                                        painter = ratingBadgeIcon.getIconPainter(),
+                                        contentDescription = ratingBadgeIcon.contentDescription,
                                         tint = MaterialTheme.colorScheme.onTertiaryContainer,
                                         modifier = Modifier.size(14.dp),
                                     )

@@ -6,14 +6,16 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import coil.imageLoader
-import coil.request.ImageRequest
+import coil3.SingletonImageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.toBitmap
 import kotlin.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -145,7 +147,8 @@ internal class ReadingSessionService : Service() {
                 .size(COVER_SIZE_PX)
                 .build()
 
-            val bitmap = (applicationContext.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
+            val result = SingletonImageLoader.get(applicationContext).execute(request)
+            val bitmap = (result as? SuccessResult)?.image?.toBitmap()
                 ?: return@launch
 
             coverBitmap = bitmap

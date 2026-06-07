@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.profile.di
 
+import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
@@ -11,7 +12,9 @@ actual val platformProfileModule: Module = module {
     single<ProfileCacheDataStore> {
         val filesDir = androidContext().filesDir.path
         ProfileCacheDataStore(
-            store = createProfileCacheDataStore { "$filesDir/datastore/profile_cache.json".toPath() },
+            store = createProfileCacheDataStore(FileSystem.SYSTEM) {
+                "$filesDir/datastore/profile_cache.json".toPath()
+            },
         )
     }
 }

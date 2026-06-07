@@ -22,11 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.R
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 
@@ -92,9 +92,14 @@ private fun ActiveFilterChip(
 
             Spacer(modifier = Modifier.width(6.dp))
 
-            Icon(
-                painter = painterResource(R.drawable.ic_close),
+            val closeIcon = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.Close,
                 contentDescription = "Remove filter $label",
+            )
+
+            Icon(
+                painter = closeIcon.getIconPainter(),
+                contentDescription = closeIcon.contentDescription,
                 modifier = Modifier.size(14.dp),
             )
         }

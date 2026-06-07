@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.apollo) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false
@@ -138,7 +139,7 @@ dependencyAnalysis {
                     "io.insert-koin:koin-core",
                     "org.jetbrains.kotlinx:kotlinx-coroutines-core",
                     // Intentional public exposure: designsystem returns a Coil ImageRequest (§10).
-                    "io.coil-kt:coil-compose",
+                    "io.coil-kt.coil3:coil-compose",
                 )
             }
 

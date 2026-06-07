@@ -1,6 +1,10 @@
 package nl.rhaydus.softcover
 
 import android.app.Application
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
@@ -15,9 +19,10 @@ import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
 import nl.rhaydus.softcover.di.appModule
+import nl.rhaydus.softcover.di.debugRoutesModule
 import nl.rhaydus.softcover.orchestration.di.softcoverModules
 
-internal class SoftCoverApp : Application() {
+internal class SoftCoverApp : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
 
@@ -26,7 +31,7 @@ internal class SoftCoverApp : Application() {
         startKoin {
             androidContext(this@SoftCoverApp)
 
-            modules(softcoverModules + appModule)
+            modules(softcoverModules + appModule + debugRoutesModule)
         }
 
         val koin = GlobalContext.get()
@@ -39,4 +44,9 @@ internal class SoftCoverApp : Application() {
             runCatching { koin.get<GetUserIdAsFlowUseCase>().invoke().first() }
         }
     }
+
+    override fun newImageLoader(context: PlatformContext): ImageLoader =
+        ImageLoader.Builder(context)
+            .components { add(OkHttpNetworkFetcherFactory()) }
+            .build()
 }

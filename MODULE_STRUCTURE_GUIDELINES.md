@@ -290,12 +290,16 @@ only on modules **below** its tier (§2).
 Build wiring conventions:
 
 - **Convention plugins** in `build-logic/` keep module build files uniform. Apply the smallest set:
-  `softcover.android.library` (base for every `:core:*`/`:feature:*`/`:orchestration` module — sets
-  SDK/JDK, and the shared coroutines/Koin/Timber runtime + JUnit5/Kotest/MockK/Turbine test stack),
-  plus `softcover.android.compose` (any module with Compose UI), `softcover.android.room`
-  (`:core:database` only), `softcover.android.apollo` (`:core:network` only). `:app` is the lone
-  `com.android.application`. Do **not** re-declare what a convention plugin already provides, and do
-  **not** enable `buildConfig`/`room`/`ksp` in a feature (Room/Apollo are core-only).
+  `softcover.android.library` (base for every Android-only `:core:*`/`:feature:*`/`:orchestration`
+  module — sets SDK/JDK, and the shared coroutines/Koin/Timber runtime + JUnit5/Kotest/MockK/Turbine
+  test stack), plus `softcover.android.compose` (any Android-only module with Compose UI),
+  `softcover.android.room` (`:core:database` only), `softcover.android.apollo` (`:core:network`
+  only). Modules migrated to Kotlin Multiplatform use the KMP siblings instead:
+  `softcover.kmp.library` (base) plus `softcover.kmp.compose` (KMP UI modules — wires AndroidX Compose
+  into `androidMain`; see KMP_MIGRATION.md §2.3). `:app` is the lone `com.android.application` and
+  stays Android-only (it owns build-type-conditional wiring). Do **not** re-declare what a convention
+  plugin already provides, and do **not** enable `buildConfig`/`room`/`ksp` in a feature (Room/Apollo
+  are core-only).
 - **Each module declares the `project(":core:x")` deps its own code imports** — never rely on a
   transitive dep. A module whose *public API* exposes a type from a library (e.g. `:core:designsystem`
   returning a coil `ImageRequest`) declares that library `api`, so consumers get it transitively; all

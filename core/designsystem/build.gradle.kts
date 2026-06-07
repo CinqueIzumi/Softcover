@@ -1,37 +1,56 @@
 plugins {
-    id("softcover.android.library")
-    id("softcover.android.compose")
+    id("softcover.kmp.library")
+    id("softcover.kmp.compose")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.core.designsystem"
+// Compose Multiplatform resource accessor: keep `Res` internal to this module (consumers reach
+// drawables through the `SoftcoverIcon` catalog, never CMP's resource runtime directly).
+compose.resources {
+    publicResClass = false
+    packageOfResClass = "nl.rhaydus.softcover.core.designsystem.generated.resources"
 }
 
-dependencies {
-    api(project(":core:domain"))
-    api(project(":core:book"))
-    api(project(":core:library"))
-    api(project(":core:profile"))
-    api(project(":core:identity"))
-    api(project(":core:personal"))
-    api(project(":core:preferences"))
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.core.designsystem"
 
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    api(libs.androidx.compose.ui.text.google.fonts)
-    implementation(libs.material.components)
+        // The KMP Android library plugin keeps Android resources off by default; this module ships
+        // the shared drawables/strings/themes, so opt them in.
+        androidResources.enable = true
+    }
 
-    implementation(libs.koin.compose)
+    sourceSets {
+        commonMain.dependencies {
+            api(project(":core:domain"))
+            api(project(":core:book"))
+            api(project(":core:library"))
+            api(project(":core:profile"))
+            api(project(":core:identity"))
+            api(project(":core:personal"))
+            api(project(":core:preferences"))
 
-    implementation(libs.voyager.navigator)
-    implementation(libs.voyager.koin)
-    api(libs.voyager.tabNavigator)
+            implementation(libs.koin.compose.multiplatform)
 
-    api(libs.coil)
+            implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.androidx.lifecycle.viewmodel)
 
-    // Shared BarcodeScanner composable
-    implementation(libs.androidx.camera.core)
-    implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view)
-    implementation(libs.mlkit.barcode.scanning)
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.koin)
+            api(libs.voyager.tabNavigator)
+
+            api(libs.coil3)
+        }
+
+        androidMain.dependencies {
+            api(libs.androidx.compose.ui.text.google.fonts)
+            implementation(libs.material.components)
+
+            // Shared BarcodeScanner composable
+            implementation(libs.androidx.camera.core)
+            implementation(libs.androidx.camera.camera2)
+            implementation(libs.androidx.camera.lifecycle)
+            implementation(libs.androidx.camera.view)
+            implementation(libs.mlkit.barcode.scanning)
+        }
+    }
 }

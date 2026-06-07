@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,8 +32,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
@@ -140,6 +140,11 @@ private fun SessionPeekBarContent(
                 )
             }
 
+            val pauseResumeIcon = SoftcoverIconResource.Drawable(
+                icon = if (active.session.isPaused) SoftcoverIcon.Play else SoftcoverIcon.Pause,
+                contentDescription = if (active.session.isPaused) "Resume session" else "Pause session",
+            )
+
             IconButton(
                 onClick = {
                     haptics.select()
@@ -148,13 +153,16 @@ private fun SessionPeekBarContent(
                 },
             ) {
                 Icon(
-                    painter = painterResource(
-                        id = if (active.session.isPaused) R.drawable.ic_play else R.drawable.ic_pause,
-                    ),
-                    contentDescription = if (active.session.isPaused) "Resume session" else "Pause session",
+                    painter = pauseResumeIcon.getIconPainter(),
+                    contentDescription = pauseResumeIcon.contentDescription,
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
+
+            val stopIcon = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.Stop,
+                contentDescription = "Stop session",
+            )
 
             IconButton(
                 onClick = {
@@ -164,8 +172,8 @@ private fun SessionPeekBarContent(
                 },
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_stop),
-                    contentDescription = "Stop session",
+                    painter = stopIcon.getIconPainter(),
+                    contentDescription = stopIcon.contentDescription,
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }

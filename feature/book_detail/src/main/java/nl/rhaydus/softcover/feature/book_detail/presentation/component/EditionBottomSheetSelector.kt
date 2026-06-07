@@ -33,14 +33,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.conditional
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
@@ -119,17 +119,27 @@ private fun EditionBottomSheetContent(
             singleLine = true,
             placeholder = { Text(text = "Search by ISBN or publisher") },
             leadingIcon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_search),
+                val searchIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.Search,
                     contentDescription = "Search",
+                )
+
+                Icon(
+                    painter = searchIcon.getIconPainter(),
+                    contentDescription = searchIcon.contentDescription,
                 )
             },
             trailingIcon = if (searchQuery.isNotEmpty()) {
                 {
                     IconButton(onClick = { onSearchQueryChange("") }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_close),
+                        val clearIcon = SoftcoverIconResource.Drawable(
+                            icon = SoftcoverIcon.Close,
                             contentDescription = "Clear search",
+                        )
+
+                        Icon(
+                            painter = clearIcon.getIconPainter(),
+                            contentDescription = clearIcon.contentDescription,
                         )
                     }
                 }

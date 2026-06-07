@@ -27,16 +27,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 
@@ -145,9 +145,14 @@ internal fun TagEditorBottomSheet(
                 trailingIcon = {
                     if (draft.isNotEmpty()) {
                         IconButton(onClick = { onDraftChange("") }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_close),
+                            val clearIcon = SoftcoverIconResource.Drawable(
+                                icon = SoftcoverIcon.Close,
                                 contentDescription = "Clear",
+                            )
+
+                            Icon(
+                                painter = clearIcon.getIconPainter(),
+                                contentDescription = clearIcon.contentDescription,
                             )
                         }
                     }
@@ -206,9 +211,14 @@ private fun CurrentTagRow(
         )
 
         IconButton(onClick = onRemove) {
-            Icon(
-                painter = painterResource(R.drawable.ic_close),
+            val removeIcon = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.Close,
                 contentDescription = "Remove ${tag.name}",
+            )
+
+            Icon(
+                painter = removeIcon.getIconPainter(),
+                contentDescription = removeIcon.contentDescription,
             )
         }
     }

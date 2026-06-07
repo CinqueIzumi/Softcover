@@ -18,7 +18,7 @@ dependencies {
     implementation(project(":core:designsystem"))
 
     implementation(libs.koin.compose)
-    implementation(libs.coil)
+    implementation(libs.coil3)
 
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.koin)

@@ -52,8 +52,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.ClickableTe
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverLoadingSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -360,9 +362,14 @@ object OnboardingScreen : Screen {
                     .padding(all = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_content_paste),
+                val pasteIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.ContentPaste,
                     contentDescription = "Paste icon",
+                )
+
+                Icon(
+                    painter = pasteIcon.getIconPainter(),
+                    contentDescription = pasteIcon.contentDescription,
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.primary,
                 )

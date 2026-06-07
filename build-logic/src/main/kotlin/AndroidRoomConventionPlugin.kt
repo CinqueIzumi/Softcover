@@ -34,12 +34,11 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
             )
 
             // One ksp<Target> configuration per target compiled — matches the targets declared in
-            // KmpLibraryConventionPlugin (the Android target + the three iOS targets).
+            // KmpLibraryConventionPlugin (the Android target + the two iOS targets).
             listOf(
                 "kspAndroid",
                 "kspIosArm64",
                 "kspIosSimulatorArm64",
-                "kspIosX64",
             ).forEach { configuration ->
                 add(
                     configuration,

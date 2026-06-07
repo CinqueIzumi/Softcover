@@ -11,6 +11,7 @@ dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.compose.compiler.gradlePlugin)
+    compileOnly(libs.compose.multiplatform.gradlePlugin)
     compileOnly(libs.apollo.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
 }
@@ -28,6 +29,10 @@ gradlePlugin {
         register("androidCompose") {
             id = "softcover.android.compose"
             implementationClass = "AndroidComposeConventionPlugin"
+        }
+        register("kmpCompose") {
+            id = "softcover.kmp.compose"
+            implementationClass = "KmpComposeConventionPlugin"
         }
         register("androidRoom") {
             id = "softcover.android.room"

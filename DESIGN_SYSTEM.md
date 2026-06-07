@@ -103,6 +103,12 @@ Sections always breathe. Two adjacent eyebrow/headline pairs without a generous 
 - Icon-only controls always carry a content description.
 - Icon size scales with the control's size token (XS → XL); icons embedded in body type sit on the type baseline at a size proportional to the surrounding text.
 
+**Icon tokens.** Icons are addressed through two design-system types, never through the platform resource system:
+
+- `SoftcoverIcon` (`core/designsystem/presentation/icon/`) — the typed catalog of the bundled vector drawables (`SoftcoverIcon.Search`, `.Close`, …), backed by Compose Multiplatform resources (the underlying `Res` is internal to the module, so it resolves identically on Android and iOS).
+- `SoftcoverIconResource` (`core/designsystem/presentation/model/`) — the icon *token* passed to components and drawn at call sites. It is a sealed type carrying a `contentDescription` plus one of: `Drawable(icon: SoftcoverIcon)` (a catalog vector), `Vector(vector: ImageVector)`, or `SoftcoverPainter(painter: Painter)`. Always draw through it — `Icon(painter = token.getIconPainter(), contentDescription = token.contentDescription, …)` — so the content description always travels with the icon and the catalog-vector / arbitrary-painter distinction stays meaningful. Do **not** reach for a raw `painterResource`/`SoftcoverIcon`-to-`Painter` shortcut at a draw site, and components that accept an icon take a `SoftcoverIconResource`, not a bare `SoftcoverIcon`.
+- A handful of icons that feed **Android-only** sinks a Compose painter can't reach — the foreground-service notification (`ic_reading`/`ic_play`/`ic_pause`/`ic_stop`/`ic_edit`) and the app's notification appearance (`ic_bookmark`) — are intentionally kept as Android `R.drawable` resources in `core:designsystem`'s `androidMain` as well; everything Compose goes through `SoftcoverIcon`.
+
 ## 3. Layout primitives
 
 ### 3.1 Page scaffold

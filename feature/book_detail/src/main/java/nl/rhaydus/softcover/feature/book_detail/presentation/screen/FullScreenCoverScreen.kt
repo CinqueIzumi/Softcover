@@ -24,15 +24,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 
 private const val MIN_SCALE = 1f
@@ -136,9 +136,14 @@ class FullScreenCoverScreen(
                     .statusBarsPadding()
                     .padding(8.dp),
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close),
+                val closeIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.Close,
                     contentDescription = "Close cover viewer",
+                )
+
+                Icon(
+                    painter = closeIcon.getIconPainter(),
+                    contentDescription = closeIcon.contentDescription,
                 )
             }
         }

@@ -30,18 +30,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesSection
+import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesContent
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
@@ -58,7 +58,6 @@ import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
-import kotlinx.coroutines.launch
 
 object SettingsScreen : Screen {
     @Composable
@@ -69,6 +68,8 @@ object SettingsScreen : Screen {
 
         val navigator = LocalNavigator.currentOrThrow
         val appNavigator = koinInject<AppNavigator>()
+        val debugRoutesContent = koinInject<DebugRoutesContent>()
+        val appUpdateSimulator = koinInject<AppUpdateSimulator>()
         val appUpdateState = LocalAppUpdateState.current
         val onStartAppUpdate = LocalStartAppUpdate.current
 
@@ -86,9 +87,9 @@ object SettingsScreen : Screen {
             appUpdateState = appUpdateState,
             onStartAppUpdate = onStartAppUpdate,
             debugSection = {
-                DebugRoutesSection()
+                debugRoutesContent.Render()
 
-                AppUpdateSimulatorSection(simulator = koinInject())
+                AppUpdateSimulatorSection(simulator = appUpdateSimulator)
             },
         )
     }
@@ -143,7 +144,7 @@ object SettingsScreen : Screen {
                     SettingsRow(
                         title = "View user profile",
                         icon = SoftcoverIconResource.Drawable(
-                            id = R.drawable.ic_account,
+                            icon = SoftcoverIcon.Account,
                             contentDescription = "Account icon",
                         ),
                         onClick = navigateToProfile,
@@ -163,7 +164,7 @@ object SettingsScreen : Screen {
                     SettingsRow(
                         title = "Appearance",
                         icon = SoftcoverIconResource.Drawable(
-                            id = R.drawable.ic_palette,
+                            icon = SoftcoverIcon.Palette,
                             contentDescription = "Appearance icon",
                         ),
                         onClick = navigateToAppearanceSettings,
@@ -174,7 +175,7 @@ object SettingsScreen : Screen {
                     SettingsRow(
                         title = "Library tabs",
                         icon = SoftcoverIconResource.Drawable(
-                            id = R.drawable.ic_shelf,
+                            icon = SoftcoverIcon.Shelf,
                             contentDescription = "Library tabs icon",
                         ),
                         onClick = navigateToLibraryVisibility,
@@ -335,9 +336,14 @@ object SettingsScreen : Screen {
                 )
             }
 
+            val arrowIcon = SoftcoverIconResource.Drawable(
+                icon = SoftcoverIcon.KeyboardArrowRight,
+                contentDescription = "",
+            )
+
             Icon(
-                painter = painterResource(R.drawable.ic_keyboard_arrow_right),
-                contentDescription = null,
+                painter = arrowIcon.getIconPainter(),
+                contentDescription = arrowIcon.contentDescription,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -383,9 +389,14 @@ object SettingsScreen : Screen {
                 BadgedBox(
                     badge = { Badge() },
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_apk_install),
+                    val apkInstallIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.ApkInstall,
                         contentDescription = "Update icon",
+                    )
+
+                    Icon(
+                        painter = apkInstallIcon.getIconPainter(),
+                        contentDescription = apkInstallIcon.contentDescription,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp),
                     )
@@ -412,9 +423,14 @@ object SettingsScreen : Screen {
                 if (isClickable) {
                     Spacer(modifier = Modifier.width(12.dp))
 
+                    val arrowIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.KeyboardArrowRight,
+                        contentDescription = "",
+                    )
+
                     Icon(
-                        painter = painterResource(R.drawable.ic_keyboard_arrow_right),
-                        contentDescription = null,
+                        painter = arrowIcon.getIconPainter(),
+                        contentDescription = arrowIcon.contentDescription,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
