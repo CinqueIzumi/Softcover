@@ -32,8 +32,11 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > `ProfileCacheDataStore` binding moved out of `profileModule` into a new `expect val
 > platformProfileModule` (pulled in via `includes(...)`) — Android supplies
 > `filesDir/datastore/profile_cache.json` (store continuity preserved) and koin-android stays confined to
-> `androidMain`, iOS supplies `NSDocumentDirectory`. **Remaining P3:** `core:library` /
-> `core:connectivity`. Update the per-module checklist (§7) as each module lands.
+> `androidMain`, iOS supplies `NSDocumentDirectory`. `core:library` is converted too — a pure
+> `commonMain` move (no platform seam, like `core:identity`): `LibraryModule` + `RefreshLibraryUseCase`
+> to `commonMain`, MockK test to `androidHostTest`; its deps (`core:domain`/`book`/`lists`/`preferences`/
+> `identity`) are already KMP so nothing else moved; all iOS targets compile and `check` is green.
+> **Remaining P3:** `core:connectivity`. Update the per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -435,7 +438,7 @@ they land.
 | P3 | `core:personal` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:deadlines`; all iOS targets compile; `check` green) |
 | P3 | `core:lists` | ✅ done (all-`commonMain` move + `androidHostTest`; `Dispatchers.IO` → injected `AppDispatchers.io` in `ListsRemoteDataSource` like `core:book`; all iOS targets compile; `check` green) |
 | P3 | `core:profile` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio `ProfileCacheDataStore` behind `platformProfileModule` like `core:preferences`; all iOS targets compile; `check` green) |
-| P3 | `core:library` | ☐ |
+| P3 | `core:library` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:identity`; all iOS targets compile; `check` green) |
 | P3 | `core:connectivity` | ☐ |
 | — | `core:platform` (stays Android) | n/a |
 | P4 | `core:designsystem` (CMP) | ☐ |
