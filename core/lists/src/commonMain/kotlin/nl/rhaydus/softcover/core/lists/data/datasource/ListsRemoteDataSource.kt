@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.lists.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.CreateListBookMutation
 import nl.rhaydus.softcover.CreateListBookMutation.Data.Insert_list_book.List_book.Companion.listBookFragment as createListBookListBookFragment
@@ -17,6 +16,7 @@ import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Co
 import nl.rhaydus.softcover.UpdateListBookPositionsMutation
 import nl.rhaydus.softcover.UpdateListMutation
 import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
+import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
@@ -80,11 +80,12 @@ private const val NAME_TAKEN_MARKER: String = "already been taken"
 
 internal class ListsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
+    private val appDispatchers: AppDispatchers,
 ) : ListsRemoteDataSource {
     override suspend fun fetchUserLists(
         userId: Int,
         listIds: Set<Int>?,
-    ): List<BookList> = withContext(Dispatchers.IO) {
+    ): List<BookList> = withContext(appDispatchers.io) {
         val whereFilter: Optional<Lists_bool_exp?> = if (listIds == null) {
             Optional.Absent
         } else {
@@ -197,7 +198,7 @@ internal class ListsRemoteDataSourceImpl(
     ) {
         if (orderedListBookIds.isEmpty()) return
 
-        withContext(Dispatchers.IO) {
+        withContext(appDispatchers.io) {
             val clearedPositions = (startPosition until startPosition + orderedListBookIds.size).toList()
 
             val updates = orderedListBookIds.mapIndexed { index, listBookId ->
@@ -228,7 +229,7 @@ internal class ListsRemoteDataSourceImpl(
     override suspend fun setListRanked(
         listId: Int,
         ranked: Boolean,
-    ): BookList = withContext(Dispatchers.IO) {
+    ): BookList = withContext(appDispatchers.io) {
         val input = ListInput(
             ranked = Optional.Present(ranked),
         )

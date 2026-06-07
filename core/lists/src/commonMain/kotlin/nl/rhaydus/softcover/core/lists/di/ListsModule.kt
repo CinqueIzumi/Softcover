@@ -16,7 +16,10 @@ import org.koin.dsl.module
 
 val listsModule = module {
     single<ListsRemoteDataSource> {
-        ListsRemoteDataSourceImpl(apolloClient = get())
+        ListsRemoteDataSourceImpl(
+            apolloClient = get(),
+            appDispatchers = get(),
+        )
     }
 
     single<ListsLocalDataSource> {

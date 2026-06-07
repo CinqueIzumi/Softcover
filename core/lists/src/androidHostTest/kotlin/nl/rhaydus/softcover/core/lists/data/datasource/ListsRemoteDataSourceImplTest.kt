@@ -12,6 +12,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.CreateListBookMutation
 import nl.rhaydus.softcover.CreateListBookMutation.Data.Insert_list_book.List_book.Companion.listBookFragment as createListBookListBookFragment
@@ -25,6 +26,7 @@ import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Co
 import nl.rhaydus.softcover.UpdateListBookPositionsMutation
 import nl.rhaydus.softcover.UpdateListMutation
 import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
+import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
@@ -43,12 +45,24 @@ import org.junit.jupiter.api.Test
 
 class ListsRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
+    private lateinit var appDispatchers: AppDispatchers
     private lateinit var dataSource: ListsRemoteDataSourceImpl
 
     @BeforeEach
     fun setUp() {
         apolloClient = mockk()
-        dataSource = ListsRemoteDataSourceImpl(apolloClient = apolloClient)
+
+        val dispatcher = UnconfinedTestDispatcher()
+        appDispatchers = AppDispatchers(
+            main = dispatcher,
+            io = dispatcher,
+            default = dispatcher,
+        )
+
+        dataSource = ListsRemoteDataSourceImpl(
+            apolloClient = apolloClient,
+            appDispatchers = appDispatchers,
+        )
 
         mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
         mockkStatic("nl.rhaydus.softcover.core.lists.data.mapper.ListMapperKt")

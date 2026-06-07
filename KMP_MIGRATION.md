@@ -23,7 +23,10 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > **P3 is underway:** `core:deadlines` and `core:personal` are converted — both pure `commonMain` moves
 > (no platform seam, like `core:identity`): all of `domain`/`data`/`di` to `commonMain`, MockK tests to
 > `androidHostTest`, no JVM/Android imports remained; all iOS targets compile and `check` is green.
-> **Remaining P3:** `core:lists` / `core:profile` / `core:library` / `core:connectivity`. Update the
+> `core:lists` is converted too — also an all-`commonMain` move, but it had the same `Dispatchers.IO`
+> leak `core:book` hit: `ListsRemoteDataSource` now takes an injected `AppDispatchers` and uses
+> `appDispatchers.io` (wired with `get()` in `listsModule`), so no JVM-only dispatcher survives into
+> `commonMain`. **Remaining P3:** `core:profile` / `core:library` / `core:connectivity`. Update the
 > per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
@@ -424,7 +427,7 @@ they land.
 | P2 | `core:book` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; okio `EditionImageStorage` behind `platformBookModule`, `Dispatchers.IO` → injected `AppDispatchers.io`; all iOS targets compile; host tests + `check` green) |
 | P3 | `core:deadlines` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:identity`; all iOS targets compile; `check` green) |
 | P3 | `core:personal` | ✅ done (pure `commonMain` move + `androidHostTest`; no platform seam needed, like `core:deadlines`; all iOS targets compile; `check` green) |
-| P3 | `core:lists` | ☐ |
+| P3 | `core:lists` | ✅ done (all-`commonMain` move + `androidHostTest`; `Dispatchers.IO` → injected `AppDispatchers.io` in `ListsRemoteDataSource` like `core:book`; all iOS targets compile; `check` green) |
 | P3 | `core:profile` | ☐ |
 | P3 | `core:library` | ☐ |
 | P3 | `core:connectivity` | ☐ |
