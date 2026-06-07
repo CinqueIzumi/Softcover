@@ -13,7 +13,7 @@ internal class IosShareCardCapture internal constructor(
         SaveOutcome.Failure(reason = "gallery save not implemented on iOS")
 
     override suspend fun saveToCache(displayName: String): SaveOutcome =
-        SaveOutcome.Failure(reason = "gallery save not implemented on iOS")
+        SaveOutcome.Failure(reason = "share-card capture not implemented on iOS")
 }
 
 @Composable

@@ -66,7 +66,6 @@ subprojects {
                 dependsOn(
                     "compileKotlinIosArm64",
                     "compileKotlinIosSimulatorArm64",
-                    "compileKotlinIosX64",
                 )
             }
         }

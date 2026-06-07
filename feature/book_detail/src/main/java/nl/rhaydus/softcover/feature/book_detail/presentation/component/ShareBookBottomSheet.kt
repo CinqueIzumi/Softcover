@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.component
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -168,12 +169,12 @@ internal fun ShareBookBottomSheet(
                             runCatching {
                                 when (val outcome = capture.saveToCache(displayName = book.title)) {
                                     is SaveOutcome.Cached -> context.launchShareImageChooser(
-                                        uri = Uri.parse(outcome.identifier),
+                                        uri = outcome.identifier.toUri(),
                                         bookTitle = book.title,
                                     )
 
                                     is SaveOutcome.Saved -> context.launchShareImageChooser(
-                                        uri = Uri.parse(outcome.identifier),
+                                        uri = outcome.identifier.toUri(),
                                         bookTitle = book.title,
                                     )
 
