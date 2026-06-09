@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 /**
  * Layers Compose Multiplatform onto [KmpLibraryConventionPlugin] for KMP modules that own UI
- * (currently `:core:designsystem`) — the KMP sibling of [AndroidComposeConventionPlugin].
+ * (e.g. `:core:designsystem`, `:feature:library`) — the KMP sibling of [AndroidComposeConventionPlugin].
  *
  * Applies the JetBrains Compose Gradle plugin (`org.jetbrains.compose`) plus the standalone Kotlin
  * Compose compiler plugin, and wires the **multiplatform** `compose.*` artifacts into `commonMain`
@@ -33,6 +33,9 @@ class KmpComposeConventionPlugin : Plugin<Project> {
                 implementation(compose.foundation)
                 implementation(compose.animation)
                 implementation(compose.ui)
+                // BackHandler ships in a standalone CMP artifact; the Android variant of compose.ui
+                // (AndroidX `compose.ui`) doesn't carry it, so wire it explicitly for every target.
+                implementation(libs.library("compose-ui-backhandler"))
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
                 // CMP's stable material3 strips the M3-expressive APIs the design system uses, so

@@ -49,8 +49,19 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > complete** — full CMP (org.jetbrains.compose 1.11.0 + alpha material3), Coil 2→3 repo-wide, resources
 > via a `SoftcoverIcon` catalog over CMP `composeResources`, platform seams (haptics/reduced-motion real
 > iOS; fonts/dynamic-color/camera/share/gallery as iOS stubs marked `// TODO(iOS)`). Both iOS targets
-> compile and full `check` is green. Remaining: `core:notification` (P4 platform seam) and the `feature:*`
-> tier (P5). Update the per-module checklist (§7) as each module lands.
+> compile and full `check` is green. **P4 is complete** — `core:notification` also converted (real
+> platform seam; see §4/§7). **P5 is underway:** `feature:library` is converted — mostly a `commonMain`
+> move, but it surfaced two cross-cutting seams the "pure leaf" plan didn't anticipate. (1) Its
+> `commonMain` pulled the **Android-only `koin-androidx-compose`** (catalog `koin.compose`) → swapped to
+> `koin.compose.multiplatform`, matching the design system. (2) `LibraryStats` formatted page counts with
+> the **JVM-only `"%,d".format(...)`** → a new locale-aware `formatGroupedNumber` seam in
+> `core:designsystem` (`NumberFormat` `expect` + `java.text.NumberFormat` / `NSNumberFormatter` actuals).
+> And `BackHandler` moved from `androidx.activity.compose` to the multiplatform
+> `androidx.compose.ui.backhandler` — whose Android side (AndroidX `compose.ui`) doesn't carry it, so the
+> standalone `org.jetbrains.compose.ui:ui-backhandler` artifact was wired into `commonMain` in
+> `KmpComposeConventionPlugin` (now available to every UI-owning KMP module). All iOS targets compile and
+> `check` is green. Remaining: the rest of the `feature:*` tier (P5). Update the per-module checklist (§7)
+> as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -532,7 +543,7 @@ they land.
 | P3 | `core:connectivity` | ✅ done (`commonMain` + `androidMain` + `iosMain` + `androidHostTest`; `ConnectivityDataSource` behind `expect val platformModule` — Android `ConnectivityManager` callback (+ `core-ktx`), iOS `NWPathMonitor`; rest a plain `commonMain` move; fixed a `PendingListWriteSyncer` DI omission; all iOS targets compile; `check` green) |
 | P4 | `core:designsystem` | ✅ done — full **Compose Multiplatform** (`org.jetbrains.compose` 1.11.0 + alpha material3 for expressive). All shared widgets live in `commonMain` and compile for `iosArm64` + `iosSimulatorArm64`; `androidResources.enable = true`. Resources → CMP `composeResources` + the `SoftcoverIcon` catalog (`Res` internal; features route through the catalog, not `R`). Platform seams via `expect`/`actual`: haptics + reduced-motion (real iOS), dynamic-color + fonts (iOS fallbacks), `currentLocalDate` (contains the CMP-forced kotlinx-datetime 0.7.1 vs Android-0.6.2 `Clock` skew). Coil 2→3 repo-wide. Hard seams (CameraX/MLKit barcode scanner, share-card capture, MediaStore gallery save + permission, local-cover files) keep full Android behaviour; iOS gets compiling stubs marked `// TODO(iOS)`. Debug routes via the `:app`-bound `DebugRoutesContent` DI seam. `:app:assembleDebug`/`assembleRelease`, `test`, and full `check` (incl. iOS compile) green. `AppEntryPoint` + `@Preview`/debug screens stay `androidMain`. |
 | P4 | `core:notification` | ✅ done — real platform seam: `SoftcoverNotifier` + the Compose permission requester + the content/appearance contracts in `commonMain`, behind `platformNotificationModule` (pulled into `notificationModule` via `includes(...)`, so `:orchestration` keeps the name). Android `actual`s keep the verbatim `NotificationManagerCompat` notifier + `SoftcoverNotificationChannel` + `NotificationChannelInitializer` + `SoftcoverWorker`; iOS `actual`s are a real `UNUserNotificationCenter` notifier (`addNotificationRequest`, `categoryIdentifier` = logical category, cached auth status) + `requestAuthorizationWithOptions`. Channels stayed Android-only — the common contract speaks logical `NotificationCategory`. The two Android-typed models were re-expressed: `pendingIntent` was **dropped** (no callers; a deep-link target belongs to the nav layer at P5), and `@DrawableRes`/`@ColorRes` became `expect class` platform tokens (`NotificationIcon` / `NotificationAccentColor`; only `:app`'s `AppModule` construction site changed). Added `-Xexpect-actual-classes` to `KmpLibraryConventionPlugin` (first `expect class` in the repo). All iOS targets compile; `check` + `buildHealth` green. |
-| P5 | `feature:library` | ☐ — pure leaf (commonMain move) |
+| P5 | `feature:library` | ✅ done — `commonMain` move + `androidHostTest`; not a clean leaf after all: `koin.compose` (Android-only `koin-androidx-compose`) → `koin.compose.multiplatform`; `LibraryStats` page-count formatting (`"%,d".format`) → a new locale-aware `formatGroupedNumber` seam in `core:designsystem` (`NumberFormat` `expect` + `java.text.NumberFormat`/`NSNumberFormatter` actuals); `BackHandler` → CMP `androidx.compose.ui.backhandler` (+ `ExperimentalComposeUiApi` opt-in) with `org.jetbrains.compose.ui:ui-backhandler` wired into `KmpComposeConventionPlugin`'s `commonMain`; all iOS targets compile; `check` green |
 | P5 | `feature:lists` | ☐ — pure leaf |
 | P5 | `feature:onboarding` | ☐ — pure leaf |
 | P5 | `feature:profile` | ☐ — pure leaf |

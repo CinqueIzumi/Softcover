@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.util
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import nl.rhaydus.softcover.core.designsystem.presentation.util.formatGroupedNumber
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
 
@@ -15,7 +16,7 @@ internal fun formatBookCount(count: Int): String = when (count) {
 }
 
 internal fun formatPageCount(pages: Int): String? = if (pages > 0) {
-    "%,d pages".format(pages)
+    "${formatGroupedNumber(pages)} pages"
 } else {
     null
 }

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -77,7 +76,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -229,7 +230,11 @@ object LibraryScreen : Screen {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+    @OptIn(
+        ExperimentalMaterial3Api::class,
+        ExperimentalMaterial3ExpressiveApi::class,
+        ExperimentalComposeUiApi::class,
+    )
     @Composable
     internal fun Screen(
         state: LibraryUiState,
