@@ -73,7 +73,16 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > moved `androidMain/res/drawable` → `commonMain/composeResources/drawable`); and the Android
 > `LocalClipboard.nativeClipboard.primaryClip` read → a new `rememberClipboardReader` `expect`/`actual`
 > seam in `core:designsystem` (Android `ClipboardManager`, iOS `UIPasteboard`), following the
-> `Haptics`/`NumberFormat` idiom. All iOS targets compile and `check` is green. Remaining: the rest of
+> `Haptics`/`NumberFormat` idiom. All iOS targets compile and `check` is green. `feature:profile` is
+> converted too — like `feature:onboarding`, its `ProfileScreen` had moved to `commonMain` but still
+> carried two Android-only APIs that broke the iOS compile. `koinViewModel<MainActivityViewModel>()`
+> (Android-only `koin-androidx-compose`) → `koinInject` (the VM is a Koin `single`); and its
+> locale-aware stat formatting (`java.text.NumberFormat` keyed off `LocalConfiguration.locales[0]`,
+> `remember`-cached) → the `core:designsystem` number-format seam — extended with a sibling
+> `formatDecimalNumber(value, fractionDigits)` (locale-aware fixed-decimal, used for the 1-decimal
+> average rating) alongside the existing `formatGroupedNumber` (the integer stat tiles), with
+> `java.text.NumberFormat` / `NSNumberFormatter` actuals. The rest was a plain `commonMain` move (MockK
+> tests already in `androidHostTest`). All iOS targets compile and `check` is green. Remaining: the rest of
 > the `feature:*` tier (P5). Update the per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
@@ -559,7 +568,7 @@ they land.
 | P5 | `feature:library` | ✅ done — `commonMain` move + `androidHostTest`; not a clean leaf after all: `koin.compose` (Android-only `koin-androidx-compose`) → `koin.compose.multiplatform`; `LibraryStats` page-count formatting (`"%,d".format`) → a new locale-aware `formatGroupedNumber` seam in `core:designsystem` (`NumberFormat` `expect` + `java.text.NumberFormat`/`NSNumberFormatter` actuals); `BackHandler` → CMP `androidx.compose.ui.backhandler` (+ `ExperimentalComposeUiApi` opt-in) with `org.jetbrains.compose.ui:ui-backhandler` wired into `KmpComposeConventionPlugin`'s `commonMain`; all iOS targets compile; `check` green |
 | P5 | `feature:lists` | ✅ done — the genuine "pure leaf" `feature:library` wasn't: all-`commonMain` move (`CreateList` use case + TOAD screen/model/actions/events/flows/state + Koin module), two MockK tests → `androidHostTest`; no platform seam, no new catalog/plugin wiring (deps already KMP); all iOS targets compile; `check` green |
 | P5 | `feature:onboarding` | ✅ done — like `feature:library`, not the clean leaf the plan predicted: `OnboardingScreen` had moved to `commonMain` but still carried three Android-only APIs that broke the iOS compile. (1) `koinViewModel<MainActivityViewModel>()` (Android-only `koin-androidx-compose`) → `koinInject` (the VM is a Koin `single`). (2) `R.drawable.illu_*` + `androidx.compose.ui.res.painterResource` → a new `SoftcoverIllustration` catalog in `core:designsystem` (mirrors `SoftcoverIcon`: internal CMP `Res`, `@Composable painter()` accessor), with `illu_writing`/`illu_sign_up` moved `androidMain/res/drawable` → `commonMain/composeResources/drawable`. (3) `LocalClipboard.nativeClipboard.primaryClip` (Android clipboard) → a new `rememberClipboardReader` `expect`/`actual` seam in `core:designsystem` (Android `ClipboardManager`, iOS `UIPasteboard`), following the `Haptics`/`NumberFormat` idiom. Rest was a plain `commonMain` move (MockK tests already in `androidHostTest`). `DESIGN_SYSTEM.md` §2.6 updated for the illustration catalog. All iOS targets compile; `:feature:onboarding:check` + `:core:designsystem:check` green |
-| P5 | `feature:profile` | ☐ — pure leaf |
+| P5 | `feature:profile` | ✅ done — like `feature:onboarding`, not the clean leaf the plan predicted: `ProfileScreen` had moved to `commonMain` but still carried two Android-only APIs that broke the iOS compile. (1) `koinViewModel<MainActivityViewModel>()` (Android-only `koin-androidx-compose`) → `koinInject` (the VM is a Koin `single`). (2) Locale-aware stat formatting (`java.text.NumberFormat` keyed off `LocalConfiguration.locales[0]`, `remember`-cached) → the `core:designsystem` number-format seam, extended with a sibling `formatDecimalNumber(value, fractionDigits)` (locale-aware fixed-decimal, for the 1-decimal average rating) next to the existing `formatGroupedNumber` (the integer stat tiles), with `java.text.NumberFormat` / `NSNumberFormatter` actuals. Rest was a plain `commonMain` move (MockK tests already in `androidHostTest`); all iOS targets compile; `check` green |
 | P5 | `feature:reading` | ☐ — pure leaf (notification-permission requester comes from `core:notification`'s common contract) |
 | P5 | `feature:explore` | ☐ — near-leaf; one `android.content.Context` use to verify / `expect`-wrap |
 | P5 | `feature:settings` | ☐ — near-leaf; one `android.os.Build` SDK check → `expect`/actual |

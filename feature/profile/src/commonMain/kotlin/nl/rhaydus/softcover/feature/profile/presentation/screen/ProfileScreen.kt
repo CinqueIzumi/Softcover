@@ -30,12 +30,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -55,6 +53,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.designsystem.presentation.util.formatDecimalNumber
+import nl.rhaydus.softcover.core.designsystem.presentation.util.formatGroupedNumber
 import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
@@ -62,14 +62,13 @@ import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
-import org.koin.androidx.compose.koinViewModel
-import java.text.NumberFormat
+import org.koin.compose.koinInject
 
 class ProfileScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<ProfileScreenScreenModel>()
-        val mainVm = koinViewModel<MainActivityViewModel>()
+        val mainVm = koinInject<MainActivityViewModel>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
@@ -95,15 +94,6 @@ class ProfileScreen : Screen {
         runAction: (ProfileAction) -> Unit,
         onNavigateUp: () -> Unit,
     ) {
-        val locale = LocalConfiguration.current.locales[0]
-        val integerFormat = remember(locale) { NumberFormat.getIntegerInstance(locale) }
-        val ratingFormat = remember(locale) {
-            NumberFormat.getNumberInstance(locale).apply {
-                minimumFractionDigits = 1
-                maximumFractionDigits = 1
-            }
-        }
-
         Scaffold(
             topBar = {
                 SoftcoverTopBar(
@@ -135,7 +125,7 @@ class ProfileScreen : Screen {
                     HeroStatCard(
                         eyebrow = "Total pages read",
                         value = state.userProfileData?.totalPagesRead ?: 0,
-                        formatter = { integerFormat.format(it.toLong()) },
+                        formatter = { formatGroupedNumber(it) },
                         caption = "Every page a step further into the story.",
                         isLoading = state.isLoading,
                     )
@@ -154,7 +144,7 @@ class ProfileScreen : Screen {
                                 .fillMaxHeight(),
                             eyebrow = "Volumes",
                             value = state.userProfileData?.booksRead ?: 0,
-                            formatter = { integerFormat.format(it.toLong()) },
+                            formatter = { formatGroupedNumber(it) },
                             caption = "books read",
                             isLoading = state.isLoading,
                         )
@@ -166,7 +156,12 @@ class ProfileScreen : Screen {
                             SmallStatTile(
                                 eyebrow = "Avg. rating",
                                 value = (state.userProfileData?.averageRating ?: 0.0).toFloat(),
-                                formatter = { ratingFormat.format(it.toDouble()) },
+                                formatter = {
+                                    formatDecimalNumber(
+                                        value = it.toDouble(),
+                                        fractionDigits = 1,
+                                    )
+                                },
                                 trailing = "★",
                                 isLoading = state.isLoading,
                             )
