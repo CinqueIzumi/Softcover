@@ -76,15 +76,9 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import coil3.compose.AsyncImage
-import kotlin.math.roundToInt
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.todayIn
-import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
@@ -118,11 +112,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.bodyFontFamily
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
+import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
+import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDateTime
 import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
@@ -150,6 +144,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import org.koin.compose.koinInject
+import kotlin.math.roundToInt
 
 object ReadingScreen : Screen {
     private val booksListState = LazyListState()
@@ -321,11 +317,13 @@ object ReadingScreen : Screen {
                                 runAction(OnUpdatePageProgressClickAction(pages))
                             },
                             onUpdateTimeProgressClick = { h, m, s ->
-                                runAction(OnUpdateTimeProgressClickAction(
-                                    h,
-                                    m,
-                                    s,
-                                ),)
+                                runAction(
+                                    OnUpdateTimeProgressClickAction(
+                                        h,
+                                        m,
+                                        s,
+                                    ),
+                                )
                             },
                         )
                     }
@@ -373,7 +371,7 @@ object ReadingScreen : Screen {
         val density = LocalDensity.current
         val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
 
-        val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()).toString() }
+        val today = remember { currentLocalDate().toString() }
 
         val slideModifier: (Int) -> Modifier = { bookId ->
             if (bookId == slidingBookId) {
@@ -1064,10 +1062,12 @@ object ReadingScreen : Screen {
             Spacer(modifier = Modifier.height(if (emphasized) 10.dp else 6.dp))
 
             LinearProgressIndicator(
-                progress = { progressFraction.coerceIn(
-                    0f,
-                    1f,
-                ) },
+                progress = {
+                    progressFraction.coerceIn(
+                        0f,
+                        1f,
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(if (emphasized) 10.dp else 6.dp),
@@ -1420,7 +1420,7 @@ private fun PlanTodayNudge(
 }
 
 private fun greetingForNow(): String {
-    val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+    val hour = currentLocalDateTime().hour
     return when (hour) {
         in 5..11 -> "Good morning."
         in 12..17 -> "Good afternoon."
@@ -1638,7 +1638,7 @@ private fun ReadingScreenPreview() {
 }
 
 private fun previewReadingActivity(): List<ReadingDayActivity> {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val today = currentLocalDate()
     val firstDay = today.minus(
         20,
         DateTimeUnit.DAY,
@@ -1676,7 +1676,7 @@ private fun ReadingScreenWithStreakStripPreview() {
 @StandardPreview
 @Composable
 private fun ReadingScreenWithDeadlineAndNudgePreview() {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val today = currentLocalDate()
     val featured = previewBooks.first()
     val behindBook = previewBooks[2]
 
@@ -1726,7 +1726,7 @@ private fun ReadingScreenWithDeadlineAndNudgePreview() {
 @StandardPreview
 @Composable
 private fun ReadingScreenExpiredDeadlinePreview() {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val today = currentLocalDate()
     val featured = previewBooks.first()
 
     val deadlines = mapOf(

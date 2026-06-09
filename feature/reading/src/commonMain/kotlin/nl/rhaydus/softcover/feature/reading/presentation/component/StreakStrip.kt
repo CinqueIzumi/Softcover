@@ -27,22 +27,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 
@@ -245,7 +243,7 @@ private fun sheetDayLabel(
 }
 
 private fun previewActivity(litOffsets: Set<Int>): List<ReadingDayActivity> {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val today = currentLocalDate()
     val firstDay = today.minus(
         20,
         DateTimeUnit.DAY,
