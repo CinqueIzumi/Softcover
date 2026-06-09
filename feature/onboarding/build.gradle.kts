@@ -1,18 +1,22 @@
 plugins {
-    id("softcover.android.library")
-    id("softcover.android.compose")
+    id("softcover.kmp.library")
+    id("softcover.kmp.compose")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.feature.onboarding"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.feature.onboarding"
+    }
 
-dependencies {
-    implementation(project(":core:domain"))
-    implementation(project(":core:identity"))
-    implementation(project(":core:designsystem"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:domain"))
+            implementation(project(":core:identity"))
+            implementation(project(":core:designsystem"))
 
-    implementation(libs.koin.compose)
+            implementation(libs.koin.compose.multiplatform)
 
-    implementation(libs.voyager.koin)
+            implementation(libs.voyager.koin)
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.screen
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
@@ -33,9 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -46,19 +43,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
-import nl.rhaydus.softcover.core.designsystem.R
+import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ClickableText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverLoadingSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.illustration.SoftcoverIllustration
+import nl.rhaydus.softcover.core.designsystem.presentation.illustration.painter
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberClipboardReader
 import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction
@@ -71,13 +70,13 @@ object OnboardingScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<OnboardingScreenScreenModel>()
-        val mainVm = koinViewModel<MainActivityViewModel>()
+        val mainVm = koinInject<MainActivityViewModel>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
         val uriHandler = LocalUriHandler.current
 
-        val clipboardManager = LocalClipboard.current
+        val clipboardReader = rememberClipboardReader()
 
         Screen(
             state = state,
@@ -86,20 +85,7 @@ object OnboardingScreen : Screen {
             onInitializingComplete = {
                 mainVm.setUserAuthenticated(authenticated = true)
             },
-            getCopiedText = {
-                val text: String = try {
-                    clipboardManager
-                        .nativeClipboard
-                        .primaryClip
-                        ?.getItemAt(0)
-                        ?.text
-                        ?.toString() ?: ""
-                } catch (_: Exception) {
-                    ""
-                }
-
-                text
-            },
+            getCopiedText = clipboardReader::read,
         )
     }
 
@@ -184,7 +170,7 @@ object OnboardingScreen : Screen {
 
     @Composable
     private fun ColumnScope.IntroScreen(
-        @DrawableRes itemResource: Int,
+        illustration: SoftcoverIllustration,
         illustrationContentDescription: String,
         eyebrow: String,
         headline: String,
@@ -193,7 +179,7 @@ object OnboardingScreen : Screen {
         buttonOnClick: () -> Unit,
     ) {
         Image(
-            painter = painterResource(id = itemResource),
+            painter = illustration.painter(),
             contentDescription = illustrationContentDescription,
         )
 
@@ -245,7 +231,7 @@ object OnboardingScreen : Screen {
         onContinueClick: () -> Unit,
     ) {
         IntroScreen(
-            itemResource = R.drawable.illu_writing,
+            illustration = SoftcoverIllustration.Writing,
             illustrationContentDescription = "Illustration containing someone reading a book.",
             eyebrow = "Welcome",
             headline = "Book smart.",
@@ -260,7 +246,7 @@ object OnboardingScreen : Screen {
         onContinueClick: () -> Unit,
     ) {
         IntroScreen(
-            itemResource = R.drawable.illu_sign_up,
+            illustration = SoftcoverIllustration.SignUp,
             illustrationContentDescription = "Illustration containing someone signing up for an account.",
             eyebrow = "Connect",
             headline = "Powered by Hardcover.",

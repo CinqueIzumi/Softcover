@@ -64,8 +64,17 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > "pure leaf" the plan predicted: an all-`commonMain` move (domain use case + `CreateList` TOAD screen,
 > Koin module) with the two MockK tests to `androidHostTest`, no platform seam, no new catalog/plugin
 > wiring (its deps `core:domain`/`core:lists`/`core:designsystem` and Voyager are already KMP). All iOS
-> targets compile and `check` is green. Remaining: the rest of the `feature:*` tier (P5). Update the
-> per-module checklist (§7) as each module lands.
+> targets compile and `check` is green. `feature:onboarding` is converted too — and like `feature:library`
+> (not `feature:lists`) it wasn't the clean leaf the plan predicted: its `OnboardingScreen` had moved to
+> `commonMain` but still carried three Android-only APIs that broke the iOS compile. `koinViewModel`
+> (Android-only `koin-androidx-compose`) → `koinInject` (the `MainActivityViewModel` is a Koin `single`);
+> `R.drawable.illu_*` + `painterResource` → a new `SoftcoverIllustration` catalog in `core:designsystem`
+> mirroring `SoftcoverIcon` (internal CMP `Res`, `@Composable painter()` accessor; the two illustrations
+> moved `androidMain/res/drawable` → `commonMain/composeResources/drawable`); and the Android
+> `LocalClipboard.nativeClipboard.primaryClip` read → a new `rememberClipboardReader` `expect`/`actual`
+> seam in `core:designsystem` (Android `ClipboardManager`, iOS `UIPasteboard`), following the
+> `Haptics`/`NumberFormat` idiom. All iOS targets compile and `check` is green. Remaining: the rest of
+> the `feature:*` tier (P5). Update the per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
 > alongside the modern `com.android.kotlin.multiplatform.library` plugin under **AGP ≥ 9**, which
@@ -549,7 +558,7 @@ they land.
 | P4 | `core:notification` | ✅ done — real platform seam: `SoftcoverNotifier` + the Compose permission requester + the content/appearance contracts in `commonMain`, behind `platformNotificationModule` (pulled into `notificationModule` via `includes(...)`, so `:orchestration` keeps the name). Android `actual`s keep the verbatim `NotificationManagerCompat` notifier + `SoftcoverNotificationChannel` + `NotificationChannelInitializer` + `SoftcoverWorker`; iOS `actual`s are a real `UNUserNotificationCenter` notifier (`addNotificationRequest`, `categoryIdentifier` = logical category, cached auth status) + `requestAuthorizationWithOptions`. Channels stayed Android-only — the common contract speaks logical `NotificationCategory`. The two Android-typed models were re-expressed: `pendingIntent` was **dropped** (no callers; a deep-link target belongs to the nav layer at P5), and `@DrawableRes`/`@ColorRes` became `expect class` platform tokens (`NotificationIcon` / `NotificationAccentColor`; only `:app`'s `AppModule` construction site changed). Added `-Xexpect-actual-classes` to `KmpLibraryConventionPlugin` (first `expect class` in the repo). All iOS targets compile; `check` + `buildHealth` green. |
 | P5 | `feature:library` | ✅ done — `commonMain` move + `androidHostTest`; not a clean leaf after all: `koin.compose` (Android-only `koin-androidx-compose`) → `koin.compose.multiplatform`; `LibraryStats` page-count formatting (`"%,d".format`) → a new locale-aware `formatGroupedNumber` seam in `core:designsystem` (`NumberFormat` `expect` + `java.text.NumberFormat`/`NSNumberFormatter` actuals); `BackHandler` → CMP `androidx.compose.ui.backhandler` (+ `ExperimentalComposeUiApi` opt-in) with `org.jetbrains.compose.ui:ui-backhandler` wired into `KmpComposeConventionPlugin`'s `commonMain`; all iOS targets compile; `check` green |
 | P5 | `feature:lists` | ✅ done — the genuine "pure leaf" `feature:library` wasn't: all-`commonMain` move (`CreateList` use case + TOAD screen/model/actions/events/flows/state + Koin module), two MockK tests → `androidHostTest`; no platform seam, no new catalog/plugin wiring (deps already KMP); all iOS targets compile; `check` green |
-| P5 | `feature:onboarding` | ☐ — pure leaf |
+| P5 | `feature:onboarding` | ✅ done — like `feature:library`, not the clean leaf the plan predicted: `OnboardingScreen` had moved to `commonMain` but still carried three Android-only APIs that broke the iOS compile. (1) `koinViewModel<MainActivityViewModel>()` (Android-only `koin-androidx-compose`) → `koinInject` (the VM is a Koin `single`). (2) `R.drawable.illu_*` + `androidx.compose.ui.res.painterResource` → a new `SoftcoverIllustration` catalog in `core:designsystem` (mirrors `SoftcoverIcon`: internal CMP `Res`, `@Composable painter()` accessor), with `illu_writing`/`illu_sign_up` moved `androidMain/res/drawable` → `commonMain/composeResources/drawable`. (3) `LocalClipboard.nativeClipboard.primaryClip` (Android clipboard) → a new `rememberClipboardReader` `expect`/`actual` seam in `core:designsystem` (Android `ClipboardManager`, iOS `UIPasteboard`), following the `Haptics`/`NumberFormat` idiom. Rest was a plain `commonMain` move (MockK tests already in `androidHostTest`). `DESIGN_SYSTEM.md` §2.6 updated for the illustration catalog. All iOS targets compile; `:feature:onboarding:check` + `:core:designsystem:check` green |
 | P5 | `feature:profile` | ☐ — pure leaf |
 | P5 | `feature:reading` | ☐ — pure leaf (notification-permission requester comes from `core:notification`'s common contract) |
 | P5 | `feature:explore` | ☐ — near-leaf; one `android.content.Context` use to verify / `expect`-wrap |

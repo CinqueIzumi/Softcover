@@ -109,6 +109,10 @@ Sections always breathe. Two adjacent eyebrow/headline pairs without a generous 
 - `SoftcoverIconResource` (`core/designsystem/presentation/model/`) — the icon *token* passed to components and drawn at call sites. It is a sealed type carrying a `contentDescription` plus one of: `Drawable(icon: SoftcoverIcon)` (a catalog vector), `Vector(vector: ImageVector)`, or `SoftcoverPainter(painter: Painter)`. Always draw through it — `Icon(painter = token.getIconPainter(), contentDescription = token.contentDescription, …)` — so the content description always travels with the icon and the catalog-vector / arbitrary-painter distinction stays meaningful. Do **not** reach for a raw `painterResource`/`SoftcoverIcon`-to-`Painter` shortcut at a draw site, and components that accept an icon take a `SoftcoverIconResource`, not a bare `SoftcoverIcon`.
 - A handful of icons that feed **Android-only** sinks a Compose painter can't reach — the foreground-service notification (`ic_reading`/`ic_play`/`ic_pause`/`ic_stop`/`ic_edit`) and the app's notification appearance (`ic_bookmark`) — are intentionally kept as Android `R.drawable` resources in `core:designsystem`'s `androidMain` as well; everything Compose goes through `SoftcoverIcon`.
 
+**Illustrations.** Full-bleed editorial artwork (onboarding intro panels, empty states) is addressed the same way — through a design-system catalog, never the platform resource system:
+
+- `SoftcoverIllustration` (`core/designsystem/presentation/illustration/`) — the typed catalog of bundled illustration drawables (`SoftcoverIllustration.Writing`, `.SignUp`, …), backed by Compose Multiplatform resources with the underlying `Res` kept internal to the module, so the artwork resolves identically on Android and iOS. Draw through its `@Composable painter()` accessor — `Image(painter = illustration.painter(), contentDescription = …)` — and pass the contextual content description at the call site; never reach for a raw `painterResource` at the draw site.
+
 ## 3. Layout primitives
 
 ### 3.1 Page scaffold
