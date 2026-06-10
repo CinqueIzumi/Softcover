@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -45,6 +44,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.OnFloatingBarTo
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicColor
 
 class AppearanceSettingsScreen : Screen {
     @Composable
@@ -86,7 +86,7 @@ class AppearanceSettingsScreen : Screen {
                         vertical = 16.dp,
                     ),
             ) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (supportsDynamicColor()) {
                     DynamicColorSection(
                         state = state,
                         runAction = runAction,
@@ -111,6 +111,7 @@ class AppearanceSettingsScreen : Screen {
             }
         }
     }
+
     // region Dynamic color section
     @Composable
     private fun DynamicColorSection(
@@ -177,6 +178,7 @@ class AppearanceSettingsScreen : Screen {
             )
         }
     }
+
     // endregion
     // region Bottom bar section
     @Composable
@@ -235,6 +237,7 @@ class AppearanceSettingsScreen : Screen {
             }
         }
     }
+
     // endregion
     // region Date style section
     @Composable
