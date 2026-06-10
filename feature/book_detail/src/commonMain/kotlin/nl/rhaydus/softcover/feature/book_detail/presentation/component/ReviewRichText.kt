@@ -230,7 +230,7 @@ private fun runsForLine(
 ): List<ReviewRun> {
     if (lineStart >= lineEnd) return emptyList()
 
-    val boundaries = sortedSetOf(lineStart, lineEnd)
+    val boundaries = mutableSetOf(lineStart, lineEnd)
 
     marks.forEach { mark ->
         if (mark.end > lineStart && mark.start < lineEnd) {
@@ -245,7 +245,7 @@ private fun runsForLine(
         }
     }
 
-    val points = boundaries.toList()
+    val points = boundaries.sorted()
 
     return (0 until points.size - 1).mapNotNull { index ->
         val from = points[index]

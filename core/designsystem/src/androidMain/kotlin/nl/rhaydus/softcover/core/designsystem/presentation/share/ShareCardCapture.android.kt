@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.designsystem.presentation.share
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -76,6 +77,37 @@ internal class AndroidShareCardCapture internal constructor(
 
             SaveOutcome.Cached(identifier = uri.toString())
         }
+    }
+
+    override suspend fun share(displayName: String): ShareOutcome {
+        val cached = runCatching { saveToCache(displayName = displayName) }
+            .getOrElse { return ShareOutcome.Failure(reason = "$it") }
+
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(
+                Intent.EXTRA_STREAM,
+                Uri.parse(cached.identifier),
+            )
+            putExtra(
+                Intent.EXTRA_SUBJECT,
+                displayName,
+            )
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        val chooser = Intent.createChooser(
+            sendIntent,
+            "Share $displayName",
+        ).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        return runCatching {
+            context.startActivity(chooser)
+
+            ShareOutcome.Shared
+        }.getOrElse { ShareOutcome.Failure(reason = "$it") }
     }
 
     private fun buildFilename(displayName: String): String {

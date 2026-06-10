@@ -33,6 +33,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverIm
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 
 private const val MIN_SCALE = 1f
@@ -40,8 +41,8 @@ private const val MAX_SCALE = 5f
 private const val DOUBLE_TAP_SCALE = 2.5f
 
 class FullScreenCoverScreen(
-    @Transient private val edition: BookEdition?,
-    @Transient private val defaultEdition: BookEdition?,
+    @TransientNavArg private val edition: BookEdition?,
+    @TransientNavArg private val defaultEdition: BookEdition?,
     private val fallbackCoverUrl: String?,
 ) : Screen {
     @Composable

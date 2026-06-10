@@ -1,10 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import androidx.core.net.toUri
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -48,8 +42,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.share.CapturableShare
 import nl.rhaydus.softcover.core.designsystem.presentation.share.SaveOutcome
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCardCapture
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareContent
+import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareOutcome
 import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -78,7 +74,6 @@ internal fun ShareBookBottomSheet(
 
     val capture = rememberShareCardCapture()
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     var isSharing by remember { mutableStateOf(false) }
     var isSavingToGallery by remember { mutableStateOf(false) }
@@ -166,24 +161,14 @@ internal fun ShareBookBottomSheet(
                         isSharing = true
 
                         coroutineScope.launch {
-                            runCatching {
-                                when (val outcome = capture.saveToCache(displayName = book.title)) {
-                                    is SaveOutcome.Cached -> context.launchShareImageChooser(
-                                        uri = outcome.identifier.toUri(),
-                                        bookTitle = book.title,
-                                    )
+                            when (val outcome = capture.share(displayName = book.title)) {
+                                is ShareOutcome.Shared -> Unit
 
-                                    is SaveOutcome.Saved -> context.launchShareImageChooser(
-                                        uri = outcome.identifier.toUri(),
-                                        bookTitle = book.title,
-                                    )
+                                is ShareOutcome.Failure -> {
+                                    AppLog.e("Failed to share book card: ${outcome.reason}")
 
-                                    is SaveOutcome.Failure -> AppLog.e(
-                                        "Failed to cache share card: ${outcome.reason}",
-                                    )
+                                    SnackBarManager.showSnackbar(title = "Couldn't share — try again")
                                 }
-                            }.onFailure {
-                                AppLog.e("$it")
                             }
 
                             isSharing = false
@@ -219,11 +204,7 @@ internal fun ShareBookBottomSheet(
                             "Couldn't save to gallery"
                         }
 
-                        Toast.makeText(
-                            context,
-                            message,
-                            Toast.LENGTH_SHORT,
-                        ).show()
+                        SnackBarManager.showSnackbar(title = message)
 
                         isSavingToGallery = false
                     }
@@ -331,31 +312,4 @@ private fun Book.toShareContent(edition: BookEdition?): BookShareContent {
         description = description.takeIf { it.isNotBlank() },
         quote = null,
     )
-}
-
-private fun Context.launchShareImageChooser(
-    uri: Uri,
-    bookTitle: String,
-) {
-    val sendIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "image/png"
-        putExtra(
-            Intent.EXTRA_STREAM,
-            uri,
-        )
-        putExtra(
-            Intent.EXTRA_SUBJECT,
-            bookTitle,
-        )
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
-
-    val chooser = Intent.createChooser(
-        sendIntent,
-        "Share $bookTitle",
-    ).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-
-    startActivity(chooser)
 }

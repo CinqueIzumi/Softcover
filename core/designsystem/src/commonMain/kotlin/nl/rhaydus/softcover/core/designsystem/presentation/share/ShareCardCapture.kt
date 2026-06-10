@@ -11,6 +11,8 @@ interface ShareCardCapture {
     suspend fun saveToGallery(displayName: String): SaveOutcome
 
     suspend fun saveToCache(displayName: String): SaveOutcome
+
+    suspend fun share(displayName: String): ShareOutcome
 }
 
 @Composable

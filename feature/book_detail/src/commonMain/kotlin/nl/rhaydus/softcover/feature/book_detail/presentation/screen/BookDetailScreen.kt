@@ -90,13 +90,11 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
@@ -128,6 +126,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -139,6 +138,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverT
 import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomNavigationSpacer
 import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.designsystem.presentation.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
+import nl.rhaydus.softcover.core.designsystem.presentation.util.formatDecimalNumber
 import nl.rhaydus.softcover.core.designsystem.presentation.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
@@ -213,7 +214,7 @@ private const val REVIEW_COLLAPSED_LINES = 8
 
 class BookDetailScreen(
     val id: Int,
-    @Transient private val initialCover: BookInitialCover? = null,
+    @TransientNavArg private val initialCover: BookInitialCover? = null,
     private val transitionSurface: String? = null,
 ) : Screen {
     @Composable
@@ -977,7 +978,10 @@ class BookDetailScreen(
 
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Text(
-                                                    text = "%.1f".format(rating),
+                                                    text = formatDecimalNumber(
+                                                        value = rating ?: 0.0,
+                                                        fractionDigits = 1,
+                                                    ),
                                                     style = bodySmall,
                                                 )
 
@@ -2430,7 +2434,10 @@ class BookDetailScreen(
                         Spacer(modifier = Modifier.width(4.dp))
 
                         Text(
-                            text = "%.1f".format(book.rating),
+                            text = formatDecimalNumber(
+                                value = book.rating,
+                                fractionDigits = 1,
+                            ),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -2587,7 +2594,10 @@ class BookDetailScreen(
                                     Spacer(modifier = Modifier.width(4.dp))
 
                                     Text(
-                                        text = "%.1f".format(rating),
+                                        text = formatDecimalNumber(
+                                            value = rating,
+                                            fractionDigits = 1,
+                                        ),
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontFamily = displayFontFamily,
                                         ),
@@ -2661,7 +2671,7 @@ class BookDetailScreen(
         onConfirm: (LocalDate) -> Unit,
     ) {
         val initialMillis = remember(initialDate) {
-            (initialDate ?: Clock.System.todayIn(TimeZone.currentSystemDefault()))
+            (initialDate ?: currentLocalDate())
                 .atStartOfDayIn(TimeZone.currentSystemDefault())
                 .toEpochMilliseconds()
         }
