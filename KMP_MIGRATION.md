@@ -287,7 +287,12 @@ Android `actual`s of seam modules like `core:notification`).
     build types across the whole migration) via a DI seam: keep the real bodies in the library's
     `androidMain` (so they retain `internal` access), expose an interface, and bind it per build type
     from `app/src/debug` (real) vs `app/src/release` (no-op). `core:designsystem`'s debug routes use
-    exactly this — `DebugRoutesContent` bound by `app/.../di/DebugRoutesModule.kt`. With release
+    exactly this — `DebugRoutesContent` bound by `app/.../di/DebugRoutesModule.kt`. **The seam interface
+    itself must live in `commonMain`, not `androidMain`** — its consumer `SettingsScreen` is `commonMain`,
+    and a dependency's `androidMain` declarations are invisible to a consumer's `commonMain` compilation
+    (only to the consumer's own `androidMain`), so an `androidMain` interface fails to resolve at the
+    `koinInject<…>()` call site. Only the real-body implementations (`DebugRoutesSection` et al.) stay
+    `androidMain`; the interface needs nothing beyond the multiplatform `@Composable`. With release
     minification off the inert bodies still ship in the release APK (unreachable); enabling R8 strips
     them — tracked as a follow-up.
 - Keep `softcover.android.library` / `.compose` for modules staying Android-only, and reuse
