@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.util
 
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -11,3 +12,5 @@ actual fun currentLocalDate(): LocalDate = Clock.System.todayIn(TimeZone.current
 
 actual fun currentLocalDateTime(): LocalDateTime =
     Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
+actual fun currentInstant(): Instant = Clock.System.now()

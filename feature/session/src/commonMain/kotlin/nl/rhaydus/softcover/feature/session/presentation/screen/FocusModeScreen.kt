@@ -42,7 +42,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
 import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSuffix
@@ -56,6 +55,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.util.currentInstant
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 
 /**
@@ -109,11 +109,11 @@ private fun FocusModeContent(
     val haptics = rememberHaptics()
     val isPaused = active.session.isPaused
 
-    var now by remember { mutableStateOf(Clock.System.now()) }
+    var now by remember { mutableStateOf(currentInstant()) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            now = Clock.System.now()
+            now = currentInstant()
 
             delay(timeMillis = 1_000)
         }

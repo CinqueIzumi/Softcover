@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.session.presentation.service
 import android.content.Context
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ReadingSessionLauncher
 
-class ReadingSessionLauncherImpl(
+internal class ReadingSessionLauncherImpl(
     private val context: Context,
 ) : ReadingSessionLauncher {
     override fun start() {

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.util
 
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 
@@ -18,3 +19,12 @@ expect fun currentLocalDate(): LocalDate
  * in `commonMain`.
  */
 expect fun currentLocalDateTime(): LocalDateTime
+
+/**
+ * The current instant. Behind the same seam as [currentLocalDate] for the same reason — `Clock` moved
+ * to `kotlin.time` in kotlinx-datetime 0.7.1 (the CMP/iOS version) while Android resolves 0.6.2. The
+ * return type `Instant` is stable across both (a `kotlin.time.Instant` typealias on 0.7.1), so callers
+ * in `commonMain` can compute elapsed durations (e.g. a live reading-session timer) without seeing the
+ * platform `Clock`.
+ */
+expect fun currentInstant(): Instant

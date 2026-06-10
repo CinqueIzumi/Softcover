@@ -104,7 +104,32 @@ this doc wins (it is the worked-out version); §11 stays the one-paragraph point
 > Android-only `libs.dataStore` to `datastore-core` + `datastore-core-okio` + `okio`. The iOS gate
 > surfaced one more leak: `ExploreScreen`'s `"%.1f".format(rating)` (JVM-only) → the existing
 > `core:designsystem` `formatDecimalNumber(value, fractionDigits)` seam. MockK serializer test
-> migrated to okio `Buffer`. All iOS targets compile and `check` is green. Remaining: the rest of
+> migrated to okio `Buffer`. All iOS targets compile and `check` is green. `feature:session` is
+> converted too — and unlike the other P5 features it owns a real **Android foreground service**, so it
+> is the first feature with a genuine `androidMain` *and* a first `iosMain`. The peek bar + Focus Mode
+> composables + the Koin module moved to `commonMain`; the `ReadingSessionService` (media-style ongoing
+> notification, `PendingIntent`, coil `Bitmap`, `NotificationCompat`/`ServiceCompat`) and its
+> `ReadingSessionLauncherImpl` (now `internal`) + the service's `AndroidManifest.xml` stayed
+> `androidMain` — behind the **`ReadingSessionLauncher` seam that already existed in
+> `core:designsystem/commonMain`** (an interface `ActiveSessionController` resolves via `get()`), so no
+> new contract was needed, only its per-target Koin binding. The DI split follows the
+> `platformExploreModule` idiom: a new `expect val platformSessionModule` pulled into `sessionModule`
+> via `includes(...)` — Android binds `ReadingSessionLauncherImpl(androidContext())` (koin-android
+> confined to `androidMain`), iOS binds a **no-op launcher** (the in-app session UI works on iOS; only
+> the OS lock-screen surface is absent, so `start()` is a logged no-op rather than the module left
+> unbound, keeping `ActiveSessionController`'s `get()` resolvable). The one iOS breakage was the same
+> **kotlinx-datetime 0.7.1-vs-0.6.2 `Clock` skew** (§7 / `feature:reading`): the two composables tick a
+> live timer with `Clock.System.now()`, which doesn't resolve in `commonMain` (`Clock` is
+> `kotlinx.datetime` on Android's 0.6.2, `kotlin.time` on iOS's 0.7.1) — driving a **new sibling
+> `currentInstant(): Instant` seam** in `core:designsystem`'s `CurrentDate` (same `expect`/`actual`
+> shape as `currentLocalDate`/`currentLocalDateTime`, only the `Clock` import differs between actuals;
+> the return type `kotlinx.datetime.Instant` is a `kotlin.time.Instant` typealias on 0.7.1, so it
+> matches the domain `ReadingSession.readingDuration(now: Instant)` on both). `build.gradle.kts` also
+> needed two fixes the stub had wrong: the Android-only `koin.compose` → `koin.compose.multiplatform`
+> (the composables use `koinInject`), and `:core:notification` + `coil3` + `koin.android` + `core-ktx`
+> moved into `androidMain.dependencies` (only the service uses them). No tests existed to relocate; the
+> `sessionModule` name is unchanged so `orchestration` needed no edit. All iOS targets compile and
+> `check` is green. Remaining: the rest of
 > the `feature:*` tier (P5). Update the per-module checklist (§7) as each module lands.
 >
 > **Toolchain (raised for `core:network`'s Apollo codegen):** Apollo's Gradle plugin only runs
@@ -596,7 +621,7 @@ they land.
 | P5 | `feature:settings` | ☐ — near-leaf; one `android.os.Build` SDK check → `expect`/actual |
 | P5 | `feature:book_detail` | ☐ — small seam: external-link `Intent` + `Toast` → common open-URL/notify contract with Android/iOS actuals |
 | P5 | `feature:scan` | ☐ — CameraX/MLKit scanner (in `core:designsystem`) + camera-permission requester stay androidMain; non-camera logic to commonMain |
-| P5 | `feature:session` | ☐ — `ReadingSessionService` (foreground service) + media-style notification stay androidMain; iOS needs a background / Live-Activity equivalent |
+| P5 | `feature:session` | ✅ done — first feature with both a real `androidMain` and an `iosMain`. Peek bar + Focus Mode + Koin module → `commonMain`; `ReadingSessionService` (foreground service, media-style notification, `PendingIntent`, coil `Bitmap`) + `ReadingSessionLauncherImpl` (now `internal`) + the service manifest stay `androidMain`, behind the **`ReadingSessionLauncher` seam already in `core:designsystem/commonMain`** (no new contract — only its Koin binding). DI split via a new `expect val platformSessionModule` pulled into `sessionModule` with `includes(...)` (the `platformExploreModule` idiom): Android binds `ReadingSessionLauncherImpl(androidContext())`, iOS binds a **no-op launcher** (in-app session UI works on iOS; only the OS lock-screen surface is absent, so `start()` logs and returns — module bound, not omitted, so `ActiveSessionController`'s `get()` resolves). iOS breakage was the kotlinx-datetime 0.7.1-vs-0.6.2 `Clock` skew again: the live-timer `Clock.System.now()` → a **new sibling `currentInstant()` seam** in `core:designsystem`'s `CurrentDate` (only the `Clock` import differs between actuals; return type `kotlinx.datetime.Instant` matches the domain `readingDuration(now)` — a `kotlin.time.Instant` typealias on 0.7.1). `build.gradle.kts` fixes: `koin.compose` → `koin.compose.multiplatform`; `:core:notification`/`coil3`/`koin.android`/`core-ktx` → `androidMain`. No tests to relocate; `sessionModule` name unchanged so `orchestration` untouched. All iOS targets compile; `check` green |
 | P5 | `feature:app_update` | ☐ — Play `AppUpdateManager` + in-app-update flow stay androidMain (sanctioned); shared `AppUpdateState` already in `core:domain` |
 | P6 | `:orchestration` | ☐ |
 | P6 | `:app` (stays Android shell) + iOS/desktop entry points | ☐ |
