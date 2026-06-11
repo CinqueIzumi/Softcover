@@ -33,6 +33,10 @@ import androidx.lifecycle.lifecycleScope
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
@@ -43,13 +47,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.feature.app_update.domain.launcher.AppUpdateFlowLauncher
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CheckForAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 internal class MainActivity : ComponentActivity() {
     private val viewModel: MainActivityViewModel by viewModel()
@@ -89,12 +92,16 @@ internal class MainActivity : ComponentActivity() {
                 contract = ActivityResultContracts.StartIntentSenderForResult(),
             ) { }
 
+            val appUpdateFlowLauncher = remember(updateLauncher) {
+                this@MainActivity.get<AppUpdateFlowLauncher> { parametersOf(updateLauncher) }
+            }
+
             var appUpdateState by remember { mutableStateOf<AppUpdateState>(AppUpdateState.Idle) }
 
             val onStartAppUpdate: () -> Unit = {
                 when (appUpdateState) {
                     AppUpdateState.Downloaded -> completeAppUpdateUseCase()
-                    else -> startAppUpdateFlowUseCase(launcher = updateLauncher)
+                    else -> startAppUpdateFlowUseCase(appUpdateFlowLauncher)
                 }
             }
 
@@ -111,7 +118,7 @@ internal class MainActivity : ComponentActivity() {
                                     actionLabel = "Update",
                                     duration = SnackbarDuration.Indefinite,
                                     onActionClick = {
-                                        startAppUpdateFlowUseCase(launcher = updateLauncher)
+                                        startAppUpdateFlowUseCase(appUpdateFlowLauncher)
                                     },
                                 )
                             }

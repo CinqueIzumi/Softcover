@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
-import nl.rhaydus.softcover.feature.app_update.di.appUpdateVariantModule
 import nl.rhaydus.softcover.feature.book_detail.di.bookDetailModule
 import nl.rhaydus.softcover.feature.explore.di.exploreModule
 import nl.rhaydus.softcover.feature.library.di.libraryModule
@@ -48,7 +47,6 @@ val softcoverModules = listOf(
     profileModule,
     profileScreenModule,
     appUpdateModule,
-    appUpdateVariantModule,
     deadlinesModule,
     connectivityModule,
     notificationModule,
