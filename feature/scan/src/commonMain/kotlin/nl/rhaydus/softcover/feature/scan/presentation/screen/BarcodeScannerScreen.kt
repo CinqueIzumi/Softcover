@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.scan.presentation.screen
 
-import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -59,6 +57,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent
+import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraAvailable
 import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraPermissionGranted
 import nl.rhaydus.softcover.feature.scan.presentation.permission.rememberCameraPermissionRequester
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanScreenModel
@@ -75,15 +74,13 @@ class BarcodeScannerScreen : Screen {
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
-        val context = LocalContext.current
-
-        val hasCamera = remember {
-            context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
-        }
+        val hasCamera = isCameraAvailable()
 
         var manualMode by remember { mutableStateOf(hasCamera.not()) }
 
-        var cameraGranted by remember { mutableStateOf(isCameraPermissionGranted(context = context)) }
+        val initialCameraGranted = isCameraPermissionGranted()
+
+        var cameraGranted by remember { mutableStateOf(initialCameraGranted) }
 
         val permissionRequester = rememberCameraPermissionRequester { granted ->
             cameraGranted = granted
@@ -123,7 +120,7 @@ class BarcodeScannerScreen : Screen {
             }
         }
 
-        Screen(
+        BarcodeScannerContent(
             state = state,
             manualMode = manualMode,
             cameraGranted = cameraGranted,
@@ -144,7 +141,7 @@ class BarcodeScannerScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    private fun Screen(
+    private fun BarcodeScannerContent(
         state: ScanUiState,
         manualMode: Boolean,
         cameraGranted: Boolean,
