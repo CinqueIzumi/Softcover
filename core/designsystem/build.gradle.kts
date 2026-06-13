@@ -32,7 +32,7 @@ kotlin {
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(libs.androidx.lifecycle.viewmodel)
+            api(libs.androidx.lifecycle.viewmodel)
 
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.koin)
@@ -40,11 +40,11 @@ kotlin {
 
             api(libs.coil3)
 
-            implementation(libs.kotlinx.datetime)
+            api(libs.kotlinx.datetime)
         }
 
         androidMain.dependencies {
-            api(libs.androidx.compose.ui.text.google.fonts)
+            implementation(libs.androidx.compose.ui.text.google.fonts)
             implementation(libs.material.components)
 
             // Shared BarcodeScanner composable

@@ -3,6 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // The build-type debug-routes binding (app/src/debug) implements the @Composable DebugRoutesContent
+    // seam, so the application shell needs the Compose compiler to transform that override correctly.
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -68,8 +71,8 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // Image loading — Coil 3 singleton loader + network fetcher registration (the default loader
-    // ships no network fetcher, so the Application supplies one via SingletonImageLoader.Factory)
-    implementation(libs.coil3)
+    // Image loading — the Application registers a network fetcher on the singleton loader (the default
+    // loader ships none) via SingletonImageLoader.Factory. coil-core comes transitively from the
+    // network artifact; coil-compose is not used here (no Compose UI in :app).
     implementation(libs.coil3.network.okhttp)
 }

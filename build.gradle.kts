@@ -116,13 +116,28 @@ dependencyAnalysis {
                     "androidx.activity:activity-compose",
                     "androidx.compose.ui:ui",
                     "androidx.compose.ui:ui-tooling-preview",
+                    "androidx.compose.ui:ui-tooling",
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui-graphics",
+                    // KMP Compose Multiplatform artifacts provided uniformly by KmpComposeConventionPlugin.
+                    "org.jetbrains.compose.runtime:runtime",
+                    "org.jetbrains.compose.foundation:foundation",
+                    "org.jetbrains.compose.animation:animation",
+                    "org.jetbrains.compose.ui:ui",
+                    "org.jetbrains.compose.ui:ui-backhandler",
+                    "org.jetbrains.compose.components:components-ui-tooling-preview",
+                    "org.jetbrains.compose.material3:material3",
+                    // KMP-variant bundle deps from KmpLibraryConventionPlugin's commonMain set — provided
+                    // uniformly, so never a per-module "unused" finding (mirrors the onIncorrectConfiguration list).
+                    "io.insert-koin:koin-core",
+                    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
                     // False positives: genuinely used via mechanisms DA can't see without type resolution.
                     "io.insert-koin:koin-androidx-compose", // koinInject(...)
                     "cafe.adriel.voyager:voyager-koin", // ScreenModel / screenModelScope (ToadScreenModel)
                     "org.jetbrains.kotlinx:kotlinx-serialization-json", // @Serializable / Json
                     "androidx.work:work-runtime-ktx", // CoroutineWorker
+                    "androidx.camera:camera-camera2", // CameraX runtime backend, loaded via ServiceLoader (no compile ref)
+                    "com.google.mlkit:barcode-scanning", // MLKit barcode model + API used by the scanner; DA mis-resolves to a transitive
                 )
             }
 

@@ -15,7 +15,6 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.androidx.work.runtime.ktx)
-            implementation(libs.androidx.core.ktx)
             implementation(libs.koin.android)
         }
     }

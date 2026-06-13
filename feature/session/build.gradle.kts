@@ -21,8 +21,6 @@ kotlin {
             implementation(project(":core:notification"))
 
             implementation(libs.koin.android)
-            implementation(libs.coil3)
-            implementation(libs.androidx.core.ktx)
         }
     }
 }
