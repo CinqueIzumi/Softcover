@@ -8,6 +8,20 @@ kotlin {
         namespace = "nl.rhaydus.softcover.orchestration"
     }
 
+    // :orchestration aggregates the whole module graph and hosts App(), so it is the module that
+    // ships the iOS app framework the Xcode project embeds. The iOS targets themselves are declared
+    // by the softcover.kmp.library convention plugin; re-declaring them here is idempotent and only
+    // attaches the framework binary. Only this module exports a framework — keeping binaries.framework
+    // out of the convention plugin avoids emitting one for every library module. The whole graph is
+    // statically linked in, so no explicit `export(...)` is needed; Swift only calls MainViewController
+    // and doInitKoinIos, both defined in this module's iosMain.
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "OrchestrationKit"
+            isStatic = true
+        }
+    }
+
     sourceSets {
         commonMain.dependencies {
             // Core modules
@@ -49,6 +63,13 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.koin.android)
             implementation(libs.androidx.splash)
+        }
+
+        iosMain.dependencies {
+            // Coil's network image loading on iOS rides Ktor's Darwin engine (OkHttp is JVM/Android-
+            // only). Confined to iosMain so Android keeps its OkHttp fetcher untouched.
+            implementation(libs.coil3.network.ktor)
+            implementation(libs.ktor.client.darwin)
         }
     }
 }

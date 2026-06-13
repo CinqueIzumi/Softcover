@@ -46,5 +46,9 @@ output-metadata.json
 # Temp file for build system
 *.salive
 
+# Xcode (per-user state — never commit)
+xcuserdata/
+*.xcuserstate
+
 # Claude
 .claude/settings.local.json

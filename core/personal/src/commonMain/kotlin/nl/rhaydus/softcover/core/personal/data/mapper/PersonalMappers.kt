@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity

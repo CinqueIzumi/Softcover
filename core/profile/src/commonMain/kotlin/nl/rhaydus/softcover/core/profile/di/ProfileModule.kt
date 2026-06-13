@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.profile.di
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSourceImpl

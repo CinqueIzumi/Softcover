@@ -1,30 +1,19 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.util
 
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 
-/**
- * Today's date in the system time zone. Behind a seam because the underlying `Clock` type differs by
- * kotlinx-datetime version across this module's targets: Android resolves 0.6.2 (`kotlinx.datetime.Clock`),
- * while the iOS target resolves 0.7.1 (forced by Compose Multiplatform, where `Clock` moved to
- * `kotlin.time`). `LocalDate` itself is stable across both versions, so it is safe in `commonMain`.
- */
-expect fun currentLocalDate(): LocalDate
+/** Today's date in the system time zone. */
+fun currentLocalDate(): LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
-/**
- * The current date-and-time in the system time zone. Behind the same seam as [currentLocalDate] for
- * the same reason — the `Clock`/`Instant` types moved to `kotlin.time` in kotlinx-datetime 0.7.1 (the
- * CMP/iOS version) while Android resolves 0.6.2. `LocalDateTime` is stable across both, so it is safe
- * in `commonMain`.
- */
-expect fun currentLocalDateTime(): LocalDateTime
+/** The current date-and-time in the system time zone. */
+fun currentLocalDateTime(): LocalDateTime =
+    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
-/**
- * The current instant. Behind the same seam as [currentLocalDate] for the same reason — `Clock` moved
- * to `kotlin.time` in kotlinx-datetime 0.7.1 (the CMP/iOS version) while Android resolves 0.6.2. The
- * return type `Instant` is stable across both (a `kotlin.time.Instant` typealias on 0.7.1), so callers
- * in `commonMain` can compute elapsed durations (e.g. a live reading-session timer) without seeing the
- * platform `Clock`.
- */
-expect fun currentInstant(): Instant
+/** The current instant — callers compute elapsed durations from it (e.g. a live reading-session timer). */
+fun currentInstant(): Instant = Clock.System.now()

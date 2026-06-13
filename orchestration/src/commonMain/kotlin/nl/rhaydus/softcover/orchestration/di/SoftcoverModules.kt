@@ -26,7 +26,7 @@ import nl.rhaydus.softcover.feature.scan.di.scanModule
 import nl.rhaydus.softcover.feature.session.di.sessionModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
 
-val softcoverModules = listOf(
+internal val softcoverModules = listOf(
     designSystemModule,
     preferencesModule,
     identityModule,

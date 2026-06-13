@@ -4,12 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import platform.UserNotifications.UNAuthorizationOptionAlert
-import platform.UserNotifications.UNAuthorizationOptionBadge
-import platform.UserNotifications.UNAuthorizationOptionSound
-import platform.UserNotifications.UNUserNotificationCenter
-import platform.darwin.dispatch_async
-import platform.darwin.dispatch_get_main_queue
 
 @Composable
 actual fun rememberNotificationPermissionRequester(
@@ -20,19 +14,11 @@ actual fun rememberNotificationPermissionRequester(
 
     return remember {
         NotificationPermissionRequester(
-            launchRequest = {
-                val options = UNAuthorizationOptionAlert or UNAuthorizationOptionSound or UNAuthorizationOptionBadge
-
-                UNUserNotificationCenter.currentNotificationCenter()
-                    .requestAuthorizationWithOptions(options) { granted, _ ->
-                        // The completion handler runs off the main queue; Compose state must be touched on it.
-                        dispatch_async(dispatch_get_main_queue()) {
-                            currentOnResult(granted)
-                        }
-                    }
-            },
-            // iOS always requires a runtime authorization prompt — there is no install-time grant.
-            isAlreadyGranted = false,
+            // iOS has no reading-session lock-screen surface yet (the launcher is a no-op), so a notification
+            // authorization prompt would ask the user to grant a capability that does nothing. Skip the prompt and
+            // report granted so the session still starts; wire up the real request when the iOS surface lands.
+            launchRequest = {},
+            isAlreadyGranted = true,
             onResult = { currentOnResult(it) },
         )
     }

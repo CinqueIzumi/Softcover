@@ -2,8 +2,8 @@ package nl.rhaydus.softcover.core.domain.model
 
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 data class ReadingSession(
     val id: Long,

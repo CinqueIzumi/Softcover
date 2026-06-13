@@ -25,7 +25,7 @@ composeMaterial3Expressive = "1.11.0-alpha07"
 material3ComposeVersion = "1.5.0-alpha13"
 materialComponentsVersion = "1.13.0"
 kermitVersion = "2.0.6"
-kotlinxDatetime = "0.6.2"
+kotlinxDatetime = "0.7.1"
 koinVersion = "3.5.3"
 # Multiplatform koin-compose is versioned separately from koin core; 1.1.x targets Koin 3.5.x.
 koinComposeMultiplatform = "1.1.2"
@@ -42,6 +42,9 @@ reorderableVersion = "2.4.3"
 cameraX = "1.4.2"
 mlkitBarcode = "17.3.0"
 coroutines = "1.10.2"
+# Ktor powers Coil's network image loading on iOS only (Coil's OkHttp fetcher is JVM/Android-only and
+# Apollo brings no Ktor engine to reuse). Aligned with the Ktor 3.x line Coil 3.2.0 is built against.
+ktor = "3.1.0"
 detekt = "1.23.8"
 dependencyAnalysis = "3.14.1"
 sqlite = "2.6.2"
@@ -93,6 +96,8 @@ voyager-tabNavigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", v
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
 coil3 = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coilVersion" }
 coil3-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coilVersion" }
+coil3-network-ktor = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coilVersion" }
+ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
 kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermitVersion" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinVersion" }
