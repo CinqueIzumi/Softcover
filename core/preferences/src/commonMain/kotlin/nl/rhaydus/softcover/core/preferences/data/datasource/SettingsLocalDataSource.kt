@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
@@ -12,6 +13,7 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
+import nl.rhaydus.softcover.core.preferences.data.model.toEntity
 import nl.rhaydus.softcover.core.preferences.data.model.toModel
 
 interface SettingsLocalDataSource {
@@ -67,6 +69,10 @@ interface SettingsLocalDataSource {
     val libraryTabOrder: Flow<List<String>>
 
     suspend fun setLibraryTabOrder(order: List<String>)
+
+    val desktopWindowState: Flow<DesktopWindowState>
+
+    suspend fun setDesktopWindowState(state: DesktopWindowState)
 }
 
 internal class SettingsLocalDataSourceImpl(
@@ -224,6 +230,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setLibraryTabOrder(order: List<String>) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(libraryTabOrder = order)
+        }
+    }
+
+    override val desktopWindowState: Flow<DesktopWindowState> = appSettingsDataStore.store.data
+        .map { it.desktopWindowState.toModel() }
+        .distinctUntilChanged()
+
+    override suspend fun setDesktopWindowState(state: DesktopWindowState) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(desktopWindowState = state.toEntity())
         }
     }
 }
