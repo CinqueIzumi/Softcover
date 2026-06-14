@@ -51,6 +51,8 @@ internal fun LibraryControlStrip(
     state: LibraryUiState,
     tab: LibraryTab?,
     runAction: (LibraryAction) -> Unit,
+    layoutOptions: List<LibraryGridLayout> = LibraryGridLayout.entries,
+    layoutLabel: (LibraryGridLayout) -> String = LibraryGridLayout::label,
 ) {
     val currentTab = tab ?: return
     val tabId = currentTab.id
@@ -89,6 +91,8 @@ internal fun LibraryControlStrip(
         LayoutAction(
             state = state,
             runAction = runAction,
+            layoutOptions = layoutOptions,
+            layoutLabel = layoutLabel,
         )
     }
 }
@@ -352,6 +356,8 @@ private fun RearrangeAction(
 private fun LayoutAction(
     state: LibraryUiState,
     runAction: (LibraryAction) -> Unit,
+    layoutOptions: List<LibraryGridLayout>,
+    layoutLabel: (LibraryGridLayout) -> String,
 ) {
     Box {
         IconButton(
@@ -376,11 +382,11 @@ private fun LayoutAction(
                 runAction(OnLayoutMenuExpandedChangeAction(expanded = false))
             },
         ) {
-            LibraryGridLayout.entries.forEach { layout ->
+            layoutOptions.forEach { layout ->
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = layout.label,
+                            text = layoutLabel(layout),
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     },

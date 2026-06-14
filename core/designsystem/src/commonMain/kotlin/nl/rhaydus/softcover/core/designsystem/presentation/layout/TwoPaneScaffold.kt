@@ -17,34 +17,43 @@ import androidx.compose.ui.unit.dp
  * large window (the canonical use is a library/reading shelf in [list] beside a book detail in
  * [detail]).
  *
- * The [list] pane takes a fixed [listPaneWidth]; the [detail] pane takes the rest. A [divider]
- * separates them by default.
+ * The [list] pane takes a fixed [listPaneWidth] and the [detail] pane takes the rest, separated by a
+ * [divider]. Passing a `null` [detail] collapses to a **single pane**: [list] fills the full width
+ * with no divider. [list] is always the first child either way, so a caller that toggles [detail]
+ * between a value and `null` keeps the list subtree in a stable slot — its state (and any
+ * `movableContentOf` it hosts) is preserved across the toggle rather than torn down and rebuilt.
  */
 @Composable
 fun TwoPaneScaffold(
     list: @Composable () -> Unit,
-    detail: @Composable () -> Unit,
+    detail: (@Composable () -> Unit)?,
     modifier: Modifier = Modifier,
     listPaneWidth: Dp = 360.dp,
     divider: @Composable () -> Unit = { VerticalDivider() },
 ) {
     Row(modifier = modifier.fillMaxSize()) {
         Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(listPaneWidth),
+            modifier = if (detail == null) {
+                Modifier.fillMaxSize()
+            } else {
+                Modifier
+                    .fillMaxHeight()
+                    .width(listPaneWidth)
+            },
         ) {
             list()
         }
 
-        divider()
+        if (detail != null) {
+            divider()
 
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f),
-        ) {
-            detail()
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f),
+            ) {
+                detail()
+            }
         }
     }
 }
