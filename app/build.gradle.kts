@@ -22,6 +22,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing is configured only when a keystore is supplied via the environment (CI decodes
+    // one from repository secrets). A local build without these variables falls back to an unsigned
+    // release — exactly as before — so the signing wiring never blocks a developer build.
+    val releaseKeystoreFile = System.getenv("ANDROID_KEYSTORE_FILE")?.let(::file)
+
+    signingConfigs {
+        if (releaseKeystoreFile != null) {
+            create("release") {
+                storeFile = releaseKeystoreFile
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -29,6 +45,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Null when no keystore is supplied (local builds) → release stays unsigned, as before.
+            signingConfig = signingConfigs.findByName("release")
         }
     }
     compileOptions {
