@@ -42,6 +42,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSe
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.editorialContentWidth
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
@@ -116,6 +117,7 @@ object SettingsScreen : Screen {
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .imePadding()
+                    .editorialContentWidth()
                     .padding(horizontal = 24.dp),
             ) {
                 Spacer(modifier = Modifier.height(8.dp))

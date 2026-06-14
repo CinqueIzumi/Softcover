@@ -48,6 +48,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSu
 import nl.rhaydus.softcover.core.designsystem.presentation.component.HeroStatNumberField
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.editorialContentWidth
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
@@ -140,6 +141,7 @@ private fun FocusModeContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
+                    .editorialContentWidth()
                     .padding(horizontal = 24.dp, vertical = 16.dp),
             ) {
                 Text(

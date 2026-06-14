@@ -85,6 +85,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -125,6 +126,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleCl
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailOverlayNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPaneCloseHandler
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
@@ -217,11 +220,26 @@ class BookDetailScreen(
     @TransientNavArg private val initialCover: BookInitialCover? = null,
     private val transitionSurface: String? = null,
 ) : Screen {
+    // The key must include the book id: Voyager's ScreenModelStore is keyed by the screen key, so a
+    // class-constant key makes every book share one BookDetailScreenScreenModel. That surfaces in the
+    // two-pane (each book is a fresh nested navigator) as "every selection shows the first book."
+    override val key: ScreenKey = "book-detail-$id"
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
         val appNavigator = koinInject<AppNavigator>()
+
+        // In the expanded two-pane layout the detail rides in a pane, not the nav stack — back must
+        // clear the pane (handler provided by the shell) rather than pop. Null on the pushed path.
+        val paneCloseHandler = LocalBookDetailPaneCloseHandler.current
+        val onNavigateBack: () -> Unit = paneCloseHandler ?: { navigator.pop() }
+
+        // Full-screen overlays (cover viewer, create-list) push onto the root navigator when in the
+        // two-pane layout so they aren't cropped into the detail pane; the detail's own navigator on
+        // the pushed path.
+        val overlayNavigator = LocalBookDetailOverlayNavigator.current ?: navigator
 
         val screenModel: BookDetailScreenScreenModel =
             koinScreenModel<BookDetailScreenScreenModel> { parametersOf(
@@ -265,11 +283,11 @@ class BookDetailScreen(
         Screen(
             state = state,
             runAction = screenModel::runAction,
-            onNavigateBack = navigator::pop,
+            onNavigateBack = onNavigateBack,
             onCoverClick = {
                 val book = state.book ?: return@Screen
 
-                navigator.push(
+                overlayNavigator.push(
                     FullScreenCoverScreen(
                         edition = state.displayedEdition,
                         defaultEdition = book.defaultEdition,
@@ -280,7 +298,7 @@ class BookDetailScreen(
             onCreateNewListClick = {
                 screenModel.runAction(OnDismissChooseListsSheetAction())
 
-                navigator.push(item = appNavigator.screen(ScreenDestination.CreateList))
+                overlayNavigator.push(item = appNavigator.screen(ScreenDestination.CreateList))
             },
             isOnline = isOnline,
             celebrationKey = celebrationKey,

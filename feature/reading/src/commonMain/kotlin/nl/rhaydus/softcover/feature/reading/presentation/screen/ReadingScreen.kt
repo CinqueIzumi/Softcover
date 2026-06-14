@@ -103,6 +103,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScale
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPresenter
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
@@ -159,19 +160,22 @@ object ReadingScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val tabNavigator = LocalTabNavigator.current
         val appNavigator = koinInject<AppNavigator>()
+        val bookDetailPresenter = LocalBookDetailPresenter.current
 
         Screen(
             state = state,
             runAction = screenModel::runAction,
             onBookClick = {
-                navigator.parent?.push(
-                    item = appNavigator.screen(
-                        ScreenDestination.BookDetail(
-                            id = it.id,
-                            initialCover = BookInitialCover.fromBook(book = it),
-                        ),
-                    ),
+                val destination = ScreenDestination.BookDetail(
+                    id = it.id,
+                    initialCover = BookInitialCover.fromBook(book = it),
                 )
+
+                if (bookDetailPresenter != null) {
+                    bookDetailPresenter.open(destination)
+                } else {
+                    navigator.parent?.push(item = appNavigator.screen(destination))
+                }
             },
             onNavigateToSearch = {
                 tabNavigator.current = appNavigator.tab(TabDestination.EXPLORE)

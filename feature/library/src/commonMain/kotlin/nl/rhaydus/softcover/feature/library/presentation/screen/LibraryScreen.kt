@@ -123,6 +123,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconRe
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPresenter
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
@@ -181,6 +182,7 @@ object LibraryScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
 
         val appNavigator = koinInject<AppNavigator>()
+        val bookDetailPresenter = LocalBookDetailPresenter.current
 
         val screenModel = koinScreenModel<LibraryScreenScreenModel>()
 
@@ -196,25 +198,29 @@ object LibraryScreen : Screen {
                 gridStateFor = { id -> localState.gridStates[id] ?: LazyGridState() },
                 topAppBarState = screenModel.headerScrollState,
                 onBookClick = {
-                    navigator.parent?.push(
-                        item = appNavigator.screen(
-                            ScreenDestination.BookDetail(
-                                id = it.id,
-                                initialCover = BookInitialCover.fromBook(book = it),
-                            ),
-                        ),
+                    val destination = ScreenDestination.BookDetail(
+                        id = it.id,
+                        initialCover = BookInitialCover.fromBook(book = it),
                     )
+
+                    if (bookDetailPresenter != null) {
+                        bookDetailPresenter.open(destination)
+                    } else {
+                        navigator.parent?.push(item = appNavigator.screen(destination))
+                    }
                 },
                 onEditionClick = {
-                    navigator.parent?.push(
-                        item = appNavigator.screen(
-                            ScreenDestination.BookDetail(
-                                id = it.bookId,
-                                initialCover = BookInitialCover.fromEdition(edition = it),
-                                transitionSurface = "edition-${it.id}",
-                            ),
-                        ),
+                    val destination = ScreenDestination.BookDetail(
+                        id = it.bookId,
+                        initialCover = BookInitialCover.fromEdition(edition = it),
+                        transitionSurface = "edition-${it.id}",
                     )
+
+                    if (bookDetailPresenter != null) {
+                        bookDetailPresenter.open(destination)
+                    } else {
+                        navigator.parent?.push(item = appNavigator.screen(destination))
+                    }
                 },
                 onTabLongPress = {
                     navigator.parent?.push(

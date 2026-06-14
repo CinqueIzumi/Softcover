@@ -33,6 +33,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.editorialContentWidth
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
@@ -81,6 +82,7 @@ class AppearanceSettingsScreen : Screen {
                 modifier = Modifier
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
+                    .editorialContentWidth()
                     .padding(
                         horizontal = 24.dp,
                         vertical = 16.dp,

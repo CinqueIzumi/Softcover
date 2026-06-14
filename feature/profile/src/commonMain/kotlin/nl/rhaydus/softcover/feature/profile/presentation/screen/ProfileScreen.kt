@@ -47,6 +47,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedSta
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.editorialContentWidth
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -106,7 +107,8 @@ class ProfileScreen : Screen {
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
+                    .editorialContentWidth(),
             ) {
                 ProfileHeader(
                     profileImageUrl = state.userProfileData?.profileImageUrl,

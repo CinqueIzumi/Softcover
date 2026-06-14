@@ -81,6 +81,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClic
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPresenter
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
@@ -127,6 +128,7 @@ object ExploreScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
 
         val appNavigator = koinInject<AppNavigator>()
+        val bookDetailPresenter = LocalBookDetailPresenter.current
 
         val screenModel = koinScreenModel<ExploreScreenScreenModel>()
 
@@ -141,15 +143,17 @@ object ExploreScreen : Screen {
                 state = state,
                 runAction = screenModel::runAction,
                 onBookClick = { book, surface ->
-                    navigator.parent?.push(
-                        item = appNavigator.screen(
-                            ScreenDestination.BookDetail(
-                                id = book.id,
-                                initialCover = BookInitialCover.fromBook(book = book),
-                                transitionSurface = surface,
-                            ),
-                        ),
+                    val destination = ScreenDestination.BookDetail(
+                        id = book.id,
+                        initialCover = BookInitialCover.fromBook(book = book),
+                        transitionSurface = surface,
                     )
+
+                    if (bookDetailPresenter != null) {
+                        bookDetailPresenter.open(destination)
+                    } else {
+                        navigator.parent?.push(item = appNavigator.screen(destination))
+                    }
                 },
                 onScanClick = {
                     navigator.parent?.push(item = appNavigator.screen(ScreenDestination.BarcodeScanner))
