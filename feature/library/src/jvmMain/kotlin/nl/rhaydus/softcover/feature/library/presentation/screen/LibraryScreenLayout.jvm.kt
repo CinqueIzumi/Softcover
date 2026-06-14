@@ -539,16 +539,17 @@ private fun DesktopLibraryHeader(
 /**
  * Desktop column strategy: cover grids fill the content width adaptively (more columns on a wider
  * window) rather than honouring the phone-tuned fixed 2/3 split, while list layouts stay single
- * column. Cover-only grids pack denser than titled grids since they carry no caption.
+ * column. Titled and cover-only grids share the same cover footprint (`minSize`) so a cover is never
+ * smaller without its caption — dropping the caption only makes the cover-only grid denser *vertically*
+ * (shorter cells), not horizontally; with its tighter item spacing it ends up a touch larger, never
+ * smaller.
  */
 private fun desktopGridColumns(layout: LibraryGridLayout): GridCells = when (layout) {
     LibraryGridLayout.GRID_TWO_COLUMNS,
     LibraryGridLayout.GRID_THREE_COLUMNS,
-        -> GridCells.Adaptive(minSize = 150.dp)
-
     LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
     LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-        -> GridCells.Adaptive(minSize = 100.dp)
+        -> GridCells.Adaptive(minSize = 150.dp)
 
     LibraryGridLayout.LIST_COMPACT,
     LibraryGridLayout.LIST_LARGE,
