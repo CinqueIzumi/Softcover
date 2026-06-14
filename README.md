@@ -4,22 +4,42 @@ A [Hardcover.app](https://hardcover.app/) client for **Android, iOS, and desktop
 
 A Kotlin Multiplatform app: domain, data, and UI are shared across all three platforms via Compose Multiplatform. Android targets 8.0+.
 
+> **Why Softcover?** A fast, native home for your Hardcover shelves on the devices you actually read on — your library, reading progress, deadlines, and barcode-scan-to-add in your pocket *and* on your desktop, all from a single shared codebase.
+
+[![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/CinqueIzumi/Softcover/branch/main/graph/badge.svg)](https://codecov.io/gh/CinqueIzumi/Softcover)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-4285F4?logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
 [![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Desktop-3DDC84)](#running-the-apps)
 [![Min SDK](https://img.shields.io/badge/min%20SDK-26-3DDC84?logo=android&logoColor=white)](https://developer.android.com/about/versions/oreo)
+[![Last commit](https://img.shields.io/github/last-commit/CinqueIzumi/Softcover)](https://github.com/CinqueIzumi/Softcover/commits)
+[![Code size](https://img.shields.io/github/languages/code-size/CinqueIzumi/Softcover)](https://github.com/CinqueIzumi/Softcover)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
 
 ## Table of Contents
 
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
 - [Getting Started](#getting-started)
 - [Running the apps](#running-the-apps)
+- [Roadmap](#roadmap)
 - [Project Documentation](#project-documentation)
+- [Star History](#star-history)
 - [Disclaimer](#disclaimer)
+
+---
+
+## Screenshots
+
+| Library | Book Details | Explore |
+|:---:|:---:|:---:|
+| ![Library](screenshots/library.png) | ![Book Details](screenshots/book-detail.png) | ![Explore](screenshots/explore.png) |
+
+<sub>The same shared UI runs on Android, iOS, and desktop from one codebase. More shots live in [`screenshots/`](screenshots/).</sub>
 
 ---
 
@@ -127,6 +147,253 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ---
 
+## Architecture
+
+Softcover follows **Clean Architecture** as a multi-module Gradle build with a strict tier DAG: `:app` (platform shell) → `:orchestration` (nav host + cross-feature use cases) → `:feature:*` → `:core:*`. A feature module never depends on a sibling feature; the boundary is enforced at build time by a custom `checkModuleGraph` gate. The full layering and the TOAD state-management framework are documented in [ARCHITECTURE.md](ARCHITECTURE.md) and [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md).
+
+### Module graph
+
+```mermaid
+%%{
+  init: {
+    'theme': 'neutral'
+  }
+}%%
+
+graph LR
+  subgraph :core
+    :core:domain["domain"]
+    :core:book["book"]
+    :core:lists["lists"]
+    :core:deadlines["deadlines"]
+    :core:library["library"]
+    :core:preferences["preferences"]
+    :core:designsystem["designsystem"]
+    :core:database["database"]
+    :core:network["network"]
+    :core:profile["profile"]
+    :core:identity["identity"]
+    :core:personal["personal"]
+    :core:notification["notification"]
+    :core:connectivity["connectivity"]
+  end
+  subgraph :feature
+    :feature:library["library"]
+    :feature:app_update["app_update"]
+    :feature:settings["settings"]
+    :feature:book_detail["book_detail"]
+    :feature:explore["explore"]
+    :feature:lists["lists"]
+    :feature:onboarding["onboarding"]
+    :feature:profile["profile"]
+    :feature:reading["reading"]
+    :feature:scan["scan"]
+    :feature:session["session"]
+  end
+  :feature:library --> :core:domain
+  :feature:library --> :core:book
+  :feature:library --> :core:lists
+  :feature:library --> :core:deadlines
+  :feature:library --> :core:library
+  :feature:library --> :core:preferences
+  :feature:library --> :core:designsystem
+  :core:database --> :core:domain
+  :core:preferences --> :core:domain
+  :core:preferences --> :core:network
+  :feature:app_update --> :core:domain
+  :core:designsystem --> :core:domain
+  :core:designsystem --> :core:book
+  :core:designsystem --> :core:library
+  :core:designsystem --> :core:profile
+  :core:designsystem --> :core:identity
+  :core:designsystem --> :core:personal
+  :core:designsystem --> :core:preferences
+  :core:deadlines --> :core:domain
+  :core:deadlines --> :core:database
+  :feature:settings --> :core:domain
+  :feature:settings --> :core:preferences
+  :feature:settings --> :core:lists
+  :feature:settings --> :core:library
+  :feature:settings --> :core:designsystem
+  :app --> :orchestration
+  :app --> :core:designsystem
+  :app --> :core:domain
+  :app --> :core:notification
+  :core:network --> :core:domain
+  :orchestration --> :core:domain
+  :orchestration --> :core:network
+  :orchestration --> :core:database
+  :orchestration --> :core:preferences
+  :orchestration --> :core:identity
+  :orchestration --> :core:book
+  :orchestration --> :core:lists
+  :orchestration --> :core:deadlines
+  :orchestration --> :core:personal
+  :orchestration --> :core:profile
+  :orchestration --> :core:library
+  :orchestration --> :core:connectivity
+  :orchestration --> :core:notification
+  :orchestration --> :core:designsystem
+  :orchestration --> :feature:book_detail
+  :orchestration --> :feature:explore
+  :orchestration --> :feature:library
+  :orchestration --> :feature:lists
+  :orchestration --> :feature:onboarding
+  :orchestration --> :feature:profile
+  :orchestration --> :feature:reading
+  :orchestration --> :feature:scan
+  :orchestration --> :feature:session
+  :orchestration --> :feature:settings
+  :orchestration --> :feature:app_update
+  :core:personal --> :core:domain
+  :core:personal --> :core:database
+  :feature:reading --> :core:domain
+  :feature:reading --> :core:book
+  :feature:reading --> :core:deadlines
+  :feature:reading --> :core:library
+  :feature:reading --> :core:preferences
+  :feature:reading --> :core:profile
+  :feature:reading --> :core:notification
+  :feature:reading --> :core:designsystem
+  :feature:book_detail --> :core:domain
+  :feature:book_detail --> :core:identity
+  :feature:book_detail --> :core:designsystem
+  :feature:book_detail --> :core:book
+  :feature:book_detail --> :core:lists
+  :feature:book_detail --> :core:deadlines
+  :feature:book_detail --> :core:profile
+  :feature:book_detail --> :core:preferences
+  :feature:book_detail --> :core:database
+  :feature:book_detail --> :core:network
+  :feature:explore --> :core:domain
+  :feature:explore --> :core:book
+  :feature:explore --> :core:identity
+  :feature:explore --> :core:database
+  :feature:explore --> :core:network
+  :feature:explore --> :core:designsystem
+  :feature:profile --> :core:domain
+  :feature:profile --> :core:profile
+  :feature:profile --> :core:designsystem
+  : --> :app
+  : --> :core
+  : --> :desktopApp
+  : --> :feature
+  : --> :orchestration
+  : --> :core:book
+  : --> :core:connectivity
+  : --> :core:database
+  : --> :core:deadlines
+  : --> :core:designsystem
+  : --> :core:domain
+  : --> :core:identity
+  : --> :core:library
+  : --> :core:lists
+  : --> :core:network
+  : --> :core:notification
+  : --> :core:personal
+  : --> :core:preferences
+  : --> :core:profile
+  : --> :feature:app_update
+  : --> :feature:book_detail
+  : --> :feature:explore
+  : --> :feature:library
+  : --> :feature:lists
+  : --> :feature:onboarding
+  : --> :feature:profile
+  : --> :feature:reading
+  : --> :feature:scan
+  : --> :feature:session
+  : --> :feature:settings
+  :core:library --> :core:domain
+  :core:library --> :core:book
+  :core:library --> :core:lists
+  :core:library --> :core:preferences
+  :core:library --> :core:identity
+  :feature:lists --> :core:domain
+  :feature:lists --> :core:lists
+  :feature:lists --> :core:designsystem
+  :feature:scan --> :core:domain
+  :feature:scan --> :core:book
+  :feature:scan --> :core:designsystem
+  :desktopApp --> :orchestration
+  :desktopApp --> :core:domain
+  :core:book --> :core:domain
+  :core:book --> :core:network
+  :core:book --> :core:database
+  :core:lists --> :core:domain
+  :core:lists --> :core:database
+  :core:lists --> :core:network
+  :core:lists --> :core:book
+  :feature:onboarding --> :core:domain
+  :feature:onboarding --> :core:identity
+  :feature:onboarding --> :core:designsystem
+  :core:profile --> :core:domain
+  :core:profile --> :core:identity
+  :core:profile --> :core:network
+  :core:connectivity --> :core:domain
+  :core:connectivity --> :core:database
+  :core:connectivity --> :core:book
+  :core:connectivity --> :core:lists
+  :feature:session --> :core:designsystem
+  :feature:session --> :core:notification
+  :core:identity --> :core:preferences
+  :core:identity --> :core:domain
+  :core:notification --> :core:domain
+
+classDef kotlin-multiplatform fill:#C792EA,stroke:#fff,stroke-width:2px,color:#fff;
+classDef android-application fill:#2C4162,stroke:#fff,stroke-width:2px,color:#fff;
+classDef unknown fill:#676767,stroke:#fff,stroke-width:2px,color:#fff;
+classDef kotlin-jvm fill:#8150FF,stroke:#fff,stroke-width:2px,color:#fff;
+class :feature:library kotlin-multiplatform
+class :core:domain kotlin-multiplatform
+class :core:book kotlin-multiplatform
+class :core:lists kotlin-multiplatform
+class :core:deadlines kotlin-multiplatform
+class :core:library kotlin-multiplatform
+class :core:preferences kotlin-multiplatform
+class :core:designsystem kotlin-multiplatform
+class :core:database kotlin-multiplatform
+class :core:network kotlin-multiplatform
+class :feature:app_update kotlin-multiplatform
+class :core:profile kotlin-multiplatform
+class :core:identity kotlin-multiplatform
+class :core:personal kotlin-multiplatform
+class :feature:settings kotlin-multiplatform
+class :app android-application
+class :orchestration kotlin-multiplatform
+class :core:notification kotlin-multiplatform
+class :core:connectivity kotlin-multiplatform
+class :feature:book_detail kotlin-multiplatform
+class :feature:explore kotlin-multiplatform
+class :feature:lists kotlin-multiplatform
+class :feature:onboarding kotlin-multiplatform
+class :feature:profile kotlin-multiplatform
+class :feature:reading kotlin-multiplatform
+class :feature:scan kotlin-multiplatform
+class :feature:session kotlin-multiplatform
+class : unknown
+class :core unknown
+class :desktopApp kotlin-jvm
+class :feature unknown
+
+```
+### State flow (TOAD)
+
+Every screen is driven by a custom framework on top of Voyager's `ScreenModel`. Interactions flow one way: a `UiAction` runs against use cases (resolved via `ActionDependencies`), the result is written with `setState()`, and the immutable `UiState` re-emits on a `StateFlow` to recompose the UI. One-time effects (navigation, snackbars) go out as `UiEvent`s on a `Channel`.
+
+```mermaid
+flowchart LR
+    UI["Composable screen"] -->|UiAction| SM["ScreenModel"]
+    SM -->|"execute() via ActionDependencies"| UC["Use cases"]
+    UC --> Repo["Repository"]
+    Repo --> UC
+    UC -->|"setState()"| State[("UiState · StateFlow")]
+    State -->|recompose| UI
+    SM -.->|"UiEvent · Channel"| UI
+```
+
+---
+
 ## Getting Started
 
 ### Prerequisites
@@ -182,14 +449,30 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 ---
 
+## Roadmap
+
+Softcover is being actively redesigned. The high-level direction lives in [ROADMAP.md](ROADMAP.md), and the sequenced, pick-up-next work items live in [ROADMAP_STEPS.md](ROADMAP_STEPS.md) — completed steps are deleted as they land, so the file always reflects what's left.
+
+---
+
 ## Project Documentation
 
 | Document | Purpose |
 |---|---|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Clean Architecture layout and the TOAD state-management framework |
+| [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) | Module tiers, allowed dependency directions, and where new code belongs |
 | [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [CODE_STYLE_GUIDE.md](CODE_STYLE_GUIDE.md) | Naming, layout, and whitespace conventions |
+| [ROADMAP.md](ROADMAP.md) | Redesign roadmap and the sequenced step list |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |
+
+---
+
+## Star History
+
+<a href="https://star-history.com/#CinqueIzumi/Softcover&Date">
+  <img src="https://api.star-history.com/svg?repos=CinqueIzumi/Softcover&type=Date" alt="Star History Chart" width="600">
+</a>
 
 ---
 

@@ -47,6 +47,10 @@ coroutines = "1.10.2"
 ktor = "3.1.0"
 detekt = "1.23.8"
 dependencyAnalysis = "3.14.1"
+# Generates the Mermaid module-dependency graph embedded in README.md (./gradlew createModuleGraph).
+moduleGraph = "0.13.0"
+# Kotlin code-coverage toolset; aggregates an XML report at the root for Codecov upload in CI.
+kover = "0.9.8"
 sqlite = "2.6.2"
 # KSafe backs the desktop (JVM) SecureApiKeyStorage actual: it custodies the encryption key in the OS
 # secret store (macOS Keychain / Windows DPAPI / Linux Secret Service) with a software fallback. Used
@@ -145,3 +149,5 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }
+module-graph = { id = "dev.iurysouza.modulegraph", version.ref = "moduleGraph" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
