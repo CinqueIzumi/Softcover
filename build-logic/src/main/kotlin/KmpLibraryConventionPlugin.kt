@@ -81,6 +81,33 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
                 runtimeOnly(libs.library("junit-platform-launcher"))
                 implementation(libs.library("mockk"))
             }
+
+            // Shared mobile (Android + iOS, excluding desktop/JVM) source set. KMP provides no
+            // Android+iOS-only set by default. Desktop-specific UI is branched into `jvmMain`; the
+            // Android and iOS layouts stay identical and must live in exactly one place — `mobileMain`.
+            // Both `androidMain` and `iosMain` depend on it, while `jvmMain` stays on `commonMain`
+            // alone, so an `expect` in `commonMain` is satisfied by one `actual` in `mobileMain`
+            // (covering Android + iOS) plus one in `jvmMain` (desktop). Declared centrally here so every
+            // `:core:*` / `:feature:*` module gets the seam without per-module wiring. Calling the
+            // template explicitly keeps it applied (manual `dependsOn` edges otherwise disable the
+            // auto-application) and guarantees `androidMain`/`iosMain` exist before we re-parent them.
+            applyDefaultHierarchyTemplate()
+
+            val mobileMain = sourceSets.maybeCreate("mobileMain")
+            mobileMain.dependsOn(sourceSets.getByName("commonMain"))
+            sourceSets.getByName("androidMain").dependsOn(mobileMain)
+            // Re-parents the template's `iosMain` onto `mobileMain` (additive to its existing edge to
+            // commonMain). Today only `iosArm64`/`iosSimulatorArm64` exist, so `appleMain` is empty and
+            // nothing is lost. If a non-iOS Apple target (macOS/watchOS) is ever added, wire it with an
+            // explicit `<target>Main.dependsOn(mobileMain)` — it will NOT inherit the seam via appleMain.
+            sourceSets.getByName("iosMain").dependsOn(mobileMain)
+
+            // Test mirror. `androidHostTest` always exists (withHostTestBuilder above); `iosTest` is
+            // materialised lazily, so it stays defensive.
+            val mobileTest = sourceSets.maybeCreate("mobileTest")
+            mobileTest.dependsOn(sourceSets.getByName("commonTest"))
+            sourceSets.getByName("androidHostTest").dependsOn(mobileTest)
+            sourceSets.findByName("iosTest")?.dependsOn(mobileTest)
         }
 
         // JVM target for the Android (and any host) Kotlin compilations — matches the Android-only

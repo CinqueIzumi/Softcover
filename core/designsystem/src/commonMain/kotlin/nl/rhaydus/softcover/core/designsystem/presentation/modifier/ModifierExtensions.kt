@@ -11,7 +11,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -30,9 +32,12 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 
 private const val PRESS_SCALE_TARGET = 0.97f
+private const val HOVER_HIGHLIGHT_ALPHA = 0.06f
 
 @Composable
 fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier {
@@ -110,6 +115,53 @@ fun Modifier.pressScaleCombinedClickable(
             onClick = onClick,
             onLongClick = onLongClick,
         )
+}
+
+/**
+ * Desktop affordance: shows the platform "clickable" hand cursor while the pointer hovers the
+ * receiver. A no-op on touch platforms (no pointer device), so it is safe to apply unconditionally
+ * in shared layouts — it earns its keep on desktop, where the bespoke `jvmMain` screen layouts
+ * attach it to clickable surfaces that lack an obvious built-in cursor affordance.
+ */
+fun Modifier.pointerHandCursor(): Modifier = this.pointerHoverIcon(PointerIcon.Hand)
+
+/**
+ * Desktop affordance: paints a subtle translucent overlay (clipped to [shape]) over the receiver
+ * while [interactionSource] reports a hover, cross-fading in and out. The hover sibling of
+ * [pressScale] — pair it with a `clickable` / `hoverable` that shares the same `InteractionSource`.
+ * Inert on touch platforms, where hover interactions never fire. The default tint is a low-alpha
+ * `onSurface` wash; pass [color] for surfaces that need a stronger or differently-keyed highlight.
+ */
+@Composable
+fun Modifier.hoverHighlight(
+    interactionSource: InteractionSource,
+    shape: Shape = RectangleShape,
+    color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_HIGHLIGHT_ALPHA),
+): Modifier {
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val playMotion = playDecorativeMotion()
+    val alpha by animateFloatAsState(
+        targetValue = if (isHovered && playMotion) 1f else 0f,
+        label = "hoverHighlight",
+    )
+
+    return this.drawWithContent {
+        drawContent()
+
+        if (alpha > 0f) {
+            val outline = shape.createOutline(
+                size = size,
+                layoutDirection = layoutDirection,
+                density = this,
+            )
+
+            drawOutline(
+                outline = outline,
+                color = color,
+                alpha = alpha,
+            )
+        }
+    }
 }
 
 @Composable
