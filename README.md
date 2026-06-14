@@ -4,8 +4,6 @@ A [Hardcover.app](https://hardcover.app/) client for **Android, iOS, and desktop
 
 A Kotlin Multiplatform app: domain, data, and UI are shared across all three platforms via Compose Multiplatform. Android targets 8.0+.
 
-> **Why Softcover?** A fast, native home for your Hardcover shelves on the devices you actually read on — your library, reading progress, deadlines, and barcode-scan-to-add in your pocket *and* on your desktop, all from a single shared codebase.
-
 [![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/CinqueIzumi/Softcover/branch/main/graph/badge.svg)](https://codecov.io/gh/CinqueIzumi/Softcover)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
