@@ -1,6 +1,4 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-import dev.iurysouza.modulegraph.Orientation
-import dev.iurysouza.modulegraph.Theme
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 
@@ -15,20 +13,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.dependency.analysis)
-    alias(libs.plugins.module.graph)
     alias(libs.plugins.kover)
-}
-
-// Embeds an auto-generated Mermaid module-dependency graph into README.md under the "### Module graph"
-// heading. Regenerate with `./gradlew createModuleGraph`. Tooling-only modules are excluded so the
-// graph reflects the shipped app's tier DAG (:app → :orchestration → :feature:* → :core:*).
-moduleGraphConfig {
-    readmePath.set("$rootDir/README.md")
-    heading.set("### Module graph")
-    orientation.set(Orientation.LEFT_TO_RIGHT)
-    theme.set(Theme.NEUTRAL)
-    setStyleByModuleType.set(true)
-    excludedModulesRegex.set(".*ktlint-rules.*")
 }
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML
