@@ -1,11 +1,13 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.theme
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -36,79 +38,104 @@ data class EditorialTypography(
     val quoteGlyph: TextStyle,
 )
 
-internal val DefaultEditorialTypography: EditorialTypography = EditorialTypography(
-    eyebrow = AppTypography.labelMedium.copy(
+/**
+ * Derives the editorial type roles from a base Material [typography] and the [displayFamily] used for
+ * the italic editorial body voice. Pure (non-composable) so it can build both the branded scale (from
+ * [appTypography] + [displayFontFamily]) and the non-branded fallback below.
+ */
+internal fun buildEditorialTypography(
+    typography: Typography,
+    displayFamily: FontFamily,
+): EditorialTypography = EditorialTypography(
+    eyebrow = typography.labelMedium.copy(
         letterSpacing = 2.5.sp,
         fontWeight = FontWeight.SemiBold,
     ),
-    eyebrowSmall = AppTypography.labelSmall.copy(
+    eyebrowSmall = typography.labelSmall.copy(
         letterSpacing = 1.2.sp,
         fontWeight = FontWeight.SemiBold,
     ),
 
-    pageTitle = AppTypography.displaySmall.copy(
+    pageTitle = typography.displaySmall.copy(
         fontWeight = FontWeight.SemiBold,
         fontSize = 30.sp,
         lineHeight = 36.sp,
     ),
-    display = AppTypography.displayMedium.copy(
+    display = typography.displayMedium.copy(
         fontStyle = FontStyle.Italic,
         fontWeight = FontWeight.SemiBold,
         lineHeight = 44.sp,
     ),
-    headlineMedium = AppTypography.headlineMedium.copy(
+    headlineMedium = typography.headlineMedium.copy(
         fontStyle = FontStyle.Italic,
         fontWeight = FontWeight.SemiBold,
     ),
-    headlineSmall = AppTypography.headlineSmall.copy(
+    headlineSmall = typography.headlineSmall.copy(
         fontStyle = FontStyle.Italic,
         fontWeight = FontWeight.SemiBold,
     ),
 
-    titleLarge = AppTypography.titleLarge.copy(
+    titleLarge = typography.titleLarge.copy(
         fontWeight = FontWeight.SemiBold,
     ),
-    titleMedium = AppTypography.titleMedium.copy(
+    titleMedium = typography.titleMedium.copy(
         fontWeight = FontWeight.SemiBold,
     ),
-    titleSmall = AppTypography.titleSmall.copy(
+    titleSmall = typography.titleSmall.copy(
         fontWeight = FontWeight.SemiBold,
     ),
 
-    bodyLarge = AppTypography.bodyLarge.copy(
-        fontFamily = displayFontFamily,
+    bodyLarge = typography.bodyLarge.copy(
+        fontFamily = displayFamily,
         fontStyle = FontStyle.Italic,
         lineHeight = 24.sp,
     ),
-    body = AppTypography.bodyMedium.copy(
-        fontFamily = displayFontFamily,
+    body = typography.bodyMedium.copy(
+        fontFamily = displayFamily,
         fontStyle = FontStyle.Italic,
     ),
-    bodySmall = AppTypography.bodySmall.copy(
-        fontFamily = displayFontFamily,
+    bodySmall = typography.bodySmall.copy(
+        fontFamily = displayFamily,
         fontStyle = FontStyle.Italic,
     ),
 
-    statHero = AppTypography.displayLarge.copy(
+    statHero = typography.displayLarge.copy(
         fontStyle = FontStyle.Italic,
         fontWeight = FontWeight.SemiBold,
         fontSize = 72.sp,
         lineHeight = 76.sp,
         fontFeatureSettings = TABULAR_NUMS,
     ),
-    statLarge = AppTypography.displayMedium.copy(
+    statLarge = typography.displayMedium.copy(
         fontStyle = FontStyle.Italic,
         fontWeight = FontWeight.SemiBold,
         lineHeight = 52.sp,
         fontFeatureSettings = TABULAR_NUMS,
     ),
 
-    quoteGlyph = AppTypography.displayLarge.copy(
+    quoteGlyph = typography.displayLarge.copy(
         fontSize = 120.sp,
     ),
 )
 
-internal val LocalEditorialTypography = staticCompositionLocalOf { DefaultEditorialTypography }
+/**
+ * The branded editorial type scale, resolving the bundled font resources. Provided by `SoftcoverTheme`.
+ */
+@Composable
+internal fun defaultEditorialTypography(): EditorialTypography = buildEditorialTypography(
+    typography = appTypography(),
+    displayFamily = displayFontFamily(),
+)
+
+// Non-branded fallback for the composition-local default — used only outside SoftcoverTheme (previews
+// / tests), which always provides the branded scale. Built from the system family so it needs no
+// composable font resolution.
+private val fallbackEditorialTypography: EditorialTypography = buildEditorialTypography(
+    typography = Typography(),
+    displayFamily = FontFamily.Default,
+)
+
+internal val LocalEditorialTypography = staticCompositionLocalOf { fallbackEditorialTypography }
 
 val MaterialTheme.editorialTypography: EditorialTypography
     @Composable

@@ -14,8 +14,9 @@ import org.gradle.kotlin.dsl.dependencies
  *   exposes `SoftcoverDatabase` (a `RoomDatabase`) and the raw-query types in its public surface, so
  *   consumers resolve Room transitively across every target.
  * - `room-compiler` runs through KSP **per target** — KMP KSP has no single `ksp` configuration, so
- *   codegen is wired once per compilation (`kspAndroid` + one per iOS target declared by
- *   [KmpLibraryConventionPlugin]) so every target gets its generated `@Database` implementation.
+ *   codegen is wired once per compilation (`kspAndroid` + one per iOS target + `kspJvm`, matching the
+ *   targets declared by [KmpLibraryConventionPlugin]) so every target gets its generated `@Database`
+ *   implementation.
  */
 class AndroidRoomConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -34,11 +35,13 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
             )
 
             // One ksp<Target> configuration per target compiled — matches the targets declared in
-            // KmpLibraryConventionPlugin (the Android target + the two iOS targets).
+            // KmpLibraryConventionPlugin (the Android target, the two iOS targets, and the JVM desktop
+            // target). Room generates each target's `@Database` implementation through its own KSP run.
             listOf(
                 "kspAndroid",
                 "kspIosArm64",
                 "kspIosSimulatorArm64",
+                "kspJvm",
             ).forEach { configuration ->
                 add(
                     configuration,

@@ -13,10 +13,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * Base convention for `:core:*` / `:feature:*` modules migrated to Kotlin Multiplatform — the KMP
  * sibling of [AndroidLibraryConventionPlugin]. Applies the modern single-Android-target KMP library
  * plugin (`com.android.kotlin.multiplatform.library`) plus the Kotlin Multiplatform plugin, declares
- * the Android + two iOS targets (`iosArm64` + `iosSimulatorArm64`; `iosX64` is omitted — Compose
+ * the Android target, two iOS targets (`iosArm64` + `iosSimulatorArm64`; `iosX64` is omitted — Compose
  * Multiplatform no longer publishes it, and the Intel iOS simulator is obsolete on Apple-silicon
- * Macs), matches the Android-only plugin's SDK/JDK levels and lint config, and wires the shared
- * dependencies as their KMP (non-`-android`) variants.
+ * Macs), and the JVM desktop target, matches the Android-only plugin's SDK/JDK levels and lint config,
+ * and wires the shared dependencies as their KMP (non-`-android`) variants.
  *
  * Test stack mirrors the Android plugin but split by source set: the multiplatform tools
  * (Kotest, Turbine, coroutines-test) go in `commonTest`; the JVM-only tools (JUnit5, MockK) go in
@@ -51,6 +51,11 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
 
             iosArm64()
             iosSimulatorArm64()
+
+            // Desktop (JVM) target — the final platform in the migration. Declared centrally here, so
+            // every `:core:*` / `:feature:*` module gets a `jvmMain` source set and a `compileKotlinJvm`
+            // task without per-module wiring (mirrors how the iOS targets are declared once above).
+            jvm()
 
             // expect/actual classes are still flagged Beta by the compiler; the project uses them for
             // platform-token seams (e.g. core:notification's appearance handles), so opt in once here

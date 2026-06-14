@@ -102,11 +102,11 @@ fun SoftcoverTheme(
 
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
-        typography = AppTypography,
+        typography = appTypography(),
         motionScheme = MotionScheme.expressive(),
         content = {
             CompositionLocalProvider(
-                LocalEditorialTypography provides DefaultEditorialTypography,
+                LocalEditorialTypography provides defaultEditorialTypography(),
                 content = content,
             )
         },

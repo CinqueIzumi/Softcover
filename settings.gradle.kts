@@ -23,6 +23,7 @@ dependencyResolutionManagement {
 rootProject.name = "Softcover"
 include(":ktlint-rules")
 include(":app")
+include(":desktopApp")
 include(":orchestration")
 include(":core:domain")
 include(":core:database")

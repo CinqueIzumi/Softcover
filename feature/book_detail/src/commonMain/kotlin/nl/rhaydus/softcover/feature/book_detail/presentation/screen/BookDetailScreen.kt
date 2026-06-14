@@ -2599,7 +2599,7 @@ class BookDetailScreen(
                                             fractionDigits = 1,
                                         ),
                                         style = MaterialTheme.typography.labelMedium.copy(
-                                            fontFamily = displayFontFamily,
+                                            fontFamily = displayFontFamily(),
                                         ),
                                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                                     )

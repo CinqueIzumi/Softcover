@@ -72,6 +72,17 @@ subprojects {
     }
 }
 
+// Gate every KMP module's `check` on JVM (desktop) compilation too. Unlike the iOS gate this runs on
+// every host (Kotlin/JVM compilation is available everywhere), so a missing or incorrect `jvmMain`
+// actual fails at `check` time rather than only when the desktop app is assembled.
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        tasks.matching { it.name == "check" }.configureEach {
+            dependsOn("compileKotlinJvm")
+        }
+    }
+}
+
 // Enforces the module-tier DAG from MODULE_STRUCTURE_GUIDELINES §2 so the split graph cannot
 // silently regress: a module may depend only on a lower tier, and a leaf feature may never depend on
 // a sibling feature. Replaces the manual `grep` import audits with a build-time gate (wired into
@@ -87,7 +98,7 @@ fun tierOf(path: String): String? = when {
     path.startsWith(":core:") -> "core"
     path.startsWith(":feature:") -> "feature"
     path == ":orchestration" -> "orchestration"
-    path == ":app" -> "app"
+    path == ":app" || path == ":desktopApp" -> "app"
     else -> null
 }
 
@@ -107,6 +118,9 @@ dependencyAnalysis {
                     // Uniform runtime + test bundle provided by AndroidLibraryConventionPlugin.
                     "io.insert-koin:koin-android",
                     "org.jetbrains.kotlinx:kotlinx-coroutines-android",
+                    // Desktop's Main dispatcher — supplied via ServiceLoader (no compile reference), the
+                    // desktop counterpart of coroutines-android; wired into :desktopApp's runtime classpath.
+                    "org.jetbrains.kotlinx:kotlinx-coroutines-swing",
                     "org.junit.jupiter:junit-jupiter-api",
                     "org.junit.jupiter:junit-jupiter-params",
                     "io.kotest:kotest-assertions-core",
@@ -127,6 +141,17 @@ dependencyAnalysis {
                     "org.jetbrains.compose.ui:ui-backhandler",
                     "org.jetbrains.compose.components:components-ui-tooling-preview",
                     "org.jetbrains.compose.material3:material3",
+                    // Compose Multiplatform auto-injects a `jvmDev` source set (Compose Hot Reload) plus the
+                    // OS-specific desktop runtime for every module that has a `jvm()` target; :desktopApp's
+                    // compose.desktop.currentOs resolves to the same OS-specific coordinate. None are referenced
+                    // in code (the desktop UI types resolve transitively), so DA flags them — exclude every host
+                    // variant centrally, the same way the convention-plugin Compose artifacts above are excluded.
+                    "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64",
+                    "org.jetbrains.compose.desktop:desktop-jvm-macos-x64",
+                    "org.jetbrains.compose.desktop:desktop-jvm-linux-x64",
+                    "org.jetbrains.compose.desktop:desktop-jvm-linux-arm64",
+                    "org.jetbrains.compose.desktop:desktop-jvm-windows-x64",
+                    "org.jetbrains.compose.hot-reload:hot-reload-runtime-api",
                     // KMP-variant bundle deps from KmpLibraryConventionPlugin's commonMain set — provided
                     // uniformly, so never a per-module "unused" finding (mirrors the onIncorrectConfiguration list).
                     "io.insert-koin:koin-core",

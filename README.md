@@ -1,11 +1,12 @@
 # Softcover
 
-A native Android client for [Hardcover.app](https://hardcover.app/) — track what you read, what you've read, and what's next.
+A [Hardcover.app](https://hardcover.app/) client for **Android, iOS, and desktop** — track what you read, what you've read, and what's next.
 
-Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
+A Kotlin Multiplatform app: domain, data, and UI are shared across all three platforms via Compose Multiplatform. Android targets 8.0+.
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-[![Compose](https://img.shields.io/badge/Jetpack%20Compose-2026.01-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-4285F4?logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
+[![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Desktop-3DDC84)](#running-the-apps)
 [![Min SDK](https://img.shields.io/badge/min%20SDK-26-3DDC84?logo=android&logoColor=white)](https://developer.android.com/about/versions/oreo)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -16,6 +17,7 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+- [Running the apps](#running-the-apps)
 - [Project Documentation](#project-documentation)
 - [Disclaimer](#disclaimer)
 
@@ -72,19 +74,22 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 #### Core
 | Technology | Version | Purpose |
 |---|---|---|
-| [Kotlin](https://kotlinlang.org/) | 2.2.21 | Primary language |
-| [Jetpack Compose](https://developer.android.com/jetpack/compose) | BOM 2026.01.01 | Declarative UI framework |
-| [Material 3](https://m3.material.io/) | 1.5.0-alpha13 | Design system and theming |
-| [Gradle (KTS)](https://gradle.org/) | 8.13.1 | Build system with version catalog |
-| [KSP](https://github.com/google/ksp) | 2.2.21-2.0.4 | Kotlin Symbol Processing for Room |
+| [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) | 2.3.21 | Primary language, shared across Android/iOS/desktop |
+| [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) | 1.11.0 | Declarative UI shared across all platforms (resolves to Jetpack Compose on Android) |
+| [Material 3 (expressive)](https://m3.material.io/) | 1.11.0-alpha07 | Design system and theming (CMP expressive APIs) |
+| [Android Gradle Plugin](https://developer.android.com/build) | 9.0.0 | Android build tooling |
+| [Gradle (KTS)](https://gradle.org/) | 9.1.0 | Build system with version catalog |
+| [KSP](https://github.com/google/ksp) | 2.3.9 | Kotlin Symbol Processing for Room (per-target) |
 
 #### Data & Networking
 | Technology | Version | Purpose |
 |---|---|---|
-| [Apollo](https://www.apollographql.com/docs/kotlin) | 4.3.3 | GraphQL API client |
-| [Room](https://developer.android.com/jetpack/androidx/releases/room) | 2.7.2 | Local database for caching books |
-| [DataStore](https://developer.android.com/jetpack/androidx/releases/datastore) | 1.2.0 | Key-value storage for settings and search history |
+| [Apollo](https://www.apollographql.com/docs/kotlin) | 5.0.0 | Multiplatform GraphQL API client |
+| [Room](https://developer.android.com/jetpack/androidx/releases/room) | 2.7.2 | Local database for caching books (KMP, bundled SQLite driver) |
+| [DataStore](https://developer.android.com/jetpack/androidx/releases/datastore) | 1.2.0 | Key-value storage for settings and search history (okio-backed) |
+| [okio](https://square.github.io/okio/) | 3.9.1 | Multiplatform file I/O |
 | [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization) | 1.9.0 | JSON serialization |
+| [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime) | 0.7.1 | Multiplatform date/time |
 
 #### App Architecture
 | Technology | Version | Purpose |
@@ -92,9 +97,19 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 | [Voyager](https://voyager.adriel.cafe/) | 1.1.0-beta02 | Screen navigation and state holder models |
 | [Koin](https://insert-koin.io/docs/setup/koin/) | 3.5.3 | Dependency injection |
 | [Coroutines](https://github.com/Kotlin/kotlinx.coroutines) | 1.10.2 | Asynchronous and reactive flows |
-| [Coil](https://github.com/coil-kt/coil) | 2.7.0 | Image loading |
+| [Coil](https://github.com/coil-kt/coil) | 3.2.0 | Multiplatform image loading (OkHttp fetcher on Android/desktop, Ktor on iOS) |
 | [Reorderable](https://github.com/Calvin-LL/Reorderable) | 2.4.3 | Drag-and-drop list reordering |
 | [Kermit](https://kermit.touchlab.co/) | 2.0.6 | Multiplatform logging (via the `AppLog` facade) |
+
+#### Per-platform
+| Technology | Version | Platform | Purpose |
+|---|---|---|---|
+| [CameraX](https://developer.android.com/training/camerax) + [ML Kit](https://developers.google.com/ml-kit/vision/barcode-scanning) | 1.4.2 / 17.3.0 | Android | Camera preview + on-device ISBN barcode decoding |
+| [Play In-App Updates](https://developer.android.com/guide/playcore/in-app-updates) | 2.1.0 | Android | In-app update prompts |
+| [WorkManager](https://developer.android.com/jetpack/androidx/releases/work) | 2.10.1 | Android | Background work scheduling |
+| [Ktor](https://ktor.io/) | 3.1.0 | iOS | Coil's network engine (Darwin) |
+| [KSafe](https://github.com/ioannisa/KSafe) | 2.1.2 | Desktop | API-key storage in the OS secret store |
+| [Compose Desktop](https://www.jetbrains.com/compose-multiplatform/) | 1.11.0 | Desktop | Window + native distribution packaging |
 
 #### Testing
 | Technology | Version | Purpose |
@@ -105,26 +120,19 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 | [kotlinx-coroutines-test](https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test) | 1.10.2 | Coroutine test utilities (`runTest`) |
 | [Turbine](https://github.com/cashapp/turbine) | 1.2.0 | Testing library for Kotlin `Flow` |
 
-#### Device & Platform
-| Technology | Version | Purpose |
-|---|---|---|
-| [CameraX](https://developer.android.com/training/camerax) | 1.4.2 | Camera preview for barcode scanning |
-| [ML Kit Barcode Scanning](https://developers.google.com/ml-kit/vision/barcode-scanning) | 17.3.0 | On-device ISBN barcode decoding |
-| [Play In-App Updates](https://developer.android.com/guide/playcore/in-app-updates) | 2.1.0 | Prompting users to update from within the app |
-| [WorkManager](https://developer.android.com/jetpack/androidx/releases/work) | 2.10.1 | Background work scheduling |
-
-#### Platform
-- **Minimum SDK:** 26 (Android 8.0)
-- **Target SDK:** 37
-- **Java compatibility:** 11
+#### Platforms
+- **Android:** min SDK 26 (Android 8.0), target SDK 37, Java 11
+- **iOS:** `iosArm64` + `iosSimulatorArm64` (shared `OrchestrationKit` framework, Xcode shell in `iosApp/`)
+- **Desktop (JVM):** Compose Desktop application (`:desktopApp`), JDK 17
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
-- Android Studio (latest stable)
-- JDK 11+
+- Android Studio (latest stable) — for Android
+- JDK 17 — for the desktop target and the build toolchain
+- Xcode (latest stable) — for iOS (macOS only)
 - A Hardcover.app account and API token
 
 ### Build & Run
@@ -135,6 +143,41 @@ Built with Kotlin and Jetpack Compose. Designed for Android 8.0+.
 ./gradlew :app:test              # Run unit tests for the app module
 ./gradlew connectedAndroidTest   # Run instrumented tests (device/emulator required)
 ./gradlew lint                   # Run Android Lint
+```
+
+---
+
+## Running the apps
+
+Softcover shares a single Kotlin Multiplatform codebase across **Android**, **iOS**, and **desktop (JVM)**. The shared backend (domain, data, and Compose UI) lives in `:core:*` / `:feature:*` / `:orchestration`; each platform has a thin entry point — `:app` (Android), `iosApp/` (iOS), and `:desktopApp` (desktop). On first launch, each platform stores your Hardcover API token in its own secure store (Android Keystore, iOS Keychain, or the desktop OS keychain).
+
+### Android (`:app`)
+The simplest path is **Android Studio**: open the project, select the `app` run configuration and a device/emulator, and Run.
+
+From the command line (a connected device or running emulator is required):
+```bash
+./gradlew :app:installDebug      # build, install, then launch from the app icon
+./gradlew :app:assembleDebug     # build only → app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Desktop (JVM) (`:desktopApp`)
+Run directly from source:
+```bash
+./gradlew :desktopApp:run
+```
+Or build a native installer for the current OS (`.dmg` on macOS, `.msi` on Windows, `.deb` on Linux):
+```bash
+./gradlew :desktopApp:packageDistributionForCurrentOS   # → desktopApp/build/compose/binaries/
+```
+
+### iOS (`iosApp/`)
+iOS is driven by **Xcode** — Gradle only builds the shared `OrchestrationKit` framework, which the Xcode build invokes automatically:
+```bash
+open iosApp/iosApp.xcodeproj
+```
+Select a simulator or device and Run. Running on a **physical device** requires code-signing setup — see [iosApp/README.md](iosApp/README.md). If Xcode can't locate the toolchain, point it at the full Xcode install:
+```bash
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 ```
 
 ---

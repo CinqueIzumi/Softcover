@@ -44,7 +44,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.androidx.compose.ui.text.google.fonts)
             implementation(libs.material.components)
 
             // Shared BarcodeScanner composable

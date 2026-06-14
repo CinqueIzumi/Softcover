@@ -59,7 +59,7 @@ fun DropCapText(
     )
 
     val dropCapStyle = bodyStyle.copy(
-        fontFamily = displayFontFamily,
+        fontFamily = displayFontFamily(),
         fontWeight = FontWeight.SemiBold,
         fontSize = bodyStyle.lineHeight * dropCapLines * 0.92f,
         lineHeight = bodyStyle.lineHeight * dropCapLines,

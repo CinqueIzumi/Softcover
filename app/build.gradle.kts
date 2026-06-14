@@ -60,8 +60,6 @@ dependencies {
     // Core modules the Application entry point + version provider touch directly
     implementation(project(":core:designsystem"))
     implementation(project(":core:domain"))
-    implementation(project(":core:identity"))
-    implementation(project(":core:connectivity"))
     implementation(project(":core:notification"))
 
     // DI

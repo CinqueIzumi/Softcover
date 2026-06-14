@@ -22,6 +22,11 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.koin.android)
         }
+
+        jvmMain.dependencies {
+            // Backs the desktop SecureApiKeyStorage actual (OS secret store + software fallback).
+            implementation(libs.ksafe)
+        }
     }
 
 }

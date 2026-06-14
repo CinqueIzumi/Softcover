@@ -71,5 +71,11 @@ kotlin {
             implementation(libs.coil3.network.ktor)
             implementation(libs.ktor.client.darwin)
         }
+
+        jvmMain.dependencies {
+            // Desktop reuses Coil's OkHttp network fetcher (the same engine Android uses); DesktopApp
+            // installs it on the singleton loader. Confined to jvmMain so the other targets are untouched.
+            implementation(libs.coil3.network.okhttp)
+        }
     }
 }
