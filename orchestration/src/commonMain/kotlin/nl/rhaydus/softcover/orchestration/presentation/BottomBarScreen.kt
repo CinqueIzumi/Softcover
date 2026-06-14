@@ -114,7 +114,7 @@ internal object BottomBarScreen : Screen {
 
             // The shell owns the push-vs-pane decision, now also consulting the current tab: only a
             // detail-capable tab on an expanded window fills the detail pane. Every other case —
-            // narrower widths, and the desktop Library (full-width, no pane) — pushes full-screen.
+            // narrower widths, and the desktop Library/Explore (full-width, no pane) — pushes full-screen.
             val bookDetailPresenter = remember(
                 widthClass,
                 tabNavigator.current,
@@ -156,9 +156,10 @@ internal object BottomBarScreen : Screen {
                             // `tabBody` movable content stays in one stable slot (the list pane) —
                             // switching tabs never relocates it (a relocation tears down and rebuilds
                             // the tab host, which would strand the previous tab's content on screen).
-                            // Detail-capable tabs (Reading/Explore) supply the book-detail pane; the
-                            // desktop Library and Settings pass a null detail, collapsing to a
-                            // full-width single pane. The list pane is sized to the available body
+                            // Detail-capable tabs (Reading, and Library/Explore on mobile/tablet)
+                            // supply the book-detail pane; the desktop Library/Explore and Settings
+                            // pass a null detail, collapsing to a full-width single pane. The list
+                            // pane is sized to the available body
                             // width (clamped) so a wide desktop list surface gets real room while the
                             // detail pane never collapses on a smaller expanded window.
                             BoxWithConstraints {

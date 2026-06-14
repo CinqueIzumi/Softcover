@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSearchField
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PullToRefreshEyebrow
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
@@ -275,6 +276,7 @@ internal actual fun LibraryScreenLayout(
                         onClearClick = {
                             runAction(OnSearchQueryChangeAction(query = ""))
                         },
+                        placeholder = "Search this shelf…",
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))

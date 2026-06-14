@@ -42,22 +42,24 @@ internal val appNavTabs: List<Tab> = listOf(
 
 /**
  * Whether this root tab opens book detail in the **expanded-width two-pane** (list + detail). Settings
- * navigates only to pushed sub-pages, so it stays single-surface. Library is platform-gated via
- * [libraryUsesDetailPane]: on mobile/tablet it keeps the two-pane, but desktop has a bespoke
- * full-width shelf-sidebar + grid layout where a side detail pane only starves the grid — there a
- * tapped book pushes the detail screen full-screen instead.
+ * navigates only to pushed sub-pages, so it stays single-surface. Reading is a detail-style reading
+ * list, so it keeps the two-pane on every platform. Library and Explore are wide-grid discovery
+ * surfaces, platform-gated via [wideGridTabsUseDetailPane]: on mobile/tablet they keep the two-pane,
+ * but desktop gives each a bespoke full-width layout where a side detail pane only starves the grid —
+ * there a tapped book pushes the detail screen full-screen instead.
  */
 internal fun Tab.isDetailCapable(): Boolean = when (this) {
-    ReadingTab, ExploreTab -> true
-    LibraryTab -> libraryUsesDetailPane
+    ReadingTab -> true
+    LibraryTab, ExploreTab -> wideGridTabsUseDetailPane
     else -> false
 }
 
 /**
- * Whether the Library tab participates in the expanded two-pane (`true`) or opens book detail with a
- * full-screen push (`false`). Mobile/tablet: `true`. Desktop: `false` — see [isDetailCapable].
+ * Whether the wide-grid discovery tabs (Library, Explore) participate in the expanded two-pane
+ * (`true`) or open book detail with a full-screen push (`false`). Mobile/tablet: `true`. Desktop:
+ * `false` — their bespoke full-width layouts have no detail pane; see [isDetailCapable].
  */
-internal expect val libraryUsesDetailPane: Boolean
+internal expect val wideGridTabsUseDetailPane: Boolean
 
 /**
  * Resolves [appNavTabs] into render-ready [NavItemUi]s: current selection (from the tab navigator),

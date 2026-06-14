@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSearchField
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
@@ -191,6 +192,7 @@ internal actual fun LibraryScreenLayout(
                         onClearClick = {
                             runAction(OnSearchQueryChangeAction(query = ""))
                         },
+                        placeholder = "Search this shelf…",
                     )
                 }
 
