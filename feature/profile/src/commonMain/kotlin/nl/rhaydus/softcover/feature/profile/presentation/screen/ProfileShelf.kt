@@ -71,8 +71,8 @@ internal fun SectionLabel(text: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
-                .height(1.dp)
-                .width(20.dp)
+                .height(4.dp)
+                .width(32.dp)
                 .background(MaterialTheme.colorScheme.primary),
         )
 
