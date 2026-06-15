@@ -3,23 +3,18 @@ package nl.rhaydus.softcover.feature.scan.presentation.screen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopBackStrip
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
 // Keeps the ISBN panel at a readable modal width rather than stretching the field across a maximized
@@ -75,31 +70,6 @@ internal actual fun BarcodeScannerScreenLayout(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun DesktopBackStrip(onNavigateBack: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier.pointerHandCursor(),
-        ) {
-            val backIcon = SoftcoverIconResource.Drawable(
-                icon = SoftcoverIcon.ArrowBack,
-                contentDescription = "Navigate back icon",
-            )
-
-            Icon(
-                painter = backIcon.getIconPainter(),
-                contentDescription = backIcon.contentDescription,
-            )
         }
     }
 }

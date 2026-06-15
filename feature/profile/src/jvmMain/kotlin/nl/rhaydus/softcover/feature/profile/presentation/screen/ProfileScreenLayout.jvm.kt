@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,12 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopBackStrip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
@@ -69,7 +65,7 @@ internal actual fun ProfileScreenLayout(
         color = MaterialTheme.colorScheme.background,
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            DesktopProfileTopBar(onNavigateUp = onNavigateUp)
+            DesktopBackStrip(onNavigateBack = onNavigateUp)
 
             BoxWithConstraints(
                 modifier = Modifier
@@ -88,31 +84,6 @@ internal actual fun ProfileScreenLayout(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun DesktopProfileTopBar(onNavigateUp: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(
-            onClick = onNavigateUp,
-            modifier = Modifier.pointerHandCursor(),
-        ) {
-            val backIcon = SoftcoverIconResource.Drawable(
-                icon = SoftcoverIcon.ArrowBack,
-                contentDescription = "Navigate back icon",
-            )
-
-            Icon(
-                painter = backIcon.getIconPainter(),
-                contentDescription = backIcon.contentDescription,
-            )
         }
     }
 }
