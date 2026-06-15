@@ -1,44 +1,13 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
+import coil3.request.ImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-
-private const val MIN_SCALE = 1f
-private const val MAX_SCALE = 5f
-private const val DOUBLE_TAP_SCALE = 2.5f
 
 class FullScreenCoverScreen(
     @TransientNavArg private val edition: BookEdition?,
@@ -55,98 +24,19 @@ class FullScreenCoverScreen(
             fallbackCoverUrl = fallbackCoverUrl,
         )
 
-        var scale by remember { mutableFloatStateOf(MIN_SCALE) }
-        var offset by remember { mutableStateOf(Offset.Zero) }
-        var containerSize by remember { mutableStateOf(IntSize.Zero) }
-
-        fun clampOffset(
-            target: Offset,
-            currentScale: Float,
-        ): Offset {
-            if (currentScale <= MIN_SCALE) return Offset.Zero
-
-            val maxX = (containerSize.width * (currentScale - 1f)) / 2f
-            val maxY = (containerSize.height * (currentScale - 1f)) / 2f
-
-            return Offset(
-                x = target.x.coerceIn(
-                    -maxX,
-                    maxX,
-                ),
-                y = target.y.coerceIn(
-                    -maxY,
-                    maxY,
-                ),
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.Black)
-                .onSizeChanged { containerSize = it },
-        ) {
-            SoftcoverImage(
-                model = request,
-                contentDescription = "Full screen book cover",
-                isLoading = false,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        translationX = offset.x
-                        translationY = offset.y
-                    }
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onDoubleTap = {
-                                if (scale > MIN_SCALE) {
-                                    scale = MIN_SCALE
-                                    offset = Offset.Zero
-                                } else {
-                                    scale = DOUBLE_TAP_SCALE
-                                }
-                            },
-                        )
-                    }
-                    .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, zoom, _ ->
-                            val newScale = (scale * zoom).coerceIn(
-                                MIN_SCALE,
-                                MAX_SCALE,
-                            )
-                            scale = newScale
-                            offset = clampOffset(
-                                target = offset + pan,
-                                currentScale = newScale,
-                            )
-                        }
-                    },
-            )
-
-            IconButton(
-                onClick = navigator::pop,
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Black.copy(alpha = 0.45f),
-                    contentColor = Color.White,
-                ),
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .statusBarsPadding()
-                    .padding(8.dp),
-            ) {
-                val closeIcon = SoftcoverIconResource.Drawable(
-                    icon = SoftcoverIcon.Close,
-                    contentDescription = "Close cover viewer",
-                )
-
-                Icon(
-                    painter = closeIcon.getIconPainter(),
-                    contentDescription = closeIcon.contentDescription,
-                )
-            }
-        }
+        FullScreenCoverScreenLayout(
+            request = request,
+            onNavigateUp = navigator::pop,
+        )
     }
 }
+
+// The mobile actual zooms/pans with touch (pinch + double-tap); the desktop actual uses mouse wheel
+// zoom + drag-pan + double-click. Both render the shared [FullScreenCoverViewer] over their own
+// zoom/pan state. No default arguments — they are not allowed on an expect declaration, so every
+// argument is supplied explicitly at the single call site above.
+@Composable
+internal expect fun FullScreenCoverScreenLayout(
+    request: ImageRequest?,
+    onNavigateUp: () -> Unit,
+)
