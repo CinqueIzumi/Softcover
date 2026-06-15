@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -300,17 +301,16 @@ private fun FocusPageEditor(
     ),)
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun FocusProgressBar(fraction: Float) {
-    LinearProgressIndicator(
+    LinearWavyProgressIndicator(
         progress = { fraction.coerceIn(
             0f,
             1f,
         ) },
         modifier = Modifier
             .fillMaxWidth()
-            .height(10.dp),
-        drawStopIndicator = {},
-        gapSize = (-2).dp,
+            .height(12.dp),
     )
 }
