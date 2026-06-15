@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -15,12 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
@@ -138,9 +139,16 @@ private fun ClearFocusOnTapScreen(content: @Composable () -> Unit) {
     val focusManager = LocalFocusManager.current
 
     Box(
+        // A pointer-tap dismiss scrim — deliberately NOT a `clickable`. On desktop `clickable` also
+        // binds Spacebar/Enter as activation keys, so a focused text field that doesn't fully consume
+        // the space key bubbles it up here and clears its own focus mid-typing. `detectTapGestures`
+        // reacts to pointer taps only (no key binding, not focusable), preserving tap-to-dismiss on
+        // both touch and desktop without stealing focus on space.
         modifier = Modifier
             .fillMaxSize()
-            .noRippleClickable { focusManager.clearFocus() },
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            },
     ) {
         content()
     }
