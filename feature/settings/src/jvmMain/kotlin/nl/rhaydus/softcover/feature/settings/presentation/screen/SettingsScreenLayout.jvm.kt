@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.editorialContentWidth
@@ -527,19 +528,21 @@ internal fun DesktopSettingsBackBar(
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier.pointerHandCursor(),
-        ) {
-            val backIcon = SoftcoverIconResource.Drawable(
-                icon = SoftcoverIcon.ArrowBack,
-                contentDescription = "Navigate back",
-            )
+        DesktopTooltip(text = "Back") {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.pointerHandCursor(),
+            ) {
+                val backIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.ArrowBack,
+                    contentDescription = "Navigate back",
+                )
 
-            Icon(
-                painter = backIcon.getIconPainter(),
-                contentDescription = backIcon.contentDescription,
-            )
+                Icon(
+                    painter = backIcon.getIconPainter(),
+                    contentDescription = backIcon.contentDescription,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(4.dp))

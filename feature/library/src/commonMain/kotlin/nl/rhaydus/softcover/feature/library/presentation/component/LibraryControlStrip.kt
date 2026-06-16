@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
@@ -335,20 +336,22 @@ private fun RearrangeAction(
         )
     }
 
-    if (isRearranging) {
-        FilledIconButton(
-            onClick = onClick,
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            ),
-            content = { icon() },
-        )
-    } else {
-        IconButton(
-            onClick = onClick,
-            content = { icon() },
-        )
+    DesktopTooltip(text = if (isRearranging) "Finish rearranging" else "Rearrange") {
+        if (isRearranging) {
+            FilledIconButton(
+                onClick = onClick,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
+                content = { icon() },
+            )
+        } else {
+            IconButton(
+                onClick = onClick,
+                content = { icon() },
+            )
+        }
     }
 }
 
@@ -360,20 +363,22 @@ private fun LayoutAction(
     layoutLabel: (LibraryGridLayout) -> String,
 ) {
     Box {
-        IconButton(
-            onClick = {
-                runAction(OnLayoutMenuExpandedChangeAction(expanded = true))
-            },
-        ) {
-            val layoutIcon = SoftcoverIconResource.Drawable(
-                icon = SoftcoverIcon.ViewLayout,
-                contentDescription = "Change library layout",
-            )
+        DesktopTooltip(text = "Change layout") {
+            IconButton(
+                onClick = {
+                    runAction(OnLayoutMenuExpandedChangeAction(expanded = true))
+                },
+            ) {
+                val layoutIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.ViewLayout,
+                    contentDescription = "Change library layout",
+                )
 
-            Icon(
-                painter = layoutIcon.getIconPainter(),
-                contentDescription = layoutIcon.contentDescription,
-            )
+                Icon(
+                    painter = layoutIcon.getIconPainter(),
+                    contentDescription = layoutIcon.contentDescription,
+                )
+            }
         }
 
         DropdownMenu(

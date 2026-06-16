@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -302,17 +303,15 @@ private fun WideNavShell(
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
                         .windowInsetsPadding(WindowInsets.navigationBars)
                         .onSizeChanged {
                             sessionPeekHeight = with(localDensity) { it.height.toDp() }
                         },
                 ) {
-                    SessionPeekBar(
-                        modifier = Modifier.padding(
-                            horizontal = 8.dp,
-                            vertical = 8.dp,
-                        ),
-                    )
+                    // The wide shell has no bottom bar for a floating pill to ride over, so the
+                    // session bar docks as a flush, edge-to-edge strip across the content pane.
+                    SessionPeekBar(flush = true)
                 }
             }
         }

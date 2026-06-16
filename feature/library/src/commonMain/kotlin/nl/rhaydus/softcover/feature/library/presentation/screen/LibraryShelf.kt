@@ -8,6 +8,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +30,6 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -37,7 +38,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,20 +60,28 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopContextMenu
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopContextMenuItem
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.WindowWidthClass
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindowSizeClass
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.hoverHighlight
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.platformModifierClick
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -86,6 +94,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBa
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
@@ -94,9 +103,13 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveFromLibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnEnterSelectionModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderListBooksAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderShelfBooksAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnSelectBookRangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleBookSelectionAction
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -339,6 +352,11 @@ internal fun BookList(
     val sortMode = state.sortModeFor(tabId = tab.id)
     val selectionMode = state.selectionMode
 
+    // Desktop modifier-click anchor: the last cover the user plainly/Ctrl-selected, so a subsequent
+    // Shift-click can range-select the visible span up to it. Reset per tab. Inert on touch (no
+    // modifier-click fires there).
+    var selectionAnchorId by remember(tab.id) { mutableStateOf<Int?>(null) }
+
     // MANUAL sort renders display-only unless the user has explicitly entered rearrange mode. The
     // saved order stays visible with normal tap/long-press and no handles, so scrolling can't
     // nudge it. The grid is the SAME node either way — items only gain a drag handle and drop
@@ -486,33 +504,204 @@ internal fun BookList(
                     }
                 }
 
-                LayoutBookEntry(
-                    modifier = Modifier.mutationAnimated(
-                        scope = gridItemScope,
-                        animator = animator,
-                        itemKey = book.id,
-                    )
-                        .staggeredEntry(
-                            coordinator = entry,
-                            index = index,
-                        ),
-                    book = book,
-                    layout = state.gridLayout,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                    isSelectionMode = selectionMode,
-                    isSelected = isSelected,
-                    deadline = state.deadlines[book.id],
-                    dateStyle = state.dateStyle,
-                    dragHandle = if (isRearranging) {
-                        { DragHandle(modifier = handleModifier) }
+                // Desktop selection affordances, inert on touch: Ctrl/Cmd-click toggles this cover's
+                // selection (entering selection mode if needed), Shift-click range-selects the
+                // visible span up to the anchor. Suppressed in rearrange mode (drag-only).
+                val onCtrlClick = {
+                    selectionAnchorId = book.id
+
+                    if (selectionMode) {
+                        runAction(OnToggleBookSelectionAction(bookId = book.id))
                     } else {
-                        null
-                    },
+                        runAction(OnEnterSelectionModeAction(bookId = book.id))
+                    }
+                }
+
+                val onShiftClick = {
+                    val anchor = selectionAnchorId
+
+                    if (anchor == null) {
+                        selectionAnchorId = book.id
+
+                        runAction(OnEnterSelectionModeAction(bookId = book.id))
+                    } else {
+                        runAction(
+                            OnSelectBookRangeAction(
+                                bookIds = idRangeBetween(
+                                    ids = renderIds,
+                                    anchorId = anchor,
+                                    targetId = book.id,
+                                ),
+                            ),
+                        )
+                    }
+                }
+
+                // Desktop right-click menu (empty in rearrange mode → pass-through, and a no-op on
+                // touch where selection is reached via long-press instead).
+                val contextMenuItems = if (isRearranging) {
+                    emptyList()
+                } else {
+                    libraryBookContextMenu(
+                        book = book,
+                        selectionMode = selectionMode,
+                        isSelected = isSelected,
+                        onOpen = { onBookClick(book) },
+                        onSelect = onCtrlClick,
+                        onToggleSelection = {
+                            runAction(OnToggleBookSelectionAction(bookId = book.id))
+                        },
+                        onMarkAsRead = {
+                            // In selection mode the menu acts on the whole selection (null →
+                            // current selection); otherwise on just the right-clicked book.
+                            val targetIds = if (selectionMode) null else setOf(book.id)
+
+                            runAction(
+                                OnBulkMoveShelfAction(
+                                    status = UserBookStatus.READ,
+                                    explicitBookIds = targetIds,
+                                ),
+                            )
+                        },
+                        onAddToList = {
+                            // Enter-selection commits its setState before the sheet-shown action
+                            // runs (TOAD dispatches actions FIFO on one scope and enter-selection
+                            // has no suspension point before its setState), so the sheet opens with
+                            // this book already selected.
+                            if (selectionMode.not()) {
+                                runAction(OnEnterSelectionModeAction(bookId = book.id))
+                            }
+
+                            runAction(OnBulkAddToListSheetShownAction(shown = true))
+                        },
+                        onRemove = {
+                            val targetIds = if (selectionMode) null else setOf(book.id)
+
+                            runAction(OnBulkRemoveFromLibraryAction(explicitBookIds = targetIds))
+                        },
+                    )
+                }
+
+                val baseModifier = Modifier.mutationAnimated(
+                    scope = gridItemScope,
+                    animator = animator,
+                    itemKey = book.id,
                 )
+                    .staggeredEntry(
+                        coordinator = entry,
+                        index = index,
+                    )
+
+                val entryModifier = if (isRearranging) {
+                    baseModifier
+                } else {
+                    baseModifier.platformModifierClick(
+                        onCtrlClick = onCtrlClick,
+                        onShiftClick = onShiftClick,
+                    )
+                }
+
+                DesktopContextMenu(items = contextMenuItems) {
+                    LayoutBookEntry(
+                        modifier = entryModifier,
+                        book = book,
+                        layout = state.gridLayout,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        isSelectionMode = selectionMode,
+                        isSelected = isSelected,
+                        deadline = state.deadlines[book.id],
+                        dateStyle = state.dateStyle,
+                        dragHandle = if (isRearranging) {
+                            { DragHandle(modifier = handleModifier) }
+                        } else {
+                            null
+                        },
+                    )
+                }
             }
         }
     }
+}
+
+/**
+ * The desktop right-click menu for a book cover/row. Offers Open + the selection entry point
+ * (Select, or Add/Remove-from-selection while a selection is active) plus the per-book operations
+ * that reuse the bulk pipeline on a single book (Mark as read — hidden when already Read — Add to
+ * list, Remove). Empty on touch (the caller passes an empty list outside desktop / in rearrange mode).
+ */
+private fun libraryBookContextMenu(
+    book: Book,
+    selectionMode: Boolean,
+    isSelected: Boolean,
+    onOpen: () -> Unit,
+    onSelect: () -> Unit,
+    onToggleSelection: () -> Unit,
+    onMarkAsRead: () -> Unit,
+    onAddToList: () -> Unit,
+    onRemove: () -> Unit,
+): List<DesktopContextMenuItem> = buildList {
+    add(DesktopContextMenuItem(
+        label = "Open",
+        onClick = onOpen,
+    ),)
+
+    if (selectionMode) {
+        val toggleLabel = if (isSelected) "Remove from selection" else "Add to selection"
+
+        add(DesktopContextMenuItem(
+            label = toggleLabel,
+            onClick = onToggleSelection,
+        ),)
+    } else {
+        add(DesktopContextMenuItem(
+            label = "Select",
+            onClick = onSelect,
+        ),)
+    }
+
+    if (book.status != BookStatus.Read) {
+        add(DesktopContextMenuItem(
+            label = "Mark as read",
+            onClick = onMarkAsRead,
+        ),)
+    }
+
+    add(DesktopContextMenuItem(
+        label = "Add to list…",
+        onClick = onAddToList,
+    ),)
+    add(DesktopContextMenuItem(
+        label = "Remove from library",
+        onClick = onRemove,
+    ),)
+}
+
+/**
+ * The visible span of book ids between the selection [anchorId] and the shift-clicked [targetId]
+ * (inclusive), in display order. Falls back to just the target when either id is no longer visible
+ * (e.g. filtered out between clicks).
+ */
+private fun idRangeBetween(
+    ids: List<Int>,
+    anchorId: Int,
+    targetId: Int,
+): List<Int> {
+    val anchorIndex = ids.indexOf(anchorId)
+    val targetIndex = ids.indexOf(targetId)
+
+    if (anchorIndex == -1 || targetIndex == -1) return listOf(targetId)
+
+    return ids.subList(
+        minOf(
+            anchorIndex,
+            targetIndex,
+        ),
+        maxOf(
+            anchorIndex,
+            targetIndex,
+        ) + 1,
+    ).toList()
 }
 
 /**
@@ -1470,20 +1659,18 @@ private fun ShelfTabPill(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ReadYearChipRow(
     years: List<Int>,
     selectedYear: Int?,
     onYearClick: (Int?) -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    // Wraps on a fixed-width desktop pane (a pointer can't fling a chip row sideways); compact and
+    // medium keep the horizontal scroll.
+    val wrap = rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
+
+    val chipContent: @Composable () -> Unit = {
         YearChip(
             label = "All years",
             selected = selectedYear == null,
@@ -1496,6 +1683,29 @@ internal fun ReadYearChipRow(
                 selected = selectedYear == year,
                 onClick = { onYearClick(year) },
             )
+        }
+    }
+
+    if (wrap) {
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            chipContent()
+        }
+    } else {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            chipContent()
         }
     }
 }
@@ -1663,36 +1873,60 @@ internal fun BulkRemoveConfirmationDialog(
 ) {
     val titlePlural = if (bookCount == 1) "book" else "books"
 
-    AlertDialog(
+    // A transient destructive confirm is a bare overlay (§6) rather than a sheet, but it still
+    // carries the editorial register — Fraunces headline + body and the shared button — instead of
+    // Material AlertDialog chrome.
+    Dialog(
         onDismissRequest = {
             if (inProgress.not()) onDismiss()
         },
-        title = {
-            Text(text = "Remove $bookCount $titlePlural?")
-        },
-        text = {
-            Text(
-                text = "They'll come off every shelf and out of your Hardcover library. " +
-                    "You can always add them again later.",
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onConfirm,
-                enabled = inProgress.not(),
-            ) {
-                Text(text = "Remove")
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = "Remove $bookCount $titlePlural?",
+                    style = MaterialTheme.editorialTypography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "They'll come off every shelf and out of your Hardcover library. " +
+                        "You can always add them again later.",
+                    style = MaterialTheme.editorialTypography.body,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = 8.dp,
+                        alignment = Alignment.End,
+                    ),
+                ) {
+                    SoftcoverButton(
+                        label = "Keep",
+                        style = ButtonStyle.TEXT,
+                        onClick = onDismiss,
+                        enabled = inProgress.not(),
+                    )
+
+                    SoftcoverButton(
+                        label = "Remove",
+                        style = ButtonStyle.TEXT,
+                        onClick = onConfirm,
+                        enabled = inProgress.not(),
+                    )
+                }
             }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                enabled = inProgress.not(),
-            ) {
-                Text(text = "Keep")
-            }
-        },
-    )
+        }
+    }
 }
 
 private val SelectionShelfTargets: List<Pair<UserBookStatus, String>> = listOf(

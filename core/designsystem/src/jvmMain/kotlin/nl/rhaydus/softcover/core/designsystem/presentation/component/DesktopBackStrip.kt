@@ -32,19 +32,21 @@ fun DesktopBackStrip(
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier.pointerHandCursor(),
-        ) {
-            val backIcon = SoftcoverIconResource.Drawable(
-                icon = SoftcoverIcon.ArrowBack,
-                contentDescription = "Navigate back icon",
-            )
+        DesktopTooltip(text = "Back") {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.pointerHandCursor(),
+            ) {
+                val backIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.ArrowBack,
+                    contentDescription = "Navigate back icon",
+                )
 
-            Icon(
-                painter = backIcon.getIconPainter(),
-                contentDescription = backIcon.contentDescription,
-            )
+                Icon(
+                    painter = backIcon.getIconPainter(),
+                    contentDescription = backIcon.contentDescription,
+                )
+            }
         }
     }
 }

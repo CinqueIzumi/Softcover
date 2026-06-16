@@ -83,6 +83,7 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DropCapText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
@@ -961,19 +962,21 @@ internal fun BookOverflowMenu(
     val dismiss = { menuOpen = false }
 
     Box {
-        IconButton(
-            onClick = { menuOpen = true },
-            colors = iconColors,
-        ) {
-            val moreActionsIcon = SoftcoverIconResource.Drawable(
-                icon = SoftcoverIcon.Edit,
-                contentDescription = "More actions",
-            )
+        DesktopTooltip(text = "More actions") {
+            IconButton(
+                onClick = { menuOpen = true },
+                colors = iconColors,
+            ) {
+                val moreActionsIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.Edit,
+                    contentDescription = "More actions",
+                )
 
-            Icon(
-                painter = moreActionsIcon.getIconPainter(),
-                contentDescription = moreActionsIcon.contentDescription,
-            )
+                Icon(
+                    painter = moreActionsIcon.getIconPainter(),
+                    contentDescription = moreActionsIcon.contentDescription,
+                )
+            }
         }
 
         DropdownMenu(

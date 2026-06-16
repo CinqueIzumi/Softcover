@@ -203,19 +203,20 @@ internal data class LibraryUiState(
     }
 
     /**
-     * Resolves [selectedBookIds] to the underlying [Book] domain models so action handlers can hand
-     * them to use cases that operate on [Book] rather than just id. Looks across every collected
-     * shelf list plus the custom-list parent lookup so a selection survives a tab being
-     * recomputed mid-flight.
+     * Resolves [bookIds] (defaulting to the current [selectedBookIds]) to the underlying [Book]
+     * domain models so action handlers can hand them to use cases that operate on [Book] rather than
+     * just id. Looks across every collected shelf list plus the custom-list parent lookup so a
+     * selection survives a tab being recomputed mid-flight. A non-default [bookIds] backs the desktop
+     * per-book context menu, which acts on a single book without first entering selection mode.
      */
-    fun resolveSelectedBooks(): List<Book> {
-        if (selectedBookIds.isEmpty()) return emptyList()
+    fun resolveSelectedBooks(bookIds: Set<Int> = selectedBookIds): List<Book> {
+        if (bookIds.isEmpty()) return emptyList()
 
         val byId: Map<Int, Book> = booksByTab.values.asSequence()
             .flatten()
             .associateBy { it.id } + bookByBookId
 
-        return selectedBookIds.mapNotNull { byId[it] }
+        return bookIds.mapNotNull { byId[it] }
     }
 
     /** Years that the Read tab can be filtered to, computed from raw (unfiltered) Read books. */

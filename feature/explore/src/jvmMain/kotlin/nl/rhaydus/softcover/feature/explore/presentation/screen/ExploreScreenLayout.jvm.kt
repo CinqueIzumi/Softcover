@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSearchField
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
@@ -174,19 +175,21 @@ private fun DesktopExploreHeader(
                 Text(text = if (isRefreshing) "Refreshing…" else "Refresh")
             }
 
-            IconButton(
-                onClick = onScanClick,
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                val scanIcon = SoftcoverIconResource.Drawable(
-                    icon = SoftcoverIcon.BarcodeScanner,
-                    contentDescription = "Scan a book's barcode",
-                )
+            DesktopTooltip(text = "Scan a barcode") {
+                IconButton(
+                    onClick = onScanClick,
+                    modifier = Modifier.pointerHandCursor(),
+                ) {
+                    val scanIcon = SoftcoverIconResource.Drawable(
+                        icon = SoftcoverIcon.BarcodeScanner,
+                        contentDescription = "Scan a book's barcode",
+                    )
 
-                Icon(
-                    painter = scanIcon.getIconPainter(),
-                    contentDescription = scanIcon.contentDescription,
-                )
+                    Icon(
+                        painter = scanIcon.getIconPainter(),
+                        contentDescription = scanIcon.contentDescription,
+                    )
+                }
             }
         }
     }

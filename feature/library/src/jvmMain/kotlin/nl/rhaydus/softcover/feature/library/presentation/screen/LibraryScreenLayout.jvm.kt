@@ -39,11 +39,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSearchField
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.dismissOnEscape
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.hoverHighlight
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -130,7 +132,17 @@ internal actual fun LibraryScreenLayout(
         runAction(OnExitRearrangeModeAction())
     }
 
-    Row(modifier = Modifier.fillMaxSize()) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .dismissOnEscape(enabled = state.selectionMode || state.isRearranging) {
+                if (state.selectionMode) {
+                    runAction(OnExitSelectionModeAction())
+                } else {
+                    runAction(OnExitRearrangeModeAction())
+                }
+            },
+    ) {
         ShelfSidebar(
             tabs = tabs,
             selectedTabId = currentTab?.id,
@@ -518,19 +530,21 @@ private fun DesktopLibraryHeader(
                 Text(text = if (isRefreshing) "Refreshing…" else "Refresh")
             }
 
-            IconButton(
-                onClick = onToggleSearchClick,
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                val searchToggleIcon = SoftcoverIconResource.Drawable(
-                    icon = if (isSearchActive) SoftcoverIcon.Close else SoftcoverIcon.Search,
-                    contentDescription = if (isSearchActive) "Close library search" else "Search in library",
-                )
+            DesktopTooltip(text = if (isSearchActive) "Close" else "Search") {
+                IconButton(
+                    onClick = onToggleSearchClick,
+                    modifier = Modifier.pointerHandCursor(),
+                ) {
+                    val searchToggleIcon = SoftcoverIconResource.Drawable(
+                        icon = if (isSearchActive) SoftcoverIcon.Close else SoftcoverIcon.Search,
+                        contentDescription = if (isSearchActive) "Close library search" else "Search in library",
+                    )
 
-                Icon(
-                    painter = searchToggleIcon.getIconPainter(),
-                    contentDescription = searchToggleIcon.contentDescription,
-                )
+                    Icon(
+                        painter = searchToggleIcon.getIconPainter(),
+                        contentDescription = searchToggleIcon.contentDescription,
+                    )
+                }
             }
         }
     }

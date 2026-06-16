@@ -8,13 +8,15 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-internal class OnBulkRemoveFromLibraryAction : LibraryAction {
+internal class OnBulkRemoveFromLibraryAction(
+    private val explicitBookIds: Set<Int>? = null,
+) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
         val state = scope.currentState
-        val books = state.resolveSelectedBooks()
+        val books = state.resolveSelectedBooks(explicitBookIds ?: state.selectedBookIds)
 
         if (books.isEmpty()) {
             scope.setState { it.copy(isBulkRemoveDialogShown = false) }

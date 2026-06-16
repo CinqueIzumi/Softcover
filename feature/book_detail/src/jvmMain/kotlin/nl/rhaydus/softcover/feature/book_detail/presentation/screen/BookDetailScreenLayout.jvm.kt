@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -137,19 +138,21 @@ private fun DesktopBookDetailTopBar(
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier.pointerHandCursor(),
-        ) {
-            val backIcon = SoftcoverIconResource.Drawable(
-                icon = SoftcoverIcon.ArrowBack,
-                contentDescription = "Navigate back icon",
-            )
+        DesktopTooltip(text = "Back") {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.pointerHandCursor(),
+            ) {
+                val backIcon = SoftcoverIconResource.Drawable(
+                    icon = SoftcoverIcon.ArrowBack,
+                    contentDescription = "Navigate back icon",
+                )
 
-            Icon(
-                painter = backIcon.getIconPainter(),
-                contentDescription = backIcon.contentDescription,
-            )
+                Icon(
+                    painter = backIcon.getIconPainter(),
+                    contentDescription = backIcon.contentDescription,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))

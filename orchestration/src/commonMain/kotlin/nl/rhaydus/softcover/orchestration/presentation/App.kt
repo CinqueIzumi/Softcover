@@ -4,6 +4,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
@@ -18,10 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.koinInject
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.WindowWidthClass
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindowSizeClass
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
@@ -34,6 +39,9 @@ import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateU
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
+
+/** Cap a snackbar's width on a wide window so it doesn't stretch across the whole desktop frame. */
+private val SNACKBAR_DESKTOP_MAX_WIDTH = 420.dp
 
 /**
  * The shared application root. Holds the theme, the authenticated/onboarding navigator swap, the
@@ -122,11 +130,27 @@ internal fun App() {
                         )
                     }
 
+                    // On an expanded (desktop / large) window a bottom-centre toast floats far from
+                    // the action; anchor it bottom-end with a constrained width — the desktop
+                    // convention — and keep the phone bottom-centre otherwise.
+                    val onWideWindow =
+                        rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
+
+                    val snackbarModifier = if (onWideWindow) {
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .navigationBarsPadding()
+                            .padding(16.dp)
+                            .widthIn(max = SNACKBAR_DESKTOP_MAX_WIDTH)
+                    } else {
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                    }
+
                     SnackbarHost(
                         hostState = snackBarState,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .navigationBarsPadding(),
+                        modifier = snackbarModifier,
                     )
                 }
             }

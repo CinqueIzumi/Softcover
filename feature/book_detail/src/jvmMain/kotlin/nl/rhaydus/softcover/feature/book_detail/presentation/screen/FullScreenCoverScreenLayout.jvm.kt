@@ -16,6 +16,7 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntSize
 import coil3.request.ImageRequest
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.dismissOnEscape
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 
 // Each wheel notch multiplies / divides the zoom by this factor (between [MIN_SCALE] and [MAX_SCALE]).
@@ -44,6 +45,7 @@ internal actual fun FullScreenCoverScreenLayout(
         onSizeChanged = { containerSize = it },
         onNavigateUp = onNavigateUp,
         imageGestureModifier = Modifier
+            .dismissOnEscape(onDismiss = onNavigateUp)
             .pointerHandCursor()
             .onPointerEvent(PointerEventType.Scroll) { event ->
                 val scrollY = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
