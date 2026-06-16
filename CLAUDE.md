@@ -84,3 +84,23 @@ All versions are centralized in `gradle/libs.versions.toml`. Reference via versi
 ## Roadmap
 
 The redesign roadmap lives in [ROADMAP.md](ROADMAP.md); the sequenced pickup order lives in [ROADMAP_STEPS.md](ROADMAP_STEPS.md). When a step in `ROADMAP_STEPS.md` is finished, **delete it from the file in the same commit** — do not renumber the remaining steps (gaps are intentional so references in commits and docs stay valid). The deletion is part of the step, not a follow-up.
+
+<!-- rhaydus:start -->
+## Rhaydus foundation (managed by rhaydus-adopt - do not hand-edit)
+
+This project builds on the **nl.rhaydus foundation** (v0.2.0, from Maven Central). Capabilities index (what's available, so reuse rather than reinvent): [`docs/rhaydus/0.2.0/CAPABILITIES.md`](docs/rhaydus/0.2.0/CAPABILITIES.md).
+
+- **Foundation libraries (0.2.0):** `nl.rhaydus:toad`, `core-ui`, `designsystem-core`, `designsystem-editorial`, `designsystem-image`, `ktlint-rules`.
+- **Foundation conventions docs** (vendored, version-pinned at [`docs/rhaydus/0.2.0/`](docs/rhaydus/0.2.0)): architecture, toad-architecture, code-style, design-system-foundations, CAPABILITIES. These are the source of truth for the shared layering, TOAD pattern, code style, and design system; this app keeps only its own deltas (brand tokens, Apollo/Room, platform set).
+- **This app's design system (brand):** [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md).
+
+**How to develop here:**
+- New feature / screen **logic** (state, actions, use cases, data) → the **rhaydus-logic** agent.
+- New feature / screen **UI** (Compose render, design system) → the **rhaydus-ui** agent (it reads the foundation design system + `DESIGN_SYSTEM.md`).
+- A logic-only or UI-only change uses just that one agent; a full new screen goes logic → UI.
+- Review → **code-reviewer**. Tests → **unit-test-writer**. Style gates → the **style-check** skill.
+- **Reuse-first:** check the capabilities index before hand-rolling a component, modifier, or util.
+
+_Re-run the rhaydus-adopt agent after changing any `nl.rhaydus` dependency or version._
+<!-- rhaydus:end -->
+
