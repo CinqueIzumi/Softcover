@@ -14,12 +14,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +32,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
@@ -51,7 +51,6 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserTag
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ShareBookBottomSheet(
     book: Book,
@@ -94,11 +93,9 @@ internal fun ShareBookBottomSheet(
         "An editorial card of ${book.title}"
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    ) {
+    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+        val dismiss = LocalModalSheetDismiss.current
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -146,7 +143,7 @@ internal fun ShareBookBottomSheet(
             ) {
                 SoftcoverButton(
                     label = "Cancel",
-                    onClick = onDismissRequest,
+                    onClick = dismiss,
                     style = ButtonStyle.OUTLINED,
                     size = ButtonSize.M,
                     modifier = Modifier.weight(1f),
@@ -172,7 +169,7 @@ internal fun ShareBookBottomSheet(
                             }
 
                             isSharing = false
-                            onDismissRequest()
+                            dismiss()
                         }
                     },
                     style = ButtonStyle.FILLED,

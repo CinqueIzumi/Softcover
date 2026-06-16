@@ -28,19 +28,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
@@ -346,35 +344,20 @@ internal fun SeriesCardSkeleton(modifier: Modifier = Modifier) {
 }
 
 /**
- * The shared dismiss-options sheet host for an "up next" series book. Owns the bottom-sheet state and
- * the hide-then-dismiss animation, and wires the two dismiss actions through [runAction] so both the
- * mobile carousel and the desktop grid open an identical sheet. [onDismiss] clears the host's selected
- * book once the sheet has animated closed.
+ * The shared dismiss-options sheet host for an "up next" series book. Wires the two dismiss actions
+ * through [runAction] so both the mobile carousel and the desktop grid open an identical sheet, and
+ * closes through [LocalModalSheetDismiss] so each form animates out the way it should. [onDismiss]
+ * clears the host's selected book once the sheet has closed.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ContinueSeriesMenuSheet(
     book: Book,
     runAction: (ExploreAction) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    AdaptiveModalSheet(onDismissRequest = onDismiss) {
+        val dismiss = LocalModalSheetDismiss.current
 
-    val coroutineScope = rememberCoroutineScope()
-
-    val hideThenDismiss: () -> Unit = {
-        coroutineScope.launch {
-            sheetState.hide()
-        }.invokeOnCompletion {
-            onDismiss()
-        }
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    ) {
         ContinueSeriesDismissSheet(
             book = book,
             onDismissBookClick = {
@@ -385,7 +368,7 @@ internal fun ContinueSeriesMenuSheet(
                     ),
                 )
 
-                hideThenDismiss()
+                dismiss()
             },
             onDismissSeriesClick = {
                 val series = book.bookSeries ?: return@ContinueSeriesDismissSheet
@@ -397,7 +380,7 @@ internal fun ContinueSeriesMenuSheet(
                     ),
                 )
 
-                hideThenDismiss()
+                dismiss()
             },
         )
     }

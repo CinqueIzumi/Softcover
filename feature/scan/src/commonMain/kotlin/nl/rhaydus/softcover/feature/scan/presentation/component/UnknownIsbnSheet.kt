@@ -7,25 +7,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun UnknownIsbnSheet(
     isbn: String,
@@ -33,11 +31,9 @@ internal fun UnknownIsbnSheet(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = { if (isAdding.not()) onDismiss() },
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    ) {
+    AdaptiveModalSheet(onDismissRequest = { if (isAdding.not()) onDismiss() }) {
+        val dismiss = LocalModalSheetDismiss.current
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -90,7 +86,7 @@ internal fun UnknownIsbnSheet(
                 style = ButtonStyle.TEXT,
                 size = ButtonSize.M,
                 enabled = isAdding.not(),
-                onClick = onDismiss,
+                onClick = dismiss,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

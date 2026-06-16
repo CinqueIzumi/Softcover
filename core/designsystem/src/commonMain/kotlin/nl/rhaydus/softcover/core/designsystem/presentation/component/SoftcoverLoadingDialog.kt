@@ -7,13 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ContainedLoadingIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalBottomSheetProperties
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,7 +28,7 @@ internal fun SoftcoverLoadingDialog(isLoading: Boolean) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoftcoverLoadingSheet(
     eyebrow: String,
@@ -45,14 +40,10 @@ fun SoftcoverLoadingSheet(
 ) {
     if (isLoading.not()) return
 
-    ModalBottomSheet(
+    AdaptiveModalSheet(
         onDismissRequest = {},
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-        properties = ModalBottomSheetProperties(
-            shouldDismissOnBackPress = false,
-            shouldDismissOnClickOutside = false,
-        ),
+        dismissOnTapOutside = false,
+        dismissOnBackPress = false,
     ) {
         Column(
             modifier = Modifier

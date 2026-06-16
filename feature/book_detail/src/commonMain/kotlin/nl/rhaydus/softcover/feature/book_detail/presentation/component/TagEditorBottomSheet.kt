@@ -15,14 +15,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -30,7 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -54,7 +53,7 @@ private val EDITABLE_CATEGORIES: List<TagCategory> = listOf(
     TagCategory.CONTENT_WARNING,
 )
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TagEditorBottomSheet(
     userTags: List<UserTag>,
@@ -67,11 +66,9 @@ internal fun TagEditorBottomSheet(
     onToggleSpoiler: (UserTag) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    ) {
+    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+        val dismiss = LocalModalSheetDismiss.current
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -178,7 +175,7 @@ internal fun TagEditorBottomSheet(
 
             SoftcoverButton(
                 label = "Done",
-                onClick = onDismissRequest,
+                onClick = dismiss,
                 style = ButtonStyle.FILLED,
                 size = ButtonSize.M,
                 modifier = Modifier.fillMaxWidth(),

@@ -11,24 +11,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.component.ExpandableFlowRow
+import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetForm
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
+import nl.rhaydus.softcover.core.designsystem.presentation.model.ModalSheetForm
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun LibraryFilterSheet(
     filters: LibraryFilters,
@@ -37,11 +37,7 @@ internal fun LibraryFilterSheet(
     onClearAll: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    ) {
+    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -174,12 +170,21 @@ private fun FacetSection(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row(
-            modifier = Modifier.horizontalScroll(state = rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            chips()
+        // The fixed-width desktop panel can't scroll a chip row sideways with a pointer, so its facets
+        // wrap and collapse behind a "show more" (a long tag set never buries the facets below it); the
+        // narrow bottom sheet keeps each facet on one horizontally scrolling line.
+        if (LocalModalSheetForm.current == ModalSheetForm.PANEL) {
+            ExpandableFlowRow {
+                chips()
+            }
+        } else {
+            Row(
+                modifier = Modifier.horizontalScroll(state = rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                chips()
+            }
         }
     }
 }
