@@ -58,13 +58,38 @@ subprojects {
     }
 }
 
-// Wire the custom ktlint ruleset (:ktlint-rules) into the build so style is enforced for every
-// developer with zero setup: `./gradlew ktlintCheck` (the gate, also run by `check`) and
-// `./gradlew ktlintFormat` (autofix). The rules run via ktlint's rule-engine directly from the
-// :ktlint-rules module, so there is no Spotless/plugin version coupling.
+// Wire the custom ktlint ruleset into the build so style is enforced for every developer with zero
+// setup: `./gradlew ktlintCheck` (the gate, also run by `check`) and `./gradlew ktlintFormat` (autofix).
+// The rules run via ktlint's rule-engine directly from the published `nl.rhaydus:ktlint-rules` jar
+// (resolved on the `ktlintRules` configuration), so there is no Spotless/plugin version coupling.
+// `-Pktlint.root=<dir>` scopes the scan (used for testing a rule on a throwaway dir); defaults to the repo.
+val ktlintRules by configurations.creating
+
+dependencies {
+    add("ktlintRules", libs.rhaydus.ktlintRules)
+}
+
+val ktlintScanRoot = (project.findProperty("ktlint.root") as String?) ?: rootDir.absolutePath
+
+tasks.register<JavaExec>("ktlintFormat") {
+    group = "formatting"
+    description = "Auto-wraps multi-arg calls/declarations across the repo (custom ktlint ruleset)."
+    classpath = ktlintRules
+    mainClass.set("nl.rhaydus.ktlint.MainKt")
+    args("format", ktlintScanRoot)
+}
+
+tasks.register<JavaExec>("ktlintCheck") {
+    group = "verification"
+    description = "Fails the build on custom-ruleset violations (multi-arg one-per-line wrapping)."
+    classpath = ktlintRules
+    mainClass.set("nl.rhaydus.ktlint.MainKt")
+    args("check", ktlintScanRoot)
+}
+
 subprojects {
     tasks.matching { it.name == "check" }.configureEach {
-        dependsOn(":ktlint-rules:ktlintCheck")
+        dependsOn(rootProject.tasks.named("ktlintCheck"))
         dependsOn(":checkModuleGraph")
     }
 }
