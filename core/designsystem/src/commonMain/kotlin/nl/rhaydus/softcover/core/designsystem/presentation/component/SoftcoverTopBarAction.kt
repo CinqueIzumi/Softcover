@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
 
 data class SoftcoverTopBarAction(
-    val iconResource: SoftcoverIconResource,
+    val iconResource: RhaydusIconResource,
     val onClick: () -> Unit,
 )

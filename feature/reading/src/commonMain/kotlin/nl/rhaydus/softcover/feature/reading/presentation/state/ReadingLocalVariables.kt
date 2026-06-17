@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
 import kotlinx.coroutines.Job
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.LocalVariables
+import nl.rhaydus.toad.LocalVariables
 
 internal data class ReadingLocalVariables(
     val name: String = "",

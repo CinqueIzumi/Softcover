@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.preferences.data.repository.SettingsRepositoryI
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDesktopWindowStateAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
@@ -19,6 +20,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettin
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetDesktopWindowStateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 
@@ -72,6 +74,10 @@ val preferencesModule = module {
     factory { SetLibrarySortUseCase(settingsRepository = get()) }
 
     factory { DismissPlanTodayUseCase(settingsRepository = get()) }
+
+    factory { GetDesktopWindowStateAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetDesktopWindowStateUseCase(settingsRepository = get()) }
 
     single<GetThemeConfigurationUseCase> {
         GetThemeConfigurationUseCase(settingsRepository = get())

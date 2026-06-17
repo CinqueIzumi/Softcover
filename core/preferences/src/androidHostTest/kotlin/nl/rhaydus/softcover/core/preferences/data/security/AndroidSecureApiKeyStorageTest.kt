@@ -9,7 +9,7 @@ import io.mockk.slot
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.ui.common.AppDispatchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

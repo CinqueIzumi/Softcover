@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiState
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
+import nl.rhaydus.toad.UiState
 
 internal data class LibraryVisibilitySettingsUiState(
     val persistedEnabledStatusCodes: Set<Int> = emptySet(),

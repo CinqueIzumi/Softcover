@@ -17,12 +17,11 @@ import io.mockk.verify
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.softcover.CreateBookMutation
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
@@ -53,6 +52,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.ui.common.AppDispatchers
 
 class BooksRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient

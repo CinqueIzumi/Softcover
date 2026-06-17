@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.feature.library.presentation.util
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
-import nl.rhaydus.softcover.core.designsystem.presentation.util.formatGroupedNumber
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
+import nl.rhaydus.ui.common.formatGroupedNumber
 
 private fun Book.pagesForStats(): Int = currentEdition?.pages ?: defaultEdition?.pages ?: 0
 

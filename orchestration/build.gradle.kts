@@ -53,6 +53,8 @@ kotlin {
             implementation(project(":feature:settings"))
             implementation(project(":feature:app_update"))
 
+            implementation(libs.rhaydus.designsystemCore)
+
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.navigator)

@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.WindowPlacement
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataSource
 import org.junit.jupiter.api.BeforeEach
@@ -398,6 +400,74 @@ class SettingsRepositoryImplTest {
             // ----- Assert -----
             coVerify {
                 settingsLocalDataSource.setEnabledListIds(ids = ids)
+            }
+        }
+    }
+
+    @Nested
+    inner class DesktopWindowStateProperty {
+        @Test
+        fun `desktopWindowState property is wired to local data source desktopWindowState flow`() = runTest {
+            // ----- Arrange -----
+            val state = DesktopWindowState(
+                width = 1280,
+                height = 800,
+                x = 100,
+                y = 200,
+                placement = WindowPlacement.FLOATING,
+            )
+
+            every {
+                settingsLocalDataSource.desktopWindowState
+            } returns flowOf(state)
+
+            val freshRepository =
+                SettingsRepositoryImpl(
+                    settingsLocalDataSource = settingsLocalDataSource,
+                    settingsRemoteDataSource = settingsRemoteDataSource,
+                )
+
+            // ----- Act & Assert -----
+            freshRepository.desktopWindowState.test {
+                awaitItem() shouldBe state
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class SetDesktopWindowState {
+        @Test
+        fun `delegates to local data source with the given state`() = runTest {
+            // ----- Arrange -----
+            val state = DesktopWindowState(
+                width = 1440,
+                height = 900,
+                x = 50,
+                y = 80,
+                placement = WindowPlacement.FLOATING,
+            )
+
+            // ----- Act -----
+            repository.setDesktopWindowState(state = state)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setDesktopWindowState(state = state)
+            }
+        }
+
+        @Test
+        fun `delegates to local data source with a maximized state`() = runTest {
+            // ----- Arrange -----
+            val state = DesktopWindowState(placement = WindowPlacement.MAXIMIZED)
+
+            // ----- Act -----
+            repository.setDesktopWindowState(state = state)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setDesktopWindowState(state = state)
             }
         }
     }

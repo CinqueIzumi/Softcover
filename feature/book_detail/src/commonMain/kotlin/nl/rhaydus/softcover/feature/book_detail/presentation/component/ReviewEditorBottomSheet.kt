@@ -14,12 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,10 +40,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -59,7 +57,6 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
  * so it round-trips and is overwritten on the next refresh. "Delete" clears it and is only offered once
  * a review exists. The "Contains spoilers" switch is the whole-review gate, separate from inline marks.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ReviewEditorBottomSheet(
     initialDocument: ReviewDocument,
@@ -112,11 +109,7 @@ internal fun ReviewEditorBottomSheet(
     val selectionStart: Int = selection.min
     val selectionEnd: Int = selection.max
 
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    ) {
+    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -248,7 +241,7 @@ internal fun ReviewEditorBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Save",
                 style = ButtonStyle.FILLED,
                 size = ButtonSize.M,
@@ -268,7 +261,7 @@ internal fun ReviewEditorBottomSheet(
             if (canDelete) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                SoftcoverButton(
+                RhaydusButton(
                     label = "Delete review",
                     style = ButtonStyle.TEXT,
                     size = ButtonSize.M,

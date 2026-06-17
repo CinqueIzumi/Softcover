@@ -5,8 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import org.koin.dsl.module
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
+import nl.rhaydus.ui.common.AppDispatchers
 
 val dispatcherModule = module {
     single {

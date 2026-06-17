@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.domain.logging.AppLog
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveActiveSessionUseCase
@@ -18,6 +17,7 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.PauseReadingSessionUseC
 import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
+import nl.rhaydus.ui.common.AppDispatchers
 
 /**
  * App-scoped single source of truth for the active reading session. It exposes the running session

@@ -1,8 +1,11 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
@@ -15,17 +18,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
+import nl.rhaydus.designsystem.layout.WindowWidthClass
+import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpdate
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
@@ -33,6 +39,9 @@ import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateU
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
+
+/** Cap a snackbar's width on a wide window so it doesn't stretch across the whole desktop frame. */
+private val SNACKBAR_DESKTOP_MAX_WIDTH = 420.dp
 
 /**
  * The shared application root. Holds the theme, the authenticated/onboarding navigator swap, the
@@ -121,11 +130,27 @@ internal fun App() {
                         )
                     }
 
+                    // On an expanded (desktop / large) window a bottom-centre toast floats far from
+                    // the action; anchor it bottom-end with a constrained width — the desktop
+                    // convention — and keep the phone bottom-centre otherwise.
+                    val onWideWindow =
+                        rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
+
+                    val snackbarModifier = if (onWideWindow) {
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .navigationBarsPadding()
+                            .padding(16.dp)
+                            .widthIn(max = SNACKBAR_DESKTOP_MAX_WIDTH)
+                    } else {
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                    }
+
                     SnackbarHost(
                         hostState = snackBarState,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .navigationBarsPadding(),
+                        modifier = snackbarModifier,
                     )
                 }
             }
@@ -138,9 +163,16 @@ private fun ClearFocusOnTapScreen(content: @Composable () -> Unit) {
     val focusManager = LocalFocusManager.current
 
     Box(
+        // A pointer-tap dismiss scrim — deliberately NOT a `clickable`. On desktop `clickable` also
+        // binds Spacebar/Enter as activation keys, so a focused text field that doesn't fully consume
+        // the space key bubbles it up here and clears its own focus mid-typing. `detectTapGestures`
+        // reacts to pointer taps only (no key binding, not focusable), preserving tap-to-dismiss on
+        // both touch and desktop without stealing focus on space.
         modifier = Modifier
             .fillMaxSize()
-            .noRippleClickable { focusManager.clearFocus() },
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            },
     ) {
         content()
     }

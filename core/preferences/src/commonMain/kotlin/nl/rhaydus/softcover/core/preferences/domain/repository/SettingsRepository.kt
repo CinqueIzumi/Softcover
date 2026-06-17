@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.preferences.domain.repository
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
@@ -64,4 +65,8 @@ interface SettingsRepository {
     val libraryTabOrder: Flow<List<String>>
 
     suspend fun setLibraryTabOrder(order: List<String>)
+
+    val desktopWindowState: Flow<DesktopWindowState>
+
+    suspend fun setDesktopWindowState(state: DesktopWindowState)
 }

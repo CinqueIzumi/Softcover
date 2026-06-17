@@ -1,20 +1,22 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.toad.ActionScope
 
-internal class OnBulkRemoveFromLibraryAction : LibraryAction {
+internal class OnBulkRemoveFromLibraryAction(
+    private val explicitBookIds: Set<Int>? = null,
+) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
         val state = scope.currentState
-        val books = state.resolveSelectedBooks()
+        val books = state.resolveSelectedBooks(explicitBookIds ?: state.selectedBookIds)
 
         if (books.isEmpty()) {
             scope.setState { it.copy(isBulkRemoveDialogShown = false) }

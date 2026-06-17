@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 import java.net.Socket
 import kotlin.time.Duration.Companion.seconds
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.ui.common.AppDispatchers
 
 /**
  * Desktop connectivity monitor. The JDK exposes no network-change callback (unlike Android's

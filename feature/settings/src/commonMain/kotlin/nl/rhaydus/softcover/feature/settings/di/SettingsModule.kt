@@ -8,12 +8,12 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCa
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
-import nl.rhaydus.softcover.feature.settings.presentation.flows.DateStyleCollector
-import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilityInitializer
-import nl.rhaydus.softcover.feature.settings.presentation.flows.PersistedLibraryVisibilityCollector
-import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
-import nl.rhaydus.softcover.feature.settings.presentation.flows.ThemeConfigurationCollector
-import nl.rhaydus.softcover.feature.settings.presentation.flows.UserListsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 
@@ -31,9 +31,9 @@ val settingsModule = module {
         )
     }
 
-    factory { ThemeConfigurationCollector() } bind SettingsInitializer::class
+    factory { ThemeConfigurationCollector() } bind SettingsCollector::class
 
-    factory { DateStyleCollector() } bind SettingsInitializer::class
+    factory { DateStyleCollector() } bind SettingsCollector::class
 
     factory { SetBottomBarStyleUseCase(settingsRepository = get()) }
 
@@ -47,9 +47,9 @@ val settingsModule = module {
 
     factory { SetLibraryTabOrderUseCase(settingsRepository = get()) }
 
-    factory { PersistedLibraryVisibilityCollector() } bind LibraryVisibilityInitializer::class
+    factory { PersistedLibraryVisibilityCollector() } bind LibraryVisibilityCollector::class
 
-    factory { UserListsCollector() } bind LibraryVisibilityInitializer::class
+    factory { UserListsCollector() } bind LibraryVisibilityCollector::class
 
     factory {
         LibraryVisibilitySettingsScreenModel(

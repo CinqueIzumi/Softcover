@@ -14,12 +14,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,9 +32,12 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.share.BookShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.CapturableShareCard
 import nl.rhaydus.softcover.core.designsystem.presentation.share.SaveOutcome
@@ -45,13 +46,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareOutcome
 import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserTag
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ShareBookBottomSheet(
     book: Book,
@@ -94,11 +93,9 @@ internal fun ShareBookBottomSheet(
         "An editorial card of ${book.title}"
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    ) {
+    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+        val dismiss = LocalModalSheetDismiss.current
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -144,19 +141,19 @@ internal fun ShareBookBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                SoftcoverButton(
+                RhaydusButton(
                     label = "Cancel",
-                    onClick = onDismissRequest,
+                    onClick = dismiss,
                     style = ButtonStyle.OUTLINED,
                     size = ButtonSize.M,
                     modifier = Modifier.weight(1f),
                     enabled = isBusy.not(),
                 )
 
-                SoftcoverButton(
+                RhaydusButton(
                     label = if (isSharing) "Sharing…" else "Share",
                     onClick = {
-                        if (isBusy) return@SoftcoverButton
+                        if (isBusy) return@RhaydusButton
 
                         isSharing = true
 
@@ -172,7 +169,7 @@ internal fun ShareBookBottomSheet(
                             }
 
                             isSharing = false
-                            onDismissRequest()
+                            dismiss()
                         }
                     },
                     style = ButtonStyle.FILLED,
@@ -184,10 +181,10 @@ internal fun ShareBookBottomSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = if (isSavingToGallery) "Saving to gallery…" else "Save to gallery",
                 onClick = {
-                    if (isBusy) return@SoftcoverButton
+                    if (isBusy) return@RhaydusButton
 
                     isSavingToGallery = true
 

@@ -19,11 +19,11 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseC
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBookDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
-import nl.rhaydus.softcover.feature.explore.presentation.flows.ContinueSeriesBooksCollector
-import nl.rhaydus.softcover.feature.explore.presentation.flows.ExploreInitializer
-import nl.rhaydus.softcover.feature.explore.presentation.flows.PreviousQueriesCollector
-import nl.rhaydus.softcover.feature.explore.presentation.flows.QueriedBooksCollector
-import nl.rhaydus.softcover.feature.explore.presentation.flows.TrendingBooksCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesBooksCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.ExploreCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueriesCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -52,13 +52,13 @@ val exploreModule = module {
         )
     }
 
-    factory { PreviousQueriesCollector() } bind ExploreInitializer::class
+    factory { PreviousQueriesCollector() } bind ExploreCollector::class
 
-    factory { QueriedBooksCollector() } bind ExploreInitializer::class
+    factory { QueriedBooksCollector() } bind ExploreCollector::class
 
-    factory { TrendingBooksCollector() } bind ExploreInitializer::class
+    factory { TrendingBooksCollector() } bind ExploreCollector::class
 
-    factory { ContinueSeriesBooksCollector() } bind ExploreInitializer::class
+    factory { ContinueSeriesBooksCollector() } bind ExploreCollector::class
 
     single<SearchLocalDataSource> {
         SearchLocalDataSourceImpl(dataStore = get())

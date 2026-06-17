@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiState
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -14,6 +13,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.sort.applyEditionSort
 import nl.rhaydus.softcover.feature.library.presentation.util.availableFinishedYears
 import nl.rhaydus.softcover.feature.library.presentation.util.finishedYear
+import nl.rhaydus.toad.UiState
 
 internal data class LibraryUiState(
     val visibleTabs: List<LibraryTab> = listOf(
@@ -203,19 +203,20 @@ internal data class LibraryUiState(
     }
 
     /**
-     * Resolves [selectedBookIds] to the underlying [Book] domain models so action handlers can hand
-     * them to use cases that operate on [Book] rather than just id. Looks across every collected
-     * shelf list plus the custom-list parent lookup so a selection survives a tab being
-     * recomputed mid-flight.
+     * Resolves [bookIds] (defaulting to the current [selectedBookIds]) to the underlying [Book]
+     * domain models so action handlers can hand them to use cases that operate on [Book] rather than
+     * just id. Looks across every collected shelf list plus the custom-list parent lookup so a
+     * selection survives a tab being recomputed mid-flight. A non-default [bookIds] backs the desktop
+     * per-book context menu, which acts on a single book without first entering selection mode.
      */
-    fun resolveSelectedBooks(): List<Book> {
-        if (selectedBookIds.isEmpty()) return emptyList()
+    fun resolveSelectedBooks(bookIds: Set<Int> = selectedBookIds): List<Book> {
+        if (bookIds.isEmpty()) return emptyList()
 
         val byId: Map<Int, Book> = booksByTab.values.asSequence()
             .flatten()
             .associateBy { it.id } + bookByBookId
 
-        return selectedBookIds.mapNotNull { byId[it] }
+        return bookIds.mapNotNull { byId[it] }
     }
 
     /** Years that the Read tab can be filtered to, computed from raw (unfiltered) Read books. */

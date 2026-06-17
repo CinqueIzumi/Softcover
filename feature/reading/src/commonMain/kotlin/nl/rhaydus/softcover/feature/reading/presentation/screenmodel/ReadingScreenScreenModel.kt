@@ -8,8 +8,6 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
@@ -17,10 +15,12 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDism
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
+import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollector
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
-import nl.rhaydus.softcover.feature.reading.presentation.flows.ReadingInitializer
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import nl.rhaydus.toad.ToadScreenModel
+import nl.rhaydus.ui.common.AppDispatchers
 
 internal class ReadingScreenScreenModel(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
@@ -37,8 +37,8 @@ internal class ReadingScreenScreenModel(
     private val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     appDispatchers: AppDispatchers,
-    flows: List<ReadingInitializer>,
-) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingInitializer, ReadingLocalVariables>(
+    flows: List<ReadingCollector>,
+) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingCollector, ReadingLocalVariables>(
     initialState = ReadingScreenUiState(),
     initialLocalVariables = ReadingLocalVariables(),
     initializers = flows,

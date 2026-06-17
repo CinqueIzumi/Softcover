@@ -16,7 +16,6 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionDependencies
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
@@ -26,6 +25,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUs
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
+import nl.rhaydus.toad.ActionDependencies
 
 internal class BookDetailDependencies(
     val recordBookProgressUseCase: RecordBookProgressUseCase,

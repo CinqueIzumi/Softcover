@@ -16,7 +16,6 @@ import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Co
 import nl.rhaydus.softcover.UpdateListBookPositionsMutation
 import nl.rhaydus.softcover.UpdateListMutation
 import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
@@ -33,6 +32,7 @@ import nl.rhaydus.softcover.type.List_books_bool_exp
 import nl.rhaydus.softcover.type.List_books_set_input
 import nl.rhaydus.softcover.type.List_books_updates
 import nl.rhaydus.softcover.type.Lists_bool_exp
+import nl.rhaydus.ui.common.AppDispatchers
 
 interface ListsRemoteDataSource {
     suspend fun fetchUserLists(

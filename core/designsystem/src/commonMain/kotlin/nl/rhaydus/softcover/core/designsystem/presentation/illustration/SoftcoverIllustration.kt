@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.illustration
 
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
@@ -16,7 +17,7 @@ import org.jetbrains.compose.resources.painterResource
  * identically on Android and iOS and the underlying CMP `Res` stays internal to this module.
  *
  * Draw through [painter] so call sites never reach for a raw `painterResource`, mirroring how icons
- * are drawn through `SoftcoverIconResource`.
+ * are drawn through `RhaydusIconResource`.
  */
 enum class SoftcoverIllustration(internal val resource: DrawableResource) {
     Writing(Res.drawable.illu_writing),

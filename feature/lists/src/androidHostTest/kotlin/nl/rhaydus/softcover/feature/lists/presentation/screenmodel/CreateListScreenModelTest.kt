@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.feature.lists.domain.usecase.CreateListUseCase
@@ -23,6 +22,7 @@ import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreationFailedE
 import nl.rhaydus.softcover.feature.lists.presentation.event.ListNameTakenEvent
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVariables
+import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

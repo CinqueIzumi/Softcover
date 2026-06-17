@@ -1,6 +1,7 @@
 [versions]
 agp = "9.0.0"
 kotlin = "2.3.21"
+rhaydusFoundation = "0.2.0"
 ktlint = "1.7.1"
 coreKtx = "1.17.0"
 okio = "3.9.1"
@@ -56,6 +57,14 @@ sqlite = "2.6.2"
 ksafe = "2.1.2"
 
 [libraries]
+# rhaydus foundation — published nl.rhaydus:* artifacts, resolved from mavenCentral
+rhaydus-toad = { group = "nl.rhaydus", name = "toad", version.ref = "rhaydusFoundation" }
+rhaydus-coreUi = { group = "nl.rhaydus", name = "core-ui", version.ref = "rhaydusFoundation" }
+rhaydus-designsystemCore = { group = "nl.rhaydus", name = "designsystem-core", version.ref = "rhaydusFoundation" }
+rhaydus-designsystemEditorial = { group = "nl.rhaydus", name = "designsystem-editorial", version.ref = "rhaydusFoundation" }
+rhaydus-designsystemImage = { group = "nl.rhaydus", name = "designsystem-image", version.ref = "rhaydusFoundation" }
+rhaydus-ktlintRules = { group = "nl.rhaydus", name = "ktlint-rules", version.ref = "rhaydusFoundation" }
+
 # ktlint rule-engine — consumed by the :ktlint-rules module to drive the custom autofix ruleset
 ktlint-ruleEngine = { group = "com.pinterest.ktlint", name = "ktlint-rule-engine", version.ref = "ktlint" }
 ktlint-ruleEngineCore = { group = "com.pinterest.ktlint", name = "ktlint-rule-engine-core", version.ref = "ktlint" }

@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
@@ -13,10 +11,12 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUse
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
+import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
-import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilityInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.toad.ToadScreenModel
+import nl.rhaydus.ui.common.AppDispatchers
 
 internal class LibraryVisibilitySettingsScreenModel(
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
@@ -29,12 +29,12 @@ internal class LibraryVisibilitySettingsScreenModel(
     private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val applicationScope: ApplicationScope,
     appDispatchers: AppDispatchers,
-    flows: List<LibraryVisibilityInitializer>,
+    flows: List<LibraryVisibilityCollector>,
 ) : ToadScreenModel<
     LibraryVisibilitySettingsUiState,
     LibraryVisibilitySettingsEvent,
     LibraryVisibilitySettingsDependencies,
-    LibraryVisibilityInitializer,
+    LibraryVisibilityCollector,
     LibraryVisibilitySettingsLocalVariables,
     >(
     initialState = LibraryVisibilitySettingsUiState(),

@@ -21,4 +21,5 @@ internal data class AppSettingsEntity(
     val enabledListIds: Set<Int> = emptySet(),
     val listDefaultsSeeded: Boolean = false,
     val libraryTabOrder: List<String> = emptyList(),
+    val desktopWindowState: DesktopWindowStateEntity = DesktopWindowStateEntity(),
 )

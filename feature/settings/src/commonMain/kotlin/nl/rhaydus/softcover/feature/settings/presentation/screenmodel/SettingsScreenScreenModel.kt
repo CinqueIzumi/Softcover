@@ -1,19 +1,19 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
+import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
-import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+import nl.rhaydus.toad.ToadScreenModel
+import nl.rhaydus.ui.common.AppDispatchers
 
 internal class SettingsScreenScreenModel(
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
@@ -23,8 +23,8 @@ internal class SettingsScreenScreenModel(
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     appVersionProvider: AppVersionProvider,
     appDispatchers: AppDispatchers,
-    flows: List<SettingsInitializer>,
-) : ToadScreenModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsInitializer, SettingsLocalVariables>(
+    flows: List<SettingsCollector>,
+) : ToadScreenModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsCollector, SettingsLocalVariables>(
     initialState = SettingsScreenUiState(
         appVersionName = appVersionProvider.versionInfo.name,
         appVersionCode = appVersionProvider.versionInfo.code,

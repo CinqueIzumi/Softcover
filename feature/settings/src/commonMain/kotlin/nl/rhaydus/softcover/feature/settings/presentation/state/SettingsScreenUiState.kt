@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiState
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.toad.UiState
 
 internal data class SettingsScreenUiState(
     val useFloatingBarChecked: Boolean = true,

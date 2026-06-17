@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.icon
 
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_account
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_apk_install
@@ -48,7 +49,7 @@ import org.jetbrains.compose.resources.DrawableResource
  * [DrawableResource], so consumers reference icons through this type (`SoftcoverIcon.Search`) rather
  * than the platform resource system — the icons resolve identically on Android and iOS, and the
  * underlying CMP `Res` stays internal to this module. Wrap
- * in [nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource.Drawable] when
+ * in [nl.rhaydus.softcover.core.designsystem.presentation.model.RhaydusIconResource.Drawable] when
  * a content description is needed.
  */
 enum class SoftcoverIcon(internal val resource: DrawableResource) {

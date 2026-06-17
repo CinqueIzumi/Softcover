@@ -1,5 +1,10 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetForm
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
+import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -24,12 +29,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,25 +45,27 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.model.ModalSheetForm
+import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.toHoursMinutesSeconds
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.ui.common.toHoursMinutesSeconds
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateProgressBottomSheet(
     bookToUpdate: Book,
@@ -71,11 +76,7 @@ fun UpdateProgressBottomSheet(
     onUpdateTimeProgressClick: (String, String, String) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    ) {
+    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
         ProgressBottomSheetContent(
             book = bookToUpdate,
             progressSheetTab = selectedTab,
@@ -112,6 +113,13 @@ private fun ProgressBottomSheetContent(
 
     val focusManager = LocalFocusManager.current
 
+    // A 96dp-tall L button is the right phone thumb target; on the desktop panel it steps down to a
+    // 56dp M pointer target. The form is published by the hosting AdaptiveModalSheet.
+    val actionButtonSize = when (LocalModalSheetForm.current) {
+        ModalSheetForm.PANEL -> ButtonSize.M
+        ModalSheetForm.SHEET -> ButtonSize.L
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,6 +147,7 @@ private fun ProgressBottomSheetContent(
             ProgressSheetTab.PAGE -> {
                 ProgressBottomSheetPageContent(
                     book = book,
+                    buttonSize = actionButtonSize,
                     onUpdatePageProgressClick = onUpdatePageProgressClick,
                 )
             }
@@ -146,6 +155,7 @@ private fun ProgressBottomSheetContent(
             ProgressSheetTab.TIME -> {
                 ProgressBottomSheetTimeContent(
                     book = book,
+                    buttonSize = actionButtonSize,
                     onUpdateTimeProgressClick = onUpdateTimeProgressClick,
                 )
             }
@@ -153,6 +163,7 @@ private fun ProgressBottomSheetContent(
             ProgressSheetTab.PERCENTAGE -> {
                 ProgressBottomSheetPercentageContent(
                     book = book,
+                    buttonSize = actionButtonSize,
                     onUpdatePercentageClick = onUpdatePercentageClick,
                 )
             }
@@ -238,6 +249,7 @@ private fun EditorialProgressIndicator(fraction: Float) {
 @Composable
 private fun ColumnScope.ProgressBottomSheetPageContent(
     book: Book,
+    buttonSize: ButtonSize,
     onUpdatePageProgressClick: (String) -> Unit,
 ) {
     val totalPages = book.currentEdition?.pages ?: book.defaultEdition?.pages ?: 0
@@ -322,14 +334,14 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
 
     Spacer(modifier = Modifier.height(28.dp))
 
-    SoftcoverButton(
+    RhaydusButton(
         label = "Update progress",
         onClick = {
             onUpdatePageProgressClick(number.text)
         },
         modifier = Modifier.fillMaxWidth(),
         style = ButtonStyle.FILLED,
-        size = ButtonSize.L,
+        size = buttonSize,
     )
 
     Spacer(modifier = Modifier.height(4.dp))
@@ -338,6 +350,7 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
 @Composable
 private fun ColumnScope.ProgressBottomSheetPercentageContent(
     book: Book,
+    buttonSize: ButtonSize,
     onUpdatePercentageClick: (String) -> Unit,
 ) {
     var number by remember {
@@ -424,11 +437,11 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
 
     Spacer(modifier = Modifier.height(28.dp))
 
-    SoftcoverButton(
+    RhaydusButton(
         label = "Update progress",
         modifier = Modifier.fillMaxWidth(),
         style = ButtonStyle.FILLED,
-        size = ButtonSize.L,
+        size = buttonSize,
         onClick = {
             onUpdatePercentageClick(number.text)
         },
@@ -440,6 +453,7 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
 @Composable
 private fun ColumnScope.ProgressBottomSheetTimeContent(
     book: Book,
+    buttonSize: ButtonSize,
     onUpdateTimeProgressClick: (String, String, String) -> Unit,
 ) {
     val initial = (book.userBookRead?.currentSeconds ?: 0).toHoursMinutesSeconds()
@@ -551,7 +565,7 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
 
     Spacer(modifier = Modifier.height(28.dp))
 
-    SoftcoverButton(
+    RhaydusButton(
         label = "Update progress",
         onClick = {
             onUpdateTimeProgressClick(
@@ -562,7 +576,7 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
         },
         modifier = Modifier.fillMaxWidth(),
         style = ButtonStyle.FILLED,
-        size = ButtonSize.L,
+        size = buttonSize,
     )
 
     Spacer(modifier = Modifier.height(4.dp))
@@ -576,6 +590,24 @@ private fun TimeColon(textStyle: TextStyle) {
         style = textStyle,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+}
+
+/** Approximate width for a hero stat field of [charCount] glyphs in [textStyle]. */
+@Composable
+private fun computeHeroStatFieldWidth(
+    textStyle: TextStyle,
+    charCount: Int,
+): Dp {
+    val density = LocalDensity.current
+
+    return remember(density, textStyle, charCount) {
+        with(density) {
+            val fontSizeInPx = textStyle.fontSize.toPx()
+            val padding = 16.dp.toPx()
+
+            ((charCount * fontSizeInPx * 0.62f) + padding).toDp()
+        }
+    }
 }
 
 @Composable

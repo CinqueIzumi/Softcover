@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -44,16 +46,16 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.TwoPaneScaffold
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.WindowWidthClass
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindowSizeClass
+import nl.rhaydus.designsystem.layout.LocalBottomBarPadding
+import nl.rhaydus.designsystem.layout.TwoPaneScaffold
+import nl.rhaydus.designsystem.layout.WindowWidthClass
+import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.BookDetailPresenter
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPresenter
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalBottomBarPadding
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
@@ -61,6 +63,12 @@ import org.koin.compose.koinInject
 
 private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
 private val TAB_ROOT_DRIFT = 12.dp
+
+// Expanded two-pane list-pane sizing: a fraction of the available body width, clamped so a desktop
+// list surface stays roomy while the detail pane never collapses on a smaller expanded window.
+private const val EXPANDED_LIST_PANE_FRACTION = 0.46f
+private val EXPANDED_LIST_PANE_MIN = 440.dp
+private val EXPANDED_LIST_PANE_MAX = 680.dp
 
 /**
  * The tabbed application shell. All width-adaptive navigation chrome — bottom bar, rail, sidebar,
@@ -81,19 +89,6 @@ internal object BottomBarScreen : Screen {
         // surface, so dropping it on full process recreation regresses no existing behaviour.
         val paneBook = remember { mutableStateOf<ScreenDestination.BookDetail?>(null) }
 
-        // The shell owns the push-vs-pane decision: on expanded a tap fills the detail pane; at every
-        // narrower width it pushes the detail full-screen exactly as before. Re-created only when the
-        // width bucket changes.
-        val bookDetailPresenter = remember(widthClass, rootNavigator, appNavigator) {
-            BookDetailPresenter { destination ->
-                if (widthClass == WindowWidthClass.EXPANDED) {
-                    paneBook.value = destination
-                } else {
-                    rootNavigator.push(appNavigator.screen(destination))
-                }
-            }
-        }
-
         // Leaving the two-pane while a book is open carries it over as a pushed screen so the reader
         // doesn't lose it; growing back leaves an already-pushed detail alone (no resize thrash).
         LaunchedEffect(widthClass) {
@@ -110,15 +105,33 @@ internal object BottomBarScreen : Screen {
         // the body changes when the window crosses a breakpoint. The body is wrapped in
         // movableContentOf so its state — the tab-root SaveableStateHolder and the live tab's UI
         // state — moves intact between the chrome layouts instead of being recreated on resize.
-        CompositionLocalProvider(LocalBookDetailPresenter provides bookDetailPresenter) {
-            TabNavigator(ReadingTab) {
-                val tabNavigator = LocalTabNavigator.current
+        TabNavigator(ReadingTab) {
+            val tabNavigator = LocalTabNavigator.current
 
-                // A book opened in one tab's pane must not bleed into another tab's view.
-                LaunchedEffect(tabNavigator.current.key) {
-                    paneBook.value = null
+            // A book opened in one tab's pane must not bleed into another tab's view.
+            LaunchedEffect(tabNavigator.current.key) {
+                paneBook.value = null
+            }
+
+            // The shell owns the push-vs-pane decision, now also consulting the current tab: only a
+            // detail-capable tab on an expanded window fills the detail pane. Every other case —
+            // narrower widths, and the desktop Library/Explore (full-width, no pane) — pushes full-screen.
+            val bookDetailPresenter = remember(
+                widthClass,
+                tabNavigator.current,
+                rootNavigator,
+                appNavigator,
+            ) {
+                BookDetailPresenter { destination ->
+                    if (widthClass == WindowWidthClass.EXPANDED && tabNavigator.current.isDetailCapable()) {
+                        paneBook.value = destination
+                    } else {
+                        rootNavigator.push(appNavigator.screen(destination))
+                    }
                 }
+            }
 
+            CompositionLocalProvider(LocalBookDetailPresenter provides bookDetailPresenter) {
                 val tabBody = remember {
                     movableContentOf { bottomPadding: Dp ->
                         CompositionLocalProvider(
@@ -140,25 +153,44 @@ internal object BottomBarScreen : Screen {
                     WindowWidthClass.EXPANDED -> WideNavShell(
                         leading = { EditorialSidebar() },
                         body = { bottomPadding ->
-                            if (tabNavigator.current.isDetailCapable()) {
-                                TwoPaneScaffold(
-                                    list = { tabBody(bottomPadding) },
-                                    detail = {
-                                        val destination = paneBook.value
+                            // TwoPaneScaffold is rendered for EVERY expanded tab so the shared
+                            // `tabBody` movable content stays in one stable slot (the list pane) —
+                            // switching tabs never relocates it (a relocation tears down and rebuilds
+                            // the tab host, which would strand the previous tab's content on screen).
+                            // Detail-capable tabs (Reading, and Library/Explore on mobile/tablet)
+                            // supply the book-detail pane; the desktop Library/Explore and Settings
+                            // pass a null detail, collapsing to a full-width single pane. The list
+                            // pane is sized to the available body
+                            // width (clamped) so a wide desktop list surface gets real room while the
+                            // detail pane never collapses on a smaller expanded window.
+                            BoxWithConstraints {
+                                val listPaneWidth = (maxWidth * EXPANDED_LIST_PANE_FRACTION)
+                                    .coerceIn(
+                                        EXPANDED_LIST_PANE_MIN,
+                                        EXPANDED_LIST_PANE_MAX,
+                                    )
 
-                                        if (destination != null) {
-                                            BookDetailPaneHost(
-                                                destination = destination,
-                                                onClose = { paneBook.value = null },
-                                                overlayNavigator = rootNavigator,
-                                            )
-                                        } else {
-                                            EmptyDetailPane()
+                                TwoPaneScaffold(
+                                    listPaneWidth = listPaneWidth,
+                                    list = { tabBody(bottomPadding) },
+                                    detail = if (tabNavigator.current.isDetailCapable()) {
+                                        {
+                                            val destination = paneBook.value
+
+                                            if (destination != null) {
+                                                BookDetailPaneHost(
+                                                    destination = destination,
+                                                    onClose = { paneBook.value = null },
+                                                    overlayNavigator = rootNavigator,
+                                                )
+                                            } else {
+                                                EmptyDetailPane()
+                                            }
                                         }
+                                    } else {
+                                        null
                                     },
                                 )
-                            } else {
-                                tabBody(bottomPadding)
                             }
                         },
                     )
@@ -271,17 +303,15 @@ private fun WideNavShell(
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
                         .windowInsetsPadding(WindowInsets.navigationBars)
                         .onSizeChanged {
                             sessionPeekHeight = with(localDensity) { it.height.toDp() }
                         },
                 ) {
-                    SessionPeekBar(
-                        modifier = Modifier.padding(
-                            horizontal = 8.dp,
-                            vertical = 8.dp,
-                        ),
-                    )
+                    // The wide shell has no bottom bar for a floating pill to ride over, so the
+                    // session bar docks as a flush, edge-to-edge strip across the content pane.
+                    SessionPeekBar(flush = true)
                 }
             }
         }

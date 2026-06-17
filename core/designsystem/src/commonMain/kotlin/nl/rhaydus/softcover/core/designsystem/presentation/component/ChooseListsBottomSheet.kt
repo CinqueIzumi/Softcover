@@ -1,5 +1,8 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,23 +18,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.BookList
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChooseListsBottomSheet(
     bookIds: Set<Int>,
@@ -47,11 +45,7 @@ fun ChooseListsBottomSheet(
         "Pick the lists this book belongs in."
     },
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    ) {
+    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -213,7 +207,7 @@ private fun MembershipIndicator(
             )
 
             membership == ListMembership.ALL -> {
-                val icon = SoftcoverIconResource.Drawable(
+                val icon = drawableIconResource(
                     contentDescription = "Every selected book is on this list",
                     icon = SoftcoverIcon.Check,
                 )
