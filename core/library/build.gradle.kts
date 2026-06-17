@@ -14,6 +14,8 @@ kotlin {
             api(project(":core:lists"))
             api(project(":core:preferences"))
             api(project(":core:identity"))
+
+            api(libs.rhaydus.coreUi)
         }
     }
 }

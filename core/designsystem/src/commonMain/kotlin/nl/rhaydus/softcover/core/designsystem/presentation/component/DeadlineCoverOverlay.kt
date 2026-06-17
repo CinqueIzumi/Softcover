@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.conditional
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.grayscale
+import nl.rhaydus.designsystem.modifier.conditional
+import nl.rhaydus.designsystem.modifier.grayscale
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
 

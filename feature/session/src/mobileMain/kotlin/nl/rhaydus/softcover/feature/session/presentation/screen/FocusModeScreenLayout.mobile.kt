@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.session.presentation.screen
 
+import nl.rhaydus.designsystem.layout.cappedContentWidth
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,8 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.editorialContentWidth
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 
 @Composable
@@ -52,11 +52,11 @@ internal actual fun FocusModeScreenLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .editorialContentWidth()
+                    .cappedContentWidth()
                     .padding(horizontal = 24.dp, vertical = 16.dp),
             )
 
-            val closeIcon = SoftcoverIconResource.Drawable(
+            val closeIcon = drawableIconResource(
                 icon = SoftcoverIcon.Close,
                 contentDescription = "Close focus mode",
             )

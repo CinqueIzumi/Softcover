@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
+import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
@@ -67,28 +68,30 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.component.RhaydusSplitButton
+import nl.rhaydus.designsystem.component.mutationAnimated
+import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
+import nl.rhaydus.designsystem.component.staggeredEntry
+import nl.rhaydus.designsystem.haptics.Haptics
+import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.model.RhaydusMenuItem
+import nl.rhaydus.designsystem.model.SplitButtonStyle
+import nl.rhaydus.designsystem.modifier.hoverHighlight
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScale
+import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
-import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverMenuItem
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SplitButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.hoverHighlight
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScale
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
@@ -98,12 +101,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
-import nl.rhaydus.softcover.core.designsystem.presentation.util.Haptics
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDateTime
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
-import nl.rhaydus.softcover.core.designsystem.presentation.util.secondsToHm
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
@@ -121,105 +118,9 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdateTimeProg
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-
-/**
- * Drives the "mark as read" celebration shared by both platform layouts: it owns the slide-out
- * animation state, the confetti [celebrationKey], and the haptic + bottom-bar pulse, so the
- * `mobileMain` and `jvmMain` `ReadingScreenLayout` actuals only wire it to their own chrome.
- * Obtain one via [rememberMarkAsReadController].
- */
-@Stable
-internal class MarkAsReadController(
-    private val slideDistancePx: Float,
-    private val playMotion: Boolean,
-    private val haptics: Haptics,
-    private val runAction: (ReadingAction) -> Unit,
-) {
-    var celebrationKey by mutableIntStateOf(0)
-        private set
-
-    var slidingBookId by mutableStateOf<Int?>(null)
-        private set
-
-    val slideProgress = Animatable(initialValue = 0f)
-
-    fun celebrate() {
-        celebrationKey++
-    }
-
-    fun requestMarkAsRead(book: Book) {
-        if (slidingBookId != null) return
-
-        haptics.commit()
-        celebrationKey++
-        BottomBarPulseManager.pulseLibrary()
-
-        if (playMotion) {
-            slidingBookId = book.id
-        } else {
-            runAction(OnMarkBookAsReadClickAction(book = book))
-        }
-    }
-
-    suspend fun runSlide(books: List<Book>) {
-        val targetId = slidingBookId ?: return
-
-        slideProgress.snapTo(targetValue = 0f)
-        slideProgress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = 320,
-                easing = FastOutLinearInEasing,
-            ),
-        )
-
-        books.firstOrNull { it.id == targetId }?.let { book ->
-            runAction(OnMarkBookAsReadClickAction(book = book))
-        }
-
-        slideProgress.snapTo(targetValue = 0f)
-        slidingBookId = null
-    }
-
-    fun slideModifier(bookId: Int): Modifier =
-        if (bookId == slidingBookId) {
-            Modifier.graphicsLayer {
-                translationY = slideProgress.value * slideDistancePx
-                alpha = 1f - slideProgress.value
-            }
-        } else {
-            Modifier
-        }
-}
-
-@Composable
-internal fun rememberMarkAsReadController(
-    books: List<Book>,
-    runAction: (ReadingAction) -> Unit,
-): MarkAsReadController {
-    val haptics = rememberHaptics()
-    val playMotion = playDecorativeMotion()
-    val density = LocalDensity.current
-    val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
-
-    val currentBooks by rememberUpdatedState(books)
-    val currentRunAction by rememberUpdatedState(runAction)
-
-    val controller = remember(slideDistancePx, playMotion, haptics) {
-        MarkAsReadController(
-            slideDistancePx = slideDistancePx,
-            playMotion = playMotion,
-            haptics = haptics,
-            runAction = { currentRunAction(it) },
-        )
-    }
-
-    LaunchedEffect(controller, controller.slidingBookId) {
-        controller.runSlide(books = currentBooks)
-    }
-
-    return controller
-}
+import nl.rhaydus.ui.common.currentLocalDate
+import nl.rhaydus.ui.common.currentLocalDateTime
+import nl.rhaydus.ui.common.secondsToHm
 
 /**
  * The scrolling currently-reading column shared by both platforms: a [header] slot (the mobile
@@ -622,27 +523,27 @@ internal fun FeaturedBookCard(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                SoftcoverSplitButton(
+                RhaydusSplitButton(
                     checked = dropdownActive,
                     dropDownItems = listOf(
-                        SoftcoverMenuItem(
+                        RhaydusMenuItem(
                             label = "Mark as Read",
                             onClick = {
                                 dropdownActive = false
                                 onMarkAsRead(book)
                             },
-                            icon = SoftcoverIconResource.Drawable(
+                            icon = drawableIconResource(
                                 icon = SoftcoverIcon.CheckCircle,
                                 contentDescription = "Mark as Read icon",
                             ),
                         ),
                     ),
                     label = "Update progress",
-                    leadingIcon = SoftcoverIconResource.Drawable(
+                    leadingIcon = drawableIconResource(
                         icon = SoftcoverIcon.Edit,
                         contentDescription = "Update progress icon",
                     ),
-                    trailingIcon = SoftcoverIconResource.Drawable(
+                    trailingIcon = drawableIconResource(
                         icon = SoftcoverIcon.ArrowDropDown,
                         contentDescription = "Drop down icon",
                     ),
@@ -653,7 +554,7 @@ internal fun FeaturedBookCard(
                     onTrailingButtonClick = { dropdownActive = it },
                     leadingButtonStyle = SplitButtonStyle.FILLED,
                     size = ButtonSize.M,
-                    fillMaxWidth = true,
+                    stretchToWidth = true,
                 )
 
                 FeaturedSessionButton(book = book)
@@ -683,11 +584,11 @@ private fun FeaturedSessionButton(book: Book) {
         active?.book?.id == book.id -> {
             Spacer(modifier = Modifier.height(10.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Focus mode",
                 style = ButtonStyle.TONAL,
                 size = ButtonSize.M,
-                icon = SoftcoverIconResource.Drawable(
+                icon = drawableIconResource(
                     icon = SoftcoverIcon.Reading,
                     contentDescription = "Focus mode icon",
                 ),
@@ -705,11 +606,11 @@ private fun FeaturedSessionButton(book: Book) {
         active == null -> {
             Spacer(modifier = Modifier.height(10.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Start reading session",
                 style = ButtonStyle.TONAL,
                 size = ButtonSize.M,
-                icon = SoftcoverIconResource.Drawable(
+                icon = drawableIconResource(
                     icon = SoftcoverIcon.Play,
                     contentDescription = "Start reading session icon",
                 ),
@@ -859,23 +760,23 @@ internal fun CompactBookEntry(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                SoftcoverSplitButton(
+                RhaydusSplitButton(
                     checked = dropdownActive,
                     dropDownItems = listOf(
-                        SoftcoverMenuItem(
+                        RhaydusMenuItem(
                             label = "Mark as Read",
                             onClick = {
                                 dropdownActive = false
                                 onMarkAsRead(book)
                             },
-                            icon = SoftcoverIconResource.Drawable(
+                            icon = drawableIconResource(
                                 icon = SoftcoverIcon.CheckCircle,
                                 contentDescription = "Mark as Read icon",
                             ),
                         ),
                     ),
                     label = "Set progress",
-                    trailingIcon = SoftcoverIconResource.Drawable(
+                    trailingIcon = drawableIconResource(
                         icon = SoftcoverIcon.ArrowDropDown,
                         contentDescription = "Drop down icon",
                     ),
@@ -1033,7 +934,7 @@ internal fun EmptyCurrentlyReadingScreen(
                 modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                val searchIcon = SoftcoverIconResource.Drawable(
+                val searchIcon = drawableIconResource(
                     icon = SoftcoverIcon.Search,
                     contentDescription = "",
                 )
@@ -1252,7 +1153,7 @@ internal fun PlanTodayNudge(
             onClick = onDismiss,
             modifier = Modifier.size(32.dp),
         ) {
-            val closeIcon = SoftcoverIconResource.Drawable(
+            val closeIcon = drawableIconResource(
                 icon = SoftcoverIcon.Close,
                 contentDescription = "Dismiss",
             )

@@ -7,8 +7,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
 import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreatedEvent
 import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreationFailedEvent

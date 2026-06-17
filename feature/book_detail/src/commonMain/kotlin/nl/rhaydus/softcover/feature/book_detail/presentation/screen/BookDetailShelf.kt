@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
+import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -81,42 +83,38 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
+import nl.rhaydus.designsystem.editorial.component.DropCapText
+import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.image.RhaydusShimmerImage
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.conditional
+import nl.rhaydus.designsystem.modifier.grayscale
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.designsystem.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DropCapText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.conditional
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.grayscale
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleClickable
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
-import nl.rhaydus.softcover.core.designsystem.presentation.util.formatDecimalNumber
-import nl.rhaydus.softcover.core.designsystem.presentation.util.htmlToAnnotatedString
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
-import nl.rhaydus.softcover.core.designsystem.presentation.util.secondsToHm
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -175,6 +173,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.component.ReviewEdi
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.ui.common.currentLocalDate
+import nl.rhaydus.ui.common.formatDecimalNumber
+import nl.rhaydus.ui.common.secondsToHm
 
 private const val REVIEW_COLLAPSED_LINES = 8
 
@@ -486,7 +487,7 @@ internal fun GeneralBookInfoSection(
 
                                             Spacer(modifier = Modifier.width(4.dp))
 
-                                            val ratingStarIcon = SoftcoverIconResource.Drawable(
+                                            val ratingStarIcon = drawableIconResource(
                                                 icon = SoftcoverIcon.StarFilled,
                                                 contentDescription = "",
                                             )
@@ -573,7 +574,7 @@ private fun OwnedCoverBadge(modifier: Modifier = Modifier) {
             ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val ownedIcon = SoftcoverIconResource.Drawable(
+            val ownedIcon = drawableIconResource(
                 icon = SoftcoverIcon.Check,
                 contentDescription = "Owned",
             )
@@ -677,7 +678,7 @@ internal fun ShelfActionBar(
                         ) {
                             ShelfChip(
                                 label = "Want to read",
-                                iconRes = SoftcoverIconResource.Drawable(
+                                iconRes = drawableIconResource(
                                     icon = SoftcoverIcon.BookmarkAdd,
                                     contentDescription = "",
                                 ),
@@ -691,7 +692,7 @@ internal fun ShelfActionBar(
 
                             ShelfChip(
                                 label = "Reading",
-                                iconRes = SoftcoverIconResource.Drawable(
+                                iconRes = drawableIconResource(
                                     icon = SoftcoverIcon.Reading,
                                     contentDescription = "",
                                 ),
@@ -706,7 +707,7 @@ internal fun ShelfActionBar(
 
                             ShelfChip(
                                 label = "Read",
-                                iconRes = SoftcoverIconResource.Drawable(
+                                iconRes = drawableIconResource(
                                     icon = SoftcoverIcon.BookmarkCheck,
                                     contentDescription = "",
                                 ),
@@ -822,7 +823,7 @@ internal fun PersonalReviewSection(
 @Composable
 private fun ShelfChip(
     label: String,
-    iconRes: SoftcoverIconResource,
+    iconRes: RhaydusIconResource,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -967,7 +968,7 @@ internal fun BookOverflowMenu(
                 onClick = { menuOpen = true },
                 colors = iconColors,
             ) {
-                val moreActionsIcon = SoftcoverIconResource.Drawable(
+                val moreActionsIcon = drawableIconResource(
                     icon = SoftcoverIcon.Edit,
                     contentDescription = "More actions",
                 )
@@ -986,7 +987,7 @@ internal fun BookOverflowMenu(
             DropdownMenuItem(
                 text = { Text(text = "Share") },
                 leadingIcon = {
-                    val shareIcon = SoftcoverIconResource.Drawable(
+                    val shareIcon = drawableIconResource(
                         icon = SoftcoverIcon.Share,
                         contentDescription = "",
                     )
@@ -1006,7 +1007,7 @@ internal fun BookOverflowMenu(
                 DropdownMenuItem(
                     text = { Text(text = "Choose lists") },
                     leadingIcon = {
-                        val chooseListsIcon = SoftcoverIconResource.Drawable(
+                        val chooseListsIcon = drawableIconResource(
                             icon = SoftcoverIcon.BookmarkAdd,
                             contentDescription = "",
                         )
@@ -1031,7 +1032,7 @@ internal fun BookOverflowMenu(
                 DropdownMenuItem(
                     text = { Text(text = "Change edition") },
                     leadingIcon = {
-                        val changeEditionIcon = SoftcoverIconResource.Drawable(
+                        val changeEditionIcon = drawableIconResource(
                             icon = SoftcoverIcon.LibraryBooks,
                             contentDescription = "",
                         )
@@ -1056,7 +1057,7 @@ internal fun BookOverflowMenu(
                     val isOwned = state.isEditionOwned(edition = ownedEdition)
 
                     val ownedLabel = if (isOwned) "Unmark as owned" else "Mark as owned"
-                    val ownedToggleIcon = SoftcoverIconResource.Drawable(
+                    val ownedToggleIcon = drawableIconResource(
                         icon = if (isOwned) SoftcoverIcon.Close else SoftcoverIcon.Check,
                         contentDescription = "",
                     )
@@ -1086,7 +1087,7 @@ internal fun BookOverflowMenu(
                 DropdownMenuItem(
                     text = { Text(text = "Set deadline") },
                     leadingIcon = {
-                        val setDeadlineIcon = SoftcoverIconResource.Drawable(
+                        val setDeadlineIcon = drawableIconResource(
                             icon = SoftcoverIcon.DateRange,
                             contentDescription = "",
                         )
@@ -1105,7 +1106,7 @@ internal fun BookOverflowMenu(
                 DropdownMenuItem(
                     text = { Text(text = "Edit deadline") },
                     leadingIcon = {
-                        val editDeadlineIcon = SoftcoverIconResource.Drawable(
+                        val editDeadlineIcon = drawableIconResource(
                             icon = SoftcoverIcon.DateRange,
                             contentDescription = "",
                         )
@@ -1124,7 +1125,7 @@ internal fun BookOverflowMenu(
                 DropdownMenuItem(
                     text = { Text(text = "Clear deadline") },
                     leadingIcon = {
-                        val clearDeadlineIcon = SoftcoverIconResource.Drawable(
+                        val clearDeadlineIcon = drawableIconResource(
                             icon = SoftcoverIcon.Delete,
                             contentDescription = "",
                         )
@@ -1145,7 +1146,7 @@ internal fun BookOverflowMenu(
                 DropdownMenuItem(
                     text = { Text(text = "Remove") },
                     leadingIcon = {
-                        val removeIcon = SoftcoverIconResource.Drawable(
+                        val removeIcon = drawableIconResource(
                             icon = SoftcoverIcon.Delete,
                             contentDescription = "",
                         )
@@ -1257,7 +1258,7 @@ private fun ReadingProgressCard(
                 ),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val progressIcon = SoftcoverIconResource.Drawable(
+                    val progressIcon = drawableIconResource(
                         icon = if (isAudiobook) SoftcoverIcon.Headset else SoftcoverIcon.MenuBook,
                         contentDescription = "Progress icon",
                     )
@@ -1289,7 +1290,7 @@ private fun ReadingProgressCard(
                             runAction(OnShowUpdateProgressSheetClickAction())
                         },
                     ) {
-                        val updateProgressIcon = SoftcoverIconResource.Drawable(
+                        val updateProgressIcon = drawableIconResource(
                             icon = SoftcoverIcon.Edit,
                             contentDescription = "Update progress",
                         )
@@ -1372,7 +1373,7 @@ private fun DeadlineRow(
             ),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val deadlineIcon = SoftcoverIconResource.Drawable(
+                val deadlineIcon = drawableIconResource(
                     icon = SoftcoverIcon.DateRange,
                     contentDescription = "Deadline icon",
                 )
@@ -1414,7 +1415,7 @@ private fun ReadInfoCallout(state: BookDetailUiState) {
 
     StatusCallout(
         eyebrow = "Finished",
-        iconRes = SoftcoverIconResource.Drawable(
+        iconRes = drawableIconResource(
             icon = SoftcoverIcon.BookmarkCheck,
             contentDescription = "",
         ),
@@ -1441,7 +1442,7 @@ private fun DnfInfoCallout(state: BookDetailUiState) {
 
     StatusCallout(
         eyebrow = "Did not finish",
-        iconRes = SoftcoverIconResource.Drawable(
+        iconRes = drawableIconResource(
             icon = SoftcoverIcon.Bookmark,
             contentDescription = "",
         ),
@@ -1463,7 +1464,7 @@ private fun WantToReadInfoCallout(state: BookDetailUiState) {
 
     StatusCallout(
         eyebrow = "Up next",
-        iconRes = SoftcoverIconResource.Drawable(
+        iconRes = drawableIconResource(
             icon = SoftcoverIcon.BookmarkAdd,
             contentDescription = "",
         ),
@@ -1474,7 +1475,7 @@ private fun WantToReadInfoCallout(state: BookDetailUiState) {
 @Composable
 private fun StatusCallout(
     eyebrow: String,
-    iconRes: SoftcoverIconResource,
+    iconRes: RhaydusIconResource,
     body: String,
 ) {
     Surface(
@@ -1573,7 +1574,7 @@ internal fun ScanEditionUpdateBanner(
                         )
                     }
                 } else {
-                    SoftcoverButton(
+                    RhaydusButton(
                         label = "Update edition",
                         style = ButtonStyle.TONAL,
                         size = ButtonSize.S,
@@ -1586,7 +1587,7 @@ internal fun ScanEditionUpdateBanner(
                 onClick = { runAction(OnDismissScanEditionBannerClickAction()) },
                 modifier = Modifier.size(32.dp),
             ) {
-                val dismissIcon = SoftcoverIconResource.Drawable(
+                val dismissIcon = drawableIconResource(
                     icon = SoftcoverIcon.Close,
                     contentDescription = "Dismiss",
                 )
@@ -1647,6 +1648,7 @@ internal fun AboutSection(state: BookDetailUiState) {
                             ),
                             bodyColor = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.fillMaxWidth(),
+                            dropCapFontFamily = displayFontFamily(),
                         )
                     } else if (headline.isBlank()) {
                         Text(
@@ -1830,7 +1832,7 @@ internal fun ExternalLinksStrip(
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ExternalLinkButton(
-                iconRes = SoftcoverIconResource.Drawable(
+                iconRes = drawableIconResource(
                     icon = SoftcoverIcon.Storefront,
                     contentDescription = "Find on Bookshop.org",
                 ),
@@ -1844,7 +1846,7 @@ internal fun ExternalLinksStrip(
             )
 
             ExternalLinkButton(
-                iconRes = SoftcoverIconResource.Drawable(
+                iconRes = drawableIconResource(
                     icon = SoftcoverIcon.ShoppingBag,
                     contentDescription = "Find on Amazon",
                 ),
@@ -1858,7 +1860,7 @@ internal fun ExternalLinksStrip(
             )
 
             ExternalLinkButton(
-                iconRes = SoftcoverIconResource.Drawable(
+                iconRes = drawableIconResource(
                     icon = SoftcoverIcon.LibraryBooks,
                     contentDescription = "Find on OpenLibrary",
                 ),
@@ -1876,7 +1878,7 @@ internal fun ExternalLinksStrip(
 
 @Composable
 private fun ExternalLinkButton(
-    iconRes: SoftcoverIconResource,
+    iconRes: RhaydusIconResource,
     onClick: () -> Unit,
 ) {
     IconButton(onClick = onClick) {
@@ -1920,7 +1922,7 @@ internal fun ReviewsSection(
 
             state.book?.let { book ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val reviewsStarIcon = SoftcoverIconResource.Drawable(
+                    val reviewsStarIcon = drawableIconResource(
                         icon = SoftcoverIcon.StarFilled,
                         contentDescription = "",
                     )
@@ -2039,10 +2041,9 @@ private fun ReviewCard(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    SoftcoverImage(
+                    RhaydusShimmerImage(
                         model = review.reviewer.avatarUrl,
                         contentDescription = "Reviewer avatar",
-                        isLoading = false,
                         modifier = Modifier
                             .size(36.dp)
                             .clip(RoundedCornerShape(18.dp)),
@@ -2080,7 +2081,7 @@ private fun ReviewCard(
                                 ),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                val ratingBadgeIcon = SoftcoverIconResource.Drawable(
+                                val ratingBadgeIcon = drawableIconResource(
                                     icon = SoftcoverIcon.StarFilled,
                                     contentDescription = "Rating",
                                 )

@@ -21,6 +21,12 @@ kotlin {
             implementation(project(":core:network"))
             api(project(":core:designsystem"))
 
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
+            implementation(libs.rhaydus.designsystemImage)
+            implementation(libs.rhaydus.toad)
+
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.navigator)

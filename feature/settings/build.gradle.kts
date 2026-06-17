@@ -16,6 +16,11 @@ kotlin {
             api(project(":core:preferences"))
             implementation(project(":core:designsystem"))
 
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
+            implementation(libs.rhaydus.toad)
+
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.navigator)

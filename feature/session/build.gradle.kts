@@ -12,6 +12,10 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:designsystem"))
 
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
+
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.navigator)

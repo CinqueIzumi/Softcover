@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.di
 
-import nl.rhaydus.softcover.feature.profile.presentation.flows.ProfileInitializer
-import nl.rhaydus.softcover.feature.profile.presentation.flows.UserInformationInitializer
+import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.UserInformationCollector
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -17,5 +17,5 @@ val profileScreenModule = module {
         )
     }
 
-    factory { UserInformationInitializer() } bind ProfileInitializer::class
+    factory { UserInformationCollector() } bind ProfileCollector::class
 }

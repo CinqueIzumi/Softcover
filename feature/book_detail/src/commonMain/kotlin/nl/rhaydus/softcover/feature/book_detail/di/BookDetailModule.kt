@@ -12,24 +12,24 @@ import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsReposi
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
-import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDeadlineCollector
-import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailInitializer
-import nl.rhaydus.softcover.feature.book_detail.presentation.flows.CurrentUserCollector
-import nl.rhaydus.softcover.feature.book_detail.presentation.flows.DateStyleCollector
-import nl.rhaydus.softcover.feature.book_detail.presentation.flows.UserBooksFlowCollector
-import nl.rhaydus.softcover.feature.book_detail.presentation.flows.UserListsFlowCollector
-import nl.rhaydus.softcover.feature.book_detail.presentation.flows.UserTagsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadlineCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserBooksFlowCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserListsFlowCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val bookDetailModule = module {
-    factory { UserBooksFlowCollector() } bind BookDetailInitializer::class
-    factory { DateStyleCollector() } bind BookDetailInitializer::class
-    factory { BookDeadlineCollector() } bind BookDetailInitializer::class
-    factory { UserListsFlowCollector() } bind BookDetailInitializer::class
-    factory { CurrentUserCollector() } bind BookDetailInitializer::class
-    factory { UserTagsCollector() } bind BookDetailInitializer::class
+    factory { UserBooksFlowCollector() } bind BookDetailCollector::class
+    factory { DateStyleCollector() } bind BookDetailCollector::class
+    factory { BookDeadlineCollector() } bind BookDetailCollector::class
+    factory { UserListsFlowCollector() } bind BookDetailCollector::class
+    factory { CurrentUserCollector() } bind BookDetailCollector::class
+    factory { UserTagsCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())

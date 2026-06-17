@@ -1,5 +1,5 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.event
 
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiEvent
+import nl.rhaydus.toad.UiEvent
 
 internal sealed interface OnboardingEvent : UiEvent

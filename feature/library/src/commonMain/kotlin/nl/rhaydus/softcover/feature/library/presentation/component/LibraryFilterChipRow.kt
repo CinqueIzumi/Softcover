@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.component
 
+import nl.rhaydus.designsystem.layout.WindowWidthClass
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -28,10 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.WindowWidthClass
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindowSizeClass
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 
@@ -118,7 +118,7 @@ private fun ActiveFilterChip(
 
             Spacer(modifier = Modifier.width(6.dp))
 
-            val closeIcon = SoftcoverIconResource.Drawable(
+            val closeIcon = drawableIconResource(
                 icon = SoftcoverIcon.Close,
                 contentDescription = "Remove filter $label",
             )

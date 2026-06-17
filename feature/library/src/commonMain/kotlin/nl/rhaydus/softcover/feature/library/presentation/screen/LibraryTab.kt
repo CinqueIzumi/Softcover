@@ -1,18 +1,18 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 object LibraryTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
             val title = "Library"
-            val icon = SoftcoverIconResource.Drawable(
+            val icon = drawableIconResource(
                 icon = SoftcoverIcon.Shelf,
                 contentDescription = title,
             ).getIconPainter()

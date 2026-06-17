@@ -1,5 +1,10 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetForm
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
+import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -40,22 +45,24 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ModalSheetForm
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.model.ModalSheetForm
+import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.toHoursMinutesSeconds
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.ui.common.toHoursMinutesSeconds
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -327,7 +334,7 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
 
     Spacer(modifier = Modifier.height(28.dp))
 
-    SoftcoverButton(
+    RhaydusButton(
         label = "Update progress",
         onClick = {
             onUpdatePageProgressClick(number.text)
@@ -430,7 +437,7 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
 
     Spacer(modifier = Modifier.height(28.dp))
 
-    SoftcoverButton(
+    RhaydusButton(
         label = "Update progress",
         modifier = Modifier.fillMaxWidth(),
         style = ButtonStyle.FILLED,
@@ -558,7 +565,7 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
 
     Spacer(modifier = Modifier.height(28.dp))
 
-    SoftcoverButton(
+    RhaydusButton(
         label = "Update progress",
         onClick = {
             onUpdateTimeProgressClick(
@@ -583,6 +590,24 @@ private fun TimeColon(textStyle: TextStyle) {
         style = textStyle,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+}
+
+/** Approximate width for a hero stat field of [charCount] glyphs in [textStyle]. */
+@Composable
+private fun computeHeroStatFieldWidth(
+    textStyle: TextStyle,
+    charCount: Int,
+): Dp {
+    val density = LocalDensity.current
+
+    return remember(density, textStyle, charCount) {
+        with(density) {
+            val fontSizeInPx = textStyle.fontSize.toPx()
+            val padding = 16.dp.toPx()
+
+            ((charCount * fontSizeInPx * 0.62f) + padding).toDp()
+        }
+    }
 }
 
 @Composable

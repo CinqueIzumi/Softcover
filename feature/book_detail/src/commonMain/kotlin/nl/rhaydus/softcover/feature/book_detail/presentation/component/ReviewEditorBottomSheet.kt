@@ -40,11 +40,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -241,7 +241,7 @@ internal fun ReviewEditorBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Save",
                 style = ButtonStyle.FILLED,
                 size = ButtonSize.M,
@@ -261,7 +261,7 @@ internal fun ReviewEditorBottomSheet(
             if (canDelete) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                SoftcoverButton(
+                RhaydusButton(
                     label = "Delete review",
                     style = ButtonStyle.TEXT,
                     size = ButtonSize.M,

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.component
 
+import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,10 +30,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -146,11 +147,11 @@ private fun SortPill(
     Box {
         ControlPill(
             label = "Sort: ${currentMode.label}",
-            leadingIcon = SoftcoverIconResource.Drawable(
+            leadingIcon = drawableIconResource(
                 icon = SoftcoverIcon.Sort,
                 contentDescription = "",
             ),
-            trailingIcon = SoftcoverIconResource.Drawable(
+            trailingIcon = drawableIconResource(
                 icon = SoftcoverIcon.ArrowDropDown,
                 contentDescription = "",
             ),
@@ -182,7 +183,7 @@ private fun SortPill(
                     },
                     trailingIcon = if (isActive && isPositionalSort.not()) {
                         {
-                            val arrowIcon = SoftcoverIconResource.Drawable(
+                            val arrowIcon = drawableIconResource(
                                 icon = if (currentDirection == SortDirection.ASCENDING) {
                                     SoftcoverIcon.ArrowDropUp
                                 } else {
@@ -243,7 +244,7 @@ private fun FilterPill(
 
     ControlPill(
         label = "Filter",
-        leadingIcon = SoftcoverIconResource.Drawable(
+        leadingIcon = drawableIconResource(
             icon = SoftcoverIcon.FilterList,
             contentDescription = "",
         ),
@@ -325,7 +326,7 @@ private fun RearrangeAction(
     }
 
     val icon = @Composable {
-        val dragHandleIcon = SoftcoverIconResource.Drawable(
+        val dragHandleIcon = drawableIconResource(
             icon = SoftcoverIcon.DragHandle,
             contentDescription = if (isRearranging) "Finish rearranging" else "Rearrange this order",
         )
@@ -369,7 +370,7 @@ private fun LayoutAction(
                     runAction(OnLayoutMenuExpandedChangeAction(expanded = true))
                 },
             ) {
-                val layoutIcon = SoftcoverIconResource.Drawable(
+                val layoutIcon = drawableIconResource(
                     icon = SoftcoverIcon.ViewLayout,
                     contentDescription = "Change library layout",
                 )
@@ -407,8 +408,8 @@ private fun LayoutAction(
 @Composable
 private fun ControlPill(
     label: String,
-    leadingIcon: SoftcoverIconResource,
-    trailingIcon: SoftcoverIconResource?,
+    leadingIcon: RhaydusIconResource,
+    trailingIcon: RhaydusIconResource?,
     active: Boolean,
     a11yLabel: String,
     onClick: () -> Unit,

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -31,19 +32,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.conditional
+import nl.rhaydus.designsystem.modifier.noRippleClickable
+import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.conditional
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
@@ -112,7 +112,7 @@ private fun EditionBottomSheetContent(
             singleLine = true,
             placeholder = { Text(text = "Search by ISBN or publisher") },
             leadingIcon = {
-                val searchIcon = SoftcoverIconResource.Drawable(
+                val searchIcon = drawableIconResource(
                     icon = SoftcoverIcon.Search,
                     contentDescription = "Search",
                 )
@@ -125,7 +125,7 @@ private fun EditionBottomSheetContent(
             trailingIcon = if (searchQuery.isNotEmpty()) {
                 {
                     IconButton(onClick = { onSearchQueryChange("") }) {
-                        val clearIcon = SoftcoverIconResource.Drawable(
+                        val clearIcon = drawableIconResource(
                             icon = SoftcoverIcon.Close,
                             contentDescription = "Clear search",
                         )
@@ -183,7 +183,7 @@ private fun EditionBottomSheetContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SoftcoverButton(
+        RhaydusButton(
             label = "Confirm edition",
             style = ButtonStyle.FILLED,
             size = ButtonSize.M,

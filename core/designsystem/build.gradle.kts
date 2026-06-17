@@ -29,12 +29,17 @@ kotlin {
             api(project(":core:personal"))
             api(project(":core:preferences"))
 
+            api(libs.rhaydus.coreUi)
+            api(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
+            implementation(libs.rhaydus.designsystemImage)
+
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.androidx.lifecycle.runtime.compose)
             api(libs.androidx.lifecycle.viewmodel)
 
-            implementation(libs.voyager.navigator)
+            api(libs.voyager.navigator)
             implementation(libs.voyager.koin)
             api(libs.voyager.tabNavigator)
 

@@ -14,6 +14,11 @@ kotlin {
             implementation(project(":core:profile"))
             implementation(project(":core:designsystem"))
 
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemImage)
+            implementation(libs.rhaydus.toad)
+
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.navigator)

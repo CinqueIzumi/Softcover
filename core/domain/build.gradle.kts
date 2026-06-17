@@ -12,6 +12,8 @@ kotlin {
         commonMain.dependencies {
             api(libs.kotlinx.datetime)
 
+            implementation(libs.rhaydus.coreUi)
+
             implementation(libs.kermit)
             implementation(libs.kotlinx.serialization.json)
         }

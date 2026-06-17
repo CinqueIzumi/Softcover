@@ -13,6 +13,8 @@ kotlin {
             implementation(project(":core:database"))
             implementation(project(":core:network"))
             implementation(project(":core:book"))
+
+            implementation(libs.rhaydus.coreUi)
         }
     }
 }

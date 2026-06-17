@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
+import nl.rhaydus.designsystem.component.DesktopContextMenu
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -63,33 +64,32 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
+import nl.rhaydus.designsystem.component.DesktopContextMenuItem
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.component.mutationAnimated
+import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
+import nl.rhaydus.designsystem.component.staggeredEntry
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.layout.WindowWidthClass
+import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.hoverHighlight
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopContextMenu
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopContextMenuItem
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.WindowWidthClass
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindowSizeClass
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.hoverHighlight
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.platformModifierClick
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -717,7 +717,7 @@ private fun DragHandle(modifier: Modifier = Modifier) {
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         shape = RoundedCornerShape(percent = 50),
     ) {
-        val dragHandleIcon = SoftcoverIconResource.Drawable(
+        val dragHandleIcon = drawableIconResource(
             icon = SoftcoverIcon.DragHandle,
             contentDescription = "Drag to reorder",
         )
@@ -1357,7 +1357,7 @@ private fun LargeRow(
                         if (hasRating) {
                             Spacer(modifier = Modifier.width(4.dp))
 
-                            val starIcon = SoftcoverIconResource.Drawable(
+                            val starIcon = drawableIconResource(
                                 icon = SoftcoverIcon.StarFilled,
                                 contentDescription = "",
                             )
@@ -1450,7 +1450,7 @@ private fun SelectionCircleIndicator(
         modifier = modifier.size(24.dp),
     ) {
         if (isSelected) {
-            val checkIcon = SoftcoverIconResource.Drawable(
+            val checkIcon = drawableIconResource(
                 icon = SoftcoverIcon.Check,
                 contentDescription = "",
             )
@@ -1772,7 +1772,7 @@ internal fun SelectionHeader(
                 enabled = bulkActionInProgress.not(),
                 modifier = Modifier.pointerHandCursor(),
             ) {
-                val exitIcon = SoftcoverIconResource.Drawable(
+                val exitIcon = drawableIconResource(
                     icon = SoftcoverIcon.Close,
                     contentDescription = "Exit selection mode",
                 )
@@ -1800,7 +1800,7 @@ internal fun SelectionHeader(
                     enabled = bulkActionInProgress.not(),
                     modifier = Modifier.pointerHandCursor(),
                 ) {
-                    val moveIcon = SoftcoverIconResource.Drawable(
+                    val moveIcon = drawableIconResource(
                         icon = SoftcoverIcon.Bookmark,
                         contentDescription = "Move selected books to another shelf",
                     )
@@ -1834,7 +1834,7 @@ internal fun SelectionHeader(
                 enabled = bulkActionInProgress.not(),
                 modifier = Modifier.pointerHandCursor(),
             ) {
-                val addToListIcon = SoftcoverIconResource.Drawable(
+                val addToListIcon = drawableIconResource(
                     icon = SoftcoverIcon.BookmarkAdd,
                     contentDescription = "Add selected books to a list",
                 )
@@ -1850,7 +1850,7 @@ internal fun SelectionHeader(
                 enabled = bulkActionInProgress.not(),
                 modifier = Modifier.pointerHandCursor(),
             ) {
-                val removeIcon = SoftcoverIconResource.Drawable(
+                val removeIcon = drawableIconResource(
                     icon = SoftcoverIcon.Delete,
                     contentDescription = "Remove selected books from library",
                 )
@@ -1910,14 +1910,14 @@ internal fun BulkRemoveConfirmationDialog(
                         alignment = Alignment.End,
                     ),
                 ) {
-                    SoftcoverButton(
+                    RhaydusButton(
                         label = "Keep",
                         style = ButtonStyle.TEXT,
                         onClick = onDismiss,
                         enabled = inProgress.not(),
                     )
 
-                    SoftcoverButton(
+                    RhaydusButton(
                         label = "Remove",
                         style = ButtonStyle.TEXT,
                         onClick = onConfirm,

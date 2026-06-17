@@ -99,6 +99,18 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | [Gradle (KTS)](https://gradle.org/) | 9.1.0 | Build system with version catalog |
 | [KSP](https://github.com/google/ksp) | 2.3.9 | Kotlin Symbol Processing for Room (per-target) |
 
+#### Foundation ([`nl.rhaydus`](https://central.sonatype.com/search?q=nl.rhaydus), 0.2.0 — first-party shared libraries from Maven Central)
+| Library | Purpose |
+|---|---|
+| `nl.rhaydus:toad` | TOAD presentation runtime — `ToadScreenModel`, `UiState` / `UiAction` / `UiEvent`, `Collector`, `ActionDependencies` |
+| `nl.rhaydus:core-ui` | Non-visual UI seams — `AppDispatchers`, time / date / number formatting |
+| `nl.rhaydus:designsystem-core` | Brand-agnostic Compose skeleton — theme scaffold (`RhaydusTheme`), layout primitives, modifiers, the button family, adaptive/desktop components, the `RhaydusIconResource` token |
+| `nl.rhaydus:designsystem-editorial` | Editorial design language — the typography role contract + editorial components |
+| `nl.rhaydus:designsystem-image` | Coil-based async image components |
+| `nl.rhaydus:ktlint-rules` | Custom ktlint ruleset (the mechanizable layout rules + gate) |
+
+These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `EditionImage`) on top. See [`docs/rhaydus/0.2.0/CAPABILITIES.md`](docs/rhaydus/0.2.0/CAPABILITIES.md).
+
 #### Data & Networking
 | Technology | Version | Purpose |
 |---|---|---|
@@ -151,7 +163,7 @@ Softcover follows **Clean Architecture** as a multi-module Gradle build with a s
 
 ### State flow (TOAD)
 
-Every screen is driven by a custom framework on top of Voyager's `ScreenModel`. Interactions flow one way: a `UiAction` runs against use cases (resolved via `ActionDependencies`), the result is written with `setState()`, and the immutable `UiState` re-emits on a `StateFlow` to recompose the UI. One-time effects (navigation, snackbars) go out as `UiEvent`s on a `Channel`.
+Every screen is driven by **TOAD**, the foundation's presentation framework (`nl.rhaydus:toad`) built on Voyager's `ScreenModel`. Interactions flow one way: a `UiAction` runs against use cases (resolved via `ActionDependencies`), the result is written with `setState()`, and the immutable `UiState` re-emits on a `StateFlow` to recompose the UI. One-time effects (navigation, snackbars) go out as `UiEvent`s on a `Channel`; reactive data is fed in by per-feature `Collector`s.
 
 ```mermaid
 flowchart LR
@@ -235,6 +247,7 @@ Softcover is being actively redesigned. The high-level direction lives in [ROADM
 | [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) | Module tiers, allowed dependency directions, and where new code belongs |
 | [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [CODE_STYLE_GUIDE.md](CODE_STYLE_GUIDE.md) | Naming, layout, and whitespace conventions |
+| [docs/rhaydus/0.2.0/](docs/rhaydus/0.2.0/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
 | [ROADMAP.md](ROADMAP.md) | Redesign roadmap and the sequenced step list |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |
 

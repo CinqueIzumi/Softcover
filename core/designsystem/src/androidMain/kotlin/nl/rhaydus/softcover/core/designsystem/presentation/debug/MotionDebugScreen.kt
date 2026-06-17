@@ -34,16 +34,16 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedStatNumber
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import kotlinx.coroutines.delay
 
 object MotionDebugScreen : Screen {
@@ -171,7 +171,7 @@ object MotionDebugScreen : Screen {
                     )
                 }
 
-                SoftcoverButton(
+                RhaydusButton(
                     label = "Fire",
                     style = ButtonStyle.TONAL,
                     size = ButtonSize.XS,
@@ -208,7 +208,7 @@ object MotionDebugScreen : Screen {
                 modifier = Modifier.size(160.dp),
             )
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Fire burst",
                 style = ButtonStyle.TONAL,
                 size = ButtonSize.S,
@@ -249,7 +249,7 @@ object MotionDebugScreen : Screen {
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                SoftcoverButton(
+                RhaydusButton(
                     label = "Fire shake",
                     style = ButtonStyle.TONAL,
                     size = ButtonSize.XS,
@@ -288,7 +288,7 @@ object MotionDebugScreen : Screen {
                     color = MaterialTheme.colorScheme.primary,
                 )
 
-                SoftcoverButton(
+                RhaydusButton(
                     label = "+ Random",
                     style = ButtonStyle.TONAL,
                     size = ButtonSize.XS,

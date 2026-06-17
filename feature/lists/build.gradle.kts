@@ -14,6 +14,11 @@ kotlin {
             api(project(":core:lists"))
             implementation(project(":core:designsystem"))
 
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
+            implementation(libs.rhaydus.toad)
+
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.koin)
         }

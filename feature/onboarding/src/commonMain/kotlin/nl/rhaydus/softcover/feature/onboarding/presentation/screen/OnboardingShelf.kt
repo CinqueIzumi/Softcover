@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.screen
 
+import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,14 +25,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ClickableText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction
@@ -133,7 +133,7 @@ internal fun ApiKeyEntrySection(
                 .padding(all = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val pasteIcon = SoftcoverIconResource.Drawable(
+            val pasteIcon = drawableIconResource(
                 icon = SoftcoverIcon.ContentPaste,
                 contentDescription = "Paste icon",
             )
@@ -156,7 +156,7 @@ internal fun ApiKeyEntrySection(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        SoftcoverButton(
+        RhaydusButton(
             label = "Save API key",
             onClick = { runAction(OnApiKeySaveClickAction()) },
             modifier = Modifier

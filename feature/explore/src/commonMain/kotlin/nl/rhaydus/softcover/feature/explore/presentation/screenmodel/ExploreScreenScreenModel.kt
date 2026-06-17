@@ -5,8 +5,6 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
@@ -18,10 +16,12 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBookDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.collector.ExploreCollector
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
-import nl.rhaydus.softcover.feature.explore.presentation.flows.ExploreInitializer
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
+import nl.rhaydus.toad.ToadScreenModel
+import nl.rhaydus.ui.common.AppDispatchers
 
 internal class ExploreScreenScreenModel(
     private val getPreviousSearchQueriesUseCase: GetPreviousSearchQueriesUseCase,
@@ -38,9 +38,9 @@ internal class ExploreScreenScreenModel(
     private val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
     private val undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase,
     private val undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase,
-    flows: List<ExploreInitializer>,
+    flows: List<ExploreCollector>,
     appDispatchers: AppDispatchers,
-) : ToadScreenModel<ExploreScreenUiState, ExploreEvent, ExploreDependencies, ExploreInitializer, ExploreLocalVariables>(
+) : ToadScreenModel<ExploreScreenUiState, ExploreEvent, ExploreDependencies, ExploreCollector, ExploreLocalVariables>(
     initialState = ExploreScreenUiState(),
     initialLocalVariables = ExploreLocalVariables(),
     initializers = flows,

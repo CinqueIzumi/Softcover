@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.coroutines.Job
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.LocalVariables
+import nl.rhaydus.toad.LocalVariables
 
 internal data class BookDetailLocalVariables(
     val editionsLoadedForBookId: Int? = null,

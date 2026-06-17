@@ -18,7 +18,7 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.random.Random
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 /**
  * A radial particle burst played on a successful mark-as-read commit. Caller composes

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -38,18 +39,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.dismissOnEscape
+import nl.rhaydus.designsystem.modifier.hoverHighlight
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSearchField
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.dismissOnEscape
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.hoverHighlight
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -204,6 +204,14 @@ internal actual fun LibraryScreenLayout(
                         onClearClick = {
                             runAction(OnSearchQueryChangeAction(query = ""))
                         },
+                        searchIcon = drawableIconResource(
+                            icon = SoftcoverIcon.Search,
+                            contentDescription = "Search",
+                        ),
+                        clearIcon = drawableIconResource(
+                            icon = SoftcoverIcon.Close,
+                            contentDescription = "Clear search",
+                        ),
                         placeholder = "Search this shelf…",
                     )
                 }
@@ -535,7 +543,7 @@ private fun DesktopLibraryHeader(
                     onClick = onToggleSearchClick,
                     modifier = Modifier.pointerHandCursor(),
                 ) {
-                    val searchToggleIcon = SoftcoverIconResource.Drawable(
+                    val searchToggleIcon = drawableIconResource(
                         icon = if (isSearchActive) SoftcoverIcon.Close else SoftcoverIcon.Search,
                         contentDescription = if (isSearchActive) "Close library search" else "Search in library",
                     )
