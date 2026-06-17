@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.editorialContentWidth
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
@@ -48,7 +48,7 @@ internal actual fun AppearanceSettingsScreenLayout(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .editorialContentWidth()
+                    .cappedContentWidth()
                     .padding(
                         horizontal = 32.dp,
                         vertical = 16.dp,

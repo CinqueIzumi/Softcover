@@ -33,12 +33,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.editorialContentWidth
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
@@ -343,7 +343,7 @@ private fun AppearancePane(
         ) {
             Column(
                 modifier = Modifier
-                    .editorialContentWidth()
+                    .cappedContentWidth()
                     .padding(horizontal = 32.dp),
             ) {
                 DesktopPaneHeader(
@@ -394,7 +394,7 @@ private fun LibraryTabsPane(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .editorialContentWidth()
+                    .cappedContentWidth()
                     .padding(horizontal = 32.dp),
             )
 
@@ -434,7 +434,7 @@ private fun AboutPane(
         ) {
             Column(
                 modifier = Modifier
-                    .editorialContentWidth()
+                    .cappedContentWidth()
                     .padding(horizontal = 32.dp),
             ) {
                 DesktopPaneHeader(

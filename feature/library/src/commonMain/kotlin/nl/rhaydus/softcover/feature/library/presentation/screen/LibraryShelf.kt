@@ -64,6 +64,8 @@ import androidx.compose.ui.window.Dialog
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.layout.WindowWidthClass
+import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
@@ -79,8 +81,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLaz
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.WindowWidthClass
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindowSizeClass
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource

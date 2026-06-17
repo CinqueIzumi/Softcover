@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.launch
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.WindowWidthClass
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindowSizeClass
+import nl.rhaydus.designsystem.layout.WindowWidthClass
+import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ModalSheetForm
 
 /** Width the desktop panel settles at — wide enough for the editorial header, narrow enough to read as a focused overlay. */

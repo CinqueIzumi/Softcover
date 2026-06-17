@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
-import nl.rhaydus.softcover.core.designsystem.presentation.layout.editorialContentWidth
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
@@ -51,7 +51,7 @@ internal actual fun LibraryVisibilitySettingsScreenLayout(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .editorialContentWidth()
+                    .cappedContentWidth()
                     .padding(horizontal = 32.dp),
             )
 
