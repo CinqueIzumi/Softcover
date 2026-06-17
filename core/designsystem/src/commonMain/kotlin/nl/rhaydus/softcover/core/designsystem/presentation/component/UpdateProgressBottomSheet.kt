@@ -46,13 +46,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ModalSheetForm
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.ui.common.toHoursMinutesSeconds

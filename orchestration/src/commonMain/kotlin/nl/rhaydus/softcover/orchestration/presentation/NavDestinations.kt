@@ -16,9 +16,9 @@ import androidx.compose.ui.graphics.painter.Painter
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import kotlinx.coroutines.flow.drop
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab

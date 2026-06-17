@@ -32,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSearchTopBar
@@ -42,9 +44,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries

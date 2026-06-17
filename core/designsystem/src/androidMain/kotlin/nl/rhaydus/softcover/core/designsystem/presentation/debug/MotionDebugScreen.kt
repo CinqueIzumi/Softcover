@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedStatNumber
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
@@ -41,9 +43,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverBu
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import kotlinx.coroutines.delay
 
 object MotionDebugScreen : Screen {

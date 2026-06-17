@@ -7,7 +7,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberClipboardReader
+import nl.rhaydus.designsystem.util.rememberClipboardReader
 import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel

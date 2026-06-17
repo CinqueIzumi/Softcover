@@ -63,6 +63,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.hoverHighlight
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
@@ -80,16 +84,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindow
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.hoverHighlight
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.platformModifierClick
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline

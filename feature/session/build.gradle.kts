@@ -13,6 +13,7 @@ kotlin {
             api(project(":core:designsystem"))
 
             implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
 
             implementation(libs.koin.compose.multiplatform)
 

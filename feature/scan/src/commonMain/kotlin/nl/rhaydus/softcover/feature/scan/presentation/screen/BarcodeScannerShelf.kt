@@ -26,11 +26,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 
 /**
  * The manual ISBN-entry form, shared by the mobile scanner (reached via "Enter ISBN manually") and the

@@ -12,11 +12,11 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
+import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnConfirmedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction

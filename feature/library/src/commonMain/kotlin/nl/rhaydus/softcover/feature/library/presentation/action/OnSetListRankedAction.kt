@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection

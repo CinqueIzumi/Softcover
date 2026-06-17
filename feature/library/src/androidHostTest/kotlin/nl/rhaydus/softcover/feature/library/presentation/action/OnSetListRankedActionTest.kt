@@ -12,7 +12,7 @@ import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection

@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.haptics.Haptics
+import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
-import nl.rhaydus.softcover.core.designsystem.presentation.util.Haptics
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction

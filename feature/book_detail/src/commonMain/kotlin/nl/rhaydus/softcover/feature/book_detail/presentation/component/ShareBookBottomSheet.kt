@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
@@ -45,7 +46,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareOutcome
 import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition

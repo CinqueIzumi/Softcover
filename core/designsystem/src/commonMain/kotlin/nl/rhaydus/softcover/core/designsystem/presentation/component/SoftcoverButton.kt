@@ -35,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pressScale
+import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
@@ -42,9 +44,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.model.IconToggleButto
 import nl.rhaydus.softcover.core.designsystem.presentation.model.IconToggleButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ToggleButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScale
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

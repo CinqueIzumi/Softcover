@@ -32,12 +32,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph

@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 /**
  * Animates user-triggered add / move / remove on a lazy list:

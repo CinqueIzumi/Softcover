@@ -24,6 +24,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ClickableText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
@@ -31,7 +32,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction

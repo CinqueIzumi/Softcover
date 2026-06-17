@@ -35,6 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.noRippleClickable
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
@@ -46,10 +50,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLaz
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleClickable
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography

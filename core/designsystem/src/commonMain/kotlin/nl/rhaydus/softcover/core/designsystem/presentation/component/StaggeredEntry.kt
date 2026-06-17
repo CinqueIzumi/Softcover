@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.time.Clock
 import kotlinx.coroutines.delay
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 private const val DEFAULT_STEP_MS = 60
 private const val DEFAULT_WINDOW_MS = 350

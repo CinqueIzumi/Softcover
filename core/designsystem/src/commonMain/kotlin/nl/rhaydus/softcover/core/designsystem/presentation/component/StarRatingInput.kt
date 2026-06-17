@@ -23,10 +23,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 
 /**
  * Interactive personal-rating control: a row of [starCount] stars the user rates against in

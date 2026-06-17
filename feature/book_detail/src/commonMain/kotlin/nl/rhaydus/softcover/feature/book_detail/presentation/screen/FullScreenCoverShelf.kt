@@ -19,10 +19,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil3.request.ImageRequest
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 
 internal const val MIN_SCALE = 1f
 internal const val MAX_SCALE = 5f

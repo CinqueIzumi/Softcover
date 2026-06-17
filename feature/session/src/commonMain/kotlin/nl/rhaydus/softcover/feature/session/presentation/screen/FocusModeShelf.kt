@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
+import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSuffix
 import nl.rhaydus.softcover.core.designsystem.presentation.component.HeroStatNumberField
@@ -38,11 +40,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.ui.common.currentInstant
 
 /**

@@ -25,13 +25,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.koinInject
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.WindowWidthClass
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindowSizeClass
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpdate
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState

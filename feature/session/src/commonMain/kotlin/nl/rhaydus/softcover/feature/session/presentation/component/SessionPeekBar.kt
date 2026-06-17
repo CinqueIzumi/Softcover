@@ -33,6 +33,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
+import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -41,7 +42,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import nl.rhaydus.ui.common.currentInstant
 

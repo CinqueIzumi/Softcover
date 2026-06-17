@@ -19,6 +19,7 @@ kotlin {
             implementation(project(":core:designsystem"))
 
             implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
             implementation(libs.rhaydus.toad)
 
             implementation(libs.kotlinx.serialization.json)

@@ -9,8 +9,8 @@ import io.mockk.unmockkObject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies

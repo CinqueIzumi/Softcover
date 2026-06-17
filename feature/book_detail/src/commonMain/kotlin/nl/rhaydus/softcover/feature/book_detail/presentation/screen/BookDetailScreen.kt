@@ -14,6 +14,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
+import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
@@ -21,8 +23,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookD
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPaneCloseHandler
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TransientNavArg
-import nl.rhaydus.softcover.core.designsystem.presentation.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction

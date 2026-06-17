@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
-import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies

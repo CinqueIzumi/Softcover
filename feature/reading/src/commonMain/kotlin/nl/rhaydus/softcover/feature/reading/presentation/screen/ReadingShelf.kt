@@ -67,6 +67,13 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.haptics.Haptics
+import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.modifier.hoverHighlight
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScale
+import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
@@ -84,11 +91,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SplitButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.hoverHighlight
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScale
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
@@ -98,9 +101,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
-import nl.rhaydus.softcover.core.designsystem.presentation.util.Haptics
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress

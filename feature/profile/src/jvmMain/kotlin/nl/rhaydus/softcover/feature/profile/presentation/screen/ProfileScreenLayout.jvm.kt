@@ -24,11 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopBackStrip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction

@@ -46,6 +46,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.TwoPaneScaffold
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.WindowWidthClass
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.rememberWindowSizeClass
@@ -55,7 +56,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookD
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalBottomBarPadding
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar

@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 
 /**
  * Editorial eyebrow that swaps its label to a contextual refresh copy while the user pulls

@@ -22,11 +22,11 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnSubmitAction

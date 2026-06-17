@@ -42,15 +42,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalHaptics
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction

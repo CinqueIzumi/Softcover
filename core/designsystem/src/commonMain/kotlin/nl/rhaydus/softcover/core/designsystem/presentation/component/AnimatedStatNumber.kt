@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 private const val TABULAR_NUMS = "tnum"
 private const val PULSE_DURATION_MS = 220

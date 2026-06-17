@@ -25,9 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography

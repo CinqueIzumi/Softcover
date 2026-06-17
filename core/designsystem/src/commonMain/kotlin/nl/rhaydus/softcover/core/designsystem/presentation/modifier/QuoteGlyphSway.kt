@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 private const val SWAY_DEGREES = 2f
 private const val SWAY_HALF_PERIOD_MS = 6_800
