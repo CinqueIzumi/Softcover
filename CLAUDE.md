@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Softcover is a native Android client for [Hardcover.app](https://hardcover.app/), a book tracking platform. Built with Kotlin and Jetpack Compose, targeting SDK 26+ (Android 8.0).
+Softcover is a Kotlin Multiplatform / Compose Multiplatform client for [Hardcover.app](https://hardcover.app/), a book tracking platform. It ships on Android (SDK 26+), iOS, and desktop (JVM), with shared UI and logic in `commonMain` and thin platform seams.
 
 ## Engineering principles
 
@@ -25,20 +25,20 @@ No ktlint or detekt is configured. The project uses `kotlin.code.style=official`
 
 ## Design System
 
-Always consult [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) before designing or modifying any UI surface — it is the source of truth for the app's visual and interaction language (color roles, editorial typography, layout primitives, components, patterns, decision rules).
+The brand-agnostic design skeleton (theme/typography plumbing, layout primitives, the shared component catalog, the editorial role contract) is governed by the foundation [`docs/rhaydus/0.2.0/design-system-foundations.md`](docs/rhaydus/0.2.0/design-system-foundations.md). [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) is the source of truth for Softcover's brand layered on top — color roles, editorial typography values, brand components, patterns, decision rules. Consult both before designing or modifying any UI surface.
 
 **Maintenance rule (enforced by review).** Any change that introduces, retires, or alters a foundation, component, or pattern in the design system MUST update `DESIGN_SYSTEM.md` in the same change. The `code-reviewer` agent treats a design-system change without a corresponding doc update as a blocker. Examples that require a doc update: a new shared component under `core/presentation/component/`, a new editorial typography role, a new color role usage, a new layout pattern that other screens should adopt, retirement or renaming of any of the above. Localized tweaks to a single screen that don't change the system itself do not require an update.
 
 ## Code Style
 
-Always follow the project's code formatting rules in [CODE_STYLE_GUIDE.md](CODE_STYLE_GUIDE.md). Read it before writing or modifying any Kotlin code in this repository — it is the source of truth for naming, layout, and whitespace conventions.
+The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.2.0/code-style.md`](docs/rhaydus/0.2.0/code-style.md) — the source of truth for naming, layout, and whitespace. [CODE_STYLE_GUIDE.md](CODE_STYLE_GUIDE.md) keeps only Softcover-specific deltas (the Apollo/AppLog error-handling bindings). Read both before writing or modifying Kotlin code.
 
 The mechanical style rules are enforced by tooling, not manual vigilance — for every developer, with zero setup, via the Gradle `check` lifecycle (so CI gates on them too):
 
-- **Custom ktlint rules** in the `:ktlint-rules` module **auto-fix and gate** the mechanizable layout rules. Run `./gradlew ktlintFormat` to auto-fix, `./gradlew ktlintCheck` to gate (also run by `check`). The rules: multi-arg one-per-line wrapping (2+ args/params, even when they fit — exempting collection factories, `Modifier.…` chains, trailing-lambda calls), trailing comma on multi-line lists, blank line after `super.*()` / `Timber.e(...)`, `// region`/`// endregion` flush, no blank line after `{` / before `}`, blank line between sibling composables, and boolean `!` → `.not()` (gate-only; fix by hand).
+- **The foundation ktlint ruleset** (`nl.rhaydus:ktlint-rules`) **auto-fixes and gates** the mechanizable layout rules. Run `./gradlew ktlintFormat` to auto-fix, `./gradlew ktlintCheck` to gate (also run by `check`). The rules: multi-arg one-per-line wrapping (2+ args/params, even when they fit — exempting collection factories, `Modifier.…` chains, trailing-lambda calls), trailing comma on multi-line lists, blank line after `super.*()` / `AppLog.e(...)`, `// region`/`// endregion` flush, no blank line after `{` / before `}`, blank line between sibling composables, and boolean `!` → `.not()` (gate-only; fix by hand).
 - **The remaining greppable rules** — inline fully-qualified references, one-type-per-file, project-import ordering — are flagged by `scripts/style-check.sh` (run `./gradlew styleCheck`, or pass files). Examine each candidate; the advisory recipes have documented false positives.
 
-The subjective rules no tool can mechanize — blank line between sibling composables (incl. `Spacer`), paragraph spacing around multi-line constructs, a `Timber.e(...)` log as its own paragraph, reserved fixed height for optional card rows — live in `CODE_STYLE_GUIDE.md` and are caught in review.
+The subjective rules no tool can mechanize — blank line between sibling composables (incl. `Spacer`), paragraph spacing around multi-line constructs, an `AppLog.e(...)` log as its own paragraph, reserved fixed height for optional card rows — live in `CODE_STYLE_GUIDE.md` and are caught in review.
 
 **For substantial Kotlin changes, delegate to the `code-reviewer` agent before reporting work done.** "Substantial" = a new file, a new feature module, a change spanning multiple files, or any change touching layout/state/data flow. The reviewer audits against the full current `CODE_STYLE_GUIDE.md` and catches both new violations and pre-existing ones in the touched files (per the on-touch compliance policy). Run it after the build succeeds and before the wrap-up message.
 
@@ -62,9 +62,9 @@ The agent is required to run the tests after writing them. Prefer narrow filters
 
 ## Architecture
 
-Always consult [ARCHITECTURE.md](ARCHITECTURE.md) before writing or reviewing code that touches layering, DI, navigation, or the TOAD state-management framework. Read it before adding a new feature module, modifying a ScreenModel / Action / Initializer, or changing data flow between layers — it is the source of truth for Clean Architecture boundaries and TOAD implementation details (generic signatures, per-feature boilerplate, Koin wiring). The summary below is a quick reference only; resolve any ambiguity against `ARCHITECTURE.md`.
+Clean Architecture layering, DI, navigation, and the TOAD framework are governed by the foundation [`docs/rhaydus/0.2.0/architecture.md`](docs/rhaydus/0.2.0/architecture.md) and [`toad-architecture.md`](docs/rhaydus/0.2.0/toad-architecture.md) — the source of truth for the generic signatures, per-feature boilerplate, and Koin wiring. [ARCHITECTURE.md](ARCHITECTURE.md) keeps Softcover's deltas (the Apollo network layer, Room storage, the concrete module overview, app-specific TOAD notes). Consult both before adding a feature module, modifying a ScreenModel / Action / Collector, or changing data flow between layers.
 
-Consult [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) for how code is categorized and grouped across the Gradle modules — the `core`/`feature`/orchestration tiers, allowed dependency directions, the module roster + build-setup conventions, and where a new type, screen, or use case belongs (the *tier* axis above the layer axis). Read it before adding a module, deciding whether something is shared infrastructure vs. feature-local, or wiring a cross-feature dependency.
+The tier model (`core`/`feature`/orchestration), allowed dependency directions, and where a new type/screen/use case belongs are governed by that same foundation architecture doc; [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) keeps Softcover's concrete module roster and `softcover.*` build-setup conventions. Consult it before adding a module, deciding shared-vs-feature-local, or wiring a cross-feature dependency.
 
 The app follows **Clean Architecture** with a custom **TOAD** state management framework. It is a multi-module Gradle build: `:app` (application shell) → `:orchestration` (nav host + cross-feature use cases) → `:feature:*` → `:core:*`.
 
@@ -73,9 +73,9 @@ The app follows **Clean Architecture** with a custom **TOAD** state management f
 The detail lives in the two docs above; this is just the orientation.
 
 - **Layers (per feature):** `domain/` (repository interfaces + use cases, depends on nothing) → `data/` (impls, data sources, mappers — Room entities/DAOs live in `:core:database`, not the feature) → `presentation/` (screens, ScreenModels, actions, events, state; depends on domain only) → `di/` (Koin module). A feature never imports a sibling feature.
-- **TOAD** (custom framework on Voyager's `ScreenModel`): each screen has `UiState` (immutable, exposed as `StateFlow`), `UiAction` (sealed; one per interaction), `UiEvent` (one-time via `Channel`), `LocalVariables`, `ActionDependencies`, and `Initializers` in `flows/`. Flow: `UiAction.execute() → use cases via Dependencies → setState() → StateFlow → recompose`.
-- **Always:** Apollo via `safeQuery()` / `safeMutation()` (queries in `core/network/src/main/graphql/`); Room + migrations in `:core:database`; DataStore for preferences; Koin DI; Voyager nav (`Navigator`, `TabNavigator`); `AppDispatchers` for Main/IO/Default; `Result<T>` with `.onSuccess()` / `.onFailure()`; Timber for logging (never `println` / `Log.*`).
-- **Naming:** domain models are plain nouns (`Book`, `Author`); suffixes mark role — `*Entity`, `*DataSource(Impl)`, `*Repository(Impl)`, `*UseCase`, `*Screen`, `*ScreenModel`, `*Action`, `*Event`, `*UiState`, `*LocalVariables`, `*Dependencies`.
+- **TOAD** (custom framework on Voyager's `ScreenModel`): each screen has `UiState` (immutable, exposed as `StateFlow`), `UiAction` (sealed; one per interaction), `UiEvent` (one-time via `Channel`), `LocalVariables`, `ActionDependencies`, and per-feature `*Collector` interfaces in `flows/` (implementing the foundation `Collector`). Flow: `UiAction.execute() → use cases via Dependencies → setState() → StateFlow → recompose`.
+- **Always:** Apollo via `safeQuery()` / `safeMutation()` (queries in `core/network/src/commonMain/graphql/`); Room + migrations in `:core:database`; DataStore for preferences; Koin DI; Voyager nav (`Navigator`, `TabNavigator`); `AppDispatchers` for Main/IO/Default; `Result<T>` with `.onSuccess()` / `.onFailure()`; `AppLog` (Kermit-backed) for logging (never `println` / `Log.*`).
+- **Naming:** domain models are plain nouns (`Book`, `Author`); suffixes mark role — `*Entity`, `*DataSource(Impl)`, `*Repository(Impl)`, `*UseCase`, `*Screen`, `*ScreenModel`, `*Action`, `*Event`, `*UiState`, `*LocalVariables`, `*Dependencies`, `*Collector` (per-feature flow collector).
 
 ## Dependency Management
 
