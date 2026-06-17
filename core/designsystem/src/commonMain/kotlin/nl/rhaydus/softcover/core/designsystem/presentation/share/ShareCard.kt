@@ -32,10 +32,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -127,10 +127,9 @@ private fun BookShareCardBody(content: BookShareContent) {
                 .aspectRatio(2f / 3f)
                 .clip(RoundedCornerShape(6.dp)),
         ) {
-            SoftcoverImage(
+            RhaydusShimmerImage(
                 model = content.coverUrl,
                 contentDescription = "Cover of ${content.title}",
-                isLoading = false,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -244,10 +243,9 @@ private fun ReadingUpdateShareCardBody(content: ReadingUpdateShareContent) {
                 .aspectRatio(2f / 3f)
                 .clip(RoundedCornerShape(6.dp)),
         ) {
-            SoftcoverImage(
+            RhaydusShimmerImage(
                 model = content.coverUrl,
                 contentDescription = "Cover of ${content.title}",
-                isLoading = false,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -360,10 +358,9 @@ private fun ReadingUpdateReaderIdentity(
                     .requiredSize(28.dp)
                     .clip(CircleShape),
             ) {
-                SoftcoverImage(
+                RhaydusShimmerImage(
                     model = avatarUrl,
                     contentDescription = "$username's avatar",
-                    isLoading = false,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                 )

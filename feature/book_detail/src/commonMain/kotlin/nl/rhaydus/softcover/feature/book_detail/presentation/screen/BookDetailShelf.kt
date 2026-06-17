@@ -83,8 +83,10 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
+import nl.rhaydus.designsystem.editorial.component.DropCapText
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.conditional
@@ -97,13 +99,11 @@ import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
-import nl.rhaydus.designsystem.editorial.component.DropCapText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
@@ -2041,10 +2041,9 @@ private fun ReviewCard(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    SoftcoverImage(
+                    RhaydusShimmerImage(
                         model = review.reviewer.avatarUrl,
                         contentDescription = "Reviewer avatar",
-                        isLoading = false,
                         modifier = Modifier
                             .size(36.dp)
                             .clip(RoundedCornerShape(18.dp)),

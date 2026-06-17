@@ -20,7 +20,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil3.request.ImageRequest
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
+import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
@@ -79,10 +79,9 @@ internal fun FullScreenCoverViewer(
             .background(color = Color.Black)
             .onSizeChanged(onSizeChanged),
     ) {
-        SoftcoverImage(
+        RhaydusShimmerImage(
             model = request,
             contentDescription = "Full screen book cover",
-            isLoading = false,
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .fillMaxSize()

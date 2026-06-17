@@ -104,6 +104,11 @@ fun EditionImage(
         modifier
     }
 
+    // The loading path uses a bespoke SubcomposeAsyncImage rather than RhaydusShimmerImage because
+    // it needs both a custom success slot (BoxWithConstraints + aspect-ratio from the intrinsic
+    // painter size) and a custom error slot (CoverlessTitleCover fallback). RhaydusPlaceholderImage
+    // only exposes the placeholder slot; routing through it would require dropping these, changing
+    // behavior. The shimmer + SkeletonCrossfade primitives (from designsystem-core) are reused directly.
     SkeletonCrossfade(
         isLoading = isLoading && request == null,
         modifier = containerModifier
