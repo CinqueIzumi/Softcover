@@ -1,5 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.event
 
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiEvent
+import nl.rhaydus.toad.UiEvent
 
 internal sealed interface BookDetailEvent : UiEvent

@@ -16,7 +16,6 @@ import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCa
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
@@ -33,6 +32,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailInitializer
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.toad.ToadScreenModel
 import nl.rhaydus.ui.common.AppDispatchers
 
 internal class BookDetailScreenScreenModel(

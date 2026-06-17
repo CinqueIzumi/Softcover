@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiState
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -13,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
+import nl.rhaydus.toad.UiState
 
 internal data class BookDetailUiState(
     val loadingBookDetails: Boolean = true,

@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.designsystem.presentation.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
@@ -10,6 +9,7 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.toad.ActionScope
 
 /**
  * Flips a custom list's `ranked` flag (the Hardcover `lists.ranked` column). When turning a list

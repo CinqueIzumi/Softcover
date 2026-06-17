@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
@@ -16,6 +15,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilit
 import nl.rhaydus.softcover.feature.settings.presentation.flows.LibraryVisibilityInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.toad.ToadScreenModel
 import nl.rhaydus.ui.common.AppDispatchers
 
 internal class LibraryVisibilitySettingsScreenModel(

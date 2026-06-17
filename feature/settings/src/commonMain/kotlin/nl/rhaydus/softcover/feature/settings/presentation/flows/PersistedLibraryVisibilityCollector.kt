@@ -2,11 +2,11 @@ package nl.rhaydus.softcover.feature.settings.presentation.flows
 
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.toad.ActionScope
 
 internal class PersistedLibraryVisibilityCollector : LibraryVisibilityInitializer {
     override suspend fun onLaunch(

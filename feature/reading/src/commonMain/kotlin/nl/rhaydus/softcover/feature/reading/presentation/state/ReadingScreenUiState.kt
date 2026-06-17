@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.UiState
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.toad.UiState
 
 internal data class ReadingScreenUiState(
     val books: List<Book> = emptyList(),

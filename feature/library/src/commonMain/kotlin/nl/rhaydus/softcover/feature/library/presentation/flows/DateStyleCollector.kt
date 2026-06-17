@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.flows
 
 import kotlinx.coroutines.flow.collectLatest
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.toad.ActionScope
 
 internal class DateStyleCollector : LibraryInitializer {
     override suspend fun onLaunch(

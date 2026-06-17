@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
@@ -10,6 +9,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.flows.ProfileInitializer
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.toad.ToadScreenModel
 import nl.rhaydus.ui.common.AppDispatchers
 
 internal class ProfileScreenScreenModel(

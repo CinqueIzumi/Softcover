@@ -20,6 +20,7 @@ kotlin {
             implementation(project(":core:designsystem"))
 
             implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.toad)
 
             implementation(libs.koin.compose.multiplatform)
             implementation(libs.coil3)

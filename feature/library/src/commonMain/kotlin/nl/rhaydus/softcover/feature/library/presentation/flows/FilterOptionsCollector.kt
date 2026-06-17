@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import nl.rhaydus.softcover.core.designsystem.presentation.toad.ActionScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -14,6 +13,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.buildBookFilterOptions
 import nl.rhaydus.softcover.feature.library.presentation.state.buildEditionFilterOptions
+import nl.rhaydus.toad.ActionScope
 
 /**
  * Precomputes [LibraryFilterOptions] for every visible tab so opening the filter sheet is an
