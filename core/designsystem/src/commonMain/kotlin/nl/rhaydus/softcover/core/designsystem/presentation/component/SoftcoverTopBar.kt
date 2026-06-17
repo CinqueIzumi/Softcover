@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import nl.rhaydus.designsystem.theme.StandardPreview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -27,9 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -50,7 +50,7 @@ fun SoftcoverSearchTopBar(
                 IconButton(
                     onClick = { onSearchValueChange("") },
                 ) {
-                    val icon = SoftcoverIconResource.Drawable(
+                    val icon = drawableIconResource(
                         icon = SoftcoverIcon.Close,
                         contentDescription = "Clear search icon",
                     )
@@ -90,7 +90,7 @@ fun SoftcoverSearchTopBar(
                     if (isLoading) {
                         CircularWavyProgressIndicator(modifier = Modifier.size(32.dp))
                     } else {
-                        val icon = SoftcoverIconResource.Drawable(
+                        val icon = drawableIconResource(
                             icon = SoftcoverIcon.Search,
                             contentDescription = "Search",
                         )
@@ -126,7 +126,7 @@ fun SoftcoverSearchTopBar(
         navigationIcon = {
             onNavigateBack?.let {
                 IconButton(onClick = onNavigateBack) {
-                    val icon = SoftcoverIconResource.Drawable(
+                    val icon = drawableIconResource(
                         icon = SoftcoverIcon.ArrowBack,
                         contentDescription = "Navigate back icon",
                     )
@@ -154,7 +154,7 @@ fun SoftcoverTopBar(
     navigateBackButton: @Composable () -> Unit = {
         onNavigateBack?.let {
             IconButton(onClick = onNavigateBack) {
-                val icon = SoftcoverIconResource.Drawable(
+                val icon = drawableIconResource(
                     icon = SoftcoverIcon.ArrowBack,
                     contentDescription = "Navigate back icon",
                 )
@@ -220,7 +220,7 @@ private fun SoftcoverTopBarPreview() {
                 subTitle = "subtitle",
                 actions = List(2) {
                     SoftcoverTopBarAction(
-                        iconResource = SoftcoverIconResource.Drawable(
+                        iconResource = drawableIconResource(
                             icon = SoftcoverIcon.Palette,
                             contentDescription = "",
                         ),
@@ -256,7 +256,7 @@ private fun SoftcoverSearchTopBarPreview() {
                 placeHolder = "Search",
                 actions = List(2) {
                     SoftcoverTopBarAction(
-                        iconResource = SoftcoverIconResource.Drawable(
+                        iconResource = drawableIconResource(
                             icon = SoftcoverIcon.Palette,
                             contentDescription = "",
                         ),

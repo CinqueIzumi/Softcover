@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.modifier.pressScale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -35,14 +37,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.IconToggleButtonShape
 import nl.rhaydus.softcover.core.designsystem.presentation.model.IconToggleButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ToggleButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 
@@ -50,7 +51,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 @Composable
 fun SoftcoverIconToggleButton(
     checked: Boolean,
-    icon: SoftcoverIconResource,
+    icon: RhaydusIconResource,
     style: IconToggleButtonStyle,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -230,7 +231,7 @@ fun SoftcoverButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    icon: SoftcoverIconResource? = null,
+    icon: RhaydusIconResource? = null,
     size: ButtonSize = ButtonSize.S,
 ) {
     val shapes = ButtonDefaults.shapesFor(buttonHeight = size.height)
@@ -580,7 +581,7 @@ private fun SoftcoverIconToggleButtonFilledPreview() {
             ButtonSize.entries.forEachIndexed { index, size ->
                 Row {
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Drawable(
+                        icon = drawableIconResource(
                             icon = SoftcoverIcon.Palette,
                             contentDescription = "",
                         ),
@@ -594,7 +595,7 @@ private fun SoftcoverIconToggleButtonFilledPreview() {
                     Spacer(modifier = Modifier.width(8.dp))
 
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Drawable(
+                        icon = drawableIconResource(
                             icon = SoftcoverIcon.Palette,
                             contentDescription = "",
                         ),
@@ -624,7 +625,7 @@ private fun SoftcoverIconToggleButtonTonalPreview() {
             ButtonSize.entries.forEachIndexed { index, size ->
                 Row {
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Drawable(
+                        icon = drawableIconResource(
                             icon = SoftcoverIcon.Palette,
                             contentDescription = "",
                         ),
@@ -638,7 +639,7 @@ private fun SoftcoverIconToggleButtonTonalPreview() {
                     Spacer(modifier = Modifier.width(8.dp))
 
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Drawable(
+                        icon = drawableIconResource(
                             icon = SoftcoverIcon.Palette,
                             contentDescription = "",
                         ),
@@ -668,7 +669,7 @@ private fun SoftcoverIconToggleButtonOutlinedPreview() {
             ButtonSize.entries.forEachIndexed { index, size ->
                 Row {
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Drawable(
+                        icon = drawableIconResource(
                             icon = SoftcoverIcon.Palette,
                             contentDescription = "",
                         ),
@@ -682,7 +683,7 @@ private fun SoftcoverIconToggleButtonOutlinedPreview() {
                     Spacer(modifier = Modifier.width(8.dp))
 
                     SoftcoverIconToggleButton(
-                        icon = SoftcoverIconResource.Drawable(
+                        icon = drawableIconResource(
                             icon = SoftcoverIcon.Palette,
                             contentDescription = "",
                         ),

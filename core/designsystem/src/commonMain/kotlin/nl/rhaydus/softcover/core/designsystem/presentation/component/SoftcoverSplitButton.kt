@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.theme.StandardPreview
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,10 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverMenuItem
 import nl.rhaydus.softcover.core.designsystem.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -42,7 +43,7 @@ fun SoftcoverSplitButton(
     checked: Boolean,
     dropDownItems: List<SoftcoverMenuItem>,
     label: String,
-    trailingIcon: SoftcoverIconResource,
+    trailingIcon: RhaydusIconResource,
     onDismissMenuRequest: () -> Unit,
     onLeadingButtonClick: () -> Unit,
     onTrailingButtonClick: (Boolean) -> Unit,
@@ -51,7 +52,7 @@ fun SoftcoverSplitButton(
     leadingEnabled: Boolean = true,
     trailingButtonStyle: SplitButtonStyle = leadingButtonStyle,
     trailingEnabled: Boolean = true,
-    leadingIcon: SoftcoverIconResource? = null,
+    leadingIcon: RhaydusIconResource? = null,
     fillMaxWidth: Boolean = false,
 ) {
     // Workaround for a Material 3 (1.5.0-alpha13) bug: `SplitButtonDefaults.*ShapesFor`
@@ -329,7 +330,7 @@ private fun SoftcoverSplitButtonPreview() {
                 .background(color = MaterialTheme.colorScheme.background)
                 .padding(all = 8.dp),
         ) {
-            val leadingIcon = SoftcoverIconResource.Drawable(
+            val leadingIcon = drawableIconResource(
                 icon = SoftcoverIcon.Palette,
                 contentDescription = "",
             )
@@ -338,7 +339,7 @@ private fun SoftcoverSplitButtonPreview() {
                 SoftcoverSplitButton(
                     size = size,
                     label = "Label $index",
-                    trailingIcon = SoftcoverIconResource.Drawable(
+                    trailingIcon = drawableIconResource(
                         icon = SoftcoverIcon.ArrowDropDown,
                         contentDescription = "",
                     ),

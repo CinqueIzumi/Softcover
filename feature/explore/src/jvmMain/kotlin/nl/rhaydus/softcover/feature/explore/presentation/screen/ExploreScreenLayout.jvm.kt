@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
@@ -41,7 +41,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSe
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
@@ -180,7 +180,7 @@ private fun DesktopExploreHeader(
                     onClick = onScanClick,
                     modifier = Modifier.pointerHandCursor(),
                 ) {
-                    val scanIcon = SoftcoverIconResource.Drawable(
+                    val scanIcon = drawableIconResource(
                         icon = SoftcoverIcon.BarcodeScanner,
                         contentDescription = "Scan a book's barcode",
                     )

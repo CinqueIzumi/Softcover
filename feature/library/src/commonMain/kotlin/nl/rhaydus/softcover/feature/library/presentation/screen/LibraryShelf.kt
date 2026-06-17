@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -63,7 +64,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.modifier.hoverHighlight
@@ -81,9 +81,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLaz
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.platformModifierClick
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
@@ -717,7 +717,7 @@ private fun DragHandle(modifier: Modifier = Modifier) {
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         shape = RoundedCornerShape(percent = 50),
     ) {
-        val dragHandleIcon = SoftcoverIconResource.Drawable(
+        val dragHandleIcon = drawableIconResource(
             icon = SoftcoverIcon.DragHandle,
             contentDescription = "Drag to reorder",
         )
@@ -1357,7 +1357,7 @@ private fun LargeRow(
                         if (hasRating) {
                             Spacer(modifier = Modifier.width(4.dp))
 
-                            val starIcon = SoftcoverIconResource.Drawable(
+                            val starIcon = drawableIconResource(
                                 icon = SoftcoverIcon.StarFilled,
                                 contentDescription = "",
                             )
@@ -1450,7 +1450,7 @@ private fun SelectionCircleIndicator(
         modifier = modifier.size(24.dp),
     ) {
         if (isSelected) {
-            val checkIcon = SoftcoverIconResource.Drawable(
+            val checkIcon = drawableIconResource(
                 icon = SoftcoverIcon.Check,
                 contentDescription = "",
             )
@@ -1772,7 +1772,7 @@ internal fun SelectionHeader(
                 enabled = bulkActionInProgress.not(),
                 modifier = Modifier.pointerHandCursor(),
             ) {
-                val exitIcon = SoftcoverIconResource.Drawable(
+                val exitIcon = drawableIconResource(
                     icon = SoftcoverIcon.Close,
                     contentDescription = "Exit selection mode",
                 )
@@ -1800,7 +1800,7 @@ internal fun SelectionHeader(
                     enabled = bulkActionInProgress.not(),
                     modifier = Modifier.pointerHandCursor(),
                 ) {
-                    val moveIcon = SoftcoverIconResource.Drawable(
+                    val moveIcon = drawableIconResource(
                         icon = SoftcoverIcon.Bookmark,
                         contentDescription = "Move selected books to another shelf",
                     )
@@ -1834,7 +1834,7 @@ internal fun SelectionHeader(
                 enabled = bulkActionInProgress.not(),
                 modifier = Modifier.pointerHandCursor(),
             ) {
-                val addToListIcon = SoftcoverIconResource.Drawable(
+                val addToListIcon = drawableIconResource(
                     icon = SoftcoverIcon.BookmarkAdd,
                     contentDescription = "Add selected books to a list",
                 )
@@ -1850,7 +1850,7 @@ internal fun SelectionHeader(
                 enabled = bulkActionInProgress.not(),
                 modifier = Modifier.pointerHandCursor(),
             ) {
-                val removeIcon = SoftcoverIconResource.Drawable(
+                val removeIcon = drawableIconResource(
                     icon = SoftcoverIcon.Delete,
                     contentDescription = "Remove selected books from library",
                 )

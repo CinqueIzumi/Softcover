@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
+import nl.rhaydus.designsystem.layout.cappedContentWidth
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -33,13 +34,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
@@ -287,7 +287,7 @@ private fun SettingsSidebarRow(
             ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val leadingIcon = SoftcoverIconResource.Drawable(
+            val leadingIcon = drawableIconResource(
                 icon = icon,
                 contentDescription = "",
             )
@@ -311,7 +311,7 @@ private fun SettingsSidebarRow(
             )
 
             if (showTrailingArrow) {
-                val arrowIcon = SoftcoverIconResource.Drawable(
+                val arrowIcon = drawableIconResource(
                     icon = SoftcoverIcon.KeyboardArrowRight,
                     contentDescription = "",
                 )
@@ -533,7 +533,7 @@ internal fun DesktopSettingsBackBar(
                 onClick = onNavigateBack,
                 modifier = Modifier.pointerHandCursor(),
             ) {
-                val backIcon = SoftcoverIconResource.Drawable(
+                val backIcon = drawableIconResource(
                     icon = SoftcoverIcon.ArrowBack,
                     contentDescription = "Navigate back",
                 )

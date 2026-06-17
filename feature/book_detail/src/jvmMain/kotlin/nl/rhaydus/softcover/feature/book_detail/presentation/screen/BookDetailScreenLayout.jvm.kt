@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -28,13 +29,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
@@ -143,7 +143,7 @@ private fun DesktopBookDetailTopBar(
                 onClick = onNavigateBack,
                 modifier = Modifier.pointerHandCursor(),
             ) {
-                val backIcon = SoftcoverIconResource.Drawable(
+                val backIcon = drawableIconResource(
                     icon = SoftcoverIcon.ArrowBack,
                     contentDescription = "Navigate back icon",
                 )

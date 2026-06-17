@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import nl.rhaydus.designsystem.theme.StandardPreview
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
@@ -41,7 +41,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTo
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -87,7 +87,7 @@ internal actual fun ExploreScreenLayout(
                 },
                 isLoading = state.isLoading,
                 trailingFieldAction = SoftcoverTopBarAction(
-                    iconResource = SoftcoverIconResource.Drawable(
+                    iconResource = drawableIconResource(
                         icon = SoftcoverIcon.BarcodeScanner,
                         contentDescription = "Scan a book's barcode",
                     ),

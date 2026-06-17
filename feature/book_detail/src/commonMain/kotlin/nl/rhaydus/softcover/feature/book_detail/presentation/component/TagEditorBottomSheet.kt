@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
+import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -27,15 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 
@@ -142,7 +142,7 @@ internal fun TagEditorBottomSheet(
                 trailingIcon = {
                     if (draft.isNotEmpty()) {
                         IconButton(onClick = { onDraftChange("") }) {
-                            val clearIcon = SoftcoverIconResource.Drawable(
+                            val clearIcon = drawableIconResource(
                                 icon = SoftcoverIcon.Close,
                                 contentDescription = "Clear",
                             )
@@ -208,7 +208,7 @@ private fun CurrentTagRow(
         )
 
         IconButton(onClick = onRemove) {
-            val removeIcon = SoftcoverIconResource.Drawable(
+            val removeIcon = drawableIconResource(
                 icon = SoftcoverIcon.Close,
                 contentDescription = "Remove ${tag.name}",
             )

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,9 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 /**
  * A rounded, editorial-styled inline search field: a leading search glyph, a single-line text field,
@@ -52,7 +52,7 @@ fun EditorialSearchField(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val searchIcon = SoftcoverIconResource.Drawable(
+            val searchIcon = drawableIconResource(
                 icon = SoftcoverIcon.Search,
                 contentDescription = "Search",
             )
@@ -98,7 +98,7 @@ fun EditorialSearchField(
                         .size(32.dp)
                         .pointerHandCursor(),
                 ) {
-                    val clearSearchIcon = SoftcoverIconResource.Drawable(
+                    val clearSearchIcon = drawableIconResource(
                         icon = SoftcoverIcon.Close,
                         contentDescription = "Clear search",
                     )

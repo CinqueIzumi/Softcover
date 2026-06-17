@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.session.presentation.component
 
+import nl.rhaydus.designsystem.haptics.rememberHaptics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -33,11 +34,10 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
-import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
@@ -159,7 +159,7 @@ private fun SessionPeekBarContent(
                     )
                 }
 
-                val pauseResumeIcon = SoftcoverIconResource.Drawable(
+                val pauseResumeIcon = drawableIconResource(
                     icon = if (active.session.isPaused) SoftcoverIcon.Play else SoftcoverIcon.Pause,
                     contentDescription = if (active.session.isPaused) {
                         "Resume session"
@@ -184,7 +184,7 @@ private fun SessionPeekBarContent(
                     }
                 }
 
-                val stopIcon = SoftcoverIconResource.Drawable(
+                val stopIcon = drawableIconResource(
                     icon = SoftcoverIcon.Stop,
                     contentDescription = "Stop session",
                 )

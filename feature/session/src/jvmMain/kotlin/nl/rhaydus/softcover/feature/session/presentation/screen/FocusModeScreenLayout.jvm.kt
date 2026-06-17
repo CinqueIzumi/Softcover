@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.session.presentation.screen
 
+import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,12 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 
 // Keeps the reading panel at a comfortable column measure rather than stretching the hero across a
@@ -79,7 +79,7 @@ internal actual fun FocusModeScreenLayout(
                     .padding(vertical = 4.dp),
             )
 
-            val closeIcon = SoftcoverIconResource.Drawable(
+            val closeIcon = drawableIconResource(
                 icon = SoftcoverIcon.Close,
                 contentDescription = "Close focus mode",
             )

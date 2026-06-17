@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import nl.rhaydus.designsystem.modifier.noRippleClickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.shimmer
@@ -48,8 +48,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedB
 import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -143,7 +143,7 @@ internal fun TrendingCard(
             modifier = Modifier.height(16.dp),
         ) {
             if (book.rating != 0.0) {
-                val starIcon = SoftcoverIconResource.Drawable(
+                val starIcon = drawableIconResource(
                     icon = SoftcoverIcon.StarFilled,
                     contentDescription = "",
                 )
@@ -249,7 +249,7 @@ internal fun SeriesCard(
                         shape = CircleShape,
                     ),
             ) {
-                val moreVertIcon = SoftcoverIconResource.Drawable(
+                val moreVertIcon = drawableIconResource(
                     icon = SoftcoverIcon.MoreVert,
                     contentDescription = "More options",
                 )
@@ -523,7 +523,7 @@ private fun QueryChipsRow(
                 },
                 label = { Text(text = query) },
                 trailingIcon = {
-                    val closeIcon = SoftcoverIconResource.Drawable(
+                    val closeIcon = drawableIconResource(
                         icon = SoftcoverIcon.Close,
                         contentDescription = "Remove query icon",
                     )
@@ -630,7 +630,7 @@ internal fun SearchResultRow(
                 if (book.rating != 0.0) {
                     Spacer(modifier = Modifier.width(4.dp))
 
-                    val starIcon = SoftcoverIconResource.Drawable(
+                    val starIcon = drawableIconResource(
                         icon = SoftcoverIcon.StarFilled,
                         contentDescription = "",
                     )
@@ -669,7 +669,7 @@ internal fun SearchResultRow(
                 else -> "Add to library icon"
             }
 
-            val bookmarkIcon = SoftcoverIconResource.Drawable(
+            val bookmarkIcon = drawableIconResource(
                 icon = iconResource,
                 contentDescription = contentDescription,
             )

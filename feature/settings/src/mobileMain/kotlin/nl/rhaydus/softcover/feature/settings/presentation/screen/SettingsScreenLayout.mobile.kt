@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.layout.cappedContentWidth
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,12 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
@@ -104,7 +105,7 @@ internal actual fun SettingsScreenLayout(
             SettingsGroup {
                 SettingsRow(
                     title = "View user profile",
-                    icon = SoftcoverIconResource.Drawable(
+                    icon = drawableIconResource(
                         icon = SoftcoverIcon.Account,
                         contentDescription = "Account icon",
                     ),
@@ -124,7 +125,7 @@ internal actual fun SettingsScreenLayout(
             SettingsGroup {
                 SettingsRow(
                     title = "Appearance",
-                    icon = SoftcoverIconResource.Drawable(
+                    icon = drawableIconResource(
                         icon = SoftcoverIcon.Palette,
                         contentDescription = "Appearance icon",
                     ),
@@ -135,7 +136,7 @@ internal actual fun SettingsScreenLayout(
 
                 SettingsRow(
                     title = "Library tabs",
-                    icon = SoftcoverIconResource.Drawable(
+                    icon = drawableIconResource(
                         icon = SoftcoverIcon.Shelf,
                         contentDescription = "Library tabs icon",
                     ),
@@ -179,7 +180,7 @@ private fun SettingsPageHeader() {
 @Composable
 private fun SettingsRow(
     title: String,
-    icon: SoftcoverIconResource,
+    icon: RhaydusIconResource,
     onClick: () -> Unit,
 ) {
     Row(
@@ -210,7 +211,7 @@ private fun SettingsRow(
             )
         }
 
-        val arrowIcon = SoftcoverIconResource.Drawable(
+        val arrowIcon = drawableIconResource(
             icon = SoftcoverIcon.KeyboardArrowRight,
             contentDescription = "",
         )

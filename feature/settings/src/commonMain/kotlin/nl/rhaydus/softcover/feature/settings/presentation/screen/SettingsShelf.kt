@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,14 +43,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -541,7 +541,7 @@ private fun ReorderableRow(
                 .size(40.dp),
             contentAlignment = Alignment.Center,
         ) {
-            val dragHandleIcon = SoftcoverIconResource.Drawable(
+            val dragHandleIcon = drawableIconResource(
                 icon = SoftcoverIcon.DragHandle,
                 contentDescription = "Reorder ${entry.label}",
             )
@@ -703,7 +703,7 @@ internal fun AppUpdateSection(
             BadgedBox(
                 badge = { Badge() },
             ) {
-                val apkInstallIcon = SoftcoverIconResource.Drawable(
+                val apkInstallIcon = drawableIconResource(
                     icon = SoftcoverIcon.ApkInstall,
                     contentDescription = "Update icon",
                 )
@@ -737,7 +737,7 @@ internal fun AppUpdateSection(
             if (isClickable) {
                 Spacer(modifier = Modifier.width(12.dp))
 
-                val arrowIcon = SoftcoverIconResource.Drawable(
+                val arrowIcon = drawableIconResource(
                     icon = SoftcoverIcon.KeyboardArrowRight,
                     contentDescription = "",
                 )
