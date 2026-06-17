@@ -19,6 +19,8 @@ kotlin {
             implementation(project(":core:notification"))
             implementation(project(":core:designsystem"))
 
+            implementation(libs.rhaydus.coreUi)
+
             implementation(libs.koin.compose.multiplatform)
             implementation(libs.coil3)
 

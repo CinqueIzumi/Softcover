@@ -99,11 +99,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
 import nl.rhaydus.softcover.core.designsystem.presentation.util.Haptics
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDateTime
 import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
-import nl.rhaydus.softcover.core.designsystem.presentation.util.secondsToHm
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
@@ -121,6 +118,9 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdateTimeProg
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import nl.rhaydus.ui.common.currentLocalDate
+import nl.rhaydus.ui.common.currentLocalDateTime
+import nl.rhaydus.ui.common.secondsToHm
 
 /**
  * Drives the "mark as read" celebration shared by both platform layouts: it owns the slide-out

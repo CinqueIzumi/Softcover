@@ -9,7 +9,6 @@ import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
@@ -21,6 +20,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEven
 import nl.rhaydus.softcover.feature.reading.presentation.flows.ReadingInitializer
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import nl.rhaydus.ui.common.AppDispatchers
 
 internal class ReadingScreenScreenModel(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,

@@ -54,8 +54,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.toHoursMinutesSeconds
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.ui.common.toHoursMinutesSeconds
 import kotlin.math.min
 import kotlin.math.roundToInt
 

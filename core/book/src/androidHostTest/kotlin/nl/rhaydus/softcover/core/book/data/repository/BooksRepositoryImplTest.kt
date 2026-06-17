@@ -27,7 +27,6 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -39,6 +38,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.ui.common.AppDispatchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

@@ -42,7 +42,7 @@ import platform.Security.kSecMatchLimitOne
 import platform.Security.kSecReturnData
 import platform.Security.kSecValueData
 import nl.rhaydus.softcover.core.domain.logging.AppLog
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.ui.common.AppDispatchers
 
 /**
  * iOS secure storage: the API key is stored as a generic-password item in the Keychain (keyed by a

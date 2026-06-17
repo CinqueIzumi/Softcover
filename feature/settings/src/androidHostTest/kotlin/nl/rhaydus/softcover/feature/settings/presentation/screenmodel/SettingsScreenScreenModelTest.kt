@@ -10,7 +10,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import nl.rhaydus.softcover.core.domain.app.AppVersionInfo
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.ui.common.AppDispatchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

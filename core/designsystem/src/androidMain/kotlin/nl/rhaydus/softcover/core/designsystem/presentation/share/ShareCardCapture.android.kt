@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.ui.common.AppDispatchers
 import java.io.File
 
 internal class AndroidShareCardCapture internal constructor(

@@ -111,12 +111,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
-import nl.rhaydus.softcover.core.designsystem.presentation.util.formatDecimalNumber
 import nl.rhaydus.softcover.core.designsystem.presentation.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.designsystem.presentation.util.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
-import nl.rhaydus.softcover.core.designsystem.presentation.util.secondsToHm
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -175,6 +172,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.component.ReviewEdi
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.ui.common.currentLocalDate
+import nl.rhaydus.ui.common.formatDecimalNumber
+import nl.rhaydus.ui.common.secondsToHm
 
 private const val REVIEW_COLLAPSED_LINES = 8
 

@@ -7,7 +7,7 @@ import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
+import nl.rhaydus.ui.common.AppDispatchers
 
 actual val platformDatabaseModule: Module = module {
     single<SoftcoverDatabase> {

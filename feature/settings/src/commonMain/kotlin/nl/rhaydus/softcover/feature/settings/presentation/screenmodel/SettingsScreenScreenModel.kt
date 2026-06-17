@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
@@ -14,6 +13,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEv
 import nl.rhaydus.softcover.feature.settings.presentation.flows.SettingsInitializer
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+import nl.rhaydus.ui.common.AppDispatchers
 
 internal class SettingsScreenScreenModel(
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,

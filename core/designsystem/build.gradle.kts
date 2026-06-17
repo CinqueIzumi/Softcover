@@ -29,6 +29,8 @@ kotlin {
             api(project(":core:personal"))
             api(project(":core:preferences"))
 
+            implementation(libs.rhaydus.coreUi)
+
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.androidx.lifecycle.runtime.compose)

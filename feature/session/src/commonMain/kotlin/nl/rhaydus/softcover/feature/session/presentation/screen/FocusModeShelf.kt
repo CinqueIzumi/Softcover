@@ -42,8 +42,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandC
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentInstant
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
+import nl.rhaydus.ui.common.currentInstant
 
 /**
  * The distraction-free reading hero shared by both platforms: eyebrow → cover → title/author → the

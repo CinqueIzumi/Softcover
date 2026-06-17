@@ -18,6 +18,8 @@ kotlin {
             implementation(project(":core:preferences"))
             implementation(project(":core:designsystem"))
 
+            implementation(libs.rhaydus.coreUi)
+
             implementation(libs.koin.compose.multiplatform)
             implementation(libs.reorderable)
 

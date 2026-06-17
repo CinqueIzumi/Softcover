@@ -4,12 +4,12 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.core.designsystem.presentation.toad.ToadScreenModel
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.feature.scan.presentation.action.ScanAction
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.flows.ScanInitializer
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
+import nl.rhaydus.ui.common.AppDispatchers
 
 internal class ScanScreenModel(
     private val resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase,

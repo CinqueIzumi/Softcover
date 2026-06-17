@@ -33,9 +33,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedSta
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.formatDecimalNumber
-import nl.rhaydus.softcover.core.designsystem.presentation.util.formatGroupedNumber
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.ui.common.formatDecimalNumber
+import nl.rhaydus.ui.common.formatGroupedNumber
 
 /**
  * Shared Profile content reused by both the mobile ([ProfileScreenLayout] in `mobileMain`) and desktop

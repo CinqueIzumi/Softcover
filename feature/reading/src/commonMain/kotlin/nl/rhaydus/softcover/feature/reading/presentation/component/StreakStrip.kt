@@ -38,9 +38,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pressScaleCl
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.ui.common.currentLocalDate
 
 private val DOT_ROW_HEIGHT = 18.dp
 private val DOT = 9.dp

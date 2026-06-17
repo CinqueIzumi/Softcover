@@ -31,7 +31,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.modifier.pointerHandC
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentLocalDate
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
@@ -39,6 +38,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import nl.rhaydus.ui.common.currentLocalDate
 
 private val readingScrollState = ScrollState(initial = 0)
 

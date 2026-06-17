@@ -18,6 +18,8 @@ kotlin {
             implementation(project(":core:network"))
             implementation(project(":core:designsystem"))
 
+            implementation(libs.rhaydus.coreUi)
+
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.datastore.core)
             implementation(libs.datastore.core.okio)

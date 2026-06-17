@@ -41,9 +41,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.currentInstant
 import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberHaptics
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
+import nl.rhaydus.ui.common.currentInstant
 
 /**
  * Persistent live-timer bar shown above the bottom nav while a reading session is active. Tapping it

@@ -14,6 +14,8 @@ kotlin {
             implementation(project(":core:identity"))
             implementation(project(":core:designsystem"))
 
+            implementation(libs.rhaydus.coreUi)
+
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.koin)

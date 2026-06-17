@@ -12,9 +12,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 import nl.rhaydus.softcover.core.domain.logging.AppLog
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.security.SecureApiKeyStorage
+import nl.rhaydus.ui.common.AppDispatchers
 import kotlin.concurrent.Volatile
 
 interface ApiKeyLocalDataSource : AuthTokenProvider {

@@ -42,7 +42,6 @@ import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.logging.AppLog
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
@@ -54,6 +53,7 @@ import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
+import nl.rhaydus.ui.common.AppDispatchers
 
 interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book

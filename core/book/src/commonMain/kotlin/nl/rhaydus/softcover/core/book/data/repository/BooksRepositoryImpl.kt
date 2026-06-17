@@ -28,7 +28,6 @@ import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.logging.AppLog
-import nl.rhaydus.softcover.core.domain.model.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -41,6 +40,7 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
+import nl.rhaydus.ui.common.AppDispatchers
 
 private const val TRENDING_LIMIT = 10
 private const val TRENDING_OFFSET = 0

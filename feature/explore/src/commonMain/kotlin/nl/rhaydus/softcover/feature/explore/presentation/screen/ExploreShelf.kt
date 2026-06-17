@@ -54,7 +54,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBook
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.designsystem.presentation.util.formatDecimalNumber
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
@@ -64,6 +63,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAct
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveAllSearchQueriesClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQueryClickedAction
+import nl.rhaydus.ui.common.formatDecimalNumber
 import kotlin.time.Duration.Companion.seconds
 
 internal const val TRENDING_SKELETON_COUNT = 4
