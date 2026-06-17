@@ -14,7 +14,7 @@ kotlin {
             api(project(":core:book"))
             api(project(":core:lists"))
 
-            implementation(libs.rhaydus.coreUi)
+            api(libs.rhaydus.coreUi)
         }
 
         androidMain.dependencies {
