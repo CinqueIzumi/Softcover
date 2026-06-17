@@ -97,8 +97,8 @@ subprojects {
 // Gate every KMP module's `check` on iOS compilation. The Android variant compiles common/androidMain
 // for the JVM, where JVM-only APIs resolve fine (kotlin.jvm.* default imports, Dispatchers.IO,
 // java.time) — so an Android-only build silently hides code that will not compile for iOS. Compiling
-// all declared iOS targets here fails such leaks at `check` time (per KMP_MIGRATION.md §7's per-module
-// Definition of Done) instead of at iOS bring-up in P6. Guarded to KMP modules; and to macOS hosts,
+// all declared iOS targets here fails such leaks at `check` time instead of only at iOS link time.
+// Guarded to KMP modules; and to macOS hosts,
 // since Kotlin/Native iOS compilation is unavailable elsewhere (an iOS CI must use a macOS runner).
 subprojects {
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
