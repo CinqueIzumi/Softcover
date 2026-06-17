@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Softcover</string>
+
+    <string name="session_notification_default_title">Reading session</string>
+    <string name="session_notification_paused">Paused · %1$s</string>
+    <string name="session_action_pause">Pause</string>
+    <string name="session_action_resume">Resume</string>
+    <string name="session_action_stop">Stop</string>
+    <string name="session_action_update_page">Update page</string>
+    <string name="session_action_update">Update</string>
+</resources>

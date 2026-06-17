@@ -1,0 +1,40 @@
+package nl.rhaydus.softcover.feature.explore.presentation.action
+
+import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
+import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
+import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
+import nl.rhaydus.toad.ActionScope
+
+internal class OnDismissContinueSeriesBookAction(
+    val bookId: Int,
+    val bookTitle: String,
+) : ExploreAction {
+    override suspend fun execute(
+        dependencies: ExploreDependencies,
+        scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
+    ) {
+        dependencies.dismissContinueSeriesBookUseCase(bookId = bookId)
+            .onFailure { AppLog.e(
+                it,
+                "Failed to dismiss book $bookId from continue-series",
+            ) }
+            .onSuccess {
+                SnackBarManager.showSnackBar(
+                    title = "\"$bookTitle\" won't be suggested again",
+                    actionLabel = "Undo",
+                    onActionClick = {
+                        dependencies.launch {
+                            dependencies.undoContinueSeriesBookDismissalUseCase(bookId = bookId)
+                                .onFailure { AppLog.e(
+                                    it,
+                                    "Failed to undo book dismissal",
+                                ) }
+                        }
+                    },
+                )
+            }
+    }
+}

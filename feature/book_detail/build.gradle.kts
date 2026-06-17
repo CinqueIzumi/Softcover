@@ -1,26 +1,36 @@
 plugins {
-    id("softcover.android.library")
-    id("softcover.android.compose")
+    id("softcover.kmp.library")
+    id("softcover.kmp.compose")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.feature.book_detail"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.feature.book_detail"
+    }
 
-dependencies {
-    api(project(":core:domain"))
-    implementation(project(":core:book"))
-    implementation(project(":core:lists"))
-    implementation(project(":core:deadlines"))
-    implementation(project(":core:profile"))
-    api(project(":core:identity"))
-    implementation(project(":core:preferences"))
-    implementation(project(":core:database"))
-    implementation(project(":core:network"))
-    api(project(":core:designsystem"))
+    sourceSets {
+        commonMain.dependencies {
+            api(project(":core:domain"))
+            implementation(project(":core:book"))
+            implementation(project(":core:lists"))
+            implementation(project(":core:deadlines"))
+            implementation(project(":core:profile"))
+            api(project(":core:identity"))
+            implementation(project(":core:preferences"))
+            implementation(project(":core:database"))
+            implementation(project(":core:network"))
+            api(project(":core:designsystem"))
 
-    implementation(libs.koin.compose)
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
+            implementation(libs.rhaydus.designsystemImage)
+            implementation(libs.rhaydus.toad)
 
-    implementation(libs.voyager.navigator)
-    implementation(libs.voyager.koin)
+            implementation(libs.koin.compose.multiplatform)
+
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.koin)
+        }
+    }
 }

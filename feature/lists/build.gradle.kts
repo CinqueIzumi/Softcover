@@ -1,17 +1,26 @@
 plugins {
-    id("softcover.android.library")
-    id("softcover.android.compose")
+    id("softcover.kmp.library")
+    id("softcover.kmp.compose")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.feature.lists"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.feature.lists"
+    }
 
-dependencies {
-    api(project(":core:domain"))
-    api(project(":core:lists"))
-    implementation(project(":core:designsystem"))
+    sourceSets {
+        commonMain.dependencies {
+            api(project(":core:domain"))
+            api(project(":core:lists"))
+            implementation(project(":core:designsystem"))
 
-    implementation(libs.voyager.navigator)
-    implementation(libs.voyager.koin)
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
+            implementation(libs.rhaydus.toad)
+
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.koin)
+        }
+    }
 }

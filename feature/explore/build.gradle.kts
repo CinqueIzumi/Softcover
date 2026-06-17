@@ -1,27 +1,42 @@
 plugins {
-    id("softcover.android.library")
-    id("softcover.android.compose")
+    id("softcover.kmp.library")
+    id("softcover.kmp.compose")
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.feature.explore"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.feature.explore"
+    }
 
-dependencies {
-    api(project(":core:domain"))
-    api(project(":core:book"))
-    api(project(":core:identity"))
-    implementation(project(":core:database"))
-    implementation(project(":core:network"))
-    implementation(project(":core:designsystem"))
+    sourceSets {
+        commonMain.dependencies {
+            api(project(":core:domain"))
+            api(project(":core:book"))
+            api(project(":core:identity"))
+            implementation(project(":core:database"))
+            implementation(project(":core:network"))
+            implementation(project(":core:designsystem"))
 
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.dataStore)
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
+            implementation(libs.rhaydus.toad)
 
-    implementation(libs.koin.compose)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.datastore.core)
+            implementation(libs.datastore.core.okio)
+            implementation(libs.okio)
 
-    implementation(libs.voyager.navigator)
-    implementation(libs.voyager.koin)
-    api(libs.voyager.tabNavigator)
+            implementation(libs.koin.compose.multiplatform)
+
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.koin)
+            api(libs.voyager.tabNavigator)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.koin.android)
+        }
+    }
 }
