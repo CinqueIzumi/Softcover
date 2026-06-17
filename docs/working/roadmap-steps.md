@@ -1,8 +1,7 @@
-# ROADMAP_STEPS.md
+# Roadmap Steps
+A sequenced pickup order for the ideas in [roadmap.md](roadmap.md). Each step is a self-contained chunk of work that delivers visible value or unlocks downstream steps. Where a step depends on earlier work, the dependency is named.
 
-A sequenced pickup order for the ideas in [ROADMAP.md](ROADMAP.md). Each step is a self-contained chunk of work that delivers visible value or unlocks downstream steps. Where a step depends on earlier work, the dependency is named.
-
-Items are referenced by their ROADMAP.md tag (e.g. `B.4.1`).
+Items are referenced by their roadmap.md tag (e.g. `B.4.1`).
 
 Scope key: **S** ≈ 1–2 day, **M** ≈ 3–6 day, **L** ≈ 7+ day. Scope is a rough hint, not an estimate.
 
@@ -413,7 +412,7 @@ Phase 0  ──┬──> Phase 1 ──> Phase 2 ──> Phase 3 ──┬─�
 
 ## Maintenance reminders
 
-- Every step that introduces a new component or pattern must update `DESIGN_SYSTEM.md` in the same change (DS maintenance rule, CLAUDE.md).
+- Every step that introduces a new component or pattern must update `../reference/design-system.md` in the same change (DS maintenance rule, CLAUDE.md).
 - Substantial changes (new file, new feature module, layout/state/data flow changes) delegate to the `code-reviewer` agent before reporting work done.
 - Test writing always delegates to the `unit-test-writer` agent.
 - Roadmap docs are uncommitted by convention (per existing project practice); keep them local and update as steps complete.

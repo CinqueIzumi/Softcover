@@ -47,7 +47,7 @@ identity use cases into a module that should only know Compose + design tokens +
 
 What I'd change:
 - Move `MainActivityViewModel`, `ActiveSessionController`, and any other cross-feature app state out
-  of `:core:designsystem` into `:orchestration` (they are orchestration concerns; ARCHITECTURE.md
+  of `:core:designsystem` into `:orchestration` (they are orchestration concerns; ../reference/architecture.md
   already says TOAD is per-screen and `MainActivityViewModel` is the one app-level exception — it
   just lives in the wrong tier).
 - After the move, `:core:designsystem` should depend on **`:core:domain` only** (for the model types
@@ -118,7 +118,7 @@ Two distinct things both live under `:core:` with `*Module` Koin names:
 - **Pure infra** (`:core:network`, `:core:database`, `:core:preferences`, `:core:connectivity`,
   `:core:notification`, `:core:designsystem`).
 
-This is fine, but worth making explicit in MODULE_STRUCTURE_GUIDELINES.md (e.g. a `core:data:*` vs
+This is fine, but worth making explicit in ../reference/module-structure.md (e.g. a `core:data:*` vs
 `core:*` infra split, or just a documented convention), so the next module lands in the right bucket.
 Related: `:core:domain` is a single shared-kernel holding models for *every* area — it grows
 monotonically and couples all areas to one module. Worth a note on when a model is "shared kernel"
@@ -294,7 +294,7 @@ Cost: low-medium.
   Scanner UI living in the design-system module is another "designsystem is the catch-all" symptom
   (relates to M1). Consider a `:core:camera` or keeping it in `:feature:scan`.
 - **Document the wide-but-correct reach**: `:feature:book_detail` depends on 9 core modules. That's
-  legitimate for its size; a one-line note in ARCHITECTURE.md heads off "is this a smell?" reviews.
+  legitimate for its size; a one-line note in ../reference/architecture.md heads off "is this a smell?" reviews.
 - **`SoftcoverWorker` catches `Throwable` then re-throws `CancellationException` inside the block**;
   functionally correct but clearer as ordered catches (`catch (c: CancellationException) { throw c }`
   then `catch (t: Throwable)`). Trivial.

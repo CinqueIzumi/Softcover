@@ -1,10 +1,10 @@
 ---
 name: Style conventions
-description: Key Kotlin/Compose style rules from CODE_STYLE_GUIDE.md for Softcover, plus the deterministic style-check to run before signing off on a review
+description: Key Kotlin/Compose style rules from docs/reference/code-style.md for Softcover, plus the deterministic style-check to run before signing off on a review
 type: feedback
 ---
 
-From CODE_STYLE_GUIDE.md (read on every review):
+From docs/reference/code-style.md (read on every review):
 
 - Trailing commas required on ALL multi-argument function declarations and call sites, including the last argument.
 - Multi-argument calls/declarations/instantiations break one-per-line as soon as there are 2+ args — even if they fit on one line.
@@ -17,7 +17,7 @@ From CODE_STYLE_GUIDE.md (read on every review):
 - Guard clauses: blank line after extraction, blank line between each guard clause, blank line after the last guard clause.
 - `.not()` for boolean negation, never `!`.
 
-**Why:** CODE_STYLE_GUIDE.md is the canonical style source. Style violations — especially multi-arg-on-one-line — are the findings the user pushes back on most.
+**Why:** docs/reference/code-style.md is the canonical style source. Style violations — especially multi-arg-on-one-line — are the findings the user pushes back on most.
 
 **How to apply:** Sweep every changed file, not just the changed lines.
 

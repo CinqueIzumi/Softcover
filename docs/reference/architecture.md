@@ -1,6 +1,6 @@
 # Architecture
 
-Clean Architecture layering, the core/feature/orchestration tiers, the TOAD pattern, DI, navigation, and dispatchers are governed by the foundation [`docs/rhaydus/0.2.0/architecture.md`](docs/rhaydus/0.2.0/architecture.md) and [`docs/rhaydus/0.2.0/toad-architecture.md`](docs/rhaydus/0.2.0/toad-architecture.md). Read those first — they are the source of truth for the two axes, the layer rules, placing a new type, the generic TOAD framework + per-feature boilerplate, Koin wiring, the `AppNavigator` contract, and the `AppDispatchers` abstraction.
+Clean Architecture layering, the core/feature/orchestration tiers, the TOAD pattern, DI, navigation, and dispatchers are governed by the foundation [`docs/rhaydus/0.2.0/architecture.md`](../rhaydus/0.2.0/architecture.md) and [`docs/rhaydus/0.2.0/toad-architecture.md`](../rhaydus/0.2.0/toad-architecture.md). Read those first — they are the source of truth for the two axes, the layer rules, placing a new type, the generic TOAD framework + per-feature boilerplate, Koin wiring, the `AppNavigator` contract, and the `AppDispatchers` abstraction.
 
 This file keeps only Softcover's concrete deltas.
 
@@ -11,7 +11,7 @@ Softcover is a Kotlin Multiplatform / Compose Multiplatform client for [Hardcove
 The app is a **multi-module Gradle build**. Modules depend only on lower tiers
 (`:app → :orchestration → :feature:* → :core:*`). The tier rules, the authoritative full module
 roster, and build-setup conventions live in
-[MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) — consult it rather than duplicating
+[module-structure.md](module-structure.md) — consult it rather than duplicating
 the roster here. Modules are Kotlin Multiplatform: shared source lives under
 `<module>/src/commonMain/kotlin/nl/rhaydus/softcover/…` with platform source sets
 (`androidMain` / `iosMain` / `jvmMain` / `mobileMain`) for the platform seams.
@@ -29,7 +29,7 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 ## TOAD — Softcover-specific notes
 
 The generic TOAD framework, the five generic parameters, and the per-feature boilerplate are covered
-by [`toad-architecture.md`](docs/rhaydus/0.2.0/toad-architecture.md). Softcover deltas:
+by [`toad-architecture.md`](../rhaydus/0.2.0/toad-architecture.md). Softcover deltas:
 
 - **TOAD is per-Voyager-screen only.** `MainActivityViewModel` is a plain `ViewModel`, not a TOAD
   `ScreenModel`. It lives in `core:designsystem` (`core/presentation/`).
@@ -60,5 +60,5 @@ by [`toad-architecture.md`](docs/rhaydus/0.2.0/toad-architecture.md). Softcover 
 
 - **Room**: relational data (books, user books, editions) with migration support. The Room database,
   migrations, and **all** persisted entities + DAOs live in `:core:database` (not in the feature whose
-  data source uses them — see the vertical-slice rule in MODULE_STRUCTURE_GUIDELINES.md).
+  data source uses them — see the vertical-slice rule in module-structure.md).
 - **DataStore**: simple key-value preferences (app settings, search history).

@@ -1,8 +1,7 @@
-# ROADMAP.md
+# Roadmap
+A long-form catalogue of upgrades for Softcover — split into *look & feel* (visual, motion, haptics, decoration) and *features* (new data, screens, expansions). This is a brainstorming surface, not a plan: items are not ordered or scoped here. The sequenced pickup order lives in [roadmap-steps.md](roadmap-steps.md).
 
-A long-form catalogue of upgrades for Softcover — split into *look & feel* (visual, motion, haptics, decoration) and *features* (new data, screens, expansions). This is a brainstorming surface, not a plan: items are not ordered or scoped here. The sequenced pickup order lives in [ROADMAP_STEPS.md](ROADMAP_STEPS.md).
-
-> Style note: every entry below is meant to fit the editorial voice in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md). Where an idea pulls toward "Material dashboard" rather than "editorial spread", that's flagged. Anything brand-new that adds a foundation, component, or pattern must update `DESIGN_SYSTEM.md` in the same change (per the maintenance rule).
+> Style note: every entry below is meant to fit the editorial voice in [design-system.md](../reference/design-system.md). Where an idea pulls toward "Material dashboard" rather than "editorial spread", that's flagged. Anything brand-new that adds a foundation, component, or pattern must update `../reference/design-system.md` in the same change (per the maintenance rule).
 
 ---
 

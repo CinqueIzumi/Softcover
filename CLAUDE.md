@@ -25,22 +25,22 @@ No ktlint or detekt is configured. The project uses `kotlin.code.style=official`
 
 ## Design System
 
-The brand-agnostic design skeleton (theme/typography plumbing, layout primitives, the shared component catalog, the editorial role contract) is governed by the foundation [`docs/rhaydus/0.2.0/design-system-foundations.md`](docs/rhaydus/0.2.0/design-system-foundations.md). [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) is the source of truth for Softcover's brand layered on top — color roles, editorial typography values, brand components, patterns, decision rules. Consult both before designing or modifying any UI surface.
+The brand-agnostic design skeleton (theme/typography plumbing, layout primitives, the shared component catalog, the editorial role contract) is governed by the foundation [`docs/rhaydus/0.2.0/design-system-foundations.md`](docs/rhaydus/0.2.0/design-system-foundations.md). [docs/reference/design-system.md](docs/reference/design-system.md) is the source of truth for Softcover's brand layered on top — color roles, editorial typography values, brand components, patterns, decision rules. Consult both before designing or modifying any UI surface.
 
-**Maintenance rule (enforced by review).** Any change that introduces, retires, or alters a foundation, component, or pattern in the design system MUST update `DESIGN_SYSTEM.md` in the same change. The `code-reviewer` agent treats a design-system change without a corresponding doc update as a blocker. Examples that require a doc update: a new shared component under `core/presentation/component/`, a new editorial typography role, a new color role usage, a new layout pattern that other screens should adopt, retirement or renaming of any of the above. Localized tweaks to a single screen that don't change the system itself do not require an update.
+**Maintenance rule (enforced by review).** Any change that introduces, retires, or alters a foundation, component, or pattern in the design system MUST update `docs/reference/design-system.md` in the same change. The `code-reviewer` agent treats a design-system change without a corresponding doc update as a blocker. Examples that require a doc update: a new shared component under `core/presentation/component/`, a new editorial typography role, a new color role usage, a new layout pattern that other screens should adopt, retirement or renaming of any of the above. Localized tweaks to a single screen that don't change the system itself do not require an update.
 
 ## Code Style
 
-The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.2.0/code-style.md`](docs/rhaydus/0.2.0/code-style.md) — the source of truth for naming, layout, and whitespace. [CODE_STYLE_GUIDE.md](CODE_STYLE_GUIDE.md) keeps only Softcover-specific deltas (the Apollo/AppLog error-handling bindings). Read both before writing or modifying Kotlin code.
+The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.2.0/code-style.md`](docs/rhaydus/0.2.0/code-style.md) — the source of truth for naming, layout, and whitespace. [docs/reference/code-style.md](docs/reference/code-style.md) keeps only Softcover-specific deltas (the Apollo/AppLog error-handling bindings). Read both before writing or modifying Kotlin code.
 
 The mechanical style rules are enforced by tooling, not manual vigilance — for every developer, with zero setup, via the Gradle `check` lifecycle (so CI gates on them too):
 
 - **The foundation ktlint ruleset** (`nl.rhaydus:ktlint-rules`) **auto-fixes and gates** the mechanizable layout rules. Run `./gradlew ktlintFormat` to auto-fix, `./gradlew ktlintCheck` to gate (also run by `check`). The rules: multi-arg one-per-line wrapping (2+ args/params, even when they fit — exempting collection factories, `Modifier.…` chains, trailing-lambda calls), trailing comma on multi-line lists, blank line after `super.*()` / `AppLog.e(...)`, `// region`/`// endregion` flush, no blank line after `{` / before `}`, blank line between sibling composables, and boolean `!` → `.not()` (gate-only; fix by hand).
 - **The remaining greppable rules** — inline fully-qualified references, one-type-per-file, project-import ordering — are flagged by `scripts/style-check.sh` (run `./gradlew styleCheck`, or pass files). Examine each candidate; the advisory recipes have documented false positives.
 
-The subjective rules no tool can mechanize — blank line between sibling composables (incl. `Spacer`), paragraph spacing around multi-line constructs, an `AppLog.e(...)` log as its own paragraph, reserved fixed height for optional card rows — live in `CODE_STYLE_GUIDE.md` and are caught in review.
+The subjective rules no tool can mechanize — blank line between sibling composables (incl. `Spacer`), paragraph spacing around multi-line constructs, an `AppLog.e(...)` log as its own paragraph, reserved fixed height for optional card rows — live in `docs/reference/code-style.md` and are caught in review.
 
-**For substantial Kotlin changes, delegate to the `code-reviewer` agent before reporting work done.** "Substantial" = a new file, a new feature module, a change spanning multiple files, or any change touching layout/state/data flow. The reviewer audits against the full current `CODE_STYLE_GUIDE.md` and catches both new violations and pre-existing ones in the touched files (per the on-touch compliance policy). Run it after the build succeeds and before the wrap-up message.
+**For substantial Kotlin changes, delegate to the `code-reviewer` agent before reporting work done.** "Substantial" = a new file, a new feature module, a change spanning multiple files, or any change touching layout/state/data flow. The reviewer audits against the full current `docs/reference/code-style.md` and catches both new violations and pre-existing ones in the touched files (per the on-touch compliance policy). Run it after the build succeeds and before the wrap-up message.
 
 ## Test Writing
 
@@ -62,9 +62,9 @@ The agent is required to run the tests after writing them. Prefer narrow filters
 
 ## Architecture
 
-Clean Architecture layering, DI, navigation, and the TOAD framework are governed by the foundation [`docs/rhaydus/0.2.0/architecture.md`](docs/rhaydus/0.2.0/architecture.md) and [`toad-architecture.md`](docs/rhaydus/0.2.0/toad-architecture.md) — the source of truth for the generic signatures, per-feature boilerplate, and Koin wiring. [ARCHITECTURE.md](ARCHITECTURE.md) keeps Softcover's deltas (the Apollo network layer, Room storage, the concrete module overview, app-specific TOAD notes). Consult both before adding a feature module, modifying a ScreenModel / Action / Collector, or changing data flow between layers.
+Clean Architecture layering, DI, navigation, and the TOAD framework are governed by the foundation [`docs/rhaydus/0.2.0/architecture.md`](docs/rhaydus/0.2.0/architecture.md) and [`toad-architecture.md`](docs/rhaydus/0.2.0/toad-architecture.md) — the source of truth for the generic signatures, per-feature boilerplate, and Koin wiring. [docs/reference/architecture.md](docs/reference/architecture.md) keeps Softcover's deltas (the Apollo network layer, Room storage, the concrete module overview, app-specific TOAD notes). Consult both before adding a feature module, modifying a ScreenModel / Action / Collector, or changing data flow between layers.
 
-The tier model (`core`/`feature`/orchestration), allowed dependency directions, and where a new type/screen/use case belongs are governed by that same foundation architecture doc; [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) keeps Softcover's concrete module roster and `softcover.*` build-setup conventions. Consult it before adding a module, deciding shared-vs-feature-local, or wiring a cross-feature dependency.
+The tier model (`core`/`feature`/orchestration), allowed dependency directions, and where a new type/screen/use case belongs are governed by that same foundation architecture doc; [docs/reference/module-structure.md](docs/reference/module-structure.md) keeps Softcover's concrete module roster and `softcover.*` build-setup conventions. Consult it before adding a module, deciding shared-vs-feature-local, or wiring a cross-feature dependency.
 
 The app follows **Clean Architecture** with a custom **TOAD** state management framework. It is a multi-module Gradle build: `:app` (application shell) → `:orchestration` (nav host + cross-feature use cases) → `:feature:*` → `:core:*`.
 
@@ -83,7 +83,7 @@ All versions are centralized in `gradle/libs.versions.toml`. Reference via versi
 
 ## Roadmap
 
-The redesign roadmap lives in [ROADMAP.md](ROADMAP.md); the sequenced pickup order lives in [ROADMAP_STEPS.md](ROADMAP_STEPS.md). When a step in `ROADMAP_STEPS.md` is finished, **delete it from the file in the same commit** — do not renumber the remaining steps (gaps are intentional so references in commits and docs stay valid). The deletion is part of the step, not a follow-up.
+The redesign roadmap lives in [docs/working/roadmap.md](docs/working/roadmap.md); the sequenced pickup order lives in [docs/working/roadmap-steps.md](docs/working/roadmap-steps.md). When a step in `docs/working/roadmap-steps.md` is finished, **delete it from the file in the same commit** — do not renumber the remaining steps (gaps are intentional so references in commits and docs stay valid). The deletion is part of the step, not a follow-up.
 
 <!-- rhaydus:start -->
 ## Rhaydus foundation (managed by rhaydus-adopt - do not hand-edit)
@@ -92,11 +92,11 @@ This project builds on the **nl.rhaydus foundation** (v0.2.0, from Maven Central
 
 - **Foundation libraries (0.2.0):** `nl.rhaydus:toad`, `core-ui`, `designsystem-core`, `designsystem-editorial`, `designsystem-image`, `ktlint-rules`.
 - **Foundation conventions docs** (vendored, version-pinned at [`docs/rhaydus/0.2.0/`](docs/rhaydus/0.2.0)): architecture, toad-architecture, code-style, design-system-foundations, CAPABILITIES. These are the source of truth for the shared layering, TOAD pattern, code style, and design system; this app keeps only its own deltas (brand tokens, Apollo/Room, platform set).
-- **This app's design system (brand):** [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md).
+- **This app's design system (brand):** [`docs/reference/design-system.md`](docs/reference/design-system.md).
 
 **How to develop here:**
 - New feature / screen **logic** (state, actions, use cases, data) → the **rhaydus-logic** agent.
-- New feature / screen **UI** (Compose render, design system) → the **rhaydus-ui** agent (it reads the foundation design system + `DESIGN_SYSTEM.md`).
+- New feature / screen **UI** (Compose render, design system) → the **rhaydus-ui** agent (it reads the foundation design system + `docs/reference/design-system.md`).
 - A logic-only or UI-only change uses just that one agent; a full new screen goes logic → UI.
 - Review → **code-reviewer**. Tests → **unit-test-writer**. Style gates → the **style-check** skill.
 - **Reuse-first:** check the capabilities index before hand-rolling a component, modifier, or util.

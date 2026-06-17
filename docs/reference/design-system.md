@@ -1,5 +1,4 @@
-# DESIGN_SYSTEM.md
-
+# Design System
 The visual and interaction language for Softcover. This document is purely descriptive — it does not point at code. When a screen is being designed or redesigned, a contributor should be able to read this and know how the surface should look and behave without consulting other screens.
 
 > **Maintenance rule.** Any change that introduces, retires, or alters a foundation, component, or pattern in this system must update this file in the same change. If the doc and the code disagree, the code is wrong, the doc is wrong, or both — none of those is acceptable to merge.

@@ -159,7 +159,7 @@ These replace what was previously vendored in the app — the local TOAD runtime
 
 ## Architecture
 
-Softcover follows **Clean Architecture** as a multi-module Gradle build with a strict tier DAG: `:app` (platform shell) → `:orchestration` (nav host + cross-feature use cases) → `:feature:*` → `:core:*`. A feature module never depends on a sibling feature; the boundary is enforced at build time by a custom `checkModuleGraph` gate. The full layering and the TOAD state-management framework are documented in [ARCHITECTURE.md](ARCHITECTURE.md) and [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md).
+Softcover follows **Clean Architecture** as a multi-module Gradle build with a strict tier DAG: `:app` (platform shell) → `:orchestration` (nav host + cross-feature use cases) → `:feature:*` → `:core:*`. A feature module never depends on a sibling feature; the boundary is enforced at build time by a custom `checkModuleGraph` gate. The full layering and the TOAD state-management framework are documented in [docs/reference/architecture.md](docs/reference/architecture.md) and [docs/reference/module-structure.md](docs/reference/module-structure.md).
 
 ### State flow (TOAD)
 
@@ -235,7 +235,7 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 ## Roadmap
 
-Softcover is being actively redesigned. The high-level direction lives in [ROADMAP.md](ROADMAP.md), and the sequenced, pick-up-next work items live in [ROADMAP_STEPS.md](ROADMAP_STEPS.md) — completed steps are deleted as they land, so the file always reflects what's left.
+Softcover is being actively redesigned. The high-level direction lives in [docs/working/roadmap.md](docs/working/roadmap.md), and the sequenced, pick-up-next work items live in [docs/working/roadmap-steps.md](docs/working/roadmap-steps.md) — completed steps are deleted as they land, so the file always reflects what's left.
 
 ---
 
@@ -243,12 +243,12 @@ Softcover is being actively redesigned. The high-level direction lives in [ROADM
 
 | Document | Purpose |
 |---|---|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Clean Architecture layout and the TOAD state-management framework |
-| [MODULE_STRUCTURE_GUIDELINES.md](MODULE_STRUCTURE_GUIDELINES.md) | Module tiers, allowed dependency directions, and where new code belongs |
-| [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Color roles, editorial typography, layout primitives, components, and patterns |
-| [CODE_STYLE_GUIDE.md](CODE_STYLE_GUIDE.md) | Naming, layout, and whitespace conventions |
+| [docs/reference/architecture.md](docs/reference/architecture.md) | Clean Architecture layout and the TOAD state-management framework |
+| [docs/reference/module-structure.md](docs/reference/module-structure.md) | Module tiers, allowed dependency directions, and where new code belongs |
+| [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
+| [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
 | [docs/rhaydus/0.2.0/](docs/rhaydus/0.2.0/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
-| [ROADMAP.md](ROADMAP.md) | Redesign roadmap and the sequenced step list |
+| [docs/working/roadmap.md](docs/working/roadmap.md) | Redesign roadmap and the sequenced step list |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |
 
 ---

@@ -1,8 +1,7 @@
-# RELEASE_PLAN.md
+# Release Plan
+A release-by-release slicing of [roadmap-steps.md](roadmap-steps.md). Current shipped version is **2.1.0**.
 
-A release-by-release slicing of [ROADMAP_STEPS.md](ROADMAP_STEPS.md). Current shipped version is **2.1.0**.
-
-Each release below mixes a foundational/plumbing step with user-visible features so every drop feels substantial. Step references map directly to `ROADMAP_STEPS.md` — when a step ships, delete it there (per its maintenance rule). This file is the *order* of the steps, not a replacement for them.
+Each release below mixes a foundational/plumbing step with user-visible features so every drop feels substantial. Step references map directly to `roadmap-steps.md` — when a step ships, delete it there (per its maintenance rule). This file is the *order* of the steps, not a replacement for them.
 
 Scope key from steps file: **S** ≈ 1–2 day, **M** ≈ 3–6 day, **L** ≈ 7+ day.
 

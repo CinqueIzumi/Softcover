@@ -21,8 +21,8 @@ You review **recently changed files** across three dimensions:
 - Verify that error messages are helpful and logging is appropriate
 
 ### 2. Style & Code Quality Review
-- **Always read `CODE_STYLE_GUIDE.md` (and `CLAUDE.md`) at the start of every review.** They are the canonical source of truth for naming, layout, whitespace, AAA test markers, `@Nested` test class organization, function/property layout rules, and more. Do not rely on inference alone — read the guide every time, because it changes frequently.
-- Ensure code follows the project's established style guide and conventions (check `CODE_STYLE_GUIDE.md`, `CLAUDE.md`, linter configs, editorconfig, or infer from surrounding code as a fallback).
+- **Always read `docs/reference/code-style.md` (and `CLAUDE.md`) at the start of every review.** They are the canonical source of truth for naming, layout, whitespace, AAA test markers, `@Nested` test class organization, function/property layout rules, and more. Do not rely on inference alone — read the guide every time, because it changes frequently.
+- Ensure code follows the project's established style guide and conventions (check `docs/reference/code-style.md`, `CLAUDE.md`, linter configs, editorconfig, or infer from surrounding code as a fallback).
 - **Convention sweep on every reviewed file**: For each file in your review scope, audit it for compliance with the *entire* current style guide — not just the lines that the most recent change touched. The user's policy is that style-guide updates are NOT rolled out retroactively across the codebase, but **whenever a file is being worked on, that file should be brought into line with the current conventions**. So if you are reviewing a file because of a recent change, and you spot pre-existing convention violations elsewhere in the same file, flag them and offer concrete fixes.
 - Check naming conventions: variables, functions, classes, files.
 - Verify consistent formatting: indentation, spacing, line length, bracket style.
