@@ -2,13 +2,11 @@ package nl.rhaydus.softcover.core.designsystem.presentation.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialExpressiveTheme
-import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import nl.rhaydus.designsystem.theme.RhaydusTheme
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -86,7 +84,6 @@ private val darkScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoftcoverTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -100,17 +97,18 @@ fun SoftcoverTheme(
     )
         ?: if (darkTheme) darkScheme else lightScheme
 
-    MaterialExpressiveTheme(
+    // Delegates the Material 3 Expressive scaffold to the foundation RhaydusTheme (designsystem-core),
+    // supplying Softcover's brand color scheme + typography. The branded editorial scale stays an
+    // app concern, provided here via Softcover's own LocalEditorialTypography.
+    RhaydusTheme(
         colorScheme = colorScheme,
         typography = appTypography(),
-        motionScheme = MotionScheme.expressive(),
-        content = {
-            CompositionLocalProvider(
-                LocalEditorialTypography provides defaultEditorialTypography(),
-                content = content,
-            )
-        },
-    )
+    ) {
+        CompositionLocalProvider(
+            LocalEditorialTypography provides defaultEditorialTypography(),
+            content = content,
+        )
+    }
 }
 
 /**

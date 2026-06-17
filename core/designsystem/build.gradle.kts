@@ -31,6 +31,7 @@ kotlin {
 
             implementation(libs.rhaydus.coreUi)
             implementation(libs.rhaydus.toad)
+            implementation(libs.rhaydus.designsystemCore)
 
             implementation(libs.koin.compose.multiplatform)
 
