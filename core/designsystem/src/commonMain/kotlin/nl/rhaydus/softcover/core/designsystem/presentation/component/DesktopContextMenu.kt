@@ -2,12 +2,6 @@ package nl.rhaydus.softcover.core.designsystem.presentation.component
 
 import androidx.compose.runtime.Composable
 
-/** One entry in a [DesktopContextMenu]. [onClick] runs when the user picks the item. */
-data class DesktopContextMenuItem(
-    val label: String,
-    val onClick: () -> Unit,
-)
-
 /**
  * Wraps a surface in a desktop right-click context menu, inert on touch.
  *
