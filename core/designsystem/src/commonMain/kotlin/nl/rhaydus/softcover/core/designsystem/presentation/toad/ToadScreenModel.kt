@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-abstract class ToadScreenModel<S : UiState, E : UiEvent, D : ActionDependencies, F : Initializer<S, E, D, V>, V : LocalVariables>(
+abstract class ToadScreenModel<S : UiState, E : UiEvent, D : ActionDependencies, F : Collector<S, E, D, V>, V : LocalVariables>(
     initialState: S,
     initialLocalVariables: V,
     private val initializers: List<F>,
