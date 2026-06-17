@@ -5,8 +5,8 @@ import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
+import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.flows.ProfileInitializer
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.toad.ToadScreenModel
@@ -17,8 +17,8 @@ internal class ProfileScreenScreenModel(
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
     dispatchers: AppDispatchers,
-    initializers: List<ProfileInitializer>,
-) : ToadScreenModel<ProfileUiState, ProfileEvent, ProfileDependencies, ProfileInitializer, LocalProfileVariables>(
+    initializers: List<ProfileCollector>,
+) : ToadScreenModel<ProfileUiState, ProfileEvent, ProfileDependencies, ProfileCollector, LocalProfileVariables>(
     initializers = initializers,
     initialState = ProfileUiState(),
     initialLocalVariables = LocalProfileVariables(),

@@ -34,9 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.staggeredEntry
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSearchTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBarAction

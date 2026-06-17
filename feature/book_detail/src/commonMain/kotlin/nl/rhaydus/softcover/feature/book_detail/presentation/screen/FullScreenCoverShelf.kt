@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +20,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil3.request.ImageRequest
-import nl.rhaydus.designsystem.image.RhaydusShimmerImage
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 

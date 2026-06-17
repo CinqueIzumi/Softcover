@@ -31,13 +31,13 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
+import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
+import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
-import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
-import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession

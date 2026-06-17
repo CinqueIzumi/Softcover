@@ -27,10 +27,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 
 /**
  * The manual ISBN-entry form, shared by the mobile scanner (reached via "Enter ISBN manually") and the

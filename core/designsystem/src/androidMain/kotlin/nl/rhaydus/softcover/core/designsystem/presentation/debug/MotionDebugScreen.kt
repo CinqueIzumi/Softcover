@@ -35,12 +35,12 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedStatNumber
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography

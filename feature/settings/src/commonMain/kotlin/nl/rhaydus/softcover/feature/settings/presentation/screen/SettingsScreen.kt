@@ -17,9 +17,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination

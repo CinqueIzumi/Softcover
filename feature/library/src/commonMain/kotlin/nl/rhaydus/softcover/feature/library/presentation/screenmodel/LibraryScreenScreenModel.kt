@@ -26,8 +26,8 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
-import nl.rhaydus.softcover.feature.library.presentation.flows.LibraryInitializer
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ToadScreenModel
@@ -57,8 +57,8 @@ internal class LibraryScreenScreenModel(
     private val reorderListBooksUseCase: ReorderListBooksUseCase,
     private val setListRankedUseCase: SetListRankedUseCase,
     appDispatchers: AppDispatchers,
-    flows: List<LibraryInitializer>,
-) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryInitializer, LibraryLocalVariables>(
+    flows: List<LibraryCollector>,
+) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryCollector, LibraryLocalVariables>(
     initialState = LibraryUiState(),
     initialLocalVariables = LibraryLocalVariables(),
     initializers = flows,

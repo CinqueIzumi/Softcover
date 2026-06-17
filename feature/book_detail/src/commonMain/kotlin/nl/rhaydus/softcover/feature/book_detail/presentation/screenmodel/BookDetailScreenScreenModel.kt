@@ -28,8 +28,8 @@ import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCa
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.flows.BookDetailInitializer
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ToadScreenModel
@@ -61,9 +61,9 @@ internal class BookDetailScreenScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val getUserTagsUseCase: GetUserTagsUseCase,
     private val saveUserTagsUseCase: SaveUserTagsUseCase,
-    flows: List<BookDetailInitializer>,
+    flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
-) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailInitializer, BookDetailLocalVariables>(
+) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailCollector, BookDetailLocalVariables>(
     initialState = BookDetailUiState(
         initialCover = initialCover,
         scannedEditionId = initialCover?.scannedEditionId,

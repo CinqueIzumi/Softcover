@@ -15,8 +15,8 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDism
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
+import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollector
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
-import nl.rhaydus.softcover.feature.reading.presentation.flows.ReadingInitializer
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ToadScreenModel
@@ -37,8 +37,8 @@ internal class ReadingScreenScreenModel(
     private val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     appDispatchers: AppDispatchers,
-    flows: List<ReadingInitializer>,
-) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingInitializer, ReadingLocalVariables>(
+    flows: List<ReadingCollector>,
+) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingCollector, ReadingLocalVariables>(
     initialState = ReadingScreenUiState(),
     initialLocalVariables = ReadingLocalVariables(),
     initializers = flows,
