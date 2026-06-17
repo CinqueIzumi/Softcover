@@ -19,12 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetForm
+import nl.rhaydus.designsystem.model.ModalSheetForm
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ExpandableFlowRow
-import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetForm
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ModalSheetForm
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters

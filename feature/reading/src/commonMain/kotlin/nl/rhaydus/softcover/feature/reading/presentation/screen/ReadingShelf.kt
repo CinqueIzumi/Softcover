@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
-import nl.rhaydus.designsystem.haptics.Haptics
+import nl.rhaydus.designsystem.component.mutationAnimated
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
@@ -68,6 +68,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
+import nl.rhaydus.designsystem.component.staggeredEntry
+import nl.rhaydus.designsystem.haptics.Haptics
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
@@ -80,11 +84,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImag
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
-import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize

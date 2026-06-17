@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,8 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSearchField
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader

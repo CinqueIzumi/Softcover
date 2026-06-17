@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
-import nl.rhaydus.designsystem.modifier.conditional
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,9 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton

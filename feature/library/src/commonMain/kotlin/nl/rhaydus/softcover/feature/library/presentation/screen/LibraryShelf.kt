@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
-import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.component.DesktopContextMenu
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -64,6 +64,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
+import nl.rhaydus.designsystem.component.DesktopContextMenuItem
+import nl.rhaydus.designsystem.component.mutationAnimated
+import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
+import nl.rhaydus.designsystem.component.staggeredEntry
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.modifier.hoverHighlight
@@ -72,14 +78,8 @@ import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopContextMenu
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopContextMenuItem
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.staggeredEntry
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle

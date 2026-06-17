@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen
 
+import nl.rhaydus.designsystem.component.DesktopBackStrip
+import nl.rhaydus.designsystem.modifier.shimmer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -24,10 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.shimmer
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopBackStrip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
@@ -65,7 +67,13 @@ internal actual fun ProfileScreenLayout(
         color = MaterialTheme.colorScheme.background,
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            DesktopBackStrip(onNavigateBack = onNavigateUp)
+            DesktopBackStrip(
+                onNavigateBack = onNavigateUp,
+                backIcon = drawableIconResource(
+                    contentDescription = "Navigate back icon",
+                    icon = SoftcoverIcon.ArrowBack,
+                ),
+            )
 
             BoxWithConstraints(
                 modifier = Modifier

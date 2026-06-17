@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.haptics.rememberHaptics
-import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -83,6 +83,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
@@ -93,7 +94,6 @@ import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DropCapText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership

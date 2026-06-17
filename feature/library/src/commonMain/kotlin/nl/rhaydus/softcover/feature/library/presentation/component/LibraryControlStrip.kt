@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.component
 
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

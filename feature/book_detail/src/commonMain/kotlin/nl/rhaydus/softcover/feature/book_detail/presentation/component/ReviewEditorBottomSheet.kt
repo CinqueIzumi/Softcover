@@ -40,7 +40,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize

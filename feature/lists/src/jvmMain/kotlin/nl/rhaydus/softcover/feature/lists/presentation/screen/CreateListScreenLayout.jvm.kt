@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.lists.presentation.screen
 
+import nl.rhaydus.designsystem.component.DesktopBackStrip
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopBackStrip
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 
@@ -39,7 +41,13 @@ internal actual fun CreateListScreenLayout(
         color = MaterialTheme.colorScheme.background,
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            DesktopBackStrip(onNavigateBack = onNavigateBack)
+            DesktopBackStrip(
+                onNavigateBack = onNavigateBack,
+                backIcon = drawableIconResource(
+                    contentDescription = "Navigate back icon",
+                    icon = SoftcoverIcon.ArrowBack,
+                ),
+            )
 
             Box(
                 modifier = Modifier

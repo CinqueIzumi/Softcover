@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
-import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle

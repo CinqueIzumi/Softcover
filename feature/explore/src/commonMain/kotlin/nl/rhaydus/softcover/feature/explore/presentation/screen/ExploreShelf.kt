@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
-import nl.rhaydus.designsystem.modifier.noRippleClickable
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,17 +36,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
+import nl.rhaydus.designsystem.component.mutationAnimated
+import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.shimmer
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.mutationAnimated
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle

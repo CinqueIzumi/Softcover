@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -46,10 +48,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.model.ModalSheetForm
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ModalSheetForm
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme

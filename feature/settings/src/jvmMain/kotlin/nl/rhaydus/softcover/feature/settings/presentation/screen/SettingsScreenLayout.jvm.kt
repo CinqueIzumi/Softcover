@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
-import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -34,9 +34,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopTooltip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource

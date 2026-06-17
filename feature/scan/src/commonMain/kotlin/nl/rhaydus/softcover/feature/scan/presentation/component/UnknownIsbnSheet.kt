@@ -16,9 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
