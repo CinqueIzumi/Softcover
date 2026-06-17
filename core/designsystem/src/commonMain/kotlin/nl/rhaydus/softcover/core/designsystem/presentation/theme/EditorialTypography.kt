@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.designsystem.editorial.EditorialTypography as FoundationEditorialTypography
 
 private const val TABULAR_NUMS = "tnum"
 
@@ -141,3 +142,37 @@ val MaterialTheme.editorialTypography: EditorialTypography
     @Composable
     @ReadOnlyComposable
     get() = LocalEditorialTypography.current
+
+/**
+ * Maps Softcover's 15-role [EditorialTypography] onto the 9-role
+ * [nl.rhaydus.designsystem.editorial.EditorialTypography] consumed by the foundation editorial
+ * components. Wired once in [SoftcoverTheme] via [nl.rhaydus.designsystem.editorial.EditorialTheme];
+ * the richer Softcover scale remains separately available through [MaterialTheme.editorialTypography].
+ *
+ * Role mapping:
+ * - foundation.eyebrow       ← Softcover.eyebrow
+ * - foundation.eyebrowSmall  ← Softcover.eyebrowSmall
+ * - foundation.pageTitle     ← Softcover.pageTitle
+ * - foundation.headline      ← Softcover.headlineMedium  (what EditorialSectionHeader rendered before)
+ * - foundation.title         ← Softcover.titleLarge
+ * - foundation.body          ← Softcover.body
+ * - foundation.bodySmall     ← Softcover.bodySmall
+ * - foundation.statLarge     ← Softcover.statLarge
+ * - foundation.statHero      ← Softcover.statHero
+ */
+@Composable
+internal fun softcoverFoundationEditorialTypography(): FoundationEditorialTypography {
+    val sc = defaultEditorialTypography()
+
+    return FoundationEditorialTypography(
+        eyebrow = sc.eyebrow,
+        eyebrowSmall = sc.eyebrowSmall,
+        pageTitle = sc.pageTitle,
+        headline = sc.headlineMedium,
+        title = sc.titleLarge,
+        body = sc.body,
+        bodySmall = sc.bodySmall,
+        statLarge = sc.statLarge,
+        statHero = sc.statHero,
+    )
+}

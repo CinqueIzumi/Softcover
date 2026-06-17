@@ -6,6 +6,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import nl.rhaydus.designsystem.editorial.EditorialTheme
 import nl.rhaydus.designsystem.theme.RhaydusTheme
 
 private val lightScheme = lightColorScheme(
@@ -100,14 +101,19 @@ fun SoftcoverTheme(
     // Delegates the Material 3 Expressive scaffold to the foundation RhaydusTheme (designsystem-core),
     // supplying Softcover's brand color scheme + typography. The branded editorial scale stays an
     // app concern, provided here via Softcover's own LocalEditorialTypography.
+    // EditorialTheme (designsystem-editorial) nests inside RhaydusTheme so that foundation editorial
+    // components resolve the shared 9-role contract; Softcover's richer 15-role scale is provided in
+    // parallel so app-specific screens that read editorialTypography directly are unaffected.
     RhaydusTheme(
         colorScheme = colorScheme,
         typography = appTypography(),
     ) {
-        CompositionLocalProvider(
-            LocalEditorialTypography provides defaultEditorialTypography(),
-            content = content,
-        )
+        EditorialTheme(editorialTypography = softcoverFoundationEditorialTypography()) {
+            CompositionLocalProvider(
+                LocalEditorialTypography provides defaultEditorialTypography(),
+                content = content,
+            )
+        }
     }
 }
 

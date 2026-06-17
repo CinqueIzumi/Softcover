@@ -37,8 +37,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSearchField
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
+import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -96,6 +96,14 @@ internal actual fun ExploreScreenLayout(
             onClearClick = {
                 runAction(OnQueryChangeAction(newQuery = ""))
             },
+            searchIcon = drawableIconResource(
+                icon = SoftcoverIcon.Search,
+                contentDescription = "Search",
+            ),
+            clearIcon = drawableIconResource(
+                icon = SoftcoverIcon.Close,
+                contentDescription = "Clear search",
+            ),
             placeholder = "Search books, authors…",
         )
 

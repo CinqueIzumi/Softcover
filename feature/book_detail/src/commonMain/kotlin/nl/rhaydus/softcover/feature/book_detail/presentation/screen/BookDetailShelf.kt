@@ -97,7 +97,7 @@ import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DropCapText
+import nl.rhaydus.designsystem.editorial.component.DropCapText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
@@ -1648,6 +1648,7 @@ internal fun AboutSection(state: BookDetailUiState) {
                             ),
                             bodyColor = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.fillMaxWidth(),
+                            dropCapFontFamily = displayFontFamily(),
                         )
                     } else if (headline.isBlank()) {
                         Text(

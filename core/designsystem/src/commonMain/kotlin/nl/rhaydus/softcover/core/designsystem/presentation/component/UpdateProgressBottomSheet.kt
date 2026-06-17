@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.core.designsystem.presentation.component
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
+import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -43,11 +45,13 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
@@ -586,6 +590,24 @@ private fun TimeColon(textStyle: TextStyle) {
         style = textStyle,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+}
+
+/** Approximate width for a hero stat field of [charCount] glyphs in [textStyle]. */
+@Composable
+private fun computeHeroStatFieldWidth(
+    textStyle: TextStyle,
+    charCount: Int,
+): Dp {
+    val density = LocalDensity.current
+
+    return remember(density, textStyle, charCount) {
+        with(density) {
+            val fontSizeInPx = textStyle.fontSize.toPx()
+            val padding = 16.dp.toPx()
+
+            ((charCount * fontSizeInPx * 0.62f) + padding).toDp()
+        }
+    }
 }
 
 @Composable

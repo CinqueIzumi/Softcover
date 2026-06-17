@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
