@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen
 
 import nl.rhaydus.designsystem.component.DesktopBackStrip
-import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -26,11 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
@@ -116,7 +116,7 @@ private fun TwoColumnProfile(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Log out",
                 onClick = { runAction(OnLogOutClickAction()) },
                 style = ButtonStyle.TONAL,
@@ -189,7 +189,7 @@ private fun SingleColumnProfile(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Log out",
                 onClick = { runAction(OnLogOutClickAction()) },
                 style = ButtonStyle.TONAL,

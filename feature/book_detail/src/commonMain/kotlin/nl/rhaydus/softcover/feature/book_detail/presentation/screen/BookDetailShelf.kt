@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import nl.rhaydus.designsystem.component.DesktopTooltip
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -83,7 +83,10 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
+import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
@@ -100,7 +103,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembers
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
@@ -108,8 +110,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedB
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -1574,7 +1574,7 @@ internal fun ScanEditionUpdateBanner(
                         )
                     }
                 } else {
-                    SoftcoverButton(
+                    RhaydusButton(
                         label = "Update edition",
                         style = ButtonStyle.TONAL,
                         size = ButtonSize.S,

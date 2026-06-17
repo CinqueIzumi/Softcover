@@ -29,13 +29,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 
@@ -158,7 +158,7 @@ internal fun TagEditorBottomSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Add tag",
                 onClick = {
                     onAddTag(
@@ -173,7 +173,7 @@ internal fun TagEditorBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Done",
                 onClick = dismiss,
                 style = ButtonStyle.FILLED,

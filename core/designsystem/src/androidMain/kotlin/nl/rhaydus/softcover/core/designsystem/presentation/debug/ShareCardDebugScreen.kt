@@ -28,11 +28,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.share.BookShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.CapturableShareCard
 import nl.rhaydus.softcover.core.designsystem.presentation.share.QuoteShareContent
@@ -218,7 +218,7 @@ object ShareCardDebugScreen : Screen {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Save to gallery",
                 style = ButtonStyle.TONAL,
                 size = ButtonSize.S,

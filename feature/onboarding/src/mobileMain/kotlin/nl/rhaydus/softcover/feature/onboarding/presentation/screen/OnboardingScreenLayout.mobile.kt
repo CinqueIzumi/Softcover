@@ -24,13 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverLoadingSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.illustration.SoftcoverIllustration
 import nl.rhaydus.softcover.core.designsystem.presentation.illustration.painter
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
@@ -164,7 +164,7 @@ private fun ColumnScope.IntroScreenPage(
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        SoftcoverButton(
+        RhaydusButton(
             label = buttonLabel,
             style = ButtonStyle.FILLED,
             size = ButtonSize.M,

@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -70,7 +70,7 @@ internal fun UnknownIsbnSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = if (isAdding) "Adding to Hardcover" else "Add to Hardcover",
                 style = ButtonStyle.FILLED,
                 size = ButtonSize.M,
@@ -81,7 +81,7 @@ internal fun UnknownIsbnSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Cancel",
                 style = ButtonStyle.TEXT,
                 size = ButtonSize.M,

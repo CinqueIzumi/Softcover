@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
-import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.component.RhaydusIconToggleButton
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -19,8 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverIconToggleButton
-import nl.rhaydus.softcover.core.designsystem.presentation.model.IconToggleButtonStyle
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.model.IconToggleButtonStyle
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -61,7 +61,7 @@ internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
             val iconPainter = item.tab.options.icon ?: return@forEach
 
             Box {
-                SoftcoverIconToggleButton(
+                RhaydusIconToggleButton(
                     checked = item.selected,
                     onCheckedChange = { tabNavigator.current = item.tab },
                     icon = RhaydusIconResource.Custom(

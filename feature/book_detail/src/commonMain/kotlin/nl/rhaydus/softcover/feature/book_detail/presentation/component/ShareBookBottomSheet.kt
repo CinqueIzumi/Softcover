@@ -34,10 +34,10 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.share.BookShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.CapturableShareCard
 import nl.rhaydus.softcover.core.designsystem.presentation.share.SaveOutcome
@@ -141,7 +141,7 @@ internal fun ShareBookBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                SoftcoverButton(
+                RhaydusButton(
                     label = "Cancel",
                     onClick = dismiss,
                     style = ButtonStyle.OUTLINED,
@@ -150,10 +150,10 @@ internal fun ShareBookBottomSheet(
                     enabled = isBusy.not(),
                 )
 
-                SoftcoverButton(
+                RhaydusButton(
                     label = if (isSharing) "Sharing…" else "Share",
                     onClick = {
-                        if (isBusy) return@SoftcoverButton
+                        if (isBusy) return@RhaydusButton
 
                         isSharing = true
 
@@ -181,10 +181,10 @@ internal fun ShareBookBottomSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = if (isSavingToGallery) "Saving to gallery…" else "Save to gallery",
                 onClick = {
-                    if (isBusy) return@SoftcoverButton
+                    if (isBusy) return@RhaydusButton
 
                     isSavingToGallery = true
 

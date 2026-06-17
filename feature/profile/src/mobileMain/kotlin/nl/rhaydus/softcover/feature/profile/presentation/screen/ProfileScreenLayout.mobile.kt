@@ -23,12 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -75,7 +75,7 @@ internal actual fun ProfileScreenLayout(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Log out",
                 onClick = { runAction(OnLogOutClickAction()) },
                 style = ButtonStyle.TONAL,

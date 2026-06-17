@@ -16,11 +16,11 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesContent
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
@@ -139,7 +139,7 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
     Spacer(modifier = Modifier.height(16.dp))
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        SoftcoverButton(
+        RhaydusButton(
             label = "Simulate update available",
             style = ButtonStyle.TONAL,
             size = ButtonSize.S,
@@ -149,7 +149,7 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        SoftcoverButton(
+        RhaydusButton(
             label = "Simulate downloading",
             style = ButtonStyle.TONAL,
             size = ButtonSize.S,
@@ -159,7 +159,7 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        SoftcoverButton(
+        RhaydusButton(
             label = "Simulate downloaded",
             style = ButtonStyle.TONAL,
             size = ButtonSize.S,
@@ -169,7 +169,7 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        SoftcoverButton(
+        RhaydusButton(
             label = "Simulate failure",
             style = ButtonStyle.TONAL,
             size = ButtonSize.S,
@@ -179,7 +179,7 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        SoftcoverButton(
+        RhaydusButton(
             label = "Reset",
             style = ButtonStyle.TEXT,
             size = ButtonSize.S,

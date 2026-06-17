@@ -22,11 +22,11 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditorialSectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnSubmitAction
@@ -95,7 +95,7 @@ internal fun CreateListForm(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        SoftcoverButton(
+        RhaydusButton(
             label = if (state.isSubmitting) "Creating" else "Create list",
             style = ButtonStyle.FILLED,
             size = ButtonSize.M,

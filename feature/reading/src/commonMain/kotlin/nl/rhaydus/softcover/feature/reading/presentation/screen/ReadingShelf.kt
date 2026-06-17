@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
-import nl.rhaydus.designsystem.component.mutationAnimated
+import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
@@ -68,11 +68,17 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.component.RhaydusSplitButton
+import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.Haptics
 import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.model.RhaydusMenuItem
+import nl.rhaydus.designsystem.model.SplitButtonStyle
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
@@ -81,16 +87,10 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSplitButton
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonSize
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SoftcoverMenuItem
-import nl.rhaydus.softcover.core.designsystem.presentation.model.SplitButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
@@ -523,10 +523,10 @@ internal fun FeaturedBookCard(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                SoftcoverSplitButton(
+                RhaydusSplitButton(
                     checked = dropdownActive,
                     dropDownItems = listOf(
-                        SoftcoverMenuItem(
+                        RhaydusMenuItem(
                             label = "Mark as Read",
                             onClick = {
                                 dropdownActive = false
@@ -554,7 +554,7 @@ internal fun FeaturedBookCard(
                     onTrailingButtonClick = { dropdownActive = it },
                     leadingButtonStyle = SplitButtonStyle.FILLED,
                     size = ButtonSize.M,
-                    fillMaxWidth = true,
+                    stretchToWidth = true,
                 )
 
                 FeaturedSessionButton(book = book)
@@ -584,7 +584,7 @@ private fun FeaturedSessionButton(book: Book) {
         active?.book?.id == book.id -> {
             Spacer(modifier = Modifier.height(10.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Focus mode",
                 style = ButtonStyle.TONAL,
                 size = ButtonSize.M,
@@ -606,7 +606,7 @@ private fun FeaturedSessionButton(book: Book) {
         active == null -> {
             Spacer(modifier = Modifier.height(10.dp))
 
-            SoftcoverButton(
+            RhaydusButton(
                 label = "Start reading session",
                 style = ButtonStyle.TONAL,
                 size = ButtonSize.M,
@@ -760,10 +760,10 @@ internal fun CompactBookEntry(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                SoftcoverSplitButton(
+                RhaydusSplitButton(
                     checked = dropdownActive,
                     dropDownItems = listOf(
-                        SoftcoverMenuItem(
+                        RhaydusMenuItem(
                             label = "Mark as Read",
                             onClick = {
                                 dropdownActive = false

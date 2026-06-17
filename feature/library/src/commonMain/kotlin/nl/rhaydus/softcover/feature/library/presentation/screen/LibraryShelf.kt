@@ -65,6 +65,7 @@ import androidx.compose.ui.window.Dialog
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.designsystem.component.DesktopContextMenuItem
+import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
@@ -72,6 +73,7 @@ import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
@@ -79,10 +81,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBad
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.platformModifierClick
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -1910,14 +1910,14 @@ internal fun BulkRemoveConfirmationDialog(
                         alignment = Alignment.End,
                     ),
                 ) {
-                    SoftcoverButton(
+                    RhaydusButton(
                         label = "Keep",
                         style = ButtonStyle.TEXT,
                         onClick = onDismiss,
                         enabled = inProgress.not(),
                     )
 
-                    SoftcoverButton(
+                    RhaydusButton(
                         label = "Remove",
                         style = ButtonStyle.TEXT,
                         onClick = onConfirm,
