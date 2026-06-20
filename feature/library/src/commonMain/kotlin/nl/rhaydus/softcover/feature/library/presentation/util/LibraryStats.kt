@@ -22,23 +22,24 @@ internal fun formatPageCount(pages: Int): String? = if (pages > 0) {
 }
 
 internal fun Book.finishedYear(): Int? {
-    userBookRead?.finishedAt?.let { finishedAt ->
-        runCatching { LocalDate.parse(finishedAt).year }
-            .getOrNull()
-            ?.let { return it }
-    }
-
-    val updatedAt = userBook?.journals
+    val finishedJournalUpdatedAt = userBook?.journals
         ?.filter { it.event == JournalEventType.StatusFinished.eventName }
         ?.maxByOrNull { it.updatedAt }
-        ?.updatedAt ?: return null
+        ?.updatedAt
 
-    return try {
-        LocalDateTime.parse(updatedAt).year
-    } catch (_: IllegalArgumentException) {
-        null
-    }
+    val candidates = listOfNotNull(
+        userBookRead?.finishedAt,
+        userBook?.lastReadDate,
+        finishedJournalUpdatedAt,
+        userBook?.createdAt,
+    )
+
+    return candidates.firstNotNullOfOrNull { it.toYearOrNull() }
 }
+
+private fun String.toYearOrNull(): Int? =
+    runCatching { LocalDate.parse(this).year }.getOrNull()
+        ?: runCatching { LocalDateTime.parse(this).year }.getOrNull()
 
 internal fun List<Book>.availableFinishedYears(): List<Int> =
     mapNotNull { it.finishedYear() }

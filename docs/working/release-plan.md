@@ -23,7 +23,7 @@ Dependencies are noted only where they cross a release boundary; same-release de
 The first release on the new Kotlin Multiplatform foundation — the public iOS & desktop debut — anchored on a stable fix set. Ships when the fixes are ready, including the two awaiting investigation (logout, lock-screen notif).
 
 - ✅ **Fix (done)** — Gate list fetch on `updated_at`; skip re-fetching a list's contents when its `updated_at` hasn't advanced. *(Gated on a composite signature: `updated_at` + `list_books` count + max(`list_books.updated_at`).)*
-- **Fix** — Finished-date coalesce: `user_book_reads.finished_at ?? user_books.last_read_date ?? user_books.updated_at` (or `created_at` for a less volatile final fallback — *open decision*). Feeds the shipped date-finished sort + Read-tab year filter.
+- ✅ **Fix (done)** — Finished-date coalesce: `user_book_reads.finished_at ?? user_books.last_read_date ?? finished-journal updated_at ?? user_books.created_at`. Same chain in the date-finished sort SQL and the Read-tab year filter; `created_at` chosen as the stable final fallback, and the existing finished-journal signal kept after `last_read_date`.
 - **Fix** — Progress updates reflect immediately in the recently-reading strip (reactive propagation on the progress write).
 - **Fix** — Use the action date (`action_at`) for progress updates so the reading streak is computed from the day the user actually read, not the write timestamp.
 - **Fix** — Retry book-progress (and similar) mutations on server error; drain on startup/reconnect. *Narrow slice of Step 9.7; the 2.12 list-mutation queue infra is reused.*
