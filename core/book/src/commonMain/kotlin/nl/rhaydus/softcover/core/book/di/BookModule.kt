@@ -31,6 +31,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.dao.BookDao
+import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import org.koin.dsl.module
 
 val bookModule = module {
@@ -143,7 +144,10 @@ val bookModule = module {
     }
 
     factory {
-        MarkBookAsReadUseCase(repository = get())
+        MarkBookAsReadUseCase(
+            repository = get(),
+            markReadingActivityTodayUseCase = get(),
+        )
     }
 
     factory {
@@ -151,7 +155,10 @@ val bookModule = module {
     }
 
     factory {
-        UpdateBookProgressUseCase(repository = get())
+        UpdateBookProgressUseCase(
+            repository = get(),
+            markReadingActivityTodayUseCase = get(),
+        )
     }
 
     factory {

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.profile.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -20,6 +21,10 @@ internal class ProfileRepositoryImpl(
 
     override suspend fun cacheUserProfileData(data: UserProfileData) {
         profileLocalDataSource.cacheUserProfileData(data = data)
+    }
+
+    override suspend fun markActiveReadingDate(date: LocalDate) {
+        profileLocalDataSource.markActiveReadingDate(date = date)
     }
 
     override suspend fun clearProfileCache() {
