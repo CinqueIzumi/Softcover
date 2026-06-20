@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.ui.common.AppDispatchers
@@ -103,10 +104,7 @@ class RefreshLibraryUseCaseTest {
             }
 
             coVerify(exactly = 0) {
-                listsRepository.fetchUserLists(
-                    userId = any(),
-                    listIds = any(),
-                )
+                listsRepository.refreshUserLists(userId = any())
             }
         }
     }
@@ -124,8 +122,11 @@ class RefreshLibraryUseCaseTest {
         fun `returns success and calls both booksRepository and listsRepository`() = runTest {
             // ----- Arrange -----
             coEvery {
-                listsRepository.fetchUserLists(userId = 55)
-            } returns emptyList()
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                serverListIds = emptySet(),
+                changedLists = emptyList(),
+            )
 
             // ----- Act -----
             val result = useCase(scope = RefreshScope.All)
@@ -141,7 +142,7 @@ class RefreshLibraryUseCaseTest {
             }
 
             coVerify {
-                listsRepository.fetchUserLists(userId = 55)
+                listsRepository.refreshUserLists(userId = 55)
             }
         }
 
@@ -156,11 +157,14 @@ class RefreshLibraryUseCaseTest {
                 bookId = 20,
                 editionId = 200,
             )
-            val fetchedList = stubBookList(books = listOf(listBook1, listBook2))
+            val changedList = stubBookList(books = listOf(listBook1, listBook2))
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55)
-            } returns listOf(fetchedList)
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                serverListIds = emptySet(),
+                changedLists = listOf(changedList),
+            )
 
             // ----- Act -----
             useCase(scope = RefreshScope.All)
@@ -176,49 +180,59 @@ class RefreshLibraryUseCaseTest {
         }
 
         @Test
-        fun `calls syncBookListMetadata with server list ids`() = runTest {
+        fun `calls syncBookListMetadata with the full server list ids from the result — not just changed list ids`() = runTest {
             // ----- Arrange -----
-            val fetchedList = stubBookList(id = 7)
+            // changedList has id=7; server also knows about ids 8 and 9 (unchanged lists)
+            val changedList = stubBookList(id = 7)
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55)
-            } returns listOf(fetchedList)
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                serverListIds = setOf(7, 8, 9),
+                changedLists = listOf(changedList),
+            )
 
             // ----- Act -----
             useCase(scope = RefreshScope.All)
 
             // ----- Assert -----
             coVerify {
-                listsRepository.syncBookListMetadata(serverListIds = setOf(7))
+                listsRepository.syncBookListMetadata(serverListIds = setOf(7, 8, 9))
             }
         }
 
         @Test
-        fun `calls cacheUserBookLists with the fetched lists`() = runTest {
+        fun `calls cacheUserBookLists with the changed lists`() = runTest {
             // ----- Arrange -----
-            val fetchedList = stubBookList(id = 3)
+            val changedList = stubBookList(id = 3)
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55)
-            } returns listOf(fetchedList)
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                serverListIds = setOf(3),
+                changedLists = listOf(changedList),
+            )
 
             // ----- Act -----
             useCase(scope = RefreshScope.All)
 
             // ----- Assert -----
             coVerify {
-                listsRepository.cacheUserBookLists(lists = listOf(fetchedList))
+                listsRepository.cacheUserBookLists(lists = listOf(changedList))
             }
         }
 
         @Test
         fun `calls deleteOrphanBooks after cacheUserBookLists`() = runTest {
             // ----- Arrange -----
-            val fetchedList = stubBookList()
+            val changedList = stubBookList()
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55)
-            } returns listOf(fetchedList)
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                serverListIds = emptySet(),
+                changedLists = listOf(changedList),
+            )
 
             // ----- Act -----
             useCase(scope = RefreshScope.All)
@@ -243,8 +257,11 @@ class RefreshLibraryUseCaseTest {
             } returns flowOf(false)
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55)
-            } returns listOf(ownedList)
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                serverListIds = emptySet(),
+                changedLists = listOf(ownedList),
+            )
 
             // ----- Act -----
             useCase(scope = RefreshScope.All)
@@ -268,8 +285,11 @@ class RefreshLibraryUseCaseTest {
             } returns flowOf(true)
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55)
-            } returns listOf(ownedList)
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                serverListIds = emptySet(),
+                changedLists = listOf(ownedList),
+            )
 
             // ----- Act -----
             useCase(scope = RefreshScope.All)
@@ -293,8 +313,11 @@ class RefreshLibraryUseCaseTest {
             } returns flowOf(false)
 
             coEvery {
-                listsRepository.fetchUserLists(userId = 55)
-            } returns listOf(nonOwnedList)
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                serverListIds = emptySet(),
+                changedLists = listOf(nonOwnedList),
+            )
 
             // ----- Act -----
             useCase(scope = RefreshScope.All)
@@ -302,6 +325,41 @@ class RefreshLibraryUseCaseTest {
             // ----- Assert -----
             coVerify {
                 settingsRepository.seedEnabledListIds(ids = emptySet())
+            }
+        }
+
+        @Test
+        fun `syncs full server id set and runs delete even when no lists changed`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                serverListIds = setOf(1, 2),
+                changedLists = emptyList(),
+            )
+
+            // ----- Act -----
+            useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            coVerify {
+                listsRepository.cacheUserBookLists(lists = emptyList())
+            }
+
+            coVerify {
+                booksRepository.hydrateReferencedBooks(
+                    bookIds = emptyList(),
+                    editionIds = emptyList(),
+                    forceNetwork = true,
+                )
+            }
+
+            coVerify {
+                listsRepository.syncBookListMetadata(serverListIds = setOf(1, 2))
+            }
+
+            coVerify {
+                booksRepository.deleteOrphanBooks()
             }
         }
     }

@@ -3,11 +3,21 @@ package nl.rhaydus.softcover.core.lists.domain.repository
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 
 interface ListsRepository {
     val allUserLists: Flow<List<BookList>>
 
     suspend fun createList(name: String): BookList
+
+    /**
+     * Gated full refresh of the user's lists. Fetches a cheap per-list freshness signature for every
+     * list, then deep-fetches the `list_books` only for lists whose signature advanced (or that are
+     * new). The returned [ListsRefreshResult] carries the full server id set (for
+     * [syncBookListMetadata]) plus only the changed lists, which the caller must hydrate and then
+     * pass to [cacheUserBookLists] in that order so list-book inserts resolve against the books table.
+     */
+    suspend fun refreshUserLists(userId: Int): ListsRefreshResult
 
     /**
      * Fetches user lists from the remote without writing to the local cache. Callers (typically

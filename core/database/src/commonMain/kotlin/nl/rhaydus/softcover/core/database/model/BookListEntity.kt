@@ -11,4 +11,12 @@ data class BookListEntity(
     val name: String,
     val slug: String,
     val ranked: Boolean = false,
+
+    /**
+     * The freshness signature captured the last time this list's `list_books` were deep-fetched.
+     * Compared against the server's signature to decide whether the contents must be re-fetched;
+     * `null` for rows created before the column existed or written by an optimistic mutation, which
+     * forces one re-fetch on the next full refresh.
+     */
+    val signature: String? = null,
 )

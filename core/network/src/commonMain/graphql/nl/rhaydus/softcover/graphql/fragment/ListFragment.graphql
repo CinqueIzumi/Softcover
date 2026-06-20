@@ -3,6 +3,17 @@ fragment ListFragment on lists {
     name
     slug
     ranked
+    updated_at
+
+    list_books_aggregate {
+        aggregate {
+            count
+
+            max {
+                updated_at
+            }
+        }
+    }
 
     list_books {
         ...ListBookFragment

@@ -68,7 +68,7 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 40,
+    version = 41,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -132,6 +132,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     MIGRATION_37_38,
                     MIGRATION_38_39,
                     MIGRATION_39_40,
+                    MIGRATION_40_41,
                 )
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(queryContext)
@@ -1120,6 +1121,16 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 connection.execSQL("ALTER TABLE tags ADD COLUMN category TEXT NOT NULL DEFAULT 'OTHER'")
 
                 connection.execSQL("ALTER TABLE book_tag_cross_ref ADD COLUMN count INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        // Lists gain a cached freshness `signature` (updated_at + list_books count + max list_book
+        // updated_at) so a full refresh can skip re-fetching a list's contents when nothing changed.
+        // ADD COLUMN is safe on SQLite < 3.35 (minSdk 26); existing rows default to NULL, which forces
+        // one re-fetch per list on the first refresh after upgrade.
+        private val MIGRATION_40_41 = object : Migration(40, 41) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_lists ADD COLUMN signature TEXT DEFAULT NULL")
             }
         }
 

@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.database.model.EditionLocalImagePath
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.ListBookFull
+import nl.rhaydus.softcover.core.database.model.ListSignatureRow
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
@@ -93,6 +94,9 @@ interface BookDao {
     @Transaction
     @Query("SELECT * FROM book_lists")
     fun observeBookLists(): Flow<List<BookListWithBooks>>
+
+    @Query("SELECT id, signature FROM book_lists")
+    suspend fun getCachedListSignatures(): List<ListSignatureRow>
 
     /**
      * Sorts user_books matching [statusCode] by the most recent

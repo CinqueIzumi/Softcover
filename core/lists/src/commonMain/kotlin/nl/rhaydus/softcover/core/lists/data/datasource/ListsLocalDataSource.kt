@@ -11,6 +11,12 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 interface ListsLocalDataSource {
     val allUserLists: Flow<List<BookList>>
 
+    /**
+     * The cached freshness signature per list id, keyed by list id. A missing id (or a `null`
+     * value) means the list has never been deep-fetched and must be treated as stale.
+     */
+    suspend fun getCachedListSignatures(): Map<Int, String?>
+
     suspend fun cacheUserBookLists(lists: List<BookList>)
 
     suspend fun cacheListBook(book: ListBook)
@@ -62,6 +68,9 @@ internal class ListsLocalDataSourceImpl(
             .observeBookLists()
             .distinctUntilChanged()
             .map { lists -> lists.map { it.toModel() } }
+
+    override suspend fun getCachedListSignatures(): Map<Int, String?> =
+        dao.getCachedListSignatures().associate { it.id to it.signature }
 
     override suspend fun cacheUserBookLists(lists: List<BookList>) {
         dao.cacheBookLists(lists = lists)

@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.ui.common.AppDispatchers
@@ -44,18 +45,22 @@ class RefreshLibraryUseCase(
     private suspend fun refreshAll(userId: Int) = coroutineScope {
         val seeded: Boolean = settingsRepository.listDefaultsSeeded.first()
 
-        val listsDeferred = async {
-            listsRepository.fetchUserLists(userId = userId)
+        val refreshDeferred = async {
+            listsRepository.refreshUserLists(userId = userId)
         }
 
         val booksJob = launch {
             booksRepository.refreshUserBooks(userId = userId)
         }
 
-        val fetchedLists: List<BookList> = listsDeferred.await()
+        val refreshResult: ListsRefreshResult = refreshDeferred.await()
+        val changedLists: List<BookList> = refreshResult.changedLists
 
         if (seeded.not()) {
-            val ownedListId: Int? = fetchedLists.firstOrNull { it.slug == OWNED_LIST_SLUG }?.id
+            // Sourcing the owned list from changedLists (not the full set) is safe: seeding flips the
+            // seeded flag and runs *before* the cache write below, so whenever it runs no prior refresh
+            // has cached a list signature yet — every list is therefore stale and present in changedLists.
+            val ownedListId: Int? = changedLists.firstOrNull { it.slug == OWNED_LIST_SLUG }?.id
 
             settingsRepository.seedEnabledListIds(ids = setOfNotNull(ownedListId))
         }
@@ -63,13 +68,13 @@ class RefreshLibraryUseCase(
         booksJob.join()
 
         booksRepository.hydrateReferencedBooks(
-            bookIds = fetchedLists.flatMap { it.books.map(ListBook::bookId) },
-            editionIds = fetchedLists.flatMap { it.books.map(ListBook::editionId) },
+            bookIds = changedLists.flatMap { it.books.map(ListBook::bookId) },
+            editionIds = changedLists.flatMap { it.books.map(ListBook::editionId) },
             forceNetwork = true,
         )
 
-        listsRepository.syncBookListMetadata(serverListIds = fetchedLists.map { it.id }.toSet())
-        listsRepository.cacheUserBookLists(lists = fetchedLists)
+        listsRepository.syncBookListMetadata(serverListIds = refreshResult.serverListIds)
+        listsRepository.cacheUserBookLists(lists = changedLists)
 
         booksRepository.deleteOrphanBooks()
     }
