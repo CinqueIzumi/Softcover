@@ -7,6 +7,7 @@ import androidx.room.RoomRawQuery
 import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
+import nl.rhaydus.softcover.core.database.mapper.planEditionCaching
 import nl.rhaydus.softcover.core.database.mapper.toBookAuthorRefs
 import nl.rhaydus.softcover.core.database.mapper.toEditionAuthorRefs
 import nl.rhaydus.softcover.core.database.mapper.toEntity
@@ -21,7 +22,7 @@ import nl.rhaydus.softcover.core.database.model.BookListWithBooks
 import nl.rhaydus.softcover.core.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
-import nl.rhaydus.softcover.core.database.model.EditionLocalImagePath
+import nl.rhaydus.softcover.core.database.model.EditionImageRef
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.ListBookFull
 import nl.rhaydus.softcover.core.database.model.ListSignatureRow
@@ -207,19 +208,20 @@ interface BookDao {
     @Query("SELECT * FROM authors WHERE name IN (:names)")
     suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
 
-    @Query("SELECT id, localImagePath FROM book_editions WHERE id IN (:editionIds)")
-    suspend fun getLocalImagePathsByEditionIds(editionIds: List<Int>): List<EditionLocalImagePath>
+    @Query("SELECT id, localImagePath, localImageUrl FROM book_editions WHERE id IN (:editionIds)")
+    suspend fun getEditionImageRefsByEditionIds(editionIds: List<Int>): List<EditionImageRef>
 
-    @Query("SELECT id, localImagePath FROM book_editions WHERE bookId = :bookId")
-    suspend fun getLocalImagePathsByBookId(bookId: Int): List<EditionLocalImagePath>
+    @Query("SELECT id, localImagePath, localImageUrl FROM book_editions WHERE bookId = :bookId")
+    suspend fun getEditionImageRefsByBookId(bookId: Int): List<EditionImageRef>
 
-    @Query("SELECT id, localImagePath FROM book_editions")
-    suspend fun getAllLocalImagePaths(): List<EditionLocalImagePath>
+    @Query("SELECT id, localImagePath, localImageUrl FROM book_editions")
+    suspend fun getAllEditionImageRefs(): List<EditionImageRef>
 
-    @Query("UPDATE book_editions SET localImagePath = :path WHERE id = :editionId")
-    suspend fun updateEditionLocalImagePath(
+    @Query("UPDATE book_editions SET localImagePath = :path, localImageUrl = :url WHERE id = :editionId")
+    suspend fun updateEditionLocalImage(
         editionId: Int,
         path: String?,
+        url: String?,
     )
 
     @Query("SELECT bookId FROM user_books WHERE id = :userBookId")
@@ -265,13 +267,19 @@ interface BookDao {
     ): ListBookFull?
     // endregion
     // region Data insertions
+    /**
+     * Returns the on-disk cover paths that were evicted because their edition's URL changed; the
+     * caller deletes those files after the transaction. See `EditionCachePlanner.kt`.
+     */
     @Transaction
-    suspend fun cacheBooks(books: List<Book>) {
-        books.forEach { cacheBook(it) }
-    }
+    suspend fun cacheBooks(books: List<Book>): List<String> = books.flatMap { cacheBook(it) }
 
+    /**
+     * Returns the on-disk cover paths that were evicted because their edition's URL changed; the
+     * caller deletes those files after the transaction. See `EditionCachePlanner.kt`.
+     */
     @Transaction
-    suspend fun cacheBook(book: Book) {
+    suspend fun cacheBook(book: Book): List<String> {
         book.bookSeries?.let { series ->
             insertBookSeries(bookSeries = series.toEntity())
         }
@@ -293,8 +301,12 @@ interface BookDao {
             }
         }
 
-        // Insert editions
-        insertEditions(toEntitiesPreservingLocalImagePath(editions = book.editions))
+        // Insert editions, evicting locally-cached covers whose URL changed
+        val editionPlan = planEditionCaching(
+            editions = book.editions,
+            existingRefs = getEditionImageRefsByEditionIds(editionIds = book.editions.map { it.id }),
+        )
+        insertEditions(editionPlan.entities)
 
         // Insert authors (deduplicated)
         val allAuthors = (book.authors + book.editions.flatMap { it.authors })
@@ -340,6 +352,8 @@ interface BookDao {
                 },
             )
         }
+
+        return editionPlan.stalePaths
     }
 
     @Transaction
@@ -399,29 +413,23 @@ interface BookDao {
         return books.filter { it.bookId in cachedBookIds && it.editionId in cachedEditionIds }
     }
 
-    suspend fun toEntitiesPreservingLocalImagePath(
-        editions: List<BookEdition>,
-    ): List<BookEditionEntity> {
+    /**
+     * Returns the on-disk cover paths that were evicted because their edition's URL changed; the
+     * caller deletes those files after the transaction. See `EditionCachePlanner.kt`.
+     */
+    @Transaction
+    suspend fun cacheEditions(editions: List<BookEdition>): List<String> {
         if (editions.isEmpty()) return emptyList()
 
-        val existing = getLocalImagePathsByEditionIds(editionIds = editions.map { it.id })
-            .associateBy { it.id }
-
-        return editions.map { edition ->
-            val preserved = edition.localImagePath ?: existing[edition.id]?.localImagePath
-            edition.toEntity().copy(localImagePath = preserved)
-        }
-    }
-
-    @Transaction
-    suspend fun cacheEditions(editions: List<BookEdition>) {
-        if (editions.isEmpty()) return
-
-        insertEditions(toEntitiesPreservingLocalImagePath(editions = editions))
+        val plan = planEditionCaching(
+            editions = editions,
+            existingRefs = getEditionImageRefsByEditionIds(editionIds = editions.map { it.id }),
+        )
+        insertEditions(plan.entities)
 
         val allAuthors = editions.flatMap { it.authors }.distinctBy { it.name }
 
-        if (allAuthors.isEmpty()) return
+        if (allAuthors.isEmpty()) return plan.stalePaths
 
         insertAuthors(allAuthors.map { it.toEntity() })
         val authorEntities = getAuthorsByName(allAuthors.map { it.name })
@@ -432,6 +440,8 @@ interface BookDao {
 
         val crossRefs = editions.flatMap { edition -> edition.toEditionAuthorRefs(authorIdsByName) }
         insertEditionAuthors(crossRefs)
+
+        return plan.stalePaths
     }
 
     @Upsert

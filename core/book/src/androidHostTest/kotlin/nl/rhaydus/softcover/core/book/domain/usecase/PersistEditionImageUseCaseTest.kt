@@ -26,11 +26,13 @@ class PersistEditionImageUseCaseTest {
         fun `returns success and delegates to repository when call succeeds`() = runTest {
             // ----- Arrange -----
             val editionId = 42
+            val url = "https://example.com/cover42.jpg"
             val bytes = byteArrayOf(1, 2, 3)
 
             coEvery {
                 booksRepository.persistEditionImage(
                     editionId = editionId,
+                    url = url,
                     bytes = bytes,
                 )
             } returns Unit
@@ -38,6 +40,7 @@ class PersistEditionImageUseCaseTest {
             // ----- Act -----
             val result = useCase(
                 editionId = editionId,
+                url = url,
                 bytes = bytes,
             )
 
@@ -46,14 +49,16 @@ class PersistEditionImageUseCaseTest {
         }
 
         @Test
-        fun `forwards editionId and bytes to the repository`() = runTest {
+        fun `forwards editionId, url, and bytes to the repository`() = runTest {
             // ----- Arrange -----
             val editionId = 7
+            val url = "https://example.com/cover7.jpg"
             val bytes = byteArrayOf(4, 5, 6)
 
             coEvery {
                 booksRepository.persistEditionImage(
                     editionId = editionId,
+                    url = url,
                     bytes = bytes,
                 )
             } returns Unit
@@ -61,6 +66,7 @@ class PersistEditionImageUseCaseTest {
             // ----- Act -----
             useCase(
                 editionId = editionId,
+                url = url,
                 bytes = bytes,
             )
 
@@ -68,6 +74,7 @@ class PersistEditionImageUseCaseTest {
             coVerify(exactly = 1) {
                 booksRepository.persistEditionImage(
                     editionId = editionId,
+                    url = url,
                     bytes = bytes,
                 )
             }
@@ -77,12 +84,14 @@ class PersistEditionImageUseCaseTest {
         fun `returns failure when repository throws`() = runTest {
             // ----- Arrange -----
             val editionId = 5
+            val url = "https://example.com/cover5.jpg"
             val bytes = byteArrayOf(7, 8, 9)
             val error = RuntimeException("disk full")
 
             coEvery {
                 booksRepository.persistEditionImage(
                     editionId = editionId,
+                    url = url,
                     bytes = bytes,
                 )
             } throws error
@@ -90,6 +99,7 @@ class PersistEditionImageUseCaseTest {
             // ----- Act -----
             val result = useCase(
                 editionId = editionId,
+                url = url,
                 bytes = bytes,
             )
 

@@ -8,10 +8,12 @@ class PersistEditionImageUseCase(
 ) {
     suspend operator fun invoke(
         editionId: Int,
+        url: String?,
         bytes: ByteArray,
     ): Result<Unit> = runCatching {
         booksRepository.persistEditionImage(
             editionId = editionId,
+            url = url,
             bytes = bytes,
         )
     }.onFailure {

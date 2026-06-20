@@ -3281,14 +3281,16 @@ class BooksRepositoryImplTest {
     @Nested
     inner class PersistEditionImage {
         @Test
-        fun `delegates to local data source with the given editionId and bytes`() = runTest {
+        fun `delegates to local data source with the given editionId, url, and bytes`() = runTest {
             // ----- Arrange -----
             val editionId = 42
+            val url = "https://example.com/cover42.jpg"
             val bytes = byteArrayOf(1, 2, 3)
 
             coEvery {
                 booksLocalDataSource.persistEditionImage(
                     editionId = editionId,
+                    url = url,
                     bytes = bytes,
                 )
             } returns Unit
@@ -3296,6 +3298,7 @@ class BooksRepositoryImplTest {
             // ----- Act -----
             repository.persistEditionImage(
                 editionId = editionId,
+                url = url,
                 bytes = bytes,
             )
 
@@ -3303,6 +3306,7 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 1) {
                 booksLocalDataSource.persistEditionImage(
                     editionId = editionId,
+                    url = url,
                     bytes = bytes,
                 )
             }

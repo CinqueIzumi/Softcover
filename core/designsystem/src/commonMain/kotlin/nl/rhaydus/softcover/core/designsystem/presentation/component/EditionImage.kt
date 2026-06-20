@@ -339,6 +339,7 @@ private fun persistFromDiskCache(
         snapshot.use {
             persistEditionImageUseCase(
                 editionId = editionId,
+                url = url,
                 bytes = diskCache.fileSystem.read(it.data) { readByteArray() },
             )
         }

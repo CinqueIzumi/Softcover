@@ -68,7 +68,7 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 41,
+    version = 42,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -133,6 +133,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     MIGRATION_38_39,
                     MIGRATION_39_40,
                     MIGRATION_40_41,
+                    MIGRATION_41_42,
                 )
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(queryContext)
@@ -1131,6 +1132,40 @@ abstract class SoftcoverDatabase : RoomDatabase() {
         private val MIGRATION_40_41 = object : Migration(40, 41) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL("ALTER TABLE book_lists ADD COLUMN signature TEXT DEFAULT NULL")
+            }
+        }
+
+        // Editions gain `localImageUrl` — the URL a locally-persisted cover file was downloaded from
+        // — so a refresh can detect when the cover URL changed and evict the stale local file (covers
+        // weren't updating on refresh). ADD COLUMN is safe on SQLite < 3.35 (minSdk 26); the view
+        // selects edition.*, so it is dropped and recreated. Existing rows default to NULL, which is
+        // treated as unknown provenance: any already-cached cover is re-fetched on the next refresh.
+        private val MIGRATION_41_42 = object : Migration(41, 42) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_editions ADD COLUMN localImageUrl TEXT DEFAULT NULL")
+
+                connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+                connection.execSQL(
+                    """
+                        CREATE VIEW `book_edition_view` AS SELECT
+                                edition.*,
+                                EXISTS(
+                                    SELECT 1
+                                    FROM list_books lb
+                                    JOIN book_lists bl ON bl.id = lb.listId
+                                    WHERE bl.slug = 'owned'
+                                    AND (
+                                        lb.editionId = edition.id
+                                        OR lb.editionId = edition.canonicalId
+                                        OR lb.editionId IN (
+                                            SELECT sub.id FROM book_editions sub
+                                            WHERE sub.canonicalId = edition.id
+                                        )
+                                    )
+                                ) AS isOwned
+                            FROM book_editions edition
+                    """.trimIndent(),
+                )
             }
         }
 

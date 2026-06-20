@@ -58,13 +58,15 @@ interface BooksLocalDataSource {
 
     suspend fun cacheEditions(editions: List<BookEdition>)
 
-    suspend fun updateEditionLocalImagePath(
+    suspend fun updateEditionLocalImage(
         editionId: Int,
         path: String?,
+        url: String?,
     )
 
     suspend fun persistEditionImage(
         editionId: Int,
+        url: String?,
         bytes: ByteArray,
     )
 
@@ -119,33 +121,38 @@ internal class BooksLocalDataSourceImpl(
     }
 
     override suspend fun cacheEditions(editions: List<BookEdition>) {
-        dao.cacheEditions(editions = editions)
+        deleteStaleCovers(dao.cacheEditions(editions = editions))
     }
 
-    override suspend fun updateEditionLocalImagePath(
+    override suspend fun updateEditionLocalImage(
         editionId: Int,
         path: String?,
+        url: String?,
     ) {
-        dao.updateEditionLocalImagePath(
+        dao.updateEditionLocalImage(
             editionId = editionId,
             path = path,
+            url = url,
         )
     }
 
     override suspend fun persistEditionImage(
         editionId: Int,
+        url: String?,
         bytes: ByteArray,
     ) {
-        if (editionImageStorage.exists(editionId = editionId)) return
-
+        // Always (over)write: the resolver only loads from the URL when no valid local cover exists
+        // (a stale file is evicted by the cache transaction first), so reaching here means the file
+        // is missing or out of date — and recording [url] is what lets a later URL change be detected.
         val storedPath = editionImageStorage.write(
             editionId = editionId,
             bytes = bytes,
         )
 
-        dao.updateEditionLocalImagePath(
+        dao.updateEditionLocalImage(
             editionId = editionId,
             path = storedPath,
+            url = url,
         )
     }
 
@@ -272,7 +279,7 @@ internal class BooksLocalDataSourceImpl(
     }
 
     override suspend fun cacheBook(book: Book) {
-        dao.cacheBook(book = book)
+        deleteStaleCovers(dao.cacheBook(book = book))
     }
 
     override suspend fun getBookById(id: Int): Book? {
@@ -280,13 +287,13 @@ internal class BooksLocalDataSourceImpl(
     }
 
     override suspend fun cacheBooks(books: List<Book>) {
-        dao.cacheBooks(books = books)
+        deleteStaleCovers(dao.cacheBooks(books = books))
     }
 
     override suspend fun removeUserBooksById(ids: List<Int>) {
         val bookIds = ids.mapNotNull { dao.getBookIdByUserBookId(userBookId = it) }
         val pathsToDelete = bookIds.flatMap { bookId ->
-            dao.getLocalImagePathsByBookId(bookId = bookId).mapNotNull { it.localImagePath }
+            dao.getEditionImageRefsByBookId(bookId = bookId).mapNotNull { it.localImagePath }
         }
 
         dao.deleteUserBooksByIds(ids)
@@ -299,11 +306,15 @@ internal class BooksLocalDataSourceImpl(
     }
 
     override suspend fun removeAllBooks() {
-        val pathsToDelete = dao.getAllLocalImagePaths().mapNotNull { it.localImagePath }
+        val pathsToDelete = dao.getAllEditionImageRefs().mapNotNull { it.localImagePath }
 
         dao.deleteAllUserBooksAndData()
 
         pathsToDelete.forEach { editionImageStorage.delete(path = it) }
+    }
+
+    private suspend fun deleteStaleCovers(stalePaths: List<String>) {
+        stalePaths.forEach { editionImageStorage.delete(path = it) }
     }
 
     override suspend fun deleteOrphanBooks() {

@@ -857,10 +857,12 @@ internal class BooksRepositoryImpl(
 
     override suspend fun persistEditionImage(
         editionId: Int,
+        url: String?,
         bytes: ByteArray,
     ) {
         booksLocalDataSource.persistEditionImage(
             editionId = editionId,
+            url = url,
             bytes = bytes,
         )
     }

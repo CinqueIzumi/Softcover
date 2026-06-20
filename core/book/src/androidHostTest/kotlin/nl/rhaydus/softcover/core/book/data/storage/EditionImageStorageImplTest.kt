@@ -24,37 +24,6 @@ class EditionImageStorageImplTest {
     }
 
     @Nested
-    inner class Exists {
-        @Test
-        fun `returns false when no file has been written for the edition`() {
-            // ----- Arrange -----
-            val editionId = 1
-
-            // ----- Act -----
-            val result = storage.exists(editionId = editionId)
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
-        fun `returns true after write has been called for the edition`() {
-            // ----- Arrange -----
-            val editionId = 2
-            storage.write(
-                editionId = editionId,
-                bytes = byteArrayOf(0),
-            )
-
-            // ----- Act -----
-            val result = storage.exists(editionId = editionId)
-
-            // ----- Assert -----
-            result shouldBe true
-        }
-    }
-
-    @Nested
     inner class Write {
         @Test
         fun `writes bytes to the edition file and they can be read back`() {
@@ -125,7 +94,7 @@ class EditionImageStorageImplTest {
             storage.delete(path = path)
 
             // ----- Assert -----
-            storage.exists(editionId = editionId) shouldBe false
+            FileSystem.SYSTEM.exists(path.toPath()) shouldBe false
         }
 
         @Test
