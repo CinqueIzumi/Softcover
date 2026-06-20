@@ -1,3 +1,3 @@
 package nl.rhaydus.softcover.core.domain.exception
 
-class OfflineException : Exception("No internet connection")
+class OfflineException : RetryableSyncException("No internet connection")

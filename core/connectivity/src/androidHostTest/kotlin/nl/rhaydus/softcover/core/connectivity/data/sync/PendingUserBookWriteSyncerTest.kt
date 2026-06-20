@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -280,7 +281,7 @@ class PendingUserBookWriteSyncerTest {
         }
 
         @Test
-        fun `does not add failed replays to the returned set and halts further drains`() = runTest {
+        fun `transient retryable failure increments attempts and halts further drains`() = runTest {
             // ----- Arrange -----
             val entityA = updateProgressEntity(
                 localId = 1L,
@@ -314,7 +315,7 @@ class PendingUserBookWriteSyncerTest {
                     startedAt = any(),
                     finishedAt = any(),
                 )
-            } throws RuntimeException("network error")
+            } throws ServerUnavailableException("server unreachable")
 
             coJustRun {
                 dao.incrementAttempts(any())
@@ -347,6 +348,61 @@ class PendingUserBookWriteSyncerTest {
                     finishedAt = any(),
                 )
             }
+        }
+
+        @Test
+        fun `non-retryable failure deletes the row and continues draining remaining entities`() = runTest {
+            // ----- Arrange -----
+            val entityA = updateProgressEntity(
+                localId = 1L,
+                userBookId = 10,
+                userBookReadId = 101,
+                editionId = 201,
+            )
+            val entityB = updateProgressEntity(
+                localId = 2L,
+                userBookId = 20,
+                userBookReadId = 102,
+                editionId = 202,
+            )
+
+            coEvery {
+                dao.getPending()
+            } returns listOf(entityA, entityB)
+
+            coEvery {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = 101,
+                    editionId = 201,
+                    progressPages = any(),
+                    progressSeconds = any(),
+                    startedAt = any(),
+                    finishedAt = any(),
+                )
+            } throws RuntimeException("rejected by server")
+
+            coJustRun {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = 102,
+                    editionId = 202,
+                    progressPages = any(),
+                    progressSeconds = any(),
+                    startedAt = any(),
+                    finishedAt = any(),
+                )
+            }
+
+            coJustRun { dao.delete(any()) }
+
+            // ----- Act -----
+            val result = syncer.drainPendingUpdates()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { dao.delete(1L) }
+            coVerify(exactly = 1) { dao.delete(2L) }
+            coVerify(exactly = 0) { dao.incrementAttempts(any()) }
+            result shouldBe setOf(entityB.userBookId)
+            result.contains(entityA.userBookId) shouldBe false
         }
 
         @Test

@@ -7,6 +7,7 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.cache.normalized.FetchPolicy
 import com.apollographql.apollo.cache.normalized.fetchPolicy
+import com.apollographql.apollo.exception.ApolloHttpException
 import com.apollographql.apollo.exception.ApolloNetworkException
 import com.apollographql.apollo.exception.CacheMissException
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +15,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
+import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 
 private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
@@ -22,11 +25,45 @@ private fun notifyGenericError() {
     UserMessageNotifier.notify(message = GENERIC_ERROR_MESSAGE)
 }
 
+/**
+ * True when [statusCode] reflects the server failing to process the request rather than rejecting it:
+ * any 5xx, plus 408 (request timeout) and 429 (too many requests). These are transient and worth
+ * retrying; a 4xx means the server understood and refused the request, so retrying is pointless.
+ */
+private fun isTransientHttpStatus(statusCode: Int): Boolean =
+    statusCode in 500..599 || statusCode == 408 || statusCode == 429
+
+/**
+ * Maps a transport-level Apollo failure to a [RetryableSyncException] when it is transient — the
+ * request never got a processable response (offline, an online network failure, or a 5xx/throttle).
+ * Returns null for everything else (4xx, parse errors, …): the server processed and rejected the
+ * request, so replaying it would fail identically and the caller should surface a genuine error.
+ *
+ * Shared by [requireData] and [safeQueryFlow] so both paths classify failures identically.
+ */
+private fun retryableTransportFailureOrNull(exception: Throwable): RetryableSyncException? = when {
+    exception is ApolloNetworkException && NetworkAvailability.isOnline().not() -> OfflineException()
+
+    exception is ApolloNetworkException ->
+        ServerUnavailableException(
+            "Server unreachable: ${exception.message}",
+            exception,
+        )
+
+    exception is ApolloHttpException && isTransientHttpStatus(exception.statusCode) ->
+        ServerUnavailableException(
+            "Server error ${exception.statusCode}: ${exception.message}",
+            exception,
+        )
+
+    else -> null
+}
+
 private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
     response.exception?.let { exception ->
-        if (exception is ApolloNetworkException && NetworkAvailability.isOnline().not()) {
-            throw OfflineException()
-        }
+        // A transient transport/server failure is retryable: throw it WITHOUT toasting, since the
+        // write is applied optimistically and will sync later. Everything else is a genuine failure.
+        retryableTransportFailureOrNull(exception)?.let { throw it }
 
         notifyGenericError()
 
@@ -116,8 +153,8 @@ internal fun <T : Query.Data> ApolloClient.safeQueryFlow(
     if (emittedAny.not()) {
         val failure = lastFailure
 
-        if (failure is ApolloNetworkException && NetworkAvailability.isOnline().not()) {
-            throw OfflineException()
+        if (failure != null) {
+            retryableTransportFailureOrNull(failure)?.let { throw it }
         }
 
         notifyGenericError()

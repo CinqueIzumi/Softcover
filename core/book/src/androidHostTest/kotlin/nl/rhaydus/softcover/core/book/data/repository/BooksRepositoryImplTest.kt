@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -2027,6 +2028,74 @@ class BooksRepositoryImplTest {
         }
 
         @Test
+        fun `when online and remote throws ServerUnavailableException enqueues UPDATE_RATING and returns optimistic book`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 5
+            val bookId = 10
+            val newRating = 4.5
+            val book = Book(
+                id = bookId,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = stubUserBookWithRating(
+                    id = userBookId,
+                    rating = 3.0,
+                ),
+                userBookRead = null,
+            )
+            val snapshot = stubBook(userBookId = userBookId)
+
+            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = bookId)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.updateBookRating(
+                    userBook = any(),
+                    rating = newRating,
+                )
+            } throws ServerUnavailableException("server error")
+
+            // ----- Act -----
+            repository.updateBookRating(
+                book = book,
+                rating = newRating,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+
+            coVerify {
+                userBookWriteQueue.enqueue(
+                    update = match {
+                        it.kind == PendingUserBookWriteKind.UPDATE_RATING &&
+                            it.userBookId == userBookId &&
+                            it.rating == newRating
+                    },
+                )
+            }
+        }
+
+        @Test
         fun `when offline caches optimistic book and enqueues UPDATE_RATING without calling remote`() = runTest {
             // ----- Arrange -----
             val userBookId = 5
@@ -2264,6 +2333,84 @@ class BooksRepositoryImplTest {
                     reviewedAt = any(),
                 )
             } throws OfflineException()
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = any())
+            } returns Unit
+
+            // ----- Act -----
+            val result = repository.updateBookReview(
+                book = book,
+                review = body,
+                hasSpoilers = hasSpoilers,
+            )
+
+            // ----- Assert -----
+            result.userBook?.reviewDocument shouldBe body
+            result.userBook?.reviewHasSpoilers shouldBe hasSpoilers
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.updateBookReview(
+                    userBook = any(),
+                    review = any(),
+                    hasSpoilers = any(),
+                    reviewedAt = any(),
+                )
+            }
+
+            coVerify {
+                userBookWriteQueue.enqueue(
+                    update = match {
+                        it.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
+                            it.userBookId == userBookId &&
+                            it.reviewSlateJson == body.toJson() &&
+                            it.reviewHasSpoilers == hasSpoilers
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `when online and remote throws ServerUnavailableException enqueues UPDATE_REVIEW and returns optimistic book`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 5
+            val bookId = 10
+            val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Review written while falsely online")))))
+            val hasSpoilers = false
+            val book = Book(
+                id = bookId,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = stubUserBookForReview(id = userBookId),
+                userBookRead = null,
+            )
+            val snapshot = stubBook(userBookId = userBookId)
+
+            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = bookId)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.updateBookReview(
+                    userBook = any(),
+                    review = any(),
+                    hasSpoilers = any(),
+                    reviewedAt = any(),
+                )
+            } throws ServerUnavailableException("server error")
 
             coEvery {
                 booksLocalDataSource.cacheBook(book = any())
@@ -2674,6 +2821,53 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
         }
+
+        @Test
+        fun `updateBookProgress when online and remote throws ServerUnavailableException does NOT restore snapshot`() = runTest {
+            // ----- Arrange -----
+            val bookId = 42
+            val book = mockk<Book>(relaxed = true) {
+                every { this@mockk.id } returns bookId
+            }
+            val snapshot = mockk<Book>(relaxed = true) {
+                every { this@mockk.id } returns bookId
+            }
+
+            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = bookId)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = book,
+                    newPage = any(),
+                    newSeconds = any(),
+                )
+            } throws ServerUnavailableException("server error")
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 50,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+
+            coVerify {
+                userBookWriteQueue.enqueue(
+                    update = match { it.kind == PendingUserBookWriteKind.UPDATE_PROGRESS },
+                )
+            }
+        }
     }
 
     @Nested
@@ -2926,6 +3120,49 @@ class BooksRepositoryImplTest {
 
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = snapshot)
+            }
+        }
+
+        @Test
+        fun `markBookAsRead when online and remote throws ServerUnavailableException enqueues MARK_AS_READ and does NOT restore snapshot`() = runTest {
+            // ----- Arrange -----
+            val bookId = 42
+            val book = mockk<Book>(relaxed = true) {
+                every { this@mockk.id } returns bookId
+            }
+            val snapshot = mockk<Book>(relaxed = true) {
+                every { this@mockk.id } returns bookId
+            }
+
+            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = bookId)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = any(),
+                )
+            } throws ServerUnavailableException("server error")
+
+            // ----- Act -----
+            repository.markBookAsRead(book = book)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+
+            coVerify {
+                userBookWriteQueue.enqueue(
+                    update = match { it.kind == PendingUserBookWriteKind.MARK_AS_READ },
+                )
             }
         }
     }

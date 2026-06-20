@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -392,7 +393,12 @@ internal class BooksRepositoryImpl(
                 when (error) {
                     is CancellationException -> throw error
 
-                    is OfflineException -> {
+                    is RetryableSyncException -> {
+                        AppLog.w(
+                            error,
+                            "Rating update hit a transient error; queued for retry",
+                        )
+
                         enqueueRatingUpdate(
                             book = optimistic,
                             rating = rating,
@@ -444,7 +450,12 @@ internal class BooksRepositoryImpl(
                 when (error) {
                     is CancellationException -> throw error
 
-                    is OfflineException -> {
+                    is RetryableSyncException -> {
+                        AppLog.w(
+                            error,
+                            "Review update hit a transient error; queued for retry",
+                        )
+
                         enqueueReviewUpdate(
                             book = optimistic,
                             review = review,
@@ -511,7 +522,12 @@ internal class BooksRepositoryImpl(
                 when (error) {
                     is CancellationException -> throw error
 
-                    is OfflineException -> {
+                    is RetryableSyncException -> {
+                        AppLog.w(
+                            error,
+                            "Progress update hit a transient error; queued for retry",
+                        )
+
                         enqueueProgressUpdate(
                             book = optimistic,
                             newPage = newPage,
@@ -554,7 +570,12 @@ internal class BooksRepositoryImpl(
                 when (error) {
                     is CancellationException -> throw error
 
-                    is OfflineException -> {
+                    is RetryableSyncException -> {
+                        AppLog.w(
+                            error,
+                            "Mark-as-read hit a transient error; queued for retry",
+                        )
+
                         enqueueMarkAsRead(book = optimistic)
                         optimistic
                     }
