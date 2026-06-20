@@ -105,6 +105,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
@@ -116,6 +117,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProg
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdateTimeProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
+import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.ui.common.currentLocalDate
@@ -874,6 +876,9 @@ internal fun SectionLabel(text: String) {
 internal fun EmptyCurrentlyReadingScreen(
     wantToReadBooks: List<Book> = emptyList(),
     trendingBooks: List<Book> = emptyList(),
+    streakEnabled: Boolean = false,
+    recentReadingActivity: List<ReadingDayActivity> = emptyList(),
+    onExpandStreak: () -> Unit = {},
     onBookClick: (Book) -> Unit = {},
     onNavigateToSearch: () -> Unit,
 ) {
@@ -954,6 +959,18 @@ internal fun EmptyCurrentlyReadingScreen(
                     ),
                 )
             }
+        }
+
+        // When the streak is enabled we show the full 21-day grid even with zero days
+        // read (all-unlit), inviting a brand-new reader to start a streak; isNotEmpty()
+        // only suppresses the brief pre-load window before activity data arrives.
+        if (streakEnabled && recentReadingActivity.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(32.dp))
+
+            StreakStrip(
+                activity = recentReadingActivity,
+                onClick = onExpandStreak,
+            )
         }
 
         if (pickUpNext.isNotEmpty()) {

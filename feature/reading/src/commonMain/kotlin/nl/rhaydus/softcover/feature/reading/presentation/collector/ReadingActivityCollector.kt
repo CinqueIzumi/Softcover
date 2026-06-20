@@ -14,18 +14,24 @@ internal class ReadingActivityCollector : ReadingCollector {
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
         dependencies: ReadingScreenDependencies,
     ) {
-        // Keep the strip fresh even when the user never opens Profile — this is the
-        // canonical refresh for reading-activity dates, the same one Profile fires.
-        dependencies.launch {
-            dependencies.refreshUserProfileDataUseCase()
-                .onFailure { AppLog.e(it) }
-        }
+        dependencies.getReadingStreakEnabledAsFlowUseCase().collectLatest { enabled ->
+            scope.setState { it.copy(streakEnabled = enabled) }
 
-        dependencies.observeRecentReadingActivityUseCase()
-            .collectLatest { activity: List<ReadingDayActivity> ->
-                scope.setState {
-                    it.copy(recentReadingActivity = activity)
+            if (enabled) {
+                dependencies.launch {
+                    dependencies.refreshUserProfileDataUseCase()
+                        .onFailure { AppLog.e("$it") }
                 }
+
+                dependencies.observeRecentReadingActivityUseCase()
+                    .collectLatest { activity: List<ReadingDayActivity> ->
+                        scope.setState {
+                            it.copy(recentReadingActivity = activity)
+                        }
+                    }
+            } else {
+                scope.setState { it.copy(recentReadingActivity = emptyList()) }
             }
+        }
     }
 }

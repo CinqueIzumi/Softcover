@@ -119,4 +119,10 @@ internal class SettingsRepositoryImpl(
     override suspend fun setDesktopWindowState(state: DesktopWindowState) {
         settingsLocalDataSource.setDesktopWindowState(state = state)
     }
+
+    override val readingStreakEnabled: Flow<Boolean> = settingsLocalDataSource.readingStreakEnabled
+
+    override suspend fun setReadingStreakEnabled(enabled: Boolean) {
+        settingsLocalDataSource.setReadingStreakEnabled(enabled = enabled)
+    }
 }

@@ -3,7 +3,9 @@ package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
@@ -21,6 +23,8 @@ internal class SettingsScreenScreenModel(
     private val setBottomBarStyleUseCase: SetBottomBarStyleUseCase,
     private val setDynamicColorUseCase: SetDynamicColorUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
+    private val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
+    private val setReadingStreakEnabledUseCase: SetReadingStreakEnabledUseCase,
     appVersionProvider: AppVersionProvider,
     appDispatchers: AppDispatchers,
     flows: List<SettingsCollector>,
@@ -38,6 +42,8 @@ internal class SettingsScreenScreenModel(
         setDynamicColorUseCase = setDynamicColorUseCase,
         setDateStyleUseCase = setDateStyleUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
+        getReadingStreakEnabledAsFlowUseCase = getReadingStreakEnabledAsFlowUseCase,
+        setReadingStreakEnabledUseCase = setReadingStreakEnabledUseCase,
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,
     )

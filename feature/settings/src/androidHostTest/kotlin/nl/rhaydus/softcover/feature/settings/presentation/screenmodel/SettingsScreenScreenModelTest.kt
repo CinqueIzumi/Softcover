@@ -57,6 +57,8 @@ class SettingsScreenScreenModelTest {
                 setBottomBarStyleUseCase = mockk(relaxed = true),
                 setDynamicColorUseCase = mockk(relaxed = true),
                 getThemeConfigurationUseCase = mockk(relaxed = true),
+                getReadingStreakEnabledAsFlowUseCase = mockk(relaxed = true),
+                setReadingStreakEnabledUseCase = mockk(relaxed = true),
                 appVersionProvider = appVersionProvider,
                 appDispatchers = appDispatchers,
                 flows = emptyList(),

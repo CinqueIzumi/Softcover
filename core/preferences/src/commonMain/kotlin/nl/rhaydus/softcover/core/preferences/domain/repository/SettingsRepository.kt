@@ -69,4 +69,8 @@ interface SettingsRepository {
     val desktopWindowState: Flow<DesktopWindowState>
 
     suspend fun setDesktopWindowState(state: DesktopWindowState)
+
+    val readingStreakEnabled: Flow<Boolean>
+
+    suspend fun setReadingStreakEnabled(enabled: Boolean)
 }

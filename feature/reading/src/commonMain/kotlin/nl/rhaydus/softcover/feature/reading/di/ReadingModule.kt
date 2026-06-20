@@ -28,6 +28,7 @@ val readingModule = module {
             getTrendingBooksUseCase = get(),
             observeRecentReadingActivityUseCase = get(),
             refreshUserProfileDataUseCase = get(),
+            getReadingStreakEnabledAsFlowUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
         )

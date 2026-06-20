@@ -24,4 +24,5 @@ internal data class ReadingScreenUiState(
     val trendingBooks: List<Book> = emptyList(),
 
     val recentReadingActivity: List<ReadingDayActivity> = emptyList(),
+    val streakEnabled: Boolean = true,
 ) : UiState

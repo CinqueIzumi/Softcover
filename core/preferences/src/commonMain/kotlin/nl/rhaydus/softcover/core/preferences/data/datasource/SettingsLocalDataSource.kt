@@ -73,6 +73,10 @@ interface SettingsLocalDataSource {
     val desktopWindowState: Flow<DesktopWindowState>
 
     suspend fun setDesktopWindowState(state: DesktopWindowState)
+
+    val readingStreakEnabled: Flow<Boolean>
+
+    suspend fun setReadingStreakEnabled(enabled: Boolean)
 }
 
 internal class SettingsLocalDataSourceImpl(
@@ -240,6 +244,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setDesktopWindowState(state: DesktopWindowState) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(desktopWindowState = state.toEntity())
+        }
+    }
+
+    override val readingStreakEnabled: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.readingStreakEnabled }
+        .distinctUntilChanged()
+
+    override suspend fun setReadingStreakEnabled(enabled: Boolean) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(readingStreakEnabled = enabled)
         }
     }
 }

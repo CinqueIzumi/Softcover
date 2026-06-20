@@ -83,6 +83,7 @@ internal actual fun ReadingScreenLayout(
                                 bookCount = state.books.size,
                                 averageProgress = state.books.averageProgress(),
                                 recentReadingActivity = state.recentReadingActivity,
+                                streakEnabled = state.streakEnabled,
                                 isRefreshing = state.isLoading,
                                 onExpandStreak = { showStreakSheet = true },
                                 onRefreshClick = { runAction(RefreshAction) },
@@ -104,6 +105,9 @@ internal actual fun ReadingScreenLayout(
                     else -> EmptyCurrentlyReadingScreen(
                         wantToReadBooks = state.wantToReadBooks,
                         trendingBooks = state.trendingBooks,
+                        streakEnabled = state.streakEnabled,
+                        recentReadingActivity = state.recentReadingActivity,
+                        onExpandStreak = { showStreakSheet = true },
                         onBookClick = onBookClick,
                         onNavigateToSearch = onNavigateToSearch,
                     )
@@ -222,6 +226,7 @@ private fun DesktopReadingHeader(
     bookCount: Int,
     averageProgress: Float?,
     recentReadingActivity: List<ReadingDayActivity>,
+    streakEnabled: Boolean,
     isRefreshing: Boolean,
     onExpandStreak: () -> Unit,
     onRefreshClick: () -> Unit,
@@ -277,7 +282,7 @@ private fun DesktopReadingHeader(
             }
         }
 
-        if (recentReadingActivity.any { it.didRead }) {
+        if (streakEnabled && recentReadingActivity.isNotEmpty()) {
             Spacer(modifier = Modifier.height(14.dp))
 
             StreakStrip(

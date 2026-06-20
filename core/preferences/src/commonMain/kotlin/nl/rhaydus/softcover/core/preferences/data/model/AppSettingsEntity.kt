@@ -22,4 +22,5 @@ internal data class AppSettingsEntity(
     val listDefaultsSeeded: Boolean = false,
     val libraryTabOrder: List<String> = emptyList(),
     val desktopWindowState: DesktopWindowStateEntity = DesktopWindowStateEntity(),
+    val readingStreakEnabled: Boolean = true,
 )
