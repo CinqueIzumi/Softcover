@@ -235,7 +235,7 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 ## Roadmap
 
-Softcover is being actively redesigned. The high-level direction lives in [docs/working/roadmap.md](docs/working/roadmap.md), and the sequenced, pick-up-next work items live in [docs/working/roadmap-steps.md](docs/working/roadmap-steps.md) — completed steps are deleted as they land, so the file always reflects what's left.
+Softcover is being actively redesigned. **What's coming, by version, lives in [ROADMAP.md](ROADMAP.md)** — the public, user-facing roadmap (also viewable inside the app). Behind it, the internal planning docs in [docs/working/](docs/working/) hold the idea catalogue, the sequenced step list (completed steps are deleted as they land), and the per-release bundling.
 
 ---
 
@@ -248,7 +248,8 @@ Softcover is being actively redesigned. The high-level direction lives in [docs/
 | [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
 | [docs/rhaydus/0.2.0/](docs/rhaydus/0.2.0/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
-| [docs/working/roadmap.md](docs/working/roadmap.md) | Redesign roadmap and the sequenced step list |
+| [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — what's coming, by version |
+| [docs/working/](docs/working/) | Internal planning — idea catalogue, sequenced steps, release plan, and the day-to-day `now.md` |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |
 
 ---

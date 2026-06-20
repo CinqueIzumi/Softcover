@@ -83,7 +83,15 @@ All versions are centralized in `gradle/libs.versions.toml`. Reference via versi
 
 ## Roadmap
 
-The redesign roadmap lives in [docs/working/roadmap.md](docs/working/roadmap.md); the sequenced pickup order lives in [docs/working/roadmap-steps.md](docs/working/roadmap-steps.md). When a step in `docs/working/roadmap-steps.md` is finished, **delete it from the file in the same commit** — do not renumber the remaining steps (gaps are intentional so references in commits and docs stay valid). The deletion is part of the step, not a follow-up.
+Planning is layered. **Internal** (engineering source of truth, in `docs/working/`):
+- [docs/working/idea-catalogue.md](docs/working/idea-catalogue.md) — the idea catalogue (the *what*), tagged (`B.4.1`).
+- [docs/working/roadmap-steps.md](docs/working/roadmap-steps.md) — the sequenced pickup order (the *order*), scoped S/M/L. When a step is finished, **delete it from the file in the same commit** — do not renumber the remaining steps (gaps are intentional so references in commits and docs stay valid). The deletion is part of the step, not a follow-up.
+- [docs/working/release-plan.md](docs/working/release-plan.md) — steps bundled into versioned drops (the *when*), each with a user-facing release-note blurb.
+- [docs/working/now.md](docs/working/now.md) — the **day-to-day working surface**: the 1–2 topics in active focus (pointers into the steps, never forks) and a flat fast-track-fixes backlog for small things done outside the release cadence. Fixes are deleted when shipped and folded into the next release's notes rather than listed on the public roadmap.
+
+**Public** (user-facing): [ROADMAP.md](ROADMAP.md) at the repo root is a curated, version-labelled projection of `release-plan.md` — plain language, no internal tags/scope/dependencies/"won't do" list. It is **derived, not authored**: app users read it on GitHub, and the in-app Roadmap screen (Step 8.12 / D.11) fetches the same raw file at runtime so the two never drift.
+
+**Maintenance rule (enforced by review).** `ROADMAP.md` is a projection of `release-plan.md`, kept in lockstep. Any change that reorders, cuts, adds, or reshapes a release in `release-plan.md` MUST update the corresponding section of `ROADMAP.md` in the same change. Never add user-facing content to `ROADMAP.md` that isn't backed by a release in `release-plan.md`.
 
 <!-- rhaydus:start -->
 ## Rhaydus foundation (managed by rhaydus-adopt - do not hand-edit)

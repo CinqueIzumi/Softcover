@@ -1,5 +1,5 @@
-# Roadmap
-A long-form catalogue of upgrades for Softcover — split into *look & feel* (visual, motion, haptics, decoration) and *features* (new data, screens, expansions). This is a brainstorming surface, not a plan: items are not ordered or scoped here. The sequenced pickup order lives in [roadmap-steps.md](roadmap-steps.md).
+# Idea catalogue
+A long-form catalogue of upgrades for Softcover — split into *look & feel* (visual, motion, haptics, decoration) and *features* (new data, screens, expansions). This is a brainstorming surface, not a plan: items are not ordered or scoped here. The sequenced pickup order lives in [roadmap-steps.md](roadmap-steps.md); the public, user-facing view is [ROADMAP.md](../../ROADMAP.md).
 
 > Style note: every entry below is meant to fit the editorial voice in [design-system.md](../reference/design-system.md). Where an idea pulls toward "Material dashboard" rather than "editorial spread", that's flagged. Anything brand-new that adds a foundation, component, or pattern must update `../reference/design-system.md` in the same change (per the maintenance rule).
 
@@ -54,6 +54,7 @@ The system has `commit` and `reject`. Two states is intentional, but a few exten
 - **A.3.9 Status callout ribbons.** When a book is marked Read, the status callout in detail gets a small "Finished — 12 Mar" ribbon icon — a literal bookmark ribbon glyph that fits the print register better than another chip.
 - **A.3.10 Audiobook waveform under wavy progress.** Audiobook progress also paints a very low-alpha waveform stripe under the wavy bar — a visual reminder you're listening, not reading.
 - **A.3.11 Two-tone wavy bar near goals.** When the wavy progress bar represents pacing (deadline pace, daily-goal pace), the part *behind today* paints in primary and the part *ahead of today* in primary at 40% alpha. The bar communicates *where you should be*, not just *where you are*.
+- **A.3.12 Auto-resize coverless title text.** On coverless book placeholders, shrink the title font to fit cleanly rather than breaking words across lines, keeping long titles legible on the typographic tile.
 
 ### A.4 Decorative patterns
 
@@ -68,31 +69,24 @@ The system has `commit` and `reject`. Two states is intentional, but a few exten
 
 ### B.1 Library
 
-- **B.1.1 Sort within a tab.** A small sort affordance (paired with the existing layout switcher) supporting: date added, date finished, title, author, rating, progress, deadline urgency, page count. Persists per tab.
-- **B.1.2 Filter chips above the grid.** Inline chip row showing the active filters (genre, format, year, owned, rating range) with mutation animations. Tap a chip to remove.
 - **B.1.3 Smart shelves.** Auto-computed tabs alongside user statuses: "Owned & unread", "Started but stalled" (Currently Reading with no progress in 30d), "Finished this year", "Highest rated", "Quick wins" (<200pp), "Long hauls" (>500pp).
-- **B.1.4 Bulk select mode.** Long-press a cover → enter selection mode with a top-bar swap (count + actions). Bulk actions: move shelf, mark as read, add to list, remove. Pairs with `select` haptic on each toggle.
-- **B.1.6 Drag-to-reorder Want-to-Read.** The Want-to-Read tab supports manual ordering — a user-defined priority queue. Reorder uses A.1.13 + A.2.4 haptics.
 - **B.1.7 Deadline urgency pinned section.** When any book on the active tab has a deadline within 14 days, render an "Up against the clock" editorial section at the top, separate from the grid.
-- **B.1.8 Year filter on Read.** A horizontal year chip row over the Read tab (2026 · 2025 · 2024 · …). Tapping a year filters; combines with smart shelves.
-- **B.1.9 Stats summary per tab.** Subtitle line under the page title shows tab-specific aggregate ("24 titles · 8,402 pages") instead of generic count copy.
 - **B.1.10 Inline edition swap.** Long-press a tile → edition picker quick action without going into book detail.
-- **B.1.11 Tag system.** User-defined freeform tags ("dnf-but-might-revisit", "lent-to-mom") visible as a chip strip under each book in list layout, and filterable from B.1.2.
+- **B.1.11 Tag system.** User-defined freeform tags ("dnf-but-might-revisit", "lent-to-mom") visible as a chip strip under each book in list layout, and filterable from the library filter chips.
 - **B.1.12 Custom-list creation in-app.** Today lists are toggleable visibility but not creatable. Add a "+" entry at the tab strip that opens a sheet to create a list, then drag-to-fill from any shelf.
 - **B.1.13 Library export.** Export current view as CSV or as a styled "shelf card" image (see B.7.4 sharing).
 
 ### B.2 Reading
 
 - **B.2.1 Reading session timer.** "Start session" affordance on the featured card — captures duration, starting and ending page, can pause/resume. Sessions feed B.2.5 streaks and the Stats Atlas (C.3). Session UI lives as a peek bar above the bottom nav while active.
-- **B.2.2 "Plan today" prompt.** Above the featured card, a one-line editorial nudge: "Aim for 32 pages today to stay on pace with *The Wager*." Dismissible. Built from deadline data already present.
 - **B.2.3 Streak indicator.** A small heatmap-strip near the greeting: last 21 days, each day a small dot, today highlighted. Tap to expand to a fuller calendar view.
 - **B.2.4 Reorder currently-reading priority.** Drag the order in which books are shown; first non-featured becomes featured. Use A.1.13 + A.2.4.
 - **B.2.5 Pace card per book.** Below the progress strip in each compact row, an italic editorial line: "At your weekly average, you'll finish on 18 March." Lives next to the deadline line — both never appear together, the more informative one wins.
 - **B.2.6 Quick-add highlight.** A "Save a passage" action on the featured card opens a tiny sheet for typing/dictating a quote + optional page number. Feeds the Notes & Highlights inbox (C.7).
 - **B.2.7 Audiobook mini-player.** When the active book is an audiobook with a connected playback target (or just a local stopwatch), the featured card shows play/pause + 30s skips alongside the wavy bar. Editorial styling, not Material chrome.
 - **B.2.8 "Since you last read" delta.** When opening the screen, the compact rows briefly show "+18 pages since yesterday" / "+34 min Tuesday" in the eyebrow slot, fading to the normal eyebrow after 3s.
-- **B.2.9 Empty-state nudges that adapt.** The empty state today reads generically. Adapt it: if Want-to-Read is non-empty, surface the top 3 as "Pick up next"; if Want-to-Read is also empty, surface a Trending tile.
 - **B.2.10 Multiple progress entry methods.** Today the sheet supports page/percent/time. Add: barcode/cover OCR of a page number (camera reads "247" off a real page), voice ("I'm on page two hundred forty-seven"), and slider on a thumb-friendly track for fast skim updates.
+- **B.2.11 Direct add to Currently Reading.** A one-step "start reading" action (from book detail's shelf bar, search, and the add flows) that puts a book straight onto Currently Reading rather than add-to-shelf-then-change-status. May chain create → set-status (→ start date) mutations on top of the shipped create-userBook path. Pairs with session start (B.2.1).
 
 ### B.3 Explore
 
@@ -104,7 +98,6 @@ The system has `commit` and `reject`. Two states is intentional, but a few exten
 - **B.3.6 Curated lists / staff picks.** A horizontally-scrolling tile of *lists* (not books). Each tile shows 3 stacked cover spines + a list title + curator avatar. Tapping enters the list screen (C.6).
 - **B.3.7 Author spotlight.** A single full-width "Author of the week" tile pulling the author's photo + a one-line bio + their highest-rated work.
 - **B.3.8 Search filters & sorts.** When a search is active, surface a chip row: year range, format (print/audio/ebook), rating threshold, language, page-count range. Sort: relevance, rating, year, popularity.
-- **B.3.9 ISBN/barcode scan.** Floating action in the search bar opens the camera to scan a book in the wild. Result drops into search results.
 - **B.3.10 Cover-art grid view.** A toggle on search results: text-rows (default) vs. cover-only grid for visual browsing. Reuses the cover-only mode the Library already implements.
 - **B.3.11 Continue-series intelligence.** Today Explore shows a "Up next in your series" row. Add: "You haven't touched *Foundation* in 6 months — pick up where you left off?" — gentler re-engagement nudges as separate cards in the same row.
 
@@ -119,21 +112,24 @@ The system has `commit` and `reject`. Two states is intentional, but a few exten
 - **B.4.7 Genre & mood chips.** Tappable chip row under metadata. Tapping a chip drops into the Explore genre filter (B.3.1).
 - **B.4.8 Awards & accolades.** When a book has awards, a small inline strip in the editorial section style: eyebrow "RECOGNITION" → italic display "Booker Prize, 2023".
 - **B.4.9 Content warnings / trigger tags.** Collapsible "Warnings (4)" section near the about block — content notes from the community, opt-in to reveal.
-- **B.4.10 Publisher / imprint / ISBN inline.** Today these are only in the edition picker. Surface a small metadata strip below the about block.
 - **B.4.11 Author micro-card → author screen.** Tapping the byline opens an Author screen (C.5).
 - **B.4.12 Share book sheet.** A "Share" action in the overflow menu opens a sheet with three share modes: shareable image card, plain text link, "send to a friend" deep link. Image card uses cover + title + user rating + a quote (if highlighted) — composed in the editorial visual style.
 - **B.4.13 Add to a custom list.** Beyond shelves, "Add to a list…" sheet with the user's lists + ability to create new.
 - **B.4.14 Audiobook ETA.** If audiobook and the user has a known listening pace (avg minutes/day), the deadline summary swaps to a predicted finish date.
-- **B.4.15 External links.** Bookshop.org, Amazon, library.org, author website. A small "FIND IT" eyebrow with a row of icon-only links.
 - **B.4.16 Reviews filters & sorts.** Inside the "Voices" section, chip row: friends only, top-rated, recent, with spoilers, in your language.
 - **B.4.17 Lent-out tracking.** "Loaned to" field on owned editions — name + date + reminder option.
-- **B.4.18 Add-to-list action sheet.** Today the data layer has read + remove-from-list but no add-to-list mutation, so "Owned" is added via a separate `MarkEditionAsOwned` mutation and other lists can only have books *taken out* of them. Adds a real add-to-list GraphQL mutation and surfaces a sheet from book detail (and from bulk-select in Library, B.1.4): the user's lists rendered with their current spine-count and a "create new list" entry at the bottom. Selecting a list toggles membership with the existing chip-ink-fill animation (A.1.5) and `commit` haptic. Differs from B.4.13 in that it ships the *write path* — B.4.13 assumed the mutation existed. Treat "Owned" as a special-cased list that still routes through `MarkEditionAsOwned` so the rest of the surface remains uniform.
+- **B.4.18 Add-to-list action sheet.** Today the data layer has read + remove-from-list but no add-to-list mutation, so "Owned" is added via a separate `MarkEditionAsOwned` mutation and other lists can only have books *taken out* of them. Adds a real add-to-list GraphQL mutation and surfaces a sheet from book detail (and from bulk-select in Library): the user's lists rendered with their current spine-count and a "create new list" entry at the bottom. Selecting a list toggles membership with the existing chip-ink-fill animation (A.1.5) and `commit` haptic. Differs from B.4.13 in that it ships the *write path* — B.4.13 assumed the mutation existed. Treat "Owned" as a special-cased list that still routes through `MarkEditionAsOwned` so the rest of the surface remains uniform.
 - **B.4.19 Author identity tags (personal, optional).** A quiet panel on the byline (and on the Author detail screen once C.1 lands) where the user can flag — privately, for themselves — the author's gender, BIPOC affiliation, LGBTQ+ affiliation, and (optional) country of birth. Strictly local; never written back to Hardcover. Editorial framing: a single italic eyebrow line under the byline ("you tagged: woman · queer · Nigerian"), not a Material chip cluster. Feeds the new diversity & representation stats (B.5.15) and any future wrap-ups (C.17).
 - **B.4.20 Book representation tags (personal).** "Who's in this book?" — personal flags at the *book* level for LGBTQ+ characters and BIPOC characters/protagonists, distinct from author identity tagging (B.4.19). Same private/local storage rule as above. Renders as a separate italic line ("you tagged: queer leads · sapphic") below the about block, opt-in to reveal so spoilers don't leak. Feeds B.5.15 and C.17.
 - **B.4.21 Personal moods (book + chapter).** A private mood log. The user can tag one or more moods for the book overall (e.g., "devastated", "hopeful", "exhausted") and, optionally, for a per-chapter / per-percentage anchor ("at 62% — wrecked"). Distinct from B.3.1 (community moods used for discovery): these moods never leave the device. Surfaces as an italic mood column on book detail and as a per-chapter mood ribbon along the wavy progress bar where anchors exist. Picker uses a small curated vocabulary plus a "your moods" free-text option.
 - **B.4.22 Personal notes (book + characters).** A private notes field deliberately *separate* from B.4.2 (personal review): the review is the user's polished take that they may publish; notes are unfiltered marginalia that never publish. Two surfaces: a book-level "Notes" section on book detail, and a per-character note affordance when Hardcover exposes a character list for the book (especially useful for romance — notes against a love interest, the antagonist, an ensemble). Notes can carry an optional chapter/page anchor and appear in the Notes & Highlights inbox (C.7) under a "private — notes" group, never shareable from the inbox.
 - **B.4.23 Audience as a separate classification from genre.** Treat audience-style tags (Young Adult, Middle Grade, New Adult, Adult) as a distinct *classification* dimension from genre (Romance, Fantasy, Mystery, Literary Fiction). Renders on book detail as a small audience eyebrow above the genre chip strip ("YOUNG ADULT · ROMANCE"), and on the genre/mood browser (B.3.1) as an independent audience filter that composes with genre filters. Requires a mapping layer over Hardcover's tag taxonomy — design phase first to confirm what's recoverable from their data. Out of scope: forcing a reclassification when Hardcover labels a book "Young Adult Fantasy" as a genre — we'd surface our re-grouping in the UI without mutating Hardcover state.
 - **B.4.24 Personal trigger warnings (extends B.4.9).** Beyond surfacing community warnings (B.4.9 / Step 4.3), let the user add their own private warnings to a book — for warnings the community hasn't tagged, or to mark which canonical warnings matter most for *them* ("for me, this one really matters"). Same opt-in reveal as B.4.9; user-added warnings get a small "you noted" italic eyebrow when displayed alongside the community list.
+- **B.4.25 Local tag cache + tag suggestions.** Cache the user's own applied tags locally (aggregated across **all** their tagged books) and surface them as suggestions / autocomplete in the tag editor. Works around the API's no-`_ilike` tag-search limit by sourcing suggestions from the local vocabulary. Builds on the shipped tagging slice (B.1.11 partial).
+- **B.4.26 Rating/review prompt on mark-as-read.** When a book is marked Read from any surface (Reading screen, book detail, bulk-select), prompt the user to add a rating and/or review — reusing the personal-rating (B.4.1) and personal-review (B.4.2) controls in an editorial prompt sheet.
+- **B.4.27 Format in the edition selector.** Show each edition's format (ebook / physical / audiobook) in the edition selector so editions are distinguishable at a glance. Reads the edition format/type field.
+- **B.4.28 romance.io link.** For romance titles, add a romance.io destination to the external "Find it" links strip. Feasibility spike first — how to resolve a book to its romance.io page (ISBN/slug URL vs. their API). Genre-gated so it only shows for romance.
+- **B.4.29 Book-detail tabs / sectioning.** Book detail has grown long; break its vertical scroll into tabs or sectioned navigation. Design spike first — the editorial register may favour section-nav / collapsibles over Material tabs. Sequence after the detail-enrichment surfaces exist so the IA accounts for them.
 
 ### B.5 Profile
 
@@ -227,7 +223,7 @@ A standalone wizard reached from settings/Profile to set a reading challenge: bo
 *Rough plan — keep loose until Phase 7's session data lands.* A full-screen calendar (month grid, with a year-overview zoom-out) where each day cell shows what the user *did* that day with their reading: pages read, time read, finishes, ratings published, highlights saved. Day cells render editorial-style — a tiny stacked spine row of covers touched that day, with the dominant cover acting as a tinted background. Tap a day → an editorial sheet with the full per-day breakdown (sessions, page deltas, books touched, links into book detail / sessions log / highlights). Pinches to a 12-month overview that doubles as the streak heatmap (subsumes B.5.3 in its richer form). Reached from Profile, from the Reading screen's streak strip (B.2.3), and from the Stats Atlas (C.3). Sources: reading sessions (B.2.1 / Phase 3), reading log finish dates (B.4.4), personal highlights (B.4.3). Out of scope for the first cut: forward-looking "planned reading" entries — those would collide with deadline pacing already covered elsewhere.
 
 ### C.15 New Releases Calendar
-*Rough plan — keep loose until B.3.3 lands.* A calendar surface that flips the activity calendar inside-out: instead of past activity, future-dated book releases plotted onto a month grid. Day cells highlight when a book on the user's Want-to-Read shelf releases (primary tint, full intensity) and when followed authors / followed series release anything (lower-intensity tint). Optional toggle to include "Most anticipated" globally curated releases (B.3.3) as a third tint. Tap a day → editorial sheet listing the releases with quick-actions (set release-day reminder via D.1, jump to book detail, pre-order link via B.4.15). Reached from Explore (a "Coming up" tile next to the existing carousels) and from Want-to-Read in Library. Sources: edition `release_date` already present on book data, the Want-to-Read shelf, the future-author-follow surface (B.5.13). The author/series follow tints are deferred until follow infra exists; first cut can ship Want-to-Read only and still feel complete.
+*Rough plan — keep loose until B.3.3 lands.* A calendar surface that flips the activity calendar inside-out: instead of past activity, future-dated book releases plotted onto a month grid. Day cells highlight when a book on the user's Want-to-Read shelf releases (primary tint, full intensity) and when followed authors / followed series release anything (lower-intensity tint). Optional toggle to include "Most anticipated" globally curated releases (B.3.3) as a third tint. Tap a day → editorial sheet listing the releases with quick-actions (set release-day reminder via D.1, jump to book detail, pre-order link via the external "Find it" links). Reached from Explore (a "Coming up" tile next to the existing carousels) and from Want-to-Read in Library. Sources: edition `release_date` already present on book data, the Want-to-Read shelf, the future-author-follow surface (B.5.13). The author/series follow tints are deferred until follow infra exists; first cut can ship Want-to-Read only and still feel complete.
 
 ### C.17 Custom-scope wrap-up
 A generalisation of C.4 (Year in Books) to arbitrary scopes: day, week, month, year, "since you joined Softcover". User picks the window from a small sheet (preset chips + a custom-range picker); the wrap-up generator produces an editorial 6–10 slide spread tuned to the scope's density — a "day" wrap-up is leaner (single book, single session, single highlight), a "year" wrap-up matches C.4's density. Slides draw on every personal-data source available: sessions (B.2.1), highlights (B.4.3), reading log (B.4.4), personal ratings (B.4.1), personal moods (B.4.21), personal identity & representation tags (B.4.19, B.4.20). Each slide is shareable via D.3 (image export) so the user can send a "this week in books" card to a friend who doesn't use the app. Reached from Profile and from a "Wrap it up" affordance on the Reading Stats Atlas (C.3). Subsumes C.4's annual recap as the year scope; C.4 stays as the seasonal December surface, and both routes reach the same generator.
@@ -254,6 +250,9 @@ Local + (optional) push. Triggers: deadline reminders, release-day for Want-to-R
 - **D.2.2 Streak.** Heatmap strip of the last 14 days + today's session count.
 - **D.2.3 Quote of the day.** Pulls from user highlights, refreshes daily.
 - **D.2.4 Year in books.** Pages-read hero stat with sparkline of monthly cadence.
+- **D.2.5 Random from Want-to-Read.** Surfaces a random book from the user's Want-to-Read shelf; tap to open. A "what next?" nudge.
+- **D.2.6 Trending this week.** Shows trending books (from Explore's trending data); tap to open.
+- **D.2.7 Reading activity calendar.** A mini month / streak view of the user's reading activity (sessions + finishes); reads the same data as the full Reading Activity Calendar screen (C.14).
 
 ### D.3 Sharing surface
 A single shared "share card" composition that renders into PNG/JPG: editorial layout, cover + a chosen stat or quote + Softcover sign-off. Used by Book detail, Profile, Library, Year in Books. All shares route through this surface so the brand is consistent.
@@ -283,6 +282,9 @@ A single shared "share card" composition that renders into PNG/JPG: editorial la
 
 ### D.10 Per-feature in-app changelog
 - A small "What's new" route from Settings → About showing per-version editorial release notes. Pairs with B.7.7.
+
+### D.11 In-app roadmap viewer
+- A read-only "Roadmap" route from Settings → About that renders the public [`ROADMAP.md`](../../ROADMAP.md) so users can see what's coming. **Single source of truth:** the screen fetches the raw `ROADMAP.md` from the repo at runtime (cached) and renders the markdown, with a build-time bundled copy as the offline / first-load fallback — there is no hand-maintained in-app copy to drift. Pairs with D.10 (changelog is *shipped*, roadmap is *coming*).
 
 ---
 

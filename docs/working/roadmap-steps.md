@@ -1,7 +1,7 @@
 # Roadmap Steps
-A sequenced pickup order for the ideas in [roadmap.md](roadmap.md). Each step is a self-contained chunk of work that delivers visible value or unlocks downstream steps. Where a step depends on earlier work, the dependency is named.
+A sequenced pickup order for the ideas in [idea-catalogue.md](idea-catalogue.md). Each step is a self-contained chunk of work that delivers visible value or unlocks downstream steps. Where a step depends on earlier work, the dependency is named.
 
-Items are referenced by their roadmap.md tag (e.g. `B.4.1`).
+Items are referenced by their idea-catalogue.md tag (e.g. `B.4.1`).
 
 Scope key: **S** ≈ 1–2 day, **M** ≈ 3–6 day, **L** ≈ 7+ day. Scope is a rough hint, not an estimate.
 
@@ -9,63 +9,18 @@ Scope key: **S** ≈ 1–2 day, **M** ≈ 3–6 day, **L** ≈ 7+ day. Scope is 
 
 ---
 
-## Phase 0 — Foundations
-
-These steps don't deliver standalone user value but unblock everything that follows. Skipping ahead here causes rework later.
-
-### Step 0.3 — Personal-data layer (M)
-Add the domain + data layer for user-generated content: personal rating, personal review, personal highlight (quote + page + book), reading session (start, end, book, page delta), reading-log entry (re-reads). Tables, DAOs, repository methods. **No UI yet.**
-- **Why first:** B.4.1–B.4.4, B.2.1, B.2.6, C.6–C.8, B.5.x all read/write through this. Without the schema in place, every feature builds its own.
-
----
-
-## Phase 1 — Cheap, high-visibility polish
-
-Small motion/visual tweaks that lift the perceived quality of every surface without new screens or data. Most are 1–2 file changes.
-
-> **End of Phase 1:** The app should already feel meaningfully more crafted on every surface without any new data or screens, and the Material You toggle is live for Android users who want it.
-
----
-
 ## Phase 2 — Library & Reading depth
 
 The two most-used surfaces gain shelf management depth and reading-flow nudges. Most of this is presentation-layer; no new persistence beyond Phase 0.
 
-### Step 2.1 — Sort within Library tabs (M)
-Sort affordance paired with the layout switcher (date added/finished, title, author, rating, progress, deadline urgency, page count). Persist per tab. *(B.1.1)*
-
 ### Step 2.3 — Smart shelves as virtual tabs (M)
 "Owned & unread", "Started but stalled", "Finished this year", "Quick wins", "Long hauls". Computed in domain; reuse the existing tab UI. *(B.1.3)*
-
-### Step 2.4 — Per-tab stats subtitle + year filter on Read (S)
-Subtitle copy changes per tab ("24 titles · 8,402 pages"); the Read tab gains a year chip row. *(B.1.8, B.1.9)*
-
-### Step 2.8 — "Plan today" nudge on Reading (S)
-Editorial one-liner above the featured card using deadline pacing maths already present. Dismissible per book per day. *(B.2.2)*
 
 ### Step 2.9 — "Since last read" delta on Reading rows (S)
 Eyebrow on compact rows briefly shows the page/time delta since previous open, fading to the regular eyebrow. *(B.2.8)*
 
-### Step 2.10 — Adaptive empty Reading state (S)
-If Want-to-Read is non-empty, render the top 3 as "Pick up next"; else fall back to a Trending tile. *(B.2.9)*
-
-### Step 2.11 — Custom-list MVP: name-only creation + add/remove from book detail (M) *(carved out of [[5.3]] + [[5.5]], pulled forward to 2.3.0)*
-Minimum viable custom-list write path so users can group books in 2.3.0 without waiting for the full Lists screen (Step 5.3) or the full add-to-list sheet (Step 5.5).
-
-**In scope:**
-- **Create:** a single-field "New list" form (name only — no description, no privacy toggle, no header image, no curated/community fields). Reached from (a) the book-detail "Add to list" sheet's footer ("Create new list…") and (b) the existing library/lists entry point if one already exists; if not, expose creation only from the sheet for now. Hits a new `CreateList` GraphQL mutation, optimistically inserts into the local cache, reconciles on the next list refresh.
-- **Add / remove from book detail:** a new "Add to list" action sheet reached from the book detail screen. Each row = list name + spine-count + current-membership indicator; tapping toggles membership. Uses the new `AddListBook` mutation (still needed — Hardcover only ships `RemoveListBook` today) plus the existing `RemoveListBook` mutation. Optimistic local update, `commit` haptic on toggle, non-blocking error toast on mutation failure.
-
-**Explicitly out of scope (still owned by 5.3 / 5.5 / 10.10):** rename, delete, reorder lists, share lists, curated/community lists discovery, the standalone Lists screen, the bulk-select-bar add-to-list affordance, list privacy controls, list cover/header art, tag system. The action sheet's ink-fill chip animation (A.1.5) can be deferred to 5.5 if it slows the slice — a plain toggle indicator is acceptable for 2.3.0.
-
-**Why pulled forward:** unblocks list-based organization for users in 2.3.0 without committing to the full Phase 5 surface area. Leaves 5.3 / 5.5 / 10.10 to focus on discovery, polish, and tagging rather than the basic write path. *(B.4.18, B.4.13, B.1.12, C.5)*
-
-### Step 2.13 — Drag-to-reorder books within built-in shelves (S)
-Press-and-hold lift, drop-with-snap, with `lift`/`drop` haptics. Applies to the built-in library shelves — Want-to-Read, Currently Reading, Read. Persisted as a manual sort mode per shelf that coexists with Step 2.1's sort options (selecting any non-manual sort hides the drag affordance until manual is re-selected).
-
-**Persistence.** Hardcover does not model a user-defined position on built-in shelves, so the manual sort is stored in Room against the local user and never round-tripped. Treat the local manual order as authoritative; no server mutation, no retry-queue entry.
-
-**Out of scope:** the active-reading order on the Reading screen. Reading-screen ordering can be revisited in a later release once shelf manual-sort patterns have settled. *(B.1.6, A.1.13)*
+### Step 2.14 — Directly add a book to Currently Reading (S–M)
+One-step "start reading" action from book detail's shelf bar, search, and the add flows that puts a book straight onto Currently Reading instead of add-to-shelf-then-change-status. May chain create → set-status (→ start date) mutations on top of the shipped create-userBook path. Pairs with session start (Step 3.5). *(B.2.11)*
 
 ---
 
@@ -104,6 +59,9 @@ A private notes field deliberately separated from Step 3.2 (personal review): no
 
 Notes appear in the Notes & Highlights inbox (Step 3.4) under a "private — notes" group; the inbox UI suppresses the share affordance for this group so private notes can't be exported accidentally. *(B.4.22)*
 
+### Step 3.12 — Rating/review prompt on mark-as-read (S–M)
+When a book is marked Read from any surface (Reading screen, book detail, bulk-select), prompt for a rating and/or review, reusing the shipped personal-rating (Step 3.1) and personal-review (Step 3.2) controls in an editorial prompt sheet. *(B.4.26)*
+
 > **End of Phase 3:** The app has personal voice — the user's ratings, words, highlights, tags, moods, and notes become a corpus the rest of the app can draw from.
 
 ---
@@ -127,11 +85,20 @@ When audiobook + known listening pace exists, deadline summary swaps to a predic
 ### Step 4.7 — Reviews filters & sorts (S)
 Chip row inside the "Voices" section: friends only, top-rated, recent, with spoilers, in language. *(B.4.16)*
 
-### Step 4.8 — Share book sheet (S, depends on 0.2)
-Overflow "Share" → sheet with three modes (image, link, deep link) all routed through Step 0.2. *(B.4.12)*
+### Step 4.8 — Share book sheet: link + deep-link modes (S, depends on 0.2)
+The image-share mode shipped in 2.2.0; this adds the remaining two modes (plain link, send-to-a-friend deep link) to the existing overflow "Share" sheet, all routed through Step 0.2. *(B.4.12)*
 
 ### Step 4.9 — Personal trigger warnings (S, depends on 4.3)
 Extends the community-sourced content-warnings collapsible (Step 4.3) so the user can add their own private warnings to a book — for warnings the community hasn't tagged yet, or to mark which canonical warnings matter most for *them*. Same opt-in reveal as Step 4.3; user-added warnings render alongside the community list under a small "you noted" italic eyebrow. Strictly local. *(B.4.24)*
+
+### Step 4.10 — Format in the edition selector (S)
+Show each edition's format (ebook / physical / audiobook) in the edition selector, reading the edition format/type field. Pairs with the audiobook-by-type fix. *(B.4.27)*
+
+### Step 4.11 — romance.io link on book detail (spike + S/M)
+For romance titles, add a romance.io destination to the external links strip (Step 4.5, shipped). Feasibility spike first — resolve a book to its romance.io page (ISBN/slug URL vs. their API). Genre-gated. *(B.4.28)*
+
+### Step 4.12 — Book-detail tabs / sectioning (M)
+*Design spike before build.* Break the long book-detail scroll into tabs or sectioned navigation. The editorial register may favour section-nav / collapsibles over Material tabs — settle it in the spike. Sequence after the detail-enrichment surfaces (Steps 3.3, 3.9–3.11, 4.x) so the IA accounts for everything on the screen. Touches `../reference/design-system.md`. *(B.4.29)*
 
 ---
 
@@ -146,14 +113,14 @@ New screen reached from any byline. Hero, bio, works carousel with shelf states,
 Spine row of the full series, reading-order checklist, aggregate progress stat, read-order toggle. Reached from series eyebrow and from B.4.6. *(C.2, B.4.6)*
 
 ### Step 5.3 — Lists screen (M)
-User's custom lists + curated/community lists. Books inside use library anatomy. Basic name-only creation already shipped in [[2.11]] — this step adds the standalone Lists screen, rename, delete, reorder of lists, share, description/privacy/header fields, and curated/community list discovery. *(C.5, B.1.12, B.4.13)*
+User's custom lists + curated/community lists. Books inside use library anatomy. Basic name-only creation already shipped (the 2.3.0 custom-list MVP) — this step adds the standalone Lists screen, rename, delete, reorder of lists, share, description/privacy/header fields, and curated/community list discovery. *(C.5, B.1.12, B.4.13)*
 
 ### Step 5.4 — Series-completion cascade (S, depends on 5.2)
 When the last book of a series is marked Read, all covers in that series cascade through a fade-to-monochrome-then-back, ending with a "Complete" stamp. *(A.1.15)*
 
-### Step 5.5 — Add-to-list polish: ink-fill chip animation (S, depends on [[2.11]])
-The core write path (`AddListBook` mutation, `RemoveListBook` reuse, the `ChooseListsBottomSheet` shared between book detail and library bulk-select, name-only list creation) shipped in [[2.11]] for 2.3.0; the bulk-select wiring on top of that sheet shipped with the deleted Step 2.5 in the same release. This step is the remaining polish:
-- Upgrade each sheet row's toggle to the ink-fill chip animation (A.1.5) with the `commit` haptic (deferred from 2.11).
+### Step 5.5 — Add-to-list polish: ink-fill chip animation (S)
+The core write path (`AddListBook` mutation, `RemoveListBook` reuse, the `ChooseListsBottomSheet` shared between book detail and library bulk-select, name-only list creation) and the bulk-select wiring on top of that sheet both shipped in 2.3.0 (custom-list MVP). This step is the remaining polish:
+- Upgrade each sheet row's toggle to the ink-fill chip animation (A.1.5) with the `commit` haptic (deferred from the MVP).
 - "Owned" stays special-cased and continues to route through `MarkEditionAsOwned` so the rest of the surface is uniform.
 - **Why here:** finishes the list write-path *visual* surface; full Lists screen polish is owned by 5.3, tag system + library-side creation by 10.10. *(B.4.18, B.4.13, B.1.12)*
 
@@ -283,6 +250,9 @@ Misc preferences. *(B.6.10, B.6.12, B.6.13)*
 ### Step 8.9 — About screen with licenses + per-version changelog (S)
 In-app changelog route from Settings → About; same surface drives the post-upgrade "What's new". *(B.6.14, D.10, B.7.7)*
 
+### Step 8.12 — In-app Roadmap screen (S)
+Read-only "Roadmap" route from Settings → About that renders the public `ROADMAP.md`. Fetches the raw file from the repo at runtime (cached) so it's always current without an app release, with a build-time bundled copy as the offline / first-load fallback. No hand-maintained in-app copy. *(D.11)*
+
 ### Step 8.10 — Onboarding goal + theme + import + notifications + better error UI (M, depends on 7.3, 8.1, 8.6, 0.4, B.7.6)
 Extend onboarding with skippable goal, theme, import, notification opt-in steps; surface inline error UI on invalid API keys. *(B.7.1–B.7.6)*
 
@@ -301,8 +271,8 @@ Wire the actual triggers: deadline reminders, release-day, weekly recap, monthly
 ### Step 9.2 — Activity feed / Notifications inbox screen (M, depends on 9.1)
 Subdued in-app inbox of soft nudges and friend activity. Pull-to-refresh, swipe-to-dismiss. *(C.10)*
 
-### Step 9.3 — Widgets (M, depends on 3.5 + 7.7 + Step 0.2)
-Currently-reading, streak, quote of the day, year-in-books widgets. *(D.2)*
+### Step 9.3 — Widgets (L, depends on widget infra + 3.5)
+Android home-screen widgets (Glance). Builds the widget infrastructure once, then the widget family in two waves. **First wave:** currently-reading (D.2.1), random-from-Want-to-Read (D.2.5), trending-this-week (D.2.6), reading-activity-calendar (D.2.7 — needs reading-log Step 3.7). **Second wave:** streak (D.2.2), quote-of-the-day (D.2.3 → feeds Step 9.4), year-in-books (D.2.4). *(D.2)*
 
 ### Step 9.4 — Quote of the day surface + notification + widget link (S, depends on 9.3)
 Full-screen pull-quote landing surface for the QotD widget/notification. *(C.11)*
@@ -359,7 +329,7 @@ Spine row on Profile, pull-quote of the day, fleuron divider, page-edge serif on
 OCR a page number from camera, voice entry, slider track in the progress sheet. *(B.2.10)*
 
 ### Step 10.10 — Tag system + custom list creation in library (M, depends on 5.3)
-Freeform tags filterable from B.1.2; in-app list creation. *(B.1.11, B.1.12)*
+Freeform tags filterable from the library filter chips; in-app list creation. *(B.1.11, B.1.12)*
 
 ### Step 10.11 — Lent-out tracking on owned editions (S)
 "Loaned to" field on owned editions with optional reminder. *(B.4.17)*
@@ -372,6 +342,12 @@ Italic finish-date prediction on each Reading row; "Up against the clock" sectio
 
 ### Step 10.14 — Library export (S, depends on 0.2 + 8.5)
 Export current view as styled shelf card image. *(B.1.13)*
+
+### Step 10.15 — Auto-resize coverless title text (S)
+On coverless book placeholders, shrink the title font to fit cleanly rather than breaking words across lines. Shared component — design-system note travels with it. *(A.3.12)*
+
+### Step 10.16 — Local tag cache + tag suggestions (S–M)
+Cache the user's applied tags locally (aggregated across all tagged books) and suggest them in the tag editor, working around the API's no-`_ilike` tag-search limit. Builds on the shipped tagging slice. *(B.4.25)*
 
 ---
 
