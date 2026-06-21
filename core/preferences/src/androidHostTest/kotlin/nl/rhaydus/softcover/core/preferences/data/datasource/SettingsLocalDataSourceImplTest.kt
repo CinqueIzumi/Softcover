@@ -1015,6 +1015,74 @@ class SettingsLocalDataSourceImplTest {
     }
 
     @Nested
+    inner class ResetAllSettings {
+        @Test
+        fun `calls updateData on the data store`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(userId = 42)
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                updater(existingEntity)
+            }
+
+            // ----- Act -----
+            dataSource.resetAllSettings()
+
+            // ----- Assert -----
+            coVerify { dataStore.updateData(any()) }
+        }
+
+        @Test
+        fun `update lambda returns a fresh AppSettingsEntity with default userId`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(userId = 42)
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.resetAllSettings()
+
+            // ----- Assert -----
+            capturedResult?.userId shouldBe -1
+        }
+
+        @Test
+        fun `update lambda discards all non-default entity state`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                userId = 99,
+                dateStyle = DateStyle.YEAR_MONTH_DAY,
+                libraryGridLayout = LibraryGridLayout.LIST_LARGE,
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.resetAllSettings()
+
+            // ----- Assert -----
+            capturedResult shouldBe AppSettingsEntity()
+        }
+    }
+
+    @Nested
     inner class SetBottomBarStyle {
         @Test
         fun `update lambda sets bottomBarStyle inside themeConfig`() = runTest {

@@ -736,7 +736,7 @@ class BooksLocalDataSourceImplTest {
     @Nested
     inner class RemoveAllBooks {
         @Test
-        fun `delegates to DAO deleteAllUserBooksAndData`() = runTest {
+        fun `delegates to DAO deleteAllLocalData`() = runTest {
             // ----- Arrange -----
             coEvery { dao.getAllEditionImageRefs() } returns emptyList()
 
@@ -745,7 +745,7 @@ class BooksLocalDataSourceImplTest {
 
             // ----- Assert -----
             coVerify {
-                dao.deleteAllUserBooksAndData()
+                dao.deleteAllLocalData()
             }
         }
 
@@ -776,7 +776,7 @@ class BooksLocalDataSourceImplTest {
             // ----- Assert -----
             coVerifyOrder {
                 dao.getAllEditionImageRefs()
-                dao.deleteAllUserBooksAndData()
+                dao.deleteAllLocalData()
                 editionImageStorage.delete(path = path1)
                 editionImageStorage.delete(path = path2)
             }

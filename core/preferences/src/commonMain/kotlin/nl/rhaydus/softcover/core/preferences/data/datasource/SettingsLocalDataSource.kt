@@ -62,6 +62,8 @@ interface SettingsLocalDataSource {
 
     suspend fun resetLibraryVisibilityPreferences()
 
+    suspend fun resetAllSettings()
+
     suspend fun setEnabledStatusCodes(codes: Set<Int>)
 
     suspend fun setEnabledListIds(ids: Set<Int>)
@@ -225,6 +227,10 @@ internal class SettingsLocalDataSourceImpl(
                 libraryTabOrder = defaults.libraryTabOrder,
             )
         }
+    }
+
+    override suspend fun resetAllSettings() {
+        appSettingsDataStore.store.updateData { AppSettingsEntity() }
     }
 
     override val libraryTabOrder: Flow<List<String>> = appSettingsDataStore.store.data

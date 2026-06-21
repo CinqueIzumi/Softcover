@@ -6,6 +6,8 @@ import com.apollographql.apollo.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.apollo.cache.normalized.normalizedCache
 import com.apollographql.apollo.network.http.DefaultHttpEngine
 import org.koin.dsl.module
+import nl.rhaydus.softcover.core.domain.cache.NetworkCacheCleaner
+import nl.rhaydus.softcover.core.network.cache.ApolloNetworkCacheCleaner
 import nl.rhaydus.softcover.core.network.cache.SoftcoverCacheResolver
 import nl.rhaydus.softcover.core.network.interceptor.AuthInterceptor
 
@@ -28,5 +30,9 @@ val apolloModule = module {
                 cacheResolver = SoftcoverCacheResolver,
             )
             .build()
+    }
+
+    single<NetworkCacheCleaner> {
+        ApolloNetworkCacheCleaner(apolloClient = get())
     }
 }

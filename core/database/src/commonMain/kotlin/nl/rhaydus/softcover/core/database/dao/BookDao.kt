@@ -514,6 +514,33 @@ interface BookDao {
     @Query("DELETE FROM edition_author_cross_ref")
     suspend fun deleteAllEditionAuthorCrossRefs()
 
+    @Query("DELETE FROM book_series")
+    suspend fun deleteAllBookSeries()
+
+    @Query("DELETE FROM book_deadlines")
+    suspend fun deleteAllBookDeadlines()
+
+    @Query("DELETE FROM pending_user_book_writes")
+    suspend fun deleteAllPendingUserBookWrites()
+
+    @Query("DELETE FROM pending_list_writes")
+    suspend fun deleteAllPendingListWrites()
+
+    @Query("DELETE FROM dismissed_continue_series_books")
+    suspend fun deleteAllDismissedContinueSeriesBooks()
+
+    @Query("DELETE FROM dismissed_continue_series")
+    suspend fun deleteAllDismissedContinueSeries()
+
+    @Query("DELETE FROM book_highlights")
+    suspend fun deleteAllHighlights()
+
+    @Query("DELETE FROM reading_sessions")
+    suspend fun deleteAllReadingSessions()
+
+    @Query("DELETE FROM reading_log_entries")
+    suspend fun deleteAllReadingLogEntries()
+
     @Query("DELETE FROM book_editions WHERE bookId = :bookId")
     suspend fun deleteEditions(bookId: Int)
 
@@ -658,8 +685,13 @@ interface BookDao {
         deleteBook(bookId)
     }
 
+    /**
+     * Clears **every** table this DAO's database owns — the full local-data wipe used by logout and
+     * account-switch. Cross-ref and child rows are deleted before their parents. Keep this exhaustive:
+     * a new `@Entity` added to `SoftcoverDatabase` must also be cleared here.
+     */
     @Transaction
-    suspend fun deleteAllUserBooksAndData() {
+    suspend fun deleteAllLocalData() {
         deleteAllListBooks()
         deleteAllUserBookReads()
         deleteAllReadingJournals()
@@ -667,12 +699,21 @@ interface BookDao {
         deleteAllEditionAuthorCrossRefs()
         deleteAllBookTagCrossRefs()
         deleteAllShelfManualOrder()
+        deleteAllDismissedContinueSeriesBooks()
+        deleteAllDismissedContinueSeries()
+        deleteAllBookDeadlines()
+        deleteAllPendingUserBookWrites()
+        deleteAllPendingListWrites()
+        deleteAllHighlights()
+        deleteAllReadingSessions()
+        deleteAllReadingLogEntries()
 
         deleteAllUserBooks()
         deleteAllBookEditions()
 
         deleteAllBooks()
         deleteAllBookLists()
+        deleteAllBookSeries()
         deleteAllAuthors()
         deleteAllTags()
     }

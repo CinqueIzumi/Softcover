@@ -99,6 +99,10 @@ internal class SettingsRepositoryImpl(
         settingsLocalDataSource.resetLibraryVisibilityPreferences()
     }
 
+    override suspend fun resetAllSettings() {
+        settingsLocalDataSource.resetAllSettings()
+    }
+
     override suspend fun setEnabledStatusCodes(codes: Set<Int>) {
         settingsLocalDataSource.setEnabledStatusCodes(codes = codes)
     }

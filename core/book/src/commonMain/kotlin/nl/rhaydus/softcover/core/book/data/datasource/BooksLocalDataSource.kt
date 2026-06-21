@@ -308,7 +308,7 @@ internal class BooksLocalDataSourceImpl(
     override suspend fun removeAllBooks() {
         val pathsToDelete = dao.getAllEditionImageRefs().mapNotNull { it.localImagePath }
 
-        dao.deleteAllUserBooksAndData()
+        dao.deleteAllLocalData()
 
         pathsToDelete.forEach { editionImageStorage.delete(path = it) }
     }

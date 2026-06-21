@@ -14,9 +14,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
+import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
+import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
 import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 
 private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
@@ -59,11 +61,30 @@ private fun retryableTransportFailureOrNull(exception: Throwable): RetryableSync
     else -> null
 }
 
+/**
+ * Maps an HTTP 401/403 to an [InvalidTokenException] — the server rejected the credentials, so the
+ * stored token is bad and replaying is pointless. Returns null for everything else. Emitting on this
+ * lets the app prompt a non-destructive re-auth instead of a generic error.
+ */
+private fun authFailureOrNull(exception: Throwable): InvalidTokenException? =
+    if (exception is ApolloHttpException && (exception.statusCode == 401 || exception.statusCode == 403)) {
+        InvalidTokenException("Auth rejected (${exception.statusCode})")
+    } else {
+        null
+    }
+
 private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
     response.exception?.let { exception ->
         // A transient transport/server failure is retryable: throw it WITHOUT toasting, since the
         // write is applied optimistically and will sync later. Everything else is a genuine failure.
         retryableTransportFailureOrNull(exception)?.let { throw it }
+
+        // A rejected token drives the re-auth dialog rather than a generic toast.
+        authFailureOrNull(exception)?.let {
+            SessionExpiredNotifier.notifySessionExpired()
+
+            throw it
+        }
 
         notifyGenericError()
 
@@ -150,9 +171,20 @@ internal fun <T : Query.Data> ApolloClient.safeQueryFlow(
         }
     }
 
-    if (emittedAny.not()) {
-        val failure = lastFailure
+    val failure = lastFailure
 
+    // Surface a rejected token regardless of whether cached data was already emitted — a
+    // CacheAndNetwork hit must still raise re-auth when the network leg returns 401/403. Only throw
+    // when nothing was emitted; otherwise the cached data stands and we just signal re-auth.
+    failure?.let { authFailureOrNull(it) }?.let { invalid ->
+        SessionExpiredNotifier.notifySessionExpired()
+
+        if (emittedAny.not()) throw invalid
+
+        return@flow
+    }
+
+    if (emittedAny.not()) {
         if (failure != null) {
             retryableTransportFailureOrNull(failure)?.let { throw it }
         }

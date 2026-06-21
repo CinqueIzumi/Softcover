@@ -58,6 +58,13 @@ interface SettingsRepository {
 
     suspend fun resetLibraryVisibilityPreferences()
 
+    /**
+     * Resets **all** app settings to their defaults (theme, layout, sort, library visibility, userId,
+     * etc.) — the preference half of the full local-data wipe used by logout / account-switch. The
+     * API key lives in secure storage and is cleared separately via [updateApiKey].
+     */
+    suspend fun resetAllSettings()
+
     suspend fun setEnabledStatusCodes(codes: Set<Int>)
 
     suspend fun setEnabledListIds(ids: Set<Int>)

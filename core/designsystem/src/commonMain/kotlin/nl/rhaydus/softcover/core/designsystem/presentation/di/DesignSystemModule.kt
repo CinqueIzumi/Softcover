@@ -11,6 +11,8 @@ val designSystemModule = module {
             refreshLibraryUseCase = get(),
             getThemeConfigurationUseCase = get(),
             refreshUserProfileDataUseCase = get(),
+            reAuthenticateUseCase = get(),
+            resetUserDataUseCase = get(),
         )
     }
 
