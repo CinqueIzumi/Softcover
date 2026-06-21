@@ -10,6 +10,7 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 - [roadmap-steps.md](roadmap-steps.md) — the sequenced steps (the *order*).
 - [release-plan.md](release-plan.md) — steps bundled into versioned drops (the *when*).
 - [../../ROADMAP.md](../../ROADMAP.md) — the **public**, user-facing projection of the release plan.
+- [foundation-upstream-candidates.md](foundation-upstream-candidates.md) — findings to push upstream into the nl.rhaydus foundation (bugs, reusability gaps, gates to promote).
 
 **Maintenance rules.**
 - A **focus** item is a step pulled to the front — link it to its step number / roadmap tag so it stays anchored. When it ships, it follows its step's normal lifecycle (deleted from `roadmap-steps.md`); remove it from Focus here too.
