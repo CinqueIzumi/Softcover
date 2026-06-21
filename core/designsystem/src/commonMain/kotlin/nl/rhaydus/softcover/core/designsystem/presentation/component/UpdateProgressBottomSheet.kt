@@ -97,19 +97,27 @@ private fun ProgressBottomSheetContent(
     onUpdatePageProgressClick: (String) -> Unit,
     onUpdateTimeProgressClick: (String, String, String) -> Unit = { _, _, _ -> },
 ) {
-    val isAudiobook = book.currentEdition?.isAudiobook == true
+    val edition = book.currentEdition
+    val isAudiobook = edition?.isAudiobook == true
 
-    val visibleTabs = if (isAudiobook) {
-        listOf(ProgressSheetTab.TIME, ProgressSheetTab.PERCENTAGE)
+    // Percentage entry needs a known total to convert a fraction into pages (or seconds); without one
+    // it can only ever record 0, so it's offered only when that total is known. The primary unit —
+    // time for an audiobook, pages otherwise — always stays, allowing free entry even with no total.
+    val primaryTab = if (isAudiobook) ProgressSheetTab.TIME else ProgressSheetTab.PAGE
+
+    val totalPages = edition?.pages ?: book.defaultEdition?.pages ?: 0
+    val totalSeconds = edition?.audioSeconds ?: 0
+    val hasKnownTotal = if (isAudiobook) totalSeconds > 0 else totalPages > 0
+
+    val visibleTabs = if (hasKnownTotal) {
+        listOf(primaryTab, ProgressSheetTab.PERCENTAGE)
     } else {
-        listOf(ProgressSheetTab.PAGE, ProgressSheetTab.PERCENTAGE)
+        listOf(primaryTab)
     }
 
-    val activeTab = if (progressSheetTab in visibleTabs) {
-        progressSheetTab
-    } else {
-        visibleTabs.first()
-    }
+    // A stored unit that isn't valid for this book (e.g. PAGE on an audiobook) falls back to the
+    // primary tab, which is always the first visible one.
+    val activeTab = if (progressSheetTab in visibleTabs) progressSheetTab else primaryTab
 
     val focusManager = LocalFocusManager.current
 
@@ -253,6 +261,7 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
     onUpdatePageProgressClick: (String) -> Unit,
 ) {
     val totalPages = book.currentEdition?.pages ?: book.defaultEdition?.pages ?: 0
+    val hasTotal = totalPages > 0
 
     var number by remember {
         val currentPage = book.userBookRead?.currentPage ?: 0
@@ -264,7 +273,7 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
 
     val parsed = number.text.toIntOrNull() ?: 0
 
-    val fraction = if (totalPages > 0) {
+    val fraction = if (hasTotal) {
         (parsed.toFloat() / totalPages).coerceIn(
             minimumValue = 0f,
             maximumValue = 1f,
@@ -302,10 +311,14 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
                     return@HeroStatNumberField
                 }
 
-                val updatedNumber = min(
-                    newNumber,
-                    totalPages,
-                )
+                val updatedNumber = if (hasTotal) {
+                    min(
+                        newNumber,
+                        totalPages,
+                    )
+                } else {
+                    newNumber
+                }
 
                 number = newValue.copy(text = updatedNumber.toString())
             },
@@ -324,13 +337,15 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
         )
     }
 
-    Spacer(modifier = Modifier.height(8.dp))
+    if (hasTotal) {
+        Spacer(modifier = Modifier.height(8.dp))
 
-    EditorialSuffix(text = "of $totalPages pages")
+        EditorialSuffix(text = "of $totalPages pages")
 
-    Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-    EditorialProgressIndicator(fraction = fraction)
+        EditorialProgressIndicator(fraction = fraction)
+    }
 
     Spacer(modifier = Modifier.height(28.dp))
 
@@ -458,6 +473,7 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
 ) {
     val initial = (book.userBookRead?.currentSeconds ?: 0).toHoursMinutesSeconds()
     val totalSeconds = book.currentEdition?.audioSeconds ?: 0
+    val hasTotal = totalSeconds > 0
     val totalHms = totalSeconds.toHoursMinutesSeconds()
 
     var hours by remember { mutableStateOf(TextFieldValue(text = initial.hours.toString())) }
@@ -468,7 +484,7 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
         (minutes.text.toIntOrNull() ?: 0) * 60 +
         (seconds.text.toIntOrNull() ?: 0)
 
-    val fraction = if (totalSeconds > 0) {
+    val fraction = if (hasTotal) {
         (currentSeconds.toFloat() / totalSeconds).coerceIn(
             minimumValue = 0f,
             maximumValue = 1f,
@@ -541,27 +557,29 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
         )
     }
 
-    Spacer(modifier = Modifier.height(8.dp))
+    if (hasTotal) {
+        Spacer(modifier = Modifier.height(8.dp))
 
-    EditorialSuffix(
-        text = "of " +
-            "${totalHms.hours.toString().padStart(
-                2,
-                '0',
-            )}:" +
-            "${totalHms.minutes.toString().padStart(
-                2,
-                '0',
-            )}:" +
-            totalHms.seconds.toString().padStart(
-                2,
-                '0',
-            ),
-    )
+        EditorialSuffix(
+            text = "of " +
+                "${totalHms.hours.toString().padStart(
+                    2,
+                    '0',
+                )}:" +
+                "${totalHms.minutes.toString().padStart(
+                    2,
+                    '0',
+                )}:" +
+                totalHms.seconds.toString().padStart(
+                    2,
+                    '0',
+                ),
+        )
 
-    Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-    EditorialProgressIndicator(fraction = fraction)
+        EditorialProgressIndicator(fraction = fraction)
+    }
 
     Spacer(modifier = Modifier.height(28.dp))
 

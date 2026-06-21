@@ -30,10 +30,18 @@ internal data class OnUpdateTimeProgressClickAction(
         ) ?: 0
 
         val total = bookToUpdate.currentEdition?.audioSeconds ?: 0
-        val newSeconds = (h * 3600 + m * 60 + s).coerceIn(
-            0,
-            total,
-        )
+        val entered = h * 3600 + m * 60 + s
+
+        // With a known duration the entry is clamped to it; when the audiobook's length is unknown
+        // there's no ceiling to clamp against, so any non-negative time is accepted as-is.
+        val newSeconds = if (total > 0) {
+            entered.coerceIn(
+                0,
+                total,
+            )
+        } else {
+            entered.coerceAtLeast(0)
+        }
 
         scope.currentLocalVariables.bookMutationJobs[bookToUpdate.id]?.cancel()
 

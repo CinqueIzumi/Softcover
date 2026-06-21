@@ -429,12 +429,12 @@ class OnUpdateTimeProgressClickActionTest {
         }
 
         @Test
-        fun `uses 0 as total when audioSeconds is null and still clamps`() = runTest {
+        fun `records entered seconds unclamped when audioSeconds is null`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(audioSeconds = null)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            // total = 0, so (1*3600).coerceIn(0,0) = 0
+            // total = 0 (null), so entered.coerceAtLeast(0) = 3600
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
                 minutes = "0",
@@ -451,7 +451,35 @@ class OnUpdateTimeProgressClickActionTest {
             coVerify {
                 updateBookProgress(
                     book = book,
-                    newSeconds = 0,
+                    newSeconds = 3600,
+                )
+            }
+        }
+
+        @Test
+        fun `records entered seconds unclamped when audioSeconds is null with 2 hours`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = null)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+            // total = 0 (null), so entered.coerceAtLeast(0) = 7200
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "2",
+                minutes = "0",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 7200,
                 )
             }
         }

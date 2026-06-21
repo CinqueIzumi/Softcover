@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -94,6 +95,7 @@ class ReadingUpdateShareContentMapperTest {
         releaseDate = null,
         format = "audio",
         owned = false,
+        readingFormat = ReadingFormat.Audio,
     )
 
     private fun buildBook(
