@@ -21,6 +21,8 @@ import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
@@ -61,6 +63,8 @@ internal class BookDetailScreenScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val getUserTagsUseCase: GetUserTagsUseCase,
     private val saveUserTagsUseCase: SaveUserTagsUseCase,
+    private val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
+    private val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailCollector, BookDetailLocalVariables>(
@@ -97,6 +101,8 @@ internal class BookDetailScreenScreenModel(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         getUserTagsUseCase = getUserTagsUseCase,
         saveUserTagsUseCase = saveUserTagsUseCase,
+        getLastUsedProgressUnitAsFlowUseCase = getLastUsedProgressUnitAsFlowUseCase,
+        setLastUsedProgressUnitUseCase = setLastUsedProgressUnitUseCase,
     )
 
     init {

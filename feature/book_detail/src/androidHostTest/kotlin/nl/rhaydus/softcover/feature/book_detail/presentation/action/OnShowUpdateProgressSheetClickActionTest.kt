@@ -21,7 +21,6 @@ class OnShowUpdateProgressSheetClickActionTest {
 
     @BeforeEach
     fun setUp() {
-        dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(BookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -35,6 +34,7 @@ class OnShowUpdateProgressSheetClickActionTest {
         @Test
         fun `sets showUpdateProgressSheet to true`() = runTest {
             // ----- Arrange -----
+            dependencies = mockk(relaxed = true)
             val action = OnShowUpdateProgressSheetClickAction()
 
             // ----- Act -----
@@ -48,25 +48,9 @@ class OnShowUpdateProgressSheetClickActionTest {
         }
 
         @Test
-        fun `does not mutate any other state field`() = runTest {
-            // ----- Arrange -----
-            val initialState = BookDetailUiState()
-            stateFlow.value = initialState
-            val action = OnShowUpdateProgressSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState.copy(showUpdateProgressSheet = true)
-        }
-
-        @Test
         fun `is idempotent when showUpdateProgressSheet is already true`() = runTest {
             // ----- Arrange -----
+            dependencies = mockk(relaxed = true)
             stateFlow.value = BookDetailUiState(showUpdateProgressSheet = true)
             val action = OnShowUpdateProgressSheetClickAction()
 

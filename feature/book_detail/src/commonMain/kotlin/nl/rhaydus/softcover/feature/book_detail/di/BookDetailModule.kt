@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadl
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserBooksFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserListsFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
@@ -30,6 +31,7 @@ val bookDetailModule = module {
     factory { UserListsFlowCollector() } bind BookDetailCollector::class
     factory { CurrentUserCollector() } bind BookDetailCollector::class
     factory { UserTagsCollector() } bind BookDetailCollector::class
+    factory { LastUsedProgressUnitCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -91,6 +93,8 @@ val bookDetailModule = module {
             observeUserProfileDataUseCase = get(),
             getUserTagsUseCase = get(),
             saveUserTagsUseCase = get(),
+            getLastUsedProgressUnitAsFlowUseCase = get(),
+            setLastUsedProgressUnitUseCase = get(),
         )
     }
 }

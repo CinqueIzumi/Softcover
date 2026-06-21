@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 
@@ -80,4 +81,8 @@ interface SettingsRepository {
     val readingStreakEnabled: Flow<Boolean>
 
     suspend fun setReadingStreakEnabled(enabled: Boolean)
+
+    val lastUsedProgressUnit: Flow<ProgressUnit>
+
+    suspend fun setLastUsedProgressUnit(unit: ProgressUnit)
 }

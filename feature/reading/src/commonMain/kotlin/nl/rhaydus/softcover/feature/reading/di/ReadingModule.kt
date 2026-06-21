@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.di
 import nl.rhaydus.softcover.feature.reading.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.CurrentlyReadingBooksCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.reading.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.PlanTodayDismissalsCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingActivityCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollector
@@ -29,6 +30,8 @@ val readingModule = module {
             observeRecentReadingActivityUseCase = get(),
             refreshUserProfileDataUseCase = get(),
             getReadingStreakEnabledAsFlowUseCase = get(),
+            getLastUsedProgressUnitAsFlowUseCase = get(),
+            setLastUsedProgressUnitUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
         )
@@ -41,4 +44,5 @@ val readingModule = module {
     factory { WantToReadCollector() } bind ReadingCollector::class
     factory { TrendingBooksLoader() } bind ReadingCollector::class
     factory { ReadingActivityCollector() } bind ReadingCollector::class
+    factory { LastUsedProgressUnitCollector() } bind ReadingCollector::class
 }

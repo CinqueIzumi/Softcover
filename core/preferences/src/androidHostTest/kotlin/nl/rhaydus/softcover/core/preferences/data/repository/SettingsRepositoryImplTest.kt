@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.WindowPlacement
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
@@ -468,6 +469,43 @@ class SettingsRepositoryImplTest {
             // ----- Assert -----
             coVerify {
                 settingsLocalDataSource.setDesktopWindowState(state = state)
+            }
+        }
+    }
+
+    @Nested
+    inner class LastUsedProgressUnitProperty {
+        @Test
+        fun `lastUsedProgressUnit is wired to local data source flow`() = runTest {
+            // ----- Arrange -----
+            every {
+                settingsLocalDataSource.lastUsedProgressUnit
+            } returns flowOf(ProgressUnit.TIME)
+
+            val freshRepository =
+                SettingsRepositoryImpl(
+                    settingsLocalDataSource = settingsLocalDataSource,
+                    settingsRemoteDataSource = settingsRemoteDataSource,
+                )
+
+            // ----- Act & Assert -----
+            freshRepository.lastUsedProgressUnit.test {
+                awaitItem() shouldBe ProgressUnit.TIME
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class SetLastUsedProgressUnit {
+        @Test
+        fun `delegates to local data source with the given unit`() = runTest {
+            // ----- Act -----
+            repository.setLastUsedProgressUnit(unit = ProgressUnit.PERCENTAGE)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setLastUsedProgressUnit(unit = ProgressUnit.PERCENTAGE)
             }
         }
     }
