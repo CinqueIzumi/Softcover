@@ -19,7 +19,8 @@
 # Severity:
 #   ERROR    — high-precision rule, safe to gate a build on (currently: boolean ! negation).
 #   ADVISORY — useful but grep-imprecise (multi-arg wrapping, FQ refs, one-type-per-file,
-#              import order, composable blank lines). Surfaced for review, never gates CI.
+#              import order, composable blank lines, unguarded terminal flow reads). Surfaced
+#              for review, never gates CI.
 #              The PostToolUse hook surfaces ALL findings on files Claude just edited, so the
 #              advisory rules are still enforced in practice via the on-touch policy.
 
@@ -104,6 +105,29 @@ check_one_type_per_file() {
     fi
 }
 
+# Rule: a terminal flow read must never be able to crash the app.
+# `.first()` / `.single()` throw on an empty flow, and any terminal re-throws an upstream error
+# (DataStore / network / Apollo / repository). A bare `.first(` / `.single(` is a crash risk —
+# guard it (`.firstOrNull()` + default + `.catch` / cancellation-aware `runCatching`) or consume
+# the flow reactively via a TOAD Collector. Production source only (test code controls its flows).
+# (Imprecise: List/Iterable `.first()`/`.single()` also match — review each; confirm not empty.)
+check_unguarded_flow_terminal() {
+    local f out=""
+    for f in "${targets[@]}"; do
+        case "$f" in
+            */src/*[Tt]est*/*) continue ;; # production source sets only (commonMain/androidMain/…)
+        esac
+        local hits
+        hits=$(grep -HnE '\.(first|single)[[:space:]]*[({]' "$f" 2>/dev/null)
+        [ -n "$hits" ] && out+="$hits"$'\n'
+    done
+    if [ -n "$out" ]; then
+        section "[advisory] Terminal flow read (.first()/.single()) can crash on an empty/erroring flow — guard it (.firstOrNull() + default + .catch / runCatching) or consume via a Collector; never let a flow read crash the app (§Error Handling)"
+        printf '%s' "$out"
+        advisory_hits=$((advisory_hits + 1))
+    fi
+}
+
 # Rule: project imports (nl.rhaydus.*) are alphabetical within their group.
 check_import_order() {
     local f block out=""
@@ -126,6 +150,7 @@ check_import_order() {
 check_fq_refs
 check_one_type_per_file
 check_import_order
+check_unguarded_flow_terminal
 
 if [ "$error_hits" -gt 0 ]; then
     printf '\nstyle-check: %d error-tier rule(s), %d advisory rule(s) with findings.\n' "$error_hits" "$advisory_hits"
