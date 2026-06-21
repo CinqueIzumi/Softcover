@@ -17,13 +17,14 @@ internal const val READING_ACTIVITY_WINDOW_DAYS = 21
 class ObserveRecentReadingActivityUseCase(
     private val profileRepository: ProfileRepository,
     private val clock: Clock,
+    private val timeZone: TimeZone,
 ) {
     operator fun invoke(): Flow<List<ReadingDayActivity>> =
         profileRepository.observeUserProfileData().map { data ->
             val activeDates = data?.activeReadingDates.orEmpty()
-            // "Today" is defined in UTC to match the server's UTC calendar dates for reading
-            // activity; the strip therefore advances at UTC midnight, not the device's local midnight.
-            val today = clock.todayIn(TimeZone.UTC)
+            // "Today" is defined in the device's local timezone so the strip advances at the user's
+            // local midnight and a reading-day matches the calendar day they actually read on.
+            val today = clock.todayIn(timeZone)
             val firstDay = today.minus(
                 READING_ACTIVITY_WINDOW_DAYS - 1,
                 DateTimeUnit.DAY,

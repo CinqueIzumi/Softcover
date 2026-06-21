@@ -15,11 +15,12 @@ class RefreshUserProfileDataUseCase(
     private val profileRepository: ProfileRepository,
     private val getUserIdUseCase: GetUserIdUseCase,
     private val clock: Clock,
+    private val timeZone: TimeZone,
 ) {
     suspend operator fun invoke(): Result<Unit> = runCatching {
         val userId = getUserIdUseCase().getOrThrow()
         val snapshot = profileRepository.fetchUserProfileSnapshot(userId = userId)
-        val data = snapshot.toUserProfileData(today = clock.todayIn(TimeZone.UTC))
+        val data = snapshot.toUserProfileData(today = clock.todayIn(timeZone))
 
         profileRepository.cacheUserProfileData(data = data)
     }

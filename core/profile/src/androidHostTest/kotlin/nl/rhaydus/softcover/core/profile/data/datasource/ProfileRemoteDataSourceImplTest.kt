@@ -10,6 +10,9 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.UtcOffset
+import kotlinx.datetime.asTimeZone
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -25,7 +28,10 @@ class ProfileRemoteDataSourceImplTest {
     @BeforeEach
     fun setUp() {
         apolloClient = mockk()
-        dataSource = ProfileRemoteDataSourceImpl(apolloClient = apolloClient)
+        dataSource = ProfileRemoteDataSourceImpl(
+            apolloClient = apolloClient,
+            timeZone = TimeZone.UTC,
+        )
 
         mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
     }
@@ -467,6 +473,72 @@ class ProfileRemoteDataSourceImplTest {
                 5,
                 4,
             ),)
+        }
+
+        @Test
+        fun `activeReadingDates — UTC-5 timezone maps late-night UTC timestamps to correct local dates`() = runTest {
+            // Under TimeZone.UTC these three instants bucket to {05-17, 05-19, 05-20},
+            // leaving 05-18 empty and breaking the streak.
+            // With UTC-5 they map to {05-17, 05-18, 05-19} — a continuous set.
+            // ----- Arrange -----
+            val utcMinus5 = UtcOffset(hours = -5).asTimeZone()
+            val localDataSource = ProfileRemoteDataSourceImpl(
+                apolloClient = apolloClient,
+                timeZone = utcMinus5,
+            )
+
+            val queryData = mockk<GetUserProfileDataQuery.Data>()
+            val meEntry = mockk<GetUserProfileDataQuery.Data.Me>()
+            val booksRead = mockk<GetUserProfileDataQuery.Data.Me.Books_read>()
+            val ratedBooks = mockk<GetUserProfileDataQuery.Data.Me.Rated_books>()
+
+            val entry1 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
+            val entry2 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
+            val entry3 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
+            } returns queryData
+
+            every { queryData.me } returns listOf(meEntry)
+            every { meEntry.user_books_pages } returns emptyList()
+            every { queryData.streak_journals } returns listOf(entry1, entry2, entry3)
+            // 2026-05-17T23:15:05Z → UTC-5: 18:15 on 2026-05-17
+            every { entry1.action_at } returns "2026-05-17T23:15:05+00:00"
+            // 2026-05-19T04:00:00Z → UTC-5: 23:00 on 2026-05-18
+            every { entry2.action_at } returns "2026-05-19T04:00:00+00:00"
+            // 2026-05-20T03:42:04Z → UTC-5: 22:42 on 2026-05-19
+            every { entry3.action_at } returns "2026-05-20T03:42:04+00:00"
+            every { meEntry.name } returns ""
+            every { meEntry.username } returns ""
+            every { meEntry.bio } returns ""
+            every { meEntry.image } returns null
+            every { meEntry.books_read } returns booksRead
+            every { booksRead.aggregate } returns null
+            every { meEntry.rated_books } returns ratedBooks
+            every { ratedBooks.aggregate } returns null
+
+            // ----- Act -----
+            val result = localDataSource.getUserProfileSnapshot(userId = 42)
+
+            // ----- Assert -----
+            result.activeReadingDates shouldBe setOf(
+                LocalDate(
+                    year = 2026,
+                    monthNumber = 5,
+                    dayOfMonth = 17,
+                ),
+                LocalDate(
+                    year = 2026,
+                    monthNumber = 5,
+                    dayOfMonth = 18,
+                ),
+                LocalDate(
+                    year = 2026,
+                    monthNumber = 5,
+                    dayOfMonth = 19,
+                ),
+            )
         }
     }
 

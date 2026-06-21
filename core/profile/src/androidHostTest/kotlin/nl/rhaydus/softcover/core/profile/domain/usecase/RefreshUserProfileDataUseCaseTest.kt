@@ -14,6 +14,7 @@ import kotlinx.datetime.plus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlinx.datetime.TimeZone
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
@@ -36,6 +37,7 @@ class RefreshUserProfileDataUseCaseTest {
             profileRepository = profileRepository,
             getUserIdUseCase = getUserIdUseCase,
             clock = fixedClock,
+            timeZone = TimeZone.UTC,
         )
     }
 

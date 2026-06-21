@@ -15,6 +15,7 @@ import kotlinx.datetime.plus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlinx.datetime.TimeZone
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
@@ -38,6 +39,7 @@ class ObserveRecentReadingActivityUseCaseTest {
         useCase = ObserveRecentReadingActivityUseCase(
             profileRepository = profileRepository,
             clock = fixedClock,
+            timeZone = TimeZone.UTC,
         )
     }
 

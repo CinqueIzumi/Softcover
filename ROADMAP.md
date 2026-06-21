@@ -20,11 +20,12 @@ Softcover arrives on **iPhone, iPad, and desktop** — one app, your whole libra
 - Faster library sync (lists only re-fetch when they've actually changed).
 - More accurate "finished" dates across your shelves.
 - Reading-progress updates show up instantly on your Currently Reading strip.
-- Reading streaks now count the day you actually read.
+- Reading streaks now count the day you actually read — in your own time zone, so late-night reading no longer breaks your streak.
 - Progress you log offline or during a hiccup retries automatically.
 - Covers refresh properly when a book's artwork changes.
 - A renewable login — an expired key no longer means losing your local data.
 - Reliable audiobook handling, including time tracking for audiobooks without a listed length.
+- Progress entry remembers whether you last logged by page, time, or percent.
 - A toggle to hide the reading-streak strip, and it now shows on an empty Reading screen too.
 
 ## 3.1.0 — Quick wins

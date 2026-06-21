@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.profile.di
 
 import kotlin.time.Clock
+import kotlinx.datetime.TimeZone
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
@@ -18,7 +19,10 @@ val profileModule = module {
     includes(platformProfileModule)
 
     single<ProfileRemoteDataSource> {
-        ProfileRemoteDataSourceImpl(apolloClient = get())
+        ProfileRemoteDataSourceImpl(
+            apolloClient = get(),
+            timeZone = get(),
+        )
     }
 
     single<ProfileLocalDataSource> {
@@ -40,6 +44,7 @@ val profileModule = module {
         ObserveRecentReadingActivityUseCase(
             profileRepository = get(),
             clock = get(),
+            timeZone = get(),
         )
     }
 
@@ -47,6 +52,7 @@ val profileModule = module {
         MarkReadingActivityTodayUseCaseImpl(
             profileRepository = get(),
             clock = get(),
+            timeZone = get(),
         )
     }
 
@@ -55,9 +61,15 @@ val profileModule = module {
             profileRepository = get(),
             getUserIdUseCase = get(),
             clock = get(),
+            timeZone = get(),
         )
     }
 
-    // Hardcover serves action_at as a UTC calendar date, so streak comparisons must use UTC too.
+    // Reading-activity dates are bucketed in the user's local timezone so a streak day matches the
+    // calendar day they actually read on; Clock + TimeZone are the shared basis every collaborator uses.
     single<Clock> { Clock.System }
+
+    // Captured once at graph creation (not a live call), so a mid-session timezone change only takes
+    // effect after an app restart — an acceptable trade-off for a day-granularity streak.
+    single<TimeZone> { TimeZone.currentSystemDefault() }
 }

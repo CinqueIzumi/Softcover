@@ -11,11 +11,12 @@ import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlinx.datetime.TimeZone
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
 class MarkReadingActivityTodayUseCaseTest {
-    // Fixed instant: 2026-06-19T23:30:00Z — still the 19th in UTC
+    // Fixed instant: 2026-06-19T23:30:00Z — UTC pinned as a deterministic test timezone, not production behavior
     private val fixedClock: Clock = object : Clock {
         override fun now(): Instant = Instant.parse("2026-06-19T23:30:00Z")
     }
@@ -29,13 +30,14 @@ class MarkReadingActivityTodayUseCaseTest {
         useCase = MarkReadingActivityTodayUseCaseImpl(
             profileRepository = profileRepository,
             clock = fixedClock,
+            timeZone = TimeZone.UTC,
         )
     }
 
     @Nested
     inner class Invoke {
         @Test
-        fun `forwards today's UTC date to repository`() = runTest {
+        fun `forwards today's local date (using injected timezone) to repository`() = runTest {
             // ----- Arrange -----
 
             // ----- Act -----
