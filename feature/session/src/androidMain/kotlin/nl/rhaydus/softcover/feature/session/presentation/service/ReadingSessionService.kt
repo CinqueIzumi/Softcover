@@ -192,8 +192,11 @@ internal class ReadingSessionService : Service() {
                 R.color.notification_accent,
             ),)
             .setOngoing(true)
+            // setOnlyAlertOnce (but deliberately NOT setSilent): the alerting Session channel lets the
+            // notification chime once when the session starts so it lands on the lock screen, while
+            // this flag suppresses the sound on every subsequent timer/page update. setSilent would
+            // demote it into Android's "silent" autogroup, which One UI hides from the lock screen.
             .setOnlyAlertOnce(true)
-            .setSilent(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(focusModePendingIntent())
             .setDeleteIntent(servicePendingIntent(action = ACTION_RESHOW))
