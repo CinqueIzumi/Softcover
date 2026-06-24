@@ -25,7 +25,7 @@ import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.book_detail.di.bookDetailModule
 import nl.rhaydus.softcover.feature.explore.di.exploreModule
 import nl.rhaydus.softcover.feature.library.di.libraryModule
-import nl.rhaydus.softcover.feature.lists.di.createListModule
+import nl.rhaydus.softcover.feature.lists.di.listsScreenModule
 import nl.rhaydus.softcover.feature.onboarding.di.onboardingModule
 import nl.rhaydus.softcover.feature.profile.di.profileScreenModule
 import nl.rhaydus.softcover.feature.reading.di.readingModule
@@ -59,7 +59,7 @@ internal val orchestrationModule = module {
         bookDetailModule,
         exploreModule,
         libraryModule,
-        createListModule,
+        listsScreenModule,
         onboardingModule,
         profileScreenModule,
         readingModule,

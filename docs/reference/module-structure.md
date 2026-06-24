@@ -39,6 +39,11 @@ Notes on features that are leaves only for their *screens*:
 `deadlines`, `personal`, and `connectivity` were kernels in disguise and are now `core` modules —
 they are **not** features.
 
+`session` is a small feature (a Focus-Mode overlay over the shared `ActiveSessionController`) but
+**stays its own module**: it contributes an Android foreground `ReadingSessionService` and its manifest
+entry, which is a genuine module boundary (manifests merge upward — see below), not presentation glue
+that belongs in `:orchestration`.
+
 ## The module roster and build setup
 
 The build is split into the following Gradle modules (see `settings.gradle.kts`). A module may depend
@@ -67,6 +72,18 @@ only on modules **below** its tier.
 | `core:designsystem` | TOAD framework, Material 3 theme, reusable components, modifiers, shared presentation models, and the cross-tier presentation contracts whose impls live in orchestration: nav (`AppNavigator`), `ActiveSessionController`, `SessionAuthenticator` |
 | `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation` |
 | `core:database` | Room database, migrations, **all** persisted entities + DAOs (incl. those a feature's data source uses) |
+
+The `core` tier holds two **kinds** of module, and a new one should land deliberately in one bucket:
+
+- **Domain-area data modules** — `core:{book, lists, deadlines, personal, profile, identity,
+  preferences}`: a repository + use cases (+ data sources/mappers) for one area. These carry a feature's
+  data/use-case layer, so depending on one is normal but **re-exporting one is not**: a module must
+  `implementation`-depend on them, never `api`, unless the edge is on the allowlist in the
+  `checkModuleGraph` task. That api-visibility rule is what stops a UI/infra module from quietly becoming
+  a god-module (the way `:core:designsystem` once `api`-exported half the app).
+- **Infra / contract modules** — `core:{domain, database, network, notification, connectivity,
+  designsystem}`: cross-cutting plumbing (Apollo, Room, DI/UI primitives, sync) and the shared kernel
+  (`core:domain`). They may `api`-expose their own surface (and `core:domain` types) as needed.
 
 ### The vertical-slice rule (Softcover concretization)
 
@@ -112,9 +129,16 @@ Room DB.
   `modules(softcoverModules + appModule)`. The whole-graph wiring is guarded by a Koin `verify()`
   test (`orchestration` `SoftcoverModulesVerificationTest`): every binding's constructor deps must be
   resolvable across the aggregate (externally-supplied types are listed in its `extraTypes`).
-- The tier rules are **enforced automatically** by the `checkModuleGraph` Gradle task (wired into
-  `check`): it derives each module's tier from its path and fails the build on any `project(...)`
-  dependency pointing sideways or upward.
+
+  **Naming:** a module's `module { }` val is `<moduleName>Module` (e.g. `bookModule`, `readingModule`);
+  a feature whose name collides with a `core` module of the same name uses `<feature>ScreenModule` for
+  its presentation DI (`profileScreenModule`, `listsScreenModule`) so the two are distinguishable. The
+  two infra modules named for their tech rather than their path — `dispatcherModule` (`core:domain`) and
+  `apolloModule` (`core:network`) — are deliberate.
+- The tier rules and the data-module **api-visibility** rule are **enforced automatically** by the
+  `checkModuleGraph` Gradle task (wired into `check`): it derives each module's tier from its path and
+  fails the build on any `project(...)` dependency pointing sideways or upward, and on any
+  `api(project(":core:<data-module>"))` edge that is not on the task's explicit allowlist (§10).
 
 ### Kotlin Multiplatform
 

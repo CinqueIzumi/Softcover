@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.feature.lists.domain.usecase.CreateListUseCase
 import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListScreenModel
 import org.koin.dsl.module
 
-val createListModule = module {
+val listsScreenModule = module {
     includes(
         dispatcherModule,
         listsModule,
