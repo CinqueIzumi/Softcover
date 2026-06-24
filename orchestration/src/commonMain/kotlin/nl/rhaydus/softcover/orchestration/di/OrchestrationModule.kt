@@ -9,10 +9,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
+import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
-import nl.rhaydus.softcover.core.library.di.libraryServiceModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.notification.di.notificationModule
@@ -33,6 +33,7 @@ import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import nl.rhaydus.softcover.orchestration.navigation.AppNavigatorImpl
 import nl.rhaydus.softcover.orchestration.usecase.InitializeUserIdAndBooksUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ReAuthenticateUseCaseImpl
+import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ResetUserDataUseCaseImpl
 
 internal val orchestrationModule = module {
@@ -50,7 +51,6 @@ internal val orchestrationModule = module {
         deadlinesModule,
         personalModule,
         profileModule,
-        libraryServiceModule,
         connectivityModule,
         bookDetailModule,
         exploreModule,
@@ -89,6 +89,16 @@ internal val orchestrationModule = module {
             resetUserDataUseCase = get(),
             refreshLibraryUseCase = get(),
             refreshUserProfileDataUseCase = get(),
+        )
+    }
+
+    factory<RefreshLibraryUseCase> {
+        RefreshLibraryUseCaseImpl(
+            getUserIdUseCase = get(),
+            booksRepository = get(),
+            listsRepository = get(),
+            settingsRepository = get(),
+            dispatchers = get(),
         )
     }
 }

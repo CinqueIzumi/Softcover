@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.library.domain.usecase
+package nl.rhaydus.softcover.orchestration.usecase
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
@@ -17,14 +18,14 @@ import nl.rhaydus.ui.common.AppDispatchers
 
 private const val OWNED_LIST_SLUG: String = "owned"
 
-class RefreshLibraryUseCase(
+internal class RefreshLibraryUseCaseImpl(
     private val getUserIdUseCase: GetUserIdUseCase,
     private val booksRepository: BooksRepository,
     private val listsRepository: ListsRepository,
     private val settingsRepository: SettingsRepository,
     private val dispatchers: AppDispatchers,
-) {
-    suspend operator fun invoke(scope: RefreshScope = RefreshScope.All): Result<Unit> = runCatching {
+) : RefreshLibraryUseCase {
+    override suspend operator fun invoke(scope: RefreshScope): Result<Unit> = runCatching {
         val userId: Int = getUserIdUseCase().getOrThrow()
 
         withContext(dispatchers.io) {

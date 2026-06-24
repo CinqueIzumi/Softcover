@@ -49,19 +49,18 @@ only on modules **below** its tier.
 | T3 app shell | `:app` |
 | T3 orchestration | `:orchestration` |
 | T1 features | `:feature:{lists, profile, onboarding, explore, library, book_detail, reading, session, scan, settings, app_update}` |
-| T0 core | `:core:{domain, database, network, notification, preferences, identity, book, lists, deadlines, personal, profile, library, connectivity, designsystem}` |
+| T0 core | `:core:{domain, database, network, notification, preferences, identity, book, lists, deadlines, personal, profile, connectivity, designsystem}` |
 
 ### What each `core:*` module holds (Softcover roster)
 
 | Module | Holds |
 |--------|-------|
-| `core:domain` | shared domain models, classification enums, config value types, cross-feature use-case **contracts** (`ResetUserDataUseCase`, `InitializeUserIdAndBooksUseCase`, `AppUpdateSimulator`) whose impls live in orchestration |
+| `core:domain` | shared domain models, classification enums, config value types, cross-feature use-case **contracts** (`ResetUserDataUseCase`, `InitializeUserIdAndBooksUseCase`, `ReAuthenticateUseCase`, `RefreshLibraryUseCase`, `AppUpdateSimulator`) whose impls live in orchestration |
 | `core:book` | the book-operations service: `BooksRepository` + use cases every feature calls (incl. `GetTrendingBooksUseCase`) |
 | `core:lists` | the list-operations service: `ListsRepository`, `GetAllUserListsUseCase`, `AddBookToListUseCase`, `SetEditionAsOwnedUseCase` |
 | `core:deadlines` | the deadline-operations service: `BookDeadlineRepository`, `ObserveBookDeadlineUseCase`, `SetBookDeadlineUseCase` |
 | `core:personal` | the reading-activity service (sessions, highlights, reading log) — no screen |
 | `core:profile` | the profile-data service consumed by reading/book_detail (the `ProfileScreen` stays a feature) |
-| `core:library` | `RefreshLibraryUseCase` (consumed by reading + the settings library-visibility screen) |
 | `core:preferences` | `SettingsRepository`, `Get*AsFlowUseCase` readers, `AppSettingsDataStore`, `ApiKeyLocalDataSource` |
 | `core:identity` | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:connectivity` | offline write-queue / sync infra (contracts in `core:domain/connectivity`) |

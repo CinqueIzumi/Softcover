@@ -23,7 +23,6 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:domain"))
             api(project(":core:book"))
-            api(project(":core:library"))
             api(project(":core:profile"))
             api(project(":core:identity"))
             api(project(":core:personal"))

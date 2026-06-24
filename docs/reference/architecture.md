@@ -23,7 +23,7 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 :feature:*            # Leaf features: lists, profile, onboarding, explore, library, book_detail,
                       #   reading, session, scan, settings, app_update
 :core:*               # domain, database, network, designsystem, notification, preferences, identity,
-                      #   book, lists, deadlines, personal, profile, library, connectivity
+                      #   book, lists, deadlines, personal, profile, connectivity
 ```
 
 ## TOAD — Softcover-specific notes

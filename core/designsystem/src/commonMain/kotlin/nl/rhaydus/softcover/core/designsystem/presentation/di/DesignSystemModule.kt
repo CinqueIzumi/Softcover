@@ -6,7 +6,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
-import nl.rhaydus.softcover.core.library.di.libraryServiceModule
 import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
@@ -15,7 +14,6 @@ val designSystemModule = module {
     includes(
         dispatcherModule,
         bookModule,
-        libraryServiceModule,
         profileModule,
         identityModule,
         personalModule,

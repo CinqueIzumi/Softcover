@@ -4,7 +4,6 @@ import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
-import nl.rhaydus.softcover.core.library.di.libraryServiceModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.feature.library.presentation.collector.AllBooksCollector
@@ -27,7 +26,6 @@ val libraryModule = module {
         bookModule,
         listsModule,
         deadlinesModule,
-        libraryServiceModule,
         preferencesModule,
         designSystemModule,
     )

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.library.domain.usecase
+package nl.rhaydus.softcover.orchestration.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -24,12 +24,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class RefreshLibraryUseCaseTest {
+class RefreshLibraryUseCaseImplTest {
     private lateinit var getUserIdUseCase: GetUserIdUseCase
     private lateinit var booksRepository: BooksRepository
     private lateinit var listsRepository: ListsRepository
     private lateinit var settingsRepository: SettingsRepository
-    private lateinit var useCase: RefreshLibraryUseCase
+    private lateinit var useCase: RefreshLibraryUseCaseImpl
 
     @BeforeEach
     fun setUp() {
@@ -44,7 +44,7 @@ class RefreshLibraryUseCaseTest {
 
         val dispatcher = UnconfinedTestDispatcher()
 
-        useCase = RefreshLibraryUseCase(
+        useCase = RefreshLibraryUseCaseImpl(
             getUserIdUseCase = getUserIdUseCase,
             booksRepository = booksRepository,
             listsRepository = listsRepository,

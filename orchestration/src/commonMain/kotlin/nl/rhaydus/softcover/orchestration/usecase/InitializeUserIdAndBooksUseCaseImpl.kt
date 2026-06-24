@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.orchestration.usecase
 
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
-import nl.rhaydus.softcover.core.library.domain.usecase.RefreshLibraryUseCase
+import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 internal class InitializeUserIdAndBooksUseCaseImpl(
