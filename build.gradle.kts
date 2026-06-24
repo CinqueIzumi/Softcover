@@ -332,9 +332,16 @@ tasks.register("checkModuleGraph") {
 // Runs the deterministic mechanical-style checks (scripts/style-check.sh) so CI / pre-commit can
 // gate on them. By default the script checks the changed .kt files; pass files via -PstyleCheckFiles
 // to scope it. Fails the build only on ERROR-tier findings (see the script header for the tiers).
+//
+// Also runs `detekt` across every module. detekt is wired into the heavy `check` lifecycle by default,
+// but the lightweight per-change gate developers actually run is `styleCheck` — so without this, detekt
+// violations only surface in a rarely-run full build and silently accumulate. Folding it in here keeps
+// detekt a first-class part of the fast gate (it is source-only / no type resolution, so it stays fast).
 tasks.register<Exec>("styleCheck") {
     group = "verification"
-    description = "Runs scripts/style-check.sh over changed Kotlin files (mechanical style rules)."
+    description = "Runs detekt (all modules) + scripts/style-check.sh over changed Kotlin files."
+
+    dependsOn(subprojects.map { "${it.path}:detekt" })
 
     val script = "${rootProject.projectDir}/scripts/style-check.sh"
     val extraFiles = (project.findProperty("styleCheckFiles") as String?)

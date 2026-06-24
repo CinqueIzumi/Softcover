@@ -21,7 +21,9 @@ Softcover is a Kotlin Multiplatform / Compose Multiplatform client for [Hardcove
 ./gradlew lint                   # Run Android Lint
 ```
 
-No ktlint or detekt is configured. The project uses `kotlin.code.style=official`.
+The project uses `kotlin.code.style=official`. Both the foundation ktlint ruleset and detekt **are**
+configured and gated (see Code Style below); `./gradlew styleCheck` runs detekt + the mechanical checks,
+and `./gradlew check` runs the full set.
 
 ## Design System
 
@@ -37,6 +39,7 @@ The mechanical style rules are enforced by tooling, not manual vigilance — for
 
 - **The foundation ktlint ruleset** (`nl.rhaydus:ktlint-rules`) **auto-fixes and gates** the mechanizable layout rules. Run `./gradlew ktlintFormat` to auto-fix, `./gradlew ktlintCheck` to gate (also run by `check`). The rules: multi-arg one-per-line wrapping (2+ args/params, even when they fit — exempting collection factories, `Modifier.…` chains, trailing-lambda calls), trailing comma on multi-line lists, blank line after `super.*()` / `AppLog.e(...)`, `// region`/`// endregion` flush, no blank line after `{` / before `}`, blank line between sibling composables, and boolean `!` → `.not()` (gate-only; fix by hand).
 - **The remaining greppable rules** — inline fully-qualified references, one-type-per-file, project-import ordering — are flagged by `scripts/style-check.sh` (run `./gradlew styleCheck`, or pass files). Examine each candidate; the advisory recipes have documented false positives.
+- **detekt** (`config/detekt/detekt.yml`, gates from zero — no baseline) is wired into both `check` **and** `styleCheck`, so the per-change gate catches detekt findings, not just the rarely-run full build. Run `./gradlew detekt --continue` to see every module's findings at once.
 
 The subjective rules no tool can mechanize — blank line between sibling composables (incl. `Spacer`), paragraph spacing around multi-line constructs, an `AppLog.e(...)` log as its own paragraph, reserved fixed height for optional card rows — live in `docs/reference/code-style.md` and are caught in review.
 

@@ -73,6 +73,10 @@ private fun authFailureOrNull(exception: Throwable): InvalidTokenException? =
         null
     }
 
+// Each throw is a distinct, deliberate failure path (retryable transport, auth-rejected, generic, and
+// GraphQL-errors), so the count is over the threshold by design. Suppressed rather than gated — the real
+// fix is to collapse this throw-based seam into a typed result (see docs/working/architecture-review.md, D1).
+@Suppress("ThrowsCount")
 private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
     response.exception?.let { exception ->
         // A transient transport/server failure is retryable: throw it WITHOUT toasting, since the
