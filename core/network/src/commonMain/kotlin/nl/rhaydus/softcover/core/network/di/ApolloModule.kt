@@ -7,6 +7,7 @@ import com.apollographql.apollo.cache.normalized.normalizedCache
 import com.apollographql.apollo.network.http.DefaultHttpEngine
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.cache.NetworkCacheCleaner
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.network.cache.ApolloNetworkCacheCleaner
 import nl.rhaydus.softcover.core.network.cache.SoftcoverCacheResolver
 import nl.rhaydus.softcover.core.network.interceptor.AuthInterceptor
@@ -15,6 +16,8 @@ private const val APOLLO_MEMORY_CACHE_BYTES = 10 * 1024 * 1024
 private const val NETWORK_TIMEOUT_MILLIS = 60_000L
 
 val apolloModule = module {
+    includes(dispatcherModule)
+
     single {
         AuthInterceptor(authTokenProvider = get())
     }

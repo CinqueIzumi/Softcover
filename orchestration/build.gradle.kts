@@ -67,6 +67,17 @@ kotlin {
             implementation(libs.androidx.splash)
         }
 
+        androidHostTest.dependencies {
+            // Koin's reflection-based `verify()` guards the whole-graph DI wiring (every binding's
+            // constructor deps are resolvable across the aggregate). JVM-only, so it lives in the
+            // Android host-test set.
+            implementation(libs.koin.test)
+            // datastore-core is `implementation` in :core:preferences, so it doesn't leak onto our
+            // compile classpath. Add it here so the verify() extraTypes list can reference
+            // androidx.datastore.core.DataStore::class directly.
+            implementation(libs.datastore.core)
+        }
+
         iosMain.dependencies {
             // Coil's network image loading on iOS rides Ktor's Darwin engine (OkHttp is JVM/Android-
             // only). Confined to iosMain so Android keeps its OkHttp fetcher untouched.

@@ -1,6 +1,12 @@
 package nl.rhaydus.softcover.feature.explore.di
 
+import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
+import nl.rhaydus.softcover.core.database.di.databaseModule
+import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.identity.di.identityModule
+import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSourceImpl
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSource
@@ -29,7 +35,15 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val exploreModule = module {
-    includes(platformExploreModule)
+    includes(
+        platformExploreModule,
+        dispatcherModule,
+        bookModule,
+        identityModule,
+        databaseModule,
+        apolloModule,
+        designSystemModule,
+    )
 
     factory {
         ExploreScreenScreenModel(

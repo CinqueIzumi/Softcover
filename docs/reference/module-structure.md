@@ -106,8 +106,13 @@ Room DB.
   `src/main/AndroidManifest.xml` (`:orchestration` the launcher `MainActivity`, `:feature:session` the
   `ReadingSessionService`); `:app` owns the `<application>` element, permissions, FileProvider, and
   launcher icons. Shared resources (strings, drawables, `Theme.Softcover`) live in `:core:designsystem`.
-- **Koin:** each module owns one `module { }`; `:orchestration` aggregates them all into
-  `softcoverModules`, and `:app` starts Koin with `modules(softcoverModules + appModule)`.
+- **Koin:** each module owns one `module { }` that declares its own dependencies via `includes(...)`
+  (the sibling modules whose bindings it `get()`s, plus its platform `expect`/`actual` module). The
+  composition root `orchestrationModule` `includes(...)` the whole graph, so `softcoverModules` is just
+  `listOf(orchestrationModule)` — order-independent, not a hand-sequenced list. `:app` starts Koin with
+  `modules(softcoverModules + appModule)`. The whole-graph wiring is guarded by a Koin `verify()`
+  test (`orchestration` `SoftcoverModulesVerificationTest`): every binding's constructor deps must be
+  resolvable across the aggregate (externally-supplied types are listed in its `extraTypes`).
 - The tier rules are **enforced automatically** by the `checkModuleGraph` Gradle task (wired into
   `check`): it derives each module's tier from its path and fails the build on any `project(...)`
   dependency pointing sideways or upward.

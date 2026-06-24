@@ -1,5 +1,10 @@
 package nl.rhaydus.softcover.feature.settings.di
 
+import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.library.di.libraryServiceModule
+import nl.rhaydus.softcover.core.lists.di.listsModule
+import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
@@ -21,6 +26,14 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val settingsModule = module {
+    includes(
+        dispatcherModule,
+        listsModule,
+        libraryServiceModule,
+        preferencesModule,
+        designSystemModule,
+    )
+
     factory {
         SettingsScreenScreenModel(
             appDispatchers = get(),

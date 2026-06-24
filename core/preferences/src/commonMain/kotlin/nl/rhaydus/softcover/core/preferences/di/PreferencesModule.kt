@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.preferences.di
 
 import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.preferences.data.datasource.ApiKeyLocalDataSource
 import nl.rhaydus.softcover.core.preferences.data.datasource.ApiKeyLocalDataSourceImpl
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
@@ -29,7 +31,11 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnab
 import org.koin.dsl.module
 
 val preferencesModule = module {
-    includes(platformPreferencesModule)
+    includes(
+        platformPreferencesModule,
+        dispatcherModule,
+        apolloModule,
+    )
 
     single<ApiKeyLocalDataSource> {
         ApiKeyLocalDataSourceImpl(

@@ -4,6 +4,9 @@ import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.identity.di.identityModule
+import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSourceImpl
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
@@ -16,7 +19,12 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUs
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
 val profileModule = module {
-    includes(platformProfileModule)
+    includes(
+        platformProfileModule,
+        dispatcherModule,
+        identityModule,
+        apolloModule,
+    )
 
     single<ProfileRemoteDataSource> {
         ProfileRemoteDataSourceImpl(

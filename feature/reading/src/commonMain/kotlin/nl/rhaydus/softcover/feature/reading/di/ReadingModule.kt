@@ -1,5 +1,13 @@
 package nl.rhaydus.softcover.feature.reading.di
 
+import nl.rhaydus.softcover.core.book.di.bookModule
+import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
+import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.library.di.libraryServiceModule
+import nl.rhaydus.softcover.core.notification.di.notificationModule
+import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.reading.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.CurrentlyReadingBooksCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.DateStyleCollector
@@ -14,6 +22,17 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val readingModule = module {
+    includes(
+        dispatcherModule,
+        bookModule,
+        deadlinesModule,
+        libraryServiceModule,
+        preferencesModule,
+        profileModule,
+        notificationModule,
+        designSystemModule,
+    )
+
     factory {
         ReadingScreenScreenModel(
             getCurrentlyReadingBooksUseCase = get(),

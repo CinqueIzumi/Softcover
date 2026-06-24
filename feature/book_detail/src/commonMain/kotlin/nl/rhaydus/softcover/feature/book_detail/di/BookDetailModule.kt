@@ -1,6 +1,16 @@
 package nl.rhaydus.softcover.feature.book_detail.di
 
+import nl.rhaydus.softcover.core.book.di.bookModule
+import nl.rhaydus.softcover.core.database.di.databaseModule
+import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
+import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.identity.di.identityModule
+import nl.rhaydus.softcover.core.lists.di.listsModule
+import nl.rhaydus.softcover.core.network.di.apolloModule
+import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
@@ -25,6 +35,19 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val bookDetailModule = module {
+    includes(
+        bookModule,
+        listsModule,
+        deadlinesModule,
+        profileModule,
+        identityModule,
+        preferencesModule,
+        databaseModule,
+        apolloModule,
+        designSystemModule,
+        dispatcherModule,
+    )
+
     factory { UserBooksFlowCollector() } bind BookDetailCollector::class
     factory { DateStyleCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class

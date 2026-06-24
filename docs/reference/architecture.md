@@ -34,7 +34,10 @@ by [`toad-architecture.md`](../rhaydus/0.2.0/toad-architecture.md). Softcover de
 - **TOAD is per-Voyager-screen only.** `MainActivityViewModel` is a plain `ViewModel`, not a TOAD
   `ScreenModel`. It lives in `core:designsystem` (`core/presentation/`).
 - The Koin aggregate is named `softcoverModules`; `:app`'s `SoftCoverApp` starts Koin with
-  `modules(softcoverModules + appModule)`.
+  `modules(softcoverModules + appModule)`. Each module self-declares its DI dependencies via
+  `includes(...)`; `orchestrationModule` is the composition root that includes the whole graph, so
+  `softcoverModules = listOf(orchestrationModule)` (order-independent). A Koin `verify()` test
+  (`SoftcoverModulesVerificationTest`) gates that every binding resolves across the aggregate.
 - The TOAD runtime is the foundation library `nl.rhaydus:toad` (`nl.rhaydus.toad.*`) — it is no longer
   vendored in the app. Softcover's per-feature flow-collector interfaces are named `XxxCollector`
   (e.g. `BookDetailCollector`, in each feature's `presentation/collector/`) and implement the foundation

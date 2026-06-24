@@ -1,10 +1,27 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.di
 
 import org.koin.dsl.module
+import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.identity.di.identityModule
+import nl.rhaydus.softcover.core.library.di.libraryServiceModule
+import nl.rhaydus.softcover.core.personal.di.personalModule
+import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.profile.di.profileModule
 
 val designSystemModule = module {
+    includes(
+        dispatcherModule,
+        bookModule,
+        libraryServiceModule,
+        profileModule,
+        identityModule,
+        personalModule,
+        preferencesModule,
+    )
+
     single<MainActivityViewModel> {
         MainActivityViewModel(
             getUserIdUseCase = get(),

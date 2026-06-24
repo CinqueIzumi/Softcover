@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.app_update.di
 
 import org.koin.dsl.module
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.feature.app_update.data.repository.AppUpdateRepositoryImpl
 import nl.rhaydus.softcover.feature.app_update.domain.repository.AppUpdateRepository
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CheckForAppUpdateUseCase
@@ -9,7 +10,10 @@ import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateSt
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 
 val appUpdateModule = module {
-    includes(platformAppUpdateModule)
+    includes(
+        platformAppUpdateModule,
+        dispatcherModule,
+    )
 
     single<AppUpdateRepository> {
         AppUpdateRepositoryImpl(appUpdateDataSource = get())
