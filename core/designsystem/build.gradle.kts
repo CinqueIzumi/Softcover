@@ -23,9 +23,6 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:domain"))
             api(project(":core:book"))
-            api(project(":core:profile"))
-            api(project(":core:identity"))
-            api(project(":core:preferences"))
 
             api(libs.rhaydus.coreUi)
             api(libs.rhaydus.designsystemCore)
@@ -35,7 +32,6 @@ kotlin {
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.androidx.lifecycle.runtime.compose)
-            api(libs.androidx.lifecycle.viewmodel)
 
             api(libs.voyager.navigator)
             implementation(libs.voyager.koin)

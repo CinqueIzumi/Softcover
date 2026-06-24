@@ -8,7 +8,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.util.rememberClipboardReader
-import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
+import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
@@ -17,7 +17,7 @@ object OnboardingScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<OnboardingScreenScreenModel>()
-        val mainVm = koinInject<MainActivityViewModel>()
+        val sessionAuthenticator = koinInject<SessionAuthenticator>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
@@ -30,7 +30,7 @@ object OnboardingScreen : Screen {
             runAction = screenModel::runAction,
             openUrl = uriHandler::openUri,
             onInitializingComplete = {
-                mainVm.setUserAuthenticated(authenticated = true)
+                sessionAuthenticator.setUserAuthenticated(authenticated = true)
             },
             getCopiedText = clipboardReader::read,
         )

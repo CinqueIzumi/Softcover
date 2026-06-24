@@ -33,13 +33,13 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfi
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpdate
-import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
+import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel
 
 /** Cap a snackbar's width on a wide window so it doesn't stretch across the whole desktop frame. */
 private val SNACKBAR_DESKTOP_MAX_WIDTH = 420.dp

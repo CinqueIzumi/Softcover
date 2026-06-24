@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
@@ -32,6 +33,7 @@ import nl.rhaydus.softcover.feature.scan.di.scanModule
 import nl.rhaydus.softcover.feature.session.di.sessionModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import nl.rhaydus.softcover.orchestration.navigation.AppNavigatorImpl
+import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.orchestration.session.ActiveSessionControllerImpl
 import nl.rhaydus.softcover.orchestration.usecase.InitializeUserIdAndBooksUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ReAuthenticateUseCaseImpl
@@ -83,6 +85,19 @@ internal val orchestrationModule = module {
             readingSessionLauncher = get(),
         )
     }
+
+    single<MainActivityViewModel> {
+        MainActivityViewModel(
+            getUserIdUseCase = get(),
+            refreshLibraryUseCase = get(),
+            getThemeConfigurationUseCase = get(),
+            refreshUserProfileDataUseCase = get(),
+            reAuthenticateUseCase = get(),
+            resetUserDataUseCase = get(),
+        )
+    }
+
+    single<SessionAuthenticator> { get<MainActivityViewModel>() }
 
     factory<InitializeUserIdAndBooksUseCase> {
         InitializeUserIdAndBooksUseCaseImpl(

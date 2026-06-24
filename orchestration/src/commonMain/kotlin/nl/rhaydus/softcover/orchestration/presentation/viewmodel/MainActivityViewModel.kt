@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.viewmodel
+package nl.rhaydus.softcover.orchestration.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,9 +8,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.designsystem.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.designsystem.presentation.state.SplashState
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
+import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
@@ -18,18 +20,17 @@ import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
-import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
-class MainActivityViewModel(
+internal class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
     private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     private val reAuthenticateUseCase: ReAuthenticateUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
-) : ViewModel() {
+) : ViewModel(), SessionAuthenticator {
     private val _state = MutableStateFlow(SplashState())
     val state = _state.asStateFlow()
 
@@ -66,7 +67,7 @@ class MainActivityViewModel(
         }
     }
 
-    fun setUserAuthenticated(authenticated: Boolean) {
+    override fun setUserAuthenticated(authenticated: Boolean) {
         _state.update { it.copy(authenticated = authenticated) }
     }
 

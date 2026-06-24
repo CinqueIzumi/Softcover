@@ -32,7 +32,10 @@ The generic TOAD framework, the five generic parameters, and the per-feature boi
 by [`toad-architecture.md`](../rhaydus/0.2.0/toad-architecture.md). Softcover deltas:
 
 - **TOAD is per-Voyager-screen only.** `MainActivityViewModel` is a plain `ViewModel`, not a TOAD
-  `ScreenModel`. It lives in `core:designsystem` (`core/presentation/`).
+  `ScreenModel`. It is the one app-level view model and lives in `:orchestration`
+  (`presentation/viewmodel/`); features that only need to flip the authenticated flag depend on the
+  `SessionAuthenticator` contract in `:core:designsystem`, which the view model implements (mirroring
+  the `AppNavigator` / `ActiveSessionController` seams).
 - The Koin aggregate is named `softcoverModules`; `:app`'s `SoftCoverApp` starts Koin with
   `modules(softcoverModules + appModule)`. Each module self-declares its DI dependencies via
   `includes(...)`; `orchestrationModule` is the composition root that includes the whole graph, so
