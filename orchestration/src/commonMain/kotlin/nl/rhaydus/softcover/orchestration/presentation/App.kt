@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -125,10 +126,19 @@ internal fun App() {
                 LocalStartAppUpdate provides onStartAppUpdate,
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    key(state.authenticated) {
-                        Navigator(
-                            screen = if (state.authenticated) RootScreen else OnboardingScreen,
-                        )
+                    // Gate the first navigation on resolved auth state. Until the splash check
+                    // finishes `authenticated` defaults to false, so building the navigator eagerly
+                    // would mount OnboardingScreen and only swap to RootScreen once auth resolves.
+                    // Android hides that frame behind the system splash; desktop has no such splash,
+                    // so it flashed the login screen.
+                    if (state.isLoading) {
+                        Surface(modifier = Modifier.fillMaxSize()) {}
+                    } else {
+                        key(state.authenticated) {
+                            Navigator(
+                                screen = if (state.authenticated) RootScreen else OnboardingScreen,
+                            )
+                        }
                     }
 
                     // On an expanded (desktop / large) window a bottom-centre toast floats far from
