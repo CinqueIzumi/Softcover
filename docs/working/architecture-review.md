@@ -1,16 +1,42 @@
 # Softcover — Architecture & Modularization Review
 
-> **Status:** Advisory. Nothing here has been implemented — this is a critical read-out of what to
-> change, weighted heaviest toward architecture/modularization. Each item is tagged with severity and
-> cost. It is a hand-off artifact: the prioritized table near the end is the pick-up list.
+> **Status:** Advisory read-out, **Tier 1 (M1–M8) implemented** on `refactor/audit` (2026-06-24) —
+> see the "Tier 1 implementation status" section directly below. The remaining tiers (1b, 2–7) are
+> still open. Each item is tagged with severity and cost; the prioritized table near the end is the
+> pick-up list for what's left.
 >
-> **Date:** 2026-06-17 · **Branch reviewed:** `adopt/rhaydus-foundation`
+> **Date:** 2026-06-17 (review) · 2026-06-24 (Tier 1 implementation) · **Branch reviewed:**
+> `adopt/rhaydus-foundation` · **Implemented on:** `refactor/audit`
 > **Method:** Full read-only sweep of the module graph + build files, data/domain layer,
 > presentation/TOAD layer, build-logic/platform seams, and the test suite — cross-referenced against
 > the Doveletter curated Android/Kotlin knowledge base. Headline build-graph findings verified directly
 > against `build.gradle.kts` files.
 >
 > This document is appended to as further topic sweeps complete (see "Additional findings" at the end).
+
+## Tier 1 implementation status (2026-06-24)
+
+All of **TIER 1 — Modularization (M1–M8)** is implemented on `refactor/audit` (8 commits). Every phase
+left the build green (`styleCheck` incl. JVM/iOS compile + `checkModuleGraph`, `buildHealth`, and the
+relevant tests); each logic phase was run through `code-reviewer` and moved/affected tests through
+`unit-test-writer`. **Tier 1b (B1–B4) was intentionally left out of scope; Tiers 2–7 are open.**
+
+Keystone result: `:core:designsystem` went from `api`-exporting **7 data modules** to **`:core:book`
++ `:core:domain` only**, and a new gate (M4) prevents that regressing.
+
+| # | Status | Commit | Notes / deviation from the review |
+|---|--------|--------|----------------------------------|
+| ✅ M5 | ✅ done | `5c360e9c` | Koin → `includes()` rooted at `orchestrationModule` (`softcoverModules = listOf(orchestrationModule)`). **Deviation:** the ordering was *not* actually load-bearing (lazy resolution, no eager init), so the real value added is a new Koin **`verify()` DI safety-net test** (`SoftcoverModulesVerificationTest`) — the repo had no DI verification. A follow-up commit `4b22ce78` fixed a multiplatform-build break the includes introduced in `:feature:session` (a `core:notification` androidMain-only dep was pulled into commonMain). |
+| ✅ M2 | ✅ done | `3e851d70` | Deleted `:core:library`. **Deviation:** the review said move `RefreshLibraryUseCase` to `:orchestration`, but features consume it — that would break the tier rules. Instead the **contract** went to `:core:domain` and the **impl** to `:orchestration` (the existing `ResetUserDataUseCase` pattern). |
+| ✅ M1 | ✅ done | `5b2b1133` (1a) · `a33f5a12` (1b) | **Deviation:** the review said move `ActiveSessionController` / `MainActivityViewModel` to `:orchestration`, but features inject them — a feature → orchestration edge is illegal. Used the repo's *contract-in-core / impl-in-orchestration* pattern: `ActiveSessionController` is now an interface in `:core:designsystem` with its impl in orchestration; `MainActivityViewModel` moved to orchestration behind a new one-method `SessionAuthenticator` core seam (only thing features needed). designsystem dropped `:core:profile/identity/personal/preferences` + `lifecycle-viewmodel`. |
+| ✅ M3 | ✅ done | `064626ae` | Demoted `:core:connectivity`'s `:core:book/lists/database` (+ `coreUi`) to `implementation`. **Deviation:** not the "trivial demote" the review assumed — `buildHealth` proved the public syncers exposed those types. The demotion required lifting `start(scope)` onto the domain `*Drainer` interfaces and making the syncers `internal`. |
+| ✅ M4 | ✅ done | `ee417ec4` | Extended `checkModuleGraph` with an api-visibility rule: an `api(project(":core:<data>"))` edge must be on an explicit allowlist (8 current edges allowlisted). Spot-tested to fire. Chosen over relying on `dependency-analysis` because that only checks ABI-correctness, not the architectural constraint. |
+| ✅ M6 | ✅ done | `ee417ec4` | Documented the two `core` module kinds (domain-area data vs infra/contract) + the api-visibility rule in `module-structure.md` (the roster already listed them). |
+| ✅ M7 | ✅ done | `ee417ec4` | Renamed `createListModule` → `listsScreenModule` (matches `profileScreenModule`); documented the DI-naming convention. `libraryServiceModule` disappeared with M2. |
+| ✅ M8 | ✅ done | `ee417ec4` | Kept `:feature:session` (owns an Android foreground `Service` + manifest entry); documented why, per the review's low-confidence suggestion to keep it. |
+
+Doc updates landed in lockstep across `docs/reference/{module-structure,architecture,design-system}.md`.
+Not yet run: the full release acceptance build (rhaydus merge gate) — do before merge.
 
 ## Context
 
@@ -29,7 +55,7 @@ is a rewrite; it's surgical.
 
 ## TIER 1 — Modularization (highest priority)
 
-### M1 [HIGH] `:core:designsystem` `api`-exports 7 lower modules → app-wide transitive leak
+### ✅ M1 [HIGH] `:core:designsystem` `api`-exports 7 lower modules → app-wide transitive leak
 `core/designsystem/build.gradle.kts:24-30` declares as **`api`**:
 `:core:domain`, `:core:book`, `:core:library`, `:core:profile`, `:core:identity`, `:core:personal`,
 `:core:preferences`.
@@ -60,7 +86,7 @@ What I'd change:
 Cost: medium (move 2-3 classes + their Koin bindings; then prune designsystem's deps and fix the
 fallout in features that were leaning on the transitive deps). High payoff — this is the keystone.
 
-### M2 [HIGH] `:core:library` is not a module — it's one cross-feature use case wearing a module costume
+### ✅ M2 [HIGH] `:core:library` is not a module — it's one cross-feature use case wearing a module costume
 `core/library/src` has **two production files**: `RefreshLibraryUseCase.kt` + `LibraryModule.kt`. Yet
 its build file `api`-depends on `:core:book`, `:core:lists`, `:core:preferences`, `:core:identity`
 (`core/library/build.gradle.kts`). It is pure cross-feature orchestration (refresh books + lists +
@@ -79,14 +105,14 @@ it a module, at minimum rename it (`:core:library-sync`) so it stops colliding w
 
 Cost: low-medium. Mostly a move + settings.gradle delete + Koin re-point.
 
-### M3 [MEDIUM] `:core:connectivity` `api`-re-exports `:core:book` and `:core:lists`
+### ✅ M3 [MEDIUM] `:core:connectivity` `api`-re-exports `:core:book` and `:core:lists`
 `core/connectivity/build.gradle.kts` `api`-depends on `:core:book` + `:core:lists`. A sync/offline
 *facade* should expose its own façade types (sync state, pending-write counts), not republish two
 feature-data modules to whoever depends on it. Same fix as M1: demote to `implementation` and expose
 only the connectivity surface; if a consumer needs `Book`, it should depend on `:core:book` itself.
 Cost: low.
 
-### M4 [MEDIUM] Layering IS enforced — but the gate checks edges, not `api`-visibility granularity
+### ✅ M4 [MEDIUM] Layering IS enforced — but the gate checks edges, not `api`-visibility granularity
 A `checkModuleGraph` task already exists in the root `build.gradle.kts` (~lines 244-282) and runs at
 `check` time. It enforces the tier edges: `feature:* -> core:*` only (no feature→feature),
 `core:* -> core:*`, `orchestration -> feature+core`, `app/desktopApp -> orchestration+core`. That's
@@ -103,7 +129,7 @@ The gap: that task validates *that an edge is allowed*, not *whether it should b
 Doveletter's modularization threads land on the same point: edges you allow but don't *constrain the
 visibility of* are how god-modules form. Cost: low (extend an existing task).
 
-### M5 [MEDIUM] Koin aggregation relies on implicit list ordering
+### ✅ M5 [MEDIUM] Koin aggregation relies on implicit list ordering
 `orchestration/di/SoftcoverModules.kt` builds `softcoverModules` as a flat ordered list with load-
 bearing-but-undocumented ordering (`designSystemModule` first; `libraryServiceModule` after book+
 lists). Koin doesn't enforce list order, so a reorder fails at runtime, not compile time. I'd switch
@@ -111,7 +137,7 @@ to Koin **`includes(...)`**: each feature/aggregate module declares its own depe
 `orchestrationModule` includes the graph. Ordering becomes a real dependency edge Koin resolves,
 not a comment. Cost: low.
 
-### M6 [LOW] The `core` tier mixes two different module *kinds* with one naming scheme
+### ✅ M6 [LOW] The `core` tier mixes two different module *kinds* with one naming scheme
 Two distinct things both live under `:core:` with `*Module` Koin names:
 - **Domain-area data modules** (`:core:book`, `:core:lists`, `:core:deadlines`, `:core:personal`,
   `:core:profile`) — domain interfaces + use cases + data impls for one area. Legitimate.
@@ -124,12 +150,12 @@ Related: `:core:domain` is a single shared-kernel holding models for *every* are
 monotonically and couples all areas to one module. Worth a note on when a model is "shared kernel"
 vs "belongs to its area module." Cost: doc-only now; structural later if you split it.
 
-### M7 [LOW] Feature DI-module naming is inconsistent
+### ✅ M7 [LOW] Feature DI-module naming is inconsistent
 `bookDetailModule` / `libraryModule` / `readingModule` but `profileScreenModule` / `createListModule`
 / `libraryServiceModule`. Pick one convention (recommend `*ScreenModule` for feature/presentation DI,
 `*Module` for data) and apply it across the board. Cost: trivial (rename + re-point).
 
-### M8 [LOW] `:feature:session` (5 files) barely earns module status
+### ✅ M8 [LOW] `:feature:session` (5 files) barely earns module status
 It's essentially a focus-mode overlay over existing data with notification wiring — no real data
 layer. Either fold it into `:orchestration` (it's presentation glue) or accept it but document why
 it's a module. Cost: low. (Low confidence — keep if there's a roadmap reason it'll grow.)
@@ -315,15 +341,15 @@ Cost: low-medium.
 
 | # | Change | Severity | Cost | Why first |
 |---|--------|----------|------|-----------|
-| M1 | Move app state out of `:core:designsystem`; prune its `api` deps to `:core:domain` | HIGH | Med | Removes the app-wide transitive leak — the keystone |
-| M2 | Delete `:core:library`; move `RefreshLibraryUseCase` to `:orchestration` | HIGH | Low-Med | Kills a fake module + name collision |
+| ✅ M1 | Move app state out of `:core:designsystem`; prune its `api` deps to `:core:domain` | HIGH | Med | Removes the app-wide transitive leak — the keystone |
+| ✅ M2 | Delete `:core:library`; move `RefreshLibraryUseCase` to `:orchestration` | HIGH | Low-Med | Kills a fake module + name collision |
 | T1 | Room migration tests (v40, 37 migrations; destructive fallback = silent data loss) | HIGH | Med | Highest data-loss risk in the repo |
 | T2 | Test `SoftcoverCacheResolver` + `safeQueryFlow` dual-emission | HIGH | Low-Med | Bespoke offline-affecting logic, untested |
-| M4 | Extend the existing `checkModuleGraph` with an `api`-visibility rule | MED | Low | The existing gate allows M1/M3; this catches them |
-| M3 | Demote `:core:connectivity` `api`→`implementation` | MED | Low | Same leak class as M1 |
+| ✅ M4 | Extend the existing `checkModuleGraph` with an `api`-visibility rule | MED | Low | The existing gate allows M1/M3; this catches them |
+| ✅ M3 | Demote `:core:connectivity` `api`→`implementation` | MED | Low | Same leak class as M1 |
 | C1 | Cancel `ReadingSessionService.serviceScope` in `onDestroy()` | MED-HIGH | Trivial | Real Android-service coroutine leak |
 | DC1 | Re-sync Room from server after offline write replay; scope `preserveSyncedProgress` | MED | Med | Apollo↔Room divergence on offline edits |
-| M5 | Koin `includes(...)` instead of ordered list | MED | Low | Removes runtime-fragile ordering |
+| ✅ M5 | Koin `includes(...)` instead of ordered list | MED | Low | Removes runtime-fragile ordering |
 | D1 | Single error model at the network seam; move `UserMessageNotifier` out | MED | Med-High | Root of P2; needs buy-in (ripples) |
 | D2 | Extract offline-sync out of `BooksRepositoryImpl` (pairs with DC1) | MED | Med | Testability + SRP |
 | T3 | Test offline write queue/drainer + `core:personal` mutations | MED | Med | User-data-loss paths, thin coverage |
@@ -331,7 +357,7 @@ Cost: low-medium.
 | R1 | Enable R8 + keep rules (Koin/Apollo/Room/serialization/TOAD) + release smoke test | MED | Med | Unobfuscated, leaky release builds today |
 | S1 | Verify `allowBackup` rules exclude `api_key.enc` + DBs | MED | Trivial | Possible secret exfiltration via backup |
 | T4 | Standardize flow tests on Turbine | MED | Low-Med | Hardens the (good) TOAD tests |
-| M6/M7/M8 | Doc the two core-module kinds; unify DI naming; reassess `:feature:session` | LOW | Low | Hygiene |
+| ✅ M6/M7/M8 | Doc the two core-module kinds; unify DI naming; reassess `:feature:session` | LOW | Low | Hygiene |
 | D3/D4/D5 | Resume-drain trigger; `kind` TypeConverter; cache-TTL decision | LOW | Low | Correctness hardening |
 | C2/DC2 | Wire `ApiKeyLocalDataSource` scope to `ApplicationScope`; close refresh-vs-mutation race | LOW | Low | Leak/race hardening |
 | B1-B4 | Prune dead catalog aliases; AGP/KSP debt; confirm `foundation.local`; move scanner out of designsystem | LOW | Low | Build hygiene |
@@ -465,6 +491,15 @@ That column is filtered and `GROUP BY`-ed in `BookDao` reading-stats queries but
 entities like `UserBookEntity` are indexed on `bookId`/`statusCode`). Add `@Index("userBookId")` (or a
 composite `(userBookId, updatedAt)`). Otherwise DB access is healthy — SQL does the aggregation (no N+1),
 and every query is `suspend`/`Flow` (no main-thread Room access). Needs a migration bump. Cost: low.
+
+### DB2 [LOW] `BookDao` is too large — split into area-scoped DAOs
+`BookDao` has grown past **100 functions** (book/edition/list/journal queries all live on one DAO) and
+trips detekt's `TooManyFunctions` interface threshold. It's currently `@Suppress("TooManyFunctions")`-ed
+(surfaced by the 2026-06-24 release build) — a deliberate stopgap, not a fix. It should eventually be
+split into smaller, area-scoped DAOs (e.g. `BookDao` / `EditionDao` / `BookListDao` / `ReadingJournalDao`),
+each owning its own queries; the single `@Database` keeps seeing all of them, and `BookDao`'s cross-entity
+`@Transaction` joins move to whichever DAO best owns them. Cost: medium (mechanical move + re-point call
+sites; no schema/migration change). Removes the suppression. Cost: medium.
 
 ### I1 [LOW] A couple of hardcoded desktop strings; RTL declared but unverified
 Two `jvmMain` reading-screen strings ("Now reading", "Refreshing…", etc.) are hardcoded literals;
