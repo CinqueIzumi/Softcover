@@ -28,7 +28,7 @@ private const val IN_DRAIN_RETRIES: Int = 3
 private const val INITIAL_BACKOFF_MS: Long = 250L
 private const val BACKOFF_MULTIPLIER: Long = 2L
 
-class PendingListWriteSyncer(
+internal class PendingListWriteSyncer(
     private val networkAvailability: NetworkAvailabilityProvider,
     private val dao: PendingListWriteDao,
     private val listsRemoteDataSource: ListsRemoteDataSource,
@@ -38,7 +38,7 @@ class PendingListWriteSyncer(
     private var job: Job? = null
     private val drainMutex: Mutex = Mutex()
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         if (job?.isActive == true) return
 
         job = scope.launch(appDispatchers.io) {

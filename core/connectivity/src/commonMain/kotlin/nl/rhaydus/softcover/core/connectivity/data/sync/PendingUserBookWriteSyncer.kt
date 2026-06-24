@@ -20,7 +20,7 @@ import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.ui.common.AppDispatchers
 
-class PendingUserBookWriteSyncer(
+internal class PendingUserBookWriteSyncer(
     private val networkAvailability: NetworkAvailabilityProvider,
     private val dao: PendingUserBookWriteDao,
     private val booksRemoteDataSource: BooksRemoteDataSource,
@@ -30,7 +30,7 @@ class PendingUserBookWriteSyncer(
     private val drainMutex: Mutex = Mutex()
     private val recentlySyncedUserBookIds: MutableSet<Int> = mutableSetOf()
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         if (job?.isActive == true) return
 
         job = scope.launch(appDispatchers.io) {

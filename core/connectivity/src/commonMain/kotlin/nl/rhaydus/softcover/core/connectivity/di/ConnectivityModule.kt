@@ -48,7 +48,7 @@ val connectivityModule = module {
         ListWriteQueueImpl(dao = get())
     }
 
-    single {
+    single<UserBookWriteDrainer> {
         PendingUserBookWriteSyncer(
             networkAvailability = get(),
             dao = get(),
@@ -57,11 +57,7 @@ val connectivityModule = module {
         )
     }
 
-    single<UserBookWriteDrainer> {
-        get<PendingUserBookWriteSyncer>()
-    }
-
-    single {
+    single<ListWriteDrainer> {
         PendingListWriteSyncer(
             networkAvailability = get(),
             dao = get(),
@@ -69,9 +65,5 @@ val connectivityModule = module {
             listsLocalDataSource = get(),
             appDispatchers = get(),
         )
-    }
-
-    single<ListWriteDrainer> {
-        get<PendingListWriteSyncer>()
     }
 }
