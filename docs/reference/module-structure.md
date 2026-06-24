@@ -64,7 +64,7 @@ only on modules **below** its tier.
 | `core:preferences` | `SettingsRepository`, `Get*AsFlowUseCase` readers, `AppSettingsDataStore`, `ApiKeyLocalDataSource` |
 | `core:identity` | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:connectivity` | offline write-queue / sync infra (contracts in `core:domain/connectivity`) |
-| `core:designsystem` | TOAD framework, Material 3 theme, reusable components, modifiers, shared presentation models, nav contract, `ActiveSessionController`, `MainActivityViewModel` |
+| `core:designsystem` | TOAD framework, Material 3 theme, reusable components, modifiers, shared presentation models, nav contract, the `ActiveSessionController` contract (impl in orchestration), `MainActivityViewModel` |
 | `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation` |
 | `core:database` | Room database, migrations, **all** persisted entities + DAOs (incl. those a feature's data source uses) |
 

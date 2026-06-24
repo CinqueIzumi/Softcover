@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.session
+package nl.rhaydus.softcover.orchestration.session
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coVerify
@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
@@ -26,7 +28,7 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseC
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
 import nl.rhaydus.ui.common.AppDispatchers
 
-class ActiveSessionControllerTest {
+class ActiveSessionControllerImplTest {
     private val sessionFlow = MutableStateFlow<ReadingSession?>(null)
     private val booksFlow = MutableStateFlow<List<Book>>(emptyList())
 
@@ -47,7 +49,7 @@ class ActiveSessionControllerTest {
         // are processed synchronously when upstream MutableStateFlows are mutated.
         val appScope = CoroutineScope(testScope.backgroundScope.coroutineContext + dispatcher)
 
-        return ActiveSessionController(
+        return ActiveSessionControllerImpl(
             observeActiveSessionUseCase = observeActiveSessionUseCase,
             getCurrentlyReadingBooksUseCase = getCurrentlyReadingBooksUseCase,
             startReadingSessionUseCase = startReadingSessionUseCase,
@@ -283,11 +285,13 @@ class ActiveSessionControllerTest {
             controller.stop()
 
             // ----- Assert -----
-            coVerify(exactly = 0) { stopReadingSessionUseCase(
-                any(),
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                stopReadingSessionUseCase(
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 
@@ -307,10 +311,12 @@ class ActiveSessionControllerTest {
             controller.updatePage(newPage = 200)
 
             // ----- Assert -----
-            coVerify(exactly = 1) { recordBookProgressUseCase(
-                book = book,
-                newPage = 200,
-            ) }
+            coVerify(exactly = 1) {
+                recordBookProgressUseCase(
+                    book = book,
+                    newPage = 200,
+                )
+            }
         }
 
         @Test
@@ -322,10 +328,12 @@ class ActiveSessionControllerTest {
             controller.updatePage(newPage = 50)
 
             // ----- Assert -----
-            coVerify(exactly = 0) { recordBookProgressUseCase(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                recordBookProgressUseCase(
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 

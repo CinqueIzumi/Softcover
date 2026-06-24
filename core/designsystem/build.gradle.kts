@@ -25,7 +25,6 @@ kotlin {
             api(project(":core:book"))
             api(project(":core:profile"))
             api(project(":core:identity"))
-            api(project(":core:personal"))
             api(project(":core:preferences"))
 
             api(libs.rhaydus.coreUi)

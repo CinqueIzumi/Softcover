@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
@@ -31,6 +32,7 @@ import nl.rhaydus.softcover.feature.scan.di.scanModule
 import nl.rhaydus.softcover.feature.session.di.sessionModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import nl.rhaydus.softcover.orchestration.navigation.AppNavigatorImpl
+import nl.rhaydus.softcover.orchestration.session.ActiveSessionControllerImpl
 import nl.rhaydus.softcover.orchestration.usecase.InitializeUserIdAndBooksUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ReAuthenticateUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryUseCaseImpl
@@ -66,6 +68,21 @@ internal val orchestrationModule = module {
     )
 
     single<AppNavigator> { AppNavigatorImpl() }
+
+    single<ActiveSessionController> {
+        ActiveSessionControllerImpl(
+            observeActiveSessionUseCase = get(),
+            getCurrentlyReadingBooksUseCase = get(),
+            startReadingSessionUseCase = get(),
+            stopReadingSessionUseCase = get(),
+            pauseReadingSessionUseCase = get(),
+            resumeReadingSessionUseCase = get(),
+            recordBookProgressUseCase = get(),
+            applicationScope = get(),
+            appDispatchers = get(),
+            readingSessionLauncher = get(),
+        )
+    }
 
     factory<InitializeUserIdAndBooksUseCase> {
         InitializeUserIdAndBooksUseCaseImpl(
