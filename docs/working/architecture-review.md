@@ -19,7 +19,8 @@
 All of **TIER 1 — Modularization (M1–M8)** is implemented on `refactor/audit` (8 commits). Every phase
 left the build green (`styleCheck` incl. JVM/iOS compile + `checkModuleGraph`, `buildHealth`, and the
 relevant tests); each logic phase was run through `code-reviewer` and moved/affected tests through
-`unit-test-writer`. **Tier 1b (B1–B4) was intentionally left out of scope; Tiers 2–7 are open.**
+`unit-test-writer`. **Tier 1b (B1–B4) is now also implemented on `refactor/audit` (see the Tier 1b
+section below); Tiers 2–7 remain open.**
 
 Keystone result: `:core:designsystem` went from `api`-exporting **7 data modules** to **`:core:book`
 + `:core:domain` only**, and a new gate (M4) prevents that regressing.
@@ -163,6 +164,20 @@ it's a module. Cost: low. (Low confidence — keep if there's a roadmap reason i
 ---
 
 ## TIER 1b — Build setup & platform seams (mostly clean; small cleanups)
+
+> **Status (2026-06-25): B1–B4 implemented on `refactor/audit`.** B1 was narrower than the review
+> claimed — `coreKtx` (used in `:core:connectivity`) and `material-components` (used in
+> `:core:designsystem`) are *referenced*, so only the three genuinely-dead aliases were pruned
+> (`androidx-junit`, `androidx-espresso-core`, `androidx-compose-material3`, plus their version refs
+> `junitVersion`/`espressoCore`/`material3ComposeVersion`). B2 is a documented "flip back when KSP
+> supports AGP 9 built-in Kotlin" tracker (the rationale already lives in `gradle.properties`) — no
+> action beyond confirming it's recorded. B3: the documented `foundation.local` inner-loop switch was
+> genuinely **absent** from `settings.gradle.kts`; it's now implemented (reads `foundation.local` from
+> `local.properties`, `includeBuild("../rhaydus-foundation")` when true) to match the CAPABILITIES.md
+> contract. B4: the `BarcodeScanner` expect/actual (4 files) + its CameraX/ML Kit deps moved from
+> `:core:designsystem` to `:feature:scan`; the `SoftcoverIcon.BarcodeScanner` icon token, the
+> `ic_barcode_scanner` drawable, and `ScreenDestination.BarcodeScanner` stay (icon catalog / nav
+> contract, not hardware). `design-system.md` updated in lockstep (scanner reframed as feature-owned).
 
 The Gradle setup is a genuine strength. Convention plugins (`build-logic/`: `softcover.kmp.library`,
 `.kmp.compose`, `.android.room`, `.android.apollo`) absorb all SDK/JDK/test/target boilerplate — the
@@ -316,9 +331,9 @@ Cost: low-medium.
 - **Platform TODOs** (not architectural, just gaps): iOS barcode scanner stub
   (`// TODO(iOS): real AVCaptureSession + Vision`), iOS gallery save stub, density-aware share-capture
   limitation, onboarding snackbar-hidden-behind-modal bug. Track these as issues.
-- **`:core:designsystem` doubles as the barcode-scanner home** (CameraX/MLKit in its `androidMain`).
-  Scanner UI living in the design-system module is another "designsystem is the catch-all" symptom
-  (relates to M1). Consider a `:core:camera` or keeping it in `:feature:scan`.
+- ~~**`:core:designsystem` doubles as the barcode-scanner home** (CameraX/MLKit in its `androidMain`).~~
+  **Resolved (B4, 2026-06-25):** the `BarcodeScanner` expect/actual + its CameraX/ML Kit deps moved to
+  `:feature:scan`; designsystem no longer owns hardware integration.
 - **Document the wide-but-correct reach**: `:feature:book_detail` depends on 9 core modules. That's
   legitimate for its size; a one-line note in ../reference/architecture.md heads off "is this a smell?" reviews.
 - **`SoftcoverWorker` catches `Throwable` then re-throws `CancellationException` inside the block**;
@@ -360,7 +375,7 @@ Cost: low-medium.
 | ✅ M6/M7/M8 | Doc the two core-module kinds; unify DI naming; reassess `:feature:session` | LOW | Low | Hygiene |
 | D3/D4/D5 | Resume-drain trigger; `kind` TypeConverter; cache-TTL decision | LOW | Low | Correctness hardening |
 | C2/DC2 | Wire `ApiKeyLocalDataSource` scope to `ApplicationScope`; close refresh-vs-mutation race | LOW | Low | Leak/race hardening |
-| B1-B4 | Prune dead catalog aliases; AGP/KSP debt; confirm `foundation.local`; move scanner out of designsystem | LOW | Low | Build hygiene |
+| ✅ B1-B4 | Prune dead catalog aliases; AGP/KSP debt; confirm `foundation.local`; move scanner out of designsystem | LOW | Low | Build hygiene |
 | N1/N2 | Type-safe deep links; back-stack restore across process death | LOW | Med | Nav reach/polish |
 | A1 | Richer screen-reader semantics (headings/cards); debug-gated testTags if UI tests arrive | LOW | Low | Accessibility |
 | DB1/I1 | Index `ReadingJournalEntity.userBookId`; externalize desktop strings + RTL spot-check | LOW | Low | DB perf / i18n |

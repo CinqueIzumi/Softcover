@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.feature.scan.presentation.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
  *
  * The composable is intentionally stateless about resolution: it surfaces a raw string and nothing
  * more. Turning that string into a book — and deciding what an unknown book means — belongs to the
- * call site (see `feature/scan`), never to this leaf.
+ * call site (the scan ScreenModel), never to this leaf.
  */
 @Composable
 expect fun BarcodeScanner(

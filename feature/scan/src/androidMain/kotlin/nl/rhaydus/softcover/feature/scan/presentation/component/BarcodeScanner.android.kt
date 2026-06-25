@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.feature.scan.presentation.component
 
 import android.annotation.SuppressLint
 import androidx.annotation.OptIn
@@ -223,9 +223,11 @@ private fun scanFrame(
                 onIsbnDetected(isbn)
             }
         }
-        .addOnFailureListener { AppLog.e(
-            it,
-            "ML Kit failed to process a camera frame",
-        ) }
+        .addOnFailureListener { error ->
+            AppLog.e(
+                error,
+                "ML Kit failed to process a camera frame",
+            )
+        }
         .addOnCompleteListener { imageProxy.close() }
 }

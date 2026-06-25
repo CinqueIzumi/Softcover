@@ -31,8 +31,6 @@ kotlin {
 
             implementation(libs.koin.compose.multiplatform)
 
-            implementation(libs.androidx.lifecycle.runtime.compose)
-
             api(libs.voyager.navigator)
             implementation(libs.voyager.koin)
             api(libs.voyager.tabNavigator)
@@ -44,13 +42,6 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.material.components)
-
-            // Shared BarcodeScanner composable
-            implementation(libs.androidx.camera.core)
-            implementation(libs.androidx.camera.camera2)
-            implementation(libs.androidx.camera.lifecycle)
-            implementation(libs.androidx.camera.view)
-            implementation(libs.mlkit.barcode.scanning)
         }
     }
 }
