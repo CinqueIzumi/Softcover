@@ -181,7 +181,10 @@ class PendingUserBookWriteSyncerTest {
             val result = syncer.drainPendingUpdates()
 
             // ----- Assert -----
-            result shouldBe setOf(10, 20)
+            result shouldBe mapOf(
+                10 to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS),
+                20 to setOf(PendingUserBookWriteKind.MARK_AS_READ),
+            )
             result.contains(10) shouldBe true
             result.contains(20) shouldBe true
             coVerify(exactly = 1) { dao.delete(1L) }
@@ -234,8 +237,11 @@ class PendingUserBookWriteSyncerTest {
             val secondResult = syncer.drainPendingUpdates()
 
             // ----- Assert -----
-            firstResult shouldBe setOf(10, 20)
-            secondResult shouldBe emptySet()
+            firstResult shouldBe mapOf(
+                10 to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS),
+                20 to setOf(PendingUserBookWriteKind.MARK_AS_READ),
+            )
+            secondResult shouldBe emptyMap()
         }
 
         @Test
@@ -277,7 +283,7 @@ class PendingUserBookWriteSyncerTest {
             val result = syncer.drainPendingUpdates()
 
             // ----- Assert -----
-            result shouldBe setOf(42)
+            result shouldBe mapOf(42 to setOf(PendingUserBookWriteKind.MARK_AS_READ))
         }
 
         @Test
@@ -325,7 +331,7 @@ class PendingUserBookWriteSyncerTest {
             val result = syncer.drainPendingUpdates()
 
             // ----- Assert -----
-            result shouldBe emptySet()
+            result shouldBe emptyMap()
             coVerify(exactly = 1) { dao.incrementAttempts(1L) }
             coVerify(exactly = 0) { dao.delete(any()) }
             coVerify(exactly = 0) {
@@ -401,7 +407,7 @@ class PendingUserBookWriteSyncerTest {
             coVerify(exactly = 1) { dao.delete(1L) }
             coVerify(exactly = 1) { dao.delete(2L) }
             coVerify(exactly = 0) { dao.incrementAttempts(any()) }
-            result shouldBe setOf(entityB.userBookId)
+            result shouldBe mapOf(entityB.userBookId to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS))
             result.contains(entityA.userBookId) shouldBe false
         }
 
@@ -453,7 +459,7 @@ class PendingUserBookWriteSyncerTest {
                 )
             }
 
-            result.contains(99) shouldBe true
+            result shouldBe mapOf(99 to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS))
         }
 
         @Test
@@ -492,7 +498,7 @@ class PendingUserBookWriteSyncerTest {
                 )
             }
 
-            result.contains(77) shouldBe true
+            result shouldBe mapOf(77 to setOf(PendingUserBookWriteKind.MARK_AS_READ))
         }
 
         @Test
@@ -532,7 +538,7 @@ class PendingUserBookWriteSyncerTest {
 
             coVerify(exactly = 1) { dao.delete(8L) }
 
-            result.contains(55) shouldBe true
+            result shouldBe mapOf(55 to setOf(PendingUserBookWriteKind.UPDATE_RATING))
         }
 
         @Test
@@ -612,7 +618,7 @@ class PendingUserBookWriteSyncerTest {
 
             coVerify(exactly = 1) { dao.delete(12L) }
 
-            result.contains(80) shouldBe true
+            result shouldBe mapOf(80 to setOf(PendingUserBookWriteKind.UPDATE_REVIEW))
         }
 
         @Test
@@ -750,6 +756,91 @@ class PendingUserBookWriteSyncerTest {
             }
 
             result.contains(77) shouldBe false
+        }
+
+        @Test
+        fun `two kinds for the same userBookId are both recorded in the returned map`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 50
+            val entityProgress = updateProgressEntity(
+                localId = 20L,
+                userBookId = userBookId,
+            )
+            val entityRating = updateRatingEntity(
+                localId = 21L,
+                userBookId = userBookId,
+                rating = 4.0,
+            )
+
+            coEvery {
+                dao.getPending()
+            } returns listOf(entityProgress, entityRating)
+
+            coJustRun {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = any(),
+                    editionId = any(),
+                    progressPages = any(),
+                    progressSeconds = any(),
+                    startedAt = any(),
+                    finishedAt = any(),
+                )
+            }
+
+            coJustRun {
+                booksRemoteDataSource.replayUpdateBookRating(
+                    userBookId = any(),
+                    rating = any(),
+                )
+            }
+
+            coJustRun {
+                dao.delete(any())
+            }
+
+            // ----- Act -----
+            val result = syncer.drainPendingUpdates()
+
+            // ----- Assert -----
+            result shouldBe mapOf(
+                userBookId to setOf(
+                    PendingUserBookWriteKind.UPDATE_PROGRESS,
+                    PendingUserBookWriteKind.UPDATE_RATING,
+                ),
+            )
+        }
+
+        @Test
+        fun `discarded row with unknown kind is not included as a key in the returned map`() = runTest {
+            // ----- Arrange -----
+            val entity = PendingUserBookWriteEntity(
+                localId = 30L,
+                kind = "OBSOLETE_KIND",
+                userBookId = 88,
+                userBookReadId = 0,
+                bookId = 0,
+                editionId = null,
+                progressPages = null,
+                progressSeconds = null,
+                startedAt = null,
+                finishedAt = null,
+                enqueuedAt = "2026-01-15T09:00:00Z",
+            )
+
+            coEvery {
+                dao.getPending()
+            } returns listOf(entity)
+
+            coJustRun {
+                dao.delete(any())
+            }
+
+            // ----- Act -----
+            val result = syncer.drainPendingUpdates()
+
+            // ----- Assert -----
+            result shouldBe emptyMap()
+            coVerify(exactly = 1) { dao.delete(30L) }
         }
     }
 }

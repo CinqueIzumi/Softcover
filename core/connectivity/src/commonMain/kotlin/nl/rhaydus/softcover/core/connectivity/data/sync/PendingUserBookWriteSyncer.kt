@@ -28,7 +28,7 @@ internal class PendingUserBookWriteSyncer(
 ) : UserBookWriteDrainer {
     private var job: Job? = null
     private val drainMutex: Mutex = Mutex()
-    private val recentlySyncedUserBookIds: MutableSet<Int> = mutableSetOf()
+    private val recentlySyncedWrites: MutableMap<Int, MutableSet<PendingUserBookWriteKind>> = mutableMapOf()
 
     override fun start(scope: CoroutineScope) {
         if (job?.isActive == true) return
@@ -41,11 +41,13 @@ internal class PendingUserBookWriteSyncer(
         }
     }
 
-    override suspend fun drainPendingUpdates(): Set<Int> = drainMutex.withLock {
+    override suspend fun drainPendingUpdates(): Map<Int, Set<PendingUserBookWriteKind>> = drainMutex.withLock {
         drain()
 
-        val snapshot: Set<Int> = recentlySyncedUserBookIds.toSet()
-        recentlySyncedUserBookIds.clear()
+        val snapshot: Map<Int, Set<PendingUserBookWriteKind>> =
+            recentlySyncedWrites.mapValues { (_, kinds) -> kinds.toSet() }
+
+        recentlySyncedWrites.clear()
 
         snapshot
     }
@@ -61,7 +63,12 @@ internal class PendingUserBookWriteSyncer(
                     dao.delete(entity.localId)
 
                     if (outcome == ReplayOutcome.SYNCED) {
-                        recentlySyncedUserBookIds.add(entity.userBookId)
+                        val kind: PendingUserBookWriteKind? =
+                            PendingUserBookWriteKind.entries.firstOrNull { it.name == entity.kind }
+
+                        if (kind != null) {
+                            recentlySyncedWrites.getOrPut(entity.userBookId) { mutableSetOf() }.add(kind)
+                        }
                     }
                 }
                 .onFailure { error ->

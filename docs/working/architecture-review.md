@@ -377,8 +377,8 @@ Cost: low-medium.
 | ✅ T2 | Test `SoftcoverCacheResolver` + `safeQueryFlow` dual-emission | HIGH | Low-Med | Bespoke offline-affecting logic, untested |
 | ✅ M4 | Extend the existing `checkModuleGraph` with an `api`-visibility rule | MED | Low | The existing gate allows M1/M3; this catches them |
 | ✅ M3 | Demote `:core:connectivity` `api`→`implementation` | MED | Low | Same leak class as M1 |
-| C1 | Cancel `ReadingSessionService.serviceScope` in `onDestroy()` | MED-HIGH | Trivial | Real Android-service coroutine leak |
-| DC1 | Re-sync Room from server after offline write replay; scope `preserveSyncedProgress` | MED | Med | Apollo↔Room divergence on offline edits |
+| ✅ C1 | Cancel `ReadingSessionService.serviceScope` in `onDestroy()` | MED-HIGH | Trivial | Already present (commit `5381f8d5`, predates review) — closed, no change |
+| ✅ DC1 | Re-sync Room from server after offline write replay; scope `preserveSyncedProgress` | MED | Med | Apollo↔Room divergence on offline edits |
 | ✅ M5 | Koin `includes(...)` instead of ordered list | MED | Low | Removes runtime-fragile ordering |
 | D1 | Single error model at the network seam; move `UserMessageNotifier` out | MED | Med-High | Root of P2; needs buy-in (ripples) |
 | D2 | Extract offline-sync out of `BooksRepositoryImpl` (pairs with DC1) | MED | Med | Testability + SRP |
@@ -416,12 +416,13 @@ Overall the concurrency story is good: a single DI-owned `ApplicationScope`
 `BookDetailPrefetcher`). No race-prone lazy init, no `synchronized`/`AtomicReference` misuse, flows use
 `distinctUntilChanged`/`collectLatest` correctly. Two real leaks and a data-consistency gap stand out:
 
-### C1 [MEDIUM-HIGH] `ReadingSessionService` creates a long-lived scope that is never cancelled
-`feature/session/.../service/ReadingSessionService.kt` (androidMain, ~line 53):
-`private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)` with flows
-`launchIn(serviceScope)`. An Android `Service` is lifecycle-aware and can be destroyed/recreated — the
-scope is never cancelled, so jobs from a destroyed service keep running. **Fix:** override `onDestroy()`
-→ `serviceScope.cancel()` (or drive it from a lifecycle-aware holder). Real leak, not theoretical. Cost: trivial.
+### ✅ C1 [MEDIUM-HIGH] `ReadingSessionService` creates a long-lived scope that is never cancelled
+**Already fixed; no change needed (verified 2026-06-25, `refactor/audit`).** The review flagged this from
+excerpts (and its own confidence caveat said to verify C1 in-file). `ReadingSessionService` already
+overrides `onDestroy()` → `serviceScope.cancel()` (then `super.onDestroy()`) — the fix the review
+prescribed. It landed in commit `5381f8d5` (2026-06-10, the KMP conversion of `:feature:session`),
+which **predates** the 2026-06-17 review. So the leak described here never existed on the reviewed
+branch; the item is closed with the doc note rather than a code change.
 
 ### C2 [LOW-MEDIUM] `ApiKeyLocalDataSourceImpl` launches an untracked scope in `init`
 `core/preferences/.../ApiKeyLocalDataSource.kt` (~line 42): `init { CoroutineScope(io + SupervisorJob()).launch { initialize() } }`
@@ -430,19 +431,31 @@ unsound; wire it through `ApplicationScope` like the syncers do. Cost: trivial.
 (`ConnectivityDataSourceImpl` jvm also self-owns a polling scope — safe as an app-lifetime singleton, but
 wiring it to `ApplicationScope` would be consistent.)
 
-### DC1 [MEDIUM] Offline write replay never re-syncs Room from the server response → Room can diverge
-The mutation path itself is correct (optimistic Room write → network → canonical Room re-write; on
-offline → enqueue + return optimistic; on other error → restore Room snapshot — see
-`BooksRepositoryImpl` ~lines 491-537). The gap is in the **replay**: `PendingUserBookWriteSyncer.drain()`
-replays the queued mutation to the server but **does not update Room with the server response**. Room
-keeps the optimistic value. `preserveSyncedProgress()` (`BooksRepositoryImpl` ~lines 679-709) then
-*re-applies the local snapshot over freshly-fetched server data* for synced IDs — so a field the server
-changed underneath (e.g. another client moved a `started_at`/deadline) is overwritten by the stale local
-copy. It's conservative (covers progress fields, and `MARK_AS_READING` doesn't persist `started_at`), so
-practical impact is low today — but it bypasses the server-of-record and will bite as more fields go
-through the queue. **Fix:** after replaying, either re-fetch the affected book/list and write Room, or
-apply the mutation's own server response to Room; and scope `preserveSyncedProgress` to fields the
-pending write actually owns. Cost: medium. Pairs naturally with D2 (extracting offline-sync).
+### ✅ DC1 [MEDIUM] Offline write replay never re-syncs Room from the server response → Room can diverge
+**Done (2026-06-25, `refactor/audit`).** The headline divergence — `preserveSyncedProgress()` re-applying
+the *whole* local `userBook`+`userBookRead` over freshly-fetched server data for synced IDs, clobbering any
+field the server changed underneath that no pending write touched — is fixed by **scoping the preservation
+to the fields each replayed write actually owns**.
+
+**What changed:** `UserBookWriteDrainer.drainPendingUpdates()` now returns
+`Map<Int, Set<PendingUserBookWriteKind>>` (per affected `userBook` id, the kinds that synced) instead of a
+bare `Set<Int>`. `PendingUserBookWriteSyncer` records the kind on each `SYNCED` replay.
+`BooksRepositoryImpl.preserveSyncedProgress` → `preserveSyncedWrites`: for each synced book it folds the
+synced kinds over the server-fetched book, re-applying the local optimistic value for **only** the owned
+fields — `UPDATE_PROGRESS` → `userBookRead.{currentPage, currentSeconds, progress, startedAt, finishedAt}`;
+`MARK_AS_READ` → `userBook.status` + `userBookRead.{progress, finishedAt}`; `UPDATE_RATING` →
+`userBook.rating`; `UPDATE_REVIEW` → `userBook.{reviewDocument, reviewHasSpoilers}`. Every other field flows
+through from the server, so the local copy can no longer overwrite server-of-record state; owned fields
+self-heal on the next refresh once the queue drains. Preserving owned fields (not re-fetching/applying the
+mutation response) is deliberate: the optimistic value is exactly what was just replayed, and it rides out
+the read-after-write lag that motivated `preserveSyncedProgress` in the first place — a re-fetch would
+reintroduce the pre-edit flicker that hack was added to prevent.
+
+**Deviation:** the review offered "re-fetch the affected book / apply the mutation's own server response to
+Room" *and* scoping; only the scoping path was taken (see rationale above). **DC2 deliberately not done** —
+it's a separate LOW item. Tests: the drainer/syncer kind-mapping (connectivity) and the per-kind scoped
+preservation incl. discriminating "non-owned server field flows through" cases (`:core:book`). Pairs
+naturally with D2 (extracting offline-sync) if that lands later.
 
 ### DC2 [LOW] Latent race: a local mutation during an in-flight refresh can be clobbered
 `refreshUserBooks()` drains pending writes *before* fetching, and the inflight `Mutex` serialises

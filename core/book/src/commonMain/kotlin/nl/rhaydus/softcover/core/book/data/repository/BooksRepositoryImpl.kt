@@ -39,6 +39,7 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.ui.common.AppDispatchers
@@ -134,7 +135,7 @@ internal class BooksRepositoryImpl(
         userId: Int,
         statusFilter: UserBookStatus?,
     ) {
-        val syncedUserBookIds: Set<Int> = userBookWriteDrainer.drainPendingUpdates()
+        val syncedWrites: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteDrainer.drainPendingUpdates()
 
         val statusIds: Set<Int> = statusFilter
             ?.let { setOf(it.code) }
@@ -145,9 +146,9 @@ internal class BooksRepositoryImpl(
             statusIds = statusIds,
         )
 
-        val booksToCache: List<Book> = preserveSyncedProgress(
+        val booksToCache: List<Book> = preserveSyncedWrites(
             fetchedBooks = fetchedBooks,
-            syncedUserBookIds = syncedUserBookIds,
+            syncedWrites = syncedWrites,
         )
 
         booksLocalDataSource.cacheBooks(books = booksToCache)
@@ -697,36 +698,112 @@ internal class BooksRepositoryImpl(
         booksLocalDataSource.cacheBook(book = snapshot)
     }
 
-    private suspend fun preserveSyncedProgress(
+    /**
+     * Reconciles a fresh server fetch with writes that were just replayed from the offline queue.
+     * A replayed write reached the server but the bulk fetch can lag behind it (read-after-write),
+     * so for each affected book we re-apply the local optimistic value — but only for the fields
+     * the replayed write actually owns. Every other field (e.g. a deadline another client moved)
+     * flows through from the server, so the local copy can no longer clobber server-of-record state.
+     * Owned fields self-heal on the next refresh once the queue is empty and nothing is preserved.
+     */
+    private suspend fun preserveSyncedWrites(
         fetchedBooks: List<Book>,
-        syncedUserBookIds: Set<Int>,
+        syncedWrites: Map<Int, Set<PendingUserBookWriteKind>>,
     ): List<Book> {
-        if (syncedUserBookIds.isEmpty()) return fetchedBooks
+        if (syncedWrites.isEmpty()) return fetchedBooks
 
         val snapshots: Map<Int, Book> = booksLocalDataSource.allUserBooks
             .first()
             .mapNotNull { book ->
                 val userBookId: Int = book.userBook?.id ?: return@mapNotNull null
 
-                if (userBookId in syncedUserBookIds) userBookId to book else null
+                if (userBookId in syncedWrites) userBookId to book else null
             }
             .toMap()
 
         if (snapshots.isEmpty()) return fetchedBooks
 
         return fetchedBooks.map { fetched ->
-            val userBookId: Int? = fetched.userBook?.id
-            val snapshot: Book? = userBookId?.let { snapshots[it] }
+            val userBookId: Int = fetched.userBook?.id ?: return@map fetched
+            val kinds: Set<PendingUserBookWriteKind> = syncedWrites[userBookId] ?: return@map fetched
+            val snapshot: Book = snapshots[userBookId] ?: return@map fetched
 
-            if (snapshot != null) {
-                fetched.copy(
-                    userBook = snapshot.userBook,
-                    userBookRead = snapshot.userBookRead,
-                )
-            } else {
-                fetched
-            }
+            kinds.fold(fetched) { book, kind -> book.preserveOwnedFields(
+                kind = kind,
+                snapshot = snapshot,
+            ) }
         }
+    }
+
+    private fun Book.preserveOwnedFields(
+        kind: PendingUserBookWriteKind,
+        snapshot: Book,
+    ): Book = when (kind) {
+        PendingUserBookWriteKind.UPDATE_PROGRESS -> preserveProgress(snapshot = snapshot)
+
+        PendingUserBookWriteKind.MARK_AS_READ -> preserveReadStatus(snapshot = snapshot)
+
+        PendingUserBookWriteKind.UPDATE_RATING -> preserveRating(snapshot = snapshot)
+
+        PendingUserBookWriteKind.UPDATE_REVIEW -> preserveReview(snapshot = snapshot)
+    }
+
+    private fun Book.preserveProgress(snapshot: Book): Book {
+        val snapshotRead: UserBookRead = snapshot.userBookRead ?: return this
+        // The bulk fetch hasn't surfaced the read row yet (lag) but the local snapshot carries it with
+        // its genuine prior-fetch id, so reinstate it; the next refresh takes the server copy wholesale.
+        val fetchedRead: UserBookRead = userBookRead ?: return copy(userBookRead = snapshotRead)
+
+        return copy(
+            userBookRead = fetchedRead.copy(
+                currentPage = snapshotRead.currentPage,
+                currentSeconds = snapshotRead.currentSeconds,
+                progress = snapshotRead.progress,
+                startedAt = snapshotRead.startedAt,
+                finishedAt = snapshotRead.finishedAt,
+            ),
+        )
+    }
+
+    private fun Book.preserveReadStatus(snapshot: Book): Book {
+        val snapshotUserBook: UserBook = snapshot.userBook ?: return this
+        val fetchedUserBook: UserBook = userBook ?: return this
+
+        val snapshotRead: UserBookRead? = snapshot.userBookRead
+        val fetchedRead: UserBookRead? = userBookRead
+
+        val updatedRead: UserBookRead? = if (snapshotRead != null && fetchedRead != null) {
+            fetchedRead.copy(
+                progress = snapshotRead.progress,
+                finishedAt = snapshotRead.finishedAt,
+            )
+        } else {
+            fetchedRead
+        }
+
+        return copy(
+            userBook = fetchedUserBook.copy(status = snapshotUserBook.status),
+            userBookRead = updatedRead,
+        )
+    }
+
+    private fun Book.preserveRating(snapshot: Book): Book {
+        val snapshotUserBook: UserBook = snapshot.userBook ?: return this
+        val fetchedUserBook: UserBook = userBook ?: return this
+
+        return copy(userBook = fetchedUserBook.copy(rating = snapshotUserBook.rating))
+    }
+
+    private fun Book.preserveReview(snapshot: Book): Book {
+        val snapshotUserBook: UserBook = snapshot.userBook ?: return this
+        val fetchedUserBook: UserBook = userBook ?: return this
+
+        return copy(
+            userBook = fetchedUserBook.copy(
+                reviewDocument = snapshotUserBook.reviewDocument,
+                reviewHasSpoilers = snapshotUserBook.reviewHasSpoilers,
+            ),
+        )
     }
 
     private fun Book.withProgress(

@@ -243,12 +243,28 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `refreshUserBooks reapplies local progress for userBooks the drainer just synced`() = runTest {
+        fun `refreshUserBooks reapplies local progress fields for UPDATE_PROGRESS but non-owned fields flow from server`() = runTest {
             // ----- Arrange -----
             val userId = 20
             val syncedUserBookId = 42
 
-            val localUserBook = stubUserBook(id = syncedUserBookId)
+            // Local snapshot has progress-owned fields set to "local" values, but a different rating
+            // that is NOT owned by UPDATE_PROGRESS — it should be overwritten by the server copy.
+            val localUserBook = UserBook(
+                id = syncedUserBookId,
+                status = BookStatus.Reading,
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = 2.0, // local rating — NOT owned by UPDATE_PROGRESS; server should win
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+            )
             val localUserBookRead = UserBookRead(
                 id = 1,
                 currentPage = 200,
@@ -258,12 +274,27 @@ class BooksRepositoryImplTest {
                 finishedAt = null,
             )
 
-            val staleUserBook = stubUserBook(id = syncedUserBookId)
-            val staleUserBookRead = UserBookRead(
+            // Server copy has stale progress fields but a fresher rating
+            val serverUserBook = UserBook(
+                id = syncedUserBookId,
+                status = BookStatus.Reading,
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = 4.5, // server-of-record rating — should win for UPDATE_PROGRESS
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+            )
+            val serverUserBookRead = UserBookRead(
                 id = 1,
-                currentPage = 50,
+                currentPage = 50, // stale — local (200) should win for UPDATE_PROGRESS
                 currentSeconds = null,
-                progress = 20f,
+                progress = 20f, // stale — local (80f) should win
                 startedAt = null,
                 finishedAt = null,
             )
@@ -283,8 +314,8 @@ class BooksRepositoryImplTest {
                 bookSeries = null,
                 positionsInSeries = emptyList(),
                 isCompilation = false,
-                userBook = staleUserBook,
-                userBookRead = staleUserBookRead,
+                userBook = serverUserBook,
+                userBookRead = serverUserBookRead,
             )
             val localBook = remoteBook.copy(
                 userBook = localUserBook,
@@ -293,7 +324,7 @@ class BooksRepositoryImplTest {
 
             coEvery {
                 userBookWriteDrainer.drainPendingUpdates()
-            } returns setOf(syncedUserBookId)
+            } returns mapOf(syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS))
 
             every {
                 booksLocalDataSource.allUserBooks
@@ -317,7 +348,14 @@ class BooksRepositoryImplTest {
             coVerify {
                 booksLocalDataSource.cacheBooks(
                     books = match { books ->
-                        books.any { it.userBook == localUserBook && it.userBookRead == localUserBookRead }
+                        val cached = books.firstOrNull() ?: return@match false
+                        // Progress-owned fields preserved from local
+                        val ubr = cached.userBookRead ?: return@match false
+                        val progressFieldsPreserved = ubr.currentPage == 200 &&
+                            ubr.progress == 80f
+                        // Non-owned field flows from server, not local
+                        val nonOwnedFieldFromServer = cached.userBook?.rating == 4.5
+                        progressFieldsPreserved && nonOwnedFieldFromServer
                     },
                 )
             }
@@ -331,7 +369,7 @@ class BooksRepositoryImplTest {
 
             coEvery {
                 userBookWriteDrainer.drainPendingUpdates()
-            } returns emptySet()
+            } returns emptyMap()
 
             coEvery {
                 booksRemoteDataSource.initializeBooks(
@@ -350,6 +388,236 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerify {
                 booksLocalDataSource.cacheBooks(books = listOf(remoteBook))
+            }
+        }
+
+        @Test
+        fun `refreshUserBooks UPDATE_RATING preserves local rating but server-changed progress flows through`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val syncedUserBookId = 55
+
+            val localUserBook = UserBook(
+                id = syncedUserBookId,
+                status = BookStatus.Read,
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = 5.0, // local rating — owned by UPDATE_RATING; should be preserved
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+            )
+            val localUserBookRead = UserBookRead(
+                id = 1,
+                currentPage = 100, // NOT owned by UPDATE_RATING; server should win
+                currentSeconds = null,
+                progress = 50f, // NOT owned by UPDATE_RATING; server should win
+                startedAt = null,
+                finishedAt = null,
+            )
+
+            val serverUserBook = UserBook(
+                id = syncedUserBookId,
+                status = BookStatus.Read,
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = 1.0, // stale server rating — local (5.0) should win
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+            )
+            val serverUserBookRead = UserBookRead(
+                id = 1,
+                currentPage = 350, // server-of-record progress — should flow through
+                currentSeconds = null,
+                progress = 100f,
+                startedAt = null,
+                finishedAt = null,
+            )
+
+            val remoteBook = Book(
+                id = 101,
+                title = "Rated Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2021,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = serverUserBook,
+                userBookRead = serverUserBookRead,
+            )
+            val localBook = remoteBook.copy(
+                userBook = localUserBook,
+                userBookRead = localUserBookRead,
+            )
+
+            coEvery {
+                userBookWriteDrainer.drainPendingUpdates()
+            } returns mapOf(syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_RATING))
+
+            every {
+                booksLocalDataSource.allUserBooks
+            } returns flowOf(listOf(localBook))
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
+            } returns listOf(remoteBook)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.cacheBooks(
+                    books = match { books ->
+                        val cached = books.firstOrNull() ?: return@match false
+                        // Rating-owned field preserved from local
+                        val ratingPreserved = cached.userBook?.rating == 5.0
+                        // Non-owned progress field flows from server
+                        val progressFromServer = cached.userBookRead?.currentPage == 350 &&
+                            cached.userBookRead?.progress == 100f
+                        ratingPreserved && progressFromServer
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `refreshUserBooks MARK_AS_READ preserves local status and finishedAt but non-owned server field flows through`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val syncedUserBookId = 66
+
+            val localUserBook = UserBook(
+                id = syncedUserBookId,
+                status = BookStatus.Read, // local status — owned by MARK_AS_READ; should be preserved
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = 3.0, // NOT owned by MARK_AS_READ; server should win
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+            )
+            val localUserBookRead = UserBookRead(
+                id = 1,
+                currentPage = 300,
+                currentSeconds = null,
+                progress = 100f, // owned by MARK_AS_READ; should be preserved
+                startedAt = null,
+                finishedAt = "2026-05-01", // owned by MARK_AS_READ; should be preserved
+            )
+
+            val serverUserBook = UserBook(
+                id = syncedUserBookId,
+                status = BookStatus.WantToRead, // stale server status — local (Read) should win
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = 4.8, // server-of-record rating — should flow through
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+            )
+            val serverUserBookRead = UserBookRead(
+                id = 1,
+                currentPage = 0, // server stale — local progress wins for MARK_AS_READ finishedAt
+                currentSeconds = null,
+                progress = 0f, // NOT owned by MARK_AS_READ (only finishedAt+progress); server 0f
+                startedAt = null,
+                finishedAt = null, // stale — local ("2026-05-01") should win
+            )
+
+            val remoteBook = Book(
+                id = 102,
+                title = "Finished Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2022,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = serverUserBook,
+                userBookRead = serverUserBookRead,
+            )
+            val localBook = remoteBook.copy(
+                userBook = localUserBook,
+                userBookRead = localUserBookRead,
+            )
+
+            coEvery {
+                userBookWriteDrainer.drainPendingUpdates()
+            } returns mapOf(syncedUserBookId to setOf(PendingUserBookWriteKind.MARK_AS_READ))
+
+            every {
+                booksLocalDataSource.allUserBooks
+            } returns flowOf(listOf(localBook))
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
+            } returns listOf(remoteBook)
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.cacheBooks(
+                    books = match { books ->
+                        val cached = books.firstOrNull() ?: return@match false
+                        // MARK_AS_READ-owned fields preserved from local
+                        val statusPreserved = cached.userBook?.status == BookStatus.Read
+                        val finishedAtPreserved = cached.userBookRead?.finishedAt == "2026-05-01"
+                        // Non-owned field flows from server
+                        val nonOwnedFromServer = cached.userBook?.rating == 4.8
+                        statusPreserved && finishedAtPreserved && nonOwnedFromServer
+                    },
+                )
             }
         }
 
