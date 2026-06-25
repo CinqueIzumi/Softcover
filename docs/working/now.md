@@ -30,4 +30,4 @@ _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
 _Small things to clear ASAP, outside the release cadence. One line each; delete when shipped._
 
-<!-- - [ ] Fix … -->
+- [ ] Complete the AGP 9 migration: flip `android.builtInKotlin` / `android.newDsl` back to defaults in `gradle.properties` and drop the explicit `org.jetbrains.kotlin.android` plugin once KSP supports AGP 9's built-in Kotlin (currently blocked — see architecture-review B2). Verify the Room KSP path still works after the switch.

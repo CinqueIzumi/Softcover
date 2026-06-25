@@ -74,3 +74,36 @@ hoisting a reusable bottom-bar component into the foundation design system, alon
 bottom-bar primitives it already ships (`LocalBottomBarPadding`, `rememberBottomBarPadding()`,
 `BottomNavigationSpacer`). Keep the shared piece brand-agnostic (skeleton in designsystem-core; brand
 styling layered by the app) so it fits the foundation's design-agnostic contract.
+
+---
+
+## F4 — `runCatchingCancellable` helper that rethrows `CancellationException`
+
+- **Type:** enhancement (shared util)
+- **Home:** `nl.rhaydus:core-ui` (the non-visual seam that already ships `AppDispatchers`)
+- **Status:** Open — evaluate
+
+Kotlin's stdlib `runCatching` catches *every* `Throwable`, including `CancellationException`. Inside a
+coroutine that silently swallows structured-concurrency cancellation: a cancelled child runs its
+fallback path instead of unwinding, so the coroutine never exits gracefully and the parent's
+cancellation signal is lost. The standard fix is a cancellation-aware variant that rethrows
+`CancellationException` before treating the throwable as a failure:
+
+```kotlin
+inline fun <T> runCatchingCancellable(block: () -> T): Result<T> =
+    try {
+        Result.success(block())
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (throwable: Throwable) {
+        Result.failure(throwable)
+    }
+```
+
+Every app on the foundation that uses `runCatching` in coroutine code needs this, so it belongs in
+`core-ui` rather than being re-derived per app. It is also the "cancellation-aware `runCatching`" that
+**F1** names as the acceptable guarded form of a one-shot flow read, and it is the clean replacement for
+the hand-rolled `catch (Throwable) { … }` + manual `CancellationException` rethrow pattern (e.g. the
+`SoftcoverWorker` note in the architecture review). Until it lands upstream, app code should keep the
+explicit ordered-catch (`catch (c: CancellationException) { throw c }` first) rather than a bare
+`runCatching`.
