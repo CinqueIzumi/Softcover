@@ -128,6 +128,28 @@ check_unguarded_flow_terminal() {
     fi
 }
 
+# Rule: mockk `coEvery { ... }` / `every { ... }` stubs are never one-liners — open the block onto its
+# own line (and leave a blank line after each stub's closing `}`). Test source sets only.
+# (Imprecise: only the same-line open-and-close form is greppable; the blank-line-after-`}` part is
+# review-only. Nested braces inside the stub block are not matched — review those by hand.)
+check_inline_mockk_stubs() {
+    local f out=""
+    for f in "${targets[@]}"; do
+        case "$f" in
+            */src/*[Tt]est*/*) ;; # test source sets only
+            *) continue ;;
+        esac
+        local hits
+        hits=$(grep -HnE '(coEvery|every)[[:space:]]*\{[^{}]*\}[[:space:]]*(returns|returnsMany|answers|answersMany|coAnswers|throws|throwsMany|just)' "$f" 2>/dev/null)
+        [ -n "$hits" ] && out+="$hits"$'\n'
+    done
+    if [ -n "$out" ]; then
+        section "[advisory] Inline mockk stub — open the coEvery/every block onto its own line, blank line after its closing } (foundation code-style §Whitespace)"
+        printf '%s' "$out"
+        advisory_hits=$((advisory_hits + 1))
+    fi
+}
+
 # Rule: project imports (nl.rhaydus.*) are alphabetical within their group.
 check_import_order() {
     local f block out=""
@@ -151,6 +173,7 @@ check_fq_refs
 check_one_type_per_file
 check_import_order
 check_unguarded_flow_terminal
+check_inline_mockk_stubs
 
 if [ "$error_hits" -gt 0 ]; then
     printf '\nstyle-check: %d error-tier rule(s), %d advisory rule(s) with findings.\n' "$error_hits" "$advisory_hits"
