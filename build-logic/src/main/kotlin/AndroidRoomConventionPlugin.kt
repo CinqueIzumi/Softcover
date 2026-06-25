@@ -1,5 +1,7 @@
+import androidx.room.gradle.RoomExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
 /**
@@ -17,10 +19,19 @@ import org.gradle.kotlin.dsl.dependencies
  *   codegen is wired once per compilation (`kspAndroid` + one per iOS target + `kspJvm`, matching the
  *   targets declared by [KmpLibraryConventionPlugin]) so every target gets its generated `@Database`
  *   implementation.
+ * - The Room Gradle plugin (`androidx.room`) exports the schema JSON for each `@Database` version to
+ *   `schemas/`. It coordinates the per-target KSP runs onto one schema directory (a tracked task
+ *   input/output, unlike a raw `room.schemaLocation` KSP arg) so the committed schemas stay in lockstep
+ *   with the entities and can back `MigrationTestHelper` coverage for future migrations.
  */
 class AndroidRoomConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("com.google.devtools.ksp")
+        pluginManager.apply("androidx.room")
+
+        extensions.configure<RoomExtension> {
+            schemaDirectory("$projectDir/schemas")
+        }
 
         dependencies {
             add(

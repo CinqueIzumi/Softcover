@@ -20,5 +20,12 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.koin.android)
         }
+
+        androidHostTest.dependencies {
+            // The production code uses `androidx.sqlite:sqlite-bundled` (the KMP artifact), which
+            // ships Android native libraries. The JVM host-test runner needs the JVM variant
+            // instead — it carries macOS/Linux/Windows native dylibs loaded at test startup.
+            runtimeOnly(libs.androidx.sqlite.bundled.jvm)
+        }
     }
 }

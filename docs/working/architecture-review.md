@@ -288,19 +288,34 @@ project standard), `runTest` + JUnit5 + Kotest throughout, and — notably — t
 **is** tested (76 Action tests, 19 Collector tests, 74 use-case tests, 10 mapper tests). The drift is
 in *what's left uncovered*, and a couple of these are genuinely risky:
 
-### T1 [HIGH] Room migrations have ZERO tests, at schema version 40 (37 migrations)
-`:core:database` is at v40 with 37 hand-written `execSQL` migrations and only 3 test files — none
-exercising a migration path. A bad migration is data loss on real users' devices, and
-`fallbackToDestructiveMigration(dropAllTables = true)` is configured, so a silent migration failure
-**wipes the local DB** rather than crashing visibly. I'd add Room `MigrationTestHelper` coverage for at
-least the destructive/structural migrations (the v5-6 denormalization split, v31-32 pending-writes
-rename, v35-36 review-format migration). Highest-risk gap in the codebase. Cost: medium.
+### ✅ T1 [HIGH] Room migrations have ZERO tests, at schema version 40 (37 migrations)
+**Done (2026-06-25, `refactor/audit`).** `:core:database` is at v42 with 39 hand-written `execSQL`
+migrations and only mapper tests — none exercised a migration path. A bad migration is data loss on real
+users' devices, and `fallbackToDestructiveMigration(dropAllTables = true)` is configured, so a silent
+migration failure **wipes the local DB** rather than crashing visibly.
 
-### T2 [HIGH] The custom Apollo cache resolver is untested
-`SoftcoverCacheResolver` (the primary-key redirect that makes detail-screen cache hits work) and the
-`safeQueryFlow` dual-emission handling have effectively no tests (`:core:network` has 1 test, the auth
-interceptor). This is bespoke, subtle, offline-affecting logic. Add resolver tests for the redirect
-hit/miss/fallback paths. Cost: low-medium.
+**Deviation:** Room `MigrationTestHelper` is **not usable** for the historical migrations — it needs the
+exported schema JSON for each *start* version, and this project never exported schemas (and they can't be
+regenerated retroactively). Instead, since the migrations use the new KMP `Migration.migrate(connection:
+SQLiteConnection)` API over `BundledSQLiteDriver`, they are **host-runnable on the JVM directly**: a test
+opens an in-memory SQLite connection, hand-builds the *old* schema, inserts representative rows, calls the
+migration object, then asserts data survival + post-migration schema shape. Covered the three structural
+migrations the review named — v5→6 denormalization split, v31→32 pending-writes rename, v35→36 review-format
+rebuild (33 tests in `core/database/src/androidHostTest/.../migration/`). To reach the migration objects the
+companion now exposes a single `internal val ALL_MIGRATIONS` (the migration set's source of truth, consumed
+by `build()`); the host-test runner gets `androidx.sqlite:sqlite-bundled-jvm` as a `runtimeOnly` test dep
+(production still uses the KMP `sqlite-bundled`). Schema export for *future* MigrationTestHelper coverage is
+a worthwhile separate follow-up, not required for these tests.
+
+### ✅ T2 [HIGH] The custom Apollo cache resolver is untested
+**Done (2026-06-25, `refactor/audit`).** `SoftcoverCacheResolver` (the primary-key redirect that makes
+detail-screen cache hits work) and the `safeQueryFlow` dual-emission handling had effectively no tests
+(`:core:network` had 1 test, the auth interceptor). This is bespoke, subtle, offline-affecting logic. Added
+20 MockK tests (`core/network/src/androidHostTest/.../cache/` + `.../helper/`): resolver redirect hit
+(`_eq`/`_in`, null filtering, Int→String key) vs delegate (foreign-key filter, absent `where`,
+non-redirectable field, non-root parent); and `safeQueryFlow` cache+network dual emission, CacheMiss
+ignored, 401-after-cache-hit (notify, no throw), 401/403 with no data (throw), offline/server/transient
+(503/429) transport mapping, and non-retryable/empty-flow generic-error paths.
 
 ### T3 [MEDIUM] Offline write queue/drainer and `core:personal` mutations under-tested
 The `UserBookWriteQueue`/`UserBookWriteDrainer` replay path (the heart of offline-first, see D2/D3) and
@@ -358,8 +373,8 @@ Cost: low-medium.
 |---|--------|----------|------|-----------|
 | ✅ M1 | Move app state out of `:core:designsystem`; prune its `api` deps to `:core:domain` | HIGH | Med | Removes the app-wide transitive leak — the keystone |
 | ✅ M2 | Delete `:core:library`; move `RefreshLibraryUseCase` to `:orchestration` | HIGH | Low-Med | Kills a fake module + name collision |
-| T1 | Room migration tests (v40, 37 migrations; destructive fallback = silent data loss) | HIGH | Med | Highest data-loss risk in the repo |
-| T2 | Test `SoftcoverCacheResolver` + `safeQueryFlow` dual-emission | HIGH | Low-Med | Bespoke offline-affecting logic, untested |
+| ✅ T1 | Room migration tests (v42, 39 migrations; destructive fallback = silent data loss) | HIGH | Med | Highest data-loss risk in the repo |
+| ✅ T2 | Test `SoftcoverCacheResolver` + `safeQueryFlow` dual-emission | HIGH | Low-Med | Bespoke offline-affecting logic, untested |
 | ✅ M4 | Extend the existing `checkModuleGraph` with an `api`-visibility rule | MED | Low | The existing gate allows M1/M3; this catches them |
 | ✅ M3 | Demote `:core:connectivity` `api`→`implementation` | MED | Low | Same leak class as M1 |
 | C1 | Cancel `ReadingSessionService.serviceScope` in `onDestroy()` | MED-HIGH | Trivial | Real Android-service coroutine leak |
