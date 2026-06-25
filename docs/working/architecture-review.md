@@ -225,13 +225,25 @@ What I'd change (pick the app's single error model and commit):
 Cost: medium-high (touches every use case). High payoff for consistency + testability. This is the
 one I'd most want sign-off on before touching, because it ripples.
 
-### D2 [MEDIUM] `BooksRepositoryImpl` (~250 lines) bundles cache + network + offline-queue + dedup + orphan-cleanup
-It works and is tested, but it's five responsibilities in one class: fetch strategy, local store,
-`UserBookWriteQueue` enqueue, `UserBookWriteDrainer` replay, inflight-mutex dedup, orphan removal.
-I'd extract the offline-sync concern (queue + drainer + connectivity) into an
-`OfflineUserBookSync`/decorator so the repository reads as "fetch + merge" and the sync machinery is
-independently testable. Cost: medium. (Clean-architecture-correct per the project's own principle of
-never preferring the smaller-diff pass-through.)
+### ✅ D2 [MEDIUM] `BooksRepositoryImpl` bundles cache + network + offline-queue + dedup + orphan-cleanup
+**Done (2026-06-26, `refactor/audit`).** The offline-sync concern was extracted into a new
+`OfflineUserBookSync` (interface in `:core:book` `domain/sync/`, `internal` impl
+`OfflineUserBookSyncImpl` in `data/sync/`). It owns the four `enqueue*` methods and the
+drain-then-reconcile step (`drainPendingUpdates()` + the `preserveSyncedWrites`/`preserve*` owned-field
+reconcile from DC1). The repository now composes it: mutations delegate `offlineSync.enqueue*`, and
+`refreshUserBooksInternal` calls `offlineSync.drainAndReconcile { … }` and caches the result. Constructor
+went 7 → 6 deps (dropped `userBookWriteQueue` + `userBookWriteDrainer`, added `offlineSync`).
+
+**Deviations:** (1) the review offered "decorator," but a decorator can't interpose the reconcile
+*mid-refresh* (it must run between the server fetch and the cache write) without re-implementing
+fetch/cache or double-fetching — so a **collaborator extraction** was used instead. (2) `drainAndReconcile`
+takes the fetch as a `suspend () -> List<Book>` lambda so the exact **drain → fetch → reconcile** ordering
+is preserved (the queue is drained *before* the fetch, as the original code did and DC2 relies on); the
+synced-kinds map never leaks back to the repo. (3) Impl lives in `:core:book`, not `:core:connectivity`
+— the latter already `implementation`-depends on `:core:book`, so placing it there would have cycled.
+Tests: new `OfflineUserBookSyncImplTest` (32 tests: enqueue shapes + per-kind reconcile incl. the DC1
+"non-owned server field flows through" discriminator) and `BooksRepositoryImplTest` re-pointed to assert
+delegation. Pairs with D1 only loosely; shipped independently first.
 
 ### D3 [LOW] Offline write replay is opportunistic, not guaranteed
 Pending writes drain only on the next library refresh (`UserBookWriteDrainer`). If the user edits
@@ -381,7 +393,7 @@ Cost: low-medium.
 | ✅ DC1 | Re-sync Room from server after offline write replay; scope `preserveSyncedProgress` | MED | Med | Apollo↔Room divergence on offline edits |
 | ✅ M5 | Koin `includes(...)` instead of ordered list | MED | Low | Removes runtime-fragile ordering |
 | D1 | Single error model at the network seam; move `UserMessageNotifier` out | MED | Med-High | Root of P2; needs buy-in (ripples) |
-| D2 | Extract offline-sync out of `BooksRepositoryImpl` (pairs with DC1) | MED | Med | Testability + SRP |
+| ✅ D2 | Extract offline-sync out of `BooksRepositoryImpl` (pairs with DC1) | MED | Med | Testability + SRP |
 | T3 | Test offline write queue/drainer + `core:personal` mutations | MED | Med | User-data-loss paths, thin coverage |
 | P2 | One error-state contract on TOAD `UiState` | MED | Low-Med | Consistent failure UX |
 | R1 | Enable R8 + keep rules (Koin/Apollo/Room/serialization/TOAD) + release smoke test | MED | Med | Unobfuscated, leaky release builds today |

@@ -5,7 +5,9 @@ import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.repository.BooksRepositoryImpl
+import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
@@ -52,13 +54,20 @@ val bookModule = module {
         )
     }
 
+    single<OfflineUserBookSync> {
+        OfflineUserBookSyncImpl(
+            userBookWriteQueue = get(),
+            userBookWriteDrainer = get(),
+            booksLocalDataSource = get(),
+        )
+    }
+
     single<BooksRepository> {
         BooksRepositoryImpl(
             booksRemoteDataSource = get(),
             booksLocalDataSource = get(),
             networkAvailability = get(),
-            userBookWriteQueue = get(),
-            userBookWriteDrainer = get(),
+            offlineSync = get(),
             applicationScope = get(),
             appDispatchers = get(),
         )

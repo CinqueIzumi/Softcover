@@ -21,11 +21,8 @@ import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
-import nl.rhaydus.softcover.core.database.mapper.toJson
+import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
-import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
-import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
@@ -49,8 +46,7 @@ class BooksRepositoryImplTest {
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
     private lateinit var booksLocalDataSource: BooksLocalDataSource
     private lateinit var networkAvailability: NetworkAvailabilityProvider
-    private lateinit var userBookWriteQueue: UserBookWriteQueue
-    private lateinit var userBookWriteDrainer: UserBookWriteDrainer
+    private lateinit var offlineSync: OfflineUserBookSync
     private lateinit var appDispatchers: AppDispatchers
     private lateinit var testScope: TestScope
     private lateinit var repository: BooksRepositoryImpl
@@ -60,8 +56,7 @@ class BooksRepositoryImplTest {
         booksRemoteDataSource = mockk()
         booksLocalDataSource = mockk(relaxed = true)
         networkAvailability = mockk()
-        userBookWriteQueue = mockk(relaxed = true)
-        userBookWriteDrainer = mockk(relaxed = true)
+        offlineSync = mockk(relaxed = true)
 
         val dispatcher = UnconfinedTestDispatcher()
         appDispatchers = AppDispatchers(
@@ -80,8 +75,7 @@ class BooksRepositoryImplTest {
             booksRemoteDataSource = booksRemoteDataSource,
             booksLocalDataSource = booksLocalDataSource,
             networkAvailability = networkAvailability,
-            userBookWriteQueue = userBookWriteQueue,
-            userBookWriteDrainer = userBookWriteDrainer,
+            offlineSync = offlineSync,
             applicationScope = ApplicationScope(scope = testScope),
             appDispatchers = appDispatchers,
         )
@@ -125,8 +119,7 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource = booksRemoteDataSource,
                 booksLocalDataSource = booksLocalDataSource,
                 networkAvailability = networkAvailability,
-                userBookWriteQueue = userBookWriteQueue,
-                userBookWriteDrainer = userBookWriteDrainer,
+                offlineSync = offlineSync,
                 applicationScope = ApplicationScope(scope = testScope),
                 appDispatchers = appDispatchers,
             )
@@ -178,6 +171,10 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
+            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
+
             // ----- Act -----
             repository.refreshUserBooks(userId = userId)
 
@@ -203,6 +200,10 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
+            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
+
             // ----- Act -----
             val result = runCatching {
                 repository.refreshUserBooks(userId = userId)
@@ -214,7 +215,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `refreshUserBooks drains pending updates before fetching from remote`() = runTest {
+        fun `refreshUserBooks delegates drain and reconcile to offlineSync`() = runTest {
             // ----- Arrange -----
             val userId = 20
 
@@ -228,136 +229,43 @@ class BooksRepositoryImplTest {
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
+
+            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
 
             // ----- Act -----
             repository.refreshUserBooks(userId = userId)
 
             // ----- Assert -----
-            coVerifyOrder {
-                userBookWriteDrainer.drainPendingUpdates()
-                booksRemoteDataSource.initializeBooks(
-                    userId = userId,
-                    statusIds = any(),
-                )
-            }
+            coVerify { offlineSync.drainAndReconcile(any()) }
         }
 
         @Test
-        fun `refreshUserBooks reapplies local progress fields for UPDATE_PROGRESS but non-owned fields flow from server`() = runTest {
+        fun `refreshUserBooks delegates reconciliation to offlineSync and caches whatever it returns`() = runTest {
             // ----- Arrange -----
             val userId = 20
-            val syncedUserBookId = 42
-
-            // Local snapshot has progress-owned fields set to "local" values, but a different rating
-            // that is NOT owned by UPDATE_PROGRESS — it should be overwritten by the server copy.
-            val localUserBook = UserBook(
-                id = syncedUserBookId,
-                status = BookStatus.Reading,
-                dateAdded = "2026-01-01",
-                createdAt = null,
-                privacySettingId = 1,
-                reviewHasSpoilers = false,
-                editionId = null,
-                lastReadDate = null,
-                rating = 2.0, // local rating — NOT owned by UPDATE_PROGRESS; server should win
-                referrerUserId = null,
-                reviewedAt = null,
-                updatedAt = null,
-                journals = emptyList(),
-            )
-            val localUserBookRead = UserBookRead(
-                id = 1,
-                currentPage = 200,
-                currentSeconds = null,
-                progress = 80f,
-                startedAt = null,
-                finishedAt = null,
-            )
-
-            // Server copy has stale progress fields but a fresher rating
-            val serverUserBook = UserBook(
-                id = syncedUserBookId,
-                status = BookStatus.Reading,
-                dateAdded = "2026-01-01",
-                createdAt = null,
-                privacySettingId = 1,
-                reviewHasSpoilers = false,
-                editionId = null,
-                lastReadDate = null,
-                rating = 4.5, // server-of-record rating — should win for UPDATE_PROGRESS
-                referrerUserId = null,
-                reviewedAt = null,
-                updatedAt = null,
-                journals = emptyList(),
-            )
-            val serverUserBookRead = UserBookRead(
-                id = 1,
-                currentPage = 50, // stale — local (200) should win for UPDATE_PROGRESS
-                currentSeconds = null,
-                progress = 20f, // stale — local (80f) should win
-                startedAt = null,
-                finishedAt = null,
-            )
-
-            val remoteBook = Book(
-                id = 100,
-                title = "Test Book",
-                editions = emptyList(),
-                defaultEdition = null,
-                rating = 0.0,
-                description = "",
-                releaseYear = 2020,
-                coverUrl = "",
-                authors = emptyList(),
-                usersCount = 0,
-                ratingsCount = 0,
-                bookSeries = null,
-                positionsInSeries = emptyList(),
-                isCompilation = false,
-                userBook = serverUserBook,
-                userBookRead = serverUserBookRead,
-            )
-            val localBook = remoteBook.copy(
-                userBook = localUserBook,
-                userBookRead = localUserBookRead,
-            )
-
-            coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
-            } returns mapOf(syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS))
-
-            every {
-                booksLocalDataSource.allUserBooks
-            } returns flowOf(listOf(localBook))
+            val reconciledBook = stubBook(userBookId = 42)
 
             coEvery {
                 booksRemoteDataSource.initializeBooks(
                     userId = userId,
                     statusIds = any(),
                 )
-            } returns listOf(remoteBook)
+            } returns listOf(stubBook(userBookId = 42))
 
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
+
+            coEvery { offlineSync.drainAndReconcile(any()) } returns listOf(reconciledBook)
 
             // ----- Act -----
             repository.refreshUserBooks(userId = userId)
 
             // ----- Assert -----
             coVerify {
-                booksLocalDataSource.cacheBooks(
-                    books = match { books ->
-                        val cached = books.firstOrNull() ?: return@match false
-                        // Progress-owned fields preserved from local
-                        val ubr = cached.userBookRead ?: return@match false
-                        val progressFieldsPreserved = ubr.currentPage == 200 &&
-                            ubr.progress == 80f
-                        // Non-owned field flows from server, not local
-                        val nonOwnedFieldFromServer = cached.userBook?.rating == 4.5
-                        progressFieldsPreserved && nonOwnedFieldFromServer
-                    },
-                )
+                booksLocalDataSource.cacheBooks(books = listOf(reconciledBook))
             }
         }
 
@@ -368,10 +276,6 @@ class BooksRepositoryImplTest {
             val remoteBook = stubBook(userBookId = 7)
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
-            } returns emptyMap()
-
-            coEvery {
                 booksRemoteDataSource.initializeBooks(
                     userId = userId,
                     statusIds = any(),
@@ -381,6 +285,10 @@ class BooksRepositoryImplTest {
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
+
+            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
 
             // ----- Act -----
             repository.refreshUserBooks(userId = userId)
@@ -388,236 +296,6 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerify {
                 booksLocalDataSource.cacheBooks(books = listOf(remoteBook))
-            }
-        }
-
-        @Test
-        fun `refreshUserBooks UPDATE_RATING preserves local rating but server-changed progress flows through`() = runTest {
-            // ----- Arrange -----
-            val userId = 20
-            val syncedUserBookId = 55
-
-            val localUserBook = UserBook(
-                id = syncedUserBookId,
-                status = BookStatus.Read,
-                dateAdded = "2026-01-01",
-                createdAt = null,
-                privacySettingId = 1,
-                reviewHasSpoilers = false,
-                editionId = null,
-                lastReadDate = null,
-                rating = 5.0, // local rating — owned by UPDATE_RATING; should be preserved
-                referrerUserId = null,
-                reviewedAt = null,
-                updatedAt = null,
-                journals = emptyList(),
-            )
-            val localUserBookRead = UserBookRead(
-                id = 1,
-                currentPage = 100, // NOT owned by UPDATE_RATING; server should win
-                currentSeconds = null,
-                progress = 50f, // NOT owned by UPDATE_RATING; server should win
-                startedAt = null,
-                finishedAt = null,
-            )
-
-            val serverUserBook = UserBook(
-                id = syncedUserBookId,
-                status = BookStatus.Read,
-                dateAdded = "2026-01-01",
-                createdAt = null,
-                privacySettingId = 1,
-                reviewHasSpoilers = false,
-                editionId = null,
-                lastReadDate = null,
-                rating = 1.0, // stale server rating — local (5.0) should win
-                referrerUserId = null,
-                reviewedAt = null,
-                updatedAt = null,
-                journals = emptyList(),
-            )
-            val serverUserBookRead = UserBookRead(
-                id = 1,
-                currentPage = 350, // server-of-record progress — should flow through
-                currentSeconds = null,
-                progress = 100f,
-                startedAt = null,
-                finishedAt = null,
-            )
-
-            val remoteBook = Book(
-                id = 101,
-                title = "Rated Book",
-                editions = emptyList(),
-                defaultEdition = null,
-                rating = 0.0,
-                description = "",
-                releaseYear = 2021,
-                coverUrl = "",
-                authors = emptyList(),
-                usersCount = 0,
-                ratingsCount = 0,
-                bookSeries = null,
-                positionsInSeries = emptyList(),
-                isCompilation = false,
-                userBook = serverUserBook,
-                userBookRead = serverUserBookRead,
-            )
-            val localBook = remoteBook.copy(
-                userBook = localUserBook,
-                userBookRead = localUserBookRead,
-            )
-
-            coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
-            } returns mapOf(syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_RATING))
-
-            every {
-                booksLocalDataSource.allUserBooks
-            } returns flowOf(listOf(localBook))
-
-            coEvery {
-                booksRemoteDataSource.initializeBooks(
-                    userId = userId,
-                    statusIds = any(),
-                )
-            } returns listOf(remoteBook)
-
-            coEvery {
-                booksLocalDataSource.getAllUserBookIds()
-            } returns emptyList()
-
-            // ----- Act -----
-            repository.refreshUserBooks(userId = userId)
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.cacheBooks(
-                    books = match { books ->
-                        val cached = books.firstOrNull() ?: return@match false
-                        // Rating-owned field preserved from local
-                        val ratingPreserved = cached.userBook?.rating == 5.0
-                        // Non-owned progress field flows from server
-                        val progressFromServer = cached.userBookRead?.currentPage == 350 &&
-                            cached.userBookRead?.progress == 100f
-                        ratingPreserved && progressFromServer
-                    },
-                )
-            }
-        }
-
-        @Test
-        fun `refreshUserBooks MARK_AS_READ preserves local status and finishedAt but non-owned server field flows through`() = runTest {
-            // ----- Arrange -----
-            val userId = 20
-            val syncedUserBookId = 66
-
-            val localUserBook = UserBook(
-                id = syncedUserBookId,
-                status = BookStatus.Read, // local status — owned by MARK_AS_READ; should be preserved
-                dateAdded = "2026-01-01",
-                createdAt = null,
-                privacySettingId = 1,
-                reviewHasSpoilers = false,
-                editionId = null,
-                lastReadDate = null,
-                rating = 3.0, // NOT owned by MARK_AS_READ; server should win
-                referrerUserId = null,
-                reviewedAt = null,
-                updatedAt = null,
-                journals = emptyList(),
-            )
-            val localUserBookRead = UserBookRead(
-                id = 1,
-                currentPage = 300,
-                currentSeconds = null,
-                progress = 100f, // owned by MARK_AS_READ; should be preserved
-                startedAt = null,
-                finishedAt = "2026-05-01", // owned by MARK_AS_READ; should be preserved
-            )
-
-            val serverUserBook = UserBook(
-                id = syncedUserBookId,
-                status = BookStatus.WantToRead, // stale server status — local (Read) should win
-                dateAdded = "2026-01-01",
-                createdAt = null,
-                privacySettingId = 1,
-                reviewHasSpoilers = false,
-                editionId = null,
-                lastReadDate = null,
-                rating = 4.8, // server-of-record rating — should flow through
-                referrerUserId = null,
-                reviewedAt = null,
-                updatedAt = null,
-                journals = emptyList(),
-            )
-            val serverUserBookRead = UserBookRead(
-                id = 1,
-                currentPage = 0, // server stale — local progress wins for MARK_AS_READ finishedAt
-                currentSeconds = null,
-                progress = 0f, // NOT owned by MARK_AS_READ (only finishedAt+progress); server 0f
-                startedAt = null,
-                finishedAt = null, // stale — local ("2026-05-01") should win
-            )
-
-            val remoteBook = Book(
-                id = 102,
-                title = "Finished Book",
-                editions = emptyList(),
-                defaultEdition = null,
-                rating = 0.0,
-                description = "",
-                releaseYear = 2022,
-                coverUrl = "",
-                authors = emptyList(),
-                usersCount = 0,
-                ratingsCount = 0,
-                bookSeries = null,
-                positionsInSeries = emptyList(),
-                isCompilation = false,
-                userBook = serverUserBook,
-                userBookRead = serverUserBookRead,
-            )
-            val localBook = remoteBook.copy(
-                userBook = localUserBook,
-                userBookRead = localUserBookRead,
-            )
-
-            coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
-            } returns mapOf(syncedUserBookId to setOf(PendingUserBookWriteKind.MARK_AS_READ))
-
-            every {
-                booksLocalDataSource.allUserBooks
-            } returns flowOf(listOf(localBook))
-
-            coEvery {
-                booksRemoteDataSource.initializeBooks(
-                    userId = userId,
-                    statusIds = any(),
-                )
-            } returns listOf(remoteBook)
-
-            coEvery {
-                booksLocalDataSource.getAllUserBookIds()
-            } returns emptyList()
-
-            // ----- Act -----
-            repository.refreshUserBooks(userId = userId)
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.cacheBooks(
-                    books = match { books ->
-                        val cached = books.firstOrNull() ?: return@match false
-                        // MARK_AS_READ-owned fields preserved from local
-                        val statusPreserved = cached.userBook?.status == BookStatus.Read
-                        val finishedAtPreserved = cached.userBookRead?.finishedAt == "2026-05-01"
-                        // Non-owned field flows from server
-                        val nonOwnedFromServer = cached.userBook?.rating == 4.8
-                        statusPreserved && finishedAtPreserved && nonOwnedFromServer
-                    },
-                )
             }
         }
 
@@ -641,6 +319,10 @@ class BooksRepositoryImplTest {
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
+
+            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
 
             // ----- Act -----
             repository.refreshUserBooks(
@@ -680,6 +362,10 @@ class BooksRepositoryImplTest {
             coEvery {
                 booksLocalDataSource.getUserBookIdsByStatus(status = status)
             } returns listOf(10, staleLocalId)
+
+            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
 
             // ----- Act -----
             repository.refreshUserBooks(
@@ -724,6 +410,10 @@ class BooksRepositoryImplTest {
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
+
+            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
 
             // ----- Act -----
             repository.refreshUserBooks(
@@ -2284,15 +1974,10 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match {
-                        it.kind == PendingUserBookWriteKind.UPDATE_RATING &&
-                            it.userBookId == userBookId &&
-                            it.rating == newRating
-                    },
-                )
-            }
+            coVerify { offlineSync.enqueueRatingUpdate(
+                book = any(),
+                rating = newRating,
+            ) }
         }
 
         @Test
@@ -2352,15 +2037,10 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match {
-                        it.kind == PendingUserBookWriteKind.UPDATE_RATING &&
-                            it.userBookId == userBookId &&
-                            it.rating == newRating
-                    },
-                )
-            }
+            coVerify { offlineSync.enqueueRatingUpdate(
+                book = any(),
+                rating = newRating,
+            ) }
         }
 
         @Test
@@ -2411,15 +2091,10 @@ class BooksRepositoryImplTest {
                 )
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match {
-                        it.kind == PendingUserBookWriteKind.UPDATE_RATING &&
-                            it.userBookId == userBookId &&
-                            it.rating == newRating
-                    },
-                )
-            }
+            coVerify { offlineSync.enqueueRatingUpdate(
+                book = any(),
+                rating = newRating,
+            ) }
         }
     }
 
@@ -2493,7 +2168,11 @@ class BooksRepositoryImplTest {
             result shouldBe remoteBook
 
             coVerify(exactly = 0) {
-                userBookWriteQueue.enqueue(update = any())
+                offlineSync.enqueueReviewUpdate(
+                    book = any(),
+                    review = any(),
+                    hasSpoilers = any(),
+                )
             }
         }
 
@@ -2548,16 +2227,11 @@ class BooksRepositoryImplTest {
                 )
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match {
-                        it.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
-                            it.userBookId == userBookId &&
-                            it.reviewSlateJson == body.toJson() &&
-                            it.reviewHasSpoilers == hasSpoilers
-                    },
-                )
-            }
+            coVerify { offlineSync.enqueueReviewUpdate(
+                book = any(),
+                review = body,
+                hasSpoilers = hasSpoilers,
+            ) }
         }
 
         @Test
@@ -2626,16 +2300,11 @@ class BooksRepositoryImplTest {
                 )
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match {
-                        it.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
-                            it.userBookId == userBookId &&
-                            it.reviewSlateJson == body.toJson() &&
-                            it.reviewHasSpoilers == hasSpoilers
-                    },
-                )
-            }
+            coVerify { offlineSync.enqueueReviewUpdate(
+                book = any(),
+                review = body,
+                hasSpoilers = hasSpoilers,
+            ) }
         }
 
         @Test
@@ -2704,16 +2373,11 @@ class BooksRepositoryImplTest {
                 )
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match {
-                        it.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
-                            it.userBookId == userBookId &&
-                            it.reviewSlateJson == body.toJson() &&
-                            it.reviewHasSpoilers == hasSpoilers
-                    },
-                )
-            }
+            coVerify { offlineSync.enqueueReviewUpdate(
+                book = any(),
+                review = body,
+                hasSpoilers = hasSpoilers,
+            ) }
         }
 
         @Test
@@ -3130,11 +2794,11 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match { it.kind == PendingUserBookWriteKind.UPDATE_PROGRESS },
-                )
-            }
+            coVerify { offlineSync.enqueueProgressUpdate(
+                book = any(),
+                newPage = any(),
+                newSeconds = any(),
+            ) }
         }
     }
 
@@ -3427,11 +3091,7 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match { it.kind == PendingUserBookWriteKind.MARK_AS_READ },
-                )
-            }
+            coVerify { offlineSync.enqueueMarkAsRead(book = any()) }
         }
     }
 
@@ -3702,11 +3362,11 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = any())
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match { it.kind == PendingUserBookWriteKind.UPDATE_PROGRESS },
-                )
-            }
+            coVerify { offlineSync.enqueueProgressUpdate(
+                book = any(),
+                newPage = any(),
+                newSeconds = any(),
+            ) }
 
             coVerify(exactly = 0) {
                 booksRemoteDataSource.updateBookProgress(
@@ -3732,11 +3392,7 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = any())
             }
 
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    update = match { it.kind == PendingUserBookWriteKind.MARK_AS_READ },
-                )
-            }
+            coVerify { offlineSync.enqueueMarkAsRead(book = any()) }
 
             coVerify(exactly = 0) {
                 booksRemoteDataSource.markBookAsRead(
