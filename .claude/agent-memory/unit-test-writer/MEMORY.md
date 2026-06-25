@@ -3,3 +3,6 @@
 - [MockK only — no mock servers](feedback_no_mock_servers.md) — never propose MockServer/WireMock; mock only the public surface actually consumed via MockK (mockkStatic for extensions is fine)
 - [JUnit 5 test name illegal characters](feedback_junit5_test_name_chars.md) — backtick test names must not contain `:` — use em-dash or rephrase
 - [Apollo nested interface imports](feedback_apollo_nested_interface_imports.md) — import each nesting level as its own alias; dot-notation on type aliases fails; use `this@mockk.category` to dodge CharCategory clash
+- [Room migration test pattern](project_migration_test_pattern.md) — BundledSQLiteDriver in-memory per test; requires sqlite-bundled-jvm runtimeOnly in androidHostTest; PRAGMA + sqlite_master helpers
+- [Apollo CompiledField mocking for CacheResolver tests](feedback_apollo_compiled_field_mocking.md) — stub argumentValues+nameWithArguments for delegate path; FieldPolicyCacheResolver calls argumentValues(vars, filter) not argumentValue
+- [Apollo safeQueryFlow mocking — fetchPolicy + toFlow chain](feedback_apollo_fetchpolicy_mocking.md) — mockkStatic("...NormalizedCache") for fetchPolicy ext; ApolloResponse.Builder 2-param public ctor; mockkObject for SessionExpiredNotifier/NetworkAvailability
