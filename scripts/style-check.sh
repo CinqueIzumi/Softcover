@@ -150,6 +150,31 @@ check_inline_mockk_stubs() {
     fi
 }
 
+# Rule: a use case wraps its body in `runCatchingLogged { … }`, never bare `runCatching { … }`. Bare
+# `runCatching` swallows `CancellationException` (breaking structured concurrency) and logs nothing, so
+# a failure dropped by the caller vanishes silently. `runCatchingLogged` is cancellation-safe and logs
+# once at the source; the pure `runCatchingCancellable` primitive is also allowed. Production use-case
+# source only (selected by the *UseCase*.kt filename, which catches feature and orchestration alike).
+# (Imprecise: comments mentioning `runCatching` also match — review each.)
+check_bare_runcatching_in_usecases() {
+    local f out=""
+    for f in "${targets[@]}"; do
+        case "$f" in
+            */src/*[Tt]est*/*) continue ;; # production source sets only
+            *UseCase*.kt) ;;
+            *) continue ;;
+        esac
+        local hits
+        hits=$(grep -HnE '\brunCatching\b' "$f" 2>/dev/null)
+        [ -n "$hits" ] && out+="$hits"$'\n'
+    done
+    if [ -n "$out" ]; then
+        section "[advisory] Bare runCatching in a use case — use runCatchingLogged (cancellation-safe + logged at the source) instead (§Error Handling)"
+        printf '%s' "$out"
+        advisory_hits=$((advisory_hits + 1))
+    fi
+}
+
 # Rule: project imports (nl.rhaydus.*) are alphabetical within their group.
 check_import_order() {
     local f block out=""
@@ -174,6 +199,7 @@ check_one_type_per_file
 check_import_order
 check_unguarded_flow_terminal
 check_inline_mockk_stubs
+check_bare_runcatching_in_usecases
 
 if [ "$error_hits" -gt 0 ]; then
     printf '\nstyle-check: %d error-tier rule(s), %d advisory rule(s) with findings.\n' "$error_hits" "$advisory_hits"

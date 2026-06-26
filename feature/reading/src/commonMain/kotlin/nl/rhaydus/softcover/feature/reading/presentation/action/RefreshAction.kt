@@ -22,7 +22,7 @@ internal data object RefreshAction : ReadingAction {
             .refreshLibraryUseCase(
                 scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
             )
-            .onApiFailure(logContext = "Something went wrong refreshing currently reading books!")
+            .onApiFailure()
 
         scope.setState {
             it.copy(isLoading = false)

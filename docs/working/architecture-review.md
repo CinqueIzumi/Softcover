@@ -220,7 +220,16 @@ user copy, and a new presentation `Throwable.toUserMessage()` mapper + `Result.o
 `:core:designsystem` own the copy and the snackbar. The generic toast was re-homed across ~18 Apollo-backed
 presentation folds (`book_detail`/`library`/`reading`/`settings`/`profile`/`explore`/`orchestration`); local
 DataStore folds were left (they never produced an `ApiException`). `SessionExpiredNotifier` (the auth/re-auth
-signal) was kept. **F4** (cancellation-aware `runCatching`) was deliberately left as a separate item.
+signal) was kept.
+
+**F4 folded in (follow-up).** Originally left separate, then pulled forward: `:core:domain` `result/` now
+ships `runCatchingCancellable` (the pure cancellation-aware `runCatching` primitive — the F4
+foundation-upstream candidate) plus `runCatchingLogged`, the use-case-body wrapper that composes it with a
+single `AppLog.e` at the source. All 53 `*UseCase*.kt` bodies were moved off bare `runCatching` onto
+`runCatchingLogged` (flagged advisory by `scripts/style-check.sh`), so a use-case failure is logged once at the boundary
+and `onApiFailure()` became **surface-only** (logging moved out of it). This closes the "forgotten fold →
+silently swallowed failure" gap: a missing presentation fold now costs at most a toast, never a lost log or a
+swallowed `CancellationException`.
 
 **P2 — partial.** The re-homing means `explore`'s failed search now surfaces a toast instead of silently
 resolving the spinner (P2's headline complaint), but the richer **`UiState` inline-error slot + retry**

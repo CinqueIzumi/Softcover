@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.lists.domain.usecase
 
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 
 /**
@@ -12,7 +13,7 @@ class SetListRankedUseCase(
     suspend operator fun invoke(
         listId: Int,
         ranked: Boolean,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> = runCatchingLogged {
         listsRepository.setListRanked(
             listId = listId,
             ranked = ranked,

@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
@@ -25,7 +26,7 @@ internal class RefreshLibraryUseCaseImpl(
     private val settingsRepository: SettingsRepository,
     private val dispatchers: AppDispatchers,
 ) : RefreshLibraryUseCase {
-    override suspend operator fun invoke(scope: RefreshScope): Result<Unit> = runCatching {
+    override suspend operator fun invoke(scope: RefreshScope): Result<Unit> = runCatchingLogged {
         val userId: Int = getUserIdUseCase().getOrThrow()
 
         withContext(dispatchers.io) {

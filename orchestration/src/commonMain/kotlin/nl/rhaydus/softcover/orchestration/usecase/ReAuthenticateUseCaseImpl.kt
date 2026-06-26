@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.first
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
@@ -14,7 +14,7 @@ internal class ReAuthenticateUseCaseImpl(
     private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
 ) : ReAuthenticateUseCase {
-    override suspend operator fun invoke(apiKey: String): Result<Unit> = runCatching {
+    override suspend operator fun invoke(apiKey: String): Result<Unit> = runCatchingLogged {
         val sanitizedKey = apiKey
             .removePrefix("Bearer")
             .trim()
@@ -40,9 +40,9 @@ internal class ReAuthenticateUseCaseImpl(
         refreshLibraryUseCase().getOrThrow()
 
         // Profile refresh is secondary — a transient failure shouldn't fail an otherwise-valid
-        // re-auth (and re-show the dialog); it refills on the next profile load. Logged, not surfaced:
-        // this is a use case, so it must not author UI (no `onApiFailure` here — that's presentation's job).
+        // re-auth (and re-show the dialog); it refills on the next profile load. The result is
+        // dropped, not surfaced: the failure is already logged inside the use case's own
+        // `runCatchingLogged`, and authoring UI is presentation's job, not a use case's.
         refreshUserProfileDataUseCase()
-            .onFailure { AppLog.e("Profile refresh after re-auth failed $it") }
     }
 }

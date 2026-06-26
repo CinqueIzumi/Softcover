@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 /**
  * Persists a user-defined manual order for the **prefix** of a built-in shelf.
@@ -15,7 +16,7 @@ class ReorderShelfBooksUseCase(
     suspend operator fun invoke(
         status: UserBookStatus,
         prefixOrderedBookIds: List<Int>,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> = runCatchingLogged {
         booksRepository.applyShelfManualOrderPrefix(
             status = status,
             prefixBookIds = prefixOrderedBookIds,

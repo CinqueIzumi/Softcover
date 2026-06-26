@@ -37,7 +37,7 @@ internal data class OnNewEditionSaveClickAction(val edition: BookEdition) : Book
             dependencies.updateBookEditionUseCase(
                 userBook = userBook,
                 newEditionId = edition.id,
-            ).onApiFailure("Something went wrong updating book edition!")
+            ).onApiFailure()
 
             scope.setState {
                 it.copy(loadingBookDetails = false)
