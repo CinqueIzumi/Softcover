@@ -9,6 +9,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -197,6 +198,102 @@ class OnQueryChangeActionTest {
 
             // ----- Assert -----
             localVariablesFlow.value.queryJob shouldBe null
+        }
+
+        @Test
+        fun `successful search leaves searchError as null`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(searchError = "previous error")
+
+            coEvery {
+                searchForNameUseCase(name = any())
+            } returns Result.success(Unit)
+
+            val action = OnQueryChangeAction(
+                newQuery = "dune",
+                searchDelay = 0.milliseconds,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.searchError shouldBe null
+        }
+
+        @Test
+        fun `failed search with OfflineException sets offline searchError and isLoading to false`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                searchForNameUseCase(name = any())
+            } returns Result.failure(OfflineException())
+
+            val action = OnQueryChangeAction(
+                newQuery = "dune",
+                searchDelay = 0.milliseconds,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.searchError shouldBe "You're offline. Check your connection and try again."
+            stateFlow.value.isLoading shouldBe false
+        }
+
+        @Test
+        fun `failed search with unknown error sets fallback searchError and isLoading to false`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                searchForNameUseCase(name = any())
+            } returns Result.failure(RuntimeException())
+
+            val action = OnQueryChangeAction(
+                newQuery = "dune",
+                searchDelay = 0.milliseconds,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.searchError shouldBe "We couldn't load results. Please try again."
+            stateFlow.value.isLoading shouldBe false
+        }
+
+        @Test
+        fun `empty query clears searchError`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(searchError = "previous error")
+
+            val action = OnQueryChangeAction(
+                newQuery = "",
+                searchDelay = 0.milliseconds,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.searchError shouldBe null
         }
     }
 }

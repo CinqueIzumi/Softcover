@@ -7,4 +7,5 @@ internal data class OnboardingUiState(
     val saveApiKeyButtonEnabled: Boolean = true,
     val isLoading: Boolean = false,
     val progress: Float? = null,
+    val submissionError: String? = null,
 ) : UiState

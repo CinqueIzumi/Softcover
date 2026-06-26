@@ -2,26 +2,23 @@ package nl.rhaydus.softcover.feature.onboarding.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
-import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
+import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.identity.domain.usecase.UpdateApiKeyUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -45,13 +42,6 @@ class OnApiKeySaveClickActionTest {
             localVariablesFlow = MutableStateFlow(LocalOnboardingVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
-        mockkObject(SnackBarManager)
-        justRun { SnackBarManager.showSnackbar(title = any()) }
-    }
-
-    @AfterEach
-    fun tearDown() {
-        unmockkObject(SnackBarManager)
     }
 
     private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): OnboardingDependencies {
@@ -88,12 +78,20 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `sets saveApiKeyButtonEnabled to false and isLoading to true on entry`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+            stateFlow.value = OnboardingUiState(
+                apiKeyValue = "my-key",
+                submissionError = "previous error",
+            )
             dependencies = stubDependencies(this)
+
+            var stateAtReset: OnboardingUiState? = null
 
             coEvery {
                 resetUserDataUseCase()
-            } returns Result.success(Unit)
+            } coAnswers {
+                stateAtReset = stateFlow.value
+                Result.success(Unit)
+            }
 
             coEvery {
                 updateApiKeyUseCase(key = any())
@@ -103,15 +101,7 @@ class OnApiKeySaveClickActionTest {
                 initializeUserIdAndBooksUseCase()
             } returns Result.success(Unit)
 
-            var stateAtReset: OnboardingUiState? = null
-            coEvery {
-                resetUserDataUseCase()
-            } coAnswers {
-                stateAtReset = stateFlow.value
-                Result.success(Unit)
-            }
-
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -122,6 +112,7 @@ class OnApiKeySaveClickActionTest {
             // ----- Assert -----
             stateAtReset?.saveApiKeyButtonEnabled shouldBe false
             stateAtReset?.isLoading shouldBe true
+            stateAtReset?.submissionError shouldBe null
         }
 
         @Test
@@ -142,7 +133,7 @@ class OnApiKeySaveClickActionTest {
                 initializeUserIdAndBooksUseCase()
             } returns Result.success(Unit)
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -151,7 +142,7 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            io.mockk.coVerify {
+            coVerify {
                 updateApiKeyUseCase(key = "my-key")
             }
         }
@@ -174,7 +165,7 @@ class OnApiKeySaveClickActionTest {
                 initializeUserIdAndBooksUseCase()
             } returns Result.success(Unit)
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -183,7 +174,7 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            io.mockk.coVerify {
+            coVerify {
                 updateApiKeyUseCase(key = "my-key")
             }
         }
@@ -206,7 +197,7 @@ class OnApiKeySaveClickActionTest {
                 initializeUserIdAndBooksUseCase()
             } returns Result.success(Unit)
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -215,7 +206,7 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            io.mockk.coVerify {
+            coVerify {
                 updateApiKeyUseCase(key = "plain-key")
             }
         }
@@ -238,7 +229,7 @@ class OnApiKeySaveClickActionTest {
                 initializeUserIdAndBooksUseCase()
             } returns Result.success(Unit)
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -247,7 +238,7 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            io.mockk.coVerify {
+            coVerify {
                 updateApiKeyUseCase(key = "")
             }
         }
@@ -270,7 +261,7 @@ class OnApiKeySaveClickActionTest {
                 initializeUserIdAndBooksUseCase()
             } returns Result.success(Unit)
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -279,7 +270,7 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            io.mockk.coVerify {
+            coVerify {
                 updateApiKeyUseCase(key = "my-key")
             }
         }
@@ -295,10 +286,6 @@ class OnApiKeySaveClickActionTest {
             } returns Result.success(Unit)
 
             coEvery {
-                updateApiKeyUseCase(key = any())
-            } returns Result.success(Unit)
-
-            coEvery {
                 initializeUserIdAndBooksUseCase()
             } returns Result.success(Unit)
 
@@ -310,7 +297,7 @@ class OnApiKeySaveClickActionTest {
                 Result.success(Unit)
             }
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -336,10 +323,6 @@ class OnApiKeySaveClickActionTest {
                 updateApiKeyUseCase(key = any())
             } returns Result.success(Unit)
 
-            coEvery {
-                initializeUserIdAndBooksUseCase()
-            } returns Result.success(Unit)
-
             var progressAfterUpdate: Float? = null
             coEvery {
                 initializeUserIdAndBooksUseCase()
@@ -348,7 +331,7 @@ class OnApiKeySaveClickActionTest {
                 Result.success(Unit)
             }
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -361,7 +344,7 @@ class OnApiKeySaveClickActionTest {
         }
 
         @Test
-        fun `sets progress to 1f when all three use cases succeed`() = runTest {
+        fun `sets progress to 1f and submissionError to null when all three use cases succeed`() = runTest {
             // ----- Arrange -----
             stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
             dependencies = stubDependencies(this)
@@ -378,7 +361,7 @@ class OnApiKeySaveClickActionTest {
                 initializeUserIdAndBooksUseCase()
             } returns Result.success(Unit)
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -388,19 +371,20 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.progress shouldBe 1f
+            stateFlow.value.submissionError shouldBe null
         }
 
         @Test
-        fun `calls stopLoading and returns early when resetUserDataUseCase fails`() = runTest {
+        fun `sets submissionError to offline message when resetUserDataUseCase fails with OfflineException`() = runTest {
             // ----- Arrange -----
             stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
             dependencies = stubDependencies(this)
 
             coEvery {
                 resetUserDataUseCase()
-            } returns Result.failure(RuntimeException("reset failed"))
+            } returns Result.failure(OfflineException())
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -412,6 +396,8 @@ class OnApiKeySaveClickActionTest {
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
             stateFlow.value.isLoading shouldBe false
             stateFlow.value.progress shouldBe 0f
+            stateFlow.value.submissionError shouldBe
+                "You're offline. Check your connection and try again."
         }
 
         @Test
@@ -424,7 +410,7 @@ class OnApiKeySaveClickActionTest {
                 resetUserDataUseCase()
             } returns Result.failure(RuntimeException("reset failed"))
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -433,13 +419,13 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            io.mockk.coVerify(exactly = 0) {
+            coVerify(exactly = 0) {
                 updateApiKeyUseCase(key = any())
             }
         }
 
         @Test
-        fun `calls stopLoading and returns early when updateApiKeyUseCase fails`() = runTest {
+        fun `sets submissionError to key-rejected message when updateApiKeyUseCase fails with InvalidTokenException`() = runTest {
             // ----- Arrange -----
             stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
             dependencies = stubDependencies(this)
@@ -450,9 +436,9 @@ class OnApiKeySaveClickActionTest {
 
             coEvery {
                 updateApiKeyUseCase(key = any())
-            } returns Result.failure(RuntimeException("update failed"))
+            } returns Result.failure(InvalidTokenException())
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -464,6 +450,8 @@ class OnApiKeySaveClickActionTest {
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
             stateFlow.value.isLoading shouldBe false
             stateFlow.value.progress shouldBe 0f
+            stateFlow.value.submissionError shouldBe
+                "That API key wasn't accepted. Double-check it and try again."
         }
 
         @Test
@@ -480,7 +468,7 @@ class OnApiKeySaveClickActionTest {
                 updateApiKeyUseCase(key = any())
             } returns Result.failure(RuntimeException("update failed"))
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -489,13 +477,13 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            io.mockk.coVerify(exactly = 0) {
+            coVerify(exactly = 0) {
                 initializeUserIdAndBooksUseCase()
             }
         }
 
         @Test
-        fun `calls stopLoading when initializeUserIdAndBooksUseCase fails`() = runTest {
+        fun `sets submissionError to key-rejected message when initializeUserIdAndBooksUseCase fails with InvalidTokenException`() = runTest {
             // ----- Arrange -----
             stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
             dependencies = stubDependencies(this)
@@ -510,9 +498,9 @@ class OnApiKeySaveClickActionTest {
 
             coEvery {
                 initializeUserIdAndBooksUseCase()
-            } returns Result.failure(RuntimeException("initialize failed"))
+            } returns Result.failure(InvalidTokenException())
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -524,10 +512,12 @@ class OnApiKeySaveClickActionTest {
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
             stateFlow.value.isLoading shouldBe false
             stateFlow.value.progress shouldBe 0f
+            stateFlow.value.submissionError shouldBe
+                "That API key wasn't accepted. Double-check it and try again."
         }
 
         @Test
-        fun `shows snackbar when initializeUserIdAndBooksUseCase fails`() = runTest {
+        fun `sets submissionError to fallback message when initializeUserIdAndBooksUseCase fails with generic exception`() = runTest {
             // ----- Arrange -----
             stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
             dependencies = stubDependencies(this)
@@ -544,7 +534,7 @@ class OnApiKeySaveClickActionTest {
                 initializeUserIdAndBooksUseCase()
             } returns Result.failure(RuntimeException("initialize failed"))
 
-            val action = OnApiKeySaveClickAction()
+            val action = OnApiKeySaveClickAction
 
             // ----- Act -----
             action.execute(
@@ -553,41 +543,11 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            verify {
-                SnackBarManager.showSnackbar(title = any())
-            }
-        }
-
-        @Test
-        fun `does not show snackbar when all use cases succeed`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                resetUserDataUseCase()
-            } returns Result.success(Unit)
-
-            coEvery {
-                updateApiKeyUseCase(key = any())
-            } returns Result.success(Unit)
-
-            coEvery {
-                initializeUserIdAndBooksUseCase()
-            } returns Result.success(Unit)
-
-            val action = OnApiKeySaveClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            verify(exactly = 0) {
-                SnackBarManager.showSnackbar(title = any())
-            }
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe true
+            stateFlow.value.isLoading shouldBe false
+            stateFlow.value.progress shouldBe 0f
+            stateFlow.value.submissionError shouldBe
+                "Something went wrong setting up your account. Please try again."
         }
     }
 }
