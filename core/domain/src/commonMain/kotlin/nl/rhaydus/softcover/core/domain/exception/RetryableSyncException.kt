@@ -8,7 +8,7 @@ package nl.rhaydus.softcover.core.domain.exception
  * A successful call whose payload the server *rejected* (GraphQL errors, an empty body, or a 4xx
  * response) is NOT one of these — replaying it would fail identically, so it must not be retried.
  */
-abstract class RetryableSyncException(
+sealed class RetryableSyncException(
     message: String,
     cause: Throwable? = null,
-) : Exception(message, cause)
+) : ApiException(message, cause)

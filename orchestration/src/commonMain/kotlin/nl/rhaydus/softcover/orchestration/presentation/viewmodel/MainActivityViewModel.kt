@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.designsystem.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.designsystem.presentation.state.SplashState
@@ -137,21 +138,15 @@ internal class MainActivityViewModel(
         backgroundScope.launch {
             refreshLibraryUseCase(
                 scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
-            ).onFailure {
-                AppLog.e("$it")
-            }
+            ).onApiFailure()
         }
 
         backgroundScope.launch {
-            refreshLibraryUseCase(scope = RefreshScope.All).onFailure {
-                AppLog.e("$it")
-            }
+            refreshLibraryUseCase(scope = RefreshScope.All).onApiFailure()
         }
 
         backgroundScope.launch {
-            refreshUserProfileDataUseCase().onFailure {
-                AppLog.e("$it")
-            }
+            refreshUserProfileDataUseCase().onApiFailure()
         }
     }
 }

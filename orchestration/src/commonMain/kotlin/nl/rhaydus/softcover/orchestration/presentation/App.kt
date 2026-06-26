@@ -33,7 +33,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfi
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpdate
-import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
@@ -110,12 +109,6 @@ internal fun App() {
                     AppUpdateState.Idle -> Unit
                 }
             }
-    }
-
-    LaunchedEffect(Unit) {
-        UserMessageNotifier.messages.collect { message ->
-            SnackBarManager.showSnackbar(title = message)
-        }
     }
 
     SoftcoverTheme(dynamicColor = themeConfig.useDynamicColor) {

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -37,9 +37,7 @@ internal data class OnNewEditionSaveClickAction(val edition: BookEdition) : Book
             dependencies.updateBookEditionUseCase(
                 userBook = userBook,
                 newEditionId = edition.id,
-            ).onFailure {
-                AppLog.e("Something went wrong updating book edition! $it")
-            }
+            ).onApiFailure("Something went wrong updating book edition!")
 
             scope.setState {
                 it.copy(loadingBookDetails = false)

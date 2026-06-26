@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -22,9 +22,7 @@ internal data object RefreshAction : ReadingAction {
             .refreshLibraryUseCase(
                 scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
             )
-            .onFailure {
-                AppLog.e("Something went wrong refreshing currently reading books! $it")
-            }
+            .onApiFailure(logContext = "Something went wrong refreshing currently reading books!")
 
         scope.setState {
             it.copy(isLoading = false)

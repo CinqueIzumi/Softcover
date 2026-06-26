@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
@@ -20,9 +20,7 @@ internal class OnRefreshAction : LibraryAction {
 
         scope.setState { it.copy(isLoading = true) }
 
-        dependencies.refreshLibraryUseCase(scope = refreshScope).onFailure {
-            AppLog.e("$it")
-        }
+        dependencies.refreshLibraryUseCase(scope = refreshScope).onApiFailure()
 
         scope.setState { it.copy(isLoading = false) }
     }

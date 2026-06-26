@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -17,7 +17,7 @@ internal class InitializeBookWithIdAction(
         dependencies.launch {
             val result = dependencies
                 .fetchBookByIdUseCase(id = id)
-                .onFailure { AppLog.e("$it") }
+                .onApiFailure()
                 .getOrNull()
 
             scope.setState { state ->
