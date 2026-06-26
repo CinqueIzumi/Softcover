@@ -1,11 +1,10 @@
 package nl.rhaydus.softcover.core.profile.domain.usecase
 
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
 /**
@@ -21,14 +20,11 @@ internal class MarkReadingActivityTodayUseCaseImpl(
     override suspend operator fun invoke() {
         val today = clock.todayIn(timeZone)
 
-        // This is a best-effort optimistic write riding on a book mutation — it must never fail the
-        // mutation that triggered it, but a coroutine cancellation still has to propagate.
-        runCatching {
+        // Best-effort optimistic write riding on a book mutation: it must never fail the mutation that
+        // triggered it (the Result is dropped), but a coroutine cancellation still propagates and any
+        // other failure is logged — both guaranteed by runCatchingLogged.
+        runCatchingLogged(context = "Failed to mark active reading date for $today") {
             profileRepository.markActiveReadingDate(date = today)
-        }.onFailure { error ->
-            if (error is CancellationException) throw error
-
-            AppLog.e(error)
         }
     }
 }

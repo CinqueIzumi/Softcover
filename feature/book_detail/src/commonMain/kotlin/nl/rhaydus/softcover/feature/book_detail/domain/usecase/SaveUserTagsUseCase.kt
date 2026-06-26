@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.usecase
 
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
 
 /**
@@ -13,7 +14,7 @@ class SaveUserTagsUseCase(
     suspend operator fun invoke(
         bookId: Int,
         tags: List<UserTag>,
-    ): Result<List<UserTag>> = runCatching {
+    ): Result<List<UserTag>> = runCatchingLogged {
         userTagsRepository.saveTags(
             bookId = bookId,
             tags = tags,

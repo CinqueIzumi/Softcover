@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.book.domain.usecase
 
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 /**
  * Adds a not-yet-catalogued ISBN to Hardcover via `upsert_book`, then hydrates the freshly-created
@@ -13,7 +14,7 @@ class AddBookByIsbnUseCase(
     private val booksRepository: BooksRepository,
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
 ) {
-    suspend operator fun invoke(isbn: String): Result<IsbnLookupResult.Found> = runCatching {
+    suspend operator fun invoke(isbn: String): Result<IsbnLookupResult.Found> = runCatchingLogged {
         val created = booksRepository.addBookByIsbn(isbn = isbn)
 
         val book = fetchBookByIdUseCase(id = created.bookId).getOrThrow()

@@ -11,7 +11,6 @@ import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -21,21 +20,9 @@ class ApiFailureHandlingTest {
     @BeforeEach
     fun setUp() {
         mockkObject(SnackBarManager)
-        mockkObject(AppLog)
 
         every {
             SnackBarManager.showSnackbar(title = any())
-        } returns Unit
-
-        every {
-            AppLog.e(any<Throwable>())
-        } returns Unit
-
-        every {
-            AppLog.e(
-                any<Throwable>(),
-                any<String>(),
-            )
         } returns Unit
     }
 
@@ -125,27 +112,6 @@ class ApiFailureHandlingTest {
             // ----- Assert -----
             verify(exactly = 0) { SnackBarManager.showSnackbar(title = any()) }
             returned.getOrNull() shouldBe "ok"
-        }
-    }
-
-    @Nested
-    inner class LoggingBehaviour {
-        @Test
-        fun `non-null logContext — AppLog e called with throwable and context`() {
-            // ----- Arrange -----
-            val throwable = OfflineException()
-            val result = Result.failure<Unit>(throwable)
-
-            // ----- Act -----
-            result.onApiFailure(logContext = "ctx")
-
-            // ----- Assert -----
-            verify(exactly = 1) {
-                AppLog.e(
-                    throwable,
-                    "ctx",
-                )
-            }
         }
     }
 }

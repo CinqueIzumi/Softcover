@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.preferences.domain.usecase
 
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class SetLibrarySortUseCase(
@@ -11,7 +12,7 @@ class SetLibrarySortUseCase(
         tabId: String,
         mode: LibrarySortMode,
         direction: SortDirection,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> = runCatchingLogged {
         settingsRepository.setLibrarySortForTab(
             tabId = tabId,
             mode = mode,
