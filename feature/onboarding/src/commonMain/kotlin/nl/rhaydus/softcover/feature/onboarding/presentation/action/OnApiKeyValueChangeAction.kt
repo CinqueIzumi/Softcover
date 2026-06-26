@@ -6,13 +6,16 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardin
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class OnApiKeyValueChangeAction(val newValue: String) : OnboardingAction {
+internal data class OnApiKeyValueChangeAction(val newValue: String) : OnboardingAction {
     override suspend fun execute(
         dependencies: OnboardingDependencies,
         scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>,
     ) {
         scope.setState {
-            it.copy(apiKeyValue = newValue)
+            it.copy(
+                apiKeyValue = newValue,
+                submissionError = null,
+            )
         }
     }
 }

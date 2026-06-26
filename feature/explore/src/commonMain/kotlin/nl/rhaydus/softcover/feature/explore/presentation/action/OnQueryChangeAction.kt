@@ -5,18 +5,16 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class OnQueryChangeAction(
+internal data class OnQueryChangeAction(
     val newQuery: String,
     val searchDelay: Duration = 1.seconds,
-) :
- ExploreAction {
+) : ExploreAction {
     override suspend fun execute(
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
@@ -25,6 +23,7 @@ internal class OnQueryChangeAction(
             it.copy(
                 searchText = newQuery,
                 isLoading = true,
+                searchError = null,
             )
         }
 
@@ -39,24 +38,25 @@ internal class OnQueryChangeAction(
                 it.copy(
                     queriedBooks = emptyList(),
                     isLoading = false,
+                    searchError = null,
                 )
             }
 
             return
         }
 
-        val newTimberJob: Job = dependencies.launch {
+        val newSearchJob: Job = dependencies.launch {
             delay(searchDelay)
 
-            dependencies.searchForNameUseCase(name = scope.currentState.searchText).onApiFailure()
-
-            scope.setState {
-                it.copy(isLoading = false)
-            }
+            executeBookSearch(
+                name = scope.currentState.searchText,
+                dependencies = dependencies,
+                scope = scope,
+            )
         }
 
         scope.setLocalVariables {
-            it.copy(queryJob = newTimberJob)
+            it.copy(queryJob = newSearchJob)
         }
     }
 }
