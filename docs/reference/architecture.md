@@ -60,7 +60,11 @@ by [`toad-architecture.md`](../rhaydus/0.2.0/toad-architecture.md). Softcover de
   Mutations write through the cache automatically — Room remains the source of truth for user-book
   state, so Apollo cache writes on `user_books` rows are currently inert observers.
 - Network interceptors handle authentication headers.
-- Apollo errors are wrapped in `RuntimeException` with descriptive messages.
+- Apollo errors are thrown as typed, sealed `ApiException` subtypes (`RetryableSyncException` ⊃
+  `OfflineException` / `ServerUnavailableException`, `InvalidTokenException`, `UnexpectedApiException`)
+  in `:core:domain/exception`. The seam does **not** author user-facing copy; presentation maps the
+  kind via `Throwable.toUserMessage()` + the `Result.onApiFailure()` fold helper in `:core:designsystem`
+  (see [code-style.md](code-style.md)).
 
 ## Local Storage
 

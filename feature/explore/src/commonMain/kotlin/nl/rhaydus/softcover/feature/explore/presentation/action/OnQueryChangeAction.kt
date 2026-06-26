@@ -5,7 +5,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -48,9 +48,7 @@ internal class OnQueryChangeAction(
         val newTimberJob: Job = dependencies.launch {
             delay(searchDelay)
 
-            dependencies.searchForNameUseCase(name = scope.currentState.searchText).onFailure {
-                AppLog.e("$it")
-            }
+            dependencies.searchForNameUseCase(name = scope.currentState.searchText).onApiFailure()
 
             scope.setState {
                 it.copy(isLoading = false)

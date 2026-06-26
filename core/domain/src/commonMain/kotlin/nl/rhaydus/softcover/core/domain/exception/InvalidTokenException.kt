@@ -7,4 +7,4 @@ package nl.rhaydus.softcover.core.domain.exception
  */
 class InvalidTokenException(
     message: String = "Authentication token is invalid",
-) : Exception(message)
+) : ApiException(message, null)

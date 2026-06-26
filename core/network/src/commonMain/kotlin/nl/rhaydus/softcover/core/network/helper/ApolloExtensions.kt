@@ -18,14 +18,8 @@ import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
+import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
-import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
-
-private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
-
-private fun notifyGenericError() {
-    UserMessageNotifier.notify(message = GENERIC_ERROR_MESSAGE)
-}
 
 /**
  * True when [statusCode] reflects the server failing to process the request rather than rejecting it:
@@ -73,26 +67,24 @@ private fun authFailureOrNull(exception: Throwable): InvalidTokenException? =
         null
     }
 
-// Each throw is a distinct, deliberate failure path (retryable transport, auth-rejected, generic, and
-// GraphQL-errors), so the count is over the threshold by design. Suppressed rather than gated — the real
-// fix is to collapse this throw-based seam into a typed result (see docs/working/architecture-review.md, D1).
+// Each throw is a distinct, deliberate failure path mapped to the sealed `ApiException` hierarchy
+// (retryable transport, auth-rejected, and unexpected/GraphQL), so the count is over the threshold by
+// design. Suppressed rather than gated.
 @Suppress("ThrowsCount")
 private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
     response.exception?.let { exception ->
-        // A transient transport/server failure is retryable: throw it WITHOUT toasting, since the
-        // write is applied optimistically and will sync later. Everything else is a genuine failure.
+        // A transient transport/server failure is retryable: the write is applied optimistically and
+        // will sync later. Everything else is a genuine failure.
         retryableTransportFailureOrNull(exception)?.let { throw it }
 
-        // A rejected token drives the re-auth dialog rather than a generic toast.
+        // A rejected token drives the re-auth dialog rather than a generic error.
         authFailureOrNull(exception)?.let {
             SessionExpiredNotifier.notifySessionExpired()
 
             throw it
         }
 
-        notifyGenericError()
-
-        throw RuntimeException(
+        throw UnexpectedApiException(
             "Apollo error: ${exception.message}",
             exception,
         )
@@ -111,16 +103,10 @@ private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
             }
         } ?: ""
 
-        notifyGenericError()
-
-        throw RuntimeException("Apollo GraphQL error(s): \n$message")
+        throw UnexpectedApiException("Apollo GraphQL error(s): \n$message")
     }
 
-    return response.data ?: run {
-        notifyGenericError()
-
-        throw RuntimeException("Apollo response had no data and no errors")
-    }
+    return response.data ?: throw UnexpectedApiException("Apollo response had no data and no errors")
 }
 
 private suspend fun <T : Operation.Data> executeCall(
@@ -193,8 +179,9 @@ internal fun <T : Query.Data> ApolloClient.safeQueryFlow(
             retryableTransportFailureOrNull(failure)?.let { throw it }
         }
 
-        notifyGenericError()
-
-        throw failure ?: RuntimeException("Apollo flow completed with no data")
+        throw UnexpectedApiException(
+            message = "Apollo flow failed: ${failure?.message ?: "completed with no data"}",
+            cause = failure,
+        )
     }
 }

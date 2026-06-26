@@ -206,7 +206,28 @@ correctly; only `:orchestration` emits the iOS framework. Nothing structural to 
 
 ## TIER 2 — Data & Domain layer
 
-### D1 [MEDIUM] Network errors are thrown, then re-wrapped in `Result` — two error models in one path
+### ✅ D1 [MEDIUM] Network errors are thrown, then re-wrapped in `Result` — two error models in one path
+**Done (2026-06-26, `refactor/audit`).** **Deviation:** the review framed two binary options (return a typed
+result, or stop wrapping in `Result`). Both fight the **vendored foundation contract** (data throws → use
+case `Result<T>` → action folds, per `docs/reference/code-style.md`), and the Doveletter *Sandwich* /
+*kotlin-error-handling* deep-dives confirmed a hand-rolled `ApiResult<T>` would add wrapper verbosity with no
+Apollo library support. So the chosen path keeps the throw→`Result` model and instead **seals the exception
+hierarchy**: a new `sealed class ApiException` root in `:core:domain/exception` (with `RetryableSyncException`
+re-parented under it and a new `UnexpectedApiException` replacing the last raw `RuntimeException`), so
+presentation can fold over the failure *kind* exhaustively. The **layer violation** is fixed by deleting
+`UserMessageNotifier` (the data→UI toast bridge) entirely: the seam (`ApolloExtensions`) no longer authors
+user copy, and a new presentation `Throwable.toUserMessage()` mapper + `Result.onApiFailure()` fold helper in
+`:core:designsystem` own the copy and the snackbar. The generic toast was re-homed across ~18 Apollo-backed
+presentation folds (`book_detail`/`library`/`reading`/`settings`/`profile`/`explore`/`orchestration`); local
+DataStore folds were left (they never produced an `ApiException`). `SessionExpiredNotifier` (the auth/re-auth
+signal) was kept. **F4** (cancellation-aware `runCatching`) was deliberately left as a separate item.
+
+**P2 — partial.** The re-homing means `explore`'s failed search now surfaces a toast instead of silently
+resolving the spinner (P2's headline complaint), but the richer **`UiState` inline-error slot + retry**
+treatment for `explore`/`onboarding` is deferred to a focused follow-up (does not block D1).
+
+<details><summary>Original finding</summary>
+
 `safeQuery()`/`safeMutation()` *throw* (`OfflineException`, wrapped `RuntimeException`) **and** notify
 `UserMessageNotifier`. Use cases then wrap calls in `runCatching` → `Result<T>`. So the same call
 crosses two error idioms (throw at the network seam, `Result` above it) and side-effects a user
@@ -224,6 +245,8 @@ What I'd change (pick the app's single error model and commit):
   is the pattern to copy here.
 Cost: medium-high (touches every use case). High payoff for consistency + testability. This is the
 one I'd most want sign-off on before touching, because it ripples.
+
+</details>
 
 ### ✅ D2 [MEDIUM] `BooksRepositoryImpl` bundles cache + network + offline-queue + dedup + orphan-cleanup
 **Done (2026-06-26, `refactor/audit`).** The offline-sync concern was extracted into a new
@@ -392,7 +415,7 @@ Cost: low-medium.
 | ✅ C1 | Cancel `ReadingSessionService.serviceScope` in `onDestroy()` | MED-HIGH | Trivial | Already present (commit `5381f8d5`, predates review) — closed, no change |
 | ✅ DC1 | Re-sync Room from server after offline write replay; scope `preserveSyncedProgress` | MED | Med | Apollo↔Room divergence on offline edits |
 | ✅ M5 | Koin `includes(...)` instead of ordered list | MED | Low | Removes runtime-fragile ordering |
-| D1 | Single error model at the network seam; move `UserMessageNotifier` out | MED | Med-High | Root of P2; needs buy-in (ripples) |
+| ✅ D1 | Single error model at the network seam; move `UserMessageNotifier` out | MED | Med-High | Root of P2; needs buy-in (ripples) |
 | ✅ D2 | Extract offline-sync out of `BooksRepositoryImpl` (pairs with DC1) | MED | Med | Testability + SRP |
 | T3 | Test offline write queue/drainer + `core:personal` mutations | MED | Med | User-data-loss paths, thin coverage |
 | P2 | One error-state contract on TOAD `UiState` | MED | Low-Med | Consistent failure UX |

@@ -26,8 +26,8 @@ import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
+import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
-import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 import okio.Buffer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -63,7 +63,6 @@ class SafeQueryFlowTest {
         apolloCall = mockk<ApolloCall<GetUserIdQuery.Data>>()
 
         mockkObject(SessionExpiredNotifier)
-        mockkObject(UserMessageNotifier)
         mockkObject(NetworkAvailability)
 
         mockkStatic("com.apollographql.apollo.cache.normalized.NormalizedCache")
@@ -71,7 +70,6 @@ class SafeQueryFlowTest {
         every { apolloClient.query(any<GetUserIdQuery>()) } returns apolloCall
         every { apolloCall.fetchPolicy(any()) } returns apolloCall
         every { SessionExpiredNotifier.notifySessionExpired() } returns Unit
-        every { UserMessageNotifier.notify(any()) } returns Unit
     }
 
     private fun dataResponse(data: GetUserIdQuery.Data): ApolloResponse<GetUserIdQuery.Data> =
@@ -253,21 +251,19 @@ class SafeQueryFlowTest {
     @Nested
     inner class GenericFailures {
         @Test
-        fun `no data emitted, HTTP 400 (non-retryable) — notifyGenericError called and throws`() = runTest {
+        fun `no data emitted, HTTP 400 (non-retryable) — throws UnexpectedApiException`() = runTest {
             // ----- Arrange -----
             val badRequestExResponse = exceptionResponse(httpException(400))
             every { apolloCall.toFlow() } returns flowOf(badRequestExResponse)
 
             // ----- Act & Assert -----
             apolloClient.safeQueryFlow(query).test {
-                awaitError().shouldBeInstanceOf<RuntimeException>()
+                awaitError().shouldBeInstanceOf<UnexpectedApiException>()
             }
-
-            verify(exactly = 1) { UserMessageNotifier.notify(any()) }
         }
 
         @Test
-        fun `no data emitted, response with GraphQL errors and null data — notifyGenericError called and throws`() = runTest {
+        fun `no data emitted, response with GraphQL errors and null data — throws UnexpectedApiException`() = runTest {
             // ----- Arrange -----
             val graphqlError = Error.Builder(message = "something went wrong").build()
             val graphqlErrorResponse = errorResponse(listOf(graphqlError))
@@ -275,23 +271,19 @@ class SafeQueryFlowTest {
 
             // ----- Act & Assert -----
             apolloClient.safeQueryFlow(query).test {
-                awaitError().shouldBeInstanceOf<RuntimeException>()
+                awaitError().shouldBeInstanceOf<UnexpectedApiException>()
             }
-
-            verify(exactly = 1) { UserMessageNotifier.notify(any()) }
         }
 
         @Test
-        fun `empty flow (no responses at all) — notifyGenericError called and throws RuntimeException`() = runTest {
+        fun `empty flow (no responses at all) — throws UnexpectedApiException`() = runTest {
             // ----- Arrange -----
             every { apolloCall.toFlow() } returns flowOf()
 
             // ----- Act & Assert -----
             apolloClient.safeQueryFlow(query).test {
-                awaitError().shouldBeInstanceOf<RuntimeException>()
+                awaitError().shouldBeInstanceOf<UnexpectedApiException>()
             }
-
-            verify(exactly = 1) { UserMessageNotifier.notify(any()) }
         }
     }
 }

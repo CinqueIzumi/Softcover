@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import kotlinx.coroutines.flow.filterNotNull
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -15,7 +15,7 @@ internal class UserInformationCollector : ProfileCollector {
     ) {
         dependencies.launch {
             dependencies.refreshUserProfileDataUseCase()
-                .onFailure { AppLog.e("$it") }
+                .onApiFailure()
         }
 
         dependencies.observeUserProfileDataUseCase()
