@@ -90,7 +90,7 @@ event" plumbing around the shared bottom bar.
 
 - **Type:** enhancement (shared util)
 - **Home:** `nl.rhaydus:core-ui` (the non-visual seam that already ships `AppDispatchers`)
-- **Status:** Open — **app-local implementation now in Softcover**; replace with the upstream version when it lands
+- **Status:** **Implemented upstream** in `nl.rhaydus:core-ui` (`common/RunCatchingCancellable.kt`, on the foundation `release/0.3.0` branch) as the pure primitive below. Softcover still ships its app-local copy; on adopt of the next foundation release it deletes `:core:domain` `result/RunCatchingCancellable.kt` and `result/RunCatchingLogged.kt` re-points its single import to `nl.rhaydus.ui.common`.
 
 Kotlin's stdlib `runCatching` catches *every* `Throwable`, including `CancellationException`. Inside a
 coroutine that silently swallows structured-concurrency cancellation: a cancelled child runs its
@@ -132,16 +132,16 @@ means the upstream move touches one import, not every use case.
 ## F5 — `runCatchingLogged` (log-at-source use-case wrapper)
 
 - **Type:** enhancement (shared util)
-- **Home:** `nl.rhaydus:core-ui` (next to the F4 primitive) — **gated on F6**
-- **Status:** Open — app-local in Softcover; upstream only once a foundation logging facade (F6) exists
+- **Home:** `nl.rhaydus:core-ui` (next to the F4 primitive)
+- **Status:** **Implemented upstream** in `nl.rhaydus:core-ui` (`common/RunCatchingLogged.kt`, on the foundation `release/0.3.0` branch), on top of the now-upstream `AppLog` (F6). Softcover still ships its app-local copy; on adopt it deletes `:core:domain` `result/RunCatchingLogged.kt` and re-points the 53 use-case sites' import to `nl.rhaydus.ui.common` (the wrapper insulates them — a one-line import move, not 53 edits).
 
 `runCatchingLogged` = `runCatchingCancellable` + a single `AppLog.e` on failure (optional `context`
 label). It is the enforced use-case-body form: a failure is logged once, at the boundary, so it is never
 silently dropped even when the caller discards the `Result` or omits the presentation fold. Every app on
 the foundation that has a use-case layer wants this same guarantee, so the wrapper itself is a candidate —
-**but it binds the app's logger**, and the foundation has no logging facade yet (see F6). It therefore
-cannot upstream until F6 lands; at that point an upstream `runCatchingLogged` binds the foundation logger
-and Softcover deletes its local `result/RunCatchingLogged.kt`, re-pointing one import.
+**but it binds a logger**, which is why it waited on the foundation logging facade (see F6). With `AppLog`
+now upstream, the upstream `runCatchingLogged` binds the foundation logger; Softcover deletes its local
+`result/RunCatchingLogged.kt` and re-points one import on adopt.
 
 **Should anything change in the app when this happens? No — and that's the point.** The 53 `*UseCase*.kt`
 sites call `runCatchingLogged`, so the wrapper insulates them from the relocation exactly as it does for
@@ -157,7 +157,7 @@ likewise become a real foundation ktlint rule once `runCatchingLogged` is a foun
 
 - **Type:** enhancement (shared util)
 - **Home:** `nl.rhaydus:core-ui` (alongside `AppDispatchers`, the existing non-visual seam)
-- **Status:** Open — evaluate (unblocks F5)
+- **Status:** **Implemented upstream** in `nl.rhaydus:core-ui` (`common/AppLog.kt`, on the foundation `release/0.3.0` branch) as a brand-agnostic, Kermit-backed facade: the `tag` and line `prefix` are `install(...)` parameters (no `"Softcover"` constant), output stays debug-gated, and Kermit is an `implementation` dependency so no Kermit type leaks into the public surface. It earns its place per F2's bar via the prefix formatter + debug-gated install + cross-target consistency (not a bare re-export). Unblocked F5.
 
 `AppLog` (`:core:domain` `logging/`) is a Kermit-backed, multiplatform logging facade: `i` / `w` / `e`
 with message-and-throwable variants, a debug-gated `install(...)`, and a prefix formatter — call sites
