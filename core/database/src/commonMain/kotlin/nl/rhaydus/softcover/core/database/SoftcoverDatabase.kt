@@ -68,7 +68,7 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 42,
+    version = 43,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1129,6 +1129,23 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_42_43 = object : Migration(42, 43) {
+            override fun migrate(connection: SQLiteConnection) {
+                // Index the authorId foreign side of both author junction tables so Room resolves the
+                // author relationship via the index instead of a full table scan. Names match Room's
+                // generated `index_<table>_authorId` so the migrated schema validates against 43.json.
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_book_author_cross_ref_authorId " +
+                        "ON book_author_cross_ref(authorId)",
+                )
+
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_edition_author_cross_ref_authorId " +
+                        "ON edition_author_cross_ref(authorId)",
+                )
+            }
+        }
+
         private val MIGRATION_29_30 = object : Migration(29, 30) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL(
@@ -1248,6 +1265,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_39_40,
             MIGRATION_40_41,
             MIGRATION_41_42,
+            MIGRATION_42_43,
         )
     }
 }
