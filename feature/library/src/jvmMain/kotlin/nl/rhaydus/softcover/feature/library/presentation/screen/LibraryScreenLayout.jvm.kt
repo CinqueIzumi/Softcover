@@ -34,11 +34,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
@@ -124,13 +126,23 @@ internal actual fun LibraryScreenLayout(
 
     val availableReadYears = if (isReadTab) state.availableReadYears else emptyList()
 
-    BackHandler(enabled = state.selectionMode) {
-        runAction(OnExitSelectionModeAction())
-    }
+    val selectionBackState = rememberNavigationEventState(NavigationEventInfo.None)
 
-    BackHandler(enabled = state.isRearranging) {
-        runAction(OnExitRearrangeModeAction())
-    }
+    NavigationBackHandler(
+        state = selectionBackState,
+        isBackEnabled = state.selectionMode,
+        onBackCancelled = {},
+        onBackCompleted = { runAction(OnExitSelectionModeAction()) },
+    )
+
+    val rearrangeBackState = rememberNavigationEventState(NavigationEventInfo.None)
+
+    NavigationBackHandler(
+        state = rearrangeBackState,
+        isBackEnabled = state.isRearranging,
+        onBackCancelled = {},
+        onBackCompleted = { runAction(OnExitRearrangeModeAction()) },
+    )
 
     Row(
         modifier = Modifier

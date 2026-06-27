@@ -16,6 +16,9 @@ ksp = "2.3.9"
 voyager = "1.1.0-beta02"
 coilVersion = "3.2.0"
 composeMultiplatform = "1.11.0"
+# Navigation Event library — the multiplatform back-gesture API that supersedes the deprecated CMP
+# `ui-backhandler` BackHandler. Provides NavigationBackHandler/NavigationEventHandler for every target.
+navigationevent = "1.0.1"
 # CMP's stable material3 strips the M3-expressive APIs (aligned with Jetpack material3 1.4.0-beta01).
 # The design system is built on expressive (MaterialExpressiveTheme/ToggleButton/SplitButton), so it
 # pins the alpha material3 artifact for the 1.11.0 line (≈ androidx material3 1.5.0-alpha17).
@@ -72,7 +75,7 @@ kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-pl
 compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "composeMultiplatform" }
 compose-material3-expressive = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3Expressive" }
-compose-ui-backhandler = { group = "org.jetbrains.compose.ui", name = "ui-backhandler", version.ref = "composeMultiplatform" }
+navigationevent-compose = { group = "org.jetbrains.androidx.navigationevent", name = "navigationevent-compose", version.ref = "navigationevent" }
 apollo-gradlePlugin = { group = "com.apollographql.apollo", name = "apollo-gradle-plugin", version.ref = "apollo" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }

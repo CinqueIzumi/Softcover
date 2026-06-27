@@ -209,7 +209,7 @@ dependencyAnalysis {
                     "org.jetbrains.compose.foundation:foundation",
                     "org.jetbrains.compose.animation:animation",
                     "org.jetbrains.compose.ui:ui",
-                    "org.jetbrains.compose.ui:ui-backhandler",
+                    "org.jetbrains.androidx.navigationevent:navigationevent-compose",
                     "org.jetbrains.compose.components:components-ui-tooling-preview",
                     "org.jetbrains.compose.material3:material3",
                     // Compose Multiplatform auto-injects a `jvmDev` source set (Compose Hot Reload) plus the

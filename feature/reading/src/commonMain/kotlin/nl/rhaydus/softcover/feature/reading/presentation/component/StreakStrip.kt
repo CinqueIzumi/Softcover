@@ -49,7 +49,7 @@ private val DOT_GAP = 10.dp
 private val sheetDateFormatter = LocalDate.Format {
     dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
     char(' ')
-    dayOfMonth(Padding.NONE)
+    day(Padding.NONE)
     char(' ')
     monthName(MonthNames.ENGLISH_ABBREVIATED)
 }

@@ -33,9 +33,10 @@ class KmpComposeConventionPlugin : Plugin<Project> {
                 implementation(compose.foundation)
                 implementation(compose.animation)
                 implementation(compose.ui)
-                // BackHandler ships in a standalone CMP artifact; the Android variant of compose.ui
-                // (AndroidX `compose.ui`) doesn't carry it, so wire it explicitly for every target.
-                implementation(libs.library("compose-ui-backhandler"))
+                // Back-gesture handling ships in a standalone multiplatform artifact (the AndroidX
+                // `compose.ui` variant doesn't carry it), so wire it explicitly for every target. This is
+                // the Navigation Event library that supersedes the deprecated CMP `ui-backhandler`.
+                implementation(libs.library("navigationevent-compose"))
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
                 // CMP's stable material3 strips the M3-expressive APIs the design system uses, so

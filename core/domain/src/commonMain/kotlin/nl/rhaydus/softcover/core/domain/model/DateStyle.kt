@@ -11,7 +11,7 @@ enum class DateStyle(
     DAY_MONTH_YEAR(
         label = "DD/MM/YYYY",
         formatter = LocalDate.Format {
-            dayOfMonth()
+            day()
             char('/')
             monthNumber()
             char('/')
@@ -23,7 +23,7 @@ enum class DateStyle(
         formatter = LocalDate.Format {
             monthNumber()
             char('/')
-            dayOfMonth()
+            day()
             char('/')
             year()
         },
@@ -35,7 +35,7 @@ enum class DateStyle(
             char('/')
             monthNumber()
             char('/')
-            dayOfMonth()
+            day()
         },
     ),
 }

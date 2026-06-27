@@ -45,7 +45,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.layout
@@ -53,6 +52,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -194,13 +196,23 @@ internal actual fun LibraryScreenLayout(
 
     val haptics = LocalHaptics.current
 
-    BackHandler(enabled = state.selectionMode) {
-        runAction(OnExitSelectionModeAction())
-    }
+    val selectionBackState = rememberNavigationEventState(NavigationEventInfo.None)
 
-    BackHandler(enabled = state.isRearranging) {
-        runAction(OnExitRearrangeModeAction())
-    }
+    NavigationBackHandler(
+        state = selectionBackState,
+        isBackEnabled = state.selectionMode,
+        onBackCancelled = {},
+        onBackCompleted = { runAction(OnExitSelectionModeAction()) },
+    )
+
+    val rearrangeBackState = rememberNavigationEventState(NavigationEventInfo.None)
+
+    NavigationBackHandler(
+        state = rearrangeBackState,
+        isBackEnabled = state.isRearranging,
+        onBackCancelled = {},
+        onBackCompleted = { runAction(OnExitRearrangeModeAction()) },
+    )
 
     Scaffold(
         contentWindowInsets = WindowInsets.statusBars,
