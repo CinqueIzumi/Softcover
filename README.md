@@ -50,6 +50,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ### Reading
 - See currently reading books and audiobooks at a glance.
+- Track your **reading streak** — consecutive days with logged reading — shown as a strip on the Reading screen (computed in your local timezone).
 - Track progress by page number or percentage for book editions.
 - Track listening progress in `HH:MM:SS` or percentage for audiobook editions.
 - Mark books as read in one tap.
@@ -115,6 +116,7 @@ These replace what was previously vendored in the app — the local TOAD runtime
 | Technology | Version | Purpose |
 |---|---|---|
 | [Apollo](https://www.apollographql.com/docs/kotlin) | 5.0.0 | Multiplatform GraphQL API client |
+| [Apollo Normalized Cache](https://github.com/apollographql/apollo-kotlin-normalized-cache) | 1.0.5 | Normalized in-memory GraphQL cache — cache-first reads and list→detail redirects |
 | [Room](https://developer.android.com/jetpack/androidx/releases/room) | 2.7.2 | Local database for caching books (KMP, bundled SQLite driver) |
 | [DataStore](https://developer.android.com/jetpack/androidx/releases/datastore) | 1.2.0 | Key-value storage for settings and search history (okio-backed) |
 | [okio](https://square.github.io/okio/) | 3.9.1 | Multiplatform file I/O |
