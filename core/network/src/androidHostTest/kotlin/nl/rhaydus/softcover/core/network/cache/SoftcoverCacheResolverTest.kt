@@ -5,7 +5,10 @@ import com.apollographql.apollo.api.CompiledNamedType
 import com.apollographql.apollo.api.CompiledType
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Optional
-import com.apollographql.apollo.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.CacheHeaders
+import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
+import com.apollographql.cache.normalized.api.ResolverContext
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldNotBeInstanceOf
 import io.mockk.every
@@ -14,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-@Suppress("DEPRECATION") // CacheKey, CacheResolver, FieldPolicyCacheResolver deprecated in Apollo 5 (normalized-cache migration)
 class SoftcoverCacheResolverTest {
     private lateinit var field: CompiledField
     private lateinit var variables: Executable.Variables
@@ -74,17 +76,23 @@ class SoftcoverCacheResolverTest {
 
     private fun resolve(
         name: String = "books",
-        parentId: String = "QUERY_ROOT",
+        parentKey: CacheKey = CacheKey.QUERY_ROOT,
         parent: Map<String, Any?> = emptyMap(),
     ): Any? {
         every { field.name } returns name
 
-        return SoftcoverCacheResolver.resolveField(
+        val context = ResolverContext(
             field = field,
             variables = variables,
             parent = parent,
-            parentId = parentId,
+            parentKey = parentKey,
+            parentType = "Query",
+            cacheHeaders = CacheHeaders.NONE,
+            fieldKeyGenerator = DefaultFieldKeyGenerator,
+            path = emptyList(),
         )
+
+        return SoftcoverCacheResolver.resolveField(context)
     }
 
     @Nested
@@ -219,7 +227,7 @@ class SoftcoverCacheResolverTest {
         }
 
         @Test
-        fun `non-QUERY_ROOT parentId + books in redirectable set still delegates`() {
+        fun `non-QUERY_ROOT parentKey + books in redirectable set still delegates`() {
             // ----- Arrange -----
             val sentinel = "sentinel-non-root"
             stubForDelegation("books")
@@ -227,7 +235,10 @@ class SoftcoverCacheResolverTest {
             // ----- Act -----
             val result = resolve(
                 name = "books",
-                parentId = "books:1",
+                parentKey = CacheKey(
+                    "books",
+                    "1",
+                ),
                 parent = mapOf("books" to sentinel),
             )
 

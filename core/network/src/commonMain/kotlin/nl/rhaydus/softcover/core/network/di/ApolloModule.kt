@@ -1,11 +1,12 @@
 package nl.rhaydus.softcover.core.network.di
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
-import com.apollographql.apollo.cache.normalized.api.TypePolicyCacheKeyGenerator
-import com.apollographql.apollo.cache.normalized.normalizedCache
 import com.apollographql.apollo.network.http.DefaultHttpEngine
+import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
+import com.apollographql.cache.normalized.normalizedCache
 import org.koin.dsl.module
+import nl.rhaydus.softcover.cache.Cache
 import nl.rhaydus.softcover.core.domain.cache.NetworkCacheCleaner
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.network.cache.ApolloNetworkCacheCleaner
@@ -29,7 +30,7 @@ val apolloModule = module {
             .addInterceptor(get<AuthInterceptor>())
             .normalizedCache(
                 normalizedCacheFactory = MemoryCacheFactory(maxSizeBytes = APOLLO_MEMORY_CACHE_BYTES),
-                cacheKeyGenerator = TypePolicyCacheKeyGenerator,
+                cacheKeyGenerator = TypePolicyCacheKeyGenerator(typePolicies = Cache.typePolicies),
                 cacheResolver = SoftcoverCacheResolver,
             )
             .build()
