@@ -37,7 +37,7 @@ internal class ProfileRemoteDataSourceImpl(
             bio = me.bio ?: "",
             booksRead = me.books_read.aggregate?.count ?: 0,
             totalPagesRead = me.user_books_pages.sumOf { it.pagesRead() },
-            averageRating = me.rated_books.aggregate?.avg?.rating?.toDouble() ?: 0.0,
+            averageRating = me.rated_books.aggregate?.avg?.rating ?: 0.0,
             activeReadingDates = activeReadingDates,
         )
     }

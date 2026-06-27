@@ -479,7 +479,7 @@ internal fun GeneralBookInfoSection(
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Text(
                                                 text = formatDecimalNumber(
-                                                    value = rating ?: 0.0,
+                                                    value = rating,
                                                     fractionDigits = 1,
                                                 ),
                                                 style = bodySmall,
@@ -514,7 +514,7 @@ internal fun GeneralBookInfoSection(
 
                                         Row {
                                             val lengthText = if (isAudiobook) {
-                                                secondsToHm(seconds = edition?.audioSeconds ?: 0)
+                                                secondsToHm(seconds = edition.audioSeconds ?: 0)
                                             } else {
                                                 "${edition?.pages ?: ""}"
                                             }

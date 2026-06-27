@@ -225,7 +225,7 @@ internal fun UserBookFragment.toBook(): Book? {
         releaseDate = listFragment.release_date.toLocalDateOrNull(),
         coverUrl = listFragment.image?.url ?: "",
         authors = bookAuthors,
-        usersCount = listFragment.users_count ?: 0,
+        usersCount = listFragment.users_count,
         ratingsCount = listFragment.ratings_count,
         bookSeries = listFragment.bookSeries(),
         positionsInSeries = listFragment.positionsInSeries(),
