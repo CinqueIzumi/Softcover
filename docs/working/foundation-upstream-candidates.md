@@ -16,81 +16,55 @@ entries refer to is indexed in [`../rhaydus/0.2.0/CAPABILITIES.md`](../rhaydus/0
 Each entry: **type** (bug / enhancement / gate), **home** (target foundation module), **status**, and
 enough context for whoever picks it up.
 
----
+The open candidates are organised below into **implementation batches** — each batch clusters items that
+share a target module and a kind of work, so it can be designed and landed in one focused pass. F-numbers
+are stable identifiers (referenced from commits and other docs) and are **never reused or renumbered**, so
+they are not sequential within a batch. Batches are ordered to respect the dependencies noted on each.
 
-## F1 — Crash-safety gate for terminal flow reads should be a blocking ktlint rule
+## Batch index
 
-- **Type:** gate (lint rule)
-- **Home:** `nl.rhaydus:ktlint-rules`
-- **Status:** Open — currently advisory-only in this app
-
-A bare `.first()` / `.single()` on a cold flow is a crash risk: it throws `NoSuchElementException` on
-an empty flow, and any terminal operator re-throws an upstream error (DataStore / network / Apollo /
-repository). We added app-local enforcement — a `scripts/style-check.sh` recipe
-(`check_unguarded_flow_terminal`) plus the crash-safety rule in
-[`../reference/code-style.md`](../reference/code-style.md) (Error Handling) — but it is **advisory**:
-it surfaces for review and on every touched file via the PostToolUse hook, yet it does not gate CI.
-
-The foundation `nl.rhaydus:ktlint-rules` ruleset is the only mechanical layer that hard-gates the
-build (via `ktlintCheck` / the `check` lifecycle) for every consuming project. A custom rule there —
-flag unguarded terminal flow reads (`.first()` / `.single()`) in production source, ignoring guarded
-forms and test sources — would promote this from "advisory in Softcover" to "blocking everywhere."
-The rule is **crash-safety, not "always use a Collector"**: a guarded one-shot read (`.firstOrNull()`
-+ default + `.catch` / cancellation-aware `runCatching`) is acceptable; an unguarded throwing terminal
-is the defect.
+| Batch | Theme | Home | Items |
+|---|---|---|---|
+| — | **Implemented & adopted** | — | _(none yet)_ |
+| — | **Implemented, not adopted** | `core-ui` / `ktlint-rules` / `detekt-rules` | F1, F4, F5, F6, F7, F19 |
+| B | Non-visual platform seams | `nl.rhaydus:core-ui` | F9, F10 |
+| C | Bottom bar | `nl.rhaydus:designsystem-core` (layout + component) | F2, F3 |
+| D | Shared Compose components & primitives | `nl.rhaydus:designsystem-core` | F13, F14 |
+| E | Desktop (jvm) affordances | `nl.rhaydus:designsystem-core` (jvmMain) | F12, F15 |
+| F | Error-slot + inline error UX | `nl.rhaydus:designsystem-core` + `nl.rhaydus:toad` | F16, F17 |
+| G | Image export | `nl.rhaydus:designsystem-image` | F11 |
+| H | Offline mutation queue | new connectivity/offline seam | F8 |
+| I | Shared build & gate tooling | `build-logic` / `detekt-rules` / `style-check` skill | F18, F20, F21, F22, F23 |
 
 ---
 
-## F2 — `rememberBottomBarPadding()` does not work due to the way it's implemented
+# Implemented
 
-- **Type:** bug
-- **Home:** `nl.rhaydus:designsystem-core` (layout)
-- **Status:** Open — root cause to be diagnosed before an upstream fix
+An item is **implemented** once it lands in the foundation — but that splits into two distinct states, and
+each implemented item belongs under exactly one of them:
 
-`rememberBottomBarPadding()` (and the `LocalBottomBarPadding` it reads) is part of the
-designsystem-core layout surface, but it does not work as intended — the issue is in how it is
-implemented, not in how the app calls it. Needs a root-cause diagnosis (what the helper resolves to
-vs. what callers expect) before proposing the upstream fix.
+- **Implemented & adopted** — landed in the foundation **and** live in Softcover: the app-local copy is
+  deleted and imports re-point to the foundation symbol. Done end to end; nothing left to do.
+- **Implemented, not adopted** — landed in the foundation, but Softcover still ships its app-local copy and
+  has **not** switched to the foundation symbol. It arrives in the app on the next `rhaydus-adopt` pass (or
+  once `foundation.local=true` is flipped). When that happens, **move the item up to *Implemented &
+  adopted*** and delete the "delete on adopt" notes.
 
-While in there, **audit the rest of the foundation's current surface for the same class of problem** —
-items that are published as shared API but either (a) can't actually be reused across consuming apps
-(too coupled to one app's assumptions, like the bottom-bar padding helper appears to be), or (b)
-carry very little value (thin wrappers, near-empty primitives, things a consumer would just as easily
-hand-roll). For each, decide: fix so it's genuinely reusable, demote it back into the app that needs
-it, or remove it. The goal is that everything the foundation exposes earns its place in the
-[CAPABILITIES.md](../rhaydus/0.2.0/CAPABILITIES.md) surface; dead or unusable API there is worse than
-no API, because the reuse-first rule sends people to reach for it.
+## Implemented & adopted
 
----
+_(none yet)_
 
-## F3 — Make bottom bars reusable
+## Implemented, not adopted
 
-- **Type:** enhancement (shared component)
-- **Home:** `nl.rhaydus:designsystem-core` (component)
-- **Status:** Open — evaluate
+F4, F5, and F6 landed together in `nl.rhaydus:core-ui` on the foundation `release/0.3.0` branch (the result
+helpers built on the logging facade). Softcover still ships the app-local copies and has not re-pointed its
+imports.
 
-The bottom bar is an often-recurring UI component that tends to get re-implemented per app. Evaluate
-hoisting a reusable bottom-bar component into the foundation design system, alongside the existing
-bottom-bar primitives it already ships (`LocalBottomBarPadding`, `rememberBottomBarPadding()`,
-`BottomNavigationSpacer`). Keep the shared piece brand-agnostic (skeleton in designsystem-core; brand
-styling layered by the app) so it fits the foundation's design-agnostic contract.
-
-**Include the cross-tab pulse signal.** Softcover ships `BottomBarPulseManager`
-(`core/designsystem/src/commonMain/.../presentation/util/BottomBarPulseManager.kt`): a process-wide,
-non-persistent one-shot signal that makes a bottom-bar tab icon briefly pulse when an event lands on a
-*different* tab (e.g. a book added from the Reading tab landing on the Library shelf). The mechanism — a
-keyed broadcast that nav components observe to play a scale pulse — is part of the reusable bottom-bar
-contract and should ship with it; only the concrete key name (`libraryPulseKey`) is app-specific and
-becomes caller-supplied. Without this, every app re-invents the "notify the nav of a cross-feature
-event" plumbing around the shared bottom bar.
-
----
-
-## F4 — `runCatchingCancellable` helper that rethrows `CancellationException`
+### F4 — `runCatchingCancellable` helper that rethrows `CancellationException`
 
 - **Type:** enhancement (shared util)
 - **Home:** `nl.rhaydus:core-ui` (the non-visual seam that already ships `AppDispatchers`)
-- **Status:** **Implemented upstream** in `nl.rhaydus:core-ui` (`common/RunCatchingCancellable.kt`, on the foundation `release/0.3.0` branch) as the pure primitive below. Softcover still ships its app-local copy; on adopt of the next foundation release it deletes `:core:domain` `result/RunCatchingCancellable.kt` and `result/RunCatchingLogged.kt` re-points its single import to `nl.rhaydus.ui.common`.
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-ui` (`common/RunCatchingCancellable.kt`, foundation `release/0.3.0`) as the pure primitive below; Softcover still ships its app-local `:core:domain` `result/RunCatchingCancellable.kt`. Adoption (a separate, later step) deletes the local copy and re-points the one import in `result/RunCatchingLogged.kt` to `nl.rhaydus.ui.common`.
 
 Kotlin's stdlib `runCatching` catches *every* `Throwable`, including `CancellationException`. Inside a
 coroutine that silently swallows structured-concurrency cancellation: a cancelled child runs its
@@ -129,11 +103,11 @@ means the upstream move touches one import, not every use case.
 
 ---
 
-## F5 — `runCatchingLogged` (log-at-source use-case wrapper)
+### F5 — `runCatchingLogged` (log-at-source use-case wrapper)
 
 - **Type:** enhancement (shared util)
 - **Home:** `nl.rhaydus:core-ui` (next to the F4 primitive)
-- **Status:** **Implemented upstream** in `nl.rhaydus:core-ui` (`common/RunCatchingLogged.kt`, on the foundation `release/0.3.0` branch), on top of the now-upstream `AppLog` (F6). Softcover still ships its app-local copy; on adopt it deletes `:core:domain` `result/RunCatchingLogged.kt` and re-points the 53 use-case sites' import to `nl.rhaydus.ui.common` (the wrapper insulates them — a one-line import move, not 53 edits).
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-ui` (`common/RunCatchingLogged.kt`, foundation `release/0.3.0`), on top of the now-upstream `AppLog` (F6); Softcover still ships its app-local `:core:domain` `result/RunCatchingLogged.kt`. Adoption deletes the local copy and re-points the 53 use-case sites' import to `nl.rhaydus.ui.common` (the wrapper insulates them — a one-line import move, not 53 edits).
 
 `runCatchingLogged` = `runCatchingCancellable` + a single `AppLog.e` on failure (optional `context`
 label). It is the enforced use-case-body form: a failure is logged once, at the boundary, so it is never
@@ -153,11 +127,11 @@ likewise become a real foundation ktlint rule once `runCatchingLogged` is a foun
 
 ---
 
-## F6 — Logging facade (`AppLog`) belongs in the foundation
+### F6 — Logging facade (`AppLog`) belongs in the foundation
 
 - **Type:** enhancement (shared util)
 - **Home:** `nl.rhaydus:core-ui` (alongside `AppDispatchers`, the existing non-visual seam)
-- **Status:** **Implemented upstream** in `nl.rhaydus:core-ui` (`common/AppLog.kt`, on the foundation `release/0.3.0` branch) as a brand-agnostic, Kermit-backed facade: the `tag` and line `prefix` are `install(...)` parameters (no `"Softcover"` constant), output stays debug-gated, and Kermit is an `implementation` dependency so no Kermit type leaks into the public surface. It earns its place per F2's bar via the prefix formatter + debug-gated install + cross-target consistency (not a bare re-export). Unblocked F5.
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-ui` (`common/AppLog.kt`, foundation `release/0.3.0`) as a brand-agnostic, Kermit-backed facade: the `tag` and line `prefix` are `install(...)` parameters (no `"Softcover"` constant), output stays debug-gated, and Kermit is an `implementation` dependency so no Kermit type leaks into the public surface. Earns its place per F2's bar (prefix formatter + debug-gated install + cross-target consistency, not a bare re-export) and unblocked F5. Softcover still ships its app-local `:core:domain` `logging/AppLog.kt`.
 
 `AppLog` (`:core:domain` `logging/`) is a Kermit-backed, multiplatform logging facade: `i` / `w` / `e`
 with message-and-throwable variants, a debug-gated `install(...)`, and a prefix formatter — call sites
@@ -174,11 +148,53 @@ hand-roll). If on inspection it is only the latter, demote this entry rather tha
 
 ---
 
-## F7 — Promote the `style-check.sh` recipes to blocking ktlint rules (generalize F1)
+### F19 — Shared detekt config belongs in the foundation
+
+- **Type:** enhancement (shared gate config)
+- **Home:** `nl.rhaydus:detekt-rules`
+- **Status:** **Implemented, not adopted.** The foundation now ships a shared detekt baseline (`config/detekt.yml`, bundled in `nl.rhaydus:detekt-rules`) carrying the foundation-worthy calibrations only - Compose/TOAD `ignoreAnnotated` across the complexity/naming rules, `MagicNumber` off, `LargeClass`/`LongParameterList(constructor=30)`, guard-clause `ReturnCount`, snake_case `PackageNaming`; detekt's `formatting` ruleset stays off (ktlint owns layout). A `detektCheck` task runs it (plus the custom `rhaydus` ruleset) over the foundation's own source. App-specific thresholds (Room/DAO counts, Apollo exception policy, `Typos`) stay in each app's override file. On adopt, Softcover points its detekt at the shared config and drops the duplicated calibrations.
+
+(Surfaced as one of the F18-F23 audit findings, but built now alongside F1 - standing up detekt for the type-resolved flow rule was the natural moment to centralize the config too.)
+
+---
+
+# Open work — batched for implementation
+
+## Batch A (implemented, not adopted) — Style gates → blocking rules
+
+*Home: `nl.rhaydus:ktlint-rules` + `nl.rhaydus:detekt-rules`. Covers **F1, F7** - both landed on the
+foundation `release/0.3.0` branch (see their statuses below); kept here for the rationale. Five recipes
+became blocking ktlint rules; the flow-terminal one (F1) needed type resolution and became a detekt rule.
+Not yet adopted: Softcover still runs its local `scripts/style-check.sh` until it consumes the new release.*
+
+### F1 — Crash-safety gate for terminal flow reads should be a blocking ktlint rule
+
+- **Type:** gate (lint rule)
+- **Home:** `nl.rhaydus:detekt-rules`
+- **Status:** **Implemented, not adopted.** Shipped as the type-resolved detekt rule `UnguardedFlowTerminalRead` in `nl.rhaydus:detekt-rules` (foundation `release/0.3.0`). ktlint cannot tell `Flow.first()` from `Collection.first()` without type resolution, so the blocking rule lives in detekt (resolving the receiver fqName); the guarded `firstOrNull()`/`singleOrNull()` forms and the collection operators are never flagged. Softcover still ships the advisory `check_unguarded_flow_terminal` recipe; dropped on adopt.
+
+A bare `.first()` / `.single()` on a cold flow is a crash risk: it throws `NoSuchElementException` on
+an empty flow, and any terminal operator re-throws an upstream error (DataStore / network / Apollo /
+repository). We added app-local enforcement — a `scripts/style-check.sh` recipe
+(`check_unguarded_flow_terminal`) plus the crash-safety rule in
+[`../reference/code-style.md`](../reference/code-style.md) (Error Handling) — but it is **advisory**:
+it surfaces for review and on every touched file via the PostToolUse hook, yet it does not gate CI.
+
+The foundation `nl.rhaydus:ktlint-rules` ruleset is the only mechanical layer that hard-gates the
+build (via `ktlintCheck` / the `check` lifecycle) for every consuming project. A custom rule there —
+flag unguarded terminal flow reads (`.first()` / `.single()`) in production source, ignoring guarded
+forms and test sources — would promote this from "advisory in Softcover" to "blocking everywhere."
+The rule is **crash-safety, not "always use a Collector"**: a guarded one-shot read (`.firstOrNull()`
++ default + `.catch` / cancellation-aware `runCatching`) is acceptable; an unguarded throwing terminal
+is the defect.
+
+---
+
+### F7 — Promote the `style-check.sh` recipes to blocking ktlint rules (generalize F1)
 
 - **Type:** gate (lint rules) + tooling ownership
-- **Home:** `nl.rhaydus:ktlint-rules` (the rules) + the `rhaydus-kotlin` `style-check` skill (the script)
-- **Status:** Open — **F1 is the first instance**; this generalizes it to the rest
+- **Home:** `nl.rhaydus:ktlint-rules` (+ `nl.rhaydus:detekt-rules` for the type-resolved one)
+- **Status:** **Implemented, not adopted (sub-move 1).** Five recipes are now blocking ktlint rules in `nl.rhaydus:ktlint-rules` — `one-type-per-file`, `no-fully-qualified-reference`, `project-import-order`, `inline-mockk-stub`, and `use-case-run-catching` (which names the upstream `runCatchingLogged`); the sixth (flow-terminal) is F1's detekt rule. **Sub-move 2** (own the `style-check.sh` harness + on-touch hook in the `style-check` skill) is tracked as **F22** and lands at adopt, when Softcover retires the now-redundant recipes.
 
 `scripts/style-check.sh` is an app-local bash port of the greppable code-style rules: inline
 fully-qualified references, one-type-per-file, project-import ordering, **inline mockk stubs**, unguarded
@@ -198,7 +214,240 @@ gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-move
 
 ---
 
-## F8 — Offline mutation queue + drain-and-reconcile pattern
+## Batch B — Non-visual platform seams (`core-ui`)
+
+*Home: `nl.rhaydus:core-ui`, alongside `AppDispatchers`. Covers **F9, F10**. Both are small read/write
+`expect`/`actual` seams over a platform capability (Android / iOS / desktop) with a clean domain-agnostic
+interface, so they share the same module shape and per-platform plumbing. Land **F10 before Batch H** — the
+offline queue drains on network-return and depends on this connectivity seam.*
+
+### F9 — Secure cross-platform secret storage seam
+
+- **Type:** enhancement (shared util / platform seam)
+- **Home:** `nl.rhaydus:core-ui`, or a dedicated security seam
+- **Status:** Open — already cleanly abstracted; no refactor needed
+
+`SecureApiKeyStorage` (`core/preferences/src/commonMain/.../data/security/SecureApiKeyStorage.kt`) is a
+minimal read/write/delete interface over hardware-backed secret storage, with platform implementations
+for Android (Keystore), iOS (Keychain), and desktop. Cross-platform secret storage is universal KMP
+infrastructure — not app-specific — and the interface is already clean and correct. The only app-coupled
+thing is the name (it stores *an API key*); generalize it to `SecureStorage` / a keyed secret store and
+it drops into the foundation as-is. Mind F2's bar: the value here is the three real platform-backed
+implementations, not the interface alone.
+
+---
+
+### F10 — `NetworkAvailabilityProvider` (reactive + instant connectivity seam)
+
+- **Type:** enhancement (shared util / platform seam)
+- **Home:** `nl.rhaydus:core-ui` (alongside `AppDispatchers`)
+- **Status:** Open — straightforward seam
+
+`NetworkAvailabilityProvider` (`core/domain/connectivity/NetworkAvailabilityProvider.kt`) exposes
+connectivity both reactively (`isOnline: StateFlow<Boolean>`, `awaitOnline()`) and synchronously (the
+`NetworkAvailability` instant-check singleton, for guard clauses like "throw offline if not connected").
+Every KMP app needs both shapes, and the interface is fully domain-agnostic — only the per-platform
+implementations (Android `ConnectivityManager`, iOS Network framework, desktop) bind underneath. Hoisting
+this also unblocks a foundation connectivity-banner component (Softcover's `ConnectivityBanner` /
+`OfflineGuard` are generic except for their dependency on this provider type and their copy).
+
+---
+
+## Batch C — Bottom bar (`designsystem-core`)
+
+*Home: `nl.rhaydus:designsystem-core` (layout + component). Covers **F2, F3**. Do **F2 first** — diagnose and
+fix the broken `rememberBottomBarPadding()` (and run the wider surface audit it calls for) — then **F3**
+builds the reusable bottom-bar component on top of the now-correct primitives.*
+
+### F2 — `rememberBottomBarPadding()` does not work due to the way it's implemented
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core` (layout)
+- **Status:** Open — root cause to be diagnosed before an upstream fix
+
+`rememberBottomBarPadding()` (and the `LocalBottomBarPadding` it reads) is part of the
+designsystem-core layout surface, but it does not work as intended — the issue is in how it is
+implemented, not in how the app calls it. Needs a root-cause diagnosis (what the helper resolves to
+vs. what callers expect) before proposing the upstream fix.
+
+While in there, **audit the rest of the foundation's current surface for the same class of problem** —
+items that are published as shared API but either (a) can't actually be reused across consuming apps
+(too coupled to one app's assumptions, like the bottom-bar padding helper appears to be), or (b)
+carry very little value (thin wrappers, near-empty primitives, things a consumer would just as easily
+hand-roll). For each, decide: fix so it's genuinely reusable, demote it back into the app that needs
+it, or remove it. The goal is that everything the foundation exposes earns its place in the
+[CAPABILITIES.md](../rhaydus/0.2.0/CAPABILITIES.md) surface; dead or unusable API there is worse than
+no API, because the reuse-first rule sends people to reach for it.
+
+---
+
+### F3 — Make bottom bars reusable
+
+- **Type:** enhancement (shared component)
+- **Home:** `nl.rhaydus:designsystem-core` (component)
+- **Status:** Open — evaluate
+
+The bottom bar is an often-recurring UI component that tends to get re-implemented per app. Evaluate
+hoisting a reusable bottom-bar component into the foundation design system, alongside the existing
+bottom-bar primitives it already ships (`LocalBottomBarPadding`, `rememberBottomBarPadding()`,
+`BottomNavigationSpacer`). Keep the shared piece brand-agnostic (skeleton in designsystem-core; brand
+styling layered by the app) so it fits the foundation's design-agnostic contract.
+
+**Include the cross-tab pulse signal.** Softcover ships `BottomBarPulseManager`
+(`core/designsystem/src/commonMain/.../presentation/util/BottomBarPulseManager.kt`): a process-wide,
+non-persistent one-shot signal that makes a bottom-bar tab icon briefly pulse when an event lands on a
+*different* tab (e.g. a book added from the Reading tab landing on the Library shelf). The mechanism — a
+keyed broadcast that nav components observe to play a scale pulse — is part of the reusable bottom-bar
+contract and should ship with it; only the concrete key name (`libraryPulseKey`) is app-specific and
+becomes caller-supplied. Without this, every app re-invents the "notify the nav of a cross-feature
+event" plumbing around the shared bottom bar.
+
+---
+
+## Batch D — Shared Compose components & primitives (`designsystem-core`)
+
+*Home: `nl.rhaydus:designsystem-core` (component / layout catalog). Covers **F13, F14**. Two independent,
+brand-agnostic Compose widgets whose only coupling is a colour/slot to parameterize — same module, same
+"lift the skeleton, expose the brand bits as params" shape, so they batch cleanly.*
+
+### F13 — `StarRatingInput` (half-star, drag-scrub, haptics)
+
+- **Type:** enhancement (shared component)
+- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
+- **Status:** Open — parameterize the fill colour
+
+`StarRatingInput` (`core/designsystem/.../presentation/component/StarRatingInput.kt`) is an interactive
+N-star rating control with half-star precision: tap and drag-to-scrub gestures, haptics fired on each
+half-step crossing, and a live drag preview that commits on release. The half-star math, the drag
+handling, and the haptics hookup are non-trivial and re-derived by every app with a rating surface. The
+only brand coupling is the filled-star tint (`RatingGold`); parameterize it (`filledColor` / `emptyColor`)
+and it is fully generic.
+
+---
+
+### F14 — `ExpandableFlowRow` (collapsible flow row with progressive reveal)
+
+- **Type:** enhancement (layout primitive)
+- **Home:** `nl.rhaydus:designsystem-core` (layout primitives)
+- **Status:** Open
+
+`ExpandableFlowRow` (`core/designsystem/.../presentation/component/ExpandableFlowRow.kt`) is a `FlowRow`
+that collapses to a maximum number of lines with a trailing "show more" affordance, revealing
+`linesPerExpand` further lines per tap (gradual reveal rather than all-at-once). It solves a recurring
+layout problem — unbounded tag/chip rows burying content — and sits naturally alongside the foundation's
+existing layout primitives (e.g. `TwoPaneScaffold`). Generic skeleton; parameterize the show-more
+affordance as a composable slot (defaulting to the chip) and the label text.
+
+---
+
+## Batch E — Desktop (jvm) affordances (`designsystem-core`)
+
+*Home: `nl.rhaydus:designsystem-core` (jvmMain affordances). Covers **F12, F15**. Both are jvm-only desktop
+interaction affordances sitting next to the existing `dismissOnEscape` / desktop context menu, and F15
+explicitly pairs with F12 — same source set, same review pass.*
+
+### F12 — `DesktopVerticalScrollbar` (themed, dark-surface-visible)
+
+- **Type:** enhancement (desktop affordance)
+- **Home:** `nl.rhaydus:designsystem-core` (jvm affordances)
+- **Status:** Open
+
+`DesktopScrollbar.kt` (`core/designsystem/src/jvmMain/.../presentation/component/`) is a themed vertical
+scrollbar with overloads for `LazyGridState`, `LazyListState`, and `ScrollState`, colouring the thumb to
+`onSurface` so it is actually visible — Compose Desktop's default near-black thumb disappears on dark
+editorial surfaces. Pure skeleton (the only choice is a standard Material colour role), and it belongs in
+the foundation's jvm affordances section next to the existing desktop helpers.
+
+---
+
+### F15 — `PlatformModifierClick` (desktop modifier-aware selection)
+
+- **Type:** enhancement (desktop affordance / modifier)
+- **Home:** `nl.rhaydus:designsystem-core` (jvm affordances / modifier catalog)
+- **Status:** Open
+
+`PlatformModifierClick` (`core/designsystem/.../presentation/modifier/PlatformModifierClick.kt`, with
+`.jvm` and `.mobile` actuals) adds desktop modifier-click selection — Ctrl/Cmd to toggle, Shift to
+range-select — intercepting in the Initial pointer phase so a plain click still fires, and passing
+through untouched on touch platforms. A standard desktop multi-select gesture, fully brand-agnostic; it
+belongs with the foundation's other jvm affordances (`dismissOnEscape`, desktop context menu) and pairs
+with F12.
+
+---
+
+## Batch F — Error-slot + inline error UX (`designsystem-core` + `toad`)
+
+*Home: `nl.rhaydus:designsystem-core` (component) + `nl.rhaydus:toad` (`toad-architecture.md`). Covers
+**F16, F17**. These are one feature split across two modules: F16 is the inline error/retry component and
+F17 is the TOAD `UiState` convention that renders through it. Design them together so the component's API
+and the state-slot contract match; F17 leans on the now-implemented `runCatchingLogged` (F5) for the
+cancellation guarantee.*
+
+### F16 — `InlineErrorState` (inline load/submit-failure + retry surface)
+
+- **Type:** enhancement (shared component)
+- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
+- **Status:** Open — **app-local now** (added in Phase 2b); delete on adopt
+
+`InlineErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier)`
+(`core/designsystem/.../presentation/component/InlineErrorState.kt`) renders a failure message in the
+error colour role plus a retry affordance — the standard in-content treatment for a failed load/submit
+(as opposed to the full-screen `OfflineGuard`-style placeholder). The Phase 2b survey confirmed the
+foundation ships **no** inline error/empty+retry component, yet every app needs one. The skeleton is
+brand-agnostic; only the button/typography/error-role bindings are app theme, layered as usual. Pairs
+with the TOAD error-slot convention (F17).
+
+---
+
+### F17 — A TOAD `UiState` error-slot + retry convention
+
+- **Type:** enhancement (framework convention / shared contract)
+- **Home:** `nl.rhaydus:toad` / `toad-architecture.md`
+- **Status:** Open — app-local convention now; bless it in the TOAD baseline upstream
+
+TOAD's `UiState` ships no standard error affordance, so each app re-invents how a screen surfaces a
+load/submit failure. Softcover's Phase 2b convention: a screen that can fail exposes a nullable
+`String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
+`OnboardingUiState.submissionError`), set by the action — copy authored in *presentation* via
+`toUserMessage()` plus a screen-specific fallback — cleared on edit/retry, and rendered by
+`InlineErrorState` (F16) whose retry re-dispatches the screen's own action. Cancellation is **not**
+re-handled in the fold: `runCatchingLogged` (F5) guarantees it at the use-case boundary, so the slot
+only ever holds a real failure. This is mostly a *documented convention* (the slot is per-screen, so
+there is little framework code to own) — the upstream move is to bless it in `toad-architecture.md`, and
+optionally offer an opt-in `UiError` type / base interface for screens that want a richer shape. Kept
+deliberately light locally (a provisional note in `docs/reference/architecture.md`) pending the
+foundation owning it — the foundation, not the app, should define the canonical TOAD error contract.
+
+---
+
+## Batch G — Image export (`designsystem-image`)
+
+*Home: `nl.rhaydus:designsystem-image` (existing) or `designsystem-core`. Covers **F11**. Standalone — a
+self-contained capture-to-image platform seam with no shared work with the other batches.*
+
+### F11 — `ShareCardCapture` (capture a composable to an image, save/share)
+
+- **Type:** enhancement (shared util / platform seam)
+- **Home:** `nl.rhaydus:designsystem-image` (existing) or `designsystem-core`
+- **Status:** Open — already well-shaped
+
+`ShareCardCapture` (`core/designsystem/.../presentation/share/ShareCardCapture.kt`, with `.android`,
+`.jvm`, `.ios` implementations) renders a composable to a bitmap via a `GraphicsLayer` and then
+encodes / saves / shares it, with result types for the save and share outcomes. The capture-encode-save-share
+mechanism — including the genuinely fiddly platform seams (scoped-storage save on Android, clipboard/file
+on desktop, the iOS share path) — is 100% brand-agnostic skeleton; only the *card design* fed into it is
+app-specific. Every Compose-Multiplatform app that ever exports an image re-derives this, so it is a
+high-value hoist.
+
+---
+
+## Batch H — Offline mutation queue (new connectivity/offline seam)
+
+*Home: a foundation offline/connectivity seam (likely a new module built on the skeleton). Covers **F8**.
+Standalone and the largest piece — **requires a generic-skeleton extraction first** and depends on Batch B's
+`NetworkAvailabilityProvider` (F10) for the drain-on-network-return trigger. Land it last.*
+
+### F8 — Offline mutation queue + drain-and-reconcile pattern
 
 - **Type:** enhancement (shared infra) — **requires a generic-skeleton extraction first**
 - **Home:** a foundation offline/connectivity seam (likely a new module built on the skeleton)
@@ -222,144 +471,66 @@ contracts first.
 
 ---
 
-## F9 — Secure cross-platform secret storage seam
+## Batch I — Shared build & gate tooling
 
-- **Type:** enhancement (shared util / platform seam)
-- **Home:** `nl.rhaydus:core-ui`, or a dedicated security seam
-- **Status:** Open — already cleanly abstracted; no refactor needed
+*Home: `build-logic` convention plugins / `nl.rhaydus:detekt-rules` / the `rhaydus-kotlin` `style-check`
+skill. Covers **F18, F20, F21, F22, F23** - reusable build gates and policies surfaced during the Batch A
+work, none yet extracted. Most ship with the convention plugins so a consuming app inherits the gate with
+zero setup; only the concrete allowlists/thresholds stay per-app.*
 
-`SecureApiKeyStorage` (`core/preferences/src/commonMain/.../data/security/SecureApiKeyStorage.kt`) is a
-minimal read/write/delete interface over hardware-backed secret storage, with platform implementations
-for Android (Keystore), iOS (Keychain), and desktop. Cross-platform secret storage is universal KMP
-infrastructure — not app-specific — and the interface is already clean and correct. The only app-coupled
-thing is the name (it stores *an API key*); generalize it to `SecureStorage` / a keyed secret store and
-it drops into the foundation as-is. Mind F2's bar: the value here is the three real platform-backed
-implementations, not the interface alone.
+### F18 — `checkModuleGraph` tier-DAG + api-visibility enforcement
 
----
+- **Type:** gate (custom Gradle task)
+- **Home:** `build-logic` convention plugins
+- **Status:** Open - strongest new candidate
 
-## F10 — `NetworkAvailabilityProvider` (reactive + instant connectivity seam)
+A custom verification task that fails on any module edge violating the tier DAG (the `core` / `feature` /
+orchestration allowed-direction model) and on an `api` edge to a data-area module unless allowlisted. The
+tier model is already a foundation architecture concept (`architecture.md` / module-structure), so the
+enforcement *mechanism* is foundation-worthy; only the concrete `dataAreaModules` / `allowedApiDataEdges` /
+per-module edge lists are app data. Softcover has it inline in `build.gradle.kts`.
 
-- **Type:** enhancement (shared util / platform seam)
-- **Home:** `nl.rhaydus:core-ui` (alongside `AppDispatchers`)
-- **Status:** Open — straightforward seam
+### F20 — `dependencyAnalysis` (buildHealth) gating policy
 
-`NetworkAvailabilityProvider` (`core/domain/connectivity/NetworkAvailabilityProvider.kt`) exposes
-connectivity both reactively (`isOnline: StateFlow<Boolean>`, `awaitOnline()`) and synchronously (the
-`NetworkAvailability` instant-check singleton, for guard clauses like "throw offline if not connected").
-Every KMP app needs both shapes, and the interface is fully domain-agnostic — only the per-platform
-implementations (Android `ConnectivityManager`, iOS Network framework, desktop) bind underneath. Hoisting
-this also unblocks a foundation connectivity-banner component (Softcover's `ConnectivityBanner` /
-`OfflineGuard` are generic except for their dependency on this provider type and their copy).
-
----
-
-## F11 — `ShareCardCapture` (capture a composable to an image, save/share)
-
-- **Type:** enhancement (shared util / platform seam)
-- **Home:** `nl.rhaydus:designsystem-image` (existing) or `designsystem-core`
-- **Status:** Open — already well-shaped
-
-`ShareCardCapture` (`core/designsystem/.../presentation/share/ShareCardCapture.kt`, with `.android`,
-`.jvm`, `.ios` implementations) renders a composable to a bitmap via a `GraphicsLayer` and then
-encodes / saves / shares it, with result types for the save and share outcomes. The capture-encode-save-share
-mechanism — including the genuinely fiddly platform seams (scoped-storage save on Android, clipboard/file
-on desktop, the iOS share path) — is 100% brand-agnostic skeleton; only the *card design* fed into it is
-app-specific. Every Compose-Multiplatform app that ever exports an image re-derives this, so it is a
-high-value hoist.
-
----
-
-## F12 — `DesktopVerticalScrollbar` (themed, dark-surface-visible)
-
-- **Type:** enhancement (desktop affordance)
-- **Home:** `nl.rhaydus:designsystem-core` (jvm affordances)
+- **Type:** gate (policy)
+- **Home:** `build-logic` convention plugins (ships with the convention bundle)
 - **Status:** Open
 
-`DesktopScrollbar.kt` (`core/designsystem/src/jvmMain/.../presentation/component/`) is a themed vertical
-scrollbar with overloads for `LazyGridState`, `LazyListState`, and `ScrollState`, colouring the thumb to
-`onSurface` so it is actually visible — Compose Desktop's default near-black thumb disappears on dark
-editorial surfaces. Pure skeleton (the only choice is a standard Material colour role), and it belongs in
-the foundation's jvm affordances section next to the existing desktop helpers.
+Gate `onUnusedDependencies` + `onIncorrectConfiguration` to fail; set `onUsedTransitive` / `onRuntimeOnly` /
+`onRedundantPlugins` to ignore. The policy plus the exclusion list of the centrally-provided convention
+bundle (Koin, coroutines, JUnit5/Kotest/MockK/Turbine, Compose MP artifacts) is foundation-worthy - the
+exclusions mirror exactly what the convention plugins provide. Only app-library false positives stay local.
 
----
+### F21 — Shared `lint.xml` + `warningsAsErrors` policy
 
-## F13 — `StarRatingInput` (half-star, drag-scrub, haptics)
-
-- **Type:** enhancement (shared component)
-- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
-- **Status:** Open — parameterize the fill colour
-
-`StarRatingInput` (`core/designsystem/.../presentation/component/StarRatingInput.kt`) is an interactive
-N-star rating control with half-star precision: tap and drag-to-scrub gestures, haptics fired on each
-half-step crossing, and a live drag preview that commits on release. The half-star math, the drag
-handling, and the haptics hookup are non-trivial and re-derived by every app with a rating surface. The
-only brand coupling is the filled-star tint (`RatingGold`); parameterize it (`filledColor` / `emptyColor`)
-and it is fully generic.
-
----
-
-## F14 — `ExpandableFlowRow` (collapsible flow row with progressive reveal)
-
-- **Type:** enhancement (layout primitive)
-- **Home:** `nl.rhaydus:designsystem-core` (layout primitives)
+- **Type:** gate (policy + config)
+- **Home:** `build-logic` convention plugins + a shared `lint.xml`
 - **Status:** Open
 
-`ExpandableFlowRow` (`core/designsystem/.../presentation/component/ExpandableFlowRow.kt`) is a `FlowRow`
-that collapses to a maximum number of lines with a trailing "show more" affordance, revealing
-`linesPerExpand` further lines per tap (gradual reveal rather than all-at-once). It solves a recurring
-layout problem — unbounded tag/chip rows burying content — and sits naturally alongside the foundation's
-existing layout primitives (e.g. `TwoPaneScaffold`). Generic skeleton; parameterize the show-more
-affordance as a composable slot (defaulting to the chip) and the label text.
+Every module references one shared lint config with `warningsAsErrors` / `abortOnError`. The version-freshness
+checks (`NewerVersionAvailable` / `GradleDependency` / `AndroidGradlePluginVersion`) set to `informational`
+because every nl.rhaydus app pins to the foundation catalog. The convention plugins already wire
+`lintConfig = rootProject.file("lint.xml")`; the shared `lint.xml` file and the freshness policy are the
+missing pieces.
 
----
+### F22 — On-touch style hook + script ownership in the `style-check` skill
 
-## F15 — `PlatformModifierClick` (desktop modifier-aware selection)
+- **Type:** tooling ownership
+- **Home:** the `rhaydus-kotlin` `style-check` skill
+- **Status:** Open - this is F7's sub-move 2
 
-- **Type:** enhancement (desktop affordance / modifier)
-- **Home:** `nl.rhaydus:designsystem-core` (jvm affordances / modifier catalog)
+The PostToolUse adapter (`scripts/kt-style-hook.sh`) that runs the style script on the just-edited file and
+feeds findings back for on-touch fixing is reusable infra. It - and any residual greppable recipes not yet
+promoted to rules - should live with the `style-check` skill so every app gets on-touch enforcement without
+copying the adapter. Done at adopt, alongside retiring the now-promoted recipes from Softcover's
+`scripts/style-check.sh`.
+
+### F23 — "No raw `println` / `Log.*` - use the logging facade" rule
+
+- **Type:** gate (lint rule)
+- **Home:** `nl.rhaydus:detekt-rules` (a `ForbiddenMethodCall`-style rule) or `nl.rhaydus:ktlint-rules`
 - **Status:** Open
 
-`PlatformModifierClick` (`core/designsystem/.../presentation/modifier/PlatformModifierClick.kt`, with
-`.jvm` and `.mobile` actuals) adds desktop modifier-click selection — Ctrl/Cmd to toggle, Shift to
-range-select — intercepting in the Initial pointer phase so a plain click still fires, and passing
-through untouched on touch platforms. A standard desktop multi-select gesture, fully brand-agnostic; it
-belongs with the foundation's other jvm affordances (`dismissOnEscape`, desktop context menu) and pairs
-with F12.
-
----
-
-## F16 — `InlineErrorState` (inline load/submit-failure + retry surface)
-
-- **Type:** enhancement (shared component)
-- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
-- **Status:** Open — **app-local now** (added in Phase 2b); delete on adopt
-
-`InlineErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier)`
-(`core/designsystem/.../presentation/component/InlineErrorState.kt`) renders a failure message in the
-error colour role plus a retry affordance — the standard in-content treatment for a failed load/submit
-(as opposed to the full-screen `OfflineGuard`-style placeholder). The Phase 2b survey confirmed the
-foundation ships **no** inline error/empty+retry component, yet every app needs one. The skeleton is
-brand-agnostic; only the button/typography/error-role bindings are app theme, layered as usual. Pairs
-with the TOAD error-slot convention (F17).
-
----
-
-## F17 — A TOAD `UiState` error-slot + retry convention
-
-- **Type:** enhancement (framework convention / shared contract)
-- **Home:** `nl.rhaydus:toad` / `toad-architecture.md`
-- **Status:** Open — app-local convention now; bless it in the TOAD baseline upstream
-
-TOAD's `UiState` ships no standard error affordance, so each app re-invents how a screen surfaces a
-load/submit failure. Softcover's Phase 2b convention: a screen that can fail exposes a nullable
-`String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
-`OnboardingUiState.submissionError`), set by the action — copy authored in *presentation* via
-`toUserMessage()` plus a screen-specific fallback — cleared on edit/retry, and rendered by
-`InlineErrorState` (F16) whose retry re-dispatches the screen's own action. Cancellation is **not**
-re-handled in the fold: `runCatchingLogged` (F5) guarantees it at the use-case boundary, so the slot
-only ever holds a real failure. This is mostly a *documented convention* (the slot is per-screen, so
-there is little framework code to own) — the upstream move is to bless it in `toad-architecture.md`, and
-optionally offer an opt-in `UiError` type / base interface for screens that want a richer shape. Kept
-deliberately light locally (a provisional note in `docs/reference/architecture.md`) pending the
-foundation owning it — the foundation, not the app, should define the canonical TOAD error contract.
+A mechanizable ban on raw `println` / `android.util.Log.*` in favour of the `AppLog` facade (now upstream,
+F6). Currently review-only in Softcover's `code-style.md`. Pairs with F6 and is a natural addition to the new
+detekt ruleset built for F1.
