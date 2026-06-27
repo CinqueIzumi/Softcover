@@ -10,7 +10,7 @@ To test `safeQueryFlow` (which calls `apolloClient.query(q).fetchPolicy(fp).toFl
 1. `mockk<ApolloClient>()` — MockK can mock this despite its private constructor
 2. `mockk<ApolloCall<T>>()` — same; `ApolloCall` has `internal constructor` but MockK handles it
 3. Stub `apolloClient.query(any<MyQuery>()) returns apolloCall`
-4. `mockkStatic("com.apollographql.apollo.cache.normalized.NormalizedCache")` — `fetchPolicy` is a top-level extension in `ClientCacheExtensions.kt` with `@file:JvmName("NormalizedCache")`, so the JVM class is `com.apollographql.apollo.cache.normalized.NormalizedCache`
+4. `mockkStatic("com.apollographql.cache.normalized.FetchPoliciesKt")` — after migrating to `com.apollographql.cache:normalized-cache` v1.0.5 (the new library), `fetchPolicy` lives in `FetchPoliciesKt` (file `fetchPolicies.kt`). **Old library** used `com.apollographql.apollo.cache.normalized.NormalizedCache` — do NOT use that anymore.
 5. Stub `every { apolloCall.fetchPolicy(any()) } returns apolloCall`
 6. Stub `every { apolloCall.toFlow() } returns flowOf(response1, response2, ...)`
 

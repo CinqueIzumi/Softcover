@@ -5,8 +5,8 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Error
-import com.apollographql.apollo.cache.normalized.FetchPolicy
-import com.apollographql.apollo.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.exception.ApolloHttpException
 import com.apollographql.apollo.exception.ApolloNetworkException
@@ -33,7 +33,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-@Suppress("DEPRECATION") // FetchPolicy and fetchPolicy extension deprecated in Apollo 5 (normalized-cache migration)
 class SafeQueryFlowTest {
     private val query = GetUserIdQuery()
     private lateinit var apolloClient: ApolloClient
@@ -65,7 +64,7 @@ class SafeQueryFlowTest {
         mockkObject(SessionExpiredNotifier)
         mockkObject(NetworkAvailability)
 
-        mockkStatic("com.apollographql.apollo.cache.normalized.NormalizedCache")
+        mockkStatic("com.apollographql.cache.normalized.FetchPoliciesKt")
 
         every { apolloClient.query(any<GetUserIdQuery>()) } returns apolloCall
         every { apolloCall.fetchPolicy(any()) } returns apolloCall

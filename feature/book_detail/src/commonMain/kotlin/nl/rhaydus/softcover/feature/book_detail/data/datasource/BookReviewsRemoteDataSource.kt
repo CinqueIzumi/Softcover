@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.data.datasource
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.FetchPolicy
 import nl.rhaydus.softcover.GetTopBookReviewsQuery
 import nl.rhaydus.softcover.GetTopBookReviewsQuery.Data.User_book.Companion.bookReviewFragment
 import nl.rhaydus.softcover.core.network.helper.safeQuery

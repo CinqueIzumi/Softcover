@@ -26,3 +26,21 @@ private fun stubForDelegation(responseName: String) {
 ```
 
 `CompiledField.argumentValues` is `@ApolloExperimental` — the compiler emits a warning but it compiles fine.
+
+**New API (`com.apollographql.cache:normalized-cache` v1.0.5):** `resolveField` now takes a single `ResolverContext` (from `com.apollographql.cache.normalized.api`). Build it directly — the constructor is accessible from Kotlin even though javap shows the primary constructor as `private` (value class parameter artifact):
+
+```kotlin
+val context = ResolverContext(
+    field = field,
+    variables = variables,
+    parent = parent,
+    parentKey = CacheKey.QUERY_ROOT,   // or CacheKey("books", "1") for non-root
+    parentType = "Query",
+    cacheHeaders = CacheHeaders.NONE,
+    fieldKeyGenerator = DefaultFieldKeyGenerator,
+    path = emptyList(),
+)
+SoftcoverCacheResolver.resolveField(context)
+```
+
+`CacheKey` is now `com.apollographql.cache.normalized.api.CacheKey`. `CacheKey.QUERY_ROOT` is the root key. `CacheKey("typeName", "id")` is a non-root key.
