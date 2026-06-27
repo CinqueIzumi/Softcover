@@ -1,0 +1,1 @@
+- [InlineErrorState pattern](project_inline_error_state.md) — shared `core/designsystem` component for TOAD `String?` error-slots; RhaydusButton OUTLINED S + error color bodySmall text
