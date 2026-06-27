@@ -326,3 +326,40 @@ range-select — intercepting in the Initial pointer phase so a plain click stil
 through untouched on touch platforms. A standard desktop multi-select gesture, fully brand-agnostic; it
 belongs with the foundation's other jvm affordances (`dismissOnEscape`, desktop context menu) and pairs
 with F12.
+
+---
+
+## F16 — `InlineErrorState` (inline load/submit-failure + retry surface)
+
+- **Type:** enhancement (shared component)
+- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
+- **Status:** Open — **app-local now** (added in Phase 2b); delete on adopt
+
+`InlineErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier)`
+(`core/designsystem/.../presentation/component/InlineErrorState.kt`) renders a failure message in the
+error colour role plus a retry affordance — the standard in-content treatment for a failed load/submit
+(as opposed to the full-screen `OfflineGuard`-style placeholder). The Phase 2b survey confirmed the
+foundation ships **no** inline error/empty+retry component, yet every app needs one. The skeleton is
+brand-agnostic; only the button/typography/error-role bindings are app theme, layered as usual. Pairs
+with the TOAD error-slot convention (F17).
+
+---
+
+## F17 — A TOAD `UiState` error-slot + retry convention
+
+- **Type:** enhancement (framework convention / shared contract)
+- **Home:** `nl.rhaydus:toad` / `toad-architecture.md`
+- **Status:** Open — app-local convention now; bless it in the TOAD baseline upstream
+
+TOAD's `UiState` ships no standard error affordance, so each app re-invents how a screen surfaces a
+load/submit failure. Softcover's Phase 2b convention: a screen that can fail exposes a nullable
+`String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
+`OnboardingUiState.submissionError`), set by the action — copy authored in *presentation* via
+`toUserMessage()` plus a screen-specific fallback — cleared on edit/retry, and rendered by
+`InlineErrorState` (F16) whose retry re-dispatches the screen's own action. Cancellation is **not**
+re-handled in the fold: `runCatchingLogged` (F5) guarantees it at the use-case boundary, so the slot
+only ever holds a real failure. This is mostly a *documented convention* (the slot is per-screen, so
+there is little framework code to own) — the upstream move is to bless it in `toad-architecture.md`, and
+optionally offer an opt-in `UiError` type / base interface for screens that want a richer shape. Kept
+deliberately light locally (a provisional note in `docs/reference/architecture.md`) pending the
+foundation owning it — the foundation, not the app, should define the canonical TOAD error contract.
