@@ -309,12 +309,29 @@ group related actions into one sealed file per concern; or a light codegen/templ
 UiState/Action/Event/ScreenModel/Dependencies quintet. Cost: low locally (grouping) / foundation
 change (codegen). Mostly a "name the cost" item — don't fork the foundation convention unilaterally.
 
-### P2 [MEDIUM] Error/loading state handling is inconsistent across screens
+### ✅ P2 [MEDIUM] Error/loading state handling is inconsistent across screens
+
+**Done (Phase 2b).** `explore` (search) and `onboarding` no longer `AppLog.e()`-and-swallow: each folds
+its failure into a nullable `String?` error slot on its `UiState` (`searchError` / `submissionError`),
+set by the action — copy authored in presentation via `Throwable.toUserMessage()` + a screen-specific
+fallback (onboarding special-cases a rejected key) — cleared on edit/retry, and rendered by a shared
+`InlineErrorState(message, onRetry)` component whose retry re-dispatches the screen's own action.
+Cancellation is not re-handled in the fold (`runCatchingLogged` guarantees it at the use-case boundary).
+**Deviation:** the review wanted the contract on the TOAD `UiState` baseline, but that baseline is
+vendored — so it was implemented app-locally and **queued upstream** (`foundation-upstream-candidates.md`
+F16 = the component, F17 = the TOAD error-slot convention), with a provisional note in
+`docs/reference/architecture.md`. `book_detail`/`reading`/`library` already tracked per-item failures and
+were left as-is.
+
+<details><summary>Original finding</summary>
+
 `book_detail`/`reading`/`library` track per-item mutation failures in state (good); `explore`/
 `onboarding` `AppLog.e()` and swallow — the user sees a spinner resolve to nothing on a failed
 search. I'd define **one error-state contract** on the TOAD `UiState` baseline (e.g. a standard
 `transientError`/`inlineError` slot + a convention for retry) so every screen handles failure the
 same way. This is the presentation-side symptom of D1 — fixing D1 makes this natural. Cost: low-medium.
+
+</details>
 
 ### P3 [LOW] A few justified-but-fragile UI state syncs
 `library` shelf keeps a `mutableStateList` synced via `LaunchedEffect` (commented: avoids a blank
