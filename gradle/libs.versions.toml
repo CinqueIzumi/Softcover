@@ -1,28 +1,41 @@
 [versions]
-agp = "8.13.1"
-kotlin = "2.2.21"
+agp = "9.0.0"
+kotlin = "2.3.21"
+rhaydusFoundation = "0.2.0"
 ktlint = "1.7.1"
 coreKtx = "1.17.0"
+okio = "3.9.1"
 junit = "4.13.2"
-junitVersion = "1.3.0"
-espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.0"
 composeBom = "2026.01.01"
-apollo = "4.3.3"
+apollo = "5.0.0"
+# Apollo's normalized cache moved to a separately-versioned library in Apollo Kotlin 5.0; the built-in
+# `com.apollographql.apollo.cache.normalized.*` is deprecated. This is the new in-memory cache artifact.
+apolloCache = "1.0.5"
 dataStore = "1.2.0"
 kotlinxSerialization = "1.9.0"
-ksp = "2.2.21-2.0.4"
+ksp = "2.3.9"
 voyager = "1.1.0-beta02"
-coilVersion = "2.7.0"
-material3ComposeVersion = "1.5.0-alpha13"
+coilVersion = "3.2.0"
+composeMultiplatform = "1.11.0"
+# Navigation Event library — the multiplatform back-gesture API that supersedes the deprecated CMP
+# `ui-backhandler` BackHandler. Provides NavigationBackHandler/NavigationEventHandler for every target.
+navigationevent = "1.0.1"
+# CMP's stable material3 strips the M3-expressive APIs (aligned with Jetpack material3 1.4.0-beta01).
+# The design system is built on expressive (MaterialExpressiveTheme/ToggleButton/SplitButton), so it
+# pins the alpha material3 artifact for the 1.11.0 line (≈ androidx material3 1.5.0-alpha17).
+composeMaterial3Expressive = "1.11.0-alpha07"
 materialComponentsVersion = "1.13.0"
 kermitVersion = "2.0.6"
-kotlinxDatetime = "0.6.2"
+kotlinxDatetime = "0.7.1"
 koinVersion = "3.5.3"
+# Multiplatform koin-compose is versioned separately from koin core; 1.1.x targets Koin 3.5.x.
+koinComposeMultiplatform = "1.1.2"
 roomVersion = "2.7.2"
 splashVersion = "1.0.1"
 jUnitVersion = "5.11.4"
+junitPlatform = "1.11.4"
 kotestVersion = "5.9.1"
 mockkVersion = "1.13.17"
 turbineVersion = "1.2.0"
@@ -32,10 +45,28 @@ reorderableVersion = "2.4.3"
 cameraX = "1.4.2"
 mlkitBarcode = "17.3.0"
 coroutines = "1.10.2"
+# Ktor powers Coil's network image loading on iOS only (Coil's OkHttp fetcher is JVM/Android-only and
+# Apollo brings no Ktor engine to reuse). Aligned with the Ktor 3.x line Coil 3.2.0 is built against.
+ktor = "3.1.0"
 detekt = "1.23.8"
 dependencyAnalysis = "3.14.1"
+# Kotlin code-coverage toolset; aggregates an XML report at the root for Codecov upload in CI.
+kover = "0.9.8"
+sqlite = "2.6.2"
+# KSafe backs the desktop (JVM) SecureApiKeyStorage actual: it custodies the encryption key in the OS
+# secret store (macOS Keychain / Windows DPAPI / Linux Secret Service) with a software fallback. Used
+# in core:preferences/jvmMain only; Android/iOS keep their own hardware-backed impls.
+ksafe = "2.1.2"
 
 [libraries]
+# rhaydus foundation — published nl.rhaydus:* artifacts, resolved from mavenCentral
+rhaydus-toad = { group = "nl.rhaydus", name = "toad", version.ref = "rhaydusFoundation" }
+rhaydus-coreUi = { group = "nl.rhaydus", name = "core-ui", version.ref = "rhaydusFoundation" }
+rhaydus-designsystemCore = { group = "nl.rhaydus", name = "designsystem-core", version.ref = "rhaydusFoundation" }
+rhaydus-designsystemEditorial = { group = "nl.rhaydus", name = "designsystem-editorial", version.ref = "rhaydusFoundation" }
+rhaydus-designsystemImage = { group = "nl.rhaydus", name = "designsystem-image", version.ref = "rhaydusFoundation" }
+rhaydus-ktlintRules = { group = "nl.rhaydus", name = "ktlint-rules", version.ref = "rhaydusFoundation" }
+
 # ktlint rule-engine — consumed by the :ktlint-rules module to drive the custom autofix ruleset
 ktlint-ruleEngine = { group = "com.pinterest.ktlint", name = "ktlint-rule-engine", version.ref = "ktlint" }
 ktlint-ruleEngineCore = { group = "com.pinterest.ktlint", name = "ktlint-rule-engine-core", version.ref = "ktlint" }
@@ -45,15 +76,19 @@ ktlint-cliRulesetCore = { group = "com.pinterest.ktlint", name = "ktlint-cli-rul
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
+compose-multiplatform-gradlePlugin = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "composeMultiplatform" }
+compose-material3-expressive = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3Expressive" }
+navigationevent-compose = { group = "org.jetbrains.androidx.navigationevent", name = "navigationevent-compose", version.ref = "navigationevent" }
 apollo-gradlePlugin = { group = "com.apollographql.apollo", name = "apollo-gradle-plugin", version.ref = "apollo" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "coroutines" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -62,30 +97,37 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3ComposeVersion" }
-androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts" }
 apollo = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
-apollo-normalized-cache = { group = "com.apollographql.apollo", name = "apollo-normalized-cache", version.ref = "apollo" }
+apollo-normalized-cache = { group = "com.apollographql.cache", name = "normalized-cache", version.ref = "apolloCache" }
 dataStore = { group = "androidx.datastore", name = "datastore", version.ref = "dataStore" }
+datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "dataStore" }
+datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "dataStore" }
+okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 voyager-koin = { group = "cafe.adriel.voyager", name = "voyager-koin", version.ref = "voyager" }
 voyager-tabNavigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
-coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilVersion" }
+coil3 = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coilVersion" }
+coil3-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coilVersion" }
+coil3-network-ktor = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coilVersion" }
+ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
 kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermitVersion" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinVersion" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinVersion" }
+koin-compose-multiplatform = { group = "io.insert-koin", name = "koin-compose", version.ref = "koinComposeMultiplatform" }
+koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koinVersion" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVersion" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
+room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "roomVersion" }
 material-components = { group = "com.google.android.material", name = "material", version.ref = "materialComponentsVersion" }
 androidx-splash = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashVersion" }
 junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "jUnitVersion" }
 junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "jUnitVersion" }
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "jUnitVersion" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junitPlatform" }
 kotest = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotestVersion" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
@@ -99,14 +141,22 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+androidx-sqlite-bundled-jvm = { module = "androidx.sqlite:sqlite-bundled-jvm", version.ref = "sqlite" }
+ksafe = { module = "eu.anifantakis:ksafe", version.ref = "ksafe" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "roomVersion" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

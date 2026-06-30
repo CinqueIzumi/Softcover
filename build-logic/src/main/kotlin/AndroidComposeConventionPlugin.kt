@@ -6,7 +6,7 @@ import org.gradle.kotlin.dsl.dependencies
 
 /**
  * Layers Jetpack Compose on top of [AndroidLibraryConventionPlugin]. Applied by the modules that own
- * UI (`:core:designsystem`) or Compose-based platform helpers (`:core:platform`).
+ * UI (`:core:designsystem`) or Compose-based platform helpers (`:core:notification`).
  */
 class AndroidComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {

@@ -1,0 +1,6 @@
+<resources>
+    <string name="connectivity_offline_banner">You\'re offline. Progress changes are saved and will sync when you reconnect.</string>
+    <string name="connectivity_offline_action_blocked">No internet connection. Try again when you\'re back online.</string>
+    <string name="connectivity_offline_screen_title">No internet connection</string>
+    <string name="connectivity_offline_screen_body">This screen needs internet to load. Reconnect to try again.</string>
+</resources>

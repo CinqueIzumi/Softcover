@@ -6,12 +6,24 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.apollo) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.room) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.dependency.analysis)
+    alias(libs.plugins.kover)
+}
+
+// Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML
+// report at the root — `./gradlew koverXmlReport` → build/reports/kover/report.xml — which CI uploads
+// to Codecov. :ktlint-rules is build tooling, not shipped code, so it is excluded from the report.
+dependencies {
+    subprojects
+        .filter { it.path != ":ktlint-rules" }
+        .forEach { kover(it) }
 }
 
 // Apply detekt uniformly to every Kotlin module (no baseline — gates from zero on the shared config).
@@ -19,6 +31,12 @@ plugins {
 subprojects {
     apply(plugin = "com.autonomousapps.dependency-analysis")
     apply(plugin = "io.gitlab.arturbosch.detekt")
+
+    // Coverage instrumentation for every shipped module; the merged report is wired at the root above.
+    // :ktlint-rules is build tooling, so it stays uninstrumented.
+    if (path != ":ktlint-rules") {
+        apply(plugin = "org.jetbrains.kotlinx.kover")
+    }
 
     configure<DetektExtension> {
         buildUponDefaultConfig = true
@@ -29,7 +47,9 @@ subprojects {
     tasks.withType<Detekt>().configureEach {
         jvmTarget = "11"
         // Analyse production code only; test sources follow their own (looser) patterns.
-        setSource(project.files("src/main/java", "src/main/kotlin"))
+        // `commonMain/kotlin` covers the KMP modules' shared production code (Android-only modules
+        // have none, so the extra path is a harmless no-op for them).
+        setSource(project.files("src/main/java", "src/main/kotlin", "src/commonMain/kotlin"))
         reports {
             html.required.set(true)
             xml.required.set(true)
@@ -39,14 +59,69 @@ subprojects {
     }
 }
 
-// Wire the custom ktlint ruleset (:ktlint-rules) into the build so style is enforced for every
-// developer with zero setup: `./gradlew ktlintCheck` (the gate, also run by `check`) and
-// `./gradlew ktlintFormat` (autofix). The rules run via ktlint's rule-engine directly from the
-// :ktlint-rules module, so there is no Spotless/plugin version coupling.
+// Wire the custom ktlint ruleset into the build so style is enforced for every developer with zero
+// setup: `./gradlew ktlintCheck` (the gate, also run by `check`) and `./gradlew ktlintFormat` (autofix).
+// The rules run via ktlint's rule-engine directly from the published `nl.rhaydus:ktlint-rules` jar
+// (resolved on the `ktlintRules` configuration), so there is no Spotless/plugin version coupling.
+// `-Pktlint.root=<dir>` scopes the scan (used for testing a rule on a throwaway dir); defaults to the repo.
+val ktlintRules by configurations.creating
+
+dependencies {
+    add("ktlintRules", libs.rhaydus.ktlintRules)
+}
+
+val ktlintScanRoot = (project.findProperty("ktlint.root") as String?) ?: rootDir.absolutePath
+
+tasks.register<JavaExec>("ktlintFormat") {
+    group = "formatting"
+    description = "Auto-wraps multi-arg calls/declarations across the repo (custom ktlint ruleset)."
+    classpath = ktlintRules
+    mainClass.set("nl.rhaydus.ktlint.MainKt")
+    args("format", ktlintScanRoot)
+}
+
+tasks.register<JavaExec>("ktlintCheck") {
+    group = "verification"
+    description = "Fails the build on custom-ruleset violations (multi-arg one-per-line wrapping)."
+    classpath = ktlintRules
+    mainClass.set("nl.rhaydus.ktlint.MainKt")
+    args("check", ktlintScanRoot)
+}
+
 subprojects {
     tasks.matching { it.name == "check" }.configureEach {
-        dependsOn(":ktlint-rules:ktlintCheck")
+        dependsOn(rootProject.tasks.named("ktlintCheck"))
         dependsOn(":checkModuleGraph")
+    }
+}
+
+// Gate every KMP module's `check` on iOS compilation. The Android variant compiles common/androidMain
+// for the JVM, where JVM-only APIs resolve fine (kotlin.jvm.* default imports, Dispatchers.IO,
+// java.time) — so an Android-only build silently hides code that will not compile for iOS. Compiling
+// all declared iOS targets here fails such leaks at `check` time instead of only at iOS link time.
+// Guarded to KMP modules; and to macOS hosts,
+// since Kotlin/Native iOS compilation is unavailable elsewhere (an iOS CI must use a macOS runner).
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        if (System.getProperty("os.name").startsWith("Mac")) {
+            tasks.matching { it.name == "check" }.configureEach {
+                dependsOn(
+                    "compileKotlinIosArm64",
+                    "compileKotlinIosSimulatorArm64",
+                )
+            }
+        }
+    }
+}
+
+// Gate every KMP module's `check` on JVM (desktop) compilation too. Unlike the iOS gate this runs on
+// every host (Kotlin/JVM compilation is available everywhere), so a missing or incorrect `jvmMain`
+// actual fails at `check` time rather than only when the desktop app is assembled.
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        tasks.matching { it.name == "check" }.configureEach {
+            dependsOn("compileKotlinJvm")
+        }
     }
 }
 
@@ -65,9 +140,38 @@ fun tierOf(path: String): String? = when {
     path.startsWith(":core:") -> "core"
     path.startsWith(":feature:") -> "feature"
     path == ":orchestration" -> "orchestration"
-    path == ":app" -> "app"
+    path == ":app" || path == ":desktopApp" -> "app"
     else -> null
 }
+
+// api-visibility rule (MODULE_STRUCTURE_GUIDELINES §10). The tier check above proves an edge is
+// *allowed*; it does not constrain whether a data-area module is re-exported (`api`) or kept private
+// (`implementation`). An `api` edge to a data module transitively republishes that whole feature's
+// data/use-case layer to every downstream consumer — which is exactly how `:core:designsystem` became
+// a god-module. `implementation` is therefore the default for these; every `api(project(<data>))` edge
+// must be an explicit, reviewed entry below so a new one is a conscious decision, not a silent leak.
+val dataAreaModules = setOf(
+    ":core:book",
+    ":core:lists",
+    ":core:deadlines",
+    ":core:personal",
+    ":core:profile",
+    ":core:identity",
+    ":core:preferences",
+)
+
+// Allowlisted (source → data module) `api` edges: each genuinely renders/returns the data module's
+// types in its own public surface. Adding a row is the deliberate sign-off the rule exists to force.
+val allowedApiDataEdges = setOf(
+    ":core:designsystem" to ":core:book",
+    ":core:identity" to ":core:preferences",
+    ":core:profile" to ":core:identity",
+    ":feature:book_detail" to ":core:identity",
+    ":feature:explore" to ":core:book",
+    ":feature:explore" to ":core:identity",
+    ":feature:lists" to ":core:lists",
+    ":feature:settings" to ":core:preferences",
+)
 
 // dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
 // unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
@@ -85,6 +189,9 @@ dependencyAnalysis {
                     // Uniform runtime + test bundle provided by AndroidLibraryConventionPlugin.
                     "io.insert-koin:koin-android",
                     "org.jetbrains.kotlinx:kotlinx-coroutines-android",
+                    // Desktop's Main dispatcher — supplied via ServiceLoader (no compile reference), the
+                    // desktop counterpart of coroutines-android; wired into :desktopApp's runtime classpath.
+                    "org.jetbrains.kotlinx:kotlinx-coroutines-swing",
                     "org.junit.jupiter:junit-jupiter-api",
                     "org.junit.jupiter:junit-jupiter-params",
                     "io.kotest:kotest-assertions-core",
@@ -92,15 +199,41 @@ dependencyAnalysis {
                     "app.cash.turbine:turbine",
                     // Provided uniformly by the Compose / Room convention plugins (not per-module deps).
                     "androidx.activity:activity-compose",
+                    "androidx.compose.ui:ui",
                     "androidx.compose.ui:ui-tooling-preview",
+                    "androidx.compose.ui:ui-tooling",
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui-graphics",
-                    "androidx.room:room-ktx",
+                    // KMP Compose Multiplatform artifacts provided uniformly by KmpComposeConventionPlugin.
+                    "org.jetbrains.compose.runtime:runtime",
+                    "org.jetbrains.compose.foundation:foundation",
+                    "org.jetbrains.compose.animation:animation",
+                    "org.jetbrains.compose.ui:ui",
+                    "org.jetbrains.androidx.navigationevent:navigationevent-compose",
+                    "org.jetbrains.compose.components:components-ui-tooling-preview",
+                    "org.jetbrains.compose.material3:material3",
+                    // Compose Multiplatform auto-injects a `jvmDev` source set (Compose Hot Reload) plus the
+                    // OS-specific desktop runtime for every module that has a `jvm()` target; :desktopApp's
+                    // compose.desktop.currentOs resolves to the same OS-specific coordinate. None are referenced
+                    // in code (the desktop UI types resolve transitively), so DA flags them — exclude every host
+                    // variant centrally, the same way the convention-plugin Compose artifacts above are excluded.
+                    "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64",
+                    "org.jetbrains.compose.desktop:desktop-jvm-macos-x64",
+                    "org.jetbrains.compose.desktop:desktop-jvm-linux-x64",
+                    "org.jetbrains.compose.desktop:desktop-jvm-linux-arm64",
+                    "org.jetbrains.compose.desktop:desktop-jvm-windows-x64",
+                    "org.jetbrains.compose.hot-reload:hot-reload-runtime-api",
+                    // KMP-variant bundle deps from KmpLibraryConventionPlugin's commonMain set — provided
+                    // uniformly, so never a per-module "unused" finding (mirrors the onIncorrectConfiguration list).
+                    "io.insert-koin:koin-core",
+                    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
                     // False positives: genuinely used via mechanisms DA can't see without type resolution.
                     "io.insert-koin:koin-androidx-compose", // koinInject(...)
                     "cafe.adriel.voyager:voyager-koin", // ScreenModel / screenModelScope (ToadScreenModel)
                     "org.jetbrains.kotlinx:kotlinx-serialization-json", // @Serializable / Json
                     "androidx.work:work-runtime-ktx", // CoroutineWorker
+                    "androidx.camera:camera-camera2", // CameraX runtime backend, loaded via ServiceLoader (no compile ref)
+                    "com.google.mlkit:barcode-scanning", // MLKit barcode model + API used by the scanner; DA mis-resolves to a transitive
                 )
             }
 
@@ -111,8 +244,12 @@ dependencyAnalysis {
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui",
                     "androidx.compose.ui:ui-graphics",
+                    // KMP-variant bundle deps from KmpLibraryConventionPlugin's commonMain set — same
+                    // central-provisioning rationale as the Android `-android` variants above.
+                    "io.insert-koin:koin-core",
+                    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
                     // Intentional public exposure: designsystem returns a Coil ImageRequest (§10).
-                    "io.coil-kt:coil-compose",
+                    "io.coil-kt.coil3:coil-compose",
                 )
             }
 
@@ -159,13 +296,32 @@ tasks.register("checkModuleGraph") {
                             violations += "${module.path} → ${dependency.path}  " +
                                 "($fromTier may depend only on $allowed)"
                         }
+
+                        // api-visibility rule: a declared `api` edge to a data-area module must be
+                        // allowlisted above. Match every declarable api bucket — plain `api`
+                        // (android-only modules) and the KMP/variant `<sourceSet>Api` configs
+                        // (`commonMainApi`, `androidMainApi`, `debugApi`, …) — but never the test ones,
+                        // where an api edge can't leak into a production consumer's graph.
+                        val isApiEdge = configuration.name.endsWith("api", ignoreCase = true) &&
+                            configuration.name.contains("test", ignoreCase = true).not()
+
+                        if (
+                            isApiEdge &&
+                            dependency.path in dataAreaModules &&
+                            (module.path to dependency.path) !in allowedApiDataEdges
+                        ) {
+                            violations += "${module.path} → api(${dependency.path})  " +
+                                "(data modules must be implementation-depended unless allowlisted — " +
+                                "MODULE_STRUCTURE_GUIDELINES §10)"
+                        }
                     }
             }
         }
 
         if (violations.isNotEmpty()) {
             throw GradleException(
-                "Illegal module dependencies (see MODULE_STRUCTURE_GUIDELINES §2):\n" +
+                "Illegal module dependencies (see MODULE_STRUCTURE_GUIDELINES §2 tiers / §10 " +
+                    "api-visibility):\n" +
                     violations.distinct().sorted().joinToString("\n") { "  - $it" },
             )
         }
@@ -177,9 +333,16 @@ tasks.register("checkModuleGraph") {
 // Runs the deterministic mechanical-style checks (scripts/style-check.sh) so CI / pre-commit can
 // gate on them. By default the script checks the changed .kt files; pass files via -PstyleCheckFiles
 // to scope it. Fails the build only on ERROR-tier findings (see the script header for the tiers).
+//
+// Also runs `detekt` across every module. detekt is wired into the heavy `check` lifecycle by default,
+// but the lightweight per-change gate developers actually run is `styleCheck` — so without this, detekt
+// violations only surface in a rarely-run full build and silently accumulate. Folding it in here keeps
+// detekt a first-class part of the fast gate (it is source-only / no type resolution, so it stays fast).
 tasks.register<Exec>("styleCheck") {
     group = "verification"
-    description = "Runs scripts/style-check.sh over changed Kotlin files (mechanical style rules)."
+    description = "Runs detekt (all modules) + scripts/style-check.sh over changed Kotlin files."
+
+    dependsOn(subprojects.map { "${it.path}:detekt" })
 
     val script = "${rootProject.projectDir}/scripts/style-check.sh"
     val extraFiles = (project.findProperty("styleCheckFiles") as String?)

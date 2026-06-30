@@ -1,0 +1,22 @@
+# The @typePolicy / @fieldPolicy directives moved out of Apollo core into the separately-versioned
+# normalized-cache library; this @link registers them so the schema parser and cache compiler plugin
+# recognise them.
+extend schema
+    @link(url: "https://specs.apollo.dev/cache/v0.4", import: ["@typePolicy", "@fieldPolicy"])
+
+# NOTE: This is required to ensure that each object is only cached once, based on the ID as identifier
+extend type user_books @typePolicy(keyFields: "id")
+extend type user_book_reads @typePolicy(keyFields: "id")
+extend type editions @typePolicy(keyFields: "id")
+
+# The live API exposes canonical_id on editions, but the current schema.graphqls
+# dump does not include it. Declared here so Apollo can generate the field.
+extend type editions {
+    canonical_id: Int
+}
+extend type books @typePolicy(keyFields: "id")
+extend type lists @typePolicy(keyFields: "id")
+extend type list_books @typePolicy(keyFields: "id")
+extend type users @typePolicy(keyFields: "id")
+extend type authors @typePolicy(keyFields: "id")
+extend type series @typePolicy(keyFields: "id")

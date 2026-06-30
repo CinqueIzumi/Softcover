@@ -8,6 +8,8 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
+# Kotlin Gradle plugin build artifacts (compiler sessions, error logs, metadata) — root-level dir
+.kotlin
 /build
 /buildSrc/build
 # Build outputs for every module (build-logic, :core:*, :feature:*, …)
@@ -44,5 +46,10 @@ output-metadata.json
 # Temp file for build system
 *.salive
 
+# Xcode (per-user state — never commit)
+xcuserdata/
+*.xcuserstate
+
 # Claude
 .claude/settings.local.json
+.claude/worktrees/

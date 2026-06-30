@@ -1,14 +1,18 @@
 plugins {
-    id("softcover.android.library")
+    id("softcover.kmp.library")
     id("softcover.android.apollo")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.core.network"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.core.network"
+    }
 
-dependencies {
-    implementation(project(":core:domain"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:domain"))
+        }
+    }
 }
 
 apollo {
@@ -16,7 +20,10 @@ apollo {
         packageName.set("nl.rhaydus.softcover")
         addTypename.set("always")
 
-        schemaFiles.from("src/main/graphql/schema.graphqls", "src/main/graphql/extra.graphqls")
+        schemaFiles.from(
+            "src/commonMain/graphql/schema.graphqls",
+            "src/commonMain/graphql/extra.graphqls",
+        )
 
         mapScalar("numeric", "kotlin.Double")
         mapScalar("float8", "kotlin.Double")
@@ -28,5 +35,12 @@ apollo {
 
         codegenModels.set("responseBased")
         generateMethods.set(listOf("dataClass"))
+
+        // Generates `nl.rhaydus.softcover.cache.Cache` (typePolicies / fieldPolicies) consumed by the
+        // separately-versioned normalized-cache library's key generator and field-policy resolver. The
+        // plugin appends `.cache` to this package argument, so the base is the service package.
+        plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin:${libs.versions.apolloCache.get()}") {
+            pluginArgument("com.apollographql.cache.packageName", "nl.rhaydus.softcover")
+        }
     }
 }

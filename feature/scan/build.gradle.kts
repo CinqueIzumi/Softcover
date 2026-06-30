@@ -1,20 +1,39 @@
 plugins {
-    id("softcover.android.library")
-    id("softcover.android.compose")
+    id("softcover.kmp.library")
+    id("softcover.kmp.compose")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.feature.scan"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.feature.scan"
+    }
 
-dependencies {
-    implementation(project(":core:domain"))
-    implementation(project(":core:book"))
-    implementation(project(":core:platform"))
-    implementation(project(":core:designsystem"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:domain"))
+            implementation(project(":core:book"))
+            implementation(project(":core:designsystem"))
 
-    implementation(libs.koin.compose)
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
+            implementation(libs.rhaydus.toad)
 
-    implementation(libs.voyager.navigator)
-    implementation(libs.voyager.koin)
+            implementation(libs.koin.compose.multiplatform)
+
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.koin)
+        }
+
+        androidMain.dependencies {
+            // CameraX + bundled ML Kit pipeline backing the Android BarcodeScanner actual.
+            implementation(libs.androidx.camera.core)
+            implementation(libs.androidx.camera.camera2)
+            implementation(libs.androidx.camera.lifecycle)
+            implementation(libs.androidx.camera.view)
+            implementation(libs.mlkit.barcode.scanning)
+
+            implementation(libs.androidx.lifecycle.runtime.compose)
+        }
+    }
 }

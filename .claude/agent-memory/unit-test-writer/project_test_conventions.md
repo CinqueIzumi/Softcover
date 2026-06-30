@@ -36,6 +36,6 @@ Canonical example tests (paths relative to the project root):
 
 **`UserBook.status` is `BookStatus`, not `UserBookStatus`:** When stubbing a book's status in tests, use `mockk<UserBook> { every { status } returns BookStatus.getFromCode(userBookStatus.code) }`. Import `nl.rhaydus.softcover.core.domain.model.enum.BookStatus`. The two enums have matching integer codes so the conversion is always safe.
 
-**Why:** CODE_STYLE_GUIDE.md and CLAUDE.md mandate these rules; violations cause style inconsistency across the codebase.
+**Why:** docs/reference/code-style.md and CLAUDE.md mandate these rules; violations cause style inconsistency across the codebase.
 
 **How to apply:** Every new test file in this project must follow these conventions exactly, regardless of test complexity.

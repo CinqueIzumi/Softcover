@@ -1,17 +1,30 @@
 plugins {
-    id("softcover.android.library")
-    id("softcover.android.compose")
+    id("softcover.kmp.library")
+    id("softcover.kmp.compose")
 }
 
-android {
-    namespace = "nl.rhaydus.softcover.feature.session"
-}
+kotlin {
+    androidLibrary {
+        namespace = "nl.rhaydus.softcover.feature.session"
+    }
 
-dependencies {
-    api(project(":core:designsystem"))
-    implementation(project(":core:platform"))
+    sourceSets {
+        commonMain.dependencies {
+            api(project(":core:designsystem"))
 
-    implementation(libs.koin.compose)
+            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.designsystemEditorial)
 
-    implementation(libs.voyager.navigator)
+            implementation(libs.koin.compose.multiplatform)
+
+            implementation(libs.voyager.navigator)
+        }
+
+        androidMain.dependencies {
+            implementation(project(":core:notification"))
+
+            implementation(libs.koin.android)
+        }
+    }
 }

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 pluginManagement {
     includeBuild("build-logic")
     repositories {
@@ -21,13 +23,26 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Softcover"
-include(":ktlint-rules")
+
+// Foundation inner-loop switch (see docs/rhaydus/0.2.0/CAPABILITIES.md "How a project consumes it"):
+// set `foundation.local=true` in local.properties to substitute the published nl.rhaydus coordinates
+// for a sibling `../rhaydus-foundation` checkout via an included build — no version bumps, instant
+// cross-repo edits. Off by default; the build resolves the published artifacts from mavenCentral.
+val foundationLocal = Properties().apply {
+    val localProperties = rootDir.resolve("local.properties")
+    if (localProperties.exists()) localProperties.inputStream().use { load(it) }
+}.getProperty("foundation.local").toBoolean()
+if (foundationLocal) {
+    includeBuild("../rhaydus-foundation")
+}
+
 include(":app")
+include(":desktopApp")
 include(":orchestration")
 include(":core:domain")
 include(":core:database")
 include(":core:network")
-include(":core:platform")
+include(":core:notification")
 include(":core:preferences")
 include(":core:identity")
 include(":core:book")
@@ -35,7 +50,6 @@ include(":core:lists")
 include(":core:deadlines")
 include(":core:personal")
 include(":core:profile")
-include(":core:library")
 include(":core:connectivity")
 include(":core:designsystem")
 include(":feature:lists")

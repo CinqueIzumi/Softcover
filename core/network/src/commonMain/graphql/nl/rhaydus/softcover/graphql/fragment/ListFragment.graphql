@@ -1,0 +1,21 @@
+fragment ListFragment on lists {
+    id
+    name
+    slug
+    ranked
+    updated_at
+
+    list_books_aggregate {
+        aggregate {
+            count
+
+            max {
+                updated_at
+            }
+        }
+    }
+
+    list_books {
+        ...ListBookFragment
+    }
+}
