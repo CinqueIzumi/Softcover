@@ -41,9 +41,6 @@ import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.designsystem.presentation.component.InlineErrorState
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSearchTopBar
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBarAction
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -83,19 +80,10 @@ internal actual fun ExploreScreenLayout(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             SoftcoverSearchTopBar(
-                onNavigateBack = null,
                 searchText = state.searchText,
-                onSearchValueChange = {
-                    runAction(OnQueryChangeAction(newQuery = it))
-                },
+                onSearchValueChange = { runAction(OnQueryChangeAction(newQuery = it)) },
+                onScanClick = onScanClick,
                 isLoading = state.isLoading,
-                trailingFieldAction = SoftcoverTopBarAction(
-                    iconResource = drawableIconResource(
-                        icon = SoftcoverIcon.BarcodeScanner,
-                        contentDescription = "Scan a book's barcode",
-                    ),
-                    onClick = onScanClick,
-                ),
             )
         },
     ) { padding ->

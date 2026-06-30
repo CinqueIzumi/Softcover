@@ -38,7 +38,7 @@ compose.desktop {
             // Desktop release version — the marketing version (mirrors Android versionName /
             // iOS MARKETING_VERSION). Kept in sync by the set-version-name / release skills. Desktop
             // has no separate build-number field, so versionCode has no desktop counterpart.
-            packageVersion = "3.0.0"
+            packageVersion = "3.0.1"
 
             // Required for KSafe's OS-backed key custody in a trimmed release distributable: the
             // native secret-store access needs sun.misc.Unsafe (jdk.unsupported); without these the
