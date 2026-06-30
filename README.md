@@ -127,6 +127,7 @@ These replace what was previously vendored in the app — the local TOAD runtime
 | Technology | Version | Purpose |
 |---|---|---|
 | [Voyager](https://voyager.adriel.cafe/) | 1.1.0-beta02 | Screen navigation and state holder models |
+| [Navigation Event](https://developer.android.com/jetpack/androidx/releases/navigationevent) | 1.0.1 | Multiplatform back-gesture handling (`NavigationBackHandler`, supersedes the deprecated CMP `BackHandler`) |
 | [Koin](https://insert-koin.io/docs/setup/koin/) | 3.5.3 | Dependency injection |
 | [Coroutines](https://github.com/Kotlin/kotlinx.coroutines) | 1.10.2 | Asynchronous and reactive flows |
 | [Coil](https://github.com/coil-kt/coil) | 3.2.0 | Multiplatform image loading (OkHttp fetcher on Android/desktop, Ktor on iOS) |
