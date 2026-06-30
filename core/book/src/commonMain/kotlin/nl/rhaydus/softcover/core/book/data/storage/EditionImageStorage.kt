@@ -5,8 +5,6 @@ import okio.Path
 import okio.Path.Companion.toPath
 
 internal interface EditionImageStorage {
-    fun exists(editionId: Int): Boolean
-
     fun write(
         editionId: Int,
         bytes: ByteArray,
@@ -31,8 +29,6 @@ internal class EditionImageStorageImpl(
     init {
         if (fileSystem.exists(imagesDir).not()) fileSystem.createDirectories(imagesDir)
     }
-
-    override fun exists(editionId: Int): Boolean = fileSystem.exists(fileFor(editionId))
 
     override fun write(
         editionId: Int,

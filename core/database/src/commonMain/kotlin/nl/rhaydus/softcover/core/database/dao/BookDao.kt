@@ -7,6 +7,7 @@ import androidx.room.RoomRawQuery
 import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
+import nl.rhaydus.softcover.core.database.mapper.planEditionCaching
 import nl.rhaydus.softcover.core.database.mapper.toBookAuthorRefs
 import nl.rhaydus.softcover.core.database.mapper.toEditionAuthorRefs
 import nl.rhaydus.softcover.core.database.mapper.toEntity
@@ -21,9 +22,10 @@ import nl.rhaydus.softcover.core.database.model.BookListWithBooks
 import nl.rhaydus.softcover.core.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
-import nl.rhaydus.softcover.core.database.model.EditionLocalImagePath
+import nl.rhaydus.softcover.core.database.model.EditionImageRef
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.ListBookFull
+import nl.rhaydus.softcover.core.database.model.ListSignatureRow
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
@@ -35,6 +37,11 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 
+// Room aggregates every book/edition/list/journal query onto one DAO, so the function count is
+// inherently high and keeps growing. Suppressed rather than gated — but this is a signal the DAO
+// should eventually be split into smaller, area-scoped DAOs (see docs/working/architecture-review.md,
+// DB2).
+@Suppress("TooManyFunctions")
 @Dao
 interface BookDao {
     // region Data fetchers
@@ -93,6 +100,9 @@ interface BookDao {
     @Transaction
     @Query("SELECT * FROM book_lists")
     fun observeBookLists(): Flow<List<BookListWithBooks>>
+
+    @Query("SELECT id, signature FROM book_lists")
+    suspend fun getCachedListSignatures(): List<ListSignatureRow>
 
     /**
      * Sorts user_books matching [statusCode] by the most recent
@@ -203,19 +213,20 @@ interface BookDao {
     @Query("SELECT * FROM authors WHERE name IN (:names)")
     suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
 
-    @Query("SELECT id, localImagePath FROM book_editions WHERE id IN (:editionIds)")
-    suspend fun getLocalImagePathsByEditionIds(editionIds: List<Int>): List<EditionLocalImagePath>
+    @Query("SELECT id, localImagePath, localImageUrl FROM book_editions WHERE id IN (:editionIds)")
+    suspend fun getEditionImageRefsByEditionIds(editionIds: List<Int>): List<EditionImageRef>
 
-    @Query("SELECT id, localImagePath FROM book_editions WHERE bookId = :bookId")
-    suspend fun getLocalImagePathsByBookId(bookId: Int): List<EditionLocalImagePath>
+    @Query("SELECT id, localImagePath, localImageUrl FROM book_editions WHERE bookId = :bookId")
+    suspend fun getEditionImageRefsByBookId(bookId: Int): List<EditionImageRef>
 
-    @Query("SELECT id, localImagePath FROM book_editions")
-    suspend fun getAllLocalImagePaths(): List<EditionLocalImagePath>
+    @Query("SELECT id, localImagePath, localImageUrl FROM book_editions")
+    suspend fun getAllEditionImageRefs(): List<EditionImageRef>
 
-    @Query("UPDATE book_editions SET localImagePath = :path WHERE id = :editionId")
-    suspend fun updateEditionLocalImagePath(
+    @Query("UPDATE book_editions SET localImagePath = :path, localImageUrl = :url WHERE id = :editionId")
+    suspend fun updateEditionLocalImage(
         editionId: Int,
         path: String?,
+        url: String?,
     )
 
     @Query("SELECT bookId FROM user_books WHERE id = :userBookId")
@@ -261,13 +272,19 @@ interface BookDao {
     ): ListBookFull?
     // endregion
     // region Data insertions
+    /**
+     * Returns the on-disk cover paths that were evicted because their edition's URL changed; the
+     * caller deletes those files after the transaction. See `EditionCachePlanner.kt`.
+     */
     @Transaction
-    suspend fun cacheBooks(books: List<Book>) {
-        books.forEach { cacheBook(it) }
-    }
+    suspend fun cacheBooks(books: List<Book>): List<String> = books.flatMap { cacheBook(it) }
 
+    /**
+     * Returns the on-disk cover paths that were evicted because their edition's URL changed; the
+     * caller deletes those files after the transaction. See `EditionCachePlanner.kt`.
+     */
     @Transaction
-    suspend fun cacheBook(book: Book) {
+    suspend fun cacheBook(book: Book): List<String> {
         book.bookSeries?.let { series ->
             insertBookSeries(bookSeries = series.toEntity())
         }
@@ -289,8 +306,12 @@ interface BookDao {
             }
         }
 
-        // Insert editions
-        insertEditions(toEntitiesPreservingLocalImagePath(editions = book.editions))
+        // Insert editions, evicting locally-cached covers whose URL changed
+        val editionPlan = planEditionCaching(
+            editions = book.editions,
+            existingRefs = getEditionImageRefsByEditionIds(editionIds = book.editions.map { it.id }),
+        )
+        insertEditions(editionPlan.entities)
 
         // Insert authors (deduplicated)
         val allAuthors = (book.authors + book.editions.flatMap { it.authors })
@@ -336,6 +357,8 @@ interface BookDao {
                 },
             )
         }
+
+        return editionPlan.stalePaths
     }
 
     @Transaction
@@ -395,29 +418,23 @@ interface BookDao {
         return books.filter { it.bookId in cachedBookIds && it.editionId in cachedEditionIds }
     }
 
-    suspend fun toEntitiesPreservingLocalImagePath(
-        editions: List<BookEdition>,
-    ): List<BookEditionEntity> {
+    /**
+     * Returns the on-disk cover paths that were evicted because their edition's URL changed; the
+     * caller deletes those files after the transaction. See `EditionCachePlanner.kt`.
+     */
+    @Transaction
+    suspend fun cacheEditions(editions: List<BookEdition>): List<String> {
         if (editions.isEmpty()) return emptyList()
 
-        val existing = getLocalImagePathsByEditionIds(editionIds = editions.map { it.id })
-            .associateBy { it.id }
-
-        return editions.map { edition ->
-            val preserved = edition.localImagePath ?: existing[edition.id]?.localImagePath
-            edition.toEntity().copy(localImagePath = preserved)
-        }
-    }
-
-    @Transaction
-    suspend fun cacheEditions(editions: List<BookEdition>) {
-        if (editions.isEmpty()) return
-
-        insertEditions(toEntitiesPreservingLocalImagePath(editions = editions))
+        val plan = planEditionCaching(
+            editions = editions,
+            existingRefs = getEditionImageRefsByEditionIds(editionIds = editions.map { it.id }),
+        )
+        insertEditions(plan.entities)
 
         val allAuthors = editions.flatMap { it.authors }.distinctBy { it.name }
 
-        if (allAuthors.isEmpty()) return
+        if (allAuthors.isEmpty()) return plan.stalePaths
 
         insertAuthors(allAuthors.map { it.toEntity() })
         val authorEntities = getAuthorsByName(allAuthors.map { it.name })
@@ -428,6 +445,8 @@ interface BookDao {
 
         val crossRefs = editions.flatMap { edition -> edition.toEditionAuthorRefs(authorIdsByName) }
         insertEditionAuthors(crossRefs)
+
+        return plan.stalePaths
     }
 
     @Upsert
@@ -499,6 +518,33 @@ interface BookDao {
 
     @Query("DELETE FROM edition_author_cross_ref")
     suspend fun deleteAllEditionAuthorCrossRefs()
+
+    @Query("DELETE FROM book_series")
+    suspend fun deleteAllBookSeries()
+
+    @Query("DELETE FROM book_deadlines")
+    suspend fun deleteAllBookDeadlines()
+
+    @Query("DELETE FROM pending_user_book_writes")
+    suspend fun deleteAllPendingUserBookWrites()
+
+    @Query("DELETE FROM pending_list_writes")
+    suspend fun deleteAllPendingListWrites()
+
+    @Query("DELETE FROM dismissed_continue_series_books")
+    suspend fun deleteAllDismissedContinueSeriesBooks()
+
+    @Query("DELETE FROM dismissed_continue_series")
+    suspend fun deleteAllDismissedContinueSeries()
+
+    @Query("DELETE FROM book_highlights")
+    suspend fun deleteAllHighlights()
+
+    @Query("DELETE FROM reading_sessions")
+    suspend fun deleteAllReadingSessions()
+
+    @Query("DELETE FROM reading_log_entries")
+    suspend fun deleteAllReadingLogEntries()
 
     @Query("DELETE FROM book_editions WHERE bookId = :bookId")
     suspend fun deleteEditions(bookId: Int)
@@ -644,8 +690,13 @@ interface BookDao {
         deleteBook(bookId)
     }
 
+    /**
+     * Clears **every** table this DAO's database owns — the full local-data wipe used by logout and
+     * account-switch. Cross-ref and child rows are deleted before their parents. Keep this exhaustive:
+     * a new `@Entity` added to `SoftcoverDatabase` must also be cleared here.
+     */
     @Transaction
-    suspend fun deleteAllUserBooksAndData() {
+    suspend fun deleteAllLocalData() {
         deleteAllListBooks()
         deleteAllUserBookReads()
         deleteAllReadingJournals()
@@ -653,12 +704,21 @@ interface BookDao {
         deleteAllEditionAuthorCrossRefs()
         deleteAllBookTagCrossRefs()
         deleteAllShelfManualOrder()
+        deleteAllDismissedContinueSeriesBooks()
+        deleteAllDismissedContinueSeries()
+        deleteAllBookDeadlines()
+        deleteAllPendingUserBookWrites()
+        deleteAllPendingListWrites()
+        deleteAllHighlights()
+        deleteAllReadingSessions()
+        deleteAllReadingLogEntries()
 
         deleteAllUserBooks()
         deleteAllBookEditions()
 
         deleteAllBooks()
         deleteAllBookLists()
+        deleteAllBookSeries()
         deleteAllAuthors()
         deleteAllTags()
     }

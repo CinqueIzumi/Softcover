@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.apollo) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.room) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.dependency.analysis)
@@ -143,6 +144,35 @@ fun tierOf(path: String): String? = when {
     else -> null
 }
 
+// api-visibility rule (MODULE_STRUCTURE_GUIDELINES §10). The tier check above proves an edge is
+// *allowed*; it does not constrain whether a data-area module is re-exported (`api`) or kept private
+// (`implementation`). An `api` edge to a data module transitively republishes that whole feature's
+// data/use-case layer to every downstream consumer — which is exactly how `:core:designsystem` became
+// a god-module. `implementation` is therefore the default for these; every `api(project(<data>))` edge
+// must be an explicit, reviewed entry below so a new one is a conscious decision, not a silent leak.
+val dataAreaModules = setOf(
+    ":core:book",
+    ":core:lists",
+    ":core:deadlines",
+    ":core:personal",
+    ":core:profile",
+    ":core:identity",
+    ":core:preferences",
+)
+
+// Allowlisted (source → data module) `api` edges: each genuinely renders/returns the data module's
+// types in its own public surface. Adding a row is the deliberate sign-off the rule exists to force.
+val allowedApiDataEdges = setOf(
+    ":core:designsystem" to ":core:book",
+    ":core:identity" to ":core:preferences",
+    ":core:profile" to ":core:identity",
+    ":feature:book_detail" to ":core:identity",
+    ":feature:explore" to ":core:book",
+    ":feature:explore" to ":core:identity",
+    ":feature:lists" to ":core:lists",
+    ":feature:settings" to ":core:preferences",
+)
+
 // dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
 // unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
 // staying out of the way of the convention-plugin design: the uniform runtime + test bundle provided
@@ -179,7 +209,7 @@ dependencyAnalysis {
                     "org.jetbrains.compose.foundation:foundation",
                     "org.jetbrains.compose.animation:animation",
                     "org.jetbrains.compose.ui:ui",
-                    "org.jetbrains.compose.ui:ui-backhandler",
+                    "org.jetbrains.androidx.navigationevent:navigationevent-compose",
                     "org.jetbrains.compose.components:components-ui-tooling-preview",
                     "org.jetbrains.compose.material3:material3",
                     // Compose Multiplatform auto-injects a `jvmDev` source set (Compose Hot Reload) plus the
@@ -266,13 +296,32 @@ tasks.register("checkModuleGraph") {
                             violations += "${module.path} → ${dependency.path}  " +
                                 "($fromTier may depend only on $allowed)"
                         }
+
+                        // api-visibility rule: a declared `api` edge to a data-area module must be
+                        // allowlisted above. Match every declarable api bucket — plain `api`
+                        // (android-only modules) and the KMP/variant `<sourceSet>Api` configs
+                        // (`commonMainApi`, `androidMainApi`, `debugApi`, …) — but never the test ones,
+                        // where an api edge can't leak into a production consumer's graph.
+                        val isApiEdge = configuration.name.endsWith("api", ignoreCase = true) &&
+                            configuration.name.contains("test", ignoreCase = true).not()
+
+                        if (
+                            isApiEdge &&
+                            dependency.path in dataAreaModules &&
+                            (module.path to dependency.path) !in allowedApiDataEdges
+                        ) {
+                            violations += "${module.path} → api(${dependency.path})  " +
+                                "(data modules must be implementation-depended unless allowlisted — " +
+                                "MODULE_STRUCTURE_GUIDELINES §10)"
+                        }
                     }
             }
         }
 
         if (violations.isNotEmpty()) {
             throw GradleException(
-                "Illegal module dependencies (see MODULE_STRUCTURE_GUIDELINES §2):\n" +
+                "Illegal module dependencies (see MODULE_STRUCTURE_GUIDELINES §2 tiers / §10 " +
+                    "api-visibility):\n" +
                     violations.distinct().sorted().joinToString("\n") { "  - $it" },
             )
         }
@@ -284,9 +333,16 @@ tasks.register("checkModuleGraph") {
 // Runs the deterministic mechanical-style checks (scripts/style-check.sh) so CI / pre-commit can
 // gate on them. By default the script checks the changed .kt files; pass files via -PstyleCheckFiles
 // to scope it. Fails the build only on ERROR-tier findings (see the script header for the tiers).
+//
+// Also runs `detekt` across every module. detekt is wired into the heavy `check` lifecycle by default,
+// but the lightweight per-change gate developers actually run is `styleCheck` — so without this, detekt
+// violations only surface in a rarely-run full build and silently accumulate. Folding it in here keeps
+// detekt a first-class part of the fast gate (it is source-only / no type resolution, so it stays fast).
 tasks.register<Exec>("styleCheck") {
     group = "verification"
-    description = "Runs scripts/style-check.sh over changed Kotlin files (mechanical style rules)."
+    description = "Runs detekt (all modules) + scripts/style-check.sh over changed Kotlin files."
+
+    dependsOn(subprojects.map { "${it.path}:detekt" })
 
     val script = "${rootProject.projectDir}/scripts/style-check.sh"
     val extraFiles = (project.findProperty("styleCheckFiles") as String?)

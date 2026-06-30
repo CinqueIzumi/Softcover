@@ -1096,6 +1096,7 @@ class BookEntityMapperTest {
             result.pages shouldBe 300
             result.releaseYear shouldBe 2020
             result.format shouldBe "Paperback"
+            result.localImageUrl shouldBe null
         }
 
         @Test

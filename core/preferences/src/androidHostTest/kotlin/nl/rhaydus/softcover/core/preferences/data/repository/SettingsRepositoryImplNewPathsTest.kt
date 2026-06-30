@@ -152,4 +152,18 @@ class SettingsRepositoryImplNewPathsTest {
             }
         }
     }
+
+    @Nested
+    inner class ResetAllSettings {
+        @Test
+        fun `delegates to local data source`() = runTest {
+            // ----- Arrange -----
+
+            // ----- Act -----
+            repository.resetAllSettings()
+
+            // ----- Assert -----
+            coVerify { settingsLocalDataSource.resetAllSettings() }
+        }
+    }
 }

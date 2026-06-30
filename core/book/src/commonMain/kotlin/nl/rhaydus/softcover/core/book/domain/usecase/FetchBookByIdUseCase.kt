@@ -4,11 +4,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 class FetchBookByIdUseCase(
     private val booksRepository: BooksRepository,
 ) {
-    suspend operator fun invoke(id: Int): Result<Book> = runCatching {
+    suspend operator fun invoke(id: Int): Result<Book> = runCatchingLogged {
         coroutineScope {
             val bookDeferred = async { booksRepository.fetchBookById(id = id) }
             val editionsDeferred = async { booksRepository.getEditionsByBookId(bookId = id) }

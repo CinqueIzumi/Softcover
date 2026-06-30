@@ -2,9 +2,11 @@ package nl.rhaydus.softcover.core.network.cache
 
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.Executable
-import com.apollographql.apollo.cache.normalized.api.CacheKey
-import com.apollographql.apollo.cache.normalized.api.CacheResolver
-import com.apollographql.apollo.cache.normalized.api.FieldPolicyCacheResolver
+import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.CacheResolver
+import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
+import com.apollographql.cache.normalized.api.ResolverContext
+import nl.rhaydus.softcover.cache.Cache
 
 // Redirects Hasura-style root list queries filtered by primary key to the
 // normalized cache entries written by other queries. Without this, fetching a
@@ -16,7 +18,9 @@ import com.apollographql.apollo.cache.normalized.api.FieldPolicyCacheResolver
 // by foreign key (e.g. editions.where.book_id) can return partial lists, so
 // they fall through to the default resolver and incur a network call.
 internal object SoftcoverCacheResolver : CacheResolver {
-    private const val ROOT_QUERY = "QUERY_ROOT"
+    // Field-policy-aware fallthrough resolver (the generated @fieldPolicy directives, plus the default
+    // parent-map lookup for everything else) — the new-library equivalent of the old singleton.
+    private val fallthrough = FieldPolicyCacheResolver(fieldPolicies = Cache.fieldPolicies)
 
     private val redirectableFields = setOf(
         "books",
@@ -30,25 +34,15 @@ internal object SoftcoverCacheResolver : CacheResolver {
         "series",
     )
 
-    override fun resolveField(
-        field: CompiledField,
-        variables: Executable.Variables,
-        parent: Map<String, Any?>,
-        parentId: String,
-    ): Any? {
-        if (parentId == ROOT_QUERY && field.name in redirectableFields) {
+    override fun resolveField(context: ResolverContext): Any? {
+        if (context.parentKey == CacheKey.QUERY_ROOT && context.field.name in redirectableFields) {
             resolveById(
-                field = field,
-                variables = variables,
+                field = context.field,
+                variables = context.variables,
             )?.let { return it }
         }
 
-        return FieldPolicyCacheResolver.resolveField(
-            field = field,
-            variables = variables,
-            parent = parent,
-            parentId = parentId,
-        )
+        return fallthrough.resolveField(context)
     }
 
     private fun resolveById(

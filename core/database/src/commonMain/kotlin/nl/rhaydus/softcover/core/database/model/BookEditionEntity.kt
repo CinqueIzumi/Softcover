@@ -14,6 +14,7 @@ data class BookEditionEntity(
     val title: String?,
     val url: String?,
     val localImagePath: String?,
+    val localImageUrl: String? = null,
     val isbn10: String?,
     val isbn13: String?,
     val pages: Int?,

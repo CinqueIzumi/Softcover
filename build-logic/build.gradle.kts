@@ -14,6 +14,7 @@ dependencies {
     compileOnly(libs.compose.multiplatform.gradlePlugin)
     compileOnly(libs.apollo.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
+    compileOnly(libs.room.gradlePlugin)
 }
 
 gradlePlugin {

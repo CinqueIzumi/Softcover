@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
@@ -1011,6 +1012,248 @@ class SettingsLocalDataSourceImplTest {
             // ----- Assert -----
             capturedResult?.userId shouldBe 77
             capturedResult?.enabledStatusCodes shouldBe setOf(1, 3)
+        }
+    }
+
+    @Nested
+    inner class ResetAllSettings {
+        @Test
+        fun `calls updateData on the data store`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(userId = 42)
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                updater(existingEntity)
+            }
+
+            // ----- Act -----
+            dataSource.resetAllSettings()
+
+            // ----- Assert -----
+            coVerify { dataStore.updateData(any()) }
+        }
+
+        @Test
+        fun `update lambda returns a fresh AppSettingsEntity with default userId`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(userId = 42)
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.resetAllSettings()
+
+            // ----- Assert -----
+            capturedResult?.userId shouldBe -1
+        }
+
+        @Test
+        fun `update lambda discards all non-default entity state`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                userId = 99,
+                dateStyle = DateStyle.YEAR_MONTH_DAY,
+                libraryGridLayout = LibraryGridLayout.LIST_LARGE,
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.resetAllSettings()
+
+            // ----- Assert -----
+            capturedResult shouldBe AppSettingsEntity()
+        }
+    }
+
+    @Nested
+    inner class LastUsedProgressUnitFlow {
+        @Test
+        fun `emits the default PAGE value when entity has not been changed`() = runTest {
+            // ----- Arrange -----
+            val entity = AppSettingsEntity(lastUsedProgressUnit = ProgressUnit.PAGE)
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            val freshDataSource =
+                SettingsLocalDataSourceImpl(
+                    appSettingsDataStore = AppSettingsDataStore(
+                        store = dataStore,
+                    ),
+                    apiKeyLocalDataSource = apiKeyLocalDataSource,
+                )
+
+            // ----- Act & Assert -----
+            freshDataSource.lastUsedProgressUnit.test {
+                awaitItem() shouldBe ProgressUnit.PAGE
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits TIME when the entity carries TIME`() = runTest {
+            // ----- Arrange -----
+            val entity = AppSettingsEntity(lastUsedProgressUnit = ProgressUnit.TIME)
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            val freshDataSource =
+                SettingsLocalDataSourceImpl(
+                    appSettingsDataStore = AppSettingsDataStore(
+                        store = dataStore,
+                    ),
+                    apiKeyLocalDataSource = apiKeyLocalDataSource,
+                )
+
+            // ----- Act & Assert -----
+            freshDataSource.lastUsedProgressUnit.test {
+                awaitItem() shouldBe ProgressUnit.TIME
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits PERCENTAGE when the entity carries PERCENTAGE`() = runTest {
+            // ----- Arrange -----
+            val entity = AppSettingsEntity(lastUsedProgressUnit = ProgressUnit.PERCENTAGE)
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            val freshDataSource =
+                SettingsLocalDataSourceImpl(
+                    appSettingsDataStore = AppSettingsDataStore(
+                        store = dataStore,
+                    ),
+                    apiKeyLocalDataSource = apiKeyLocalDataSource,
+                )
+
+            // ----- Act & Assert -----
+            freshDataSource.lastUsedProgressUnit.test {
+                awaitItem() shouldBe ProgressUnit.PERCENTAGE
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `deduplicates identical consecutive lastUsedProgressUnit values`() = runTest {
+            // ----- Arrange -----
+            val entity1 = AppSettingsEntity(lastUsedProgressUnit = ProgressUnit.PAGE)
+            val entity2 = AppSettingsEntity(lastUsedProgressUnit = ProgressUnit.PAGE)
+
+            every {
+                dataStore.data
+            } returns flowOf(
+                entity1,
+                entity2,
+            )
+
+            val freshDataSource =
+                SettingsLocalDataSourceImpl(
+                    appSettingsDataStore = AppSettingsDataStore(
+                        store = dataStore,
+                    ),
+                    apiKeyLocalDataSource = apiKeyLocalDataSource,
+                )
+
+            // ----- Act & Assert -----
+            freshDataSource.lastUsedProgressUnit.test {
+                awaitItem() shouldBe ProgressUnit.PAGE
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class SetLastUsedProgressUnit {
+        @Test
+        fun `update lambda sets lastUsedProgressUnit to TIME`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(lastUsedProgressUnit = ProgressUnit.PAGE)
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setLastUsedProgressUnit(unit = ProgressUnit.TIME)
+
+            // ----- Assert -----
+            capturedResult?.lastUsedProgressUnit shouldBe ProgressUnit.TIME
+        }
+
+        @Test
+        fun `update lambda sets lastUsedProgressUnit to PERCENTAGE`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(lastUsedProgressUnit = ProgressUnit.PAGE)
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setLastUsedProgressUnit(unit = ProgressUnit.PERCENTAGE)
+
+            // ----- Assert -----
+            capturedResult?.lastUsedProgressUnit shouldBe ProgressUnit.PERCENTAGE
+        }
+
+        @Test
+        fun `update lambda preserves other entity fields when updating lastUsedProgressUnit`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = AppSettingsEntity(
+                userId = 77,
+                dateStyle = DateStyle.MONTH_DAY_YEAR,
+                lastUsedProgressUnit = ProgressUnit.PAGE,
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                capturedResult = updater(existingEntity)
+                capturedResult!!
+            }
+
+            // ----- Act -----
+            dataSource.setLastUsedProgressUnit(unit = ProgressUnit.TIME)
+
+            // ----- Assert -----
+            capturedResult?.userId shouldBe 77
+            capturedResult?.dateStyle shouldBe DateStyle.MONTH_DAY_YEAR
         }
     }
 

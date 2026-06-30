@@ -33,12 +33,14 @@ class ListEntityMapperTest {
         slug: String = "my-list",
         ranked: Boolean = false,
         books: List<ListBook> = emptyList(),
+        signature: String? = null,
     ): BookList = mockk {
         every { this@mockk.id } returns id
         every { this@mockk.name } returns name
         every { this@mockk.slug } returns slug
         every { this@mockk.ranked } returns ranked
         every { this@mockk.books } returns books
+        every { this@mockk.signature } returns signature
     }
 
     private fun stubListBook(
@@ -229,11 +231,13 @@ class ListEntityMapperTest {
         name: String = "My List",
         slug: String = "my-list",
         ranked: Boolean = false,
+        signature: String? = null,
     ): BookListEntity = BookListEntity(
         id = id,
         name = name,
         slug = slug,
         ranked = ranked,
+        signature = signature,
     )
 
     private fun stubBookListWithBooks(
@@ -290,6 +294,30 @@ class ListEntityMapperTest {
 
             // ----- Assert -----
             result.ranked shouldBe false
+        }
+
+        @Test
+        fun `carries non-null signature through to entity`() {
+            // ----- Arrange -----
+            val bookList = stubBookList(signature = "abc123")
+
+            // ----- Act -----
+            val result = bookList.toEntity()
+
+            // ----- Assert -----
+            result.signature shouldBe "abc123"
+        }
+
+        @Test
+        fun `carries null signature through to entity`() {
+            // ----- Arrange -----
+            val bookList = stubBookList(signature = null)
+
+            // ----- Act -----
+            val result = bookList.toEntity()
+
+            // ----- Assert -----
+            result.signature shouldBe null
         }
     }
 
@@ -1168,6 +1196,32 @@ class ListEntityMapperTest {
 
             // ----- Assert -----
             result.ranked shouldBe false
+        }
+
+        @Test
+        fun `reads non-null signature from BookListEntity into model`() {
+            // ----- Arrange -----
+            val bookListEntity = stubBookListEntity(signature = "sig-xyz")
+            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.signature shouldBe "sig-xyz"
+        }
+
+        @Test
+        fun `reads null signature from BookListEntity into model`() {
+            // ----- Arrange -----
+            val bookListEntity = stubBookListEntity(signature = null)
+            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.signature shouldBe null
         }
     }
 }

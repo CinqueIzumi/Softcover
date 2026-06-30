@@ -13,4 +13,4 @@ TOAD: each screen has UiState (StateFlow), UiAction (sealed, execute()), UiEvent
 Layer structure per feature: domain/ → data/ → presentation/ → di/. Presentation depends on domain only.
 
 **Why:** Reference architecture for all feature additions and layer-placement decisions.
-**How to apply:** Check ARCHITECTURE.md before adding new features or reviewing DI/navigation code.
+**How to apply:** Check docs/reference/architecture.md before adding new features or reviewing DI/navigation code.

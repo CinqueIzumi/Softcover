@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.CreateListMutation
 import nl.rhaydus.softcover.CreateListMutation.Data.Insert_list.List.Companion.listFragment as createListListFragment
 import nl.rhaydus.softcover.GetUserBookListsQuery
 import nl.rhaydus.softcover.GetUserBookListsQuery.Data.Me.List.Companion.listFragment as userListsListFragment
+import nl.rhaydus.softcover.GetUserListSignaturesQuery
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
 import nl.rhaydus.softcover.RemoveListBookMutation
 import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Companion.listFragment as removeListBookListFragment
@@ -30,6 +31,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.lists.data.mapper.buildListSignature
 import nl.rhaydus.softcover.core.lists.data.mapper.toBookList
 import nl.rhaydus.softcover.core.lists.data.mapper.toListBook
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
@@ -85,6 +87,126 @@ class ListsRemoteDataSourceImplTest {
         every {
             this@mockk.listBookId
         } returns listBookId
+    }
+
+    // ----- FetchListSignatures -----
+
+    @Nested
+    inner class FetchListSignatures {
+        @Test
+        fun `maps each list to a ListSignature with correct signature string`() = runTest {
+            // ----- Arrange -----
+            val userId = 1
+            val updatedAt = "2024-01-10"
+            val maxBookUpdatedAt = "2024-01-09"
+            val count = 3
+            val queryData = mockk<GetUserListSignaturesQuery.Data>()
+            val meEntry = mockk<GetUserListSignaturesQuery.Data.Me>()
+            val listEntry = mockk<GetUserListSignaturesQuery.Data.Me.List>()
+            val aggregate = mockk<GetUserListSignaturesQuery.Data.Me.List.List_books_aggregate>()
+            val aggregateInner = mockk<GetUserListSignaturesQuery.Data.Me.List.List_books_aggregate.Aggregate>()
+            val max = mockk<GetUserListSignaturesQuery.Data.Me.List.List_books_aggregate.Aggregate.Max>()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetUserListSignaturesQuery>())
+            } returns queryData
+
+            every { queryData.me } returns listOf(meEntry)
+            every { meEntry.lists } returns listOf(listEntry)
+            every { listEntry.id } returns 42
+            every { listEntry.updated_at } returns updatedAt
+            every { listEntry.list_books_aggregate } returns aggregate
+            every { aggregate.aggregate } returns aggregateInner
+            every { aggregateInner.count } returns count
+            every { aggregateInner.max } returns max
+            every { max.updated_at } returns maxBookUpdatedAt
+
+            // ----- Act -----
+            val result = dataSource.fetchListSignatures()
+
+            // ----- Assert -----
+            result.size shouldBe 1
+            result[0].listId shouldBe 42
+            result[0].signature shouldBe buildListSignature(
+                updatedAt = updatedAt,
+                count = count,
+                maxListBookUpdatedAt = maxBookUpdatedAt,
+            )
+        }
+
+        @Test
+        fun `signature uses empty strings for null updatedAt and null maxListBookUpdatedAt`() = runTest {
+            // ----- Arrange -----
+            val userId = 2
+            val queryData = mockk<GetUserListSignaturesQuery.Data>()
+            val meEntry = mockk<GetUserListSignaturesQuery.Data.Me>()
+            val listEntry = mockk<GetUserListSignaturesQuery.Data.Me.List>()
+            val aggregate = mockk<GetUserListSignaturesQuery.Data.Me.List.List_books_aggregate>()
+            val aggregateInner = mockk<GetUserListSignaturesQuery.Data.Me.List.List_books_aggregate.Aggregate>()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetUserListSignaturesQuery>())
+            } returns queryData
+
+            every { queryData.me } returns listOf(meEntry)
+            every { meEntry.lists } returns listOf(listEntry)
+            every { listEntry.id } returns 7
+            every { listEntry.updated_at } returns null
+            every { listEntry.list_books_aggregate } returns aggregate
+            every { aggregate.aggregate } returns aggregateInner
+            every { aggregateInner.count } returns 5
+            every { aggregateInner.max } returns null
+
+            // ----- Act -----
+            val result = dataSource.fetchListSignatures()
+
+            // ----- Assert -----
+            result[0].signature shouldBe "|5|"
+        }
+
+        @Test
+        fun `uses count 0 when aggregate is null`() = runTest {
+            // ----- Arrange -----
+            val userId = 3
+            val queryData = mockk<GetUserListSignaturesQuery.Data>()
+            val meEntry = mockk<GetUserListSignaturesQuery.Data.Me>()
+            val listEntry = mockk<GetUserListSignaturesQuery.Data.Me.List>()
+            val aggregate = mockk<GetUserListSignaturesQuery.Data.Me.List.List_books_aggregate>()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetUserListSignaturesQuery>())
+            } returns queryData
+
+            every { queryData.me } returns listOf(meEntry)
+            every { meEntry.lists } returns listOf(listEntry)
+            every { listEntry.id } returns 9
+            every { listEntry.updated_at } returns "2024-02-01"
+            every { listEntry.list_books_aggregate } returns aggregate
+            every { aggregate.aggregate } returns null
+
+            // ----- Act -----
+            val result = dataSource.fetchListSignatures()
+
+            // ----- Assert -----
+            result[0].signature shouldBe "2024-02-01|0|"
+        }
+
+        @Test
+        fun `throws when me list is empty`() = runTest {
+            // ----- Arrange -----
+            val queryData = mockk<GetUserListSignaturesQuery.Data>()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetUserListSignaturesQuery>())
+            } returns queryData
+
+            every { queryData.me } returns emptyList()
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.fetchListSignatures()
+            }
+        }
     }
 
     // ----- FetchUserLists -----

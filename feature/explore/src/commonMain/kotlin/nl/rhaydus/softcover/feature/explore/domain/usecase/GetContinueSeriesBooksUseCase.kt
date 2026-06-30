@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.mapLatest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.feature.explore.domain.model.SeriesContinuationSeed
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
@@ -72,7 +73,7 @@ class GetContinueSeriesBooksUseCase(
         seeds
             .map { seed ->
                 async {
-                    runCatching {
+                    runCatchingLogged {
                         exploreRepository.fetchNextInSeries(
                             seriesId = seed.seriesId,
                             afterPosition = seed.afterPosition,

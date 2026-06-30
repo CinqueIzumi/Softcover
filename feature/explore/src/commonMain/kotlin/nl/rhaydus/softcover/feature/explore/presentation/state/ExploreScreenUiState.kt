@@ -13,4 +13,5 @@ internal data class ExploreScreenUiState(
     val searchText: String = "",
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
+    val searchError: String? = null,
 ) : UiState

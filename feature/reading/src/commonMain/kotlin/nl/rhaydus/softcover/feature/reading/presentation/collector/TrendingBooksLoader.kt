@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -16,8 +16,6 @@ internal class TrendingBooksLoader : ReadingCollector {
             .onSuccess { books ->
                 scope.setState { it.copy(trendingBooks = books) }
             }
-            .onFailure {
-                AppLog.e("$it")
-            }
+            .onApiFailure()
     }
 }

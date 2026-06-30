@@ -6,9 +6,9 @@ import org.koin.core.Koin
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
-import nl.rhaydus.softcover.core.connectivity.data.sync.PendingListWriteSyncer
-import nl.rhaydus.softcover.core.connectivity.data.sync.PendingUserBookWriteSyncer
+import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
 
@@ -38,8 +38,8 @@ fun startAppServices(koin: Koin) {
     NetworkAvailability.install(koin.get())
 
     val appScope = koin.get<ApplicationScope>().scope
-    koin.get<PendingUserBookWriteSyncer>().start(appScope)
-    koin.get<PendingListWriteSyncer>().start(appScope)
+    koin.get<UserBookWriteDrainer>().start(appScope)
+    koin.get<ListWriteDrainer>().start(appScope)
 
     appScope.launch {
         runCatching { koin.get<GetUserIdAsFlowUseCase>().invoke().first() }

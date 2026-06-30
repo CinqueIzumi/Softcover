@@ -10,28 +10,25 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
-import kotlin.concurrent.Volatile
 
 internal class AuthInterceptor(
     private val authTokenProvider: AuthTokenProvider,
 ) : ApolloInterceptor {
-    @Volatile
-    private var cachedToken: String? = null
-
     override fun <D : Operation.Data> intercept(
         request: ApolloRequest<D>,
         chain: ApolloInterceptorChain,
     ): Flow<ApolloResponse<D>> = flow {
-        if (cachedToken == null) {
-            cachedToken = authTokenProvider.apiKey.firstOrNull()?.ifBlank { null }
-        }
+        // Read the token fresh on every request: it is backed by an in-memory StateFlow, so this is
+        // cheap, and it ensures a token change (re-auth) or clear (logout) takes effect immediately
+        // rather than persisting a stale token until the next process restart.
+        val token = authTokenProvider.apiKey.firstOrNull()?.ifBlank { null }
 
-        val updatedRequest = if (cachedToken != null) {
+        val updatedRequest = if (token != null) {
             request
                 .newBuilder()
                 .addHttpHeader(
                     "Authorization",
-                    "Bearer $cachedToken",
+                    "Bearer $token",
                 )
                 .build()
         } else {

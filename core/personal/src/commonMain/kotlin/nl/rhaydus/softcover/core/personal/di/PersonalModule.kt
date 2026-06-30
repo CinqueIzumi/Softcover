@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.personal.di
 
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
+import nl.rhaydus.softcover.core.database.di.databaseModule
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSourceImpl
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
@@ -34,6 +36,11 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.UpdateReadingLogEntryUs
 import org.koin.dsl.module
 
 val personalModule = module {
+    includes(
+        dispatcherModule,
+        databaseModule,
+    )
+
     single { get<SoftcoverDatabase>().highlightDao() }
     single { get<SoftcoverDatabase>().readingSessionDao() }
     single { get<SoftcoverDatabase>().readingLogDao() }

@@ -68,7 +68,7 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 40,
+    version = 43,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -94,45 +94,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             queryContext: CoroutineContext,
         ): SoftcoverDatabase =
             builder
-                .addMigrations(
-                    MIGRATION_3_4,
-                    MIGRATION_4_5,
-                    MIGRATION_5_6,
-                    MIGRATION_6_7,
-                    MIGRATION_7_8,
-                    MIGRATION_8_9,
-                    MIGRATION_9_10,
-                    MIGRATION_10_11,
-                    MIGRATION_11_12,
-                    MIGRATION_12_13,
-                    MIGRATION_13_14,
-                    MIGRATION_14_15,
-                    MIGRATION_15_16,
-                    MIGRATION_16_17,
-                    MIGRATION_17_18,
-                    MIGRATION_18_19,
-                    MIGRATION_19_20,
-                    MIGRATION_20_21,
-                    MIGRATION_21_22,
-                    MIGRATION_22_23,
-                    MIGRATION_23_24,
-                    MIGRATION_24_25,
-                    MIGRATION_25_26,
-                    MIGRATION_26_27,
-                    MIGRATION_27_28,
-                    MIGRATION_28_29,
-                    MIGRATION_29_30,
-                    MIGRATION_30_31,
-                    MIGRATION_31_32,
-                    MIGRATION_32_33,
-                    MIGRATION_33_34,
-                    MIGRATION_34_35,
-                    MIGRATION_35_36,
-                    MIGRATION_36_37,
-                    MIGRATION_37_38,
-                    MIGRATION_38_39,
-                    MIGRATION_39_40,
-                )
+                .addMigrations(migrations = ALL_MIGRATIONS.toTypedArray())
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(queryContext)
                 .fallbackToDestructiveMigration(dropAllTables = true)
@@ -1123,6 +1085,67 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // Lists gain a cached freshness `signature` (updated_at + list_books count + max list_book
+        // updated_at) so a full refresh can skip re-fetching a list's contents when nothing changed.
+        // ADD COLUMN is safe on SQLite < 3.35 (minSdk 26); existing rows default to NULL, which forces
+        // one re-fetch per list on the first refresh after upgrade.
+        private val MIGRATION_40_41 = object : Migration(40, 41) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_lists ADD COLUMN signature TEXT DEFAULT NULL")
+            }
+        }
+
+        // Editions gain `localImageUrl` — the URL a locally-persisted cover file was downloaded from
+        // — so a refresh can detect when the cover URL changed and evict the stale local file (covers
+        // weren't updating on refresh). ADD COLUMN is safe on SQLite < 3.35 (minSdk 26); the view
+        // selects edition.*, so it is dropped and recreated. Existing rows default to NULL, which is
+        // treated as unknown provenance: any already-cached cover is re-fetched on the next refresh.
+        private val MIGRATION_41_42 = object : Migration(41, 42) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_editions ADD COLUMN localImageUrl TEXT DEFAULT NULL")
+
+                connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+                connection.execSQL(
+                    """
+                        CREATE VIEW `book_edition_view` AS SELECT
+                                edition.*,
+                                EXISTS(
+                                    SELECT 1
+                                    FROM list_books lb
+                                    JOIN book_lists bl ON bl.id = lb.listId
+                                    WHERE bl.slug = 'owned'
+                                    AND (
+                                        lb.editionId = edition.id
+                                        OR lb.editionId = edition.canonicalId
+                                        OR lb.editionId IN (
+                                            SELECT sub.id FROM book_editions sub
+                                            WHERE sub.canonicalId = edition.id
+                                        )
+                                    )
+                                ) AS isOwned
+                            FROM book_editions edition
+                    """.trimIndent(),
+                )
+            }
+        }
+
+        private val MIGRATION_42_43 = object : Migration(42, 43) {
+            override fun migrate(connection: SQLiteConnection) {
+                // Index the authorId foreign side of both author junction tables so Room resolves the
+                // author relationship via the index instead of a full table scan. Names match Room's
+                // generated `index_<table>_authorId` so the migrated schema validates against 43.json.
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_book_author_cross_ref_authorId " +
+                        "ON book_author_cross_ref(authorId)",
+                )
+
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_edition_author_cross_ref_authorId " +
+                        "ON edition_author_cross_ref(authorId)",
+                )
+            }
+        }
+
         private val MIGRATION_29_30 = object : Migration(29, 30) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL(
@@ -1198,5 +1221,51 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 connection.execSQL("CREATE INDEX IF NOT EXISTS index_book_tag_cross_ref_tagId ON book_tag_cross_ref(tagId)")
             }
         }
+
+        // The single source of truth for the migration set, consumed by [build] and by migration
+        // tests. Declared after every MIGRATION_* val so all are initialised before this references
+        // them. Room selects the applicable path by version, so order here is for readability only.
+        internal val ALL_MIGRATIONS: List<Migration> = listOf(
+            MIGRATION_3_4,
+            MIGRATION_4_5,
+            MIGRATION_5_6,
+            MIGRATION_6_7,
+            MIGRATION_7_8,
+            MIGRATION_8_9,
+            MIGRATION_9_10,
+            MIGRATION_10_11,
+            MIGRATION_11_12,
+            MIGRATION_12_13,
+            MIGRATION_13_14,
+            MIGRATION_14_15,
+            MIGRATION_15_16,
+            MIGRATION_16_17,
+            MIGRATION_17_18,
+            MIGRATION_18_19,
+            MIGRATION_19_20,
+            MIGRATION_20_21,
+            MIGRATION_21_22,
+            MIGRATION_22_23,
+            MIGRATION_23_24,
+            MIGRATION_24_25,
+            MIGRATION_25_26,
+            MIGRATION_26_27,
+            MIGRATION_27_28,
+            MIGRATION_28_29,
+            MIGRATION_29_30,
+            MIGRATION_30_31,
+            MIGRATION_31_32,
+            MIGRATION_32_33,
+            MIGRATION_33_34,
+            MIGRATION_34_35,
+            MIGRATION_35_36,
+            MIGRATION_36_37,
+            MIGRATION_37_38,
+            MIGRATION_38_39,
+            MIGRATION_39_40,
+            MIGRATION_40_41,
+            MIGRATION_41_42,
+            MIGRATION_42_43,
+        )
     }
 }

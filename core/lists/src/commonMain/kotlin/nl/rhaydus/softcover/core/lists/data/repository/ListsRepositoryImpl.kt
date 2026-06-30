@@ -19,6 +19,8 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
+import nl.rhaydus.softcover.core.lists.domain.model.ListSignature
+import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 
 internal class ListsRepositoryImpl(
@@ -50,6 +52,34 @@ internal class ListsRepositoryImpl(
         listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
 
         return created
+    }
+
+    override suspend fun refreshUserLists(userId: Int): ListsRefreshResult {
+        listWriteDrainer.drainPendingWrites()
+
+        val signatures: List<ListSignature> = listsRemoteDataSource.fetchListSignatures()
+        val serverListIds: Set<Int> = signatures.map { it.listId }.toSet()
+
+        val cachedSignatures: Map<Int, String?> = listsLocalDataSource.getCachedListSignatures()
+
+        val staleIds: Set<Int> = signatures
+            .filter { cachedSignatures[it.listId] != it.signature }
+            .map { it.listId }
+            .toSet()
+
+        val changedLists: List<BookList> = if (staleIds.isEmpty()) {
+            emptyList()
+        } else {
+            listsRemoteDataSource.fetchUserLists(
+                userId = userId,
+                listIds = staleIds,
+            )
+        }
+
+        return ListsRefreshResult(
+            serverListIds = serverListIds,
+            changedLists = changedLists,
+        )
     }
 
     override suspend fun fetchUserLists(

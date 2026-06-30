@@ -125,11 +125,11 @@ class AuthInterceptorTest {
     }
 
     @Nested
-    inner class TokenCaching {
+    inner class FreshTokenRead {
         @Test
-        fun `reads token only once — second intercept reuses cached token`() = runTest {
+        fun `reads token fresh on every request — token change between calls is reflected`() = runTest {
             // ----- Arrange -----
-            every { authTokenProvider.apiKey } returns flowOf("first-key")
+            every { authTokenProvider.apiKey } returnsMany listOf(flowOf("first-key"), flowOf("second-key"))
             val interceptor = AuthInterceptor(authTokenProvider = authTokenProvider)
 
             val captured1 = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
@@ -137,7 +137,7 @@ class AuthInterceptorTest {
             @Suppress("UNCHECKED_CAST")
             every { chain.proceed(capture(captured1)) } returns emptyFlow()
 
-            // ----- Act — first intercept populates the cache -----
+            // ----- Act — first intercept reads "first-key" -----
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -148,7 +148,7 @@ class AuthInterceptorTest {
             @Suppress("UNCHECKED_CAST")
             every { chain.proceed(capture(captured2)) } returns emptyFlow()
 
-            // ----- Act — second intercept must reuse cachedToken without calling apiKey again -----
+            // ----- Act — second intercept reads "second-key" fresh from the provider -----
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -158,7 +158,7 @@ class AuthInterceptorTest {
             val header1 = captured1.captured.httpHeaders?.firstOrNull { it.name == "Authorization" }
             val header2 = captured2.captured.httpHeaders?.firstOrNull { it.name == "Authorization" }
             header1?.value shouldBe "Bearer first-key"
-            header2?.value shouldBe "Bearer first-key"
+            header2?.value shouldBe "Bearer second-key"
         }
     }
 }

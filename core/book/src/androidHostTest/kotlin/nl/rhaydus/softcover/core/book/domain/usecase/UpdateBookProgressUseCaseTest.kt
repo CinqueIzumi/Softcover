@@ -7,6 +7,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -14,12 +15,17 @@ import org.junit.jupiter.api.Test
 
 class UpdateBookProgressUseCaseTest {
     private lateinit var repository: BooksRepository
+    private lateinit var markReadingActivityTodayUseCase: MarkReadingActivityTodayUseCase
     private lateinit var useCase: UpdateBookProgressUseCase
 
     @BeforeEach
     fun setUp() {
         repository = mockk()
-        useCase = UpdateBookProgressUseCase(repository = repository)
+        markReadingActivityTodayUseCase = mockk { coEvery { this@mockk() } returns Unit }
+        useCase = UpdateBookProgressUseCase(
+            repository = repository,
+            markReadingActivityTodayUseCase = markReadingActivityTodayUseCase,
+        )
     }
 
     @Nested
@@ -57,6 +63,7 @@ class UpdateBookProgressUseCaseTest {
                 )
             }
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
+            coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
         }
 
         @Test
@@ -91,6 +98,7 @@ class UpdateBookProgressUseCaseTest {
                     newPage = 0,
                 )
             }
+            coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
         }
 
         @Test
@@ -117,6 +125,7 @@ class UpdateBookProgressUseCaseTest {
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
             coVerify(exactly = 0) { repository.cacheBook(book = any()) }
+            coVerify(exactly = 0) { markReadingActivityTodayUseCase() }
         }
 
         @Test
@@ -147,6 +156,7 @@ class UpdateBookProgressUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
+            coVerify(exactly = 0) { markReadingActivityTodayUseCase() }
         }
     }
 }

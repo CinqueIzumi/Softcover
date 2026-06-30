@@ -5,7 +5,9 @@ import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.repository.BooksRepositoryImpl
+import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
@@ -31,10 +33,19 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.dao.BookDao
+import nl.rhaydus.softcover.core.database.di.databaseModule
+import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.network.di.apolloModule
 import org.koin.dsl.module
 
 val bookModule = module {
-    includes(platformBookModule)
+    includes(
+        platformBookModule,
+        dispatcherModule,
+        databaseModule,
+        apolloModule,
+    )
 
     single<BooksRemoteDataSource> {
         BooksRemoteDataSourceImpl(
@@ -43,13 +54,20 @@ val bookModule = module {
         )
     }
 
+    single<OfflineUserBookSync> {
+        OfflineUserBookSyncImpl(
+            userBookWriteQueue = get(),
+            userBookWriteDrainer = get(),
+            booksLocalDataSource = get(),
+        )
+    }
+
     single<BooksRepository> {
         BooksRepositoryImpl(
             booksRemoteDataSource = get(),
             booksLocalDataSource = get(),
             networkAvailability = get(),
-            userBookWriteQueue = get(),
-            userBookWriteDrainer = get(),
+            offlineSync = get(),
             applicationScope = get(),
             appDispatchers = get(),
         )
@@ -143,7 +161,10 @@ val bookModule = module {
     }
 
     factory {
-        MarkBookAsReadUseCase(repository = get())
+        MarkBookAsReadUseCase(
+            repository = get(),
+            markReadingActivityTodayUseCase = get(),
+        )
     }
 
     factory {
@@ -151,7 +172,10 @@ val bookModule = module {
     }
 
     factory {
-        UpdateBookProgressUseCase(repository = get())
+        UpdateBookProgressUseCase(
+            repository = get(),
+            markReadingActivityTodayUseCase = get(),
+        )
     }
 
     factory {

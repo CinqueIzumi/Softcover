@@ -12,6 +12,8 @@ internal data class OnShowProgressSheetClickAction(val book: Book) : ReadingActi
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
+        // The active unit is kept current by LastUsedProgressUnitCollector, so opening the sheet just
+        // reveals it — no one-shot preference read here (a suspending read on open could fail/stall).
         scope.setState {
             it.copy(
                 bookToUpdate = book,

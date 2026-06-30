@@ -4,7 +4,7 @@ import app.cash.turbine.test
 import com.apollographql.apollo.ApolloClient
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import com.apollographql.apollo.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.FetchPolicy
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

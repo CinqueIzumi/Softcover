@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
-import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,6 +42,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
@@ -58,6 +58,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.OnDateStyleClic
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDynamicColorToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnFloatingBarToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnListToggleAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnReadingStreakToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReorderLibraryTabsAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnStatusToggleAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -98,6 +99,13 @@ internal fun AppearanceSettingsContent(
 
             Spacer(modifier = Modifier.height(40.dp))
         }
+
+        ReadingStreakSection(
+            state = state,
+            runAction = runAction,
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
 
         DateStyleSection(
             state = state,
@@ -204,6 +212,28 @@ private fun ToggleCard(
                 onCheckedChange = onCheckedChange,
             )
         }
+    }
+}
+
+@Composable
+private fun ReadingStreakSection(
+    state: SettingsScreenUiState,
+    runAction: (SettingsAction) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        EditorialSectionHeader(
+            eyebrow = "Reading streak",
+            headline = "Track your reading days",
+            description = "Shows a 21-day dot strip above your currently-reading list.",
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        ToggleCard(
+            label = "Reading streak",
+            checked = state.readingStreakEnabledChecked,
+            onCheckedChange = { runAction(OnReadingStreakToggledAction(newValue = it)) },
+        )
     }
 }
 

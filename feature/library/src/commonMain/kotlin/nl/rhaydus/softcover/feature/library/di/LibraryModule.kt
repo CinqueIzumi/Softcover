@@ -1,5 +1,11 @@
 package nl.rhaydus.softcover.feature.library.di
 
+import nl.rhaydus.softcover.core.book.di.bookModule
+import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
+import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.lists.di.listsModule
+import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.feature.library.presentation.collector.AllBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookListsCollector
@@ -15,6 +21,15 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val libraryModule = module {
+    includes(
+        dispatcherModule,
+        bookModule,
+        listsModule,
+        deadlinesModule,
+        preferencesModule,
+        designSystemModule,
+    )
+
     factory { AllBooksCollector() } bind LibraryCollector::class
 
     factory { BooksByStatusCollector() } bind LibraryCollector::class

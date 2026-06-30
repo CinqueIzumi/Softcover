@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.data.datasource
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.FetchPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1,7 +1,9 @@
 name: Release
 
 # Builds the Android (APK + AAB) and desktop (dmg/msi/deb) artifacts for a pushed tag and attaches
-# them to a GitHub release. iOS is intentionally out of scope until Apple signing is wired up.
+# them to a GitHub release. On a stable tag the signed AAB is additionally uploaded to Google Play as
+# a *production draft* — release notes and the final Publish are done by hand in the Play Console.
+# iOS is intentionally out of scope until Apple signing is wired up.
 on:
   push:
     tags:
@@ -118,6 +120,51 @@ jobs:
           name: desktop-${{ matrix.label }}
           path: staging/*
           if-no-files-found: error
+
+  play:
+    name: Upload to Google Play (production draft)
+    needs: android
+    runs-on: ubuntu-latest
+    # The app's first production upload had to be done by hand (the Play API can't create a listing);
+    # this automation targets that existing listing. Pre-release tags (e.g. v3.0.0-rc1) still build and
+    # attach to the GitHub release but are never pushed to Play — only clean vX.Y.Z tags upload.
+    if: ${{ !contains(github.ref_name, '-') }}
+    steps:
+      - name: Verify service account secret
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::error::GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret is not set — cannot upload to Google Play."
+            exit 1
+          fi
+
+      - name: Download Android artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android
+          path: android
+
+      - name: Locate AAB
+        id: aab
+        run: |
+          path=$(find android -name "*.aab" | head -n 1)
+          if [ -z "$path" ]; then
+            echo "::error::No .aab found in the android artifact."
+            exit 1
+          fi
+          echo "path=$path" >> "$GITHUB_OUTPUT"
+
+      # status: draft uploads the bundle to a production draft release — it is NOT rolled out. Release
+      # notes and the final Publish happen manually in the Play Console, so no whatsNewDirectory is set.
+      - name: Upload AAB to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: nl.rhaydus.softcover
+          releaseFiles: ${{ steps.aab.outputs.path }}
+          track: production
+          status: draft
 
   release:
     name: Publish release

@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 
 @Serializable
@@ -22,4 +23,6 @@ internal data class AppSettingsEntity(
     val listDefaultsSeeded: Boolean = false,
     val libraryTabOrder: List<String> = emptyList(),
     val desktopWindowState: DesktopWindowStateEntity = DesktopWindowStateEntity(),
+    val readingStreakEnabled: Boolean = true,
+    val lastUsedProgressUnit: ProgressUnit = ProgressUnit.PAGE,
 )

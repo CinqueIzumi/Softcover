@@ -20,5 +20,12 @@ class NotificationChannelInitializer(private val context: Context) {
         }
 
         manager.createNotificationChannelsCompat(channels)
+
+        // Prune channels this app no longer lists — chiefly the legacy `softcover.session`, replaced
+        // by `softcover.session.v2` so its immutable LOW importance can't pin the old behaviour. Runs
+        // after the create so the device never sits without a valid session channel.
+        manager.deleteUnlistedNotificationChannels(
+            SoftcoverNotificationChannel.entries.map { it.id },
+        )
     }
 }

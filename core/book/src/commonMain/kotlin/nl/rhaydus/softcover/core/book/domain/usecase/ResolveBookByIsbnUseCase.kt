@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.book.domain.usecase
 
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.util.IsbnNormalizer
 
 /**
@@ -17,12 +18,12 @@ class ResolveBookByIsbnUseCase(
     private val booksRepository: BooksRepository,
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
 ) {
-    suspend operator fun invoke(isbn: String): Result<IsbnLookupResult> = runCatching {
+    suspend operator fun invoke(isbn: String): Result<IsbnLookupResult> = runCatchingLogged {
         val normalized = IsbnNormalizer.normalize(raw = isbn)
-            ?: return@runCatching IsbnLookupResult.InvalidIsbn
+            ?: return@runCatchingLogged IsbnLookupResult.InvalidIsbn
 
         val match = booksRepository.fetchEditionMatchForIsbn(isbn = normalized)
-            ?: return@runCatching IsbnLookupResult.UnknownEdition(normalizedIsbn = normalized)
+            ?: return@runCatchingLogged IsbnLookupResult.UnknownEdition(normalizedIsbn = normalized)
 
         val book = fetchBookByIdUseCase(id = match.bookId).getOrThrow()
 

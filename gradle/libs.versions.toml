@@ -6,24 +6,26 @@ ktlint = "1.7.1"
 coreKtx = "1.17.0"
 okio = "3.9.1"
 junit = "4.13.2"
-junitVersion = "1.3.0"
-espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.0"
 composeBom = "2026.01.01"
 apollo = "5.0.0"
+# Apollo's normalized cache moved to a separately-versioned library in Apollo Kotlin 5.0; the built-in
+# `com.apollographql.apollo.cache.normalized.*` is deprecated. This is the new in-memory cache artifact.
+apolloCache = "1.0.5"
 dataStore = "1.2.0"
 kotlinxSerialization = "1.9.0"
 ksp = "2.3.9"
 voyager = "1.1.0-beta02"
 coilVersion = "3.2.0"
 composeMultiplatform = "1.11.0"
+# Navigation Event library — the multiplatform back-gesture API that supersedes the deprecated CMP
+# `ui-backhandler` BackHandler. Provides NavigationBackHandler/NavigationEventHandler for every target.
+navigationevent = "1.0.1"
 # CMP's stable material3 strips the M3-expressive APIs (aligned with Jetpack material3 1.4.0-beta01).
 # The design system is built on expressive (MaterialExpressiveTheme/ToggleButton/SplitButton), so it
-# pins the alpha material3 artifact for the 1.11.0 line (≈ androidx material3 1.5.0-alpha17), the CMP
-# counterpart of the Android-only androidx 1.5.0-alpha13 pin below.
+# pins the alpha material3 artifact for the 1.11.0 line (≈ androidx material3 1.5.0-alpha17).
 composeMaterial3Expressive = "1.11.0-alpha07"
-material3ComposeVersion = "1.5.0-alpha13"
 materialComponentsVersion = "1.13.0"
 kermitVersion = "2.0.6"
 kotlinxDatetime = "0.7.1"
@@ -76,7 +78,7 @@ kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-pl
 compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "composeMultiplatform" }
 compose-material3-expressive = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3Expressive" }
-compose-ui-backhandler = { group = "org.jetbrains.compose.ui", name = "ui-backhandler", version.ref = "composeMultiplatform" }
+navigationevent-compose = { group = "org.jetbrains.androidx.navigationevent", name = "navigationevent-compose", version.ref = "navigationevent" }
 apollo-gradlePlugin = { group = "com.apollographql.apollo", name = "apollo-gradle-plugin", version.ref = "apollo" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -85,8 +87,6 @@ kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-co
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -97,9 +97,8 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3ComposeVersion" }
 apollo = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
-apollo-normalized-cache = { group = "com.apollographql.apollo", name = "apollo-normalized-cache", version.ref = "apollo" }
+apollo-normalized-cache = { group = "com.apollographql.cache", name = "normalized-cache", version.ref = "apolloCache" }
 dataStore = { group = "androidx.datastore", name = "datastore", version.ref = "dataStore" }
 datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "dataStore" }
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "dataStore" }
@@ -119,8 +118,10 @@ koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinV
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinVersion" }
 koin-compose-multiplatform = { group = "io.insert-koin", name = "koin-compose", version.ref = "koinComposeMultiplatform" }
+koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koinVersion" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
+room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "roomVersion" }
 material-components = { group = "com.google.android.material", name = "material", version.ref = "materialComponentsVersion" }
 androidx-splash = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashVersion" }
 junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "jUnitVersion" }
@@ -141,6 +142,7 @@ androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycl
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+androidx-sqlite-bundled-jvm = { module = "androidx.sqlite:sqlite-bundled-jvm", version.ref = "sqlite" }
 ksafe = { module = "eu.anifantakis:ksafe", version.ref = "ksafe" }
 
 [plugins]
@@ -153,6 +155,7 @@ compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMu
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "roomVersion" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }

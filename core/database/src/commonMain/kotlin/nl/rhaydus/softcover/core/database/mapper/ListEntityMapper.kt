@@ -14,6 +14,7 @@ internal fun BookList.toEntity(): BookListEntity = BookListEntity(
     name = name,
     slug = slug,
     ranked = ranked,
+    signature = signature,
 )
 
 internal fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
@@ -81,5 +82,6 @@ fun BookListWithBooks.toModel(): BookList {
         slug = bookList.slug,
         ranked = bookList.ranked,
         books = ordered.map { it.toModel(isOwnedList = isOwnedList) },
+        signature = bookList.signature,
     )
 }

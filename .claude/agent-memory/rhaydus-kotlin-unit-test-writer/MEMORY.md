@@ -1,0 +1,1 @@
+- [OfflineSync mocking pattern in BooksRepositoryImplTest](feedback_offline_sync_mocking_pattern.md) — relaxed offlineSync mock silences initializeBooks; every refreshUserBooks test needs a pass-through drainAndReconcile stub

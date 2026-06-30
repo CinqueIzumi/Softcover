@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.designsystem.presentation.model.toProgressUnit
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -16,6 +17,11 @@ internal class OnProgressTabClickAction(
     ) {
         scope.setState {
             it.copy(selectedProgressSheetTab = tab)
+        }
+
+        // Remember the unit so the sheet pre-selects it next time it opens.
+        dependencies.launch {
+            dependencies.setLastUsedProgressUnitUseCase(unit = tab.toProgressUnit())
         }
     }
 }

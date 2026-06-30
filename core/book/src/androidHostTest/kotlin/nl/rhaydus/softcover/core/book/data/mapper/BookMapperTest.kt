@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.fragment.BookDetailFragment
 import nl.rhaydus.softcover.fragment.BookListFragment
@@ -2551,7 +2552,33 @@ class BookMapperTest {
     @Nested
     inner class BookEditionIsAudiobook {
         @Test
-        fun `returns true when audioSeconds is positive`() {
+        fun `returns true when readingFormat is Audio`() {
+            // ----- Arrange -----
+            val edition = BookEdition(
+                id = 1,
+                canonicalId = null,
+                bookId = 1,
+                publisher = null,
+                title = null,
+                url = null,
+                localImagePath = null,
+                isbn10 = null,
+                isbn13 = null,
+                pages = null,
+                audioSeconds = null,
+                authors = emptyList(),
+                releaseYear = 2020,
+                format = "Audiobook",
+                owned = false,
+                readingFormat = ReadingFormat.Audio,
+            )
+
+            // ----- Act & Assert -----
+            edition.isAudiobook shouldBe true
+        }
+
+        @Test
+        fun `returns false when readingFormat is Physical`() {
             // ----- Arrange -----
             val edition = BookEdition(
                 id = 1,
@@ -2567,16 +2594,17 @@ class BookMapperTest {
                 audioSeconds = 3600,
                 authors = emptyList(),
                 releaseYear = 2020,
-                format = "Audiobook",
+                format = "Paperback",
                 owned = false,
+                readingFormat = ReadingFormat.Physical,
             )
 
             // ----- Act & Assert -----
-            edition.isAudiobook shouldBe true
+            edition.isAudiobook shouldBe false
         }
 
         @Test
-        fun `returns false when audioSeconds is zero`() {
+        fun `returns false when readingFormat is Ebook`() {
             // ----- Arrange -----
             val edition = BookEdition(
                 id = 1,
@@ -2589,11 +2617,12 @@ class BookMapperTest {
                 isbn10 = null,
                 isbn13 = null,
                 pages = null,
-                audioSeconds = 0,
+                audioSeconds = null,
                 authors = emptyList(),
                 releaseYear = 2020,
-                format = "Audiobook",
+                format = "Ebook",
                 owned = false,
+                readingFormat = ReadingFormat.Ebook,
             )
 
             // ----- Act & Assert -----
@@ -2601,7 +2630,7 @@ class BookMapperTest {
         }
 
         @Test
-        fun `returns false when audioSeconds is null`() {
+        fun `returns false when readingFormat is null`() {
             // ----- Arrange -----
             val edition = BookEdition(
                 id = 1,
@@ -2619,6 +2648,7 @@ class BookMapperTest {
                 releaseYear = 2020,
                 format = "Paperback",
                 owned = false,
+                readingFormat = null,
             )
 
             // ----- Act & Assert -----

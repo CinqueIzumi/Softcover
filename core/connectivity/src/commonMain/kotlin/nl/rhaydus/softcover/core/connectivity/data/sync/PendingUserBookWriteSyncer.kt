@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.connectivity.data.sync
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -15,10 +16,11 @@ import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
+import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.ui.common.AppDispatchers
 
-class PendingUserBookWriteSyncer(
+internal class PendingUserBookWriteSyncer(
     private val networkAvailability: NetworkAvailabilityProvider,
     private val dao: PendingUserBookWriteDao,
     private val booksRemoteDataSource: BooksRemoteDataSource,
@@ -26,9 +28,9 @@ class PendingUserBookWriteSyncer(
 ) : UserBookWriteDrainer {
     private var job: Job? = null
     private val drainMutex: Mutex = Mutex()
-    private val recentlySyncedUserBookIds: MutableSet<Int> = mutableSetOf()
+    private val recentlySyncedWrites: MutableMap<Int, MutableSet<PendingUserBookWriteKind>> = mutableMapOf()
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         if (job?.isActive == true) return
 
         job = scope.launch(appDispatchers.io) {
@@ -39,11 +41,13 @@ class PendingUserBookWriteSyncer(
         }
     }
 
-    override suspend fun drainPendingUpdates(): Set<Int> = drainMutex.withLock {
+    override suspend fun drainPendingUpdates(): Map<Int, Set<PendingUserBookWriteKind>> = drainMutex.withLock {
         drain()
 
-        val snapshot: Set<Int> = recentlySyncedUserBookIds.toSet()
-        recentlySyncedUserBookIds.clear()
+        val snapshot: Map<Int, Set<PendingUserBookWriteKind>> =
+            recentlySyncedWrites.mapValues { (_, kinds) -> kinds.toSet() }
+
+        recentlySyncedWrites.clear()
 
         snapshot
     }
@@ -59,16 +63,35 @@ class PendingUserBookWriteSyncer(
                     dao.delete(entity.localId)
 
                     if (outcome == ReplayOutcome.SYNCED) {
-                        recentlySyncedUserBookIds.add(entity.userBookId)
+                        val kind: PendingUserBookWriteKind? =
+                            PendingUserBookWriteKind.entries.firstOrNull { it.name == entity.kind }
+
+                        if (kind != null) {
+                            recentlySyncedWrites.getOrPut(entity.userBookId) { mutableSetOf() }.add(kind)
+                        }
                     }
                 }
                 .onFailure { error ->
+                    if (error is CancellationException) throw error
+
+                    // A transient failure (offline, server unreachable/5xx) means the write never got a
+                    // processable response — keep the row and retry on the next drain. Any other failure
+                    // means the server processed and rejected the payload (GraphQL error, no data, 4xx),
+                    // so replaying it would fail identically: discard the row and move on.
+                    if (error is RetryableSyncException) {
+                        AppLog.w(
+                            error,
+                            "Pending user-book write ${entity.localId} hit a transient failure; halting drain",
+                        )
+                        dao.incrementAttempts(entity.localId)
+                        return
+                    }
+
                     AppLog.w(
                         error,
-                        "Pending user-book write ${entity.localId} failed; halting drain",
+                        "Pending user-book write ${entity.localId} was rejected by the server; discarding",
                     )
-                    dao.incrementAttempts(entity.localId)
-                    return
+                    dao.delete(entity.localId)
                 }
         }
     }

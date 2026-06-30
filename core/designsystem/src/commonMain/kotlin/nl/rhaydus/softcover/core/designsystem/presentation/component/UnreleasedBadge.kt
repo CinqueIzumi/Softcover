@@ -19,7 +19,7 @@ fun LocalDate.formatCompactRelease(): String {
     val formatter = LocalDate.Format {
         monthName(MonthNames.ENGLISH_ABBREVIATED)
         char(' ')
-        dayOfMonth(Padding.NONE)
+        day(Padding.NONE)
     }
 
     val base = formatter.format(this)
@@ -32,7 +32,7 @@ fun LocalDate.formatLongRelease(): String {
     val formatter = LocalDate.Format {
         monthName(MonthNames.ENGLISH_FULL)
         char(' ')
-        dayOfMonth(Padding.NONE)
+        day(Padding.NONE)
         char(',')
         char(' ')
         year()

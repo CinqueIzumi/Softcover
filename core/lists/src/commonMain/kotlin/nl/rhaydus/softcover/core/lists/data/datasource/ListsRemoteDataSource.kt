@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.CreateListMutation
 import nl.rhaydus.softcover.CreateListMutation.Data.Insert_list.List.Companion.listFragment as createListListFragment
 import nl.rhaydus.softcover.GetUserBookListsQuery
 import nl.rhaydus.softcover.GetUserBookListsQuery.Data.Me.List.Companion.listFragment as userListsListFragment
+import nl.rhaydus.softcover.GetUserListSignaturesQuery
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion.listBookFragment
 import nl.rhaydus.softcover.RemoveListBookMutation
@@ -20,9 +21,11 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.lists.data.mapper.buildListSignature
 import nl.rhaydus.softcover.core.lists.data.mapper.toBookList
 import nl.rhaydus.softcover.core.lists.data.mapper.toListBook
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
+import nl.rhaydus.softcover.core.lists.domain.model.ListSignature
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.type.Int_comparison_exp
@@ -35,6 +38,12 @@ import nl.rhaydus.softcover.type.Lists_bool_exp
 import nl.rhaydus.ui.common.AppDispatchers
 
 interface ListsRemoteDataSource {
+    /**
+     * Fetches a cheap freshness signature for every one of the authenticated user's lists without
+     * their `list_books` payload, so the caller can decide which lists actually need a deep fetch.
+     */
+    suspend fun fetchListSignatures(): List<ListSignature>
+
     suspend fun fetchUserLists(
         userId: Int,
         listIds: Set<Int>? = null,
@@ -82,6 +91,27 @@ internal class ListsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
     private val appDispatchers: AppDispatchers,
 ) : ListsRemoteDataSource {
+    override suspend fun fetchListSignatures(): List<ListSignature> =
+        withContext(appDispatchers.io) {
+            val result = apolloClient.safeQuery(
+                GetUserListSignaturesQuery(),
+            )
+
+            val lists = result.me.firstOrNull()?.lists
+                ?: throw Exception("No lists were found")
+
+            lists.map { list ->
+                ListSignature(
+                    listId = list.id,
+                    signature = buildListSignature(
+                        updatedAt = list.updated_at,
+                        count = list.list_books_aggregate.aggregate?.count ?: 0,
+                        maxListBookUpdatedAt = list.list_books_aggregate.aggregate?.max?.updated_at,
+                    ),
+                )
+            }
+        }
+
     override suspend fun fetchUserLists(
         userId: Int,
         listIds: Set<Int>?,

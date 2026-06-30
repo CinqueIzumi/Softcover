@@ -120,5 +120,25 @@ class OnApiKeyValueChangeActionTest {
             // ----- Assert -----
             stateFlow.value.apiKeyValue shouldBe "second"
         }
+
+        @Test
+        fun `clears submissionError when apiKeyValue changes`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = OnboardingUiState(
+                apiKeyValue = "old-key",
+                submissionError = "That API key wasn't accepted. Double-check it and try again.",
+            )
+            dependencies = stubDependencies(this)
+            val action = OnApiKeyValueChangeAction(newValue = "new-key")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.submissionError shouldBe null
+        }
     }
 }

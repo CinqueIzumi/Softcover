@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.core.preferences.di
 
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
+import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.preferences.data.datasource.ApiKeyLocalDataSource
 import nl.rhaydus.softcover.core.preferences.data.datasource.ApiKeyLocalDataSourceImpl
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
@@ -15,17 +16,26 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDesktopWindowStateAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetDesktopWindowStateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
+import org.koin.dsl.module
 
 val preferencesModule = module {
-    includes(platformPreferencesModule)
+    includes(
+        platformPreferencesModule,
+        dispatcherModule,
+        apolloModule,
+    )
 
     single<ApiKeyLocalDataSource> {
         ApiKeyLocalDataSourceImpl(
@@ -78,6 +88,14 @@ val preferencesModule = module {
     factory { GetDesktopWindowStateAsFlowUseCase(settingsRepository = get()) }
 
     factory { SetDesktopWindowStateUseCase(settingsRepository = get()) }
+
+    factory { GetReadingStreakEnabledAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetReadingStreakEnabledUseCase(settingsRepository = get()) }
+
+    factory { GetLastUsedProgressUnitAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetLastUsedProgressUnitUseCase(settingsRepository = get()) }
 
     single<GetThemeConfigurationUseCase> {
         GetThemeConfigurationUseCase(settingsRepository = get())

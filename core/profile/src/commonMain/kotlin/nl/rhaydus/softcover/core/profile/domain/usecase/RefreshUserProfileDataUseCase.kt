@@ -6,6 +6,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
@@ -15,11 +16,12 @@ class RefreshUserProfileDataUseCase(
     private val profileRepository: ProfileRepository,
     private val getUserIdUseCase: GetUserIdUseCase,
     private val clock: Clock,
+    private val timeZone: TimeZone,
 ) {
-    suspend operator fun invoke(): Result<Unit> = runCatching {
+    suspend operator fun invoke(): Result<Unit> = runCatchingLogged {
         val userId = getUserIdUseCase().getOrThrow()
         val snapshot = profileRepository.fetchUserProfileSnapshot(userId = userId)
-        val data = snapshot.toUserProfileData(today = clock.todayIn(TimeZone.UTC))
+        val data = snapshot.toUserProfileData(today = clock.todayIn(timeZone))
 
         profileRepository.cacheUserProfileData(data = data)
     }

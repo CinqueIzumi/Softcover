@@ -10,11 +10,11 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":core:domain"))
-            api(project(":core:database"))
-            api(project(":core:book"))
-            api(project(":core:lists"))
+            implementation(project(":core:database"))
+            implementation(project(":core:book"))
+            implementation(project(":core:lists"))
 
-            api(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreUi)
         }
 
         androidMain.dependencies {

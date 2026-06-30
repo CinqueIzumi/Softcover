@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -37,9 +37,7 @@ internal class OnDeadlinePickedAction(
             current = current,
             total = total,
             unit = unit,
-        ).onFailure {
-            AppLog.e("$it")
-        }
+        ).onApiFailure()
 
         scope.setState { it.copy(showDeadlinePicker = false) }
     }

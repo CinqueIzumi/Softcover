@@ -1,3 +1,11 @@
+// FlowRow's `overflow` parameter and `FlowRowOverflow` are deprecated in Compose ("FlowLayout overflow
+// is no longer maintained"), but the Compose team has shipped no stable replacement — the obvious
+// successor `ContextualFlowRow` is itself deprecated, and the official guidance is to keep using (or
+// vendor) the existing implementation until a real replacement lands. The progressive line-reveal here
+// depends on `FlowRowOverflow.expandIndicator`, so the deprecation is suppressed file-wide and tracked
+// in docs/working/now.md; revisit once Compose ships a maintained overflow API.
+@file:Suppress("DEPRECATION")
+
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
 import androidx.compose.foundation.layout.Arrangement

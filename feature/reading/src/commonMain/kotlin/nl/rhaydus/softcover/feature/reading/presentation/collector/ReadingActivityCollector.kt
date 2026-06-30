@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -14,18 +14,24 @@ internal class ReadingActivityCollector : ReadingCollector {
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
         dependencies: ReadingScreenDependencies,
     ) {
-        // Keep the strip fresh even when the user never opens Profile — this is the
-        // canonical refresh for reading-activity dates, the same one Profile fires.
-        dependencies.launch {
-            dependencies.refreshUserProfileDataUseCase()
-                .onFailure { AppLog.e(it) }
-        }
+        dependencies.getReadingStreakEnabledAsFlowUseCase().collectLatest { enabled ->
+            scope.setState { it.copy(streakEnabled = enabled) }
 
-        dependencies.observeRecentReadingActivityUseCase()
-            .collectLatest { activity: List<ReadingDayActivity> ->
-                scope.setState {
-                    it.copy(recentReadingActivity = activity)
+            if (enabled) {
+                dependencies.launch {
+                    dependencies.refreshUserProfileDataUseCase()
+                        .onApiFailure()
                 }
+
+                dependencies.observeRecentReadingActivityUseCase()
+                    .collectLatest { activity: List<ReadingDayActivity> ->
+                        scope.setState {
+                            it.copy(recentReadingActivity = activity)
+                        }
+                    }
+            } else {
+                scope.setState { it.copy(recentReadingActivity = emptyList()) }
             }
+        }
     }
 }

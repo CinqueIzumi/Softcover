@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 class UpdateBookReviewUseCase(
     private val booksRepository: BooksRepository,
@@ -11,8 +12,8 @@ class UpdateBookReviewUseCase(
         book: Book,
         review: ReviewDocument,
         hasSpoilers: Boolean,
-    ): Result<Unit> = runCatching {
-        book.userBook ?: return@runCatching
+    ): Result<Unit> = runCatchingLogged {
+        book.userBook ?: return@runCatchingLogged
 
         val updatedBook: Book = booksRepository.updateBookReview(
             book = book,

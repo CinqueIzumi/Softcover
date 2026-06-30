@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -13,8 +13,6 @@ internal class OnAddBookToLibraryClickAction(val book: Book) : ExploreAction {
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        dependencies.markBookAsWantToReadUseCase(book = book).onFailure {
-            AppLog.e("-=-= $it")
-        }
+        dependencies.markBookAsWantToReadUseCase(book = book).onApiFailure()
     }
 }

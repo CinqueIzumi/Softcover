@@ -14,7 +14,6 @@ kotlin {
             implementation(project(":core:book"))
             implementation(project(":core:lists"))
             implementation(project(":core:deadlines"))
-            implementation(project(":core:library"))
             implementation(project(":core:preferences"))
             implementation(project(":core:designsystem"))
 

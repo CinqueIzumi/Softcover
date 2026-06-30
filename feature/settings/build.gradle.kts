@@ -12,7 +12,6 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:domain"))
             implementation(project(":core:lists"))
-            implementation(project(":core:library"))
             api(project(":core:preferences"))
             implementation(project(":core:designsystem"))
 

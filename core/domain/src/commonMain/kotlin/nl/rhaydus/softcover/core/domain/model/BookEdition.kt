@@ -25,5 +25,5 @@ data class BookEdition(
         get() = authors.joinToString(", ") { it.name }
 
     val isAudiobook: Boolean
-        get() = (audioSeconds ?: 0) > 0
+        get() = readingFormat == ReadingFormat.Audio
 }

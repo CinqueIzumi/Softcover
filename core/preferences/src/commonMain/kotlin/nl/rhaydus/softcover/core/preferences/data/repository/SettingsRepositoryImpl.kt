@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
@@ -99,6 +100,10 @@ internal class SettingsRepositoryImpl(
         settingsLocalDataSource.resetLibraryVisibilityPreferences()
     }
 
+    override suspend fun resetAllSettings() {
+        settingsLocalDataSource.resetAllSettings()
+    }
+
     override suspend fun setEnabledStatusCodes(codes: Set<Int>) {
         settingsLocalDataSource.setEnabledStatusCodes(codes = codes)
     }
@@ -118,5 +123,17 @@ internal class SettingsRepositoryImpl(
 
     override suspend fun setDesktopWindowState(state: DesktopWindowState) {
         settingsLocalDataSource.setDesktopWindowState(state = state)
+    }
+
+    override val readingStreakEnabled: Flow<Boolean> = settingsLocalDataSource.readingStreakEnabled
+
+    override suspend fun setReadingStreakEnabled(enabled: Boolean) {
+        settingsLocalDataSource.setReadingStreakEnabled(enabled = enabled)
+    }
+
+    override val lastUsedProgressUnit: Flow<ProgressUnit> = settingsLocalDataSource.lastUsedProgressUnit
+
+    override suspend fun setLastUsedProgressUnit(unit: ProgressUnit) {
+        settingsLocalDataSource.setLastUsedProgressUnit(unit = unit)
     }
 }

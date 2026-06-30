@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -35,15 +36,19 @@ class LibraryStatsTest {
         owned = owned,
     )
 
-    private fun buildUserBook(journals: List<ReadingJournal> = emptyList()) = UserBook(
+    private fun buildUserBook(
+        journals: List<ReadingJournal> = emptyList(),
+        createdAt: String? = null,
+        lastReadDate: String? = null,
+    ) = UserBook(
         id = 1,
         status = BookStatus.Read,
         dateAdded = "2024-01-01",
-        createdAt = null,
+        createdAt = createdAt,
         privacySettingId = 1,
         reviewHasSpoilers = false,
         editionId = null,
-        lastReadDate = null,
+        lastReadDate = lastReadDate,
         rating = null,
         referrerUserId = null,
         reviewedAt = null,
@@ -51,11 +56,21 @@ class LibraryStatsTest {
         journals = journals,
     )
 
+    private fun buildUserBookRead(finishedAt: String? = null) = UserBookRead(
+        id = 1,
+        currentPage = null,
+        currentSeconds = null,
+        progress = 1.0f,
+        startedAt = null,
+        finishedAt = finishedAt,
+    )
+
     private fun buildBook(
         id: Int = 1,
         currentEditionPages: Int? = null,
         defaultEditionPages: Int? = null,
         userBook: UserBook? = null,
+        userBookRead: UserBookRead? = null,
     ): Book {
         val ownedEdition = if (currentEditionPages != null) {
             buildEdition(
@@ -94,7 +109,7 @@ class LibraryStatsTest {
             positionsInSeries = emptyList(),
             isCompilation = false,
             userBook = userBook,
-            userBookRead = null,
+            userBookRead = userBookRead,
         )
     }
 
@@ -320,6 +335,103 @@ class LibraryStatsTest {
             )
 
             val book = buildBook(userBook = buildUserBook(journals = journals))
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `finishedAt takes precedence over lastReadDate, journal, and createdAt`() {
+            // ----- Arrange -----
+            val journals = listOf(buildFinishedJournal("2019-06-01T00:00:00"))
+            val book = buildBook(
+                userBook = buildUserBook(
+                    journals = journals,
+                    lastReadDate = "2020-03-15",
+                    createdAt = "2018-01-01T00:00:00",
+                ),
+                userBookRead = buildUserBookRead(finishedAt = "2022-05-10"),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2022
+        }
+
+        @Test
+        fun `lastReadDate is used when finishedAt is null`() {
+            // ----- Arrange -----
+            val journals = listOf(buildFinishedJournal("2019-06-01T00:00:00"))
+            val book = buildBook(
+                userBook = buildUserBook(
+                    journals = journals,
+                    lastReadDate = "2020-03-15",
+                    createdAt = "2018-01-01T00:00:00",
+                ),
+                userBookRead = buildUserBookRead(finishedAt = null),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2020
+        }
+
+        @Test
+        fun `createdAt is used as final fallback when all earlier candidates are null`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                userBook = buildUserBook(
+                    journals = emptyList(),
+                    lastReadDate = null,
+                    createdAt = "2017-11-20T08:30:00",
+                ),
+                userBookRead = buildUserBookRead(finishedAt = null),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2017
+        }
+
+        @Test
+        fun `unparseable finishedAt falls through to next valid candidate`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                userBook = buildUserBook(
+                    journals = emptyList(),
+                    lastReadDate = "2021-08-22",
+                    createdAt = null,
+                ),
+                userBookRead = buildUserBookRead(finishedAt = "garbage"),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2021
+        }
+
+        @Test
+        fun `returns null when all candidates are null`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                userBook = buildUserBook(
+                    journals = emptyList(),
+                    lastReadDate = null,
+                    createdAt = null,
+                ),
+                userBookRead = buildUserBookRead(finishedAt = null),
+            )
 
             // ----- Act -----
             val result = book.finishedYear()

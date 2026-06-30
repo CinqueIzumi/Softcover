@@ -35,7 +35,6 @@ kotlin {
             implementation(project(":core:deadlines"))
             implementation(project(":core:personal"))
             implementation(project(":core:profile"))
-            implementation(project(":core:library"))
             implementation(project(":core:connectivity"))
             implementation(project(":core:notification"))
             implementation(project(":core:designsystem"))
@@ -55,6 +54,10 @@ kotlin {
 
             implementation(libs.rhaydus.designsystemCore)
 
+            // Owns MainActivityViewModel (the one app-level ViewModel) since M1 moved it out of
+            // :core:designsystem.
+            implementation(libs.androidx.lifecycle.viewmodel)
+
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.navigator)
@@ -65,6 +68,17 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.koin.android)
             implementation(libs.androidx.splash)
+        }
+
+        androidHostTest.dependencies {
+            // Koin's reflection-based `verify()` guards the whole-graph DI wiring (every binding's
+            // constructor deps are resolvable across the aggregate). JVM-only, so it lives in the
+            // Android host-test set.
+            implementation(libs.koin.test)
+            // datastore-core is `implementation` in :core:preferences, so it doesn't leak onto our
+            // compile classpath. Add it here so the verify() extraTypes list can reference
+            // androidx.datastore.core.DataStore::class directly.
+            implementation(libs.datastore.core)
         }
 
         iosMain.dependencies {

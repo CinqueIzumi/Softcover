@@ -156,6 +156,7 @@ interface BooksRepository {
 
     suspend fun persistEditionImage(
         editionId: Int,
+        url: String?,
         bytes: ByteArray,
     )
 }

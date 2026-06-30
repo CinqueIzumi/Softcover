@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -32,13 +33,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfi
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpdate
-import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
-import nl.rhaydus.softcover.core.domain.message.UserMessageNotifier
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
+import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel
 
 /** Cap a snackbar's width on a wide window so it doesn't stretch across the whole desktop frame. */
 private val SNACKBAR_DESKTOP_MAX_WIDTH = 420.dp
@@ -58,6 +58,7 @@ internal fun App() {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val themeConfig by viewModel.themeState.collectAsStateWithLifecycle()
+    val reAuthState by viewModel.reAuthState.collectAsStateWithLifecycle()
     val snackBarState by SnackBarManager.snackBarState.collectAsStateWithLifecycle()
 
     val appUpdateFlowLauncher = rememberAppUpdateFlowLauncher()
@@ -110,12 +111,6 @@ internal fun App() {
             }
     }
 
-    LaunchedEffect(Unit) {
-        UserMessageNotifier.messages.collect { message ->
-            SnackBarManager.showSnackbar(title = message)
-        }
-    }
-
     SoftcoverTheme(dynamicColor = themeConfig.useDynamicColor) {
         ClearFocusOnTapScreen {
             CompositionLocalProvider(
@@ -124,10 +119,19 @@ internal fun App() {
                 LocalStartAppUpdate provides onStartAppUpdate,
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    key(state.authenticated) {
-                        Navigator(
-                            screen = if (state.authenticated) RootScreen else OnboardingScreen,
-                        )
+                    // Gate the first navigation on resolved auth state. Until the splash check
+                    // finishes `authenticated` defaults to false, so building the navigator eagerly
+                    // would mount OnboardingScreen and only swap to RootScreen once auth resolves.
+                    // Android hides that frame behind the system splash; desktop has no such splash,
+                    // so it flashed the login screen.
+                    if (state.isLoading) {
+                        Surface(modifier = Modifier.fillMaxSize()) {}
+                    } else {
+                        key(state.authenticated) {
+                            Navigator(
+                                screen = if (state.authenticated) RootScreen else OnboardingScreen,
+                            )
+                        }
                     }
 
                     // On an expanded (desktop / large) window a bottom-centre toast floats far from
@@ -152,6 +156,17 @@ internal fun App() {
                         hostState = snackBarState,
                         modifier = snackbarModifier,
                     )
+
+                    // Show the re-auth overlay only during an authenticated session — if the user
+                    // is already on onboarding they can enter a token through the normal flow.
+                    if (reAuthState.visible && state.authenticated) {
+                        ReAuthDialog(
+                            isSubmitting = reAuthState.isSubmitting,
+                            errorMessage = reAuthState.errorMessage,
+                            onSubmit = viewModel::reAuthenticate,
+                            onLogOut = viewModel::logOutFromReAuth,
+                        )
+                    }
                 }
             }
         }

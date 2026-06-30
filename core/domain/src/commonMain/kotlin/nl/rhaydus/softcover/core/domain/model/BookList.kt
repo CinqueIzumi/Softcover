@@ -8,6 +8,7 @@ data class BookList(
     val slug: String,
     val ranked: Boolean = false,
     val books: List<ListBook>,
+    val signature: String? = null,
 ) {
     val isOwned: Boolean
         get() = slug == OWNED_LIST_SLUG

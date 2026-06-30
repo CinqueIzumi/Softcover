@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
@@ -62,6 +63,8 @@ interface SettingsLocalDataSource {
 
     suspend fun resetLibraryVisibilityPreferences()
 
+    suspend fun resetAllSettings()
+
     suspend fun setEnabledStatusCodes(codes: Set<Int>)
 
     suspend fun setEnabledListIds(ids: Set<Int>)
@@ -73,6 +76,14 @@ interface SettingsLocalDataSource {
     val desktopWindowState: Flow<DesktopWindowState>
 
     suspend fun setDesktopWindowState(state: DesktopWindowState)
+
+    val readingStreakEnabled: Flow<Boolean>
+
+    suspend fun setReadingStreakEnabled(enabled: Boolean)
+
+    val lastUsedProgressUnit: Flow<ProgressUnit>
+
+    suspend fun setLastUsedProgressUnit(unit: ProgressUnit)
 }
 
 internal class SettingsLocalDataSourceImpl(
@@ -223,6 +234,10 @@ internal class SettingsLocalDataSourceImpl(
         }
     }
 
+    override suspend fun resetAllSettings() {
+        appSettingsDataStore.store.updateData { AppSettingsEntity() }
+    }
+
     override val libraryTabOrder: Flow<List<String>> = appSettingsDataStore.store.data
         .map { it.libraryTabOrder }
         .distinctUntilChanged()
@@ -240,6 +255,26 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setDesktopWindowState(state: DesktopWindowState) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(desktopWindowState = state.toEntity())
+        }
+    }
+
+    override val readingStreakEnabled: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.readingStreakEnabled }
+        .distinctUntilChanged()
+
+    override suspend fun setReadingStreakEnabled(enabled: Boolean) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(readingStreakEnabled = enabled)
+        }
+    }
+
+    override val lastUsedProgressUnit: Flow<ProgressUnit> = appSettingsDataStore.store.data
+        .map { it.lastUsedProgressUnit }
+        .distinctUntilChanged()
+
+    override suspend fun setLastUsedProgressUnit(unit: ProgressUnit) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(lastUsedProgressUnit = unit)
         }
     }
 }

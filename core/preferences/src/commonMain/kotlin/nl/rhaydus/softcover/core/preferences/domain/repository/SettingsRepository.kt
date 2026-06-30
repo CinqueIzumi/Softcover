@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
+import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 
@@ -58,6 +59,13 @@ interface SettingsRepository {
 
     suspend fun resetLibraryVisibilityPreferences()
 
+    /**
+     * Resets **all** app settings to their defaults (theme, layout, sort, library visibility, userId,
+     * etc.) — the preference half of the full local-data wipe used by logout / account-switch. The
+     * API key lives in secure storage and is cleared separately via [updateApiKey].
+     */
+    suspend fun resetAllSettings()
+
     suspend fun setEnabledStatusCodes(codes: Set<Int>)
 
     suspend fun setEnabledListIds(ids: Set<Int>)
@@ -69,4 +77,12 @@ interface SettingsRepository {
     val desktopWindowState: Flow<DesktopWindowState>
 
     suspend fun setDesktopWindowState(state: DesktopWindowState)
+
+    val readingStreakEnabled: Flow<Boolean>
+
+    suspend fun setReadingStreakEnabled(enabled: Boolean)
+
+    val lastUsedProgressUnit: Flow<ProgressUnit>
+
+    suspend fun setLastUsedProgressUnit(unit: ProgressUnit)
 }

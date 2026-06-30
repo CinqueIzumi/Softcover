@@ -9,7 +9,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.designsystem.presentation.viewmodel.MainActivityViewModel
+import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
@@ -19,7 +19,7 @@ class ProfileScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<ProfileScreenScreenModel>()
-        val mainVm = koinInject<MainActivityViewModel>()
+        val sessionAuthenticator = koinInject<SessionAuthenticator>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
@@ -27,7 +27,7 @@ class ProfileScreen : Screen {
 
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
-                is LogOutUserEvent -> mainVm.setUserAuthenticated(authenticated = false)
+                is LogOutUserEvent -> sessionAuthenticator.setUserAuthenticated(authenticated = false)
             }
         }
 

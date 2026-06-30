@@ -16,6 +16,7 @@ interface ProfileRemoteDataSource {
 
 internal class ProfileRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
+    private val timeZone: TimeZone,
 ) : ProfileRemoteDataSource {
     override suspend fun getUserProfileSnapshot(userId: Int): UserProfileSnapshot {
         val data = apolloClient.safeQuery(query = GetUserProfileDataQuery(userId = userId))
@@ -36,7 +37,7 @@ internal class ProfileRemoteDataSourceImpl(
             bio = me.bio ?: "",
             booksRead = me.books_read.aggregate?.count ?: 0,
             totalPagesRead = me.user_books_pages.sumOf { it.pagesRead() },
-            averageRating = me.rated_books.aggregate?.avg?.rating?.toDouble() ?: 0.0,
+            averageRating = me.rated_books.aggregate?.avg?.rating ?: 0.0,
             activeReadingDates = activeReadingDates,
         )
     }
@@ -57,11 +58,14 @@ internal class ProfileRemoteDataSourceImpl(
     }
 
     // The live API serves action_at as either a bare date ("2026-05-04") or a full
-    // ISO timestamp ("2026-05-04T06:20:37.939189+00:00"). Convert timestamps to UTC
-    // before extracting the date so non-UTC offsets don't shift entries to the wrong day.
+    // ISO timestamp ("2026-05-04T06:20:37.939189+00:00"). A bare date is already a calendar
+    // day, so it passes through unchanged; only timestamps carry a time-of-day that needs a
+    // zone. Bucket those into the user's local timezone so a reading-day matches the calendar
+    // day they actually read on — counting in UTC pushes a late-evening session onto the next
+    // UTC day and can manufacture a phantom gap that wrongly breaks the streak.
     private fun parseDateOrNull(value: String): LocalDate? = runCatching {
         if (value.contains('T')) {
-            Instant.parse(value).toLocalDateTime(TimeZone.UTC).date
+            Instant.parse(value).toLocalDateTime(timeZone).date
         } else {
             LocalDate.parse(value)
         }

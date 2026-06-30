@@ -14,4 +14,4 @@ Steps:
 4. Invoke the `set-version-name` skill via the Skill tool with the new version name. It sets the version name across all platforms (Android `versionName`, iOS `MARKETING_VERSION`, desktop `packageVersion`) and bumps the build number together — do not edit any of those fields yourself.
 5. Report a consolidated summary: README changes, the check result, and the version transition (e.g. `versionName / MARKETING_VERSION / packageVersion: 2.4.0 → 2.5.0, versionCode / CURRENT_PROJECT_VERSION: 29 → 30`).
 
-Do not create a commit or tag. Do not touch `RELEASE_PLAN.md` or any Google Play release notes. Leave all changes unstaged in the working tree.
+Do not create a commit or tag. Do not touch `docs/working/release-plan.md` or any Google Play release notes. Leave all changes unstaged in the working tree.

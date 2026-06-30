@@ -143,4 +143,23 @@ class ProfileRepositoryImplTest {
             coVerify(exactly = 1) { profileLocalDataSource.clear() }
         }
     }
+
+    @Nested
+    inner class MarkActiveReadingDate {
+        @Test
+        fun `delegates to local data source`() = runTest {
+            // ----- Arrange -----
+            val date = LocalDate(
+                2026,
+                6,
+                19,
+            )
+
+            // ----- Act -----
+            repository.markActiveReadingDate(date = date)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { profileLocalDataSource.markActiveReadingDate(date = date) }
+        }
+    }
 }
