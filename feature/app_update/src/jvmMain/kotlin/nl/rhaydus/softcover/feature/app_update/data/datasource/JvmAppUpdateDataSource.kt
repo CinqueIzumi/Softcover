@@ -1,19 +1,104 @@
 package nl.rhaydus.softcover.feature.app_update.data.datasource
 
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.io.File
+import kotlin.system.exitProcess
+import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
+import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerLauncher
+import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
+import nl.rhaydus.softcover.feature.app_update.data.release.ReleaseSource
+import nl.rhaydus.softcover.feature.app_update.data.version.VersionComparator
+import nl.rhaydus.ui.common.AppDispatchers
 
 /**
- * Desktop has no in-app update mechanism, so the data source is a no-op that permanently reports
- * [AppUpdateState.Idle]. Bound (rather than left unbound) so common consumers like the settings
- * debug section resolve without crashing.
+ * Desktop self-updater — the `AppUpdateDataSource` seam Android backs with Play. The desktop
+ * distribution ships as jpackage installers, so this drives an *assisted* update: check the latest
+ * release, download its installer, and — on the user's confirmation — launch it and exit so it can
+ * replace the running app.
+ *
+ * It maps onto the shared [AppUpdateState] machine so the common repository, use cases, and
+ * snackbar/settings UI light up unchanged: [checkForUpdate] → `Available`, [startDownload] →
+ * `Downloading` → `Downloaded`, [completeUpdate] launches the installer. Any failure resolves to
+ * `Failed` (download/launch) or `Idle` (check). The release provider is reached through
+ * [AppUpdateRemoteDataSource], so nothing here is GitHub-specific.
  */
-internal class JvmAppUpdateDataSource : AppUpdateDataSource {
-    override val updateState: Flow<AppUpdateState> = MutableStateFlow(AppUpdateState.Idle).asStateFlow()
+internal class JvmAppUpdateDataSource(
+    private val appVersionProvider: AppVersionProvider,
+    private val releaseSource: ReleaseSource,
+    private val installerLauncher: DesktopInstallerLauncher,
+    private val appDispatchers: AppDispatchers,
+    private val appDataDirectory: String,
+) : AppUpdateDataSource {
+    private val scope = CoroutineScope(SupervisorJob() + appDispatchers.io)
 
-    override suspend fun checkForUpdate() = Unit
+    private val _updateState = MutableStateFlow<AppUpdateState>(AppUpdateState.Idle)
+    override val updateState = _updateState.asStateFlow()
 
-    override fun completeUpdate() = Unit
+    private var pendingRelease: AppRelease? = null
+    private var downloadedInstaller: File? = null
+
+    override suspend fun checkForUpdate() {
+        val release = releaseSource.fetchLatestRelease()
+
+        val isNewer = release != null &&
+            VersionComparator.isNewer(
+                candidate = release.version,
+                current = appVersionProvider.versionInfo.name,
+            )
+
+        if (isNewer) {
+            pendingRelease = release
+            _updateState.value = AppUpdateState.Available
+        } else {
+            _updateState.value = AppUpdateState.Idle
+        }
+    }
+
+    /**
+     * Downloads the installer resolved by [checkForUpdate] in the background, moving the state to
+     * `Downloading` then `Downloaded` (or `Failed`). Driven by the desktop `AppUpdateFlowLauncher`
+     * when the user accepts the update; a no-op if nothing is pending or a download is already
+     * underway.
+     */
+    fun startDownload() {
+        val release = pendingRelease ?: return
+
+        if (_updateState.value == AppUpdateState.Downloading) return
+
+        _updateState.value = AppUpdateState.Downloading
+
+        scope.launch {
+            val installer = releaseSource.downloadInstaller(
+                release = release,
+                destinationDirectory = appDataDirectory,
+            )
+
+            if (installer != null) {
+                downloadedInstaller = installer
+                _updateState.value = AppUpdateState.Downloaded
+            } else {
+                AppLog.e("Failed to download the desktop update installer.")
+
+                _updateState.value = AppUpdateState.Failed
+            }
+        }
+    }
+
+    override fun completeUpdate() {
+        val installer = downloadedInstaller ?: return
+
+        if (installerLauncher.launch(installer)) {
+            exitProcess(0)
+        } else {
+            AppLog.e("Failed to launch the downloaded desktop update installer.")
+
+            _updateState.value = AppUpdateState.Failed
+        }
+    }
 }

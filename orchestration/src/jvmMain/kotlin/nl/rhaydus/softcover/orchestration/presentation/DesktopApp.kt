@@ -1,9 +1,12 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import org.koin.compose.koinInject
+import nl.rhaydus.softcover.feature.app_update.domain.usecase.CheckForAppUpdateUseCase
 
 /**
  * Installs the singleton Coil [ImageLoader] with a network fetcher (the default loader ships none) so
@@ -28,5 +31,14 @@ fun installDesktopImageLoader() {
  */
 @Composable
 fun DesktopApp() {
+    val checkForAppUpdateUseCase = koinInject<CheckForAppUpdateUseCase>()
+
+    // The desktop counterpart of Android's MainActivity.onResume() check — desktop has no Activity
+    // lifecycle, so the GitHub-releases update check runs once when the window's content first
+    // composes. A newer release surfaces through App()'s existing update snackbar.
+    LaunchedEffect(Unit) {
+        checkForAppUpdateUseCase()
+    }
+
     App()
 }
