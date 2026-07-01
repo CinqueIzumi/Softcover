@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.app_update.di
 
 import org.koin.core.module.Module
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.domain.platform.desktopAppDataDirectory
@@ -21,6 +22,8 @@ import nl.rhaydus.softcover.feature.app_update.domain.launcher.JvmAppUpdateFlowL
 actual val platformAppUpdateModule: Module = module {
     single<ReleaseSource> { GitHubReleaseSource(appDispatchers = get()) }
 
+    // Also bound as AutoCloseable so the desktop shutdown teardown can cancel the update state
+    // machine's scope and close its HTTP client without orchestration naming this internal type.
     single {
         JvmAppUpdateDataSource(
             appVersionProvider = get(),
@@ -29,7 +32,7 @@ actual val platformAppUpdateModule: Module = module {
             appDispatchers = get(),
             appDataDirectory = desktopAppDataDirectory(),
         )
-    }
+    } bind AutoCloseable::class
 
     single<AppUpdateDataSource> { get<JvmAppUpdateDataSource>() }
 

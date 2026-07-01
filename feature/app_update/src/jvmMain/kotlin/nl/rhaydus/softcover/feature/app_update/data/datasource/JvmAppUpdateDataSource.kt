@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.app_update.data.datasource
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -34,7 +35,7 @@ internal class JvmAppUpdateDataSource(
     private val installerLauncher: DesktopInstallerLauncher,
     private val appDispatchers: AppDispatchers,
     private val appDataDirectory: String,
-) : AppUpdateDataSource {
+) : AppUpdateDataSource, AutoCloseable {
     private val scope = CoroutineScope(SupervisorJob() + appDispatchers.io)
 
     private val _updateState = MutableStateFlow<AppUpdateState>(AppUpdateState.Idle)
@@ -42,6 +43,13 @@ internal class JvmAppUpdateDataSource(
 
     private var pendingRelease: AppRelease? = null
     private var downloadedInstaller: File? = null
+
+    // Cancels the update state-machine scope so the desktop shutdown path leaves no updater work
+    // running. The release provider's HTTP client is left for `exitProcess(0)` to reclaim — its
+    // threads are daemon and closing it can block on an in-flight download (see GitHubReleaseSource).
+    override fun close() {
+        scope.cancel()
+    }
 
     override suspend fun checkForUpdate() {
         val release = releaseSource.fetchLatestRelease()

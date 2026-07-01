@@ -321,4 +321,34 @@ class JvmAppUpdateDataSourceTest {
             )
         }
     }
+
+    @Nested
+    inner class Close {
+        @Test
+        fun `close cancels the scope so a later startDownload never downloads`() = runTest {
+            // ----- Arrange -----
+            val dataSource = createDataSource()
+            val release = stubRelease()
+
+            coEvery {
+                remoteDataSource.fetchLatestRelease()
+            } returns release
+
+            dataSource.checkForUpdate()
+            advanceUntilIdle()
+
+            // ----- Act -----
+            dataSource.close()
+            dataSource.startDownload()
+            advanceUntilIdle()
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                remoteDataSource.downloadInstaller(
+                    release = any(),
+                    destinationDirectory = any(),
+                )
+            }
+        }
+    }
 }

@@ -48,6 +48,11 @@ internal class GitHubReleaseSource(private val appDispatchers: AppDispatchers) :
     // Release asset downloads 302-redirect to GitHub's CDN, so the client must follow redirects (the
     // JDK default is NEVER, which would surface the 302 as a failed download). NORMAL follows
     // same-scheme redirects — GitHub stays on HTTPS — without allowing an HTTPS→HTTP downgrade.
+    //
+    // Deliberately not closed on shutdown: the JDK HttpClient's selector/executor threads are daemon
+    // (they never block JVM exit), and `HttpClient.close()` on JDK 21+ *blocks* until in-flight
+    // requests finish — so closing it during the desktop shutdown path could stall a window-close
+    // mid-download. The guaranteed `exitProcess(0)` reclaims it instead.
     private val httpClient: HttpClient = HttpClient.newBuilder()
         .followRedirects(HttpClient.Redirect.NORMAL)
         .build()

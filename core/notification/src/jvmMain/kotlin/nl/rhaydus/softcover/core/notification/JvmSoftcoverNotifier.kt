@@ -15,8 +15,9 @@ import nl.rhaydus.softcover.core.domain.logging.AppLog
  * is a best-effort no-op (the `id` is used only for logging); and a headless / tray-less session has
  * no surface to post to, so the notifier degrades to a logged no-op there.
  */
-internal class JvmSoftcoverNotifier : SoftcoverNotifier {
-    private val trayIcon: TrayIcon? by lazy { installTrayIcon() }
+internal class JvmSoftcoverNotifier : SoftcoverNotifier, AutoCloseable {
+    private val trayIconDelegate = lazy { installTrayIcon() }
+    private val trayIcon: TrayIcon? by trayIconDelegate
 
     override fun hasPostPermission(): Boolean = SystemTray.isSupported()
 
@@ -41,6 +42,17 @@ internal class JvmSoftcoverNotifier : SoftcoverNotifier {
 
     // AWT balloon notifications cannot be dismissed programmatically; nothing to cancel.
     override fun cancel(id: Int) = Unit
+
+    // Removes the tray icon from the system tray on shutdown. A live TrayIcon pins AWT's non-daemon
+    // threads, blocking a clean JVM exit — so this only touches the tray when one was actually
+    // installed (never forcing lazy installation just to tear it down).
+    override fun close() {
+        if (trayIconDelegate.isInitialized().not()) return
+
+        val icon = trayIcon ?: return
+
+        SystemTray.getSystemTray().remove(icon)
+    }
 
     private fun installTrayIcon(): TrayIcon? {
         if (SystemTray.isSupported().not()) return null
