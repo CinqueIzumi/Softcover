@@ -489,7 +489,10 @@ private fun EditorialHeader(
     val collapseFraction: () -> Float = {
         val limit = topAppBarState.heightOffsetLimit
 
-        if (limit < 0f) (topAppBarState.heightOffset / limit).coerceIn(0f, 1f) else 0f
+        if (limit < 0f) (topAppBarState.heightOffset / limit).coerceIn(
+            0f,
+            1f,
+        ) else 0f
     }
 
     Column(

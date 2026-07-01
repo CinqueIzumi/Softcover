@@ -94,8 +94,14 @@ class LibraryDisplayDerivationTest {
         fun `empty query returns raw list unfiltered`() {
             // ----- Arrange -----
             val books = listOf(
-                buildBook(id = 1, title = "Kotlin in Action"),
-                buildBook(id = 2, title = "Clean Code"),
+                buildBook(
+                    id = 1,
+                    title = "Kotlin in Action",
+                ),
+                buildBook(
+                    id = 2,
+                    title = "Clean Code",
+                ),
             )
 
             // ----- Act -----
@@ -115,8 +121,14 @@ class LibraryDisplayDerivationTest {
         fun `whitespace-only query is treated as empty and returns raw list unfiltered`() {
             // ----- Arrange -----
             val books = listOf(
-                buildBook(id = 1, title = "Kotlin in Action"),
-                buildBook(id = 2, title = "Clean Code"),
+                buildBook(
+                    id = 1,
+                    title = "Kotlin in Action",
+                ),
+                buildBook(
+                    id = 2,
+                    title = "Clean Code",
+                ),
             )
 
             // ----- Act -----
@@ -135,8 +147,14 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `title match is case-insensitive`() {
             // ----- Arrange -----
-            val matching = buildBook(id = 1, title = "Kotlin in Action")
-            val nonMatching = buildBook(id = 2, title = "Clean Code")
+            val matching = buildBook(
+                id = 1,
+                title = "Kotlin in Action",
+            )
+            val nonMatching = buildBook(
+                id = 2,
+                title = "Clean Code",
+            )
 
             // ----- Act -----
             val result = computeDisplayBooks(
@@ -154,9 +172,20 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `author name match is case-insensitive`() {
             // ----- Arrange -----
-            val author = Author(id = 1, name = "Robert C. Martin")
-            val matching = buildBook(id = 1, title = "Clean Code", authors = listOf(author))
-            val nonMatching = buildBook(id = 2, title = "Other Book", authors = emptyList())
+            val author = Author(
+                id = 1,
+                name = "Robert C. Martin",
+            )
+            val matching = buildBook(
+                id = 1,
+                title = "Clean Code",
+                authors = listOf(author),
+            )
+            val nonMatching = buildBook(
+                id = 2,
+                title = "Other Book",
+                authors = emptyList(),
+            )
 
             // ----- Act -----
             val result = computeDisplayBooks(
@@ -175,8 +204,14 @@ class LibraryDisplayDerivationTest {
         fun `non-matching query returns empty list`() {
             // ----- Arrange -----
             val books = listOf(
-                buildBook(id = 1, title = "Kotlin in Action"),
-                buildBook(id = 2, title = "Clean Code"),
+                buildBook(
+                    id = 1,
+                    title = "Kotlin in Action",
+                ),
+                buildBook(
+                    id = 2,
+                    title = "Clean Code",
+                ),
             )
 
             // ----- Act -----
@@ -195,8 +230,14 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `isReadTab true with null selectedReadYear skips year filter`() {
             // ----- Arrange -----
-            val book2023 = buildBook(id = 1, userBook = buildUserBook(lastReadDate = "2023-06-15"))
-            val book2022 = buildBook(id = 2, userBook = buildUserBook(lastReadDate = "2022-06-15"))
+            val book2023 = buildBook(
+                id = 1,
+                userBook = buildUserBook(lastReadDate = "2023-06-15"),
+            )
+            val book2022 = buildBook(
+                id = 2,
+                userBook = buildUserBook(lastReadDate = "2022-06-15"),
+            )
 
             // ----- Act -----
             val result = computeDisplayBooks(
@@ -214,8 +255,14 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `isReadTab false ignores selectedReadYear even when set`() {
             // ----- Arrange -----
-            val book2023 = buildBook(id = 1, userBook = buildUserBook(lastReadDate = "2023-06-15"))
-            val book2022 = buildBook(id = 2, userBook = buildUserBook(lastReadDate = "2022-06-15"))
+            val book2023 = buildBook(
+                id = 1,
+                userBook = buildUserBook(lastReadDate = "2023-06-15"),
+            )
+            val book2022 = buildBook(
+                id = 2,
+                userBook = buildUserBook(lastReadDate = "2022-06-15"),
+            )
 
             // ----- Act -----
             val result = computeDisplayBooks(
@@ -233,9 +280,18 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `isReadTab true with selectedReadYear keeps only books whose finishedYear matches`() {
             // ----- Arrange -----
-            val book2023 = buildBook(id = 1, userBook = buildUserBook(lastReadDate = "2023-06-15"))
-            val book2022 = buildBook(id = 2, userBook = buildUserBook(lastReadDate = "2022-06-15"))
-            val bookNoDate = buildBook(id = 3, userBook = null)
+            val book2023 = buildBook(
+                id = 1,
+                userBook = buildUserBook(lastReadDate = "2023-06-15"),
+            )
+            val book2022 = buildBook(
+                id = 2,
+                userBook = buildUserBook(lastReadDate = "2022-06-15"),
+            )
+            val bookNoDate = buildBook(
+                id = 3,
+                userBook = null,
+            )
 
             // ----- Act -----
             val result = computeDisplayBooks(
@@ -253,7 +309,10 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `empty filters short-circuits chip filter and returns year-filtered list`() {
             // ----- Arrange -----
-            val book = buildBook(id = 1, rating = 1.0)
+            val book = buildBook(
+                id = 1,
+                rating = 1.0,
+            )
 
             // ----- Act -----
             val result = computeDisplayBooks(
@@ -271,10 +330,22 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `non-empty filters keep only books matching all active facets`() {
             // ----- Arrange -----
-            val ebookEdition = buildEdition(id = 10, format = "ebook")
-            val paperbackEdition = buildEdition(id = 11, format = "paperback")
-            val ebookBook = buildBook(id = 1, editions = listOf(ebookEdition))
-            val paperbackBook = buildBook(id = 2, editions = listOf(paperbackEdition))
+            val ebookEdition = buildEdition(
+                id = 10,
+                format = "ebook",
+            )
+            val paperbackEdition = buildEdition(
+                id = 11,
+                format = "paperback",
+            )
+            val ebookBook = buildBook(
+                id = 1,
+                editions = listOf(ebookEdition),
+            )
+            val paperbackBook = buildBook(
+                id = 2,
+                editions = listOf(paperbackEdition),
+            )
 
             // ----- Act -----
             val result = computeDisplayBooks(
@@ -292,7 +363,10 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `search and year filters are both applied before chip filters`() {
             // ----- Arrange -----
-            val tagFiction = Tag(id = 1, name = "Fiction")
+            val tagFiction = Tag(
+                id = 1,
+                name = "Fiction",
+            )
             val matchingBook = buildBook(
                 id = 1,
                 title = "Kotlin Novel",
@@ -331,8 +405,14 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `empty query returns editions sorted by mode`() {
             // ----- Arrange -----
-            val editionB = buildEdition(id = 1, title = "Banana")
-            val editionA = buildEdition(id = 2, title = "Apple")
+            val editionB = buildEdition(
+                id = 1,
+                title = "Banana",
+            )
+            val editionA = buildEdition(
+                id = 2,
+                title = "Apple",
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(
@@ -352,8 +432,14 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `title match is case-insensitive`() {
             // ----- Arrange -----
-            val matching = buildEdition(id = 1, title = "Kotlin in Action")
-            val nonMatching = buildEdition(id = 2, title = "Clean Code")
+            val matching = buildEdition(
+                id = 1,
+                title = "Kotlin in Action",
+            )
+            val nonMatching = buildEdition(
+                id = 2,
+                title = "Clean Code",
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(
@@ -373,9 +459,19 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `author name match is case-insensitive`() {
             // ----- Arrange -----
-            val author = Author(id = 1, name = "Martin Fowler")
-            val matching = buildEdition(id = 1, title = "Refactoring", authors = listOf(author))
-            val nonMatching = buildEdition(id = 2, title = "Other Book")
+            val author = Author(
+                id = 1,
+                name = "Martin Fowler",
+            )
+            val matching = buildEdition(
+                id = 1,
+                title = "Refactoring",
+                authors = listOf(author),
+            )
+            val nonMatching = buildEdition(
+                id = 2,
+                title = "Other Book",
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(
@@ -395,7 +491,10 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `null title does not match a non-empty query`() {
             // ----- Arrange -----
-            val nullTitleEdition = buildEdition(id = 1, title = null)
+            val nullTitleEdition = buildEdition(
+                id = 1,
+                title = null,
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(
@@ -415,9 +514,18 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `TITLE ASCENDING sort orders editions alphabetically`() {
             // ----- Arrange -----
-            val editionC = buildEdition(id = 1, title = "Cherry")
-            val editionA = buildEdition(id = 2, title = "Apple")
-            val editionB = buildEdition(id = 3, title = "Banana")
+            val editionC = buildEdition(
+                id = 1,
+                title = "Cherry",
+            )
+            val editionA = buildEdition(
+                id = 2,
+                title = "Apple",
+            )
+            val editionB = buildEdition(
+                id = 3,
+                title = "Banana",
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(
@@ -437,9 +545,18 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `TITLE DESCENDING sort orders editions in reverse alphabetical order`() {
             // ----- Arrange -----
-            val editionC = buildEdition(id = 1, title = "Cherry")
-            val editionA = buildEdition(id = 2, title = "Apple")
-            val editionB = buildEdition(id = 3, title = "Banana")
+            val editionC = buildEdition(
+                id = 1,
+                title = "Cherry",
+            )
+            val editionA = buildEdition(
+                id = 2,
+                title = "Apple",
+            )
+            val editionB = buildEdition(
+                id = 3,
+                title = "Banana",
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(
@@ -459,7 +576,11 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `empty filters short-circuits chip filter and returns sorted list`() {
             // ----- Arrange -----
-            val edition = buildEdition(id = 1, title = "Solo Edition", owned = false)
+            val edition = buildEdition(
+                id = 1,
+                title = "Solo Edition",
+                owned = false,
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(
@@ -479,8 +600,16 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `non-empty filters keep only editions matching active facets`() {
             // ----- Arrange -----
-            val ownedEdition = buildEdition(id = 1, title = "Owned", owned = true)
-            val unownedEdition = buildEdition(id = 2, title = "Unowned", owned = false)
+            val ownedEdition = buildEdition(
+                id = 1,
+                title = "Owned",
+                owned = true,
+            )
+            val unownedEdition = buildEdition(
+                id = 2,
+                title = "Unowned",
+                owned = false,
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(
@@ -500,12 +629,29 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `matchesEdition resolves book-level facets via bookByBookId lookup`() {
             // ----- Arrange -----
-            val tagScifi = Tag(id = 1, name = "Sci-Fi")
-            val scifiBook = buildBook(id = 100, tags = listOf(tagScifi))
-            val nonScifiBook = buildBook(id = 200, tags = emptyList())
+            val tagScifi = Tag(
+                id = 1,
+                name = "Sci-Fi",
+            )
+            val scifiBook = buildBook(
+                id = 100,
+                tags = listOf(tagScifi),
+            )
+            val nonScifiBook = buildBook(
+                id = 200,
+                tags = emptyList(),
+            )
 
-            val scifiEdition = buildEdition(id = 1, bookId = 100, title = "Sci-Fi Ed")
-            val nonScifiEdition = buildEdition(id = 2, bookId = 200, title = "Other Ed")
+            val scifiEdition = buildEdition(
+                id = 1,
+                bookId = 100,
+                title = "Sci-Fi Ed",
+            )
+            val nonScifiEdition = buildEdition(
+                id = 2,
+                bookId = 200,
+                title = "Other Ed",
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(
@@ -525,8 +671,15 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `editions with unknown bookId are treated as having no book for filter purposes`() {
             // ----- Arrange -----
-            val tagScifi = Tag(id = 1, name = "Sci-Fi")
-            val orphanEdition = buildEdition(id = 1, bookId = 999, title = "Orphan")
+            val tagScifi = Tag(
+                id = 1,
+                name = "Sci-Fi",
+            )
+            val orphanEdition = buildEdition(
+                id = 1,
+                bookId = 999,
+                title = "Orphan",
+            )
 
             // ----- Act -----
             val result = computeDisplayEditions(

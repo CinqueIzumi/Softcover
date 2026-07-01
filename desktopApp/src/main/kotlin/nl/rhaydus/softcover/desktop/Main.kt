@@ -28,8 +28,14 @@ fun main() {
     // Name the app for the windowing system BEFORE any AWT/Swing toolkit init. On Linux the taskbar
     // WM_CLASS (and on macOS the menu-bar name) otherwise falls back to the main thread's class name,
     // which surfaces to users as "java-lang-Thread".
-    System.setProperty("apple.awt.application.name", "Softcover")
-    System.setProperty("awt.application.name", "Softcover")
+    System.setProperty(
+        "apple.awt.application.name",
+        "Softcover",
+    )
+    System.setProperty(
+        "awt.application.name",
+        "Softcover",
+    )
 
     AppLog.install(debug = true)
     installDesktopImageLoader()
