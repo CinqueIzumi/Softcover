@@ -135,8 +135,10 @@ internal fun EditionList(
     }
 
     // Custom-list editions still sort in memory — the dataset is small (dozens, not
-    // thousands) so the sort is cheap and the SQL-sort refactor is books-only.
-    val visibleEditions = state.displayEditionsFor(tabId = tab.id).orEmpty()
+    // thousands) so the sort is cheap and the SQL-sort refactor is books-only. Fall back to the
+    // raw (already source-ordered) list for the one frame between the raw editions landing and
+    // DisplayListsCollector producing the searched/sorted list, so the grid never flashes empty.
+    val visibleEditions = state.displayEditionsFor(tabId = tab.id) ?: rawEditions
 
     val visibleEditionIds = remember(visibleEditions) { visibleEditions.map { it.id } }
 
@@ -244,7 +246,11 @@ internal fun EditionList(
         gridState = gridState,
         columnsOverride = columnsOverride,
     ) {
-        itemsIndexed(renderIds, key = { _, id -> id }) { index, id ->
+        itemsIndexed(
+            renderIds,
+            key = { _, id -> id },
+            contentType = { _, _ -> "edition" },
+        ) { index, id ->
             val gridItemScope = this
 
             val edition = editionsById[id] ?: return@itemsIndexed
@@ -342,10 +348,11 @@ internal fun BookList(
         return
     }
 
-    // Books arrive pre-sorted from the DAO via SQL ORDER BY. The displayBooksFor call here
-    // only applies the in-memory search + Read-tab year filter, which is cheap (one pass
-    // over the list, no allocation when no filter is active).
-    val visibleBooks = state.displayBooksFor(tabId = tab.id).orEmpty()
+    // Books arrive pre-sorted from the DAO via SQL ORDER BY; DisplayListsCollector applies the
+    // search + Read-tab year filter off the main thread. Fall back to the raw (already sorted)
+    // list for the one frame between the raw books landing and the collector producing the
+    // filtered list, so the grid never flashes empty on first load.
+    val visibleBooks = state.displayBooksFor(tabId = tab.id) ?: rawBooks
 
     val visibleBookIds = remember(visibleBooks) { visibleBooks.map { it.id } }
 
@@ -445,7 +452,11 @@ internal fun BookList(
         gridState = gridState,
         columnsOverride = columnsOverride,
     ) {
-        itemsIndexed(renderIds, key = { _, id -> id }) { index, id ->
+        itemsIndexed(
+            renderIds,
+            key = { _, id -> id },
+            contentType = { _, _ -> "book" },
+        ) { index, id ->
             val gridItemScope = this
 
             val book = booksById[id] ?: return@itemsIndexed
@@ -897,6 +908,7 @@ private fun LayoutBookEntry(
                                     editionId = currentEdition?.id,
                                     bookId = book.id,
                                 ),
+                                maxDecodePx = 600,
                             )
                         }
                     }
@@ -932,6 +944,7 @@ private fun LayoutBookEntry(
                                     editionId = currentEdition?.id,
                                     bookId = book.id,
                                 ),
+                                maxDecodePx = 600,
                             )
                         }
                     }
@@ -986,6 +999,7 @@ private fun LayoutBookEntry(
                                 editionId = currentEdition?.id,
                                 bookId = book.id,
                             ),
+                            maxDecodePx = 600,
                         )
                     }
                 }
@@ -1054,6 +1068,7 @@ private fun LayoutEditionEntry(
                             bookId = edition.bookId,
                             surface = "edition-${edition.id}",
                         ),
+                        maxDecodePx = 600,
                     )
                 }
             }
@@ -1080,6 +1095,7 @@ private fun LayoutEditionEntry(
                             bookId = edition.bookId,
                             surface = "edition-${edition.id}",
                         ),
+                        maxDecodePx = 600,
                     )
                 }
             }
@@ -1115,6 +1131,7 @@ private fun LayoutEditionEntry(
                         bookId = edition.bookId,
                         surface = "edition-${edition.id}",
                     ),
+                    maxDecodePx = 600,
                 )
             }
         }

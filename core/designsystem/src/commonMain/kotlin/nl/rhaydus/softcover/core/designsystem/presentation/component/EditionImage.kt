@@ -62,11 +62,13 @@ fun EditionImage(
     cornerRadius: Dp = 4.dp,
     shadowColor: Color = Color.Unspecified,
     sharedTransitionKey: String? = null,
+    maxDecodePx: Int? = null,
 ) {
     val request = rememberEditionImageRequest(
         edition = edition,
         defaultEdition = defaultEdition,
         fallbackCoverUrl = fallbackCoverUrl,
+        maxDecodePx = maxDecodePx,
     )
 
     val coverlessFallback = coverlessTitle?.takeIf { it.isNotBlank() }
@@ -204,6 +206,7 @@ fun rememberEditionImageRequest(
     edition: BookEdition?,
     defaultEdition: BookEdition?,
     fallbackCoverUrl: String? = null,
+    maxDecodePx: Int? = null,
 ): ImageRequest? {
     val context = LocalPlatformContext.current
     val isInspection = LocalInspectionMode.current
@@ -220,7 +223,10 @@ fun rememberEditionImageRequest(
         fallbackCoverUrl = fallbackCoverUrl,
     ) ?: return null
 
-    return remember(resolution) {
+    return remember(
+        resolution,
+        maxDecodePx,
+    ) {
         val builder = ImageRequest.Builder(context).data(resolution.source)
 
         resolution.cacheKeyUrl?.let { key ->
@@ -245,6 +251,10 @@ fun rememberEditionImageRequest(
                     )
                 },
             )
+        }
+
+        if (maxDecodePx != null) {
+            builder.size(maxDecodePx)
         }
 
         builder.build()

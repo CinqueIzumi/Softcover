@@ -10,9 +10,6 @@ import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.feature.library.presentation.sort.applyEditionSort
-import nl.rhaydus.softcover.feature.library.presentation.util.availableFinishedYears
-import nl.rhaydus.softcover.feature.library.presentation.util.finishedYear
 import nl.rhaydus.toad.UiState
 
 internal data class LibraryUiState(
@@ -56,6 +53,30 @@ internal data class LibraryUiState(
      * are absent from this map; the lookup falls back to an empty [LibraryFilterOptions].
      */
     val filterOptionsByTab: Map<String, LibraryFilterOptions> = emptyMap(),
+
+    /**
+     * Search + year + filter-chip results per tab for book shelves, precomputed off the main
+     * thread by [DisplayListsCollector] so composition just does a map lookup on every frame.
+     */
+    val displayBooksByTab: Map<String, List<Book>> = emptyMap(),
+
+    /**
+     * Search + sort + filter results per tab for custom-list (edition) shelves, precomputed off
+     * the main thread by [DisplayListsCollector].
+     */
+    val displayEditionsByTab: Map<String, List<BookEdition>> = emptyMap(),
+
+    /**
+     * Tab-level stats (count + pages) keyed by tab id, precomputed off the main thread by
+     * [DisplayListsCollector].
+     */
+    val tabStatsByTab: Map<String, LibraryTabStats> = emptyMap(),
+
+    /**
+     * Available Read-tab years, precomputed off the main thread by [DisplayListsCollector] from
+     * the raw (unfiltered) Read books. Empty until the collector emits its first result.
+     */
+    val availableReadYearsCached: List<Int> = emptyList(),
 
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
@@ -117,90 +138,30 @@ internal data class LibraryUiState(
         filterOptionsByTab[tabId] ?: LibraryFilterOptions()
 
     /**
-     * Books to render for [tabId]. The list in [booksByTab] is already sorted by the DAO via
-     * SQL `ORDER BY` (see `BooksLocalDataSource.getSortedAllUserBooks` and friends), so this
-     * pass only needs to apply the in-memory search, Read-tab year filter, and the filter chips.
-     *
-     * Returns `null` when the source list hasn't been collected yet (so callers can distinguish
-     * "loading" from "loaded but empty"); returns an empty list when filters narrowed it to nothing.
+     * Books to render for [tabId], precomputed by [DisplayListsCollector] and served as an O(1)
+     * map lookup. Returns `null` when the source list hasn't been collected yet **or** the
+     * collector hasn't produced the display list for it yet (so callers can distinguish "still
+     * preparing" from "loaded but empty"); returns an empty list only when filters narrowed a
+     * computed list to nothing. Callers that already hold the raw source list fall back to it for
+     * the one-frame window between raw data landing and the display list being computed.
      */
-    fun displayBooksFor(tabId: String): List<Book>? {
-        val raw = booksByTab[tabId] ?: return null
-
-        val query = searchQuery.trim()
-
-        val searchFiltered = if (query.isEmpty()) {
-            raw
-        } else {
-            raw.filter { book ->
-                book.title.contains(
-                    query,
-                    ignoreCase = true,
-                ) ||
-                    book.authors.any { it.name.contains(
-                        query,
-                        ignoreCase = true,
-                    ) }
-            }
-        }
-
-        val isReadTab = tabId == LibraryTab.Status.of(UserBookStatus.READ).id
-
-        val yearFiltered = if (isReadTab && selectedReadYear != null) {
-            searchFiltered.filter { it.finishedYear() == selectedReadYear }
-        } else {
-            searchFiltered
-        }
-
-        val filters = filtersFor(tabId = tabId)
-
-        return if (filters.isEmpty) yearFiltered else yearFiltered.filter { filters.matchesBook(book = it) }
-    }
+    fun displayBooksFor(tabId: String): List<Book>? =
+        if (tabId in booksByTab) displayBooksByTab[tabId] else null
 
     /**
-     * Editions to render for [tabId] (custom lists only), with search + sort + filters applied
-     * in memory. Custom-list edition counts are small enough that the in-memory sort is fine —
-     * the SQL sort path is books-only. Returns `null` when the source list hasn't been collected yet.
+     * Editions to render for [tabId] (custom lists only), precomputed by [DisplayListsCollector]
+     * and served as an O(1) map lookup. Returns `null` when the source list hasn't been collected
+     * yet **or** the collector hasn't produced the display list for it yet; returns an empty list
+     * only when filters narrowed a computed list to nothing.
      */
-    fun displayEditionsFor(tabId: String): List<BookEdition>? {
-        val raw = editionsByTab[tabId] ?: return null
+    fun displayEditionsFor(tabId: String): List<BookEdition>? =
+        if (tabId in editionsByTab) displayEditionsByTab[tabId] else null
 
-        val query = searchQuery.trim()
-
-        val searchFiltered = if (query.isEmpty()) {
-            raw
-        } else {
-            raw.filter { edition ->
-                edition.title.orEmpty().contains(
-                    query,
-                    ignoreCase = true,
-                ) ||
-                    edition.authors.any { it.name.contains(
-                        query,
-                        ignoreCase = true,
-                    ) }
-            }
-        }
-
-        val sorted = searchFiltered.applyEditionSort(
-            mode = sortModeFor(tabId = tabId),
-            direction = sortDirectionFor(tabId = tabId),
-            addedAtByEditionId = addedAtByTab[tabId].orEmpty(),
+    fun tabStatsFor(tabId: String): LibraryTabStats =
+        tabStatsByTab[tabId] ?: LibraryTabStats(
+            itemCount = 0,
+            totalPages = 0,
         )
-
-        val filters = filtersFor(tabId = tabId)
-
-        return if (filters.isEmpty) {
-            sorted
-        } else {
-            sorted.filter { edition ->
-                filters.matchesEdition(
-                    edition = edition,
-                    book = bookByBookId[edition.bookId],
-                )
-            }
-        }
-    }
 
     /**
      * Resolves [bookIds] (defaulting to the current [selectedBookIds]) to the underlying [Book]
@@ -219,11 +180,7 @@ internal data class LibraryUiState(
         return bookIds.mapNotNull { byId[it] }
     }
 
-    /** Years that the Read tab can be filtered to, computed from raw (unfiltered) Read books. */
+    /** Years that the Read tab can be filtered to. Reads from the precomputed [availableReadYearsCached]. */
     val availableReadYears: List<Int>
-        get() {
-            val readTabId = LibraryTab.Status.of(UserBookStatus.READ).id
-
-            return booksByTab[readTabId]?.availableFinishedYears().orEmpty()
-        }
+        get() = availableReadYearsCached
 }

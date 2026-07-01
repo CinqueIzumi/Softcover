@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.BookDeadlines
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BooksByStatusCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.DisplayListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterOptionsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
@@ -47,6 +48,8 @@ val libraryModule = module {
     factory { DateStyleCollector() } bind LibraryCollector::class
 
     factory { FilterOptionsCollector() } bind LibraryCollector::class
+
+    factory { DisplayListsCollector() } bind LibraryCollector::class
 
     factory {
         LibraryScreenScreenModel(

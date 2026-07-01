@@ -4,15 +4,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
+import nl.rhaydus.softcover.feature.library.presentation.state.FilterOptionsInputs
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.state.buildBookFilterOptions
-import nl.rhaydus.softcover.feature.library.presentation.state.buildEditionFilterOptions
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -42,26 +38,5 @@ internal class FilterOptionsCollector : LibraryCollector {
 
                 scope.setState { it.copy(filterOptionsByTab = options) }
             }
-    }
-
-    private data class FilterOptionsInputs(
-        val booksByTab: Map<String, List<Book>>,
-        val editionsByTab: Map<String, List<BookEdition>>,
-        val bookByBookId: Map<Int, Book>,
-    ) {
-        fun compute(): Map<String, LibraryFilterOptions> {
-            val bookSide = booksByTab.mapValues { (_, books) ->
-                buildBookFilterOptions(books = books)
-            }
-
-            val editionSide = editionsByTab.mapValues { (_, editions) ->
-                buildEditionFilterOptions(
-                    editions = editions,
-                    bookByBookId = bookByBookId,
-                )
-            }
-
-            return bookSide + editionSide
-        }
     }
 }
