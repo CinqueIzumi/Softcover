@@ -136,17 +136,38 @@ class LibraryUiStateTest {
         sortDirectionByTab: Map<String, SortDirection> = emptyMap(),
         filtersByTab: Map<String, LibraryFilters> = emptyMap(),
         filterOptionsByTab: Map<String, LibraryFilterOptions> = emptyMap(),
-    ) = LibraryUiState(
-        booksByTab = booksByTab,
-        editionsByTab = editionsByTab,
-        bookByBookId = bookByBookId,
-        searchQuery = searchQuery,
-        selectedReadYear = selectedReadYear,
-        sortModeByTab = sortModeByTab,
-        sortDirectionByTab = sortDirectionByTab,
-        filtersByTab = filtersByTab,
-        filterOptionsByTab = filterOptionsByTab,
-    )
+        addedAtByTab: Map<String, Map<Int, String?>> = emptyMap(),
+    ): LibraryUiState {
+        val displayResult = DisplayInputs(
+            booksByTab = booksByTab,
+            editionsByTab = editionsByTab,
+            searchQuery = searchQuery,
+            selectedReadYear = selectedReadYear,
+            filtersByTab = filtersByTab,
+            sortModeByTab = sortModeByTab,
+            sortDirectionByTab = sortDirectionByTab,
+            addedAtByTab = addedAtByTab,
+            bookByBookId = bookByBookId,
+        ).compute(
+            prevBooksByTab = emptyMap(),
+            prevEditionsByTab = emptyMap(),
+        )
+        return LibraryUiState(
+            booksByTab = booksByTab,
+            editionsByTab = editionsByTab,
+            bookByBookId = bookByBookId,
+            searchQuery = searchQuery,
+            selectedReadYear = selectedReadYear,
+            sortModeByTab = sortModeByTab,
+            sortDirectionByTab = sortDirectionByTab,
+            filtersByTab = filtersByTab,
+            filterOptionsByTab = filterOptionsByTab,
+            displayBooksByTab = displayResult.displayBooksByTab,
+            displayEditionsByTab = displayResult.displayEditionsByTab,
+            tabStatsByTab = displayResult.tabStatsByTab,
+            availableReadYearsCached = displayResult.availableReadYearsCached,
+        )
+    }
     // endregion
     @Nested
     inner class Defaults {
