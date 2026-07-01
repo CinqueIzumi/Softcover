@@ -73,5 +73,15 @@ compose.desktop {
                 iconFile.set(project.file("src/main/resources/softcover.png"))
             }
         }
+
+        // Bake the marketing version in as a system property so the app reports it at runtime
+        // (JvmAppVersionProvider reads "softcover.appVersion"). application.jvmArgs reach BOTH the
+        // packaged launcher and a `./gradlew :run` launch (which has no jar manifest to read), so a
+        // dev run reports the real version and the auto-updater's version check behaves like a release
+        // build. Single-sourced from packageVersion above, so set-version-name only touches that literal.
+        // (No -Xdock:name here: a bare-JVM `:run` fork shows "java" in the macOS Dock and does not honor
+        // -Xdock:name; the packaged app takes its name from macOS.dockName below, which is the only
+        // reliable source. The `:run` Dock label is a dev-only cosmetic.)
+        jvmArgs += "-Dsoftcover.appVersion=${nativeDistributions.packageVersion}"
     }
 }
