@@ -36,6 +36,8 @@ Canonical example tests (paths relative to the project root):
 
 **`UserBook.status` is `BookStatus`, not `UserBookStatus`:** When stubbing a book's status in tests, use `mockk<UserBook> { every { status } returns BookStatus.getFromCode(userBookStatus.code) }`. Import `nl.rhaydus.softcover.core.domain.model.enum.BookStatus`. The two enums have matching integer codes so the conversion is always safe.
 
+**Gradle host-test task name differs by module type:** `:app` (Android-only) runs unit tests via `testDebugUnitTest`. Kotlin Multiplatform `core:*`/`feature:*` modules with an `androidHostTest` source set (e.g. `core:preferences`) instead run via `testAndroidHostTest` — e.g. `./gradlew :core:preferences:testAndroidHostTest --tests "...SomeUseCaseTest"`. If a `--tests` run against `testDebugUnitTest` fails to even find the task for a KMP module, retry with `testAndroidHostTest` before treating it as a real failure.
+
 **Why:** docs/reference/code-style.md and CLAUDE.md mandate these rules; violations cause style inconsistency across the codebase.
 
 **How to apply:** Every new test file in this project must follow these conventions exactly, regardless of test complexity.
