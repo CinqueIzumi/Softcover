@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataSource
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
@@ -129,6 +130,12 @@ internal class SettingsRepositoryImpl(
 
     override suspend fun setReadingStreakEnabled(enabled: Boolean) {
         settingsLocalDataSource.setReadingStreakEnabled(enabled = enabled)
+    }
+
+    override val uiScale: Flow<UiScale> = settingsLocalDataSource.uiScale
+
+    override suspend fun setUiScale(scale: UiScale) {
+        settingsLocalDataSource.setUiScale(scale = scale)
     }
 
     override val lastUsedProgressUnit: Flow<ProgressUnit> = settingsLocalDataSource.lastUsedProgressUnit

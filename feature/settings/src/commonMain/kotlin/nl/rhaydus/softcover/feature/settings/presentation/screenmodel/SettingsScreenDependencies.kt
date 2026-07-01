@@ -5,7 +5,9 @@ import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
@@ -19,6 +21,8 @@ internal data class SettingsScreenDependencies(
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     val setReadingStreakEnabledUseCase: SetReadingStreakEnabledUseCase,
+    val getUiScaleAsFlowUseCase: GetUiScaleAsFlowUseCase,
+    val setUiScaleUseCase: SetUiScaleUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.UiScale
 
 @Serializable
 internal data class AppSettingsEntity(
@@ -25,4 +26,5 @@ internal data class AppSettingsEntity(
     val desktopWindowState: DesktopWindowStateEntity = DesktopWindowStateEntity(),
     val readingStreakEnabled: Boolean = true,
     val lastUsedProgressUnit: ProgressUnit = ProgressUnit.PAGE,
+    val uiScale: UiScale = UiScale.DEFAULT,
 )

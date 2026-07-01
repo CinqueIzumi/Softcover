@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.toad.UiState
 
 internal data class SettingsScreenUiState(
@@ -11,4 +12,5 @@ internal data class SettingsScreenUiState(
     val dropDownExpanded: Boolean = false,
     val appVersionName: String = "",
     val appVersionCode: Int = 0,
+    val uiScale: UiScale = UiScale.DEFAULT,
 ) : UiState

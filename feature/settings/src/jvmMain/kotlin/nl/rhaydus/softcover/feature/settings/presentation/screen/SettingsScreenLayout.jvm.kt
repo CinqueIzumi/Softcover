@@ -358,6 +358,7 @@ private fun AppearancePane(
                     state = state,
                     runAction = runAction,
                     showBottomBarToggle = false,
+                    showUiScaleControl = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

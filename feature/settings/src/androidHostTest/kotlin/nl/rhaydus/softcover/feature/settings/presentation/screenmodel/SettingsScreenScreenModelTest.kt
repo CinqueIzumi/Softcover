@@ -59,6 +59,8 @@ class SettingsScreenScreenModelTest {
                 getThemeConfigurationUseCase = mockk(relaxed = true),
                 getReadingStreakEnabledAsFlowUseCase = mockk(relaxed = true),
                 setReadingStreakEnabledUseCase = mockk(relaxed = true),
+                getUiScaleAsFlowUseCase = mockk(relaxed = true),
+                setUiScaleUseCase = mockk(relaxed = true),
                 appVersionProvider = appVersionProvider,
                 appDispatchers = appDispatchers,
                 flows = emptyList(),
