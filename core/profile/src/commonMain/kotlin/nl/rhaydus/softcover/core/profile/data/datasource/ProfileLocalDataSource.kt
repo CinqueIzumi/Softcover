@@ -40,11 +40,11 @@ internal class ProfileLocalDataSourceImpl(
             // No cached profile yet → nothing to merge into; the next server refresh will carry it.
             val profile = cache.profile ?: return@updateData cache
 
-            if (isoDate in profile.activeReadingDates) return@updateData cache
+            if (isoDate in profile.recentReadingDays) return@updateData cache
 
             cache.copy(
                 profile = profile.copy(
-                    activeReadingDates = (profile.activeReadingDates + isoDate).sorted(),
+                    recentReadingDays = (profile.recentReadingDays + isoDate).sorted(),
                 ),
             )
         }

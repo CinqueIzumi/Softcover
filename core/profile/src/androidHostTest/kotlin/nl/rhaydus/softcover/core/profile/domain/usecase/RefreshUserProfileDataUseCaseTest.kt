@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -25,6 +26,10 @@ class RefreshUserProfileDataUseCaseTest {
         override fun now(): Instant = Instant.parse("2026-05-04T12:00:00Z")
     }
 
+    // Fixed clock's "today" and the window start derived from READING_ACTIVITY_WINDOW_DAYS (21).
+    private val today = LocalDate(2026, 5, 4)
+    private val windowStart = LocalDate(2026, 4, 14)
+
     private lateinit var profileRepository: ProfileRepository
     private lateinit var getUserIdUseCase: GetUserIdUseCase
     private lateinit var useCase: RefreshUserProfileDataUseCase
@@ -41,7 +46,7 @@ class RefreshUserProfileDataUseCaseTest {
         )
     }
 
-    private fun snapshot(activeReadingDates: Set<LocalDate>): UserProfileSnapshot = UserProfileSnapshot(
+    private fun snapshot(): UserProfileSnapshot = UserProfileSnapshot(
         profileImageUrl = "https://example.com/avatar.png",
         name = "Jane Doe",
         username = "cinque",
@@ -49,16 +54,26 @@ class RefreshUserProfileDataUseCaseTest {
         booksRead = 42,
         totalPagesRead = 12000,
         averageRating = 4.2,
-        activeReadingDates = activeReadingDates,
     )
 
-    private suspend fun capturedDataFor(activeReadingDates: Set<LocalDate>): UserProfileData {
+    // Drives readingStreak via streamReadingDaysDescending (must be strictly descending) and
+    // recentReadingDays via getActiveReadingDaysSince — the two are independent inputs.
+    private suspend fun capturedDataFor(
+        streamedDaysDescending: List<LocalDate>,
+        activeReadingDaysSince: Set<LocalDate>,
+    ): UserProfileData {
         val capturedData = mutableListOf<UserProfileData>()
 
         coEvery { getUserIdUseCase() } returns Result.success(42)
+        coEvery { profileRepository.fetchUserProfileSnapshot() } returns snapshot()
+
         coEvery {
-            profileRepository.fetchUserProfileSnapshot(userId = 42)
-        } returns snapshot(activeReadingDates = activeReadingDates)
+            profileRepository.streamReadingDaysDescending(userId = 42)
+        } returns flowOf(*streamedDaysDescending.toTypedArray())
+
+        coEvery {
+            profileRepository.getActiveReadingDaysSince(userId = 42, since = windowStart)
+        } returns activeReadingDaysSince
 
         coEvery {
             profileRepository.cacheUserProfileData(data = any())
@@ -76,7 +91,7 @@ class RefreshUserProfileDataUseCaseTest {
         @Test
         fun `returns success and caches profile data when repository returns snapshot`() = runTest {
             // ----- Arrange -----
-            val profileSnapshot = snapshot(activeReadingDates = emptySet())
+            val profileSnapshot = snapshot()
             val expectedData = UserProfileData(
                 profileImageUrl = profileSnapshot.profileImageUrl,
                 name = profileSnapshot.name,
@@ -86,13 +101,19 @@ class RefreshUserProfileDataUseCaseTest {
                 totalPagesRead = profileSnapshot.totalPagesRead,
                 averageRating = profileSnapshot.averageRating,
                 readingStreak = 0,
+                recentReadingDays = emptySet(),
             )
 
             coEvery { getUserIdUseCase() } returns Result.success(42)
+            coEvery { profileRepository.fetchUserProfileSnapshot() } returns profileSnapshot
 
             coEvery {
-                profileRepository.fetchUserProfileSnapshot(userId = 42)
-            } returns profileSnapshot
+                profileRepository.streamReadingDaysDescending(userId = 42)
+            } returns flowOf()
+
+            coEvery {
+                profileRepository.getActiveReadingDaysSince(userId = 42, since = windowStart)
+            } returns emptySet()
 
             coEvery {
                 profileRepository.cacheUserProfileData(data = expectedData)
@@ -119,7 +140,8 @@ class RefreshUserProfileDataUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe exception
-            coVerify(exactly = 0) { profileRepository.fetchUserProfileSnapshot(userId = any()) }
+            coVerify(exactly = 0) { profileRepository.fetchUserProfileSnapshot() }
+            coVerify(exactly = 0) { profileRepository.streamReadingDaysDescending(userId = any()) }
         }
 
         @Test
@@ -130,7 +152,7 @@ class RefreshUserProfileDataUseCaseTest {
             coEvery { getUserIdUseCase() } returns Result.success(42)
 
             coEvery {
-                profileRepository.fetchUserProfileSnapshot(userId = 42)
+                profileRepository.fetchUserProfileSnapshot()
             } throws exception
 
             // ----- Act -----
@@ -144,7 +166,10 @@ class RefreshUserProfileDataUseCaseTest {
         @Test
         fun `username from snapshot propagates into the cached UserProfileData`() = runTest {
             // ----- Act -----
-            val cached = capturedDataFor(activeReadingDates = emptySet())
+            val cached = capturedDataFor(
+                streamedDaysDescending = emptyList(),
+                activeReadingDaysSince = emptySet(),
+            )
 
             // ----- Assert -----
             cached.username shouldBe "cinque"
@@ -153,219 +178,106 @@ class RefreshUserProfileDataUseCaseTest {
 
     @Nested
     inner class ReadingStreak {
-        private suspend fun streakFor(activeReadingDates: Set<LocalDate>): Int =
-            capturedDataFor(activeReadingDates).readingStreak
+        private suspend fun streakFor(streamedDaysDescending: List<LocalDate>): Int =
+            capturedDataFor(
+                streamedDaysDescending = streamedDaysDescending,
+                activeReadingDaysSince = emptySet(),
+            ).readingStreak
 
         @Test
-        fun `returns 0 when active reading dates is empty`() = runTest {
+        fun `returns 0 when the reading-day stream is empty`() = runTest {
             // ----- Act & Assert -----
-            streakFor(activeReadingDates = emptySet()) shouldBe 0
+            streakFor(streamedDaysDescending = emptyList()) shouldBe 0
         }
 
         @Test
-        fun `returns 1 when only today has an active reading date`() = runTest {
+        fun `returns 1 when today is absent but yesterday is present (grace day)`() = runTest {
             // ----- Act & Assert -----
             streakFor(
-                activeReadingDates = setOf(LocalDate(
-                    2026,
-                    5,
-                    4,
-                ),),
+                streamedDaysDescending = listOf(today.minus(1, DateTimeUnit.DAY)),
             ) shouldBe 1
         }
 
         @Test
-        fun `returns 3 when today, yesterday, and day-before-yesterday are all present`() = runTest {
+        fun `returns short streak when the stream has an early gap`() = runTest {
+            // ----- Arrange -----
+            // today and yesterday are consecutive, then a gap (day-before-yesterday missing)
+            // before an older, unrelated date further back in the descending stream.
+            val streamedDays = listOf(
+                today,
+                today.minus(1, DateTimeUnit.DAY),
+                today.minus(3, DateTimeUnit.DAY),
+            )
+
             // ----- Act & Assert -----
-            streakFor(
-                activeReadingDates = setOf(
-                    LocalDate(
-                        2026,
-                        5,
-                        4,
-                    ),
-                    LocalDate(
-                        2026,
-                        5,
-                        3,
-                    ),
-                    LocalDate(
-                        2026,
-                        5,
-                        2,
-                    ),
-                ),
-            ) shouldBe 3
+            streakFor(streamedDaysDescending = streamedDays) shouldBe 2
         }
 
         @Test
-        fun `returns 2 when yesterday and day-before are present but not today (grace day)`() = runTest {
-            // ----- Act & Assert -----
-            streakFor(
-                activeReadingDates = setOf(
-                    LocalDate(
-                        2026,
-                        5,
-                        3,
-                    ),
-                    LocalDate(
-                        2026,
-                        5,
-                        2,
-                    ),
-                ),
-            ) shouldBe 2
-        }
+        fun `returns a streak longer than the reading-activity window when the stream has 30 consecutive days`() =
+            runTest {
+                // ----- Arrange -----
+                // 30 consecutive days ending on today, strictly descending. Only the most recent
+                // 21 days fall inside the activity window, but the streak itself is unbounded —
+                // it must not be truncated by any page-like limit.
+                val streamedDays = (0 until 30).map { today.minus(it, DateTimeUnit.DAY) }
 
-        @Test
-        fun `returns 1 when today is present but yesterday is missing (gap)`() = runTest {
-            // ----- Act & Assert -----
-            streakFor(
-                activeReadingDates = setOf(
-                    LocalDate(
-                        2026,
-                        5,
-                        4,
-                    ),
-                    LocalDate(
-                        2026,
-                        5,
-                        2,
-                    ),
-                ),
-            ) shouldBe 1
-        }
-
-        @Test
-        fun `returns 0 when only an older date outside the grace window is present`() = runTest {
-            // ----- Act & Assert -----
-            streakFor(
-                activeReadingDates = setOf(LocalDate(
-                    2026,
-                    5,
-                    1,
-                ),),
-            ) shouldBe 0
-        }
+                // ----- Act & Assert -----
+                streakFor(streamedDaysDescending = streamedDays) shouldBe 30
+            }
     }
 
     @Nested
-    inner class ActiveReadingDatesWindowing {
-        // Fixed today in this test class: 2026-05-04
-        // Window start: today.minusDays(20) = 2026-04-14
-        // Dates before 2026-04-14 must be dropped from the cached model.
+    inner class RecentReadingDaysIndependence {
+        @Test
+        fun `recentReadingDays reflects getActiveReadingDaysSince regardless of where the streamed streak breaks`() =
+            runTest {
+                // ----- Arrange -----
+                // The streamed streak breaks after two days, but getActiveReadingDaysSince
+                // returns an entirely different, older set of in-window days — the two inputs
+                // must stay independent.
+                val streamedDays = listOf(
+                    today,
+                    today.minus(1, DateTimeUnit.DAY),
+                    today.minus(5, DateTimeUnit.DAY),
+                )
+                val recentReadingDays = setOf(
+                    windowStart,
+                    windowStart.plus(2, DateTimeUnit.DAY),
+                )
+
+                // ----- Act -----
+                val cached = capturedDataFor(
+                    streamedDaysDescending = streamedDays,
+                    activeReadingDaysSince = recentReadingDays,
+                )
+
+                // ----- Assert -----
+                cached.recentReadingDays shouldBe recentReadingDays
+                coVerify(exactly = 1) {
+                    profileRepository.getActiveReadingDaysSince(userId = 42, since = windowStart)
+                }
+            }
 
         @Test
-        fun `cached activeReadingDates does not contain dates older than 20 days`() = runTest {
+        fun `readingStreak is unaffected by an unrelated or empty getActiveReadingDaysSince result`() = runTest {
             // ----- Arrange -----
-            val insideWindow = setOf(
-                LocalDate(
-                    2026,
-                    4,
-                    14,
-                ), // exactly the window start — must be kept
-                LocalDate(
-                    2026,
-                    4,
-                    20,
-                ),
-                LocalDate(
-                    2026,
-                    5,
-                    4,
-                ),
-            )
-            val outsideWindow = setOf(
-                LocalDate(
-                    2026,
-                    4,
-                    13,
-                ), // one day before window start — must be dropped
-                LocalDate(
-                    2026,
-                    3,
-                    1,
-                ),
-            )
-
-            // ----- Act -----
-            val cached = capturedDataFor(activeReadingDates = insideWindow + outsideWindow)
-
-            // ----- Assert -----
-            cached.activeReadingDates shouldBe insideWindow
-        }
-
-        @Test
-        fun `cached activeReadingDates does not contain future dates`() = runTest {
-            // ----- Arrange -----
-            val today = LocalDate(
-                2026,
-                5,
-                4,
-            )
-            val futureDate = today.plus(
-                1,
-                DateTimeUnit.DAY,
-            )
-            val validDate = today.minus(
-                1,
-                DateTimeUnit.DAY,
+            // A real streak comes from the streamed days while getActiveReadingDaysSince returns
+            // an unrelated, empty set — the streak must be driven only by the streamed days.
+            val streamedDays = listOf(
+                today,
+                today.minus(1, DateTimeUnit.DAY),
+                today.minus(2, DateTimeUnit.DAY),
             )
 
             // ----- Act -----
             val cached = capturedDataFor(
-                activeReadingDates = setOf(today, validDate, futureDate),
+                streamedDaysDescending = streamedDays,
+                activeReadingDaysSince = emptySet(),
             )
 
             // ----- Assert -----
-            cached.activeReadingDates.contains(futureDate) shouldBe false
-        }
-
-        @Test
-        fun `readingStreak uses the full snapshot set so a streak longer than 21 days is correct`() = runTest {
-            // ----- Arrange -----
-            // Build 30 consecutive days ending on today (2026-05-04).
-            // Only the last 21 days fall within the window, but the streak is 30.
-            val today = LocalDate(
-                2026,
-                5,
-                4,
-            )
-            val thirtyDays = (0 until 30).map { today.minus(
-                it,
-                DateTimeUnit.DAY,
-            ) }.toSet()
-
-            // ----- Act -----
-            val cached = capturedDataFor(activeReadingDates = thirtyDays)
-
-            // ----- Assert -----
-            cached.readingStreak shouldBe 30
-            // The cached date set is limited to the window.
-            cached.activeReadingDates.size shouldBe 21
-        }
-
-        @Test
-        fun `cached activeReadingDates is empty when all snapshot dates are outside the window`() = runTest {
-            // ----- Arrange -----
-            val oldDates = setOf(
-                LocalDate(
-                    2026,
-                    1,
-                    1,
-                ),
-                LocalDate(
-                    2025,
-                    12,
-                    15,
-                ),
-            )
-
-            // ----- Act -----
-            val cached = capturedDataFor(activeReadingDates = oldDates)
-
-            // ----- Assert -----
-            cached.activeReadingDates shouldBe emptySet()
+            cached.readingStreak shouldBe 3
         }
     }
 }

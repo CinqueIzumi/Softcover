@@ -7,6 +7,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
@@ -40,11 +42,6 @@ class ProfileRepositoryImplTest {
         booksRead = 42,
         totalPagesRead = 12345,
         averageRating = 4.2,
-        activeReadingDates = setOf(LocalDate(
-            2026,
-            5,
-            4,
-        ),),
     )
 
     private fun buildProfileData(): UserProfileData = UserProfileData(
@@ -66,15 +63,15 @@ class ProfileRepositoryImplTest {
             val expected = buildSnapshot()
 
             coEvery {
-                profileRemoteDataSource.getUserProfileSnapshot(userId = 42)
+                profileRemoteDataSource.getUserProfileSnapshot()
             } returns expected
 
             // ----- Act -----
-            val result = repository.fetchUserProfileSnapshot(userId = 42)
+            val result = repository.fetchUserProfileSnapshot()
 
             // ----- Assert -----
             result shouldBe expected
-            coVerify(exactly = 1) { profileRemoteDataSource.getUserProfileSnapshot(userId = 42) }
+            coVerify(exactly = 1) { profileRemoteDataSource.getUserProfileSnapshot() }
         }
 
         @Test
@@ -83,14 +80,65 @@ class ProfileRepositoryImplTest {
             val expectedError = RuntimeException("network error")
 
             coEvery {
-                profileRemoteDataSource.getUserProfileSnapshot(userId = 42)
+                profileRemoteDataSource.getUserProfileSnapshot()
             } throws expectedError
 
             // ----- Act -----
-            val thrownError = runCatching { repository.fetchUserProfileSnapshot(userId = 42) }.exceptionOrNull()
+            val thrownError = runCatching { repository.fetchUserProfileSnapshot() }.exceptionOrNull()
 
             // ----- Assert -----
             thrownError shouldBe expectedError
+        }
+    }
+
+    @Nested
+    inner class StreamReadingDaysDescending {
+        @Test
+        fun `delegates to remote and returns its flow`() = runTest {
+            // ----- Arrange -----
+            val dates = listOf(
+                LocalDate(2026, 6, 19),
+                LocalDate(2026, 6, 10),
+                LocalDate(2026, 5, 4),
+            )
+
+            every {
+                profileRemoteDataSource.streamReadingDaysDescending(userId = 7)
+            } returns flowOf(*dates.toTypedArray())
+
+            // ----- Act -----
+            val result = repository.streamReadingDaysDescending(userId = 7).toList()
+
+            // ----- Assert -----
+            result shouldBe dates
+        }
+    }
+
+    @Nested
+    inner class GetActiveReadingDaysSince {
+        @Test
+        fun `returns dates on or after the since date, excluding earlier dates`() = runTest {
+            // ----- Arrange -----
+            val since = LocalDate(2026, 6, 10)
+            val dates = listOf(
+                LocalDate(2026, 6, 19),
+                LocalDate(2026, 6, 10),
+                LocalDate(2026, 6, 1),
+                LocalDate(2026, 5, 4),
+            )
+
+            every {
+                profileRemoteDataSource.streamReadingDaysDescending(userId = 7)
+            } returns flowOf(*dates.toTypedArray())
+
+            // ----- Act -----
+            val result = repository.getActiveReadingDaysSince(userId = 7, since = since)
+
+            // ----- Assert -----
+            result shouldBe setOf(
+                LocalDate(2026, 6, 19),
+                LocalDate(2026, 6, 10),
+            )
         }
     }
 

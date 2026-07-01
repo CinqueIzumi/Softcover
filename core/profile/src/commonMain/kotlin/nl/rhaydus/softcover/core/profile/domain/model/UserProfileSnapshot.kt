@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.core.profile.domain.model
 
-import kotlinx.datetime.LocalDate
-
 data class UserProfileSnapshot(
     val profileImageUrl: String,
     val name: String,
@@ -10,5 +8,4 @@ data class UserProfileSnapshot(
     val booksRead: Int,
     val totalPagesRead: Int,
     val averageRating: Double,
-    val activeReadingDates: Set<LocalDate>,
 )

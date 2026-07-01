@@ -8,7 +8,14 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 interface ProfileRepository {
     fun observeUserProfileData(): Flow<UserProfileData?>
 
-    suspend fun fetchUserProfileSnapshot(userId: Int): UserProfileSnapshot
+    suspend fun fetchUserProfileSnapshot(): UserProfileSnapshot
+
+    fun streamReadingDaysDescending(userId: Int): Flow<LocalDate>
+
+    suspend fun getActiveReadingDaysSince(
+        userId: Int,
+        since: LocalDate,
+    ): Set<LocalDate>
 
     suspend fun cacheUserProfileData(data: UserProfileData)
 

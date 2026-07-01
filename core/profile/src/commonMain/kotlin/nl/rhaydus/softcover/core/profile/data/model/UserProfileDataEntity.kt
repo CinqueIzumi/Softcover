@@ -14,7 +14,7 @@ internal data class UserProfileDataEntity(
     val totalPagesRead: Int,
     val averageRating: Double,
     val readingStreak: Int,
-    val activeReadingDates: List<String> = emptyList(),
+    val recentReadingDays: List<String> = emptyList(),
 )
 
 internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
@@ -26,7 +26,7 @@ internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
     totalPagesRead = totalPagesRead,
     averageRating = averageRating,
     readingStreak = readingStreak,
-    activeReadingDates = activeReadingDates
+    recentReadingDays = recentReadingDays
         .mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
         .toSet(),
 )
@@ -40,7 +40,7 @@ internal fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileData
     totalPagesRead = totalPagesRead,
     averageRating = averageRating,
     readingStreak = readingStreak,
-    activeReadingDates = activeReadingDates
+    recentReadingDays = recentReadingDays
         .sorted()
         .map { it.toString() },
 )

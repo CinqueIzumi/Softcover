@@ -52,7 +52,7 @@ class ObserveRecentReadingActivityUseCaseTest {
         totalPagesRead = 12000,
         averageRating = 4.2,
         readingStreak = 5,
-        activeReadingDates = dates,
+        recentReadingDays = dates,
     )
 
     @Nested

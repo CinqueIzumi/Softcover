@@ -1,4 +1,4 @@
-query GetUserProfileData($userId: Int!) {
+query GetUserProfileData {
     me {
         bio
         image {
@@ -38,17 +38,5 @@ query GetUserProfileData($userId: Int!) {
                 }
             }
         }
-    }
-    # Capped at 1000 rows; users with more journal entries than that will see
-    # streaks longer than ~1000 active days truncated.
-    streak_journals: reading_journals(
-        where: {
-            user_id: { _eq: $userId }
-            event: { _in: ["progress_updated", "user_book_read_finished"] }
-        }
-        order_by: { updated_at: desc }
-        limit: 1000
-    ) {
-        action_at
     }
 }
