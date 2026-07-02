@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.connectivity.data.datasource
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,7 @@ import nl.rhaydus.ui.common.AppDispatchers
  */
 internal class ConnectivityDataSourceImpl(
     dispatchers: AppDispatchers,
-) : ConnectivityDataSource {
+) : ConnectivityDataSource, AutoCloseable {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.io)
 
     private val _isOnline = MutableStateFlow(true)
@@ -36,6 +37,11 @@ internal class ConnectivityDataSourceImpl(
                 delay(POLL_INTERVAL)
             }
         }
+    }
+
+    // Stops the process-lifetime poll loop so the desktop shutdown path leaves no probe mid-connect.
+    override fun close() {
+        scope.cancel()
     }
 
     private fun isHostReachable(): Boolean =

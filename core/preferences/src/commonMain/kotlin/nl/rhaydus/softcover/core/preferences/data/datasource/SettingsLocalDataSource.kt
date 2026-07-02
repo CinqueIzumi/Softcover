@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 import nl.rhaydus.softcover.core.preferences.data.model.toEntity
@@ -80,6 +81,10 @@ interface SettingsLocalDataSource {
     val readingStreakEnabled: Flow<Boolean>
 
     suspend fun setReadingStreakEnabled(enabled: Boolean)
+
+    val uiScale: Flow<UiScale>
+
+    suspend fun setUiScale(scale: UiScale)
 
     val lastUsedProgressUnit: Flow<ProgressUnit>
 
@@ -265,6 +270,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setReadingStreakEnabled(enabled: Boolean) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(readingStreakEnabled = enabled)
+        }
+    }
+
+    override val uiScale: Flow<UiScale> = appSettingsDataStore.store.data
+        .map { it.uiScale }
+        .distinctUntilChanged()
+
+    override suspend fun setUiScale(scale: UiScale) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(uiScale = scale)
         }
     }
 

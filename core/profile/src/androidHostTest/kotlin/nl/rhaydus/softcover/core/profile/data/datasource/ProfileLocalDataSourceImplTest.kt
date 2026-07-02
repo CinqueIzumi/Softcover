@@ -26,7 +26,7 @@ class ProfileLocalDataSourceImplTest {
         totalPagesRead = 0,
         averageRating = 0.0,
         readingStreak = 0,
-        activeReadingDates = emptyList(),
+        recentReadingDays = emptyList(),
     )
 
     @BeforeEach
@@ -43,7 +43,7 @@ class ProfileLocalDataSourceImplTest {
         fun `adds new date and keeps list sorted ascending`() = runTest {
             // ----- Arrange -----
             val seed = ProfileCacheEntity(
-                profile = baseProfile.copy(activeReadingDates = listOf("2026-06-17")),
+                profile = baseProfile.copy(recentReadingDays = listOf("2026-06-17")),
             )
             var result = seed
             coEvery { store.updateData(any()) } coAnswers {
@@ -59,14 +59,14 @@ class ProfileLocalDataSourceImplTest {
             ),)
 
             // ----- Assert -----
-            result.profile!!.activeReadingDates shouldBe listOf("2026-06-17", "2026-06-19")
+            result.profile!!.recentReadingDays shouldBe listOf("2026-06-17", "2026-06-19")
         }
 
         @Test
         fun `is a no-op when date is already present`() = runTest {
             // ----- Arrange -----
             val seed = ProfileCacheEntity(
-                profile = baseProfile.copy(activeReadingDates = listOf("2026-06-19")),
+                profile = baseProfile.copy(recentReadingDays = listOf("2026-06-19")),
             )
             var result = seed
             coEvery { store.updateData(any()) } coAnswers {
@@ -82,7 +82,7 @@ class ProfileLocalDataSourceImplTest {
             ),)
 
             // ----- Assert -----
-            result.profile!!.activeReadingDates shouldBe listOf("2026-06-19")
+            result.profile!!.recentReadingDays shouldBe listOf("2026-06-19")
         }
 
         @Test

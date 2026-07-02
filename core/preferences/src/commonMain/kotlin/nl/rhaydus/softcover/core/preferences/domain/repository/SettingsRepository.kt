@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.UiScale
 
 interface SettingsRepository {
     val dateStyle: Flow<DateStyle>
@@ -81,6 +82,10 @@ interface SettingsRepository {
     val readingStreakEnabled: Flow<Boolean>
 
     suspend fun setReadingStreakEnabled(enabled: Boolean)
+
+    val uiScale: Flow<UiScale>
+
+    suspend fun setUiScale(scale: UiScale)
 
     val lastUsedProgressUnit: Flow<ProgressUnit>
 

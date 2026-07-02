@@ -81,7 +81,8 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 ### Settings
 - Toggle between a floating and docked bottom navigation bar.
 - Choose your preferred date format.
-- Receive in-app update prompts when a newer version is available on Google Play.
+- Adjust the display scale on desktop to size text and UI to your screen.
+- Stay current with in-app updates — Google Play prompts on Android, and a self-updater backed by GitHub releases on desktop.
 
 ### Onboarding
 - Connect your Hardcover account on first launch by entering your API token, after a short introductory walkthrough.

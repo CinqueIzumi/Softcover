@@ -1,0 +1,13 @@
+query GetReadingActivityDays($userId: Int!, $limit: Int!, $offset: Int!) {
+    reading_journals(
+        where: {
+            user_id: { _eq: $userId }
+            event: { _in: ["progress_updated", "user_book_read_finished"] }
+        }
+        order_by: { action_at: desc }
+        limit: $limit
+        offset: $offset
+    ) {
+        action_at
+    }
+}

@@ -21,7 +21,7 @@ class ObserveRecentReadingActivityUseCase(
 ) {
     operator fun invoke(): Flow<List<ReadingDayActivity>> =
         profileRepository.observeUserProfileData().map { data ->
-            val activeDates = data?.activeReadingDates.orEmpty()
+            val activeDates = data?.recentReadingDays.orEmpty()
             // "Today" is defined in the device's local timezone so the strip advances at the user's
             // local midnight and a reading-day matches the calendar day they actually read on.
             val today = clock.todayIn(timeZone)

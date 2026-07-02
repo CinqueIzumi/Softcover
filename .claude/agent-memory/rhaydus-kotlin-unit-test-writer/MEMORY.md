@@ -1,1 +1,2 @@
 - [OfflineSync mocking pattern in BooksRepositoryImplTest](feedback_offline_sync_mocking_pattern.md) — relaxed offlineSync mock silences initializeBooks; every refreshUserBooks test needs a pass-through drainAndReconcile stub
+- [Kotest reference equality: always parenthesise ===](feedback_kotest_reference_equality.md) — `a === b shouldBe true` is wrong (=== < infix precedence); write `(a === b) shouldBe true`

@@ -22,12 +22,14 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettin
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetDesktopWindowStateUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 import org.koin.dsl.module
 
 val preferencesModule = module {
@@ -92,6 +94,10 @@ val preferencesModule = module {
     factory { GetReadingStreakEnabledAsFlowUseCase(settingsRepository = get()) }
 
     factory { SetReadingStreakEnabledUseCase(settingsRepository = get()) }
+
+    factory { GetUiScaleAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetUiScaleUseCase(settingsRepository = get()) }
 
     factory { GetLastUsedProgressUnitAsFlowUseCase(settingsRepository = get()) }
 

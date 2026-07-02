@@ -5,7 +5,9 @@ import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
@@ -18,6 +20,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLib
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ReadingStreakCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
@@ -43,6 +46,8 @@ val settingsModule = module {
             setDateStyleUseCase = get(),
             getReadingStreakEnabledAsFlowUseCase = get(),
             setReadingStreakEnabledUseCase = get(),
+            getUiScaleAsFlowUseCase = get(),
+            setUiScaleUseCase = get(),
             appVersionProvider = get(),
         )
     }
@@ -52,6 +57,8 @@ val settingsModule = module {
     factory { DateStyleCollector() } bind SettingsCollector::class
 
     factory { ReadingStreakCollector() } bind SettingsCollector::class
+
+    factory { UiScaleCollector() } bind SettingsCollector::class
 
     factory { SetBottomBarStyleUseCase(settingsRepository = get()) }
 

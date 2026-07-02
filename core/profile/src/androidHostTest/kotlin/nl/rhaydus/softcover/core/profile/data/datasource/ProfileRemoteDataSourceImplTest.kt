@@ -4,10 +4,12 @@ import com.apollographql.apollo.ApolloClient
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.GetReadingActivityDaysQuery
 import nl.rhaydus.softcover.GetUserProfileDataQuery
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
@@ -117,7 +120,6 @@ class ProfileRemoteDataSourceImplTest {
 
             every { queryData.me } returns listOf(meEntry)
             every { meEntry.user_books_pages } returns listOf(userBooksPage)
-            every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns "John Doe"
             every { meEntry.username } returns "johndoe"
             every { meEntry.bio } returns "A bio"
@@ -132,7 +134,7 @@ class ProfileRemoteDataSourceImplTest {
             every { ratedBooksAvg.rating } returns 3.75
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 42)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result shouldBe UserProfileSnapshot(
@@ -143,7 +145,6 @@ class ProfileRemoteDataSourceImplTest {
                 booksRead = 42,
                 totalPagesRead = 12500,
                 averageRating = 3.75,
-                activeReadingDates = emptySet(),
             )
         }
 
@@ -164,7 +165,6 @@ class ProfileRemoteDataSourceImplTest {
 
             every { queryData.me } returns listOf(meEntry)
             every { meEntry.user_books_pages } returns emptyList()
-            every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns null
             every { meEntry.username } returns null
             every { meEntry.bio } returns null
@@ -178,7 +178,7 @@ class ProfileRemoteDataSourceImplTest {
             every { ratedBooksAvg.rating } returns null
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 42)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.name shouldBe ""
@@ -203,7 +203,6 @@ class ProfileRemoteDataSourceImplTest {
 
             every { queryData.me } returns listOf(meEntry)
             every { meEntry.user_books_pages } returns emptyList()
-            every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns "Jane"
             every { meEntry.username } returns "jane"
             every { meEntry.bio } returns "Bio"
@@ -217,7 +216,7 @@ class ProfileRemoteDataSourceImplTest {
             every { ratedBooksAvg.rating } returns null
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 42)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.profileImageUrl shouldBe ""
@@ -241,7 +240,6 @@ class ProfileRemoteDataSourceImplTest {
 
             every { queryData.me } returns listOf(meEntry)
             every { meEntry.user_books_pages } returns emptyList()
-            every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns "Jane"
             every { meEntry.username } returns "jane"
             every { meEntry.bio } returns "Bio"
@@ -256,7 +254,7 @@ class ProfileRemoteDataSourceImplTest {
             every { ratedBooksAvg.rating } returns null
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 42)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.profileImageUrl shouldBe ""
@@ -276,7 +274,6 @@ class ProfileRemoteDataSourceImplTest {
 
             every { queryData.me } returns listOf(meEntry)
             every { meEntry.user_books_pages } returns emptyList()
-            every { queryData.streak_journals } returns emptyList()
             every { meEntry.name } returns "Jane"
             every { meEntry.username } returns "jane"
             every { meEntry.bio } returns "Bio"
@@ -287,7 +284,7 @@ class ProfileRemoteDataSourceImplTest {
             every { ratedBooks.aggregate } returns null
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 42)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.booksRead shouldBe 0
@@ -308,7 +305,7 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.getUserProfileSnapshot(userId = 42)
+                dataSource.getUserProfileSnapshot()
             }
         }
 
@@ -323,222 +320,8 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<RuntimeException> {
-                dataSource.getUserProfileSnapshot(userId = 42)
+                dataSource.getUserProfileSnapshot()
             }
-        }
-
-        @Test
-        fun `activeReadingDates contains only parseable dates and deduplicates`() = runTest {
-            // ----- Arrange -----
-            val queryData = mockk<GetUserProfileDataQuery.Data>()
-            val meEntry = mockk<GetUserProfileDataQuery.Data.Me>()
-            val booksRead = mockk<GetUserProfileDataQuery.Data.Me.Books_read>()
-            val ratedBooks = mockk<GetUserProfileDataQuery.Data.Me.Rated_books>()
-
-            val parseable1 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-            val parseable2 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-            val unparseable = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-            val duplicate = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-
-            coEvery {
-                apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
-            } returns queryData
-
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns emptyList()
-            every { queryData.streak_journals } returns listOf(
-                parseable1,
-                parseable2,
-                unparseable,
-                duplicate,
-            )
-            every { parseable1.action_at } returns "2026-05-04"
-            every { parseable2.action_at } returns "2026-05-03"
-            every { unparseable.action_at } returns "not-a-date"
-            every { duplicate.action_at } returns "2026-05-04"
-            every { meEntry.name } returns ""
-            every { meEntry.username } returns ""
-            every { meEntry.bio } returns ""
-            every { meEntry.image } returns null
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns null
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns null
-
-            // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 42)
-
-            // ----- Assert -----
-            result.activeReadingDates shouldBe setOf(
-                LocalDate(
-                    2026,
-                    5,
-                    4,
-                ),
-                LocalDate(
-                    2026,
-                    5,
-                    3,
-                ),
-            )
-        }
-
-        @Test
-        fun `activeReadingDates parses ISO timestamp action_at values`() = runTest {
-            // ----- Arrange -----
-            val queryData = mockk<GetUserProfileDataQuery.Data>()
-            val meEntry = mockk<GetUserProfileDataQuery.Data.Me>()
-            val booksRead = mockk<GetUserProfileDataQuery.Data.Me.Books_read>()
-            val ratedBooks = mockk<GetUserProfileDataQuery.Data.Me.Rated_books>()
-
-            val timestamp1 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-            val timestamp2 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-            val bareDate = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-
-            coEvery {
-                apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
-            } returns queryData
-
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns emptyList()
-            every { queryData.streak_journals } returns listOf(timestamp1, timestamp2, bareDate)
-            every { timestamp1.action_at } returns "2026-05-04T06:20:37.939189+00:00"
-            every { timestamp2.action_at } returns "2026-05-03T22:00:00+00:00"
-            every { bareDate.action_at } returns "2026-05-02"
-            every { meEntry.name } returns ""
-            every { meEntry.username } returns ""
-            every { meEntry.bio } returns ""
-            every { meEntry.image } returns null
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns null
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns null
-
-            // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 42)
-
-            // ----- Assert -----
-            result.activeReadingDates shouldBe setOf(
-                LocalDate(
-                    2026,
-                    5,
-                    4,
-                ),
-                LocalDate(
-                    2026,
-                    5,
-                    3,
-                ),
-                LocalDate(
-                    2026,
-                    5,
-                    2,
-                ),
-            )
-        }
-
-        @Test
-        fun `activeReadingDates converts non-UTC timestamps to UTC date`() = runTest {
-            // ----- Arrange -----
-            val queryData = mockk<GetUserProfileDataQuery.Data>()
-            val meEntry = mockk<GetUserProfileDataQuery.Data.Me>()
-            val booksRead = mockk<GetUserProfileDataQuery.Data.Me.Books_read>()
-            val ratedBooks = mockk<GetUserProfileDataQuery.Data.Me.Rated_books>()
-
-            val entry = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-
-            coEvery {
-                apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
-            } returns queryData
-
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns emptyList()
-            every { queryData.streak_journals } returns listOf(entry)
-            every { entry.action_at } returns "2026-05-05T01:30:00+04:00"
-            every { meEntry.name } returns ""
-            every { meEntry.username } returns ""
-            every { meEntry.bio } returns ""
-            every { meEntry.image } returns null
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns null
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns null
-
-            // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 42)
-
-            // ----- Assert -----
-            result.activeReadingDates shouldBe setOf(LocalDate(
-                2026,
-                5,
-                4,
-            ),)
-        }
-
-        @Test
-        fun `activeReadingDates — UTC-5 timezone maps late-night UTC timestamps to correct local dates`() = runTest {
-            // Under TimeZone.UTC these three instants bucket to {05-17, 05-19, 05-20},
-            // leaving 05-18 empty and breaking the streak.
-            // With UTC-5 they map to {05-17, 05-18, 05-19} — a continuous set.
-            // ----- Arrange -----
-            val utcMinus5 = UtcOffset(hours = -5).asTimeZone()
-            val localDataSource = ProfileRemoteDataSourceImpl(
-                apolloClient = apolloClient,
-                timeZone = utcMinus5,
-            )
-
-            val queryData = mockk<GetUserProfileDataQuery.Data>()
-            val meEntry = mockk<GetUserProfileDataQuery.Data.Me>()
-            val booksRead = mockk<GetUserProfileDataQuery.Data.Me.Books_read>()
-            val ratedBooks = mockk<GetUserProfileDataQuery.Data.Me.Rated_books>()
-
-            val entry1 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-            val entry2 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-            val entry3 = mockk<GetUserProfileDataQuery.Data.Streak_journal>()
-
-            coEvery {
-                apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
-            } returns queryData
-
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns emptyList()
-            every { queryData.streak_journals } returns listOf(entry1, entry2, entry3)
-            // 2026-05-17T23:15:05Z → UTC-5: 18:15 on 2026-05-17
-            every { entry1.action_at } returns "2026-05-17T23:15:05+00:00"
-            // 2026-05-19T04:00:00Z → UTC-5: 23:00 on 2026-05-18
-            every { entry2.action_at } returns "2026-05-19T04:00:00+00:00"
-            // 2026-05-20T03:42:04Z → UTC-5: 22:42 on 2026-05-19
-            every { entry3.action_at } returns "2026-05-20T03:42:04+00:00"
-            every { meEntry.name } returns ""
-            every { meEntry.username } returns ""
-            every { meEntry.bio } returns ""
-            every { meEntry.image } returns null
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns null
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns null
-
-            // ----- Act -----
-            val result = localDataSource.getUserProfileSnapshot(userId = 42)
-
-            // ----- Assert -----
-            result.activeReadingDates shouldBe setOf(
-                LocalDate(
-                    year = 2026,
-                    monthNumber = 5,
-                    dayOfMonth = 17,
-                ),
-                LocalDate(
-                    year = 2026,
-                    monthNumber = 5,
-                    dayOfMonth = 18,
-                ),
-                LocalDate(
-                    year = 2026,
-                    monthNumber = 5,
-                    dayOfMonth = 19,
-                ),
-            )
         }
     }
 
@@ -557,7 +340,6 @@ class ProfileRemoteDataSourceImplTest {
             } returns queryData
 
             every { queryData.me } returns listOf(meEntry)
-            every { queryData.streak_journals } returns emptyList()
             every { meEntry.user_books_pages } returns userBooksPages
             every { meEntry.name } returns ""
             every { meEntry.username } returns ""
@@ -577,7 +359,7 @@ class ProfileRemoteDataSourceImplTest {
             arrangeQueryData(userBooksPages = emptyList())
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 1)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.totalPagesRead shouldBe 0
@@ -591,7 +373,7 @@ class ProfileRemoteDataSourceImplTest {
             arrangeQueryData(userBooksPages = listOf(page))
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 1)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.totalPagesRead shouldBe 250
@@ -609,7 +391,7 @@ class ProfileRemoteDataSourceImplTest {
             arrangeQueryData(userBooksPages = listOf(page))
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 1)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.totalPagesRead shouldBe 300
@@ -627,7 +409,7 @@ class ProfileRemoteDataSourceImplTest {
             arrangeQueryData(userBooksPages = listOf(page))
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 1)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.totalPagesRead shouldBe 280
@@ -645,7 +427,7 @@ class ProfileRemoteDataSourceImplTest {
             arrangeQueryData(userBooksPages = listOf(page))
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 1)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.totalPagesRead shouldBe 0
@@ -663,7 +445,7 @@ class ProfileRemoteDataSourceImplTest {
             arrangeQueryData(userBooksPages = listOf(page))
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 1)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.totalPagesRead shouldBe 0
@@ -694,7 +476,7 @@ class ProfileRemoteDataSourceImplTest {
             arrangeQueryData(userBooksPages = listOf(page))
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 1)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.totalPagesRead shouldBe 300
@@ -725,7 +507,7 @@ class ProfileRemoteDataSourceImplTest {
             arrangeQueryData(userBooksPages = listOf(page))
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 1)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.totalPagesRead shouldBe 350
@@ -752,10 +534,183 @@ class ProfileRemoteDataSourceImplTest {
             arrangeQueryData(userBooksPages = listOf(page1, page2, page3))
 
             // ----- Act -----
-            val result = dataSource.getUserProfileSnapshot(userId = 1)
+            val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
             result.totalPagesRead shouldBe 500
+        }
+    }
+
+    @Nested
+    inner class StreamReadingDaysDescending {
+        private fun readingJournal(actionAt: String): GetReadingActivityDaysQuery.Data.Reading_journal {
+            val row = mockk<GetReadingActivityDaysQuery.Data.Reading_journal>()
+
+            every { row.action_at } returns actionAt
+
+            return row
+        }
+
+        private fun readingActivityPage(vararg actionAts: String): GetReadingActivityDaysQuery.Data {
+            val page = mockk<GetReadingActivityDaysQuery.Data>()
+
+            every { page.reading_journals } returns actionAts.map { readingJournal(it) }
+
+            return page
+        }
+
+        @Test
+        fun `emits parsed dates across pages until an empty page ends the stream`() = runTest {
+            // ----- Arrange -----
+            val page1 = readingActivityPage(
+                "2026-05-04",
+                "2026-05-03",
+            )
+            val page2 = readingActivityPage(
+                "2026-05-02",
+                "2026-05-01",
+            )
+            val emptyPage = readingActivityPage()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetReadingActivityDaysQuery>())
+            } returnsMany listOf(page1, page2, emptyPage)
+
+            // ----- Act -----
+            val result = dataSource.streamReadingDaysDescending(userId = 42).toList()
+
+            // ----- Assert -----
+            result shouldBe listOf(
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    3,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    2,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    1,
+                ),
+            )
+            coVerify(exactly = 3) {
+                apolloClient.safeQuery(query = any<GetReadingActivityDaysQuery>())
+            }
+        }
+
+        @Test
+        fun `advances offset by raw row count including unparseable rows`() = runTest {
+            // ----- Arrange -----
+            // 3 raw rows (one unparseable) → offset must advance by 3, not by the 2 parsed dates.
+            val page1 = readingActivityPage(
+                "2026-05-04",
+                "not-a-date",
+                "2026-05-03",
+            )
+            val page2 = readingActivityPage()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetReadingActivityDaysQuery>())
+            } returnsMany listOf(page1, page2)
+
+            // ----- Act -----
+            val result = dataSource.streamReadingDaysDescending(userId = 42).toList()
+
+            // ----- Assert -----
+            result shouldBe listOf(
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    3,
+                ),
+            )
+            coVerify {
+                apolloClient.safeQuery(
+                    query = GetReadingActivityDaysQuery(
+                        userId = 42,
+                        limit = 100,
+                        offset = 3,
+                    ),
+                )
+            }
+        }
+
+        @Test
+        fun `buckets timestamps by local timezone and passes bare dates through unchanged`() = runTest {
+            // ----- Arrange -----
+            val utcMinus5 = UtcOffset(hours = -5).asTimeZone()
+            val localDataSource = ProfileRemoteDataSourceImpl(
+                apolloClient = apolloClient,
+                timeZone = utcMinus5,
+            )
+
+            // 2026-05-17T23:15:05Z → UTC-5: 18:15 on 2026-05-17
+            // 2026-05-19T04:00:00Z → UTC-5: 23:00 on 2026-05-18
+            val page = readingActivityPage(
+                "2026-05-17T23:15:05+00:00",
+                "2026-05-19T04:00:00+00:00",
+                "2026-05-02",
+            )
+            val emptyPage = readingActivityPage()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetReadingActivityDaysQuery>())
+            } returnsMany listOf(page, emptyPage)
+
+            // ----- Act -----
+            val result = localDataSource.streamReadingDaysDescending(userId = 42).toList()
+
+            // ----- Assert -----
+            result shouldBe listOf(
+                LocalDate(
+                    2026,
+                    5,
+                    17,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    18,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    2,
+                ),
+            )
+        }
+
+        @Test
+        fun `empty first page emits nothing and makes a single call`() = runTest {
+            // ----- Arrange -----
+            val emptyPage = readingActivityPage()
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetReadingActivityDaysQuery>())
+            } returns emptyPage
+
+            // ----- Act -----
+            val result = dataSource.streamReadingDaysDescending(userId = 42).toList()
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+            coVerify(exactly = 1) {
+                apolloClient.safeQuery(query = any<GetReadingActivityDaysQuery>())
+            }
         }
     }
 }

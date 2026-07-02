@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
-import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -58,6 +57,7 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.theme.StandardPreview
@@ -92,7 +92,6 @@ import nl.rhaydus.softcover.feature.library.presentation.component.LibraryContro
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -160,39 +159,13 @@ internal actual fun LibraryScreenLayout(
     val isReadTab = currentTab is LibraryContentTab.Status &&
             currentTab.status == UserBookStatus.READ
 
-    // Books are pre-sorted by the DAO (SQL ORDER BY), so this is just a filter pass.
-    val currentTabBooks: List<Book>? = currentTab?.let { tab ->
-        when (tab) {
-            is LibraryContentTab.CustomList -> null
-            is LibraryContentTab.All,
-            is LibraryContentTab.Status,
-                -> state.displayBooksFor(tabId = tab.id)
-        }
-    }
-
-    val currentTabEditions: List<BookEdition>? = currentTab?.let { tab ->
-        when (tab) {
-            is LibraryContentTab.CustomList -> state.displayEditionsFor(tabId = tab.id)
-            else -> null
-        }
-    }
-
-    val currentTabBookCount = currentTabBooks?.size ?: currentTabEditions?.size
-
-    val currentTabPageCount = currentTabBooks?.totalPages() ?: 0
+    val currentTabStats = currentTab?.id?.let { state.tabStatsFor(tabId = it) }
+    val currentTabBookCount: Int? = currentTabStats?.itemCount
+    val currentTabPageCount: Int = currentTabStats?.totalPages ?: 0
 
     val availableReadYears = if (isReadTab) state.availableReadYears else emptyList()
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = topAppBarState)
-
-    val collapseFraction = if (topAppBarState.heightOffsetLimit < 0f) {
-        (topAppBarState.heightOffset / topAppBarState.heightOffsetLimit).coerceIn(
-            0f,
-            1f,
-        )
-    } else {
-        0f
-    }
 
     val haptics = LocalHaptics.current
 
@@ -251,9 +224,10 @@ internal actual fun LibraryScreenLayout(
                     onToggleSearchClick = { runAction(OnToggleSearchAction()) },
                     pullToRefreshState = pullToRefreshState,
                     isRefreshing = state.isLoading,
-                    collapseFraction = collapseFraction,
+                    topAppBarState = topAppBarState,
                     onCollapsibleSized = { measured ->
                         val newLimit = -measured.toFloat()
+
                         if (measured > 0 && newLimit != topAppBarState.heightOffsetLimit) {
                             val previousFraction = if (topAppBarState.heightOffsetLimit < 0f) {
                                 (topAppBarState.heightOffset / topAppBarState.heightOffsetLimit)
@@ -507,9 +481,20 @@ private fun EditorialHeader(
     onToggleSearchClick: () -> Unit,
     pullToRefreshState: PullToRefreshState,
     isRefreshing: Boolean,
-    collapseFraction: Float,
+    topAppBarState: TopAppBarState,
     onCollapsibleSized: (Int) -> Unit,
 ) {
+    // Reads heightOffset only inside graphicsLayer/layout lambdas so a per-frame offset
+    // change re-runs only those draw/layout phases — never a recomposition of the whole header.
+    val collapseFraction: () -> Float = {
+        val limit = topAppBarState.heightOffsetLimit
+
+        if (limit < 0f) (topAppBarState.heightOffset / limit).coerceIn(
+            0f,
+            1f,
+        ) else 0f
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -543,11 +528,11 @@ private fun EditorialHeader(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .graphicsLayer { alpha = 1f - collapseFraction }
+                .graphicsLayer { alpha = 1f - collapseFraction() }
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(constraints)
                     onCollapsibleSized(placeable.height)
-                    val visibleHeight = (placeable.height * (1f - collapseFraction))
+                    val visibleHeight = (placeable.height * (1f - collapseFraction()))
                         .toInt()
                         .coerceAtLeast(0)
                     layout(placeable.width, visibleHeight) {

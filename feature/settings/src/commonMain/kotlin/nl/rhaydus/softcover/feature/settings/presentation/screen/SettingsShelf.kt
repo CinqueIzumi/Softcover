@@ -53,6 +53,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDateStyleClickAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDynamicColorToggledAction
@@ -61,6 +62,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.OnListToggleAct
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReadingStreakToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReorderLibraryTabsAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnStatusToggleAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnUiScaleSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
@@ -71,17 +73,28 @@ import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicCo
  * The Appearance settings body, shared by the mobile [AppearanceSettingsScreen] page and the desktop
  * Settings master–detail pane. The Dynamic-colour section is gated on [supportsDynamicColor] (always
  * `false` on desktop). [showBottomBarToggle] hides the floating-bottom-bar preference on desktop,
- * where there is no bottom bar (it is a compact-only preference). The caller supplies the scroll /
- * width [modifier].
+ * where there is no bottom bar (it is a compact-only preference). [showUiScaleControl] is desktop-only
+ * (hidden on mobile, where the OS handles DPI) and surfaces the "Display scale" picker first, since on
+ * desktop it is the most relevant appearance control. The caller supplies the scroll / width [modifier].
  */
 @Composable
 internal fun AppearanceSettingsContent(
     state: SettingsScreenUiState,
     runAction: (SettingsAction) -> Unit,
     showBottomBarToggle: Boolean,
+    showUiScaleControl: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
+        if (showUiScaleControl) {
+            UiScaleSection(
+                state = state,
+                runAction = runAction,
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+        }
+
         if (supportsDynamicColor()) {
             DynamicColorSection(
                 state = state,
@@ -113,6 +126,85 @@ internal fun AppearanceSettingsContent(
         )
 
         Spacer(modifier = Modifier.height(48.dp))
+    }
+}
+
+@Composable
+private fun UiScaleSection(
+    state: SettingsScreenUiState,
+    runAction: (SettingsAction) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        EditorialSectionHeader(
+            eyebrow = "Display scale",
+            headline = "Text & interface size",
+            description = "Scales all text and controls. Try a larger size if the app looks too small on your display.",
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        UiScale.entries.forEachIndexed { index, scale ->
+            if (index > 0) {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            UiScaleOption(
+                scale = scale,
+                isSelected = state.uiScale == scale,
+                onClick = { runAction(OnUiScaleSelectedAction(scale = scale)) },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "Applies immediately, across the whole app.",
+            style = MaterialTheme.editorialTypography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun UiScaleOption(
+    scale: UiScale,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val containerColor = if (isSelected) {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    } else {
+        MaterialTheme.colorScheme.surfaceContainer
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .noRippleClickable(onClick = onClick),
+        color = containerColor,
+        shape = RoundedCornerShape(20.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 18.dp,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SelectionIndicator(isSelected = isSelected)
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = scale.label,
+                style = MaterialTheme.editorialTypography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 

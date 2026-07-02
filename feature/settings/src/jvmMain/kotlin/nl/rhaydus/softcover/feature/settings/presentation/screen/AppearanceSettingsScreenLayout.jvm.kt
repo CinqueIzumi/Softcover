@@ -45,6 +45,7 @@ internal actual fun AppearanceSettingsScreenLayout(
                 state = state,
                 runAction = runAction,
                 showBottomBarToggle = false,
+                showUiScaleControl = true,
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)

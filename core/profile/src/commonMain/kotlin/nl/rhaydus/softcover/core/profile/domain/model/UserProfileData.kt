@@ -11,5 +11,5 @@ data class UserProfileData(
     val totalPagesRead: Int,
     val averageRating: Double,
     val readingStreak: Int,
-    val activeReadingDates: Set<LocalDate> = emptySet(),
+    val recentReadingDays: Set<LocalDate> = emptySet(),
 )

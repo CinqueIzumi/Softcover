@@ -17,7 +17,7 @@ class UserProfileDataEntityTest {
         totalPagesRead = 12000,
         averageRating = 4.2,
         readingStreak = 5,
-        activeReadingDates = dates,
+        recentReadingDays = dates,
     )
 
     @Nested
@@ -31,7 +31,7 @@ class UserProfileDataEntityTest {
             val result = model.toEntity().toModel()
 
             // ----- Assert -----
-            result.activeReadingDates shouldBe emptySet()
+            result.recentReadingDays shouldBe emptySet()
         }
 
         @Test
@@ -60,7 +60,7 @@ class UserProfileDataEntityTest {
             val result = model.toEntity().toModel()
 
             // ----- Assert -----
-            result.activeReadingDates shouldBe dates
+            result.recentReadingDays shouldBe dates
         }
 
         @Test
@@ -101,14 +101,14 @@ class UserProfileDataEntityTest {
             val entity = model.toEntity()
 
             // ----- Assert -----
-            entity.activeReadingDates shouldBe listOf("2026-04-14", "2026-04-30", "2026-05-04")
+            entity.recentReadingDays shouldBe listOf("2026-04-14", "2026-04-30", "2026-05-04")
         }
     }
 
     @Nested
     inner class BackwardCompat {
         @Test
-        fun `legacy JSON without activeReadingDates field decodes with empty list`() {
+        fun `legacy JSON without recentReadingDays field decodes with empty list`() {
             // ----- Arrange -----
             val legacyJson = """
                 {
@@ -130,11 +130,11 @@ class UserProfileDataEntityTest {
             )
 
             // ----- Assert -----
-            entity.activeReadingDates shouldBe emptyList()
+            entity.recentReadingDays shouldBe emptyList()
         }
 
         @Test
-        fun `legacy entity without activeReadingDates maps to empty set on toModel`() {
+        fun `legacy entity without recentReadingDays maps to empty set on toModel`() {
             // ----- Arrange -----
             val legacyJson = """
                 {
@@ -157,11 +157,11 @@ class UserProfileDataEntityTest {
             val model = entity.toModel()
 
             // ----- Assert -----
-            model.activeReadingDates shouldBe emptySet()
+            model.recentReadingDays shouldBe emptySet()
         }
 
         @Test
-        fun `malformed date strings in activeReadingDates are silently dropped on toModel`() {
+        fun `malformed date strings in recentReadingDays are silently dropped on toModel`() {
             // ----- Arrange -----
             val entity = UserProfileDataEntity(
                 profileImageUrl = "https://example.com/avatar.png",
@@ -172,14 +172,14 @@ class UserProfileDataEntityTest {
                 totalPagesRead = 12000,
                 averageRating = 4.2,
                 readingStreak = 5,
-                activeReadingDates = listOf("2026-05-04", "not-a-date", "2026-04-14"),
+                recentReadingDays = listOf("2026-05-04", "not-a-date", "2026-04-14"),
             )
 
             // ----- Act -----
             val model = entity.toModel()
 
             // ----- Assert -----
-            model.activeReadingDates shouldBe setOf(
+            model.recentReadingDays shouldBe setOf(
                 LocalDate(
                     2026,
                     5,
