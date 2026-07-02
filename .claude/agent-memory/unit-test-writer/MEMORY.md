@@ -7,3 +7,4 @@
 - [Apollo CompiledField mocking for CacheResolver tests](feedback_apollo_compiled_field_mocking.md) — stub argumentValues+nameWithArguments for delegate path; FieldPolicyCacheResolver calls argumentValues(vars, filter) not argumentValue
 - [Apollo safeQueryFlow mocking — fetchPolicy + toFlow chain](feedback_apollo_fetchpolicy_mocking.md) — mockkStatic("...NormalizedCache") for fetchPolicy ext; ApolloResponse.Builder 2-param public ctor; mockkObject for SessionExpiredNotifier/NetworkAvailability
 - [mockk capture() needs no import](feedback_mockk_capture_no_import.md) — import only io.mockk.slot; `import io.mockk.capture` fails to resolve
+- [rhaydus-foundation Test Conventions](project_rhaydus_foundation_test_conventions.md) — sibling repo, same JUnit5/kotest/AAA idiom as Softcover; no commonTest, tests live only in androidHostTest; testAndroidHostTest task
