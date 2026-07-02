@@ -26,8 +26,7 @@ they are not sequential within a batch. Batches are ordered to respect the depen
 | Batch | Theme | Home | Items |
 |---|---|---|---|
 | — | **Implemented & adopted** | — | _(none yet)_ |
-| — | **Implemented, not adopted** | `core-ui` / `ktlint-rules` / `detekt-rules` | F1, F4, F5, F6, F7, F19 |
-| B | Non-visual platform seams | `nl.rhaydus:core-ui` | F9, F10 |
+| — | **Implemented, not adopted** | `core-common` / `core-platform` / `ktlint-rules` / `detekt-rules` | F1, F4, F5, F6, F7, F9, F10, F19 |
 | C | Bottom bar | `nl.rhaydus:designsystem-core` (layout + component) | F2, F3 |
 | D | Shared Compose components & primitives | `nl.rhaydus:designsystem-core` | F13, F14 |
 | E | Desktop (jvm) affordances | `nl.rhaydus:designsystem-core` (jvmMain) | F12, F15 |
@@ -56,15 +55,15 @@ _(none yet)_
 
 ## Implemented, not adopted
 
-F4, F5, and F6 landed together in `nl.rhaydus:core-ui` on the foundation `release/0.3.0` branch (the result
+F4, F5, and F6 landed together in `nl.rhaydus:core-common` on the foundation `release/0.3.0` branch (the result
 helpers built on the logging facade). Softcover still ships the app-local copies and has not re-pointed its
 imports.
 
 ### F4 — `runCatchingCancellable` helper that rethrows `CancellationException`
 
 - **Type:** enhancement (shared util)
-- **Home:** `nl.rhaydus:core-ui` (the non-visual seam that already ships `AppDispatchers`)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-ui` (`common/RunCatchingCancellable.kt`, foundation `release/0.3.0`) as the pure primitive below; Softcover still ships its app-local `:core:domain` `result/RunCatchingCancellable.kt`. Adoption (a separate, later step) deletes the local copy and re-points the one import in `result/RunCatchingLogged.kt` to `nl.rhaydus.ui.common`.
+- **Home:** `nl.rhaydus:core-common` (the non-visual seam that already ships `AppDispatchers`)
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-common` (`common/RunCatchingCancellable.kt`, foundation `release/0.3.0`) as the pure primitive below; Softcover still ships its app-local `:core:domain` `result/RunCatchingCancellable.kt`. Adoption (a separate, later step) deletes the local copy and re-points the one import in `result/RunCatchingLogged.kt` to `nl.rhaydus.common`.
 
 Kotlin's stdlib `runCatching` catches *every* `Throwable`, including `CancellationException`. Inside a
 coroutine that silently swallows structured-concurrency cancellation: a cancelled child runs its
@@ -84,7 +83,7 @@ inline fun <T> runCatchingCancellable(block: () -> T): Result<T> =
 ```
 
 Every app on the foundation that uses `runCatching` in coroutine code needs this, so it belongs in
-`core-ui` rather than being re-derived per app. It is also the "cancellation-aware `runCatching`" that
+`core-common` rather than being re-derived per app. It is also the "cancellation-aware `runCatching`" that
 **F1** names as the acceptable guarded form of a one-shot flow read, and it is the clean replacement for
 the hand-rolled `catch (Throwable) { … }` + manual `CancellationException` rethrow pattern (e.g. the
 `SoftcoverWorker` note in the architecture review).
@@ -106,8 +105,8 @@ means the upstream move touches one import, not every use case.
 ### F5 — `runCatchingLogged` (log-at-source use-case wrapper)
 
 - **Type:** enhancement (shared util)
-- **Home:** `nl.rhaydus:core-ui` (next to the F4 primitive)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-ui` (`common/RunCatchingLogged.kt`, foundation `release/0.3.0`), on top of the now-upstream `AppLog` (F6); Softcover still ships its app-local `:core:domain` `result/RunCatchingLogged.kt`. Adoption deletes the local copy and re-points the 53 use-case sites' import to `nl.rhaydus.ui.common` (the wrapper insulates them — a one-line import move, not 53 edits).
+- **Home:** `nl.rhaydus:core-common` (next to the F4 primitive)
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-common` (`common/RunCatchingLogged.kt`, foundation `release/0.3.0`), on top of the now-upstream `AppLog` (F6); Softcover still ships its app-local `:core:domain` `result/RunCatchingLogged.kt`. Adoption deletes the local copy and re-points the 53 use-case sites' import to `nl.rhaydus.common` (the wrapper insulates them — a one-line import move, not 53 edits).
 
 `runCatchingLogged` = `runCatchingCancellable` + a single `AppLog.e` on failure (optional `context`
 label). It is the enforced use-case-body form: a failure is logged once, at the boundary, so it is never
@@ -130,8 +129,8 @@ likewise become a real foundation ktlint rule once `runCatchingLogged` is a foun
 ### F6 — Logging facade (`AppLog`) belongs in the foundation
 
 - **Type:** enhancement (shared util)
-- **Home:** `nl.rhaydus:core-ui` (alongside `AppDispatchers`, the existing non-visual seam)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-ui` (`common/AppLog.kt`, foundation `release/0.3.0`) as a brand-agnostic, Kermit-backed facade: the `tag` and line `prefix` are `install(...)` parameters (no `"Softcover"` constant), output stays debug-gated, and Kermit is an `implementation` dependency so no Kermit type leaks into the public surface. Earns its place per F2's bar (prefix formatter + debug-gated install + cross-target consistency, not a bare re-export) and unblocked F5. Softcover still ships its app-local `:core:domain` `logging/AppLog.kt`.
+- **Home:** `nl.rhaydus:core-common` (alongside `AppDispatchers`, the existing non-visual seam)
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-common` (`common/AppLog.kt`, foundation `release/0.3.0`) as a brand-agnostic, Kermit-backed facade: the `tag` and line `prefix` are `install(...)` parameters (no `"Softcover"` constant), output stays debug-gated, and Kermit is an `implementation` dependency so no Kermit type leaks into the public surface. Earns its place per F2's bar (prefix formatter + debug-gated install + cross-target consistency, not a bare re-export) and unblocked F5. Softcover still ships its app-local `:core:domain` `logging/AppLog.kt`.
 
 `AppLog` (`:core:domain` `logging/`) is a Kermit-backed, multiplatform logging facade: `i` / `w` / `e`
 with message-and-throwable variants, a debug-gated `install(...)`, and a prefix formatter — call sites
@@ -139,7 +138,7 @@ stay platform-agnostic (Logcat / os_log / stdout). Every KMP app needs exactly t
 already carries an **implicit dependency** on it: the `nl.rhaydus:ktlint-rules` `BlankLineAfterStatementRule`
 keys on `AppLog.e` (per [`../reference/code-style.md`](../reference/code-style.md) §Error Handling). A
 shared rule that hard-codes an *app-level* symbol name is a smell — hoisting a brand-agnostic logging
-facade into `core-ui` (the `"Softcover"` tag becomes config, not a constant) makes that rule's assumption
+facade into `core-common` (the `"Softcover"` tag becomes config, not a constant) makes that rule's assumption
 real and unblocks F5's `runCatchingLogged`.
 
 Mind F2's caution: keep it earning its place. The value is the cross-target consistency, the custom prefix
@@ -155,6 +154,46 @@ hand-roll). If on inspection it is only the latter, demote this entry rather tha
 - **Status:** **Implemented, not adopted.** The foundation now ships a shared detekt baseline (`config/detekt.yml`, bundled in `nl.rhaydus:detekt-rules`) carrying the foundation-worthy calibrations only - Compose/TOAD `ignoreAnnotated` across the complexity/naming rules, `MagicNumber` off, `LargeClass`/`LongParameterList(constructor=30)`, guard-clause `ReturnCount`, snake_case `PackageNaming`; detekt's `formatting` ruleset stays off (ktlint owns layout). A `detektCheck` task runs it (plus the custom `rhaydus` ruleset) over the foundation's own source. App-specific thresholds (Room/DAO counts, Apollo exception policy, `Typos`) stay in each app's override file. On adopt, Softcover points its detekt at the shared config and drops the duplicated calibrations.
 
 (Surfaced as one of the F18-F23 audit findings, but built now alongside F1 - standing up detekt for the type-resolved flow rule was the natural moment to centralize the config too.)
+
+---
+
+F9 and F10 landed together in the new `nl.rhaydus:core-platform` module on the foundation `release/0.3.0`
+branch (the two non-visual platform-capability seams of Batch B). During this work `core-ui` was **split**:
+the base non-visual primitives (`AppDispatchers`, `AppLog`, the `runCatching*` helpers, the formatters) were
+renamed into `nl.rhaydus:core-common` (package `nl.rhaydus.common`), and the platform-capability seams live
+one module out in `core-platform` (which `api`-depends on `core-common`). Both seams ship as an interface
+plus public per-platform implementation classes with **no Koin module** — matching the foundation precedent
+that each app wires its own DI. Softcover still ships its app-local copies and has not re-pointed its
+imports.
+
+### F9 — Secure cross-platform secret storage seam
+
+- **Type:** enhancement (shared util / platform seam)
+- **Home:** `nl.rhaydus:core-platform`
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-platform` as `SecureStorage`
+  (`commonMain`) — the app's single-secret `SecureApiKeyStorage` generalized to a **keyed** read/write/delete
+  store (`read(key)` / `write(key, value)` / `delete(key)`). Public per-platform impls: `AndroidSecureStorage`
+  (AES/GCM in the Keystore, one ciphertext file per key under `filesDir`), `IosSecureStorage` (Keychain
+  generic-password keyed by account), `JvmSecureStorage` (KSafe over the desktop OS secret store; `ksafe`
+  added to the foundation catalog + `core-platform` jvmMain). Impls use `core-common`'s `AppLog`
+  + `AppDispatchers`. Softcover still ships its app-local `:core:preferences`
+  `data/security/SecureApiKeyStorage.kt` (+ the three actuals). Adoption re-points the preferences DI/data
+  code onto `SecureStorage` (keyed by the app's `"api_key"`) and deletes the app-local copies.
+
+### F10 — `NetworkAvailabilityProvider` (reactive + instant connectivity seam)
+
+- **Type:** enhancement (shared util / platform seam)
+- **Home:** `nl.rhaydus:core-platform`
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-platform`: the
+  `NetworkAvailabilityProvider` interface (`isOnline: StateFlow<Boolean>`, `awaitOnline()`), the
+  `NetworkAvailability` instant-check singleton, and a `BaseNetworkAvailabilityProvider` that implements the
+  shared `awaitOnline()`. Softcover's `ConnectivityDataSource` + `ConnectivityRepositoryImpl` two-layer split
+  is **collapsed** into one provider per platform: `AndroidNetworkAvailabilityProvider`
+  (`ConnectivityManager`), `IosNetworkAvailabilityProvider` (`nw_path_monitor`),
+  `JvmNetworkAvailabilityProvider` (reachability polling, `AutoCloseable`). Softcover still ships the
+  app-local interface (`:core:domain` `connectivity/`) + data layer (`:core:connectivity`). Adoption
+  re-points `NetworkAvailability.install(...)` and the DI onto the foundation types and deletes the app-local
+  copies. (Unblocks Batch H's drain-on-network-return trigger.)
 
 ---
 
@@ -211,45 +250,6 @@ gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-move
 2. **Own the script upstream, not per app.** The `rhaydus-kotlin` plugin already ships a `style-check`
    skill; until a rule is promoted, its recipe (and the script harness) should live with that skill so
    apps don't each copy and maintain `style-check.sh`. The app keeps only genuinely app-specific recipes.
-
----
-
-## Batch B — Non-visual platform seams (`core-ui`)
-
-*Home: `nl.rhaydus:core-ui`, alongside `AppDispatchers`. Covers **F9, F10**. Both are small read/write
-`expect`/`actual` seams over a platform capability (Android / iOS / desktop) with a clean domain-agnostic
-interface, so they share the same module shape and per-platform plumbing. Land **F10 before Batch H** — the
-offline queue drains on network-return and depends on this connectivity seam.*
-
-### F9 — Secure cross-platform secret storage seam
-
-- **Type:** enhancement (shared util / platform seam)
-- **Home:** `nl.rhaydus:core-ui`, or a dedicated security seam
-- **Status:** Open — already cleanly abstracted; no refactor needed
-
-`SecureApiKeyStorage` (`core/preferences/src/commonMain/.../data/security/SecureApiKeyStorage.kt`) is a
-minimal read/write/delete interface over hardware-backed secret storage, with platform implementations
-for Android (Keystore), iOS (Keychain), and desktop. Cross-platform secret storage is universal KMP
-infrastructure — not app-specific — and the interface is already clean and correct. The only app-coupled
-thing is the name (it stores *an API key*); generalize it to `SecureStorage` / a keyed secret store and
-it drops into the foundation as-is. Mind F2's bar: the value here is the three real platform-backed
-implementations, not the interface alone.
-
----
-
-### F10 — `NetworkAvailabilityProvider` (reactive + instant connectivity seam)
-
-- **Type:** enhancement (shared util / platform seam)
-- **Home:** `nl.rhaydus:core-ui` (alongside `AppDispatchers`)
-- **Status:** Open — straightforward seam
-
-`NetworkAvailabilityProvider` (`core/domain/connectivity/NetworkAvailabilityProvider.kt`) exposes
-connectivity both reactively (`isOnline: StateFlow<Boolean>`, `awaitOnline()`) and synchronously (the
-`NetworkAvailability` instant-check singleton, for guard clauses like "throw offline if not connected").
-Every KMP app needs both shapes, and the interface is fully domain-agnostic — only the per-platform
-implementations (Android `ConnectivityManager`, iOS Network framework, desktop) bind underneath. Hoisting
-this also unblocks a foundation connectivity-banner component (Softcover's `ConnectivityBanner` /
-`OfflineGuard` are generic except for their dependency on this provider type and their copy).
 
 ---
 
