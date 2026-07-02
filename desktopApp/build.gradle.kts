@@ -38,7 +38,7 @@ compose.desktop {
             // Desktop release version — the marketing version (mirrors Android versionName /
             // iOS MARKETING_VERSION). Kept in sync by the set-version-name / release skills. Desktop
             // has no separate build-number field, so versionCode has no desktop counterpart.
-            packageVersion = "3.0.1"
+            packageVersion = "3.0.2"
             description = "Softcover — a Hardcover.app book tracking client"
             // Maintainer/vendor for the package metadata (jpackage Deb/Msi); without it the Linux
             // package falls back to "Unknown". This is package metadata, not the runtime window name

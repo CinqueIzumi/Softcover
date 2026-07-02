@@ -27,8 +27,16 @@ class RefreshUserProfileDataUseCaseTest {
     }
 
     // Fixed clock's "today" and the window start derived from READING_ACTIVITY_WINDOW_DAYS (21).
-    private val today = LocalDate(2026, 5, 4)
-    private val windowStart = LocalDate(2026, 4, 14)
+    private val today = LocalDate(
+        2026,
+        5,
+        4,
+    )
+    private val windowStart = LocalDate(
+        2026,
+        4,
+        14,
+    )
 
     private lateinit var profileRepository: ProfileRepository
     private lateinit var getUserIdUseCase: GetUserIdUseCase
@@ -72,7 +80,10 @@ class RefreshUserProfileDataUseCaseTest {
         } returns flowOf(*streamedDaysDescending.toTypedArray())
 
         coEvery {
-            profileRepository.getActiveReadingDaysSince(userId = 42, since = windowStart)
+            profileRepository.getActiveReadingDaysSince(
+                userId = 42,
+                since = windowStart,
+            )
         } returns activeReadingDaysSince
 
         coEvery {
@@ -112,7 +123,10 @@ class RefreshUserProfileDataUseCaseTest {
             } returns flowOf()
 
             coEvery {
-                profileRepository.getActiveReadingDaysSince(userId = 42, since = windowStart)
+                profileRepository.getActiveReadingDaysSince(
+                    userId = 42,
+                    since = windowStart,
+                )
             } returns emptySet()
 
             coEvery {
@@ -194,7 +208,10 @@ class RefreshUserProfileDataUseCaseTest {
         fun `returns 1 when today is absent but yesterday is present (grace day)`() = runTest {
             // ----- Act & Assert -----
             streakFor(
-                streamedDaysDescending = listOf(today.minus(1, DateTimeUnit.DAY)),
+                streamedDaysDescending = listOf(today.minus(
+                    1,
+                    DateTimeUnit.DAY,
+                ),),
             ) shouldBe 1
         }
 
@@ -205,8 +222,14 @@ class RefreshUserProfileDataUseCaseTest {
             // before an older, unrelated date further back in the descending stream.
             val streamedDays = listOf(
                 today,
-                today.minus(1, DateTimeUnit.DAY),
-                today.minus(3, DateTimeUnit.DAY),
+                today.minus(
+                    1,
+                    DateTimeUnit.DAY,
+                ),
+                today.minus(
+                    3,
+                    DateTimeUnit.DAY,
+                ),
             )
 
             // ----- Act & Assert -----
@@ -220,7 +243,10 @@ class RefreshUserProfileDataUseCaseTest {
                 // 30 consecutive days ending on today, strictly descending. Only the most recent
                 // 21 days fall inside the activity window, but the streak itself is unbounded —
                 // it must not be truncated by any page-like limit.
-                val streamedDays = (0 until 30).map { today.minus(it, DateTimeUnit.DAY) }
+                val streamedDays = (0 until 30).map { today.minus(
+                    it,
+                    DateTimeUnit.DAY,
+                ) }
 
                 // ----- Act & Assert -----
                 streakFor(streamedDaysDescending = streamedDays) shouldBe 30
@@ -238,12 +264,21 @@ class RefreshUserProfileDataUseCaseTest {
                 // must stay independent.
                 val streamedDays = listOf(
                     today,
-                    today.minus(1, DateTimeUnit.DAY),
-                    today.minus(5, DateTimeUnit.DAY),
+                    today.minus(
+                        1,
+                        DateTimeUnit.DAY,
+                    ),
+                    today.minus(
+                        5,
+                        DateTimeUnit.DAY,
+                    ),
                 )
                 val recentReadingDays = setOf(
                     windowStart,
-                    windowStart.plus(2, DateTimeUnit.DAY),
+                    windowStart.plus(
+                        2,
+                        DateTimeUnit.DAY,
+                    ),
                 )
 
                 // ----- Act -----
@@ -255,7 +290,10 @@ class RefreshUserProfileDataUseCaseTest {
                 // ----- Assert -----
                 cached.recentReadingDays shouldBe recentReadingDays
                 coVerify(exactly = 1) {
-                    profileRepository.getActiveReadingDaysSince(userId = 42, since = windowStart)
+                    profileRepository.getActiveReadingDaysSince(
+                        userId = 42,
+                        since = windowStart,
+                    )
                 }
             }
 
@@ -266,8 +304,14 @@ class RefreshUserProfileDataUseCaseTest {
             // an unrelated, empty set — the streak must be driven only by the streamed days.
             val streamedDays = listOf(
                 today,
-                today.minus(1, DateTimeUnit.DAY),
-                today.minus(2, DateTimeUnit.DAY),
+                today.minus(
+                    1,
+                    DateTimeUnit.DAY,
+                ),
+                today.minus(
+                    2,
+                    DateTimeUnit.DAY,
+                ),
             )
 
             // ----- Act -----

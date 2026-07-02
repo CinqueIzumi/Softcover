@@ -16,8 +16,8 @@ android {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
         targetSdk = 37
-        versionCode = 31
-        versionName = "3.0.1"
+        versionCode = 32
+        versionName = "3.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

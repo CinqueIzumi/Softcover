@@ -97,9 +97,21 @@ class ProfileRepositoryImplTest {
         fun `delegates to remote and returns its flow`() = runTest {
             // ----- Arrange -----
             val dates = listOf(
-                LocalDate(2026, 6, 19),
-                LocalDate(2026, 6, 10),
-                LocalDate(2026, 5, 4),
+                LocalDate(
+                    2026,
+                    6,
+                    19,
+                ),
+                LocalDate(
+                    2026,
+                    6,
+                    10,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
             )
 
             every {
@@ -119,12 +131,32 @@ class ProfileRepositoryImplTest {
         @Test
         fun `returns dates on or after the since date, excluding earlier dates`() = runTest {
             // ----- Arrange -----
-            val since = LocalDate(2026, 6, 10)
+            val since = LocalDate(
+                2026,
+                6,
+                10,
+            )
             val dates = listOf(
-                LocalDate(2026, 6, 19),
-                LocalDate(2026, 6, 10),
-                LocalDate(2026, 6, 1),
-                LocalDate(2026, 5, 4),
+                LocalDate(
+                    2026,
+                    6,
+                    19,
+                ),
+                LocalDate(
+                    2026,
+                    6,
+                    10,
+                ),
+                LocalDate(
+                    2026,
+                    6,
+                    1,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
             )
 
             every {
@@ -132,12 +164,23 @@ class ProfileRepositoryImplTest {
             } returns flowOf(*dates.toTypedArray())
 
             // ----- Act -----
-            val result = repository.getActiveReadingDaysSince(userId = 7, since = since)
+            val result = repository.getActiveReadingDaysSince(
+                userId = 7,
+                since = since,
+            )
 
             // ----- Assert -----
             result shouldBe setOf(
-                LocalDate(2026, 6, 19),
-                LocalDate(2026, 6, 10),
+                LocalDate(
+                    2026,
+                    6,
+                    19,
+                ),
+                LocalDate(
+                    2026,
+                    6,
+                    10,
+                ),
             )
         }
     }

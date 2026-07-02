@@ -562,8 +562,14 @@ class ProfileRemoteDataSourceImplTest {
         @Test
         fun `emits parsed dates across pages until an empty page ends the stream`() = runTest {
             // ----- Arrange -----
-            val page1 = readingActivityPage("2026-05-04", "2026-05-03")
-            val page2 = readingActivityPage("2026-05-02", "2026-05-01")
+            val page1 = readingActivityPage(
+                "2026-05-04",
+                "2026-05-03",
+            )
+            val page2 = readingActivityPage(
+                "2026-05-02",
+                "2026-05-01",
+            )
             val emptyPage = readingActivityPage()
 
             coEvery {
@@ -575,10 +581,26 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe listOf(
-                LocalDate(2026, 5, 4),
-                LocalDate(2026, 5, 3),
-                LocalDate(2026, 5, 2),
-                LocalDate(2026, 5, 1),
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    3,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    2,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    1,
+                ),
             )
             coVerify(exactly = 3) {
                 apolloClient.safeQuery(query = any<GetReadingActivityDaysQuery>())
@@ -589,7 +611,11 @@ class ProfileRemoteDataSourceImplTest {
         fun `advances offset by raw row count including unparseable rows`() = runTest {
             // ----- Arrange -----
             // 3 raw rows (one unparseable) → offset must advance by 3, not by the 2 parsed dates.
-            val page1 = readingActivityPage("2026-05-04", "not-a-date", "2026-05-03")
+            val page1 = readingActivityPage(
+                "2026-05-04",
+                "not-a-date",
+                "2026-05-03",
+            )
             val page2 = readingActivityPage()
 
             coEvery {
@@ -601,12 +627,24 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe listOf(
-                LocalDate(2026, 5, 4),
-                LocalDate(2026, 5, 3),
+                LocalDate(
+                    2026,
+                    5,
+                    4,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    3,
+                ),
             )
             coVerify {
                 apolloClient.safeQuery(
-                    query = GetReadingActivityDaysQuery(userId = 42, limit = 100, offset = 3),
+                    query = GetReadingActivityDaysQuery(
+                        userId = 42,
+                        limit = 100,
+                        offset = 3,
+                    ),
                 )
             }
         }
@@ -638,9 +676,21 @@ class ProfileRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe listOf(
-                LocalDate(2026, 5, 17),
-                LocalDate(2026, 5, 18),
-                LocalDate(2026, 5, 2),
+                LocalDate(
+                    2026,
+                    5,
+                    17,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    18,
+                ),
+                LocalDate(
+                    2026,
+                    5,
+                    2,
+                ),
             )
         }
 
