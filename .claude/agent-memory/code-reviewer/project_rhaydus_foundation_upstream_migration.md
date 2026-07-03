@@ -22,7 +22,17 @@ no Koin module, app wires DI on adopt).
 
 **How to apply**: when reviewing a rhaydus-foundation change, read that repo's OWN `docs/code-style.md`
 and `CLAUDE.md` (not Softcover's) - they are the source of truth there, and drift between the two repos'
-docs is expected during migration (the foundation's rules are sometimes stricter or newer, e.g. the
-"docs are em-dash-free" rule in `CLAUDE.md` is not yet backfilled across all pre-existing foundation
-files - enforce it fully on any file touched by the change under review, per the on-touch convention
-policy, even though older files still have stray em dashes).
+docs is expected during migration (the foundation's rules are sometimes stricter or newer).
+
+**Correction (verified 2026-07-03): the "docs are em-dash-free" rule in `CLAUDE.md` does NOT reach
+Kotlin comments/KDoc** - do not flag em dashes in `.kt` files as a violation. Evidence: `CLAUDE.md`
+itself uses em dashes in its own prose (e.g. its Versioning section), and a repo-wide grep found em
+dashes already in ~8/80 `.kt` files across `designsystem-core`/`core-common` (`AppLog.kt`,
+`RunCatchingCancellable.kt`, `RunCatchingLogged.kt`, several test display names). The rule is scoped to
+markdown docs/prose, not source comments. (A prior version of this memory claimed the opposite and was
+wrong - corrected after reviewing F13/F14 `StarRatingInput`/`ExpandableFlowRow`.)
+
+Also useful: `docs/CAPABILITIES.md` (the component/module index) and the doc that governs the changed
+area (e.g. `docs/design-system-foundations.md` for a design-system component) both have a
+review-enforced maintenance rule requiring them to be updated in the same change that adds/changes a
+component - check both are current, don't just check one.
