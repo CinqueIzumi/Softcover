@@ -26,8 +26,7 @@ they are not sequential within a batch. Batches are ordered to respect the depen
 | Batch | Theme | Home | Items |
 |---|---|---|---|
 | — | **Implemented & adopted** | — | _(none yet)_ |
-| — | **Implemented, not adopted** | `core-common` / `core-platform` / `ktlint-rules` / `detekt-rules` | F1, F4, F5, F6, F7, F9, F10, F19 |
-| C | Bottom bar | `nl.rhaydus:designsystem-core` (layout + component) | F2, F3 |
+| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F19 |
 | D | Shared Compose components & primitives | `nl.rhaydus:designsystem-core` | F13, F14 |
 | E | Desktop (jvm) affordances | `nl.rhaydus:designsystem-core` (jvmMain) | F12, F15 |
 | F | Error-slot + inline error UX | `nl.rhaydus:designsystem-core` + `nl.rhaydus:toad` | F16, F17 |
@@ -197,6 +196,51 @@ imports.
 
 ---
 
+F2 and F3 landed together in `nl.rhaydus:designsystem-core` on the foundation `release/0.3.0` branch — the
+bottom-bar batch (Batch C). Diagnosing the broken padding primitive (F2) and shipping the reusable host (F3)
+converged on one deliverable: the write-side host the read primitive was always missing. Softcover still
+ships its app-local forks and has not re-pointed its imports.
+
+### F2 — `rememberBottomBarPadding()` does not work due to the way it's implemented
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core` (layout)
+- **Status:** **Implemented, not adopted.** Root cause confirmed: `LocalBottomBarPadding` (default `0.dp`) was
+  read by `rememberBottomBarPadding()` but **never provided anywhere in the foundation** — no
+  `CompositionLocalProvider(LocalBottomBarPadding provides …)` existed — so the helper always resolved to
+  `0.dp` and scrolling content was occluded. `design-system-foundations.md` §5.2 delegated the write side to
+  "the bottom-bar host screen," which the foundation never shipped. Fixed by shipping that host as
+  `BottomBarScaffold` (see F3) and simplifying `rememberBottomBarPadding()` to a direct
+  `LocalBottomBarPadding.current` read (the old `remember(current){current}` wrapper was a no-op). The host is
+  double-inset-safe: it measures the laid-out bar (`onSizeChanged` outside `windowInsetsPadding`) so the
+  nav-bar inset is counted once, not recomputed and re-added the way Softcover's `BottomBarScreen` did.
+  **Surface audit (F2's wider ask):** scanned the designsystem-core public surface for the same
+  "published-but-unusable / near-zero-value" class — the padding pair was *the* finding; no demotions or
+  removals (`BottomNavigationSpacer`, `pointerHandCursor`, `conditional`, and the one-line `model/*` enums all
+  earn their place). Softcover still ships its app-local forked `rememberBottomBarPadding()`
+  (`core/designsystem/.../util/BottomBarPadding.kt`, the DOCKED→`16.dp` / FLOATING→local branch); adoption
+  re-points the floating path onto `BottomBarScaffold` and deletes the fork.
+
+### F3 — Make bottom bars reusable
+
+- **Type:** enhancement (shared component)
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Implemented, not adopted.** Evaluated as **plumbing only**: the reusable, brand-agnostic value
+  is (a) `BottomBarScaffold` — the measure-and-provide overlay host (also the F2 fix) that takes the
+  brand-styled bar as a slot — and (b) the cross-tab pulse, generalized from Softcover's `BottomBarPulseManager`
+  (a global object with a hardcoded `libraryPulseKey`) into `NavPulse` (an instance-owned, keyed signal:
+  `pulse(key)` / `countFor(key)`) + `rememberPulseScale(pulse, key)` (the animated icon scale, gated by
+  `playDecorativeMotion()`), both in a new `designsystem-core` `nav/` package. Only the concrete key stays
+  app-supplied. **Deliberately not hoisted** (would violate the design-agnostic contract): the Voyager
+  `TabNavigator` coupling, the four concrete renderers (docked `NavigationBar`, floating toolbar, rail,
+  `EditorialSidebar`), `SessionPeekBar`, the app tab set, the `BottomBarStyle` preference, and the whole
+  `BottomBarScreen` shell — the app composes those from the foundation primitives (`rememberWindowSizeClass`,
+  `TwoPaneScaffold`, `BottomBarScaffold`, `NavPulse`). Softcover still ships its app-local
+  `BottomBarPulseManager` + `libraryPulseKey` and the shell; adoption re-points `pulseLibrary()` onto a
+  `NavPulse` instance keyed by the app's `LibraryTab` and passes the app bar into `BottomBarScaffold`.
+
+---
+
 # Open work — batched for implementation
 
 ## Batch A (implemented, not adopted) — Style gates → blocking rules
@@ -250,57 +294,6 @@ gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-move
 2. **Own the script upstream, not per app.** The `rhaydus-kotlin` plugin already ships a `style-check`
    skill; until a rule is promoted, its recipe (and the script harness) should live with that skill so
    apps don't each copy and maintain `style-check.sh`. The app keeps only genuinely app-specific recipes.
-
----
-
-## Batch C — Bottom bar (`designsystem-core`)
-
-*Home: `nl.rhaydus:designsystem-core` (layout + component). Covers **F2, F3**. Do **F2 first** — diagnose and
-fix the broken `rememberBottomBarPadding()` (and run the wider surface audit it calls for) — then **F3**
-builds the reusable bottom-bar component on top of the now-correct primitives.*
-
-### F2 — `rememberBottomBarPadding()` does not work due to the way it's implemented
-
-- **Type:** bug
-- **Home:** `nl.rhaydus:designsystem-core` (layout)
-- **Status:** Open — root cause to be diagnosed before an upstream fix
-
-`rememberBottomBarPadding()` (and the `LocalBottomBarPadding` it reads) is part of the
-designsystem-core layout surface, but it does not work as intended — the issue is in how it is
-implemented, not in how the app calls it. Needs a root-cause diagnosis (what the helper resolves to
-vs. what callers expect) before proposing the upstream fix.
-
-While in there, **audit the rest of the foundation's current surface for the same class of problem** —
-items that are published as shared API but either (a) can't actually be reused across consuming apps
-(too coupled to one app's assumptions, like the bottom-bar padding helper appears to be), or (b)
-carry very little value (thin wrappers, near-empty primitives, things a consumer would just as easily
-hand-roll). For each, decide: fix so it's genuinely reusable, demote it back into the app that needs
-it, or remove it. The goal is that everything the foundation exposes earns its place in the
-[CAPABILITIES.md](../rhaydus/0.2.0/CAPABILITIES.md) surface; dead or unusable API there is worse than
-no API, because the reuse-first rule sends people to reach for it.
-
----
-
-### F3 — Make bottom bars reusable
-
-- **Type:** enhancement (shared component)
-- **Home:** `nl.rhaydus:designsystem-core` (component)
-- **Status:** Open — evaluate
-
-The bottom bar is an often-recurring UI component that tends to get re-implemented per app. Evaluate
-hoisting a reusable bottom-bar component into the foundation design system, alongside the existing
-bottom-bar primitives it already ships (`LocalBottomBarPadding`, `rememberBottomBarPadding()`,
-`BottomNavigationSpacer`). Keep the shared piece brand-agnostic (skeleton in designsystem-core; brand
-styling layered by the app) so it fits the foundation's design-agnostic contract.
-
-**Include the cross-tab pulse signal.** Softcover ships `BottomBarPulseManager`
-(`core/designsystem/src/commonMain/.../presentation/util/BottomBarPulseManager.kt`): a process-wide,
-non-persistent one-shot signal that makes a bottom-bar tab icon briefly pulse when an event lands on a
-*different* tab (e.g. a book added from the Reading tab landing on the Library shelf). The mechanism — a
-keyed broadcast that nav components observe to play a scale pulse — is part of the reusable bottom-bar
-contract and should ship with it; only the concrete key name (`libraryPulseKey`) is app-specific and
-becomes caller-supplied. Without this, every app re-invents the "notify the nav of a cross-feature
-event" plumbing around the shared bottom bar.
 
 ---
 
