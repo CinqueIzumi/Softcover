@@ -36,3 +36,22 @@ Also useful: `docs/CAPABILITIES.md` (the component/module index) and the doc tha
 area (e.g. `docs/design-system-foundations.md` for a design-system component) both have a
 review-enforced maintenance rule requiring them to be updated in the same change that adds/changes a
 component - check both are current, don't just check one.
+
+**Doc-drift trap found in review (2026-07-03, F/desktop-scrollbar + platformModifierClick batch):**
+`design-system-foundations.md` §11's intro sentence said "the **two** modifiers below are in
+`commonMain` and no-op on touch" (accurate count for `pointerHandCursor` + `hoverHighlight` at the
+time it was written). The new change added a third commonMain/no-op modifier
+(`platformModifierClick`) into the same §11 bullet list without updating that lead-in count/wording -
+so the doc edit satisfied the "add a bullet for the new component" rule but broke the accuracy of a
+sentence it didn't touch. **Lesson: when a change inserts a new bullet into an existing enumerated
+list, grep the surrounding prose for a stated count ("two X below", "both Y", "the three Z") and
+verify it still holds** - this class of drift is easy to miss because the diff never touches the
+sentence that becomes wrong.
+
+Also confirmed in this batch: the `<Name>.jvm.kt` / `<Name>.mobile.kt` file-suffix convention for
+expect/actual is well-established precedent (`DesktopTooltip`, `DesktopContextMenu`, `Haptics`,
+`ClipboardReader`, `ReducedMotion`, `NumberFormat`), and `mobileMain` is a real wired-up intermediate
+source set (`KmpLibraryConventionPlugin.kt`: `applyDefaultHierarchyTemplate()` + manual
+`androidMain`/`iosMain` `dependsOn(mobileMain)`) - not a typo/dead source set, so a new
+`src/mobileMain/...` file for an `expect` in `commonMain` is correctly wired without per-module
+Gradle changes.

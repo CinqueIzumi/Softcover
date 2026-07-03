@@ -26,8 +26,7 @@ they are not sequential within a batch. Batches are ordered to respect the depen
 | Batch | Theme | Home | Items |
 |---|---|---|---|
 | — | **Implemented & adopted** | — | _(none yet)_ |
-| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F13, F14, F19 |
-| E | Desktop (jvm) affordances | `nl.rhaydus:designsystem-core` (jvmMain) | F12, F15 |
+| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F12, F13, F14, F15, F19 |
 | F | Error-slot + inline error UX | `nl.rhaydus:designsystem-core` + `nl.rhaydus:toad` | F16, F17 |
 | G | Image export | `nl.rhaydus:designsystem-image` | F11 |
 | H | Offline mutation queue | new connectivity/offline seam | F8 |
@@ -277,6 +276,47 @@ the brand bits as params" shape: `StarRatingInput` in the `component/` catalog, 
 
 ---
 
+F12 and F15 landed together in `nl.rhaydus:designsystem-core` on the foundation `release/0.3.0` branch — the
+desktop (jvm) affordances batch (Batch E). Two self-contained, brand-agnostic desktop interaction affordances
+lifted next to the existing `dismissOnEscape` / `DesktopContextMenu` helpers: `DesktopVerticalScrollbar` in the
+`component/` catalog (jvm-only) and `platformModifierClick` as a `commonMain` expect/actual modifier (jvm real
+gesture, mobile pass-through). Softcover still ships its app-local forks and has not re-pointed its imports.
+
+### F12 — `DesktopVerticalScrollbar` (themed, dark-surface-visible)
+
+- **Type:** enhancement (desktop affordance)
+- **Home:** `nl.rhaydus:designsystem-core` (jvm affordances)
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core`
+  (`component/DesktopScrollbar.kt`, jvmMain) as the themed vertical scrollbar with `LazyGridState` /
+  `LazyListState` / `ScrollState` overloads, colouring the thumb to `MaterialTheme.colorScheme.onSurface` so it
+  is visible on dark surfaces (Compose Desktop's default near-black thumb disappears there). Lifted verbatim;
+  the only brand-named symbol — the private `softcoverScrollbarStyle()` — was renamed to
+  `rhaydusScrollbarStyle()`, and the KDoc genericised (the "editorial surfaces" / "desktop Reading list"
+  phrasing dropped). No params — the sole choice is a standard Material colour role, so it stays a pure
+  skeleton. Softcover still ships its app-local
+  `core/designsystem/.../presentation/component/DesktopScrollbar.kt`. Adoption re-points the 13 call sites
+  across 9 feature modules (reading, settings, library, explore, profile, book_detail, onboarding, session)
+  onto the foundation symbol and deletes the fork.
+
+---
+
+### F15 — `platformModifierClick` (desktop modifier-aware selection)
+
+- **Type:** enhancement (desktop affordance / modifier)
+- **Home:** `nl.rhaydus:designsystem-core` (modifier catalog)
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core` as a `commonMain`
+  expect/actual `Modifier` extension (`modifier/PlatformModifierClick.kt` + `.jvm.kt` real gesture +
+  `.mobile.kt` pass-through, mirroring `DesktopContextMenu`): Ctrl/Cmd toggles selection, Shift range-selects,
+  intercepting in the pointer Initial phase and consuming only when a modifier is held (a plain click still
+  reaches the inner `combinedClickable`), inert on touch. Lifted near-verbatim (zero app-local imports): the
+  dangling `[jvmMain]` / `[mobileMain]` KDoc links were flattened to plain text, and the desktop actual's
+  event loop was restructured to drop its two `continue` guards (behaviour-identical) for the foundation's
+  from-zero detekt (`LoopWithTooManyJumpStatements`). Softcover still ships its
+  app-local fork triple `core/designsystem/.../presentation/modifier/PlatformModifierClick{,.jvm,.mobile}.kt`.
+  Adoption is an import swap at the one call site (`LibraryShelf.kt`) and deletes the fork.
+
+---
+
 # Open work — batched for implementation
 
 ## Batch A (implemented, not adopted) — Style gates → blocking rules
@@ -330,41 +370,6 @@ gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-move
 2. **Own the script upstream, not per app.** The `rhaydus-kotlin` plugin already ships a `style-check`
    skill; until a rule is promoted, its recipe (and the script harness) should live with that skill so
    apps don't each copy and maintain `style-check.sh`. The app keeps only genuinely app-specific recipes.
-
----
-
-## Batch E — Desktop (jvm) affordances (`designsystem-core`)
-
-*Home: `nl.rhaydus:designsystem-core` (jvmMain affordances). Covers **F12, F15**. Both are jvm-only desktop
-interaction affordances sitting next to the existing `dismissOnEscape` / desktop context menu, and F15
-explicitly pairs with F12 — same source set, same review pass.*
-
-### F12 — `DesktopVerticalScrollbar` (themed, dark-surface-visible)
-
-- **Type:** enhancement (desktop affordance)
-- **Home:** `nl.rhaydus:designsystem-core` (jvm affordances)
-- **Status:** Open
-
-`DesktopScrollbar.kt` (`core/designsystem/src/jvmMain/.../presentation/component/`) is a themed vertical
-scrollbar with overloads for `LazyGridState`, `LazyListState`, and `ScrollState`, colouring the thumb to
-`onSurface` so it is actually visible — Compose Desktop's default near-black thumb disappears on dark
-editorial surfaces. Pure skeleton (the only choice is a standard Material colour role), and it belongs in
-the foundation's jvm affordances section next to the existing desktop helpers.
-
----
-
-### F15 — `PlatformModifierClick` (desktop modifier-aware selection)
-
-- **Type:** enhancement (desktop affordance / modifier)
-- **Home:** `nl.rhaydus:designsystem-core` (jvm affordances / modifier catalog)
-- **Status:** Open
-
-`PlatformModifierClick` (`core/designsystem/.../presentation/modifier/PlatformModifierClick.kt`, with
-`.jvm` and `.mobile` actuals) adds desktop modifier-click selection — Ctrl/Cmd to toggle, Shift to
-range-select — intercepting in the Initial pointer phase so a plain click still fires, and passing
-through untouched on touch platforms. A standard desktop multi-select gesture, fully brand-agnostic; it
-belongs with the foundation's other jvm affordances (`dismissOnEscape`, desktop context menu) and pairs
-with F12.
 
 ---
 
