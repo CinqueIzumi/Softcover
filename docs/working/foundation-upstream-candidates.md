@@ -26,8 +26,7 @@ they are not sequential within a batch. Batches are ordered to respect the depen
 | Batch | Theme | Home | Items |
 |---|---|---|---|
 | — | **Implemented & adopted** | — | _(none yet)_ |
-| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F19 |
-| D | Shared Compose components & primitives | `nl.rhaydus:designsystem-core` | F13, F14 |
+| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F13, F14, F19 |
 | E | Desktop (jvm) affordances | `nl.rhaydus:designsystem-core` (jvmMain) | F12, F15 |
 | F | Error-slot + inline error UX | `nl.rhaydus:designsystem-core` + `nl.rhaydus:toad` | F16, F17 |
 | G | Image export | `nl.rhaydus:designsystem-image` | F11 |
@@ -241,6 +240,43 @@ ships its app-local forks and has not re-pointed its imports.
 
 ---
 
+F13 and F14 landed together in `nl.rhaydus:designsystem-core` on the foundation `release/0.3.0` branch — the
+shared Compose components batch (Batch D). Two independent, brand-agnostic widgets lifted with the "expose
+the brand bits as params" shape: `StarRatingInput` in the `component/` catalog, `ExpandableFlowRow` in the
+`layout/` primitives. Softcover still ships its app-local forks and has not re-pointed its imports.
+
+### F13 — `StarRatingInput` (half-star, drag-scrub, haptics)
+
+- **Type:** enhancement (shared component)
+- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core`
+  (`component/StarRatingInput.kt`) as the interactive N-star, half-star control — tap + drag-scrub, haptics
+  on each half-step crossing, live preview committing on release. Brand-decoupled on the way in: the fill
+  tint is a `filledColor` param (defaulting to `MaterialTheme.colorScheme.primary`) alongside `emptyColor`,
+  and the star glyph is a `starIcon: RhaydusIconResource` param (was Softcover's `SoftcoverIcon.StarFilled`)
+  — the foundation haptics (`rememberHaptics()`) it already used stays. The half-star math is extracted to
+  the pure `ratingForOffsetX(...)` (unit-tested under `androidHostTest`). Softcover still ships its app-local
+  `core/designsystem/.../presentation/component/StarRatingInput.kt`. Adoption re-points the two call sites
+  (`ShareCard.kt`, `BookDetailShelf.kt`) onto the foundation symbol, passing `filledColor = RatingGold` and
+  `starIcon = SoftcoverIcon.StarFilled`, and deletes the fork.
+
+---
+
+### F14 — `ExpandableFlowRow` (collapsible flow row with progressive reveal)
+
+- **Type:** enhancement (layout primitive)
+- **Home:** `nl.rhaydus:designsystem-core` (layout primitives)
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core`
+  (`layout/ExpandableFlowRow.kt`) — a `FlowRow` that collapses to `collapsedLines` behind a trailing "show
+  more" affordance and reveals `linesPerExpand` more lines per tap. Lifted almost verbatim (it had zero
+  app-local imports); the header comment was genericized (the app-repo `now.md` / `PillChip` references
+  dropped) and the show-more label became a `showMoreLabel` param on top of the existing `showMoreIndicator`
+  slot. Softcover still ships its app-local
+  `core/designsystem/.../presentation/component/ExpandableFlowRow.kt`. Adoption is a pure import swap at the
+  one call site (`LibraryFilterSheet.kt`, all defaults) and deletes the fork.
+
+---
+
 # Open work — batched for implementation
 
 ## Batch A (implemented, not adopted) — Style gates → blocking rules
@@ -294,42 +330,6 @@ gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-move
 2. **Own the script upstream, not per app.** The `rhaydus-kotlin` plugin already ships a `style-check`
    skill; until a rule is promoted, its recipe (and the script harness) should live with that skill so
    apps don't each copy and maintain `style-check.sh`. The app keeps only genuinely app-specific recipes.
-
----
-
-## Batch D — Shared Compose components & primitives (`designsystem-core`)
-
-*Home: `nl.rhaydus:designsystem-core` (component / layout catalog). Covers **F13, F14**. Two independent,
-brand-agnostic Compose widgets whose only coupling is a colour/slot to parameterize — same module, same
-"lift the skeleton, expose the brand bits as params" shape, so they batch cleanly.*
-
-### F13 — `StarRatingInput` (half-star, drag-scrub, haptics)
-
-- **Type:** enhancement (shared component)
-- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
-- **Status:** Open — parameterize the fill colour
-
-`StarRatingInput` (`core/designsystem/.../presentation/component/StarRatingInput.kt`) is an interactive
-N-star rating control with half-star precision: tap and drag-to-scrub gestures, haptics fired on each
-half-step crossing, and a live drag preview that commits on release. The half-star math, the drag
-handling, and the haptics hookup are non-trivial and re-derived by every app with a rating surface. The
-only brand coupling is the filled-star tint (`RatingGold`); parameterize it (`filledColor` / `emptyColor`)
-and it is fully generic.
-
----
-
-### F14 — `ExpandableFlowRow` (collapsible flow row with progressive reveal)
-
-- **Type:** enhancement (layout primitive)
-- **Home:** `nl.rhaydus:designsystem-core` (layout primitives)
-- **Status:** Open
-
-`ExpandableFlowRow` (`core/designsystem/.../presentation/component/ExpandableFlowRow.kt`) is a `FlowRow`
-that collapses to a maximum number of lines with a trailing "show more" affordance, revealing
-`linesPerExpand` further lines per tap (gradual reveal rather than all-at-once). It solves a recurring
-layout problem — unbounded tag/chip rows burying content — and sits naturally alongside the foundation's
-existing layout primitives (e.g. `TwoPaneScaffold`). Generic skeleton; parameterize the show-more
-affordance as a composable slot (defaulting to the chip) and the label text.
 
 ---
 
