@@ -55,3 +55,24 @@ source set (`KmpLibraryConventionPlugin.kt`: `applyDefaultHierarchyTemplate()` +
 `androidMain`/`iosMain` `dependsOn(mobileMain)`) - not a typo/dead source set, so a new
 `src/mobileMain/...` file for an `expect` in `commonMain` is correctly wired without per-module
 Gradle changes.
+
+**Test-coverage heuristic confirmed (Batch F, `InlineErrorState`, 2026-07-03):** whether a new
+`designsystem-core` component has a companion test file correlates with whether it carries internal
+state/logic, not with its visibility or how "important" it looks. Pure-render wrapper composables with
+no branching/state (`RhaydusButton`, `InlineErrorState`, `DesktopVerticalScrollbar`) correctly have no
+test file; components with real internal logic (`StarRatingInput`'s drag-scrub math, `BottomBarScaffold`'s
+measured footprint, `WindowSizeClass`'s breakpoint math, `NavPulse`'s signal semantics) do. Don't flag a
+missing test file as a gap just because the component is new and public - check whether it has any
+testable logic first.
+
+**Batch F / InlineErrorState review notes:** the component is a straight lift-and-generalize (hardcoded
+`"Retry"` + app's `editorialTypography.bodySmall` → `retryLabel`/`textStyle` params) and came out clean
+on the full code-style pass (import order, arg-layout, blank-line-between-siblings, visibility, KDoc).
+Only two 🔵 nits surfaced: (1) a named-arg call to a shared component (`RhaydusButton(label=, onClick=,
+style=, size=, modifier=)`) reordered relative to both the declaration and the "modifier right after
+required params" convention - harmless since named, but worth a pass-over on any call site with 4+ named
+args; (2) a doc-illustration field-name drift in `toad-architecture.md`'s new "error-slot + retry
+convention" bullet - it introduces the example field as `searchError` then folds via
+`it.copy(error = message)` two lines later. Same class of issue as the §11 count-drift above: an
+inline code example one line away from its own definition still needs a consistency check, not just the
+enumerated-list-count check.

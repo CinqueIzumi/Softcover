@@ -26,8 +26,7 @@ they are not sequential within a batch. Batches are ordered to respect the depen
 | Batch | Theme | Home | Items |
 |---|---|---|---|
 | — | **Implemented & adopted** | — | _(none yet)_ |
-| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F12, F13, F14, F15, F19 |
-| F | Error-slot + inline error UX | `nl.rhaydus:designsystem-core` + `nl.rhaydus:toad` | F16, F17 |
+| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F12, F13, F14, F15, F16, F17, F19 |
 | G | Image export | `nl.rhaydus:designsystem-image` | F11 |
 | H | Offline mutation queue | new connectivity/offline seam | F8 |
 | I | Shared build & gate tooling | `build-logic` / `detekt-rules` / `style-check` skill | F18, F20, F21, F22, F23 |
@@ -317,6 +316,47 @@ gesture, mobile pass-through). Softcover still ships its app-local forks and has
 
 ---
 
+F16 and F17 landed together on the foundation `release/0.3.0` branch — the error-slot + inline error UX batch
+(Batch F), one feature split across two modules: `InlineErrorState` (the component) in `nl.rhaydus:designsystem-core`
+and the TOAD error-slot + retry convention (documented) in `nl.rhaydus:toad`'s `toad-architecture.md`. The
+component's API and the state-slot contract were designed together so they match. Softcover still ships its
+app-local fork + local convention and has not re-pointed its imports.
+
+### F16 — `InlineErrorState` (inline load/submit-failure + retry surface)
+
+- **Type:** enhancement (shared component)
+- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core`
+  (`component/InlineErrorState.kt`) as the standard in-content failure surface: a centred [message] in the
+  Material `error` role above a `RhaydusButton` retry that calls `onRetry`, with the same wrap-or-fill sizing
+  contract (vertical centring only when the caller's `modifier` gives it a height). Brand-decoupled on the way
+  in: the two app couplings — Softcover's hardcoded `"Retry"` label and its `MaterialTheme.editorialTypography.bodySmall`
+  text style — became the `retryLabel: String = "Retry"` and `textStyle: TextStyle = MaterialTheme.typography.bodySmall`
+  params (the error tint stays the pure-Material `error` role; the retry already used the foundation
+  `RhaydusButton`). Softcover still ships its app-local
+  `core/designsystem/.../presentation/component/InlineErrorState.kt`. Adoption re-points the two call sites
+  (`ExploreScreenLayout.mobile.kt`, `OnboardingShelf.kt`) onto the foundation symbol, passing the app's
+  editorial `bodySmall` as `textStyle`, and deletes the fork.
+
+---
+
+### F17 — A TOAD `UiState` error-slot + retry convention
+
+- **Type:** enhancement (framework convention / shared contract)
+- **Home:** `nl.rhaydus:toad` / `toad-architecture.md`
+- **Status:** **Implemented, not adopted.** Blessed in `nl.rhaydus:toad`'s `toad-architecture.md` (a new
+  `## Conventions` bullet): a screen that can fail surfaces the failure as a nullable `String?` slot on its own
+  `data class : UiState` (defaulted null), the action folds it in `.onFailure` (copy authored in presentation,
+  with a screen-specific fallback), clears it on retry and on any invalidating edit, and renders it with
+  `InlineErrorState` (F16) whose retry re-dispatches the screen's **own** action. Cancellation is not re-handled
+  in the fold (the use-case boundary already rethrows it). Kept deliberately as a **documented convention with no
+  `toad` code** — `UiState` stays a bare marker; a screen wanting a richer shape than `String?` declares its own
+  error type, so no speculative `UiError` type was added. Softcover still keeps the provisional note in
+  `docs/reference/architecture.md` and its app-local `toUserMessage()` copy-authoring (app-specific, stays in the
+  app). Adoption re-points that provisional note at the now-canonical `toad-architecture.md` convention.
+
+---
+
 # Open work — batched for implementation
 
 ## Batch A (implemented, not adopted) — Style gates → blocking rules
@@ -370,51 +410,6 @@ gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-move
 2. **Own the script upstream, not per app.** The `rhaydus-kotlin` plugin already ships a `style-check`
    skill; until a rule is promoted, its recipe (and the script harness) should live with that skill so
    apps don't each copy and maintain `style-check.sh`. The app keeps only genuinely app-specific recipes.
-
----
-
-## Batch F — Error-slot + inline error UX (`designsystem-core` + `toad`)
-
-*Home: `nl.rhaydus:designsystem-core` (component) + `nl.rhaydus:toad` (`toad-architecture.md`). Covers
-**F16, F17**. These are one feature split across two modules: F16 is the inline error/retry component and
-F17 is the TOAD `UiState` convention that renders through it. Design them together so the component's API
-and the state-slot contract match; F17 leans on the now-implemented `runCatchingLogged` (F5) for the
-cancellation guarantee.*
-
-### F16 — `InlineErrorState` (inline load/submit-failure + retry surface)
-
-- **Type:** enhancement (shared component)
-- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
-- **Status:** Open — **app-local now** (added in Phase 2b); delete on adopt
-
-`InlineErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier)`
-(`core/designsystem/.../presentation/component/InlineErrorState.kt`) renders a failure message in the
-error colour role plus a retry affordance — the standard in-content treatment for a failed load/submit
-(as opposed to the full-screen `OfflineGuard`-style placeholder). The Phase 2b survey confirmed the
-foundation ships **no** inline error/empty+retry component, yet every app needs one. The skeleton is
-brand-agnostic; only the button/typography/error-role bindings are app theme, layered as usual. Pairs
-with the TOAD error-slot convention (F17).
-
----
-
-### F17 — A TOAD `UiState` error-slot + retry convention
-
-- **Type:** enhancement (framework convention / shared contract)
-- **Home:** `nl.rhaydus:toad` / `toad-architecture.md`
-- **Status:** Open — app-local convention now; bless it in the TOAD baseline upstream
-
-TOAD's `UiState` ships no standard error affordance, so each app re-invents how a screen surfaces a
-load/submit failure. Softcover's Phase 2b convention: a screen that can fail exposes a nullable
-`String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
-`OnboardingUiState.submissionError`), set by the action — copy authored in *presentation* via
-`toUserMessage()` plus a screen-specific fallback — cleared on edit/retry, and rendered by
-`InlineErrorState` (F16) whose retry re-dispatches the screen's own action. Cancellation is **not**
-re-handled in the fold: `runCatchingLogged` (F5) guarantees it at the use-case boundary, so the slot
-only ever holds a real failure. This is mostly a *documented convention* (the slot is per-screen, so
-there is little framework code to own) — the upstream move is to bless it in `toad-architecture.md`, and
-optionally offer an opt-in `UiError` type / base interface for screens that want a richer shape. Kept
-deliberately light locally (a provisional note in `docs/reference/architecture.md`) pending the
-foundation owning it — the foundation, not the app, should define the canonical TOAD error contract.
 
 ---
 
