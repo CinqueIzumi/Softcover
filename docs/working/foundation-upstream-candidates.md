@@ -26,8 +26,8 @@ they are not sequential within a batch. Batches are ordered to respect the depen
 | Batch | Theme | Home | Items |
 |---|---|---|---|
 | — | **Implemented & adopted** | — | _(none yet)_ |
-| — | **Implemented, not adopted** | `core-common` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F19 |
-| I | Shared build & gate tooling | `build-logic` / `detekt-rules` / `style-check` skill | F18, F20, F21, F22, F23 |
+| — | **Implemented, not adopted** | `build-logic` / `core-common` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F23 |
+| I | Shared build & gate tooling (residual) | `style-check` skill | F22 |
 
 ---
 
@@ -420,7 +420,65 @@ Softcover still ships its app-local engine and has not re-pointed anything.
 
 ---
 
-# Open work — batched for implementation
+F18, F20, F21, and F23 landed on the foundation `release/0.3.0` branch — the shared build & gate tooling batch
+(Batch I), in `build-logic` (the convention plugins + root) and `nl.rhaydus:ktlint-rules`. Each extracts a
+reusable gate mechanism from Softcover's inline build config, with the concrete app data left configurable.
+The fifth item, **F22**, is not a foundation-library change (plugin/skill ownership, done at adopt) and stays
+open. Softcover still ships its inline gates and has not re-pointed anything.
+
+### F18 — `checkModuleGraph` tier-DAG + api-visibility enforcement
+
+- **Type:** gate (custom Gradle task)
+- **Home:** `build-logic` convention plugins
+- **Status:** **Implemented, not adopted.** Landed as the root-applied `rhaydus.module-graph` convention plugin
+  (`build-logic` `ModuleGraphConventionPlugin` + `ModuleGraphExtension`): the `checkModuleGraph` task derives
+  each module's tier from its path and fails the build on any `project(...)` edge breaking the tier DAG, plus
+  the api-visibility allowlist (an `api` edge to a data-area module must be allowlisted). The mechanism is
+  generic — the concrete `tierOf` mapping, `allowedTargetTiers`, `dataAreaModules`, and `allowedApiDataEdges`
+  are supplied per build via the `moduleGraph { }` extension; the foundation configures its own graph
+  (core→{core}, designsystem→{designsystem, core}, toad→{}, tooling excluded), and it wires into every module's
+  `check` like Softcover's inline version. Verified to fail on an injected illegal edge. Softcover still has
+  the equivalent inline in its root `build.gradle.kts`; adoption applies `rhaydus.module-graph` and moves the
+  Softcover `dataAreaModules` / `allowedApiDataEdges` / tier mapping into the `moduleGraph { }` block.
+
+### F20 — `dependencyAnalysis` (buildHealth) gating policy
+
+- **Type:** gate (policy)
+- **Home:** `build-logic` (root)
+- **Status:** **Implemented, not adopted.** Landed as the root `dependencyAnalysis { }` policy (plugin
+  `com.autonomousapps.dependency-analysis` 3.14.1, applied at root + every subproject): `onUnusedDependencies`
+  and `onIncorrectConfiguration` gate to `fail`; `onUsedTransitiveDependencies` / `onRuntimeOnly` /
+  `onRedundantPlugins` are `ignore`. The exclusion list mirrors the foundation's own convention bundle (the
+  junit/kotest/turbine/mockk test stack, koin + coroutines, the Compose Multiplatform + androidx-compose +
+  desktop-host artifacts, `androidx.core:core-ktx`) plus `eu.anifantakis:ksafe` kept `implementation` (no
+  KSafe type leaks into SecureStorage's public surface). Triaged to a green `buildHealth`; verified to fail
+  when an exclusion is removed. Softcover keeps its own inline `dependencyAnalysis { }` (its exclusions cover
+  its app libraries — voyager-koin, work-runtime-ktx, camera, mlkit, coil); adoption keeps only the
+  app-specific exclusions and inherits the shared policy shape.
+
+### F21 — Shared `lint.xml` + `warningsAsErrors` policy
+
+- **Type:** gate (policy + config)
+- **Home:** `build-logic` convention plugins + the shared `lint.xml`
+- **Status:** **Implemented, not adopted.** The duplicated `lint { warningsAsErrors; abortOnError; lintConfig }`
+  block in the two library convention plugins was consolidated into one `build-logic` helper
+  (`Lint.applyRhaydusLintPolicy(project)`), and the root `lint.xml` gained the version-freshness policy
+  (`NewerVersionAvailable` / `GradleDependency` / `AndroidGradlePluginVersion` = `informational`) so a newer
+  upstream release never breaks a build pinned to the foundation catalog. Softcover already had the freshness
+  policy in its own `lint.xml`; adoption is a no-op on the app side beyond inheriting the shared helper.
+
+### F23 — "No raw `println` / `Log.*` - use the logging facade" rule
+
+- **Type:** gate (lint rule)
+- **Home:** `nl.rhaydus:ktlint-rules`
+- **Status:** **Implemented, not adopted.** Landed as the pure-AST ktlint rule `rhaydus:no-raw-logging` in
+  `nl.rhaydus:ktlint-rules` (not detekt — the foundation's `detektCheck` is syntactic, so a type-resolved
+  `ForbiddenMethodCall` would be inert; a ktlint rule gates on the foundation's own `ktlintCheck` immediately).
+  It flags unqualified `println(...)`, `System.out`/`System.err` `println`, and `Log.*` / `android.util.Log.*`
+  calls, steering to the `AppLog` facade (F6). Zero existing violations (pure ratchet); the ktlint CLI's own
+  `Main.kt` carries a documented `@file:Suppress` since its stdout is its report channel. Unit-tested
+  (`NoRawLoggingRuleTest`, 11 cases). Softcover's rule is review-only in `code-style.md`; adoption drops the
+  advisory wording once it consumes the new ktlint ruleset.
 
 ## Batch A (implemented, not adopted) — Style gates → blocking rules
 
@@ -476,66 +534,21 @@ gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-move
 
 ---
 
-## Batch I — Shared build & gate tooling
+## Batch I — Shared build & gate tooling (residual: F22)
 
-*Home: `build-logic` convention plugins / `nl.rhaydus:detekt-rules` / the `rhaydus-kotlin` `style-check`
-skill. Covers **F18, F20, F21, F22, F23** - reusable build gates and policies surfaced during the Batch A
-work, none yet extracted. Most ship with the convention plugins so a consuming app inherits the gate with
-zero setup; only the concrete allowlists/thresholds stay per-app.*
-
-### F18 — `checkModuleGraph` tier-DAG + api-visibility enforcement
-
-- **Type:** gate (custom Gradle task)
-- **Home:** `build-logic` convention plugins
-- **Status:** Open - strongest new candidate
-
-A custom verification task that fails on any module edge violating the tier DAG (the `core` / `feature` /
-orchestration allowed-direction model) and on an `api` edge to a data-area module unless allowlisted. The
-tier model is already a foundation architecture concept (`architecture.md` / module-structure), so the
-enforcement *mechanism* is foundation-worthy; only the concrete `dataAreaModules` / `allowedApiDataEdges` /
-per-module edge lists are app data. Softcover has it inline in `build.gradle.kts`.
-
-### F20 — `dependencyAnalysis` (buildHealth) gating policy
-
-- **Type:** gate (policy)
-- **Home:** `build-logic` convention plugins (ships with the convention bundle)
-- **Status:** Open
-
-Gate `onUnusedDependencies` + `onIncorrectConfiguration` to fail; set `onUsedTransitive` / `onRuntimeOnly` /
-`onRedundantPlugins` to ignore. The policy plus the exclusion list of the centrally-provided convention
-bundle (Koin, coroutines, JUnit5/Kotest/MockK/Turbine, Compose MP artifacts) is foundation-worthy - the
-exclusions mirror exactly what the convention plugins provide. Only app-library false positives stay local.
-
-### F21 — Shared `lint.xml` + `warningsAsErrors` policy
-
-- **Type:** gate (policy + config)
-- **Home:** `build-logic` convention plugins + a shared `lint.xml`
-- **Status:** Open
-
-Every module references one shared lint config with `warningsAsErrors` / `abortOnError`. The version-freshness
-checks (`NewerVersionAvailable` / `GradleDependency` / `AndroidGradlePluginVersion`) set to `informational`
-because every nl.rhaydus app pins to the foundation catalog. The convention plugins already wire
-`lintConfig = rootProject.file("lint.xml")`; the shared `lint.xml` file and the freshness policy are the
-missing pieces.
+*Home: the `rhaydus-kotlin` `style-check` skill. The rest of the batch (**F18, F20, F21, F23**) landed in the
+foundation (see *Implemented, not adopted*); **F22** is the one residual item, and it is **not** a
+foundation-library change — it is plugin/skill ownership work, done at adopt.*
 
 ### F22 — On-touch style hook + script ownership in the `style-check` skill
 
 - **Type:** tooling ownership
 - **Home:** the `rhaydus-kotlin` `style-check` skill
-- **Status:** Open - this is F7's sub-move 2
+- **Status:** Open - this is F7's sub-move 2; no foundation-library deliverable, done at adopt
 
 The PostToolUse adapter (`scripts/kt-style-hook.sh`) that runs the style script on the just-edited file and
 feeds findings back for on-touch fixing is reusable infra. It - and any residual greppable recipes not yet
 promoted to rules - should live with the `style-check` skill so every app gets on-touch enforcement without
 copying the adapter. Done at adopt, alongside retiring the now-promoted recipes from Softcover's
-`scripts/style-check.sh`.
-
-### F23 — "No raw `println` / `Log.*` - use the logging facade" rule
-
-- **Type:** gate (lint rule)
-- **Home:** `nl.rhaydus:detekt-rules` (a `ForbiddenMethodCall`-style rule) or `nl.rhaydus:ktlint-rules`
-- **Status:** Open
-
-A mechanizable ban on raw `println` / `android.util.Log.*` in favour of the `AppLog` facade (now upstream,
-F6). Currently review-only in Softcover's `code-style.md`. Pairs with F6 and is a natural addition to the new
-detekt ruleset built for F1.
+`scripts/style-check.sh`. (All six of those recipes are already promoted to foundation ktlint/detekt rules
+per F1/F7, so at adopt `scripts/style-check.sh` retires entirely and only the harness/hook move to the skill.)
