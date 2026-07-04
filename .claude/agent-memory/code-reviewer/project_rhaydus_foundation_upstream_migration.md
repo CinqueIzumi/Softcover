@@ -76,3 +76,27 @@ convention" bullet - it introduces the example field as `searchError` then folds
 `it.copy(error = message)` two lines later. Same class of issue as the §11 count-drift above: an
 inline code example one line away from its own definition still needs a consistency check, not just the
 enumerated-list-count check.
+
+**Import-order rule scope (verified 2026-07-03, Batch G `ShareCardCapture`):**
+`ktlint-rules/src/main/kotlin/nl/rhaydus/ktlint/ProjectImportOrderRule.kt` only gates alphabetical order
+within the `nl.rhaydus.*` import block. It explicitly does NOT check ordering inside the Android/AndroidX
+group or the third-party group (its own KDoc says so: "the Android / third-party groups are left to the
+IDE"). Don't flag a file where `java.awt.*`/`javax.*` imports land after `kotlinx.coroutines.*`/
+`org.jetbrains.*` (not strictly alphabetical) as a style violation - that's normal and ungated as long as
+there's no `nl.rhaydus.*` block out of order.
+
+**`Dispatchers.IO` on Kotlin/Native is public in kotlinx-coroutines 1.10.2 - a "PR says it's internal"
+claim needs verification, not trust (Batch G):** the Batch G iOS `ShareCardCapture` actual used
+`Dispatchers.Default` for file I/O with the stated rationale "`Dispatchers.IO` is internal on K/N in
+this coroutines version." That's wrong. Verified by unzipping the pinned
+`kotlinx-coroutines-core-iosarm64-1.10.2-sources.jar`: `concurrentMain/Dispatchers.kt` declares
+`public expect val Dispatchers.IO`, and `nativeMain/Dispatchers.kt` provides
+`public actual val Dispatchers.IO: CoroutineDispatcher get() = IO` (the only `internal` thing is an
+unrelated same-named member on the `Dispatchers` object itself, shadowed for external callers). Softcover's
+own `core/domain/.../DispatcherModule.kt` (commonMain, compiled for iOS too) already calls
+`Dispatchers.IO` successfully via an explicit `import kotlinx.coroutines.IO`. Likely root cause of the
+wrong belief: on Native, `Dispatchers.IO` is an *extension* property (not a direct member like on JVM), so
+referencing it without that explicit import is an unresolved-reference compile error that reads like "IO
+doesn't exist here" - easy to misdiagnose as "internal." **When a diff's rationale claims a stdlib/coroutines
+API is "internal"/"unavailable" on a KMP target, verify by grepping the pinned artifact's sources jar
+before accepting the claim** - don't just take the code comment at face value.

@@ -26,8 +26,7 @@ they are not sequential within a batch. Batches are ordered to respect the depen
 | Batch | Theme | Home | Items |
 |---|---|---|---|
 | — | **Implemented & adopted** | — | _(none yet)_ |
-| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F12, F13, F14, F15, F16, F17, F19 |
-| G | Image export | `nl.rhaydus:designsystem-image` | F11 |
+| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F11, F12, F13, F14, F15, F16, F17, F19 |
 | H | Offline mutation queue | new connectivity/offline seam | F8 |
 | I | Shared build & gate tooling | `build-logic` / `detekt-rules` / `style-check` skill | F18, F20, F21, F22, F23 |
 
@@ -357,6 +356,40 @@ app-local fork + local convention and has not re-pointed its imports.
 
 ---
 
+F11 landed on the foundation `release/0.3.0` branch — the image-export batch (Batch G), a standalone
+capture-to-image platform seam. Softcover still ships its app-local fork and has not re-pointed its imports.
+
+### F11 — `ShareCardCapture` (capture a composable to an image, save/share)
+
+- **Type:** enhancement (shared util / platform seam)
+- **Home:** `nl.rhaydus:designsystem-core` (new `share/` package)
+- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core` under a new `share/`
+  package (commonMain `ShareCardCapture` interface + `rememberShareCardCapture(config)` expect + `recordAndDraw`;
+  `CapturableShareCard`; `ShareCardCaptureConfig`; `SaveOutcome` / `ShareOutcome`; `GalleryWritePermissionRequester`;
+  android/jvm/ios actual impl classes). **Placed in `designsystem-core`, not `designsystem-image`** — the image
+  module is pure Coil async-loading (single commonMain set, no platform code); a capture/save/share seam there
+  would force Coil onto capture-only consumers and break its opt-in intent, whereas `designsystem-core` is
+  Coil-free, every consumer already depends on it, and it hosts the 3-actual seam precedent (`ClipboardReader`).
+  Generalized on the way in (it was **not** a clean lift): (1) **self-contained** — the Koin-injected
+  `AppDispatchers` and the desktop `AppLog` were dropped for kotlinx `Dispatchers.IO` / `.Main` (on K/N `IO` is
+  an extension property, reached via `import kotlinx.coroutines.IO`), and every save/share path returns a
+  `SaveOutcome.Failure` / `ShareOutcome.Failure` on error rather than throwing, so failures surface only through
+  those return types; (2) the brand bits (gallery album `"Softcover"`, filename prefix `"softcover-"`, the
+  Android `FileProvider` authority) became a `ShareCardCaptureConfig`; (3) `CapturableShareCard` took a generic
+  `@Composable` slot instead of the app-coupled `ShareContent` + `ShareCard`; (4) the desktop cache dir moved from
+  `desktopAppDataDirectory()` to `java.io.tmpdir`. designsystem-core's androidMain gained `androidx.core` +
+  `activity-compose` (catalog: `androidx-core-ktx` at 1.17.0). Review-hardened over the app original: the
+  iOS share now honours the share-sheet `completed` flag via a new `ShareOutcome.Cancelled` case (a user
+  dismissal is no longer reported as `Shared`) and dismisses a still-presented sheet on the main queue if the
+  coroutine is cancelled mid-share. Softcover still ships its app-local
+  `core/designsystem/.../presentation/share/*` (the seam + the app card design `ShareContent`/`ShareCard`/`ShareCardDimensions`).
+  Adoption re-points the seam import at the two call sites (`ShareBookBottomSheet.kt`, `ShareCardDebugScreen.kt`),
+  passes the app's `ShareCardCaptureConfig`, wraps the app's `ShareCard` in `CapturableShareCard`'s slot, adds a
+  `ShareOutcome.Cancelled` branch to the `share()` `when` in `ShareBookBottomSheet.kt` (treat as a no-op), and
+  deletes the forked seam (the card design stays app-side).
+
+---
+
 # Open work — batched for implementation
 
 ## Batch A (implemented, not adopted) — Style gates → blocking rules
@@ -410,27 +443,6 @@ gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-move
 2. **Own the script upstream, not per app.** The `rhaydus-kotlin` plugin already ships a `style-check`
    skill; until a rule is promoted, its recipe (and the script harness) should live with that skill so
    apps don't each copy and maintain `style-check.sh`. The app keeps only genuinely app-specific recipes.
-
----
-
-## Batch G — Image export (`designsystem-image`)
-
-*Home: `nl.rhaydus:designsystem-image` (existing) or `designsystem-core`. Covers **F11**. Standalone — a
-self-contained capture-to-image platform seam with no shared work with the other batches.*
-
-### F11 — `ShareCardCapture` (capture a composable to an image, save/share)
-
-- **Type:** enhancement (shared util / platform seam)
-- **Home:** `nl.rhaydus:designsystem-image` (existing) or `designsystem-core`
-- **Status:** Open — already well-shaped
-
-`ShareCardCapture` (`core/designsystem/.../presentation/share/ShareCardCapture.kt`, with `.android`,
-`.jvm`, `.ios` implementations) renders a composable to a bitmap via a `GraphicsLayer` and then
-encodes / saves / shares it, with result types for the save and share outcomes. The capture-encode-save-share
-mechanism — including the genuinely fiddly platform seams (scoped-storage save on Android, clipboard/file
-on desktop, the iOS share path) — is 100% brand-agnostic skeleton; only the *card design* fed into it is
-app-specific. Every Compose-Multiplatform app that ever exports an image re-derives this, so it is a
-high-value hoist.
 
 ---
 
