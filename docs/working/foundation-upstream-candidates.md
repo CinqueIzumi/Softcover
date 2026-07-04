@@ -26,8 +26,7 @@ they are not sequential within a batch. Batches are ordered to respect the depen
 | Batch | Theme | Home | Items |
 |---|---|---|---|
 | — | **Implemented & adopted** | — | _(none yet)_ |
-| — | **Implemented, not adopted** | `core-common` / `core-platform` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F9, F10, F11, F12, F13, F14, F15, F16, F17, F19 |
-| H | Offline mutation queue | new connectivity/offline seam | F8 |
+| — | **Implemented, not adopted** | `core-common` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F19 |
 | I | Shared build & gate tooling | `build-logic` / `detekt-rules` / `style-check` skill | F18, F20, F21, F22, F23 |
 
 ---
@@ -390,6 +389,37 @@ capture-to-image platform seam. Softcover still ships its app-local fork and has
 
 ---
 
+F8 landed on the foundation `release/0.3.0` branch as the **new `nl.rhaydus:offline-sync` module** — the
+offline mutation queue batch (Batch H). Per the standing caution, the Softcover-specific shapes were **not**
+lifted: only the generic skeleton was extracted, with the persistence and remote-replay as injected seams.
+Softcover still ships its app-local engine and has not re-pointed anything.
+
+### F8 — Offline mutation queue + drain-and-reconcile pattern
+
+- **Type:** enhancement (shared infra) — generic-skeleton extraction
+- **Home:** `nl.rhaydus:offline-sync` (new module, `commonMain`-only, depends on `core-platform` + `core-common`)
+- **Status:** **Implemented, not adopted.** Landed as the new `nl.rhaydus:offline-sync` module (package
+  `nl.rhaydus.offlinesync`), extracting only the generic engine from Softcover's two entangled syncers:
+  `WriteQueue<P>` (enqueue facade) + `PendingWriteStore<P>` (the pluggable persistence seam — `enqueue` /
+  `getPending(maxAttempts)` / `delete` / `incrementAttempts`, so **Room stays app-side**), `PendingWrite<P>`
+  (localId + attempts + payload row), `ReplayOutcome` (SYNCED / DISCARDED), `DrainPolicy` (poison cap +
+  in-drain exponential backoff), `OfflineWriteDrainer<I, K>` + `DefaultOfflineWriteDrainer<P, I, K>` (the
+  drain loop: online-triggered + startup drain under a mutex; per ordered row → backoff replay → SYNCED:delete
+  +hint / DISCARDED:delete / transient:incrementAttempts+halt / terminal:discard; `drain()` returns the
+  `Map<I, Set<K>>` reconciliation hints). The engine takes the app's `replay` dispatch, `hintKey`,
+  `isTransient` classifier, and `NetworkAvailabilityProvider` (F10) as injected inputs; it uses
+  `AppDispatchers` + `runCatchingCancellable` / `runCatchingLogged` from `core-common`. The two Softcover
+  asymmetries collapse into config: `isTransient` (user-book `{ it is RetryableSyncException }` vs list
+  `{ true }`) and `DrainPolicy.inDrainRetries` (1 vs 3). **Drainer only** — the app owns the
+  drain→fetch→reconcile composition (`OfflineUserBookSync.preserveOwnedFields` is inherently app-specific).
+  Unit-tested (`DefaultOfflineWriteDrainerTest`, `commonTest`, fakes + coroutines-test). Softcover still ships
+  its app-local `core/connectivity/.../data/sync/PendingUserBookWriteSyncer.kt` + `PendingListWriteSyncer.kt`,
+  the `core/domain/connectivity/` queue+drainer contracts, the Room DAOs/entities, and `OfflineUserBookSync`.
+  Adoption re-points the two syncers onto `DefaultOfflineWriteDrainer` (payloads/kinds/replay/reconcile stay),
+  makes the Room DAOs back a `PendingWriteStore<P>` impl, and deletes the duplicated drain-loop/backoff code.
+
+---
+
 # Open work — batched for implementation
 
 ## Batch A (implemented, not adopted) — Style gates → blocking rules
@@ -443,36 +473,6 @@ gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-move
 2. **Own the script upstream, not per app.** The `rhaydus-kotlin` plugin already ships a `style-check`
    skill; until a rule is promoted, its recipe (and the script harness) should live with that skill so
    apps don't each copy and maintain `style-check.sh`. The app keeps only genuinely app-specific recipes.
-
----
-
-## Batch H — Offline mutation queue (new connectivity/offline seam)
-
-*Home: a foundation offline/connectivity seam (likely a new module built on the skeleton). Covers **F8**.
-Standalone and the largest piece — **requires a generic-skeleton extraction first** and depends on Batch B's
-`NetworkAvailabilityProvider` (F10) for the drain-on-network-return trigger. Land it last.*
-
-### F8 — Offline mutation queue + drain-and-reconcile pattern
-
-- **Type:** enhancement (shared infra) — **requires a generic-skeleton extraction first**
-- **Home:** a foundation offline/connectivity seam (likely a new module built on the skeleton)
-- **Status:** Open — pattern is sound but currently entangled with Softcover's domain models
-
-Softcover's offline write path (`core/connectivity/.../data/sync/PendingUserBookWriteSyncer.kt`,
-`PendingListWriteSyncer.kt`; domain contracts in `core/domain/connectivity/`; the
-`OfflineUserBookSync` collaborator) is a full optimistic-write-replay engine: enqueue a write locally,
-drain it when the network returns and on startup, replay with kind-specific dispatch, halt-and-retry on
-transient failure vs. discard on terminal failure (with bounded exponential backoff), and return
-per-entity *reconciliation hints* so the merge step knows which local fields a successful replay owns.
-Every offline-capable app re-solves exactly this.
-
-What's reusable is the **skeleton**: a `Queue<T>` enqueue facade, a `Drainer<T, K>` contract that takes
-replay lambdas (not hard-coded mutation dispatch) and returns `Map<EntityId, Set<Kind>>` hints, plus the
-backoff/halt policy. What's app-specific and must be lifted out before it can upstream: the
-`PendingUserBookWrite` / `PendingListWrite` payload shapes, the `PendingUserBookWriteKind` enum, and the
-hard-wired dispatch to `BooksRemoteDataSource` / `ListsRemoteDataSource`. This is medium structural work
-— **file it, but don't lift the current Softcover-specific shapes directly**; extract the generic
-contracts first.
 
 ---
 

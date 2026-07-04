@@ -4,24 +4,35 @@ description: Testing framework, style rules, and gradle task for the rhaydus-fou
 type: project
 ---
 
-The `rhaydus-foundation` repo (KMP library, groupId `nl.rhaydus`, modules like `core-ui`, `designsystem-core`) uses the same
-idiom as [[project_test_conventions]] (Softcover): JUnit 5 (`org.junit.jupiter.api.Test`, `@Nested inner class` named after
-the function/property under test), kotest `io.kotest.matchers.shouldBe`, kotlinx-coroutines-test `runTest`. AAA markers
-(`// ----- Arrange -----` / `// ----- Act -----` / `// ----- Assert -----`, collapsing to `// ----- Act & Assert -----` when
-act and assert are the same expression) are also used here — confirmed via
-`designsystem-core/src/androidHostTest/kotlin/nl/rhaydus/designsystem/layout/WindowSizeClassTest.kt`.
+The `rhaydus-foundation` repo (KMP library, groupId `nl.rhaydus`, modules like `core-ui`, `designsystem-core`, `offline-sync`)
+uses the same idiom as [[project_test_conventions]] (Softcover): JUnit 5 (`org.junit.jupiter.api.Test`, `@Nested inner class`
+named after the function/property under test), kotest `io.kotest.matchers.shouldBe`, kotlinx-coroutines-test `runTest`. AAA
+markers (`// ----- Arrange -----` / `// ----- Act -----` / `// ----- Assert -----`) are also used here.
 
-**No commonTest source set**: KMP modules here test only from `<module>/src/androidHostTest/kotlin/...`, mirroring the
-commonMain package path. Gradle task is `./gradlew :<module>:testAndroidHostTest --tests "..."` (same
-`testAndroidHostTest` vs `testDebugUnitTest` distinction as Softcover's KMP `core:*` modules, see
-[[project_test_conventions]]).
+**`commonTest` now exists (as of `release/0.3.0`), but only carries kotest + coroutines-test + turbine — no test-annotation
+framework.** `KmpLibraryConventionPlugin` (`build-logic/src/main/kotlin/KmpLibraryConventionPlugin.kt`) wires
+`kotest-assertions-core` + `kotlinx-coroutines-test` + `turbine` into `commonTest`, but JUnit5 (`junit-jupiter-api/engine`) and
+MockK are wired **only** into `androidHostTest` (`mobileTest.dependsOn(commonTest)`, `androidHostTest.dependsOn(mobileTest)`).
+`kotlin("test")` is **not** declared anywhere, so `kotlin.test.Test` does not resolve either. Net effect: **no annotation
+resolves across every commonTest-consuming target simultaneously** without a build.gradle.kts change.
 
-**`ExperimentalCoroutinesApi` opt-in warning is accepted, uncommented**: using `runCurrent()` / `UnconfinedTestDispatcher`
-inside `runTest {}` emits a compiler warning without `@OptIn` — build still succeeds and this is left as-is (matches the
-Softcover pattern of not annotating this in test files).
+**Confirmed consequence:** a `commonTest` file using `org.junit.jupiter.api.Test`/`@Nested` compiles and runs fine via
+`:<module>:testAndroidHostTest` (which inherits commonTest's sources plus androidHostTest's own JUnit5 dep), but **fails to
+compile** for `:<module>:jvmTest` and `:<module>:iosSimulatorArm64Test` (JUnit5 absent from those classpaths) — and since
+`:<module>:check` depends on all three (`allTests`/`testAndroid` fan out to `jvmTest` + `iosSimulatorArm64Test` +
+`testAndroidHostTest`), adding such a file **breaks `:<module>:check`/`build`** for that module, even though the narrow
+`testAndroidHostTest` run is green. First hit in `offline-sync` (2026-07-03, `DefaultOfflineWriteDrainerTest`) — verified via
+`./gradlew :offline-sync:check --dry-run` showing `jvmTest`/`iosSimulatorArm64Test` as real dependencies of `check`.
 
-**Why:** first unit-test-writer task in this repo (2026-07-03, `core-ui` `NetworkAvailability`/`BaseNetworkAvailabilityProvider`
-tests) — confirms the Softcover conventions carry over to this sibling repo rather than being Softcover-specific.
+**How to apply:** If a task explicitly directs the test file into `commonTest` and forbids build.gradle.kts edits, write it
+with JUnit5 (matching house style) and run/report via `testAndroidHostTest` — but flag to the user that `jvmTest` /
+`iosSimulatorArm64Test` / the module's `check` will not compile until either (a) `implementation(kotlin("test"))` is added to
+commonTest (enabling `kotlin.test.Test`, which KGP auto-maps to `kotlin-test-junit5` for the JVM target since `useJUnitPlatform()`
+is already set repo-wide) or (b) the test file is moved to `androidHostTest` instead (matching the older, pre-0.3.0 pattern
+this repo used before commonTest existed — see history in this file). Do not silently pick a fix; this is a build-config
+decision for the user. See [[feedback_backgroundscope_advanceuntilidle]] for a related coroutines-test gotcha hit in the same
+session.
 
-**How to apply:** When asked to write tests in `rhaydus-foundation` (not Softcover), reuse the Softcover test-writing
-conventions memory wholesale; only the module-per-package test directory and lack of `commonTest` are repo-specific.
+**Why:** `offline-sync`'s `DefaultOfflineWriteDrainerTest` (F8 batch, 2026-07-03) is the first real commonTest test file in
+this repo — earlier modules (`designsystem-core`, `core-ui`) simply had no commonTest directory at all and put tests
+directly in `androidHostTest`, so this gap was never exercised before.

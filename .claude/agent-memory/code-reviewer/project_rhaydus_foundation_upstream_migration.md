@@ -37,6 +37,52 @@ area (e.g. `docs/design-system-foundations.md` for a design-system component) bo
 review-enforced maintenance rule requiring them to be updated in the same change that adds/changes a
 component - check both are current, don't just check one.
 
+**Batch H (`offline-sync` module, release/0.3.0, F8) review notes (2026-07-03):** a generic
+optimistic-write drain engine extracted from two Softcover syncers. Clean extraction (grepped for
+softcover/Room/Apollo/Book/etc - none found outside one KDoc example sentence), sensible `<P, I, K>`
+generic split (`WriteQueue<P>`/`PendingWriteStore<P>` vs. `OfflineWriteDrainer<I, K>` so plain
+enqueue-only call sites don't need the reconciliation type params), `isTransient` defaulting to
+`{ true }` (never silently discard) is the right data-safe default and is well documented. `DrainPolicy`,
+`ReplayOutcome`, one-declaration-per-file, KDoc-on-public-surface, blank-line/paragraph rules, import
+order - all compliant on read-through.
+Found one **confirmed** (empirically reproduced, see [[feedback_onstart_stateflow_double_emit]]) bug:
+`start()`'s `.onStart { if (isOnline.value) drainGuarded() }.onEach { if (it) drainGuarded() }.collect()`
+double-drains on startup when already online, because `isOnline` is a `StateFlow` and replays its
+current value to the `onEach` regardless of the redundant `onStart` guard.
+Also found a real observability gap worth calling out in any similar drain/retry engine review: the
+per-row failure paths (`store.getPending()` throwing → swallowed via `.getOrElse { emptyList() }` with
+no log; a transient `replay()` failure → caught, `incrementAttempts`'d, and silently returned from the
+loop with no log) never reach the one log call the class has (`drainGuarded`'s outer
+`runCatchingLogged`), because `drainOnce()` never actually throws for those categories - only an
+app-supplied `hintKey()` throwing (or a `store.delete`/`incrementAttempts` bug) would surface there. A
+write that permanently crosses the poison cap (`DrainPolicy.maxAttempts`) is never logged as "stuck" -
+it just silently stops being returned by `getPending` forever. Worth flagging as a design gap in any
+review of this file: the class's own KDoc claims background drains are "resilient... a failure is
+logged," but that log path is barely reachable in practice.
+Also: `hintKey()` is called unguarded inside the `onSuccess` handler, *after* `store.delete(row.localId)`
+already ran - if it throws, that row's hint is lost forever (row already gone) and the exception aborts
+processing of the rest of that drain pass's remaining rows too, asymmetric with how `replay`/`isTransient`
+failures are contained. Same class of "seam callback isn't defensively wrapped" issue as the log gap
+above.
+Naming: concrete class is `DefaultOfflineWriteDrainer`, not `*Impl` - checked, no existing
+`Default*`/`*Impl` precedent either way elsewhere in the foundation modules (core-platform uses
+per-platform names like `AndroidNetworkAvailabilityProvider`/`BaseNetworkAvailabilityProvider`, not
+`Impl`). Code-style's `*Impl` convention is framed around app-feature data-layer types
+(`*RepositoryImpl`/`*DataSourceImpl`/`*StorageImpl`/`*QueueImpl`); a foundation-shipped canonical
+"default" engine implementation that apps might swap out is a different shape, and `Default*` is a
+defensible, arguably more idiomatic library-naming choice here - not a violation, just worth noting if
+asked.
+Doc: new `docs/architecture.md` §6 subsection is accurate, correctly placed, and cross-referenced with
+CAPABILITIES.md's module row + dependency-graph line in the same change (maintenance rule satisfied).
+One newly-added em dash in the new architecture.md prose sentence - technically violates
+`CLAUDE.md`'s "docs are em-dash-free" rule for markdown docs (this rule does NOT extend to `.kt` files,
+see the em-dash correction note above, but DOES apply to markdown prose); minor, and one pre-existing
+em dash was already in the file untouched by this diff, so the codebase wasn't at zero to begin with.
+Test gap: the "in-drain backoff" test only asserts `callCount == 3`, not the actual delay/backoff
+progression (no assertion on `testScheduler.currentTime` or equivalent) - the exponential-backoff math
+itself (`initialBackoffMs` × `backoffMultiplier`, capped at `backoffCapMs`) is undocumented-by-test even
+though it's a documented, tunable behavior.
+
 **Doc-drift trap found in review (2026-07-03, F/desktop-scrollbar + platformModifierClick batch):**
 `design-system-foundations.md` §11's intro sentence said "the **two** modifiers below are in
 `commonMain` and no-op on touch" (accurate count for `pointerHandCursor` + `hoverHighlight` at the
