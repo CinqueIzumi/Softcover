@@ -45,15 +45,16 @@ by [`toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md). Softcover de
   vendored in the app. Softcover's per-feature flow-collector interfaces are named `XxxCollector`
   (e.g. `BookDetailCollector`, in each feature's `presentation/collector/`) and implement the foundation
   `nl.rhaydus.toad.Collector` role.
-- **Error-slot convention (provisional).** A screen that can fail a load/submit exposes a nullable
-  `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
-  `OnboardingUiState.submissionError`). The action sets it — copy authored in presentation via
-  `Throwable.toUserMessage()` plus a screen-specific fallback — clears it on edit/retry, and the screen
-  renders it with `InlineErrorState` (in `:core:designsystem`), whose retry re-dispatches the screen's
-  own action. Do **not** re-handle `CancellationException` in the fold: `runCatchingLogged` guarantees it
-  at the use-case boundary, so the slot only holds a real failure. This is a Softcover convention only
-  because the foundation TOAD baseline defines no error contract yet — it is queued to move upstream (see
-  `../working/foundation-upstream-candidates.md`, F16/F17); keep the local treatment minimal until it does.
+- **Error-slot convention.** A screen that can fail a load/submit follows the foundation TOAD error-slot
+  convention ([`../rhaydus/0.3.0/toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md) §Conventions):
+  a nullable `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
+  `OnboardingUiState.submissionError`), set by the action, cleared on any invalidating edit and on retry,
+  and rendered with `InlineErrorState` whose retry re-dispatches the screen's own action. Do **not**
+  re-handle `CancellationException` in the fold: `runCatchingLogged` guarantees it at the use-case boundary,
+  so the slot only holds a real failure. The Softcover-specific bindings: the copy is authored in
+  presentation via `Throwable.toUserMessage()` plus a screen-specific fallback, and the renderer is the
+  foundation `nl.rhaydus.designsystem.component.InlineErrorState` (call sites pass the editorial `bodySmall`
+  as `textStyle`).
 
 ## Network Layer
 

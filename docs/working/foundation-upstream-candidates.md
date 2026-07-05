@@ -79,8 +79,8 @@ The first foundation-adoption pass is **complete, green, and committed** across 
 
 | Batch | Theme | Home | Items |
 |---|---|---|---|
-| — | **Implemented & adopted** | `core-common` / `designsystem-core` | F4, F5, F6, F13, F14 |
-| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F11, F12, F15, F16, F17, F18, F19, F20, F21, F23 |
+| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` | F4, F5, F6, F13, F14, F16, F17 |
+| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F11, F12, F15, F18, F19, F20, F21, F23 |
 | I | Shared build & gate tooling (residual) | `style-check` skill | F22 |
 
 ---
@@ -163,6 +163,32 @@ F13 and F14 landed together in `nl.rhaydus:designsystem-core` (Batch D — share
   slot). Softcover's app-local `core/designsystem/.../component/ExpandableFlowRow.kt` (and its private
   `ShowMoreChip`) is deleted; the one call site (`LibraryFilterSheet.kt`) is a pure import swap (all defaults).
   `design-system.md` §Expandable flow row updated.
+
+F16 and F17 landed together (Batch F — error-slot + inline error UX) and are now **live in Softcover**: the
+`InlineErrorState` component (in `designsystem-core`) and the TOAD error-slot convention (documented in
+`toad-architecture.md`) were designed together, and the app now consumes both.
+
+### F16 — `InlineErrorState` (inline load/submit-failure + retry surface)
+
+- **Type:** enhancement (shared component)
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Implemented & adopted.** The in-content failure surface ships as
+  `nl.rhaydus.designsystem.component.InlineErrorState`, brand-decoupled via `retryLabel: String = "Retry"`
+  and `textStyle: TextStyle = MaterialTheme.typography.bodySmall` params (error tint stays the Material
+  `error` role; retry is the foundation `RhaydusButton`). Softcover's app-local
+  `core/designsystem/.../component/InlineErrorState.kt` is deleted; the two call sites
+  (`ExploreScreenLayout.mobile.kt`, `OnboardingShelf.kt`) pass `textStyle = MaterialTheme.editorialTypography.bodySmall`
+  (the `retryLabel` default matches), so the editorial look is preserved. `design-system.md` §Inline error state updated.
+
+### F17 — A TOAD `UiState` error-slot + retry convention
+
+- **Type:** enhancement (framework convention / shared contract)
+- **Home:** `nl.rhaydus:toad` / `toad-architecture.md`
+- **Status:** **Implemented & adopted.** The convention (nullable `String?` slot on the screen's own
+  `UiState`, folded in `.onFailure` with presentation-authored copy, cleared on retry / any invalidating edit,
+  rendered with `InlineErrorState`, no `CancellationException` re-handling) is blessed in the foundation
+  `toad-architecture.md` §Conventions. Softcover's provisional note in `docs/reference/architecture.md` is
+  re-pointed at that canonical convention; the app-specific `toUserMessage()` copy-authoring stays app-side.
 
 ## Implemented, not adopted
 
@@ -299,47 +325,6 @@ gesture, mobile pass-through). Softcover still ships its app-local forks and has
   from-zero detekt (`LoopWithTooManyJumpStatements`). Softcover still ships its
   app-local fork triple `core/designsystem/.../presentation/modifier/PlatformModifierClick{,.jvm,.mobile}.kt`.
   Adoption is an import swap at the one call site (`LibraryShelf.kt`) and deletes the fork.
-
----
-
-F16 and F17 landed together on the foundation `release/0.3.0` branch — the error-slot + inline error UX batch
-(Batch F), one feature split across two modules: `InlineErrorState` (the component) in `nl.rhaydus:designsystem-core`
-and the TOAD error-slot + retry convention (documented) in `nl.rhaydus:toad`'s `toad-architecture.md`. The
-component's API and the state-slot contract were designed together so they match. Softcover still ships its
-app-local fork + local convention and has not re-pointed its imports.
-
-### F16 — `InlineErrorState` (inline load/submit-failure + retry surface)
-
-- **Type:** enhancement (shared component)
-- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core`
-  (`component/InlineErrorState.kt`) as the standard in-content failure surface: a centred [message] in the
-  Material `error` role above a `RhaydusButton` retry that calls `onRetry`, with the same wrap-or-fill sizing
-  contract (vertical centring only when the caller's `modifier` gives it a height). Brand-decoupled on the way
-  in: the two app couplings — Softcover's hardcoded `"Retry"` label and its `MaterialTheme.editorialTypography.bodySmall`
-  text style — became the `retryLabel: String = "Retry"` and `textStyle: TextStyle = MaterialTheme.typography.bodySmall`
-  params (the error tint stays the pure-Material `error` role; the retry already used the foundation
-  `RhaydusButton`). Softcover still ships its app-local
-  `core/designsystem/.../presentation/component/InlineErrorState.kt`. Adoption re-points the two call sites
-  (`ExploreScreenLayout.mobile.kt`, `OnboardingShelf.kt`) onto the foundation symbol, passing the app's
-  editorial `bodySmall` as `textStyle`, and deletes the fork.
-
----
-
-### F17 — A TOAD `UiState` error-slot + retry convention
-
-- **Type:** enhancement (framework convention / shared contract)
-- **Home:** `nl.rhaydus:toad` / `toad-architecture.md`
-- **Status:** **Implemented, not adopted.** Blessed in `nl.rhaydus:toad`'s `toad-architecture.md` (a new
-  `## Conventions` bullet): a screen that can fail surfaces the failure as a nullable `String?` slot on its own
-  `data class : UiState` (defaulted null), the action folds it in `.onFailure` (copy authored in presentation,
-  with a screen-specific fallback), clears it on retry and on any invalidating edit, and renders it with
-  `InlineErrorState` (F16) whose retry re-dispatches the screen's **own** action. Cancellation is not re-handled
-  in the fold (the use-case boundary already rethrows it). Kept deliberately as a **documented convention with no
-  `toad` code** — `UiState` stays a bare marker; a screen wanting a richer shape than `String?` declares its own
-  error type, so no speculative `UiError` type was added. Softcover still keeps the provisional note in
-  `docs/reference/architecture.md` and its app-local `toUserMessage()` copy-authoring (app-specific, stays in the
-  app). Adoption re-points that provisional note at the now-canonical `toad-architecture.md` convention.
 
 ---
 

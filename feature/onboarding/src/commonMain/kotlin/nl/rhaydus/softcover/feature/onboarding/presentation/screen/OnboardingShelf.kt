@@ -24,13 +24,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ClickableText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.InlineErrorState
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -174,6 +174,7 @@ internal fun ApiKeyEntrySection(
             InlineErrorState(
                 message = error,
                 onRetry = { runAction(OnApiKeySaveClickAction) },
+                textStyle = MaterialTheme.editorialTypography.bodySmall,
             )
         }
     }
