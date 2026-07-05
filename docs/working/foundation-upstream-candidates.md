@@ -79,8 +79,8 @@ The first foundation-adoption pass is **complete, green, and committed** across 
 
 | Batch | Theme | Home | Items |
 |---|---|---|---|
-| — | **Implemented & adopted** | `core-common` | F4, F5, F6 |
-| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F23 |
+| — | **Implemented & adopted** | `core-common` / `designsystem-core` | F4, F5, F6, F13, F14 |
+| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F11, F12, F15, F16, F17, F18, F19, F20, F21, F23 |
 | I | Shared build & gate tooling (residual) | `style-check` skill | F22 |
 
 ---
@@ -137,6 +137,32 @@ the app-local `:core:domain` copies are deleted and every import re-points to th
   via `:core:domain` now declare `nl.rhaydus:core-common` directly (app, desktopApp, orchestration, core/{deadlines,
   identity, notification, profile}, feature/app_update androidMain); desktopApp's `:core:domain` dep — which
   existed only for the facade — is replaced by `core-common`.
+
+F13 and F14 landed together in `nl.rhaydus:designsystem-core` (Batch D — shared Compose components) and are now
+**live in Softcover**: the app-local forks are deleted and the call sites re-point to the foundation symbols.
+
+### F13 — `StarRatingInput` (half-star, drag-scrub, haptics)
+
+- **Type:** enhancement (shared component)
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Implemented & adopted.** The interactive half-star control ships as
+  `nl.rhaydus.designsystem.component.StarRatingInput`, brand-decoupled via a `starIcon: RhaydusIconResource`
+  param and a `filledColor` (default `MaterialTheme.colorScheme.primary`) alongside `emptyColor`. Softcover's
+  app-local `core/designsystem/.../component/StarRatingInput.kt` is deleted; the two call sites (`ShareCard.kt`,
+  `BookDetailShelf.kt`) pass `starIcon = drawableIconResource(icon = SoftcoverIcon.StarFilled, …)` and
+  `filledColor = RatingGold` (the `emptyColor` low-alpha `onSurfaceVariant` and the a11y label are foundation
+  defaults, so the brand look is unchanged). The pure `ratingForOffsetX(...)` math is unit-tested in the
+  foundation, so no app-local test remains. `design-system.md` §Star rating input updated.
+
+### F14 — `ExpandableFlowRow` (collapsible flow row with progressive reveal)
+
+- **Type:** enhancement (layout primitive)
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Implemented & adopted.** The collapsible `FlowRow` ships as
+  `nl.rhaydus.designsystem.layout.ExpandableFlowRow` (a `showMoreLabel` param on top of the `showMoreIndicator`
+  slot). Softcover's app-local `core/designsystem/.../component/ExpandableFlowRow.kt` (and its private
+  `ShowMoreChip`) is deleted; the one call site (`LibraryFilterSheet.kt`) is a pure import swap (all defaults).
+  `design-system.md` §Expandable flow row updated.
 
 ## Implemented, not adopted
 
@@ -232,43 +258,6 @@ ships its app-local forks and has not re-pointed its imports.
   `TwoPaneScaffold`, `BottomBarScaffold`, `NavPulse`). Softcover still ships its app-local
   `BottomBarPulseManager` + `libraryPulseKey` and the shell; adoption re-points `pulseLibrary()` onto a
   `NavPulse` instance keyed by the app's `LibraryTab` and passes the app bar into `BottomBarScaffold`.
-
----
-
-F13 and F14 landed together in `nl.rhaydus:designsystem-core` on the foundation `release/0.3.0` branch — the
-shared Compose components batch (Batch D). Two independent, brand-agnostic widgets lifted with the "expose
-the brand bits as params" shape: `StarRatingInput` in the `component/` catalog, `ExpandableFlowRow` in the
-`layout/` primitives. Softcover still ships its app-local forks and has not re-pointed its imports.
-
-### F13 — `StarRatingInput` (half-star, drag-scrub, haptics)
-
-- **Type:** enhancement (shared component)
-- **Home:** `nl.rhaydus:designsystem-core` (shared component catalog)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core`
-  (`component/StarRatingInput.kt`) as the interactive N-star, half-star control — tap + drag-scrub, haptics
-  on each half-step crossing, live preview committing on release. Brand-decoupled on the way in: the fill
-  tint is a `filledColor` param (defaulting to `MaterialTheme.colorScheme.primary`) alongside `emptyColor`,
-  and the star glyph is a `starIcon: RhaydusIconResource` param (was Softcover's `SoftcoverIcon.StarFilled`)
-  — the foundation haptics (`rememberHaptics()`) it already used stays. The half-star math is extracted to
-  the pure `ratingForOffsetX(...)` (unit-tested under `androidHostTest`). Softcover still ships its app-local
-  `core/designsystem/.../presentation/component/StarRatingInput.kt`. Adoption re-points the two call sites
-  (`ShareCard.kt`, `BookDetailShelf.kt`) onto the foundation symbol, passing `filledColor = RatingGold` and
-  `starIcon = SoftcoverIcon.StarFilled`, and deletes the fork.
-
----
-
-### F14 — `ExpandableFlowRow` (collapsible flow row with progressive reveal)
-
-- **Type:** enhancement (layout primitive)
-- **Home:** `nl.rhaydus:designsystem-core` (layout primitives)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core`
-  (`layout/ExpandableFlowRow.kt`) — a `FlowRow` that collapses to `collapsedLines` behind a trailing "show
-  more" affordance and reveals `linesPerExpand` more lines per tap. Lifted almost verbatim (it had zero
-  app-local imports); the header comment was genericized (the app-repo `now.md` / `PillChip` references
-  dropped) and the show-more label became a `showMoreLabel` param on top of the existing `showMoreIndicator`
-  slot. Softcover still ships its app-local
-  `core/designsystem/.../presentation/component/ExpandableFlowRow.kt`. Adoption is a pure import swap at the
-  one call site (`LibraryFilterSheet.kt`, all defaults) and deletes the fork.
 
 ---
 

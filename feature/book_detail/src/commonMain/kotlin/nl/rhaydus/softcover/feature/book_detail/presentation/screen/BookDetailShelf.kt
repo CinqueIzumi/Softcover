@@ -86,6 +86,7 @@ import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.editorial.component.DropCapText
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
@@ -107,7 +108,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembers
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
@@ -751,6 +751,11 @@ internal fun PersonalRatingRow(
                     rating = rating,
                 ),)
             },
+            starIcon = drawableIconResource(
+                contentDescription = "",
+                icon = SoftcoverIcon.StarFilled,
+            ),
+            filledColor = RatingGold,
         )
     }
 }
