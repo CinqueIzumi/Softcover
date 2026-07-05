@@ -22,7 +22,7 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
-- Foundation adoption onto **local 0.3.0** — complete & **GREEN**, uncommitted (both this repo and `../rhaydus-foundation`). Wiring + F4/F5/F6 + the Batch A ktlint cleanup all done; full `check` passes. **Only remaining step: commit (two repos, separately).** Full status + resume plan: [foundation-upstream-candidates.md](foundation-upstream-candidates.md) → "⏳ Adoption in progress — RESUME HERE".
+- Foundation adoption onto **local 0.3.0** — first pass **landed & committed** (Softcover `39df3489`, foundation `40b23bf`); full `check` green. Next: publish foundation 0.3.0, then the next batch. Details: [foundation-upstream-candidates.md](foundation-upstream-candidates.md) → "✅ First adoption pass — LANDED".
 
 ---
 

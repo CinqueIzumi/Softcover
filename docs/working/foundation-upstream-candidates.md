@@ -21,13 +21,19 @@ share a target module and a kind of work, so it can be designed and landed in on
 are stable identifiers (referenced from commits and other docs) and are **never reused or renumbered**, so
 they are not sequential within a batch. Batches are ordered to respect the dependencies noted on each.
 
-## ⏳ Adoption in progress — RESUME HERE (green & uncommitted, updated 2026-07-06)
+## ✅ First adoption pass — LANDED & committed (2026-07-06)
 
-A first foundation-adoption pass is **complete and GREEN but uncommitted across two repos**. Softcover runs on the
-**local 0.3.0** foundation (`foundation.local=true` in `local.properties`, includeBuild `../rhaydus-foundation`
-@ branch `release/0.3.0`). The full gate set — `ktlintCheck`, `styleCheck`, `buildHealth`, `checkModuleGraph`,
-Android+JVM compile, and the affected host tests — is **green**. **Nothing is committed** (ask-before-commit rule);
-the only remaining step is committing (below).
+The first foundation-adoption pass is **complete, green, and committed** across both repos. Softcover runs on the
+**local 0.3.0** foundation (`foundation.local=true` in `local.properties` — gitignored, so it stays local — includeBuild
+`../rhaydus-foundation` @ branch `release/0.3.0`). The full gate set — `ktlintCheck`, `styleCheck`, `buildHealth`,
+`checkModuleGraph`, Android+JVM compile, and the affected host tests — is **green**.
+
+- **Softcover** `hotfix/3.0.3` → `39df3489` — the 0.3.0 switch + F4/F5/F6 + Batch A ktlint cleanup.
+- **Foundation** `../rhaydus-foundation` `release/0.3.0` → `40b23bf` — the mockk-stub autocorrect + two carve-outs (+ tests).
+
+⚠️ Because `foundation.local` stays out of git, the committed Softcover state resolves catalog `0.3.0` from the
+**published** `nl.rhaydus:*` artifacts — so **foundation 0.3.0 must be published** before CI / a fresh clone (without
+`foundation.local=true`) can build.
 
 ### Done this pass
 - **Wiring → local 0.3.0** (via `rhaydus-adopt`): catalog `0.2.0`→`0.3.0`; retired `core-ui` → `core-common`
@@ -58,22 +64,14 @@ the only remaining step is committing (below).
 - **code-reviewer** run over the whole diff: 3 minor findings, all fixed (iosMain import order, `build.gradle.kts`
   `Properties` import, 2 added `OneTypePerFileRule` edge-case tests) and re-verified green.
 
-### Working-tree state (uncommitted)
-- **Softcover** (`hotfix/3.0.3`): ~300 files. Deletions = the 5 app-local source/test files + the 5 old
-  `docs/rhaydus/0.2.0/*`. Untracked = `docs/rhaydus/0.3.0/`, `.claude/agent-memory/…rhaydus-adopt/`.
-- **Foundation** (`../rhaydus-foundation` @ `release/0.3.0`): 6 M — `InlineMockkStubRule.kt`, `OneTypePerFileRule.kt`,
-  `InlineFullyQualifiedReferenceRule.kt`, and each rule's test.
-
-### Next actions on resume (this is step 5 onward)
-1. **Commit (ask first; two repos, separate commits).** `../rhaydus-foundation` on `release/0.3.0`: the
-   `InlineMockkStubRule` autocorrect + the two carve-outs (+ tests) — these must land/publish so Softcover's local
-   includeBuild and any future published consumption line up. Softcover on `hotfix/3.0.3`: the switch + F4/F5/F6 +
-   the Batch A cleanup.
-2. **Batch-index bookkeeping at commit:** the F7 ktlint rules are now consumed and the app is clean against them; the
-   `inline-mockk-stub` autocorrect + the two carve-outs are new foundation enhancements worth recording. Decide how to
-   reflect F1/F7 (and F22) status once committed (F1's detekt rule + F19 detekt config are still *not* adopted — the
-   app hasn't wired the foundation detekt-rules yet).
-3. Then continue with the next foundation batch (e.g. F19 detekt config, F9/F10 `core-platform`, F2/F3 bottom bar).
+### Next up
+1. **Publish foundation `0.3.0`** (or keep everyone on `foundation.local=true`) so non-local builds resolve the
+   catalog `0.3.0` coordinates — see the ⚠️ above.
+2. **Batch-index bookkeeping:** the F7 ktlint rules are now consumed and the app is clean against them, and the
+   `inline-mockk-stub` autocorrect + the two carve-outs are new foundation enhancements. F1's detekt rule + F19 detekt
+   config remain *not adopted* (the app hasn't wired the foundation `detekt-rules` yet). Reconcile F1/F7/F22 status on
+   the next pass rather than piecemeal here.
+3. Continue with the next foundation batch (e.g. F19 detekt config, F9/F10 `core-platform`, F2/F3 bottom bar).
 
 ---
 
