@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
+import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverLoadingSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.illustration.SoftcoverIllustration
 import nl.rhaydus.softcover.core.designsystem.presentation.illustration.painter

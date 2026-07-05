@@ -79,8 +79,8 @@ The first foundation-adoption pass is **complete, green, and committed** across 
 
 | Batch | Theme | Home | Items |
 |---|---|---|---|
-| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` | F4, F5, F6, F13, F14, F16, F17 |
-| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F11, F12, F15, F18, F19, F20, F21, F23 |
+| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` | F4, F5, F6, F12, F13, F14, F15, F16, F17 |
+| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F11, F18, F19, F20, F21, F23 |
 | I | Shared build & gate tooling (residual) | `style-check` skill | F22 |
 
 ---
@@ -190,6 +190,30 @@ F16 and F17 landed together (Batch F — error-slot + inline error UX) and are n
   `toad-architecture.md` §Conventions. Softcover's provisional note in `docs/reference/architecture.md` is
   re-pointed at that canonical convention; the app-specific `toUserMessage()` copy-authoring stays app-side.
 
+F12 and F15 landed together in `nl.rhaydus:designsystem-core` (Batch E — desktop jvm affordances) and are now
+**live in Softcover**: the app-local forks are deleted and the call sites re-point to the foundation symbols.
+
+### F12 — `DesktopVerticalScrollbar` (themed, dark-surface-visible)
+
+- **Type:** enhancement (desktop affordance)
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Implemented & adopted.** The themed jvm scrollbar (`LazyGridState` / `LazyListState` /
+  `ScrollState` overloads, thumb tinted to `onSurface` for dark surfaces) ships as
+  `nl.rhaydus.designsystem.component.DesktopVerticalScrollbar` (no params — pure skeleton). Softcover's app-local
+  `core/designsystem/.../component/DesktopScrollbar.kt` (jvmMain, with its private `softcoverScrollbarStyle()`) is
+  deleted; the call sites (15 invocations across 10 jvm layout files in 8 feature modules — reading, settings,
+  library, explore, profile, book_detail, onboarding, session) are pure import swaps. `design-system.md`
+  §Desktop scrollbar updated.
+
+### F15 — `platformModifierClick` (desktop modifier-aware selection)
+
+- **Type:** enhancement (desktop affordance / modifier)
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Implemented & adopted.** The `commonMain` expect/actual `Modifier` extension (Ctrl/Cmd toggle +
+  Shift range-select on jvm, pass-through on mobile) ships as `nl.rhaydus.designsystem.modifier.platformModifierClick`.
+  Softcover's app-local fork triple `core/designsystem/.../modifier/PlatformModifierClick{,.jvm,.mobile}.kt` is
+  deleted; the one call site (`LibraryShelf.kt`) is a pure import swap. `design-system.md` §Desktop selection updated.
+
 ## Implemented, not adopted
 
 ### F19 — Shared detekt config belongs in the foundation
@@ -284,47 +308,6 @@ ships its app-local forks and has not re-pointed its imports.
   `TwoPaneScaffold`, `BottomBarScaffold`, `NavPulse`). Softcover still ships its app-local
   `BottomBarPulseManager` + `libraryPulseKey` and the shell; adoption re-points `pulseLibrary()` onto a
   `NavPulse` instance keyed by the app's `LibraryTab` and passes the app bar into `BottomBarScaffold`.
-
----
-
-F12 and F15 landed together in `nl.rhaydus:designsystem-core` on the foundation `release/0.3.0` branch — the
-desktop (jvm) affordances batch (Batch E). Two self-contained, brand-agnostic desktop interaction affordances
-lifted next to the existing `dismissOnEscape` / `DesktopContextMenu` helpers: `DesktopVerticalScrollbar` in the
-`component/` catalog (jvm-only) and `platformModifierClick` as a `commonMain` expect/actual modifier (jvm real
-gesture, mobile pass-through). Softcover still ships its app-local forks and has not re-pointed its imports.
-
-### F12 — `DesktopVerticalScrollbar` (themed, dark-surface-visible)
-
-- **Type:** enhancement (desktop affordance)
-- **Home:** `nl.rhaydus:designsystem-core` (jvm affordances)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core`
-  (`component/DesktopScrollbar.kt`, jvmMain) as the themed vertical scrollbar with `LazyGridState` /
-  `LazyListState` / `ScrollState` overloads, colouring the thumb to `MaterialTheme.colorScheme.onSurface` so it
-  is visible on dark surfaces (Compose Desktop's default near-black thumb disappears there). Lifted verbatim;
-  the only brand-named symbol — the private `softcoverScrollbarStyle()` — was renamed to
-  `rhaydusScrollbarStyle()`, and the KDoc genericised (the "editorial surfaces" / "desktop Reading list"
-  phrasing dropped). No params — the sole choice is a standard Material colour role, so it stays a pure
-  skeleton. Softcover still ships its app-local
-  `core/designsystem/.../presentation/component/DesktopScrollbar.kt`. Adoption re-points the 13 call sites
-  across 9 feature modules (reading, settings, library, explore, profile, book_detail, onboarding, session)
-  onto the foundation symbol and deletes the fork.
-
----
-
-### F15 — `platformModifierClick` (desktop modifier-aware selection)
-
-- **Type:** enhancement (desktop affordance / modifier)
-- **Home:** `nl.rhaydus:designsystem-core` (modifier catalog)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core` as a `commonMain`
-  expect/actual `Modifier` extension (`modifier/PlatformModifierClick.kt` + `.jvm.kt` real gesture +
-  `.mobile.kt` pass-through, mirroring `DesktopContextMenu`): Ctrl/Cmd toggles selection, Shift range-selects,
-  intercepting in the pointer Initial phase and consuming only when a modifier is held (a plain click still
-  reaches the inner `combinedClickable`), inert on touch. Lifted near-verbatim (zero app-local imports): the
-  dangling `[jvmMain]` / `[mobileMain]` KDoc links were flattened to plain text, and the desktop actual's
-  event loop was restructured to drop its two `continue` guards (behaviour-identical) for the foundation's
-  from-zero detekt (`LoopWithTooManyJumpStatements`). Softcover still ships its
-  app-local fork triple `core/designsystem/.../presentation/modifier/PlatformModifierClick{,.jvm,.mobile}.kt`.
-  Adoption is an import swap at the one call site (`LibraryShelf.kt`) and deletes the fork.
 
 ---
 
