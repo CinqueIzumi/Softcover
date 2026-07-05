@@ -27,7 +27,9 @@ class GetTrendingBooksUseCaseTest {
             // ----- Arrange -----
             val trendingBooks = listOf(mockk<Book>(relaxed = true), mockk<Book>(relaxed = true))
 
-            coEvery { booksRepository.fetchTrendingBooks() } returns trendingBooks
+            coEvery {
+                booksRepository.fetchTrendingBooks()
+            } returns trendingBooks
 
             // ----- Act -----
             val result = useCase()
@@ -42,7 +44,9 @@ class GetTrendingBooksUseCaseTest {
             // ----- Arrange -----
             val error = RuntimeException("network error")
 
-            coEvery { booksRepository.fetchTrendingBooks() } throws error
+            coEvery {
+                booksRepository.fetchTrendingBooks()
+            } throws error
 
             // ----- Act -----
             val result = useCase()
@@ -55,7 +59,9 @@ class GetTrendingBooksUseCaseTest {
         @Test
         fun `returns Result success wrapping an empty list when the repository returns no books`() = runTest {
             // ----- Arrange -----
-            coEvery { booksRepository.fetchTrendingBooks() } returns emptyList()
+            coEvery {
+                booksRepository.fetchTrendingBooks()
+            } returns emptyList()
 
             // ----- Act -----
             val result = useCase()

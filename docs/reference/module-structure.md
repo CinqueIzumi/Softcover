@@ -3,7 +3,7 @@
 The two-axes / tier model, what goes in `core` vs `feature` vs `orchestration`, cross-feature
 navigation, the placing-a-new-thing decision flow, the review checklist, and the naming / folder
 conventions are governed by the foundation
-[`docs/rhaydus/0.2.0/architecture.md`](../rhaydus/0.2.0/architecture.md) (§1–3, §5, §8–10). Read it
+[`docs/rhaydus/0.3.0/architecture.md`](../rhaydus/0.3.0/architecture.md) (§1–3, §5, §8–10). Read it
 first — it is the source of truth for how code is categorized, grouped, and placed across the Gradle
 modules, and for the allowed dependency directions (`:app → :orchestration → :feature:* → :core:*`,
 gated so the graph stays an acyclic DAG).

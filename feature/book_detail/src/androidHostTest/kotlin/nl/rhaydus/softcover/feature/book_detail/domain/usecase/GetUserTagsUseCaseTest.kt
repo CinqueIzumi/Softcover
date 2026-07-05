@@ -44,7 +44,9 @@ class GetUserTagsUseCaseTest {
             val userId = 7
             val expectedTags = listOf(stubUserTag("Fantasy"), stubUserTag("Epic"))
 
-            coEvery { getUserIdUseCase() } returns Result.success(userId)
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(userId)
 
             coEvery {
                 userTagsRepository.getUserTags(
@@ -67,7 +69,9 @@ class GetUserTagsUseCaseTest {
             val bookId = 10
             val userId = 3
 
-            coEvery { getUserIdUseCase() } returns Result.success(userId)
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(userId)
 
             coEvery {
                 userTagsRepository.getUserTags(
@@ -91,7 +95,9 @@ class GetUserTagsUseCaseTest {
             val userId = 2
             val expectedError = RuntimeException("network failure")
 
-            coEvery { getUserIdUseCase() } returns Result.success(userId)
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(userId)
 
             coEvery {
                 userTagsRepository.getUserTags(
@@ -114,7 +120,9 @@ class GetUserTagsUseCaseTest {
             val bookId = 99
             val idError = RuntimeException("no user id")
 
-            coEvery { getUserIdUseCase() } returns Result.failure(idError)
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.failure(idError)
 
             // ----- Act -----
             val result = useCase(bookId = bookId)
@@ -136,7 +144,9 @@ class GetUserTagsUseCaseTest {
             val bookId = 3
             val userId = 1
 
-            coEvery { getUserIdUseCase() } returns Result.success(userId)
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(userId)
 
             coEvery {
                 userTagsRepository.getUserTags(

@@ -33,15 +33,23 @@ class RecordBookProgressUseCaseTest {
         audioSeconds: Int? = null,
     ): Book = mockk<Book>().also { book ->
         val edition = mockk<BookEdition> {
-            every { this@mockk.pages } returns pages
-            every { this@mockk.audioSeconds } returns audioSeconds
+            every {
+                this@mockk.pages
+            } returns pages
+            every {
+                this@mockk.audioSeconds
+            } returns audioSeconds
         }
 
-        every { book.currentEdition } returns edition
+        every {
+            book.currentEdition
+        } returns edition
     }
 
     private fun stubBookWithNullEdition(): Book = mockk<Book>().also { book ->
-        every { book.currentEdition } returns null
+        every {
+            book.currentEdition
+        } returns null
     }
 
     @Nested

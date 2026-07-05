@@ -22,7 +22,7 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
-<!-- - Topic — `[[step N.N]]` / roadmap tag — one line on the current state -->
+- Foundation adoption onto **local 0.3.0** — complete & **GREEN**, uncommitted (both this repo and `../rhaydus-foundation`). Wiring + F4/F5/F6 + the Batch A ktlint cleanup all done; full `check` passes. **Only remaining step: commit (two repos, separately).** Full status + resume plan: [foundation-upstream-candidates.md](foundation-upstream-candidates.md) → "⏳ Adoption in progress — RESUME HERE".
 
 ---
 

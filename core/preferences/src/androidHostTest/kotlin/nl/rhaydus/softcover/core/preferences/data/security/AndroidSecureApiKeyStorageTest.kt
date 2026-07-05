@@ -9,7 +9,7 @@ import io.mockk.slot
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.ui.common.AppDispatchers
+import nl.rhaydus.common.AppDispatchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -40,7 +40,9 @@ class AndroidSecureApiKeyStorageTest {
     @BeforeEach
     fun setUp() {
         context = mockk {
-            every { filesDir } returns tempDir
+            every {
+                filesDir
+            } returns tempDir
         }
 
         val dispatcher = UnconfinedTestDispatcher()
@@ -60,21 +62,31 @@ class AndroidSecureApiKeyStorageTest {
         mockkStatic(KeyStore::class)
         mockkStatic(KeyGenerator::class)
 
-        every { KeyStore.getInstance("AndroidKeyStore") } returns keyStore
+        every {
+            KeyStore.getInstance("AndroidKeyStore")
+        } returns keyStore
         every { keyStore.getKey(
             "softcover_api_key",
             null,
         ) } returns secretKey
 
-        every { encryptCipher.iv } returns fakeIv
+        every {
+            encryptCipher.iv
+        } returns fakeIv
 
         val plaintextSlot = slot<ByteArray>()
-        every { encryptCipher.doFinal(capture(plaintextSlot)) } answers { plaintextSlot.captured }
+        every {
+            encryptCipher.doFinal(capture(plaintextSlot))
+        } answers { plaintextSlot.captured }
 
         val ciphertextSlot = slot<ByteArray>()
-        every { decryptCipher.doFinal(capture(ciphertextSlot)) } answers { ciphertextSlot.captured }
+        every {
+            decryptCipher.doFinal(capture(ciphertextSlot))
+        } answers { ciphertextSlot.captured }
 
-        every { Cipher.getInstance("AES/GCM/NoPadding") } returnsMany listOf(encryptCipher, decryptCipher)
+        every {
+            Cipher.getInstance("AES/GCM/NoPadding")
+        } returnsMany listOf(encryptCipher, decryptCipher)
     }
 
     @AfterEach
@@ -116,7 +128,9 @@ class AndroidSecureApiKeyStorageTest {
             storage.write("my-api-key")
 
             // Reset so read gets decryptCipher on the next getInstance call.
-            every { Cipher.getInstance("AES/GCM/NoPadding") } returns decryptCipher
+            every {
+                Cipher.getInstance("AES/GCM/NoPadding")
+            } returns decryptCipher
 
             // ----- Act -----
             val result = storage.read()

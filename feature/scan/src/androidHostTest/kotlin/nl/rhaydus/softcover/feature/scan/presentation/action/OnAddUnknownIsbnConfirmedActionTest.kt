@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
@@ -42,7 +43,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): ScanDependencies {
+    private fun stubDependencies(testScope: TestScope): ScanDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
 
         return mockk<ScanDependencies>(relaxed = true).also { mock ->

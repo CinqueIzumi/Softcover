@@ -72,8 +72,12 @@ class RefreshUserProfileDataUseCaseTest {
     ): UserProfileData {
         val capturedData = mutableListOf<UserProfileData>()
 
-        coEvery { getUserIdUseCase() } returns Result.success(42)
-        coEvery { profileRepository.fetchUserProfileSnapshot() } returns snapshot()
+        coEvery {
+            getUserIdUseCase()
+        } returns Result.success(42)
+        coEvery {
+            profileRepository.fetchUserProfileSnapshot()
+        } returns snapshot()
 
         coEvery {
             profileRepository.streamReadingDaysDescending(userId = 42)
@@ -115,8 +119,12 @@ class RefreshUserProfileDataUseCaseTest {
                 recentReadingDays = emptySet(),
             )
 
-            coEvery { getUserIdUseCase() } returns Result.success(42)
-            coEvery { profileRepository.fetchUserProfileSnapshot() } returns profileSnapshot
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(42)
+            coEvery {
+                profileRepository.fetchUserProfileSnapshot()
+            } returns profileSnapshot
 
             coEvery {
                 profileRepository.streamReadingDaysDescending(userId = 42)
@@ -146,7 +154,9 @@ class RefreshUserProfileDataUseCaseTest {
             // ----- Arrange -----
             val exception = RuntimeException("user id error")
 
-            coEvery { getUserIdUseCase() } returns Result.failure(exception)
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.failure(exception)
 
             // ----- Act -----
             val result = useCase()
@@ -163,7 +173,9 @@ class RefreshUserProfileDataUseCaseTest {
             // ----- Arrange -----
             val exception = RuntimeException("network error")
 
-            coEvery { getUserIdUseCase() } returns Result.success(42)
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(42)
 
             coEvery {
                 profileRepository.fetchUserProfileSnapshot()

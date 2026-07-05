@@ -70,7 +70,9 @@ class OnBulkRemoveFromLibraryActionTest {
 
     private fun stubDependencies(): LibraryDependencies =
         mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every { mock.removeBookFromLibraryUseCase } returns removeBookFromLibraryUseCase
+            every {
+                mock.removeBookFromLibraryUseCase
+            } returns removeBookFromLibraryUseCase
         }
 
     @Nested

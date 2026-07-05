@@ -14,6 +14,8 @@ kotlin {
             api(project(":core:identity"))
             implementation(project(":core:network"))
 
+            implementation(libs.rhaydus.coreCommon)
+
             implementation(libs.datastore.core)
             implementation(libs.datastore.core.okio)
             implementation(libs.okio)

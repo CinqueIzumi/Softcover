@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -39,19 +40,31 @@ class OnRemoveUserTagActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): BookDetailDependencies {
+    private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
-            every { mock.saveUserTagsUseCase } returns saveUserTagsUseCase
-            every { mock.coroutineScope } returns testScope
-            every { mock.mainDispatcher } returns dispatcher
-            every { mock.launch(any()) } answers { callOriginal() }
+            every {
+                mock.saveUserTagsUseCase
+            } returns saveUserTagsUseCase
+            every {
+                mock.coroutineScope
+            } returns testScope
+            every {
+                mock.mainDispatcher
+            } returns dispatcher
+            every {
+                mock.launch(any())
+            } answers { callOriginal() }
         }
     }
 
     private fun stubBook(id: Int = 1): Book = mockk {
-        every { this@mockk.id } returns id
-        every { this@mockk.userBook } returns mockk()
+        every {
+            this@mockk.id
+        } returns id
+        every {
+            this@mockk.userBook
+        } returns mockk()
     }
 
     @Nested

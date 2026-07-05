@@ -48,7 +48,9 @@ class OnReorderListBooksActionTest {
 
     private fun stubDependencies(): LibraryDependencies =
         mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every { mock.reorderListBooksUseCase } returns reorderListBooksUseCase
+            every {
+                mock.reorderListBooksUseCase
+            } returns reorderListBooksUseCase
         }
 
     @Nested
@@ -146,7 +148,9 @@ class OnReorderListBooksActionTest {
                 )
             } returns Result.failure(RuntimeException("network error"))
 
-            every { SnackBarManager.showSnackbar(title = any()) } returns Unit
+            every {
+                SnackBarManager.showSnackbar(title = any())
+            } returns Unit
 
             // ----- Act -----
             action.execute(
@@ -178,7 +182,9 @@ class OnReorderListBooksActionTest {
                     )
                 } returns Result.failure(RuntimeException("not found"))
 
-                every { SnackBarManager.showSnackbar(title = any()) } returns Unit
+                every {
+                    SnackBarManager.showSnackbar(title = any())
+                } returns Unit
 
                 // ----- Act -----
                 action.execute(

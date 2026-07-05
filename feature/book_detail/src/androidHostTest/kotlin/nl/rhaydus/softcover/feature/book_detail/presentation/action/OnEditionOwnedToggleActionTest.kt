@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -40,7 +41,7 @@ class OnEditionOwnedToggleActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): BookDetailDependencies {
+    private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
@@ -65,8 +66,12 @@ class OnEditionOwnedToggleActionTest {
         id: Int = 99,
         owned: Boolean,
     ): BookEdition = mockk<BookEdition>().also { mock ->
-        every { mock.id } returns id
-        every { mock.owned } returns owned
+        every {
+            mock.id
+        } returns id
+        every {
+            mock.owned
+        } returns owned
     }
 
     @Nested

@@ -11,9 +11,18 @@ guide covers everything else.
 Mechanizable style is enforced by the shared custom ktlint ruleset published as
 `nl.rhaydus:ktlint-rules` (package `nl.rhaydus.ktlint`). Run it via `./gradlew ktlintFormat` to
 auto-fix, and `./gradlew ktlintCheck` to verify. The ruleset gates the uniformly-internal
-visibility categories and other mechanical rules described below. It is deliberately conservative:
-the remaining cases (cross-module mappers, shared components, anything subtler) are caught in
-review.
+visibility categories and other mechanical rules described below - including the formerly advisory
+checks now promoted to blocking rules: one-type-per-file, no inline fully-qualified references,
+project-import order, no inline mockk stubs, and no bare `runCatching` in a `*UseCase*`. It also bans
+raw logging (`no-raw-logging`): use the `AppLog` facade (`nl.rhaydus:core-common`) — never `println`
+or `android.util.Log.*`. It is deliberately conservative: the remaining cases (cross-module mappers,
+shared components, anything subtler) are caught in review.
+
+A second gate, the custom detekt ruleset `nl.rhaydus:detekt-rules` (`./gradlew detektCheck`, plus the
+shared `config/detekt.yml` baseline), adds the crash-safety checks that need type resolution - notably
+`UnguardedFlowTerminalRead`, which flags an unguarded terminal read of a `Flow` (`first()` / `single()`)
+without flagging the identically named `Collection` operators. detekt's `formatting` ruleset stays off:
+the mechanizable layout rules are owned by `ktlint-rules`.
 
 ## Naming Conventions
 
@@ -525,10 +534,13 @@ The error model is layered. In short:
   the exception propagates. Repository-level `try`/`catch`/`runCatching` is reserved for *deliberate
   business decisions* (e.g. falling back to a placeholder), never for hiding errors the caller should
   see or for running failure-policy side effects.
-- **Every use case returns `Result<T>` and owns failure policy,** wrapping its repository call in a
-  cancellation-aware `runCatchingCancellable` - a `runCatching` that rethrows `CancellationException`
-  so a cancelled coroutine never becomes a `Result.failure`. Never use bare `runCatching` around a
-  suspend call. Reactions to a failure that span operations belong here, not in the repository.
+- **Every use case returns `Result<T>` and owns failure policy,** wrapping its repository call in the
+  cancellation-aware `runCatchingCancellable` from `nl.rhaydus:core-common` - a `runCatching` that rethrows
+  `CancellationException` so a cancelled coroutine never becomes a `Result.failure`. Never use bare
+  `runCatching` around a suspend call. Reactions to a failure that span operations belong here, not in
+  the repository. When the use case should also log the failure at the boundary, use `runCatchingLogged`
+  (same module) - `runCatchingCancellable` plus a single `AppLog.e`, so a failure is never silently
+  dropped; it logs through whatever tag the app passed to `AppLog.install(...)`.
 - **Screen-model actions unpack the `Result` with `.onSuccess { }` / `.onFailure { }`** and fold the
   outcome into UI state. **Never use `.fold()`** - `.onSuccess`/`.onFailure` only. Actions therefore
   carry no `try`/`catch` of their own; the use case already converted the throw into a `Result`.

@@ -104,7 +104,9 @@ class DisplayListsCollectorTest {
             eventChannel = Channel(Channel.BUFFERED),
         )
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every { mock.defaultDispatcher } returns testDispatcher
+            every {
+                mock.defaultDispatcher
+            } returns testDispatcher
         }
     }
 

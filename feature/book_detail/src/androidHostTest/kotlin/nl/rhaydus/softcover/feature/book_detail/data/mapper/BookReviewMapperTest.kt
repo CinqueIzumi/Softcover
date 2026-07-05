@@ -48,7 +48,9 @@ class BookReviewMapperTest {
 
         val image: BookReviewFragment.User.Image? = if (avatarUrl != null) {
             mockk<BookReviewFragment.User.Image>().also { img ->
-                every { img.url } returns avatarUrl
+                every {
+                    img.url
+                } returns avatarUrl
             }
         } else {
             null

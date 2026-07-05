@@ -59,8 +59,12 @@ class OnSetListRankedActionTest {
 
     private fun stubDependencies(): LibraryDependencies =
         mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every { mock.setListRankedUseCase } returns setListRankedUseCase
-            every { mock.setLibrarySortUseCase } returns setLibrarySortUseCase
+            every {
+                mock.setListRankedUseCase
+            } returns setListRankedUseCase
+            every {
+                mock.setLibrarySortUseCase
+            } returns setLibrarySortUseCase
         }
 
     @Nested
@@ -146,7 +150,9 @@ class OnSetListRankedActionTest {
                     )
                 } returns Result.failure(RuntimeException("server error"))
 
-                every { SnackBarManager.showSnackbar(title = any()) } returns Unit
+                every {
+                    SnackBarManager.showSnackbar(title = any())
+                } returns Unit
 
                 val action = OnSetListRankedAction(
                     listId = listId,
@@ -248,7 +254,9 @@ class OnSetListRankedActionTest {
                     )
                 } returns Result.failure(RuntimeException("server error"))
 
-                every { SnackBarManager.showSnackbar(title = any()) } returns Unit
+                every {
+                    SnackBarManager.showSnackbar(title = any())
+                } returns Unit
 
                 val action = OnSetListRankedAction(
                     listId = listId,
@@ -289,7 +297,9 @@ class OnSetListRankedActionTest {
                 )
             } returns Result.failure(RuntimeException("not found"))
 
-            every { SnackBarManager.showSnackbar(title = any()) } returns Unit
+            every {
+                SnackBarManager.showSnackbar(title = any())
+            } returns Unit
 
             val action = OnSetListRankedAction(
                 listId = listId,

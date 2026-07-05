@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.preferences.domain.usecase
 
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class SetLibrarySortUseCase(

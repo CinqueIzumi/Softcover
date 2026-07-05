@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
@@ -37,7 +38,7 @@ class OnUpdatePercentageProgressClickActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): BookDetailDependencies {
+    private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
@@ -59,15 +60,27 @@ class OnUpdatePercentageProgressClickActionTest {
     }
 
     private fun stubEdition(pages: Int?): BookEdition = mockk {
-        every { this@mockk.pages } returns pages
-        every { id } returns 1
-        every { isAudiobook } returns false
-        every { audioSeconds } returns null
+        every {
+            this@mockk.pages
+        } returns pages
+        every {
+            id
+        } returns 1
+        every {
+            isAudiobook
+        } returns false
+        every {
+            audioSeconds
+        } returns null
     }
 
     private fun stubAudiobookEdition(audioSeconds: Int?): BookEdition = mockk {
-        every { this@mockk.audioSeconds } returns audioSeconds
-        every { isAudiobook } returns true
+        every {
+            this@mockk.audioSeconds
+        } returns audioSeconds
+        every {
+            isAudiobook
+        } returns true
     }
 
     private fun stubBook(
@@ -77,14 +90,22 @@ class OnUpdatePercentageProgressClickActionTest {
         val edition = stubEdition(currentEditionPages)
         val defaultEdition = defaultEditionPages?.let { stubEdition(it) }
 
-        every { currentEdition } returns edition
-        every { this@mockk.defaultEdition } returns defaultEdition
+        every {
+            currentEdition
+        } returns edition
+        every {
+            this@mockk.defaultEdition
+        } returns defaultEdition
     }
 
     private fun stubAudiobook(audioSeconds: Int?): Book = mockk {
         val edition = stubAudiobookEdition(audioSeconds = audioSeconds)
-        every { currentEdition } returns edition
-        every { defaultEdition } returns null
+        every {
+            currentEdition
+        } returns edition
+        every {
+            defaultEdition
+        } returns null
     }
 
     @Nested

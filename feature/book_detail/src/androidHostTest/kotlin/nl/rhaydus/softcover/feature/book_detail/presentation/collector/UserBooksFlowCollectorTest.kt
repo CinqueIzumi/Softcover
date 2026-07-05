@@ -43,10 +43,14 @@ class UserBooksFlowCollectorTest {
             eventChannel = Channel(Channel.BUFFERED),
         )
 
-        every { getAllUserBooksUseCase() } returns userBooksFlow
+        every {
+            getAllUserBooksUseCase()
+        } returns userBooksFlow
 
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also { mock ->
-            every { mock.getAllUserBooksUseCase } returns getAllUserBooksUseCase
+            every {
+                mock.getAllUserBooksUseCase
+            } returns getAllUserBooksUseCase
         }
     }
 

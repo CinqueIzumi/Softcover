@@ -47,7 +47,9 @@ class ListsRepositoryImplSetListRankedTest {
     }
 
     private fun stubBookList(): BookList = mockk {
-        every { this@mockk.id } returns 1
+        every {
+            this@mockk.id
+        } returns 1
     }
 
     @Nested

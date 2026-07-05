@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -173,6 +174,13 @@ val allowedApiDataEdges = setOf(
     ":feature:settings" to ":core:preferences",
 )
 
+// Mirrors settings.gradle.kts: true when developing against the local foundation checkout (the
+// nl.rhaydus:* coordinates are substituted by an includeBuild of ../rhaydus-foundation).
+val foundationLocal = Properties().apply {
+    val localProperties = rootDir.resolve("local.properties")
+    if (localProperties.exists()) localProperties.inputStream().use { load(it) }
+}.getProperty("foundation.local").toBoolean()
+
 // dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
 // unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
 // staying out of the way of the convention-plugin design: the uniform runtime + test bundle provided
@@ -235,6 +243,22 @@ dependencyAnalysis {
                     "androidx.camera:camera-camera2", // CameraX runtime backend, loaded via ServiceLoader (no compile ref)
                     "com.google.mlkit:barcode-scanning", // MLKit barcode model + API used by the scanner; DA mis-resolves to a transitive
                 )
+
+                // With foundation.local=true the nl.rhaydus:* coordinates are substituted by an includeBuild
+                // of ../rhaydus-foundation; dependency-analysis cannot resolve the composite-build ABI and
+                // false-flags every foundation dependency as unused. Exclude them in local mode only — against
+                // the published artifacts (CI / normal builds) DA resolves them and the gate stays effective.
+                if (foundationLocal) {
+                    exclude(
+                        "nl.rhaydus:core-common",
+                        "nl.rhaydus:core-platform",
+                        "nl.rhaydus:toad",
+                        "nl.rhaydus:designsystem-core",
+                        "nl.rhaydus:designsystem-editorial",
+                        "nl.rhaydus:designsystem-image",
+                        "nl.rhaydus:offline-sync",
+                    )
+                }
             }
 
             onIncorrectConfiguration {

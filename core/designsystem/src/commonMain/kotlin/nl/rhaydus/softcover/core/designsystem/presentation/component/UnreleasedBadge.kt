@@ -13,7 +13,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
-import nl.rhaydus.ui.common.currentLocalDate
+import nl.rhaydus.common.currentLocalDate
 
 fun LocalDate.formatCompactRelease(): String {
     val formatter = LocalDate.Format {

@@ -14,8 +14,9 @@ dependencies {
     // Orchestration tier (composes every feature + core module and hosts DesktopApp()).
     implementation(project(":orchestration"))
 
-    // core:domain for the logging facade the entry point installs (mirrors Android's SoftCoverApp).
-    implementation(project(":core:domain"))
+    // The logging facade the entry point installs (AppLog.install, mirrors Android's SoftCoverApp)
+    // now lives in the foundation core-common module.
+    implementation(libs.rhaydus.coreCommon)
 
     implementation(compose.desktop.currentOs)
 

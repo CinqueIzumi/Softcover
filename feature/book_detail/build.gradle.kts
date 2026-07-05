@@ -21,7 +21,7 @@ kotlin {
             implementation(project(":core:network"))
             api(project(":core:designsystem"))
 
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)
             implementation(libs.rhaydus.designsystemEditorial)
             implementation(libs.rhaydus.designsystemImage)

@@ -23,7 +23,9 @@ class MarkBookAsReadUseCaseTest {
     @BeforeEach
     fun setUp() {
         repository = mockk()
-        markReadingActivityTodayUseCase = mockk { coEvery { this@mockk() } returns Unit }
+        markReadingActivityTodayUseCase = mockk { coEvery {
+            this@mockk()
+        } returns Unit }
         useCase = MarkBookAsReadUseCase(
             repository = repository,
             markReadingActivityTodayUseCase = markReadingActivityTodayUseCase,
@@ -38,7 +40,9 @@ class MarkBookAsReadUseCaseTest {
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
 
-            every { inputBook.status } returns BookStatus.Reading
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
 
             coEvery {
                 repository.markBookAsRead(
@@ -72,7 +76,9 @@ class MarkBookAsReadUseCaseTest {
             val editionId = 99
             val updatedBook = mockk<Book>()
 
-            every { inputBook.status } returns BookStatus.Reading
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
 
             coEvery {
                 repository.markBookAsRead(
@@ -105,7 +111,9 @@ class MarkBookAsReadUseCaseTest {
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
 
-            every { inputBook.status } returns BookStatus.Reading
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
 
             coEvery {
                 repository.markBookAsRead(
@@ -135,7 +143,9 @@ class MarkBookAsReadUseCaseTest {
             val inputBook = mockk<Book>()
             val expectedError = RuntimeException("network error")
 
-            every { inputBook.status } returns BookStatus.Reading
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
 
             coEvery {
                 repository.markBookAsRead(
@@ -161,7 +171,9 @@ class MarkBookAsReadUseCaseTest {
             val updatedBook = mockk<Book>()
             val expectedError = RuntimeException("cache error")
 
-            every { inputBook.status } returns BookStatus.Reading
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
 
             coEvery {
                 repository.markBookAsRead(
@@ -188,7 +200,9 @@ class MarkBookAsReadUseCaseTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
 
-            every { inputBook.status } returns BookStatus.Read
+            every {
+                inputBook.status
+            } returns BookStatus.Read
 
             // ----- Act -----
             val result = useCase(inputBook)

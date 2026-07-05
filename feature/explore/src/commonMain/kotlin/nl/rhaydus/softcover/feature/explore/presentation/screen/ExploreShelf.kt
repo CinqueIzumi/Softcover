@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.common.formatDecimalNumber
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.component.mutationAnimated
@@ -63,7 +64,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAct
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveAllSearchQueriesClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQueryClickedAction
-import nl.rhaydus.ui.common.formatDecimalNumber
 import kotlin.time.Duration.Companion.seconds
 
 internal const val TRENDING_SKELETON_COUNT = 4

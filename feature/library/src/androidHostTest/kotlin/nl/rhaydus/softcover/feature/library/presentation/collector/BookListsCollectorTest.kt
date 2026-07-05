@@ -66,15 +66,27 @@ class BookListsCollectorTest {
     }
 
     private fun stubEdition(): BookEdition = mockk {
-        every { url } returns "https://example.com/cover.jpg"
-        every { localImagePath } returns null
+        every {
+            url
+        } returns "https://example.com/cover.jpg"
+        every {
+            localImagePath
+        } returns null
     }
 
     private fun stubListBook(edition: BookEdition?): ListBook = mockk {
-        every { this@mockk.edition } returns edition
-        every { this@mockk.editionId } returns 0
-        every { this@mockk.addedAt } returns null
-        every { this@mockk.book } returns null
+        every {
+            this@mockk.edition
+        } returns edition
+        every {
+            this@mockk.editionId
+        } returns 0
+        every {
+            this@mockk.addedAt
+        } returns null
+        every {
+            this@mockk.book
+        } returns null
     }
 
     private fun stubBookList(

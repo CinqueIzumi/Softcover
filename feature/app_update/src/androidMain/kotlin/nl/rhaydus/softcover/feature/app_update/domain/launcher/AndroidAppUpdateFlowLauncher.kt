@@ -5,7 +5,7 @@ import androidx.activity.result.IntentSenderRequest
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 
 /**
  * Android [AppUpdateFlowLauncher] — re-requests the current [com.google.android.play.core.appupdate.AppUpdateInfo]

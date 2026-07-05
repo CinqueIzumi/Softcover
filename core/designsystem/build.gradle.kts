@@ -24,7 +24,7 @@ kotlin {
             api(project(":core:domain"))
             api(project(":core:book"))
 
-            api(libs.rhaydus.coreUi)
+            api(libs.rhaydus.coreCommon)
             api(libs.rhaydus.designsystemCore)
             implementation(libs.rhaydus.designsystemEditorial)
             implementation(libs.rhaydus.designsystemImage)

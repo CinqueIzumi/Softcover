@@ -10,9 +10,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -129,7 +131,7 @@ class OnRefreshActionTest {
         @Test
         fun `preserves booksByTab when toggling isLoading`() = runTest {
             // ----- Arrange -----
-            val existingBooks = listOf(mockk<nl.rhaydus.softcover.core.domain.model.Book>())
+            val existingBooks = listOf(mockk<Book>())
             stateFlow.value = LibraryUiState(
                 booksByTab = mapOf("all" to existingBooks),
                 isLoading = false,
@@ -156,7 +158,7 @@ class OnRefreshActionTest {
         @Test
         fun `preserves editionsByTab when toggling isLoading`() = runTest {
             // ----- Arrange -----
-            val existingEditions = listOf(mockk<nl.rhaydus.softcover.core.domain.model.BookEdition>())
+            val existingEditions = listOf(mockk<BookEdition>())
             stateFlow.value = LibraryUiState(
                 editionsByTab = mapOf("list-1" to existingEditions),
                 isLoading = false,

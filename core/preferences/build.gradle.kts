@@ -13,7 +13,7 @@ kotlin {
             api(project(":core:domain"))
             implementation(project(":core:network"))
 
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
 
             implementation(libs.datastore.core)
             implementation(libs.datastore.core.okio)

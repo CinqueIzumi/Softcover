@@ -64,7 +64,9 @@ class OnUpdateToScannedEditionClickActionTest {
     private fun stubUserBook(): UserBook = mockk()
 
     private fun stubBook(userBook: UserBook?): Book = mockk<Book>().also { mock ->
-        every { mock.userBook } returns userBook
+        every {
+            mock.userBook
+        } returns userBook
     }
 
     @Nested

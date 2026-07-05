@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.preferences.domain.usecase
 
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class SetLibraryGridLayoutUseCase(

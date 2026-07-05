@@ -13,7 +13,7 @@ kotlin {
             implementation(project(":core:database"))
             api(project(":core:network"))
 
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
             implementation(libs.okio)
         }
 

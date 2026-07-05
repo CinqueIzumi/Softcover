@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
@@ -35,7 +36,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ToadScreenModel
-import nl.rhaydus.ui.common.AppDispatchers
 
 internal class BookDetailScreenScreenModel(
     private val bookId: Int,

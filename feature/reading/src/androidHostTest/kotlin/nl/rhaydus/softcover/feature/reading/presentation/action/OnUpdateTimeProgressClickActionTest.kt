@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
@@ -40,7 +41,7 @@ class OnUpdateTimeProgressClickActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): ReadingScreenDependencies {
+    private fun stubDependencies(testScope: TestScope): ReadingScreenDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
 
         return mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
@@ -68,11 +69,17 @@ class OnUpdateTimeProgressClickActionTest {
     ): Book =
         mockk<Book>().also { book ->
             val edition = mockk<BookEdition>().also { e ->
-                every { e.audioSeconds } returns audioSeconds
+                every {
+                    e.audioSeconds
+                } returns audioSeconds
             }
 
-            every { book.id } returns id
-            every { book.currentEdition } returns edition
+            every {
+                book.id
+            } returns id
+            every {
+                book.currentEdition
+            } returns edition
         }
 
     @Nested

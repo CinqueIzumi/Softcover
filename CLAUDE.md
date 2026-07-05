@@ -27,13 +27,13 @@ and `./gradlew check` runs the full set.
 
 ## Design System
 
-The brand-agnostic design skeleton (theme/typography plumbing, layout primitives, the shared component catalog, the editorial role contract) is governed by the foundation [`docs/rhaydus/0.2.0/design-system-foundations.md`](docs/rhaydus/0.2.0/design-system-foundations.md). [docs/reference/design-system.md](docs/reference/design-system.md) is the source of truth for Softcover's brand layered on top — color roles, editorial typography values, brand components, patterns, decision rules. Consult both before designing or modifying any UI surface.
+The brand-agnostic design skeleton (theme/typography plumbing, layout primitives, the shared component catalog, the editorial role contract) is governed by the foundation [`docs/rhaydus/0.3.0/design-system-foundations.md`](docs/rhaydus/0.3.0/design-system-foundations.md). [docs/reference/design-system.md](docs/reference/design-system.md) is the source of truth for Softcover's brand layered on top — color roles, editorial typography values, brand components, patterns, decision rules. Consult both before designing or modifying any UI surface.
 
 **Maintenance rule (enforced by review).** Any change that introduces, retires, or alters a foundation, component, or pattern in the design system MUST update `docs/reference/design-system.md` in the same change. The `code-reviewer` agent treats a design-system change without a corresponding doc update as a blocker. Examples that require a doc update: a new shared component under `core/presentation/component/`, a new editorial typography role, a new color role usage, a new layout pattern that other screens should adopt, retirement or renaming of any of the above. Localized tweaks to a single screen that don't change the system itself do not require an update.
 
 ## Code Style
 
-The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.2.0/code-style.md`](docs/rhaydus/0.2.0/code-style.md) — the source of truth for naming, layout, and whitespace. [docs/reference/code-style.md](docs/reference/code-style.md) keeps only Softcover-specific deltas (the Apollo/AppLog error-handling bindings). Read both before writing or modifying Kotlin code.
+The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.3.0/code-style.md`](docs/rhaydus/0.3.0/code-style.md) — the source of truth for naming, layout, and whitespace. [docs/reference/code-style.md](docs/reference/code-style.md) keeps only Softcover-specific deltas (the Apollo/AppLog error-handling bindings). Read both before writing or modifying Kotlin code.
 
 The mechanical style rules are enforced by tooling, not manual vigilance — for every developer, with zero setup, via the Gradle `check` lifecycle (so CI gates on them too):
 
@@ -65,7 +65,7 @@ The agent is required to run the tests after writing them. Prefer narrow filters
 
 ## Architecture
 
-Clean Architecture layering, DI, navigation, and the TOAD framework are governed by the foundation [`docs/rhaydus/0.2.0/architecture.md`](docs/rhaydus/0.2.0/architecture.md) and [`docs/rhaydus/0.2.0/toad-architecture.md`](docs/rhaydus/0.2.0/toad-architecture.md) — the source of truth for the generic signatures, per-feature boilerplate, and Koin wiring. [docs/reference/architecture.md](docs/reference/architecture.md) keeps Softcover's deltas (the Apollo network layer, Room storage, the concrete module overview, app-specific TOAD notes). Consult both before adding a feature module, modifying a ScreenModel / Action / Collector, or changing data flow between layers.
+Clean Architecture layering, DI, navigation, and the TOAD framework are governed by the foundation [`docs/rhaydus/0.3.0/architecture.md`](docs/rhaydus/0.3.0/architecture.md) and [`docs/rhaydus/0.3.0/toad-architecture.md`](docs/rhaydus/0.3.0/toad-architecture.md) — the source of truth for the generic signatures, per-feature boilerplate, and Koin wiring. [docs/reference/architecture.md](docs/reference/architecture.md) keeps Softcover's deltas (the Apollo network layer, Room storage, the concrete module overview, app-specific TOAD notes). Consult both before adding a feature module, modifying a ScreenModel / Action / Collector, or changing data flow between layers.
 
 The tier model (`core`/`feature`/orchestration), allowed dependency directions, and where a new type/screen/use case belongs are governed by that same foundation architecture doc; [docs/reference/module-structure.md](docs/reference/module-structure.md) keeps Softcover's concrete module roster and `softcover.*` build-setup conventions. Consult it before adding a module, deciding shared-vs-feature-local, or wiring a cross-feature dependency.
 
@@ -99,10 +99,11 @@ Planning is layered. **Internal** (engineering source of truth, in `docs/working
 <!-- rhaydus:start -->
 ## Rhaydus foundation (managed by rhaydus-adopt - do not hand-edit)
 
-This project builds on the **nl.rhaydus foundation** (v0.2.0, from Maven Central). Capabilities index (what's available, so reuse rather than reinvent): [`docs/rhaydus/0.2.0/CAPABILITIES.md`](docs/rhaydus/0.2.0/CAPABILITIES.md).
+This project builds on the **nl.rhaydus foundation** (v0.3.0, resolved locally via `foundation.local=true` in `local.properties` → `includeBuild("../rhaydus-foundation")`; falls back to Maven Central when unset). Capabilities index (what's available, so reuse rather than reinvent): [`docs/rhaydus/0.3.0/CAPABILITIES.md`](docs/rhaydus/0.3.0/CAPABILITIES.md).
 
-- **Foundation libraries (0.2.0):** `nl.rhaydus:toad`, `core-ui`, `designsystem-core`, `designsystem-editorial`, `designsystem-image`, `ktlint-rules`.
-- **Foundation conventions docs** (vendored, version-pinned at [`docs/rhaydus/0.2.0/`](docs/rhaydus/0.2.0)): architecture, toad-architecture, code-style, design-system-foundations, CAPABILITIES. These are the source of truth for the shared layering, TOAD pattern, code style, and design system; this app keeps only its own deltas (brand tokens, Apollo/Room, platform set).
+- **Foundation libraries consumed (0.3.0):** `nl.rhaydus:toad`, `core-common` (formerly `core-ui`, split 0.2.0→0.3.0 into `core-common`/`core-platform`), `designsystem-core`, `designsystem-editorial`, `designsystem-image`, `ktlint-rules`.
+- **Catalog entries available, not yet wired into any module** (`gradle/libs.versions.toml`, for future adoption batches): `nl.rhaydus:core-platform`, `offline-sync`, `detekt-rules`.
+- **Foundation conventions docs** (vendored, version-pinned at [`docs/rhaydus/0.3.0/`](docs/rhaydus/0.3.0)): architecture, toad-architecture, code-style, design-system-foundations, CAPABILITIES. These are the source of truth for the shared layering, TOAD pattern, code style, and design system; this app keeps only its own deltas (brand tokens, Apollo/Room, platform set).
 - **This app's design system (brand):** [`docs/reference/design-system.md`](docs/reference/design-system.md).
 
 **How to develop here:**

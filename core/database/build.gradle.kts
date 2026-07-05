@@ -13,7 +13,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:domain"))
 
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
             implementation(libs.kotlinx.serialization.json)
         }
 

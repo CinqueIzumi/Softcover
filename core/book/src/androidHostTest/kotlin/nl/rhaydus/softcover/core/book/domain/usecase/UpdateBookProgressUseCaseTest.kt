@@ -21,7 +21,9 @@ class UpdateBookProgressUseCaseTest {
     @BeforeEach
     fun setUp() {
         repository = mockk()
-        markReadingActivityTodayUseCase = mockk { coEvery { this@mockk() } returns Unit }
+        markReadingActivityTodayUseCase = mockk { coEvery {
+            this@mockk()
+        } returns Unit }
         useCase = UpdateBookProgressUseCase(
             repository = repository,
             markReadingActivityTodayUseCase = markReadingActivityTodayUseCase,

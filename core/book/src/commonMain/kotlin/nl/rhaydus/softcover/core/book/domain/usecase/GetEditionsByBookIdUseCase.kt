@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.book.domain.usecase
 
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 class GetEditionsByBookIdUseCase(
     private val booksRepository: BooksRepository,

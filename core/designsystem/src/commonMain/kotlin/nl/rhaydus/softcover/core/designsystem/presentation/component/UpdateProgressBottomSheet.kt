@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import nl.rhaydus.common.toHoursMinutesSeconds
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
-import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -53,6 +53,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.model.ModalSheetForm
@@ -62,7 +63,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.ui.common.toHoursMinutesSeconds
 import kotlin.math.min
 import kotlin.math.roundToInt
 

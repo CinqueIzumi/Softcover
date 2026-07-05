@@ -11,6 +11,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:domain"))
+
+            implementation(libs.rhaydus.coreCommon)
         }
 
         androidMain.dependencies {

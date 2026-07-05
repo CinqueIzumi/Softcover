@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.core.deadlines.domain.usecase
 
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 class SetBookDeadlineUseCase(
     private val repository: BookDeadlineRepository,

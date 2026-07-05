@@ -14,7 +14,7 @@ kotlin {
             implementation(project(":core:network"))
             implementation(project(":core:book"))
 
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
         }
     }
 }

@@ -80,6 +80,10 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:notification"))
 
+    // The logging facade the Application entry point installs (AppLog.install) now lives in the
+    // foundation core-common module.
+    implementation(libs.rhaydus.coreCommon)
+
     // DI
     implementation(libs.koin.core)
     implementation(libs.koin.android)

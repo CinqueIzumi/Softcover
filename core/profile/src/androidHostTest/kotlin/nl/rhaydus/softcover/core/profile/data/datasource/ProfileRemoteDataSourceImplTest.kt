@@ -53,14 +53,30 @@ class ProfileRemoteDataSourceImplTest {
         val book = mockk<GetUserProfileDataQuery.Data.Me.User_books_page.Book>()
         val page = mockk<GetUserProfileDataQuery.Data.Me.User_books_page>()
 
-        every { page.user_book_reads_aggregate } returns readsAggregate
-        every { readsAggregate.aggregate } returns aggregate
-        every { aggregate.max } returns max
-        every { max.progress_pages } returns maxProgress
-        every { page.status_id } returns 2 // CURRENTLY_READING — not reached when max != null
-        every { page.edition } returns null
-        every { page.book } returns book
-        every { book.pages } returns 0
+        every {
+            page.user_book_reads_aggregate
+        } returns readsAggregate
+        every {
+            readsAggregate.aggregate
+        } returns aggregate
+        every {
+            aggregate.max
+        } returns max
+        every {
+            max.progress_pages
+        } returns maxProgress
+        every {
+            page.status_id
+        } returns 2 // CURRENTLY_READING — not reached when max != null
+        every {
+            page.edition
+        } returns null
+        every {
+            page.book
+        } returns book
+        every {
+            book.pages
+        } returns 0
 
         return page
     }
@@ -77,20 +93,40 @@ class ProfileRemoteDataSourceImplTest {
         val book = mockk<GetUserProfileDataQuery.Data.Me.User_books_page.Book>()
         val page = mockk<GetUserProfileDataQuery.Data.Me.User_books_page>()
 
-        every { page.user_book_reads_aggregate } returns readsAggregate
-        every { readsAggregate.aggregate } returns aggregate
-        every { aggregate.max } returns max
-        every { max.progress_pages } returns null
-        every { page.status_id } returns statusId
-        every { page.book } returns book
-        every { book.pages } returns bookPages
+        every {
+            page.user_book_reads_aggregate
+        } returns readsAggregate
+        every {
+            readsAggregate.aggregate
+        } returns aggregate
+        every {
+            aggregate.max
+        } returns max
+        every {
+            max.progress_pages
+        } returns null
+        every {
+            page.status_id
+        } returns statusId
+        every {
+            page.book
+        } returns book
+        every {
+            book.pages
+        } returns bookPages
 
         if (editionPages != null) {
             val edition = mockk<GetUserProfileDataQuery.Data.Me.User_books_page.Edition>()
-            every { page.edition } returns edition
-            every { edition.pages } returns editionPages
+            every {
+                page.edition
+            } returns edition
+            every {
+                edition.pages
+            } returns editionPages
         } else {
-            every { page.edition } returns null
+            every {
+                page.edition
+            } returns null
         }
 
         return page
@@ -118,20 +154,48 @@ class ProfileRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
             } returns queryData
 
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns listOf(userBooksPage)
-            every { meEntry.name } returns "John Doe"
-            every { meEntry.username } returns "johndoe"
-            every { meEntry.bio } returns "A bio"
-            every { meEntry.image } returns image
-            every { image.url } returns "https://example.com/avatar.jpg"
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns booksReadAggregate
-            every { booksReadAggregate.count } returns 42
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns ratedBooksAggregate
-            every { ratedBooksAggregate.avg } returns ratedBooksAvg
-            every { ratedBooksAvg.rating } returns 3.75
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+            every {
+                meEntry.user_books_pages
+            } returns listOf(userBooksPage)
+            every {
+                meEntry.name
+            } returns "John Doe"
+            every {
+                meEntry.username
+            } returns "johndoe"
+            every {
+                meEntry.bio
+            } returns "A bio"
+            every {
+                meEntry.image
+            } returns image
+            every {
+                image.url
+            } returns "https://example.com/avatar.jpg"
+            every {
+                meEntry.books_read
+            } returns booksRead
+            every {
+                booksRead.aggregate
+            } returns booksReadAggregate
+            every {
+                booksReadAggregate.count
+            } returns 42
+            every {
+                meEntry.rated_books
+            } returns ratedBooks
+            every {
+                ratedBooks.aggregate
+            } returns ratedBooksAggregate
+            every {
+                ratedBooksAggregate.avg
+            } returns ratedBooksAvg
+            every {
+                ratedBooksAvg.rating
+            } returns 3.75
 
             // ----- Act -----
             val result = dataSource.getUserProfileSnapshot()
@@ -163,19 +227,45 @@ class ProfileRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
             } returns queryData
 
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns emptyList()
-            every { meEntry.name } returns null
-            every { meEntry.username } returns null
-            every { meEntry.bio } returns null
-            every { meEntry.image } returns null
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns booksReadAggregate
-            every { booksReadAggregate.count } returns 0
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns ratedBooksAggregate
-            every { ratedBooksAggregate.avg } returns ratedBooksAvg
-            every { ratedBooksAvg.rating } returns null
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+            every {
+                meEntry.user_books_pages
+            } returns emptyList()
+            every {
+                meEntry.name
+            } returns null
+            every {
+                meEntry.username
+            } returns null
+            every {
+                meEntry.bio
+            } returns null
+            every {
+                meEntry.image
+            } returns null
+            every {
+                meEntry.books_read
+            } returns booksRead
+            every {
+                booksRead.aggregate
+            } returns booksReadAggregate
+            every {
+                booksReadAggregate.count
+            } returns 0
+            every {
+                meEntry.rated_books
+            } returns ratedBooks
+            every {
+                ratedBooks.aggregate
+            } returns ratedBooksAggregate
+            every {
+                ratedBooksAggregate.avg
+            } returns ratedBooksAvg
+            every {
+                ratedBooksAvg.rating
+            } returns null
 
             // ----- Act -----
             val result = dataSource.getUserProfileSnapshot()
@@ -201,19 +291,45 @@ class ProfileRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
             } returns queryData
 
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns emptyList()
-            every { meEntry.name } returns "Jane"
-            every { meEntry.username } returns "jane"
-            every { meEntry.bio } returns "Bio"
-            every { meEntry.image } returns null
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns booksReadAggregate
-            every { booksReadAggregate.count } returns 0
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns ratedBooksAggregate
-            every { ratedBooksAggregate.avg } returns ratedBooksAvg
-            every { ratedBooksAvg.rating } returns null
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+            every {
+                meEntry.user_books_pages
+            } returns emptyList()
+            every {
+                meEntry.name
+            } returns "Jane"
+            every {
+                meEntry.username
+            } returns "jane"
+            every {
+                meEntry.bio
+            } returns "Bio"
+            every {
+                meEntry.image
+            } returns null
+            every {
+                meEntry.books_read
+            } returns booksRead
+            every {
+                booksRead.aggregate
+            } returns booksReadAggregate
+            every {
+                booksReadAggregate.count
+            } returns 0
+            every {
+                meEntry.rated_books
+            } returns ratedBooks
+            every {
+                ratedBooks.aggregate
+            } returns ratedBooksAggregate
+            every {
+                ratedBooksAggregate.avg
+            } returns ratedBooksAvg
+            every {
+                ratedBooksAvg.rating
+            } returns null
 
             // ----- Act -----
             val result = dataSource.getUserProfileSnapshot()
@@ -238,20 +354,48 @@ class ProfileRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
             } returns queryData
 
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns emptyList()
-            every { meEntry.name } returns "Jane"
-            every { meEntry.username } returns "jane"
-            every { meEntry.bio } returns "Bio"
-            every { meEntry.image } returns image
-            every { image.url } returns null
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns booksReadAggregate
-            every { booksReadAggregate.count } returns 0
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns ratedBooksAggregate
-            every { ratedBooksAggregate.avg } returns ratedBooksAvg
-            every { ratedBooksAvg.rating } returns null
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+            every {
+                meEntry.user_books_pages
+            } returns emptyList()
+            every {
+                meEntry.name
+            } returns "Jane"
+            every {
+                meEntry.username
+            } returns "jane"
+            every {
+                meEntry.bio
+            } returns "Bio"
+            every {
+                meEntry.image
+            } returns image
+            every {
+                image.url
+            } returns null
+            every {
+                meEntry.books_read
+            } returns booksRead
+            every {
+                booksRead.aggregate
+            } returns booksReadAggregate
+            every {
+                booksReadAggregate.count
+            } returns 0
+            every {
+                meEntry.rated_books
+            } returns ratedBooks
+            every {
+                ratedBooks.aggregate
+            } returns ratedBooksAggregate
+            every {
+                ratedBooksAggregate.avg
+            } returns ratedBooksAvg
+            every {
+                ratedBooksAvg.rating
+            } returns null
 
             // ----- Act -----
             val result = dataSource.getUserProfileSnapshot()
@@ -272,16 +416,36 @@ class ProfileRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
             } returns queryData
 
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns emptyList()
-            every { meEntry.name } returns "Jane"
-            every { meEntry.username } returns "jane"
-            every { meEntry.bio } returns "Bio"
-            every { meEntry.image } returns null
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns null
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns null
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+            every {
+                meEntry.user_books_pages
+            } returns emptyList()
+            every {
+                meEntry.name
+            } returns "Jane"
+            every {
+                meEntry.username
+            } returns "jane"
+            every {
+                meEntry.bio
+            } returns "Bio"
+            every {
+                meEntry.image
+            } returns null
+            every {
+                meEntry.books_read
+            } returns booksRead
+            every {
+                booksRead.aggregate
+            } returns null
+            every {
+                meEntry.rated_books
+            } returns ratedBooks
+            every {
+                ratedBooks.aggregate
+            } returns null
 
             // ----- Act -----
             val result = dataSource.getUserProfileSnapshot()
@@ -301,7 +465,9 @@ class ProfileRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
             } returns queryData
 
-            every { queryData.me } returns emptyList()
+            every {
+                queryData.me
+            } returns emptyList()
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
@@ -339,16 +505,36 @@ class ProfileRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserProfileDataQuery>())
             } returns queryData
 
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.user_books_pages } returns userBooksPages
-            every { meEntry.name } returns ""
-            every { meEntry.username } returns ""
-            every { meEntry.bio } returns ""
-            every { meEntry.image } returns null
-            every { meEntry.books_read } returns booksRead
-            every { booksRead.aggregate } returns null
-            every { meEntry.rated_books } returns ratedBooks
-            every { ratedBooks.aggregate } returns null
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+            every {
+                meEntry.user_books_pages
+            } returns userBooksPages
+            every {
+                meEntry.name
+            } returns ""
+            every {
+                meEntry.username
+            } returns ""
+            every {
+                meEntry.bio
+            } returns ""
+            every {
+                meEntry.image
+            } returns null
+            every {
+                meEntry.books_read
+            } returns booksRead
+            every {
+                booksRead.aggregate
+            } returns null
+            every {
+                meEntry.rated_books
+            } returns ratedBooks
+            every {
+                ratedBooks.aggregate
+            } returns null
 
             return queryData
         }
@@ -463,15 +649,33 @@ class ProfileRemoteDataSourceImplTest {
             val book = mockk<GetUserProfileDataQuery.Data.Me.User_books_page.Book>()
             val page = mockk<GetUserProfileDataQuery.Data.Me.User_books_page>()
 
-            every { page.user_book_reads_aggregate } returns readsAggregate
-            every { readsAggregate.aggregate } returns aggregate
-            every { aggregate.max } returns max
-            every { max.progress_pages } returns 50
-            every { page.status_id } returns 3
-            every { page.edition } returns edition
-            every { edition.pages } returns 300
-            every { page.book } returns book
-            every { book.pages } returns 999
+            every {
+                page.user_book_reads_aggregate
+            } returns readsAggregate
+            every {
+                readsAggregate.aggregate
+            } returns aggregate
+            every {
+                aggregate.max
+            } returns max
+            every {
+                max.progress_pages
+            } returns 50
+            every {
+                page.status_id
+            } returns 3
+            every {
+                page.edition
+            } returns edition
+            every {
+                edition.pages
+            } returns 300
+            every {
+                page.book
+            } returns book
+            every {
+                book.pages
+            } returns 999
 
             arrangeQueryData(userBooksPages = listOf(page))
 
@@ -494,15 +698,33 @@ class ProfileRemoteDataSourceImplTest {
             val book = mockk<GetUserProfileDataQuery.Data.Me.User_books_page.Book>()
             val page = mockk<GetUserProfileDataQuery.Data.Me.User_books_page>()
 
-            every { page.user_book_reads_aggregate } returns readsAggregate
-            every { readsAggregate.aggregate } returns aggregate
-            every { aggregate.max } returns max
-            every { max.progress_pages } returns 350
-            every { page.status_id } returns 3
-            every { page.edition } returns edition
-            every { edition.pages } returns 300
-            every { page.book } returns book
-            every { book.pages } returns 100
+            every {
+                page.user_book_reads_aggregate
+            } returns readsAggregate
+            every {
+                readsAggregate.aggregate
+            } returns aggregate
+            every {
+                aggregate.max
+            } returns max
+            every {
+                max.progress_pages
+            } returns 350
+            every {
+                page.status_id
+            } returns 3
+            every {
+                page.edition
+            } returns edition
+            every {
+                edition.pages
+            } returns 300
+            every {
+                page.book
+            } returns book
+            every {
+                book.pages
+            } returns 100
 
             arrangeQueryData(userBooksPages = listOf(page))
 
@@ -546,7 +768,9 @@ class ProfileRemoteDataSourceImplTest {
         private fun readingJournal(actionAt: String): GetReadingActivityDaysQuery.Data.Reading_journal {
             val row = mockk<GetReadingActivityDaysQuery.Data.Reading_journal>()
 
-            every { row.action_at } returns actionAt
+            every {
+                row.action_at
+            } returns actionAt
 
             return row
         }
@@ -554,7 +778,9 @@ class ProfileRemoteDataSourceImplTest {
         private fun readingActivityPage(vararg actionAts: String): GetReadingActivityDaysQuery.Data {
             val page = mockk<GetReadingActivityDaysQuery.Data>()
 
-            every { page.reading_journals } returns actionAts.map { readingJournal(it) }
+            every {
+                page.reading_journals
+            } returns actionAts.map { readingJournal(it) }
 
             return page
         }

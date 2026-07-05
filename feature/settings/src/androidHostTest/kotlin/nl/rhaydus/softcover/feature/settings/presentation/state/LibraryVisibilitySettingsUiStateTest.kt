@@ -14,8 +14,12 @@ class LibraryVisibilitySettingsUiStateTest {
         id: Int,
         name: String,
     ): BookList = mockk {
-        every { this@mockk.id } returns id
-        every { this@mockk.name } returns name
+        every {
+            this@mockk.id
+        } returns id
+        every {
+            this@mockk.name
+        } returns name
     }
 
     @Nested

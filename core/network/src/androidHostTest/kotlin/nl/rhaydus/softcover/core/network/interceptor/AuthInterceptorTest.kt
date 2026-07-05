@@ -29,11 +29,15 @@ class AuthInterceptorTest {
         chain = mockk()
 
         @Suppress("UNCHECKED_CAST")
-        every { chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>()) } returns emptyFlow()
+        every {
+            chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+        } returns emptyFlow()
     }
 
     private fun buildInterceptor(token: String?): AuthInterceptor {
-        every { authTokenProvider.apiKey } returns flowOf(token)
+        every {
+            authTokenProvider.apiKey
+        } returns flowOf(token)
         return AuthInterceptor(authTokenProvider = authTokenProvider)
     }
 
@@ -46,7 +50,9 @@ class AuthInterceptorTest {
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
             @Suppress("UNCHECKED_CAST")
-            every { chain.proceed(capture(capturedRequest)) } returns emptyFlow()
+            every {
+                chain.proceed(capture(capturedRequest))
+            } returns emptyFlow()
 
             // ----- Act -----
             interceptor.intercept(
@@ -67,7 +73,9 @@ class AuthInterceptorTest {
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
             @Suppress("UNCHECKED_CAST")
-            every { chain.proceed(capture(capturedRequest)) } returns emptyFlow()
+            every {
+                chain.proceed(capture(capturedRequest))
+            } returns emptyFlow()
 
             // ----- Act -----
             interceptor.intercept(
@@ -88,7 +96,9 @@ class AuthInterceptorTest {
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
             @Suppress("UNCHECKED_CAST")
-            every { chain.proceed(capture(capturedRequest)) } returns emptyFlow()
+            every {
+                chain.proceed(capture(capturedRequest))
+            } returns emptyFlow()
 
             // ----- Act -----
             interceptor.intercept(
@@ -109,7 +119,9 @@ class AuthInterceptorTest {
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
             @Suppress("UNCHECKED_CAST")
-            every { chain.proceed(capture(capturedRequest)) } returns emptyFlow()
+            every {
+                chain.proceed(capture(capturedRequest))
+            } returns emptyFlow()
 
             // ----- Act -----
             interceptor.intercept(
@@ -129,13 +141,17 @@ class AuthInterceptorTest {
         @Test
         fun `reads token fresh on every request — token change between calls is reflected`() = runTest {
             // ----- Arrange -----
-            every { authTokenProvider.apiKey } returnsMany listOf(flowOf("first-key"), flowOf("second-key"))
+            every {
+                authTokenProvider.apiKey
+            } returnsMany listOf(flowOf("first-key"), flowOf("second-key"))
             val interceptor = AuthInterceptor(authTokenProvider = authTokenProvider)
 
             val captured1 = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
             @Suppress("UNCHECKED_CAST")
-            every { chain.proceed(capture(captured1)) } returns emptyFlow()
+            every {
+                chain.proceed(capture(captured1))
+            } returns emptyFlow()
 
             // ----- Act — first intercept reads "first-key" -----
             interceptor.intercept(
@@ -146,7 +162,9 @@ class AuthInterceptorTest {
             val captured2 = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
             @Suppress("UNCHECKED_CAST")
-            every { chain.proceed(capture(captured2)) } returns emptyFlow()
+            every {
+                chain.proceed(capture(captured2))
+            } returns emptyFlow()
 
             // ----- Act — second intercept reads "second-key" fresh from the provider -----
             interceptor.intercept(

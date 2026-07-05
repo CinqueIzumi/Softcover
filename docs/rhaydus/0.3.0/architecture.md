@@ -295,7 +295,8 @@ Koin. Each feature and each `core/*` operation service owns exactly **one** `mod
 - Shared dependencies (storage, the API client, dispatchers) come from their owning `core/*` unit.
 
 See [`toad-architecture.md`](toad-architecture.md) for the per-feature Koin wiring of screen models
-and flow collectors (`getAll()` aggregation, `bind <Feature>Initializer::class`).
+and flow collectors (the `factory { XScreenModel(..., flows = listOf(SomeCollector)) }` pattern —
+collectors are passed inline into the screen-model factory, *not* bound in Koin).
 
 ---
 
@@ -358,6 +359,47 @@ An `AppDispatchers` abstraction provides `Main` / `IO` / `Default` dispatchers v
 testability. TOAD actions run on `Main`; use cases, data sources, and repositories switch to `IO` for
 network and disk work internally.
 
+`AppDispatchers` lives in `core-common`, the module of non-visual shared primitives (dispatchers,
+logging, result helpers, formatting). The platform-capability seams every KMP app needs live one module
+out in `core-platform` (which depends on `core-common`), each an interface in `commonMain` with a public
+per-platform implementation the app wires into its own DI:
+
+- **`SecureStorage`** - a keyed read/write/delete secret store backed by hardware-backed storage
+  (`AndroidSecureStorage` over the Keystore, `IosSecureStorage` over the Keychain, `JvmSecureStorage`
+  over the desktop OS secret store).
+- **`NetworkAvailabilityProvider`** - reactive connectivity (`isOnline: StateFlow<Boolean>`,
+  `awaitOnline()`) with per-platform providers (Android `ConnectivityManager`, iOS `nw_path_monitor`,
+  desktop reachability polling). The companion `NetworkAvailability` singleton exposes the same state as
+  an instant, non-suspending check for guard clauses; install the provider once at startup. The desktop
+  provider owns a polling coroutine and is `AutoCloseable` - the app must `close()` it on shutdown, or
+  the loop leaks for the process lifetime.
+
+### Offline write queue (`offline-sync`)
+
+The `offline-sync` module (depends on `core-platform`) is the brand-agnostic skeleton for an
+optimistic-write / drain-and-reconcile engine: when a mutation can't reach the server, enqueue it locally
+and replay it when connectivity returns. It owns the generic algorithm and leaves the app's concrete write
+shapes, persistence, and remote dispatch as injected seams.
+
+- **`PendingWriteStore<P>`** (extends **`WriteQueue<P>`**) is the persistence seam the app implements
+  (Room / SQLite / DataStore): `enqueue(payload)`, `getPending(maxAttempts)` (oldest-first, poison-capped),
+  `delete(localId)`, `incrementAttempts(localId)`. The concrete table, the payload↔row codec, and any
+  coalescing (upsert-replacing same-kind writes for an entity) stay app-side. `P` is the app's opaque
+  write payload; a `PendingWrite<P>` row carries `localId` + `attempts`.
+- **`DefaultOfflineWriteDrainer<P, I, K>`** (implements **`OfflineWriteDrainer<I, K>`**) is the engine.
+  `start(scope)` drains on every connectivity return (via `NetworkAvailabilityProvider`) and once at
+  startup; `drain()` runs one pass on demand and returns the **reconciliation hints** `Map<I, Set<K>>`
+  (per entity id, the write kinds that synced) so the caller preserves only the fields each replayed write
+  owns when merging a fresh fetch. The app supplies the `replay: suspend (P) -> ReplayOutcome` dispatch,
+  a `hintKey: (P) -> Pair<I, K>?` extractor, an `isTransient: (Throwable) -> Boolean` classifier, and a
+  `DrainPolicy` (poison cap + in-drain exponential backoff). A **transient** replay failure bumps the
+  row's attempts and halts the pass (preserving enqueue order); a **terminal** failure discards the row.
+  `isTransient` defaults to treating every failure as transient (never lose a queued write); override it
+  to discard writes the server will always reject.
+
+The app owns the drain→fetch→reconcile *composition* (the field-preserving merge is inherently
+app-specific); the module ships only the drainer that yields the hints.
+
 ---
 
 ## 7. Build setup and convention plugins
@@ -388,8 +430,23 @@ Other build conventions:
 
 A single-module app has no module graph to gate, but the same package boundaries and the same
 "declare what you import" discipline keep it ready for extraction. The multi-module shape additionally
-gates the tier rules mechanically: a Gradle check derives each module's tier from its path and fails
-the build on any `project(...)` dependency pointing sideways or upward.
+gates three things mechanically, each wired into every module's `check`:
+
+- **Module-graph tiers** — the root-applied `rhaydus.module-graph` convention plugin registers a
+  `checkModuleGraph` task that derives each module's tier from its path and fails the build on any
+  `project(...)` dependency pointing sideways or upward. It also enforces api-visibility: an `api`
+  edge to a designated data-area module must be allowlisted, so re-exporting a whole data/use-case
+  layer is always a deliberate decision. The mechanism is shared; each build supplies its own tiers,
+  module→tier mapping, and allowlists via the `moduleGraph { }` block in its root build script.
+- **Dependency health** — the `com.autonomousapps.dependency-analysis` policy fails on a genuinely
+  unused dependency or a wrong `api`-vs-`implementation` exposure; each module's `projectHealth` is
+  wired into its `check` (the `buildHealth` task aggregates them). The uniform runtime /
+  test / Compose bundle the convention plugins inject centrally is excluded (it is never a per-module
+  "unused" finding); transitive-completeness and compile-vs-runtime advice stay informational.
+- **Android lint** — every module runs lint with `warningsAsErrors` + `abortOnError` against the
+  shared root `lint.xml`, whose version-freshness checks (`NewerVersionAvailable` / `GradleDependency`
+  / `AndroidGradlePluginVersion`) are held `informational` so a newer upstream release never breaks a
+  build that is deliberately pinned to the foundation catalog.
 
 ---
 

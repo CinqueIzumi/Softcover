@@ -15,7 +15,7 @@ kotlin {
             api(project(":core:preferences"))
             implementation(project(":core:designsystem"))
 
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)
             implementation(libs.rhaydus.designsystemEditorial)
             implementation(libs.rhaydus.toad)

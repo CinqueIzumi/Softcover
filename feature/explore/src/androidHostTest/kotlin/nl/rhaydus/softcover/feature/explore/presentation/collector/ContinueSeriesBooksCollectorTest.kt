@@ -43,21 +43,33 @@ class ContinueSeriesBooksCollectorTest {
             eventChannel = Channel(Channel.BUFFERED),
         )
 
-        every { getContinueSeriesBooksUseCase() } returns continueSeriesBooksFlow
+        every {
+            getContinueSeriesBooksUseCase()
+        } returns continueSeriesBooksFlow
 
-        every { getAllUserBooksUseCase() } returns allUserBooksFlow
+        every {
+            getAllUserBooksUseCase()
+        } returns allUserBooksFlow
 
         dependencies = mockk<ExploreDependencies>(relaxed = true).also { mock ->
-            every { mock.continueSeriesRefreshTrigger } returns MutableStateFlow(0L)
+            every {
+                mock.continueSeriesRefreshTrigger
+            } returns MutableStateFlow(0L)
 
-            every { mock.getContinueSeriesBooksUseCase } returns getContinueSeriesBooksUseCase
+            every {
+                mock.getContinueSeriesBooksUseCase
+            } returns getContinueSeriesBooksUseCase
 
-            every { mock.getAllUserBooksUseCase } returns getAllUserBooksUseCase
+            every {
+                mock.getAllUserBooksUseCase
+            } returns getAllUserBooksUseCase
         }
     }
 
     private fun stubBook(id: Int): Book = mockk {
-        every { this@mockk.id } returns id
+        every {
+            this@mockk.id
+        } returns id
     }
 
     // ----- OnLaunch -----
@@ -88,7 +100,9 @@ class ContinueSeriesBooksCollectorTest {
         fun `clears loading flag and sets continueSeriesBooks to empty on failure`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val errorFlow: MutableSharedFlow<List<Book>> = MutableSharedFlow()
-            every { getContinueSeriesBooksUseCase() } returns kotlinx.coroutines.flow.flow {
+            every {
+                getContinueSeriesBooksUseCase()
+            } returns kotlinx.coroutines.flow.flow {
                 throw RuntimeException("use case error")
             }
             val collector = ContinueSeriesBooksCollector()
@@ -178,7 +192,9 @@ class ContinueSeriesBooksCollectorTest {
                 searchText = "sci-fi",
                 loadingTrendingBooks = false,
             )
-            every { getContinueSeriesBooksUseCase() } returns kotlinx.coroutines.flow.flow {
+            every {
+                getContinueSeriesBooksUseCase()
+            } returns kotlinx.coroutines.flow.flow {
                 throw RuntimeException("error")
             }
             val collector = ContinueSeriesBooksCollector()

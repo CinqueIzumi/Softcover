@@ -66,8 +66,12 @@ class BookTest {
     )
 
     private fun buildUserBook(editionId: Int?): UserBook = mockk<UserBook>().also {
-        every { it.status } returns BookStatus.Reading
-        every { it.editionId } returns editionId
+        every {
+            it.status
+        } returns BookStatus.Reading
+        every {
+            it.editionId
+        } returns editionId
     }
 
     // ----- currentEdition -----
@@ -318,7 +322,9 @@ class BookTest {
         fun `returns status from userBook when userBook is not null`() {
             // ----- Arrange -----
             val userBook = buildUserBook(editionId = null).also {
-                every { it.status } returns BookStatus.Read
+                every {
+                    it.status
+                } returns BookStatus.Read
             }
             val book = buildBook(
                 editions = listOf(buildEdition(id = 1)),

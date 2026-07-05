@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
@@ -34,12 +35,18 @@ class OnProgressTabClickActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): BookDetailDependencies {
+    private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
-            every { mock.coroutineScope } returns testScope
-            every { mock.mainDispatcher } returns dispatcher
-            every { mock.launch(any()) } answers { callOriginal() }
+            every {
+                mock.coroutineScope
+            } returns testScope
+            every {
+                mock.mainDispatcher
+            } returns dispatcher
+            every {
+                mock.launch(any())
+            } answers { callOriginal() }
         }
     }
 

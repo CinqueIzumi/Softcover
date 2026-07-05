@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.notification
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import kotlin.concurrent.Volatile
 import platform.UserNotifications.UNAuthorizationStatusAuthorized
 import platform.UserNotifications.UNAuthorizationStatusEphemeral
 import platform.UserNotifications.UNAuthorizationStatusProvisional
@@ -9,6 +9,7 @@ import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNUserNotificationCenter
 import platform.darwin.dispatch_async
 import platform.darwin.dispatch_get_main_queue
+import nl.rhaydus.common.AppLog
 
 /**
  * iOS notifier over `UNUserNotificationCenter`. Notifications post immediately (no trigger); the
@@ -25,7 +26,7 @@ internal class SoftcoverNotifierImpl : SoftcoverNotifier {
 
     // Written on the main queue after the async settings query (see refreshAuthorization); @Volatile so a
     // synchronous hasPostPermission() read from any dispatcher sees the latest value.
-    @kotlin.concurrent.Volatile
+    @Volatile
     private var cachedGranted = false
 
     init {

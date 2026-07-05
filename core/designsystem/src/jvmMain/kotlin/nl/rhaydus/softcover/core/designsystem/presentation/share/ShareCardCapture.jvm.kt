@@ -19,9 +19,9 @@ import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.platform.desktopAppDataDirectory
-import nl.rhaydus.ui.common.AppDispatchers
 
 /**
  * Desktop share-card capture. Compose Desktop renders through Skiko, so the capture path mirrors the

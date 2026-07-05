@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
@@ -40,7 +41,7 @@ class InitializeBookWithIdActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): BookDetailDependencies {
+    private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
@@ -65,8 +66,12 @@ class InitializeBookWithIdActionTest {
         id: Int = 42,
         editions: List<BookEdition> = listOf(mockk(), mockk()),
     ): Book = mockk {
-        every { this@mockk.id } returns id
-        every { this@mockk.editions } returns editions
+        every {
+            this@mockk.id
+        } returns id
+        every {
+            this@mockk.editions
+        } returns editions
     }
 
     @Nested

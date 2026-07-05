@@ -10,8 +10,8 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
-import nl.rhaydus.softcover.core.domain.logging.AppLog
-import nl.rhaydus.ui.common.AppDispatchers
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.common.AppLog
 
 /**
  * Android secure storage: the API key is encrypted with an AES/GCM key held in the Android Keystore

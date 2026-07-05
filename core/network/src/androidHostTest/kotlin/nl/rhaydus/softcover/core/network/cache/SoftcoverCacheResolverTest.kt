@@ -30,9 +30,15 @@ class SoftcoverCacheResolverTest {
 
         val compiledType = mockk<CompiledType>()
 
-        every { field.type } returns compiledType
-        every { compiledType.rawType() } returns rawType
-        every { field.responseName } returns "books"
+        every {
+            field.type
+        } returns compiledType
+        every {
+            compiledType.rawType()
+        } returns rawType
+        every {
+            field.responseName
+        } returns "books"
     }
 
     private fun stubArgumentValue(value: Any?) {
@@ -64,14 +70,18 @@ class SoftcoverCacheResolverTest {
      * sentinel value was stored there.
      */
     private fun stubForDelegation(responseName: String) {
-        every { field.responseName } returns responseName
+        every {
+            field.responseName
+        } returns responseName
         every {
             field.argumentValues(
                 any(),
                 any(),
             )
         } returns emptyMap()
-        every { field.nameWithArguments(any()) } returns responseName
+        every {
+            field.nameWithArguments(any())
+        } returns responseName
     }
 
     private fun resolve(
@@ -79,7 +89,9 @@ class SoftcoverCacheResolverTest {
         parentKey: CacheKey = CacheKey.QUERY_ROOT,
         parent: Map<String, Any?> = emptyMap(),
     ): Any? {
-        every { field.name } returns name
+        every {
+            field.name
+        } returns name
 
         val context = ResolverContext(
             field = field,
@@ -100,7 +112,9 @@ class SoftcoverCacheResolverTest {
         @Test
         fun `QUERY_ROOT + books + where id _eq Int id produces single CacheKey with id converted to String`() {
             // ----- Arrange -----
-            every { rawType.name } returns "books"
+            every {
+                rawType.name
+            } returns "books"
             stubArgumentValue(mapOf("id" to mapOf("_eq" to 123)))
 
             // ----- Act -----
@@ -118,7 +132,9 @@ class SoftcoverCacheResolverTest {
         @Test
         fun `QUERY_ROOT + editions + where id _in list filters nulls and returns CacheKey per id`() {
             // ----- Arrange -----
-            every { rawType.name } returns "editions"
+            every {
+                rawType.name
+            } returns "editions"
             stubArgumentValue(mapOf("id" to mapOf("_in" to listOf(1, null, 3))))
 
             // ----- Act -----
@@ -140,7 +156,9 @@ class SoftcoverCacheResolverTest {
         @Test
         fun `QUERY_ROOT + authors + where id _eq String id produces CacheKey`() {
             // ----- Arrange -----
-            every { rawType.name } returns "authors"
+            every {
+                rawType.name
+            } returns "authors"
             stubArgumentValue(mapOf("id" to mapOf("_eq" to "42")))
 
             // ----- Act -----
@@ -158,7 +176,9 @@ class SoftcoverCacheResolverTest {
         @Test
         fun `QUERY_ROOT + user_books + where id _in empty list returns empty CacheKey list`() {
             // ----- Arrange -----
-            every { rawType.name } returns "user_books"
+            every {
+                rawType.name
+            } returns "user_books"
             stubArgumentValue(mapOf("id" to mapOf("_in" to listOf<Int>())))
 
             // ----- Act -----

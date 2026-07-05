@@ -128,3 +128,16 @@ feature/<name>/
 - `single` for things with one instance (repositories); `factory` for the `ScreenModel` so each
   screen gets a fresh one. Collectors are not registered in Koin at all - they're listed inline in
   the screen model's factory (see step 8).
+- **Error-slot + retry convention.** `UiState` is a bare marker, so a screen that can fail a
+  load/submit surfaces the failure as a nullable `String?` slot on its own `data class` state (e.g.
+  `val searchError: String? = null`), defaulted null like every other field. The action folds the
+  failure into it: in the `.onFailure { }` branch, author the copy in *presentation* (map the typed
+  throwable to a message, with a screen-specific fallback) and `setState { it.copy(searchError = message) }`.
+  Clear the slot to null both on retry and on any edit that invalidates the failure (a new keystroke, a
+  changed field), so a stale error never lingers. Render it with `InlineErrorState(message, onRetry)`
+  from `designsystem-core`, whose retry re-dispatches the screen's **own** action - a retry is just
+  re-running the same `*Action`, never a new "retry" type. Do **not** re-handle `CancellationException`
+  in the fold: the use-case boundary already rethrows it (a cancellation-aware `runCatching`), so the
+  slot only ever holds a real failure. A screen that wants a richer shape than a `String?` (a code, a
+  retryable flag) declares its own error type on its state - the framework stays out of it; the
+  convention is the `String?` slot plus `InlineErrorState`, not a shared `toad` type.

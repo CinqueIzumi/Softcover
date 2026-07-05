@@ -34,7 +34,9 @@ class UpdateBookReviewUseCaseTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
 
-            every { inputBook.userBook } returns null
+            every {
+                inputBook.userBook
+            } returns null
 
             // ----- Act -----
             val result = useCase(
@@ -63,7 +65,9 @@ class UpdateBookReviewUseCaseTest {
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
 
-            every { inputBook.userBook } returns userBook
+            every {
+                inputBook.userBook
+            } returns userBook
 
             coEvery {
                 booksRepository.updateBookReview(

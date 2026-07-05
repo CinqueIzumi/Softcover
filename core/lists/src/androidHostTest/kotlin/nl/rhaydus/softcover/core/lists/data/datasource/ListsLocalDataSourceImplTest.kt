@@ -142,7 +142,9 @@ class ListsLocalDataSourceImplTest {
                 ),
             )
 
-            coEvery { dao.getCachedListSignatures() } returns rows
+            coEvery {
+                dao.getCachedListSignatures()
+            } returns rows
 
             // ----- Act -----
             val result = dataSource.getCachedListSignatures()
@@ -161,7 +163,9 @@ class ListsLocalDataSourceImplTest {
                 ),
             )
 
-            coEvery { dao.getCachedListSignatures() } returns rows
+            coEvery {
+                dao.getCachedListSignatures()
+            } returns rows
 
             // ----- Act -----
             val result = dataSource.getCachedListSignatures()
@@ -173,7 +177,9 @@ class ListsLocalDataSourceImplTest {
         @Test
         fun `returns empty map when no rows exist`() = runTest {
             // ----- Arrange -----
-            coEvery { dao.getCachedListSignatures() } returns emptyList()
+            coEvery {
+                dao.getCachedListSignatures()
+            } returns emptyList()
 
             // ----- Act -----
             val result = dataSource.getCachedListSignatures()

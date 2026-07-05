@@ -46,7 +46,9 @@ class ListsRepositoryImplRefreshTest {
     }
 
     private fun stubBookList(id: Int = 1): BookList = mockk {
-        io.mockk.every { this@mockk.id } returns id
+        io.mockk.every {
+            this@mockk.id
+        } returns id
     }
 
     @Nested

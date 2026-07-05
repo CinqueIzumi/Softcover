@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
+import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ReadingUpdateKind
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ReadingUpdateShareContent
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -8,7 +9,6 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.domain.model.isBlank
-import nl.rhaydus.ui.common.secondsToHm
 import kotlin.math.roundToInt
 
 /**

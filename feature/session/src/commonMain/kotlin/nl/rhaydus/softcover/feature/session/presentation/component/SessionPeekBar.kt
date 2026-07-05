@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.session.presentation.component
 
-import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.common.currentInstant
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,6 +34,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -43,7 +44,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
-import nl.rhaydus.ui.common.currentInstant
 
 /**
  * Persistent live-timer bar shown above the bottom nav while a reading session is active. Tapping it

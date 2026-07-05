@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
@@ -36,7 +37,6 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.ui.common.AppDispatchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -171,7 +171,9 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
-            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
                 firstArg<suspend () -> List<Book>>().invoke()
             }
 
@@ -200,7 +202,9 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
-            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
                 firstArg<suspend () -> List<Book>>().invoke()
             }
 
@@ -230,7 +234,9 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
-            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
                 firstArg<suspend () -> List<Book>>().invoke()
             }
 
@@ -258,7 +264,9 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
-            coEvery { offlineSync.drainAndReconcile(any()) } returns listOf(reconciledBook)
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } returns listOf(reconciledBook)
 
             // ----- Act -----
             repository.refreshUserBooks(userId = userId)
@@ -286,7 +294,9 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
-            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
                 firstArg<suspend () -> List<Book>>().invoke()
             }
 
@@ -320,7 +330,9 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
-            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
                 firstArg<suspend () -> List<Book>>().invoke()
             }
 
@@ -363,7 +375,9 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getUserBookIdsByStatus(status = status)
             } returns listOf(10, staleLocalId)
 
-            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
                 firstArg<suspend () -> List<Book>>().invoke()
             }
 
@@ -411,7 +425,9 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getAllUserBookIds()
             } returns emptyList()
 
-            coEvery { offlineSync.drainAndReconcile(any()) } coAnswers {
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
                 firstArg<suspend () -> List<Book>>().invoke()
             }
 
@@ -789,12 +805,16 @@ class BooksRepositoryImplTest {
         @Test
         fun `getEditionsByBookId when offline returns cached book editions and skips remote`() = runTest {
             // ----- Arrange -----
-            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
 
             val bookId = 7
             val cachedEditions = listOf(mockk<BookEdition>(relaxed = true), mockk<BookEdition>(relaxed = true))
             val localBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.editions } returns cachedEditions
+                every {
+                    this@mockk.editions
+                } returns cachedEditions
             }
 
             coEvery {
@@ -815,7 +835,9 @@ class BooksRepositoryImplTest {
         @Test
         fun `getEditionsByBookId when offline and cache miss returns empty list`() = runTest {
             // ----- Arrange -----
-            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
 
             val bookId = 7
 
@@ -857,7 +879,9 @@ class BooksRepositoryImplTest {
         @Test
         fun `fetchBookById when offline returns cached book and skips remote`() = runTest {
             // ----- Arrange -----
-            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
 
             val bookId = 7
             val cachedBook = mockk<Book>(relaxed = true)
@@ -880,7 +904,9 @@ class BooksRepositoryImplTest {
         @Test
         fun `fetchBookById when offline and cache miss throws OfflineException`() = runTest {
             // ----- Arrange -----
-            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
 
             val bookId = 7
 
@@ -906,16 +932,24 @@ class BooksRepositoryImplTest {
             val canonicalId = 99
 
             val userBook = mockk<UserBook>(relaxed = true) {
-                every { this@mockk.editionId } returns editionId
+                every {
+                    this@mockk.editionId
+                } returns editionId
             }
 
             val localBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns userBook
+                every {
+                    this@mockk.userBook
+                } returns userBook
             }
 
             val canonicalBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns null
-                every { this@mockk.id } returns canonicalId
+                every {
+                    this@mockk.userBook
+                } returns null
+                every {
+                    this@mockk.id
+                } returns canonicalId
             }
 
             coEvery {
@@ -949,16 +983,24 @@ class BooksRepositoryImplTest {
             val canonicalId = 99
 
             val userBook = mockk<UserBook>(relaxed = true) {
-                every { this@mockk.editionId } returns editionId
+                every {
+                    this@mockk.editionId
+                } returns editionId
             }
 
             val localBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns userBook
+                every {
+                    this@mockk.userBook
+                } returns userBook
             }
 
             val canonicalBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns null
-                every { this@mockk.id } returns canonicalId
+                every {
+                    this@mockk.userBook
+                } returns null
+                every {
+                    this@mockk.id
+                } returns canonicalId
             }
 
             coEvery {
@@ -999,11 +1041,15 @@ class BooksRepositoryImplTest {
             val canonicalId = 99
 
             val userBook = mockk<UserBook>(relaxed = true) {
-                every { this@mockk.editionId } returns editionId
+                every {
+                    this@mockk.editionId
+                } returns editionId
             }
 
             val localBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns userBook
+                every {
+                    this@mockk.userBook
+                } returns userBook
             }
 
             coEvery {
@@ -1051,12 +1097,18 @@ class BooksRepositoryImplTest {
             val canonicalId = 100
 
             val currentEdition = mockk<BookEdition>(relaxed = true) {
-                every { this@mockk.id } returns editionId
+                every {
+                    this@mockk.id
+                } returns editionId
             }
 
             val localBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns null
-                every { this@mockk.currentEdition } returns currentEdition
+                every {
+                    this@mockk.userBook
+                } returns null
+                every {
+                    this@mockk.currentEdition
+                } returns currentEdition
             }
 
             val canonicalBook = stubBook(userBookId = null)
@@ -1092,13 +1144,21 @@ class BooksRepositoryImplTest {
             val canonicalId = 101
 
             val firstEdition = mockk<BookEdition>(relaxed = true) {
-                every { this@mockk.id } returns editionId
+                every {
+                    this@mockk.id
+                } returns editionId
             }
 
             val localBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns null
-                every { this@mockk.currentEdition } returns null
-                every { this@mockk.editions } returns listOf(firstEdition)
+                every {
+                    this@mockk.userBook
+                } returns null
+                every {
+                    this@mockk.currentEdition
+                } returns null
+                every {
+                    this@mockk.editions
+                } returns listOf(firstEdition)
             }
 
             val canonicalBook = stubBook(userBookId = null)
@@ -1160,9 +1220,15 @@ class BooksRepositoryImplTest {
             val notFound = BookNotFoundException(bookId = missingId)
 
             val localBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns null
-                every { this@mockk.currentEdition } returns null
-                every { this@mockk.editions } returns emptyList()
+                every {
+                    this@mockk.userBook
+                } returns null
+                every {
+                    this@mockk.currentEdition
+                } returns null
+                every {
+                    this@mockk.editions
+                } returns emptyList()
             }
 
             coEvery {
@@ -1187,11 +1253,15 @@ class BooksRepositoryImplTest {
             val notFound = BookNotFoundException(bookId = missingId)
 
             val userBook = mockk<UserBook>(relaxed = true) {
-                every { this@mockk.editionId } returns editionId
+                every {
+                    this@mockk.editionId
+                } returns editionId
             }
 
             val localBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns userBook
+                every {
+                    this@mockk.userBook
+                } returns userBook
             }
 
             coEvery {
@@ -1220,11 +1290,15 @@ class BooksRepositoryImplTest {
             val notFound = BookNotFoundException(bookId = missingId)
 
             val userBook = mockk<UserBook>(relaxed = true) {
-                every { this@mockk.editionId } returns editionId
+                every {
+                    this@mockk.editionId
+                } returns editionId
             }
 
             val localBook = mockk<Book>(relaxed = true) {
-                every { this@mockk.userBook } returns userBook
+                every {
+                    this@mockk.userBook
+                } returns userBook
             }
 
             coEvery {
@@ -1272,8 +1346,12 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 11
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithStatus(
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookWithStatus(
                     id = 5,
                     status = BookStatus.Reading,
                 )
@@ -1311,8 +1389,12 @@ class BooksRepositoryImplTest {
             val bookId = 11
             val editionId = 55
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithStatus(
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookWithStatus(
                     id = 5,
                     status = BookStatus.Reading,
                 )
@@ -1346,8 +1428,12 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 11
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithStatus(
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookWithStatus(
                     id = 5,
                     status = BookStatus.Reading,
                 )
@@ -1378,8 +1464,12 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 11
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns null
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns null
             }
             val remoteBook = stubBook(userBookId = null)
 
@@ -1404,8 +1494,12 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 11
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithStatus(
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookWithStatus(
                     id = 5,
                     status = BookStatus.Reading,
                 )
@@ -1440,8 +1534,12 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 11
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithStatus(
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookWithStatus(
                     id = 5,
                     status = BookStatus.Reading,
                 )
@@ -1588,10 +1686,14 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
 
             coEvery {
@@ -1616,10 +1718,14 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val remoteError = RuntimeException("network failure")
 
@@ -1642,7 +1748,9 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
 
             coEvery {
@@ -1667,7 +1775,9 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = stubBook(userBookId = 1)
 
@@ -1738,7 +1848,9 @@ class BooksRepositoryImplTest {
                 rating = 3.0,
             )
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             val book = Book(
                 id = 10,
@@ -1796,15 +1908,21 @@ class BooksRepositoryImplTest {
             val bookId = 10
             val newRating = 4.5
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithRating(
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookWithRating(
                     id = 5,
                     rating = 3.0,
                 )
             }
             val remoteBook = stubBook(userBookId = 5)
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksRemoteDataSource.updateBookRating(
@@ -1841,8 +1959,12 @@ class BooksRepositoryImplTest {
             val bookId = 10
             val newRating = 4.5
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithRating(
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookWithRating(
                     id = 5,
                     rating = 3.0,
                 )
@@ -1850,7 +1972,9 @@ class BooksRepositoryImplTest {
             val snapshot = stubBook(userBookId = 5)
             val remoteError = RuntimeException("network failure")
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -1883,15 +2007,21 @@ class BooksRepositoryImplTest {
             val bookId = 10
             val newRating = 4.5
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookWithRating(
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookWithRating(
                     id = 5,
                     rating = 3.0,
                 )
             }
             val snapshot = stubBook(userBookId = 5)
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -1946,7 +2076,9 @@ class BooksRepositoryImplTest {
             )
             val snapshot = stubBook(userBookId = userBookId)
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2009,7 +2141,9 @@ class BooksRepositoryImplTest {
             )
             val snapshot = stubBook(userBookId = userBookId)
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2071,7 +2205,9 @@ class BooksRepositoryImplTest {
                 userBookRead = null,
             )
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
 
             // ----- Act -----
             repository.updateBookRating(
@@ -2137,12 +2273,18 @@ class BooksRepositoryImplTest {
             val userBookId = 5
             val bookId = 10
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookForReview(id = userBookId)
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookForReview(id = userBookId)
             }
             val remoteBook = stubBook(userBookId = userBookId)
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksRemoteDataSource.updateBookReview(
@@ -2201,7 +2343,9 @@ class BooksRepositoryImplTest {
                 userBookRead = null,
             )
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
 
             // ----- Act -----
             val result = repository.updateBookReview(
@@ -2261,7 +2405,9 @@ class BooksRepositoryImplTest {
             )
             val snapshot = stubBook(userBookId = userBookId)
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2334,7 +2480,9 @@ class BooksRepositoryImplTest {
             )
             val snapshot = stubBook(userBookId = userBookId)
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2388,13 +2536,19 @@ class BooksRepositoryImplTest {
             val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Review that will fail")))))
             val hasSpoilers = true
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBookForReview(id = userBookId)
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBookForReview(id = userBookId)
             }
             val snapshot = stubBook(userBookId = userBookId)
             val remoteError = RuntimeException("network failure")
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2460,8 +2614,12 @@ class BooksRepositoryImplTest {
             val bookId = 42
             val userBookId = 7
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBook(id = userBookId)
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBook(id = userBookId)
             }
             val snapshot = stubBook(userBookId = userBookId)
             val remoteError = RuntimeException("network error")
@@ -2491,8 +2649,12 @@ class BooksRepositoryImplTest {
             val bookId = 42
             val userBookId = 7
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
-                every { this@mockk.userBook } returns stubUserBook(id = userBookId)
+                every {
+                    this@mockk.id
+                } returns bookId
+                every {
+                    this@mockk.userBook
+                } returns stubUserBook(id = userBookId)
             }
             val snapshot = stubBook(userBookId = userBookId)
 
@@ -2613,7 +2775,9 @@ class BooksRepositoryImplTest {
             )
             val slot = slot<Book>()
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksRemoteDataSource.updateBookProgress(
@@ -2646,13 +2810,19 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2683,14 +2853,20 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val remoteError = RuntimeException("network failure")
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2718,13 +2894,19 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2759,13 +2941,19 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2928,7 +3116,9 @@ class BooksRepositoryImplTest {
             )
             val slot = slot<Book>()
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksRemoteDataSource.markBookAsRead(
@@ -2959,13 +3149,19 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -2992,14 +3188,20 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val remoteError = RuntimeException("network failure")
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -3023,13 +3225,19 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -3060,13 +3268,19 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
             val snapshot = mockk<Book>(relaxed = true) {
-                every { this@mockk.id } returns bookId
+                every {
+                    this@mockk.id
+                } returns bookId
             }
 
-            every { networkAvailability.isOnline } returns MutableStateFlow(true)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -3290,7 +3504,9 @@ class BooksRepositoryImplTest {
         @Test
         fun `offline — throws OfflineException without calling remote`() = runTest {
             // ----- Arrange -----
-            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
 
             val isbn = "9780451524935"
 
@@ -3308,8 +3524,12 @@ class BooksRepositoryImplTest {
     @Nested
     inner class OfflineBehavior {
         private fun stubUserBook(id: Int = 1): UserBook = mockk(relaxed = true) {
-            every { this@mockk.id } returns id
-            every { this@mockk.editionId } returns null
+            every {
+                this@mockk.id
+            } returns id
+            every {
+                this@mockk.editionId
+            } returns null
         }
 
         private fun stubUserBookRead(id: Int = 1): UserBookRead = UserBookRead(
@@ -3346,7 +3566,9 @@ class BooksRepositoryImplTest {
         @Test
         fun `updateBookProgress when offline caches optimistic book and enqueues UPDATE_PROGRESS without calling remote`() = runTest {
             // ----- Arrange -----
-            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
 
             val book = stubBookWithUserBookRead()
             val newPage = 75
@@ -3380,7 +3602,9 @@ class BooksRepositoryImplTest {
         @Test
         fun `markBookAsRead when offline caches optimistic book and enqueues MARK_AS_READ without calling remote`() = runTest {
             // ----- Arrange -----
-            every { networkAvailability.isOnline } returns MutableStateFlow(false)
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
 
             val book = stubBookWithUserBookRead()
 

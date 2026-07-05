@@ -132,11 +132,25 @@ bottom bar's footprint** so the last item is never occluded.
 This is wired through a CompositionLocal, not passed by hand down every screen:
 
 - A `LocalBottomBarPadding` CompositionLocal (default `0.dp`) carries the current bottom-bar footprint.
-- The bottom-bar host screen measures the bar's height, adds spacing and the `navigationBars` window inset,
-  and **provides** that total through `CompositionLocalProvider(LocalBottomBarPadding provides ...)`.
+- `BottomBarScaffold(bottomBar, barSpacing, content)` is the shipped host: the app hands it the brand-styled
+  bar as a slot, and it measures the bar's laid-out footprint, adds `barSpacing`, and **provides** that total
+  through `CompositionLocalProvider(LocalBottomBarPadding provides ...)`. No per-app host boilerplate.
+- **Measure once - never re-add the inset.** The host measures the *laid-out* bar (its `onSizeChanged` sits
+  outside the bar's `windowInsetsPadding`), so the `navigationBars` inset the bar reserves is already baked
+  into the measured height and counted exactly once. Recomputing and re-adding `WindowInsets.navigationBars`
+  on top of a measured height double-counts it.
+- **Floating vs docked.** `BottomBarScaffold` (and the `LocalBottomBarPadding` it writes) is for an
+  **overlay / floating** bar that draws *over* content - the only case a padding channel is needed, since an
+  overlay bar cannot be reserved by layout. A **docked** bar instead lives in a Material `Scaffold { bottomBar }`
+  and its space comes from `innerPadding`; there `LocalBottomBarPadding` correctly stays `0.dp`.
 - Screens read it through a `rememberBottomBarPadding()` helper and apply it as trailing content padding.
 - A companion `BottomNavigationSpacer()` helper emits a `Spacer` sized to the bottom navigation-bar inset
   for screens that need the raw inset.
+
+The **rendered bar and the tab host stay app-side** (they name concrete features and brand chrome; section
+8): the foundation ships the reusable pieces the shell leans on - `BottomBarScaffold`, the window-size
+primitives (§5.7), `TwoPaneScaffold` (§5.8), and the cross-tab pulse (§7) - and the app composes them into
+its own adaptive nav shell.
 
 **Root tabs prefer an in-page title over a chrome title.** On a root tab, the screen's identity renders
 *inside* the scroll (an in-page `pageTitle`-style role), so it shares the editorial scale with the section
@@ -256,6 +270,11 @@ multiplatform resources) is an app-level decision and belongs in the app's own d
   screen-entry window, never an animate-on-scroll effect. `rememberStaggeredEntryCoordinator(key)` +
   `Modifier.staggeredEntry(coordinator, index)` provide it; "first entry" is tracked per key for the
   process lifetime, so a return visit to the same screen renders statically.
+- **Cross-tab nav pulse.** When an event lands on a tab other than the current one (a book added from the
+  Reading tab landing on the Library shelf), that tab's icon briefly pulses. `NavPulse` (§nav) is a keyed,
+  instance-owned signal - the app fires `navPulse.pulse(key)` from wherever the event originates (safe outside
+  composition) and the nav chrome reads `rememberPulseScale(navPulse, key)` to scale the icon. The concrete
+  key (which tab, what event) stays app-side; the foundation ships only the mechanism.
 - **All motion is suppressed under reduced motion** (system animations disabled): the reduced path is an
   instant, un-animated swap. This gate is mandatory for every animation.
 
@@ -273,16 +292,37 @@ opt-in `designsystem-image` module (it brings Coil): `RhaydusImage` (plain), `Rh
 caller-supplied placeholder slot while loading), and `RhaydusShimmerImage` (the placeholder is a shimmer).
 The network fetcher stays an app choice, configured on the app's Coil `ImageLoader`.
 
+- **Exporting a composable as an image is a shared seam.** `ShareCardCapture` (`share/`, in `designsystem-core`)
+  captures a composable to a PNG and saves or shares it: wrap the card in `CapturableShareCard(capture) { … }`
+  (the app's card design is the `@Composable` slot), then call `saveToGallery` / `saveToCache` / `share` on the
+  `rememberShareCardCapture(config)` instance. The platform fiddliness is handled inside the seam — Android
+  MediaStore/scoped-storage save + a `FileProvider` share `Intent`, desktop native save dialog + clipboard copy,
+  iOS `UIActivityViewController` — while the brand-specific bits (file-name prefix, gallery album, the Android
+  `FileProvider` authority the app must declare in its manifest) come in through `ShareCardCaptureConfig`. It is
+  self-contained (kotlinx `Dispatchers`, no Koin), so failures surface through the `SaveOutcome` / `ShareOutcome`
+  return types rather than a logger. `GalleryWritePermissionRequester` gates the legacy Android write permission
+  (API ≤ 28); it reports granted immediately elsewhere.
+
 - **The button family is shared.** `RhaydusButton`, `RhaydusToggleButton`, `RhaydusIconToggleButton`, and
   `RhaydusSplitButton` (in `designsystem-core`) are the canonical buttons, parameterized by the `ButtonSize`
   / `ButtonStyle` / `ToggleButtonStyle` / `IconToggleButtonStyle` / `SplitButtonStyle` enums and taking icons
   as `RhaydusIconResource`. Reach for these rather than calling Material `Button` directly; the filled style
   carries the press-scale feedback (section 7). They use Material typography, so they carry no editorial
   dependency.
+- **Shared interactive widgets stay brand-agnostic via params, not brand values.** `StarRatingInput`
+  (`component/`) is a half-star tap/drag-scrub rating control; its star glyph is a `RhaydusIconResource` and
+  its filled/empty tints are colour params (defaulting to Material roles), so no brand token leaks in.
+  `ExpandableFlowRow` (`layout/`) is a `FlowRow` that collapses to N lines behind a replaceable "show more"
+  affordance and reveals more per tap. `InlineErrorState` (`component/`) is the standard in-content
+  load/submit-failure surface — a message in the Material `error` role above a `RhaydusButton` retry — with
+  its retry label and text style as params (the app supplies its own copy and editorial role); it is the
+  render side of the TOAD error-slot convention (`toad-architecture.md`). Reach for these before hand-rolling
+  a rating row, a collapsing chip/tag set, or an error-and-retry block.
 - **Reusable building blocks live in `core/presentation/widget/` (or the app's design-system module);
   theming lives in `core/presentation/theme/`.** Shell-tier components that enumerate concrete app tabs
   (bottom navigation, the tab host) live at the shell/orchestration tier, not in generic `core`, because they
-  name concrete features; the reusable pieces they lean on (icon toggles, color roles) stay in `core`.
+  name concrete features; the reusable pieces they lean on (icon toggles, color roles, `BottomBarScaffold`
+  and its padding contract §5.2, the `NavPulse` cross-tab pulse §7) stay in `core`.
 - **One declaration per file**, named after the declaration. One action per file in TOAD features (section 9).
 - **Slot APIs over flags where the content varies.** A pill chip takes an optional `onClick` (interactive
   when present, a read-only tag when omitted) rather than a boolean mode. Components prefer the canonical
@@ -349,7 +389,7 @@ Walk this before reaching for novelty. Brand-specific rules extend this list in 
 Compose Multiplatform runs the same shared composables on a desktop (jvm) window, where a pointer and a
 physical keyboard exist. These affordances make a shared surface feel native there while staying inert on
 touch, so a shared composable can carry them unconditionally. The desktop-only ones live in `jvmMain`; the
-two modifiers below are in `commonMain` and no-op on touch.
+`commonMain` modifiers below (`pointerHandCursor`, `hoverHighlight`, `platformModifierClick`) no-op on touch.
 
 - **Hand cursor.** `Modifier.pointerHandCursor()` shows the platform "clickable" hand cursor while the
   pointer hovers a clickable surface that lacks an obvious built-in cursor affordance. A no-op on touch
@@ -366,6 +406,13 @@ two modifiers below are in `commonMain` and no-op on touch.
 - **Back strip.** `DesktopBackStrip(...)` is the static leading-gutter back button a pushed desktop screen
   carries instead of a scroll-collapsing top bar. The app supplies its own arrow glyph (wrapped in
   `RhaydusIconResource`); no icon asset is baked into the shared module.
+- **Scrollbar.** `DesktopVerticalScrollbar(state)` overlays a persistent, themed vertical scrollbar on the
+  trailing edge of a scrolling region — mouse-driven desktop scrolling has no fling indicator, so the bar
+  is how a desktop user reads and grabs their position in a long list. It takes a `LazyGridState`,
+  `LazyListState`, or `ScrollState` (prefer the `ScrollState` overload when items vary wildly in height, so
+  the thumb reflects the exact extent instead of a lazy estimate). The thumb is keyed to
+  `MaterialTheme.colorScheme.onSurface` so it stays visible on dark surfaces where Compose Desktop's
+  near-black default disappears. jvm-only (touch has no scrollbar; the fling + edge-glow is the affordance).
 - **Esc dismisses in-app overlays.** `Modifier.dismissOnEscape(enabled) { onDismiss() }` closes an in-app
   surface that sits over the page (a full-screen viewer, a transient selection mode) on the Esc key. It is
   only for surfaces that are **not** a `Dialog` / `Popup`: a `Dialog` (including `AdaptiveModalSheet`'s
@@ -375,6 +422,12 @@ two modifiers below are in `commonMain` and no-op on touch.
 - **Selection on desktop.** Where touch enters a multi-select mode by long-press, desktop also honors the
   pointer idioms (right-click to open the selection, modifier-click to extend it). The concrete gestures
   are an app decision; the rule is that a desktop layout does not leave long-press as the only entry.
+- **Modifier-click selection.** `Modifier.platformModifierClick(onCtrlClick, onShiftClick)` is the concrete
+  modifier-click gesture for the rule above: on desktop a primary click with **Ctrl/Cmd** held toggles this
+  item's selection and with **Shift** held range-selects to it. It intercepts in the pointer **Initial**
+  phase and consumes the press only when a modifier is held, so a plain click still reaches the surface's
+  own inner `combinedClickable` (no double-fire); Shift wins when both are held. It lives in `commonMain`
+  and is a pure pass-through on touch, so a shared cell can wire it unconditionally.
 - **Right-click menu.** `DesktopContextMenu(items) { content }` wraps a surface in a desktop secondary-click
   menu (the pointer counterpart to a touch long-press) and is a pure pass-through on touch and for an empty
   `items` list, so a shared composable can wrap unconditionally and populate items only where a menu applies.

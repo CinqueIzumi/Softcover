@@ -11,7 +11,7 @@ upstream and record it here.
 **Process.** With `foundation.local=true` (includeBuild against `../rhaydus-foundation`), fix it at the
 source and bump the foundation. Otherwise file it against the foundation and track it here until a
 released version carries the fix, then re-run the `rhaydus-adopt` agent. The capability surface these
-entries refer to is indexed in [`../rhaydus/0.2.0/CAPABILITIES.md`](../rhaydus/0.2.0/CAPABILITIES.md).
+entries refer to is indexed in [`../rhaydus/0.3.0/CAPABILITIES.md`](../rhaydus/0.3.0/CAPABILITIES.md).
 
 Each entry: **type** (bug / enhancement / gate), **home** (target foundation module), **status**, and
 enough context for whoever picks it up.
@@ -21,12 +21,68 @@ share a target module and a kind of work, so it can be designed and landed in on
 are stable identifiers (referenced from commits and other docs) and are **never reused or renumbered**, so
 they are not sequential within a batch. Batches are ordered to respect the dependencies noted on each.
 
+## ⏳ Adoption in progress — RESUME HERE (green & uncommitted, updated 2026-07-06)
+
+A first foundation-adoption pass is **complete and GREEN but uncommitted across two repos**. Softcover runs on the
+**local 0.3.0** foundation (`foundation.local=true` in `local.properties`, includeBuild `../rhaydus-foundation`
+@ branch `release/0.3.0`). The full gate set — `ktlintCheck`, `styleCheck`, `buildHealth`, `checkModuleGraph`,
+Android+JVM compile, and the affected host tests — is **green**. **Nothing is committed** (ask-before-commit rule);
+the only remaining step is committing (below).
+
+### Done this pass
+- **Wiring → local 0.3.0** (via `rhaydus-adopt`): catalog `0.2.0`→`0.3.0`; retired `core-ui` → `core-common`
+  (added `core-platform` / `offline-sync` / `detekt-rules` catalog entries for later batches); 18 build files
+  `libs.rhaydus.coreUi`→`coreCommon`; package rename `nl.rhaydus.ui.common`→`nl.rhaydus.common` (AppDispatchers +
+  date/number formatters); docs re-vendored `docs/rhaydus/0.2.0/`→`docs/rhaydus/0.3.0/`; managed CLAUDE.md block refreshed.
+- **F4/F5/F6 adopted** — see *Implemented & adopted* below. Deleted app-local `:core:domain`
+  `result/RunCatchingCancellable.kt`, `result/RunCatchingLogged.kt`, `logging/AppLog.kt` (+ their 2 tests);
+  re-pointed the imports to `nl.rhaydus.common`; install sites now `AppLog.install(tag = "Softcover", …)`; added
+  `implementation(libs.rhaydus.coreCommon)` to app, desktopApp (replacing its facade-only `:core:domain` dep),
+  orchestration, core/{deadlines,identity,notification,profile}, feature:app_update **androidMain**; removed the
+  now-unused `libs.kermit` from `:core:domain`. `code-style.md` updated (helpers now live in `nl.rhaydus:core-common`).
+- **Batch A (F1/F7) ktlint tail cleared to green** — consuming the 0.3.0 ktlint ruleset activated the F7 rules as
+  hard gates (~2076 pre-existing violations). Resolved via three moves (all done):
+  1. **`inline-mockk-stub` made autocorrecting** (foundation change): `InlineMockkStubRule` was detect-only; added a
+     whitespace-only reflow autocorrect + updated its test to assert formatted output. `ktlintFormat` cleared
+     **1988 → 0**. Also sorted 110 `project-import-order` files (detect-only rule).
+  2. **Two foundation rule carve-outs** (foundation change, + unit tests): `OneTypePerFileRule` now exempts a single
+     interface + its single implementing class (the 19 co-located `interface Foo`+`class FooImpl` datasources);
+     `InlineFullyQualifiedReferenceRule` now exempts generated `nl.rhaydus.*.fragment.*` types (the 13 `BookMapperTest`
+     Apollo refs). Cleared 32 sites with no app churn.
+  3. **56 safe FQ hoists** in Softcover — 44 uniform `testScope: kotlinx.coroutines.test.TestScope` params + 11 misc
+     (test files via two `unit-test-writer` agents; `SoftcoverNotifierImpl.kt` iosMain `@Volatile` directly).
+- **`buildHealth` under `foundation.local`** — dependency-analysis can't resolve includeBuild-substituted artifacts, so
+  it false-flags every `nl.rhaydus:*` dep as unused. Added a `foundationLocal`-guarded `exclude(nl.rhaydus:*)` to the
+  root `dependencyAnalysis { onUnusedDependencies }` (local mode only; published/CI mode resolves them and the gate
+  stays fully effective).
+- **code-reviewer** run over the whole diff: 3 minor findings, all fixed (iosMain import order, `build.gradle.kts`
+  `Properties` import, 2 added `OneTypePerFileRule` edge-case tests) and re-verified green.
+
+### Working-tree state (uncommitted)
+- **Softcover** (`hotfix/3.0.3`): ~300 files. Deletions = the 5 app-local source/test files + the 5 old
+  `docs/rhaydus/0.2.0/*`. Untracked = `docs/rhaydus/0.3.0/`, `.claude/agent-memory/…rhaydus-adopt/`.
+- **Foundation** (`../rhaydus-foundation` @ `release/0.3.0`): 6 M — `InlineMockkStubRule.kt`, `OneTypePerFileRule.kt`,
+  `InlineFullyQualifiedReferenceRule.kt`, and each rule's test.
+
+### Next actions on resume (this is step 5 onward)
+1. **Commit (ask first; two repos, separate commits).** `../rhaydus-foundation` on `release/0.3.0`: the
+   `InlineMockkStubRule` autocorrect + the two carve-outs (+ tests) — these must land/publish so Softcover's local
+   includeBuild and any future published consumption line up. Softcover on `hotfix/3.0.3`: the switch + F4/F5/F6 +
+   the Batch A cleanup.
+2. **Batch-index bookkeeping at commit:** the F7 ktlint rules are now consumed and the app is clean against them; the
+   `inline-mockk-stub` autocorrect + the two carve-outs are new foundation enhancements worth recording. Decide how to
+   reflect F1/F7 (and F22) status once committed (F1's detekt rule + F19 detekt config are still *not* adopted — the
+   app hasn't wired the foundation detekt-rules yet).
+3. Then continue with the next foundation batch (e.g. F19 detekt config, F9/F10 `core-platform`, F2/F3 bottom bar).
+
+---
+
 ## Batch index
 
 | Batch | Theme | Home | Items |
 |---|---|---|---|
-| — | **Implemented & adopted** | — | _(none yet)_ |
-| — | **Implemented, not adopted** | `build-logic` / `core-common` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F23 |
+| — | **Implemented & adopted** | `core-common` | F4, F5, F6 |
+| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F23 |
 | I | Shared build & gate tooling (residual) | `style-check` skill | F22 |
 
 ---
@@ -45,101 +101,46 @@ each implemented item belongs under exactly one of them:
 
 ## Implemented & adopted
 
-_(none yet)_
-
-## Implemented, not adopted
-
-F4, F5, and F6 landed together in `nl.rhaydus:core-common` on the foundation `release/0.3.0` branch (the result
-helpers built on the logging facade). Softcover still ships the app-local copies and has not re-pointed its
-imports.
+F4, F5, and F6 landed together in `nl.rhaydus:core-common` (foundation `release/0.3.0`, package
+`nl.rhaydus.common`) — the result helpers built on the logging facade — and are now **live in Softcover**:
+the app-local `:core:domain` copies are deleted and every import re-points to the foundation symbol.
 
 ### F4 — `runCatchingCancellable` helper that rethrows `CancellationException`
 
 - **Type:** enhancement (shared util)
-- **Home:** `nl.rhaydus:core-common` (the non-visual seam that already ships `AppDispatchers`)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-common` (`common/RunCatchingCancellable.kt`, foundation `release/0.3.0`) as the pure primitive below; Softcover still ships its app-local `:core:domain` `result/RunCatchingCancellable.kt`. Adoption (a separate, later step) deletes the local copy and re-points the one import in `result/RunCatchingLogged.kt` to `nl.rhaydus.common`.
-
-Kotlin's stdlib `runCatching` catches *every* `Throwable`, including `CancellationException`. Inside a
-coroutine that silently swallows structured-concurrency cancellation: a cancelled child runs its
-fallback path instead of unwinding, so the coroutine never exits gracefully and the parent's
-cancellation signal is lost. The standard fix is a cancellation-aware variant that rethrows
-`CancellationException` before treating the throwable as a failure:
-
-```kotlin
-inline fun <T> runCatchingCancellable(block: () -> T): Result<T> =
-    try {
-        Result.success(block())
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        Result.failure(throwable)
-    }
-```
-
-Every app on the foundation that uses `runCatching` in coroutine code needs this, so it belongs in
-`core-common` rather than being re-derived per app. It is also the "cancellation-aware `runCatching`" that
-**F1** names as the acceptable guarded form of a one-shot flow read, and it is the clean replacement for
-the hand-rolled `catch (Throwable) { … }` + manual `CancellationException` rethrow pattern (e.g. the
-`SoftcoverWorker` note in the architecture review).
-
-**App-local implementation (delete on adopt).** Softcover now ships this in
-`:core:domain` `result/RunCatchingCancellable.kt`, kept as a **pure primitive** exactly matching the
-signature above (no logging, no app coupling) so it is a drop-in delete once the upstream version
-lands — at which point `:core:domain` `result/RunCatchingLogged.kt` re-points its single import to the
-foundation. `runCatchingLogged` is the Softcover-only wrapper (`runCatchingCancellable(block).onFailure { AppLog.e(…) }`)
-that binds the app's logger once; it is the enforced use-case-body form (every `*UseCase*.kt` uses it,
-flagged advisory by `scripts/style-check.sh`), and it stays in the app because logging is an app concern, not a
-foundation one. The logger is **not** a parameter on the primitive: `kotlin.Result` already exposes the
-failure-injection point (`.onFailure { }`), so a parameter would only duplicate stdlib, and keeping the
-53 call sites on the app wrapper (rather than calling the primitive directly with an inline lambda)
-means the upstream move touches one import, not every use case.
-
----
+- **Home:** `nl.rhaydus:core-common`
+- **Status:** **Implemented & adopted.** The cancellation-aware `runCatching` (rethrows
+  `CancellationException` before treating a throwable as failure) ships as `nl.rhaydus.common.runCatchingCancellable`.
+  Softcover's app-local `:core:domain` `result/RunCatchingCancellable.kt` (and its test) are deleted; it had no
+  direct call sites of its own (only `runCatchingLogged` composed it), so adoption was purely the delete.
 
 ### F5 — `runCatchingLogged` (log-at-source use-case wrapper)
 
 - **Type:** enhancement (shared util)
-- **Home:** `nl.rhaydus:core-common` (next to the F4 primitive)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-common` (`common/RunCatchingLogged.kt`, foundation `release/0.3.0`), on top of the now-upstream `AppLog` (F6); Softcover still ships its app-local `:core:domain` `result/RunCatchingLogged.kt`. Adoption deletes the local copy and re-points the 53 use-case sites' import to `nl.rhaydus.common` (the wrapper insulates them — a one-line import move, not 53 edits).
-
-`runCatchingLogged` = `runCatchingCancellable` + a single `AppLog.e` on failure (optional `context`
-label). It is the enforced use-case-body form: a failure is logged once, at the boundary, so it is never
-silently dropped even when the caller discards the `Result` or omits the presentation fold. Every app on
-the foundation that has a use-case layer wants this same guarantee, so the wrapper itself is a candidate —
-**but it binds a logger**, which is why it waited on the foundation logging facade (see F6). With `AppLog`
-now upstream, the upstream `runCatchingLogged` binds the foundation logger; Softcover deletes its local
-`result/RunCatchingLogged.kt` and re-points one import on adopt.
-
-**Should anything change in the app when this happens? No — and that's the point.** The 53 `*UseCase*.kt`
-sites call `runCatchingLogged`, so the wrapper insulates them from the relocation exactly as it does for
-the F4 primitive: the move is a one-line import change in the wrapper file, not 53 edits. Keep the logger
-bound *inside* the wrapper (not exposed as a per-call lambda) — `kotlin.Result` already provides the
-failure-injection point via `.onFailure { }`, so a parameter would duplicate stdlib and re-expose every
-call site to the upstream move. The advisory "bare `runCatching` in a `*UseCase*.kt`" recipe (F7) can
-likewise become a real foundation ktlint rule once `runCatchingLogged` is a foundation symbol.
-
----
+- **Home:** `nl.rhaydus:core-common`
+- **Status:** **Implemented & adopted.** `runCatchingLogged` (= `runCatchingCancellable` + a single
+  `AppLog.e` on failure, optional `context`) ships as `nl.rhaydus.common.runCatchingLogged`, binding the
+  now-upstream `AppLog` (F6). Softcover's app-local `:core:domain` `result/RunCatchingLogged.kt` (and its
+  test) are deleted; the 54 `*UseCase*.kt` sites had their import re-pointed to `nl.rhaydus.common`. The
+  bare-`runCatching`-in-a-use-case gate is now the foundation `nl.rhaydus:ktlint-rules` `use-case-run-catching`
+  rule.
 
 ### F6 — Logging facade (`AppLog`) belongs in the foundation
 
 - **Type:** enhancement (shared util)
-- **Home:** `nl.rhaydus:core-common` (alongside `AppDispatchers`, the existing non-visual seam)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-common` (`common/AppLog.kt`, foundation `release/0.3.0`) as a brand-agnostic, Kermit-backed facade: the `tag` and line `prefix` are `install(...)` parameters (no `"Softcover"` constant), output stays debug-gated, and Kermit is an `implementation` dependency so no Kermit type leaks into the public surface. Earns its place per F2's bar (prefix formatter + debug-gated install + cross-target consistency, not a bare re-export) and unblocked F5. Softcover still ships its app-local `:core:domain` `logging/AppLog.kt`.
+- **Home:** `nl.rhaydus:core-common`
+- **Status:** **Implemented & adopted.** The brand-agnostic, Kermit-backed `AppLog` facade ships as
+  `nl.rhaydus.common.AppLog` — the `tag` and line `prefix` are `install(...)` parameters (no `"Softcover"`
+  constant), output stays debug-gated, Kermit is an `implementation` dep so no Kermit type leaks. Softcover's
+  app-local `:core:domain` `logging/AppLog.kt` is deleted; the ~77 `AppLog` call sites re-point to
+  `nl.rhaydus.common`, and the two install sites (`SoftCoverApp`, desktop `Main`) now pass
+  `AppLog.install(tag = "Softcover", debug = …)`. The foundation `BlankLineAfterStatementRule` still keys on
+  `AppLog.e`, now against the upstream symbol. Modules that reached `AppLog`/`runCatchingLogged` transitively
+  via `:core:domain` now declare `nl.rhaydus:core-common` directly (app, desktopApp, orchestration, core/{deadlines,
+  identity, notification, profile}, feature/app_update androidMain); desktopApp's `:core:domain` dep — which
+  existed only for the facade — is replaced by `core-common`.
 
-`AppLog` (`:core:domain` `logging/`) is a Kermit-backed, multiplatform logging facade: `i` / `w` / `e`
-with message-and-throwable variants, a debug-gated `install(...)`, and a prefix formatter — call sites
-stay platform-agnostic (Logcat / os_log / stdout). Every KMP app needs exactly this, and the foundation
-already carries an **implicit dependency** on it: the `nl.rhaydus:ktlint-rules` `BlankLineAfterStatementRule`
-keys on `AppLog.e` (per [`../reference/code-style.md`](../reference/code-style.md) §Error Handling). A
-shared rule that hard-codes an *app-level* symbol name is a smell — hoisting a brand-agnostic logging
-facade into `core-common` (the `"Softcover"` tag becomes config, not a constant) makes that rule's assumption
-real and unblocks F5's `runCatchingLogged`.
-
-Mind F2's caution: keep it earning its place. The value is the cross-target consistency, the custom prefix
-formatter, and the debug-gated install — not a bare Kermit re-export (which a consumer would just as easily
-hand-roll). If on inspection it is only the latter, demote this entry rather than ship a thin wrapper.
-
----
+## Implemented, not adopted
 
 ### F19 — Shared detekt config belongs in the foundation
 

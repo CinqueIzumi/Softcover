@@ -37,7 +37,9 @@ class OnReorderShelfBooksActionTest {
 
     private fun stubDependencies(): LibraryDependencies =
         mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every { mock.reorderShelfBooksUseCase } returns reorderShelfBooksUseCase
+            every {
+                mock.reorderShelfBooksUseCase
+            } returns reorderShelfBooksUseCase
         }
 
     @Nested

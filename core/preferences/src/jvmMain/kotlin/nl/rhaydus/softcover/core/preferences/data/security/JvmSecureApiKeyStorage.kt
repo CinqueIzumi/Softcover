@@ -2,8 +2,8 @@ package nl.rhaydus.softcover.core.preferences.data.security
 
 import eu.anifantakis.lib.ksafe.KSafe
 import kotlinx.coroutines.withContext
-import nl.rhaydus.softcover.core.domain.logging.AppLog
-import nl.rhaydus.ui.common.AppDispatchers
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.common.AppLog
 
 /**
  * Desktop secure storage: the API key is held by [KSafe], which encrypts it and custodies the

@@ -9,10 +9,10 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerTarget
 import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
-import nl.rhaydus.ui.common.AppDispatchers
 
 /**
  * Provider-agnostic access to the desktop app's release feed. Named for its role, not its backing:

@@ -170,8 +170,12 @@ class PersistedLibraryVisibilityCollectorTest {
         fun `preserves availableLists when updating persisted fields`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val mockList = mockk<BookList> {
-                every { id } returns 99
-                every { name } returns "My List"
+                every {
+                    id
+                } returns 99
+                every {
+                    name
+                } returns "My List"
             }
             stateFlow.value = LibraryVisibilitySettingsUiState(availableLists = listOf(mockList))
             val collector = PersistedLibraryVisibilityCollector()

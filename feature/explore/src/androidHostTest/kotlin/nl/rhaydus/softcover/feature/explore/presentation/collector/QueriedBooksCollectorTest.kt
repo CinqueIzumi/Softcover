@@ -63,7 +63,9 @@ class QueriedBooksCollectorTest {
     }
 
     private fun stubBook(id: Int): Book = mockk {
-        every { this@mockk.id } returns id
+        every {
+            this@mockk.id
+        } returns id
     }
 
     @Nested

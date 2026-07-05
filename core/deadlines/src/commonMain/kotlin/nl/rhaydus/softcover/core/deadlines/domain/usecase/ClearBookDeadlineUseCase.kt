@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.deadlines.domain.usecase
 
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 class ClearBookDeadlineUseCase(
     private val repository: BookDeadlineRepository,

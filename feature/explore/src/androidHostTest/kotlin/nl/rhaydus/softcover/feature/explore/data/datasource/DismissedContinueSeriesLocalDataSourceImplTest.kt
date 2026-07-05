@@ -22,8 +22,12 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
     fun setUp() {
         dao = mockk(relaxed = true)
 
-        every { dao.observeDismissedBookIds() } returns flowOf(emptyList())
-        every { dao.observeDismissedSeriesIds() } returns flowOf(emptyList())
+        every {
+            dao.observeDismissedBookIds()
+        } returns flowOf(emptyList())
+        every {
+            dao.observeDismissedSeriesIds()
+        } returns flowOf(emptyList())
 
         dataSource = DismissedContinueSeriesLocalDataSourceImpl(dao = dao)
     }
@@ -35,7 +39,9 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
             // ----- Arrange -----
             val expectedIds = listOf(1, 2, 3)
 
-            every { dao.observeDismissedBookIds() } returns flowOf(expectedIds)
+            every {
+                dao.observeDismissedBookIds()
+            } returns flowOf(expectedIds)
 
             val freshDataSource = DismissedContinueSeriesLocalDataSourceImpl(dao = dao)
 
@@ -54,7 +60,9 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
             // ----- Arrange -----
             val expectedIds = listOf(10, 20)
 
-            every { dao.observeDismissedSeriesIds() } returns flowOf(expectedIds)
+            every {
+                dao.observeDismissedSeriesIds()
+            } returns flowOf(expectedIds)
 
             val freshDataSource = DismissedContinueSeriesLocalDataSourceImpl(dao = dao)
 

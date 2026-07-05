@@ -17,11 +17,12 @@ import io.mockk.verify
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.CreateBookMutation
+import nl.rhaydus.common.AppDispatchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
@@ -52,7 +53,6 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
-import nl.rhaydus.ui.common.AppDispatchers
 
 class BooksRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
@@ -2705,7 +2705,9 @@ class BooksRemoteDataSourceImplTest {
             every {
                 userBook.status
             } returns mockk {
-                every { code } returns 1
+                every {
+                    code
+                } returns 1
             }
 
             coEvery {
@@ -2769,7 +2771,9 @@ class BooksRemoteDataSourceImplTest {
             every {
                 userBook.status
             } returns mockk {
-                every { code } returns 1
+                every {
+                    code
+                } returns 1
             }
 
             coEvery {
@@ -2829,7 +2833,9 @@ class BooksRemoteDataSourceImplTest {
             every {
                 userBook.status
             } returns mockk {
-                every { code } returns 1
+                every {
+                    code
+                } returns 1
             }
 
             coEvery {
@@ -3044,10 +3050,18 @@ class BooksRemoteDataSourceImplTest {
                 )
             } returns queryData
 
-            every { queryData.isbn13 } returns listOf(isbn13Row)
-            every { queryData.isbn10 } returns emptyList()
-            every { isbn13Row.book_id } returns 10
-            every { isbn13Row.id } returns 110
+            every {
+                queryData.isbn13
+            } returns listOf(isbn13Row)
+            every {
+                queryData.isbn10
+            } returns emptyList()
+            every {
+                isbn13Row.book_id
+            } returns 10
+            every {
+                isbn13Row.id
+            } returns 110
 
             // ----- Act -----
             val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
@@ -3073,10 +3087,18 @@ class BooksRemoteDataSourceImplTest {
                 )
             } returns queryData
 
-            every { queryData.isbn13 } returns emptyList()
-            every { queryData.isbn10 } returns listOf(isbn10Row)
-            every { isbn10Row.book_id } returns 20
-            every { isbn10Row.id } returns 220
+            every {
+                queryData.isbn13
+            } returns emptyList()
+            every {
+                queryData.isbn10
+            } returns listOf(isbn10Row)
+            every {
+                isbn10Row.book_id
+            } returns 20
+            every {
+                isbn10Row.id
+            } returns 220
 
             // ----- Act -----
             val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
@@ -3101,8 +3123,12 @@ class BooksRemoteDataSourceImplTest {
                 )
             } returns queryData
 
-            every { queryData.isbn13 } returns emptyList()
-            every { queryData.isbn10 } returns emptyList()
+            every {
+                queryData.isbn13
+            } returns emptyList()
+            every {
+                queryData.isbn10
+            } returns emptyList()
 
             // ----- Act -----
             val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)

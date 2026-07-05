@@ -31,7 +31,7 @@ import platform.UIKit.UIViewController
 import platform.UIKit.UIWindow
 import platform.UIKit.UIWindowScene
 import platform.UIKit.popoverPresentationController
-import nl.rhaydus.ui.common.AppDispatchers
+import nl.rhaydus.common.AppDispatchers
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 internal class IosShareCardCapture internal constructor(

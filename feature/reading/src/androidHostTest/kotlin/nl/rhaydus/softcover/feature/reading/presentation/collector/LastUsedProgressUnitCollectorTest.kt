@@ -36,7 +36,9 @@ class LastUsedProgressUnitCollectorTest {
 
     private fun buildDependencies(unit: ProgressUnit): ReadingScreenDependencies =
         mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
-            every { mock.getLastUsedProgressUnitAsFlowUseCase() } returns flowOf(unit)
+            every {
+                mock.getLastUsedProgressUnitAsFlowUseCase()
+            } returns flowOf(unit)
         }
 
     @Nested

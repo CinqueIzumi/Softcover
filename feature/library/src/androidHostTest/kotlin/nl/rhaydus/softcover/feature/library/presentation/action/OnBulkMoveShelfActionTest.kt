@@ -78,9 +78,15 @@ class OnBulkMoveShelfActionTest {
 
     private fun stubDependencies(): LibraryDependencies =
         mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every { mock.markBookAsReadUseCase } returns markBookAsReadUseCase
-            every { mock.markBookAsReadingUseCase } returns markBookAsReadingUseCase
-            every { mock.markBookAsWantToReadUseCase } returns markBookAsWantToReadUseCase
+            every {
+                mock.markBookAsReadUseCase
+            } returns markBookAsReadUseCase
+            every {
+                mock.markBookAsReadingUseCase
+            } returns markBookAsReadingUseCase
+            every {
+                mock.markBookAsWantToReadUseCase
+            } returns markBookAsWantToReadUseCase
         }
 
     @Nested

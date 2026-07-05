@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.designsystem.presentation.state.ReAuthState
@@ -15,7 +16,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.state.SplashState
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration

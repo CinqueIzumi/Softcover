@@ -66,9 +66,13 @@ class UserTagsRemoteDataSourceImplTest {
                 )
             } returns queryData
 
-            every { queryData.taggings } returns listOf(tagging)
+            every {
+                queryData.taggings
+            } returns listOf(tagging)
 
-            every { tagging.toUserTag() } returns userTag
+            every {
+                tagging.toUserTag()
+            } returns userTag
 
             // ----- Act -----
             val result = dataSource.getUserTags(
@@ -89,7 +93,9 @@ class UserTagsRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<FindTagsByUserAndTaggableQuery>())
             } returns queryData
 
-            every { queryData.taggings } returns emptyList()
+            every {
+                queryData.taggings
+            } returns emptyList()
 
             // ----- Act -----
             val result = dataSource.getUserTags(
@@ -114,11 +120,17 @@ class UserTagsRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<FindTagsByUserAndTaggableQuery>())
             } returns queryData
 
-            every { queryData.taggings } returns listOf(tagging1, tagging2)
+            every {
+                queryData.taggings
+            } returns listOf(tagging1, tagging2)
 
-            every { tagging1.toUserTag() } returns userTag1
+            every {
+                tagging1.toUserTag()
+            } returns userTag1
 
-            every { tagging2.toUserTag() } returns userTag2
+            every {
+                tagging2.toUserTag()
+            } returns userTag2
 
             // ----- Act -----
             val result = dataSource.getUserTags(
@@ -147,11 +159,17 @@ class UserTagsRemoteDataSourceImplTest {
                 apolloClient.safeMutation(mutation = any<SaveTagsMutation>())
             } returns mutationData
 
-            every { mutationData.upsertTags } returns upsertTags
+            every {
+                mutationData.upsertTags
+            } returns upsertTags
 
-            every { upsertTags.tags } returns listOf(mutationTag)
+            every {
+                upsertTags.tags
+            } returns listOf(mutationTag)
 
-            every { mutationTag.toUserTag() } returns expectedUserTag
+            every {
+                mutationTag.toUserTag()
+            } returns expectedUserTag
 
             // ----- Act -----
             val result = dataSource.saveTags(
@@ -172,7 +190,9 @@ class UserTagsRemoteDataSourceImplTest {
                 apolloClient.safeMutation(mutation = any<SaveTagsMutation>())
             } returns mutationData
 
-            every { mutationData.upsertTags } returns null
+            every {
+                mutationData.upsertTags
+            } returns null
 
             // ----- Act -----
             val result = dataSource.saveTags(
@@ -194,9 +214,13 @@ class UserTagsRemoteDataSourceImplTest {
                 apolloClient.safeMutation(mutation = any<SaveTagsMutation>())
             } returns mutationData
 
-            every { mutationData.upsertTags } returns upsertTags
+            every {
+                mutationData.upsertTags
+            } returns upsertTags
 
-            every { upsertTags.tags } returns emptyList()
+            every {
+                upsertTags.tags
+            } returns emptyList()
 
             // ----- Act -----
             val result = dataSource.saveTags(
@@ -220,11 +244,17 @@ class UserTagsRemoteDataSourceImplTest {
                 apolloClient.safeMutation(mutation = any<SaveTagsMutation>())
             } returns mutationData
 
-            every { mutationData.upsertTags } returns upsertTags
+            every {
+                mutationData.upsertTags
+            } returns upsertTags
 
-            every { upsertTags.tags } returns listOf(null, mutationTag)
+            every {
+                upsertTags.tags
+            } returns listOf(null, mutationTag)
 
-            every { mutationTag.toUserTag() } returns expectedUserTag
+            every {
+                mutationTag.toUserTag()
+            } returns expectedUserTag
 
             // ----- Act -----
             val result = dataSource.saveTags(

@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
@@ -40,7 +41,7 @@ class OnUpdatePercentageProgressClickActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): ReadingScreenDependencies {
+    private fun stubDependencies(testScope: TestScope): ReadingScreenDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
 
         return mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
@@ -63,15 +64,25 @@ class OnUpdatePercentageProgressClickActionTest {
     }
 
     private fun stubEditionWithPages(pages: Int?): BookEdition = mockk<BookEdition>().also { edition ->
-        every { edition.pages } returns pages
-        every { edition.isAudiobook } returns false
-        every { edition.audioSeconds } returns null
+        every {
+            edition.pages
+        } returns pages
+        every {
+            edition.isAudiobook
+        } returns false
+        every {
+            edition.audioSeconds
+        } returns null
     }
 
     private fun stubAudiobookEdition(audioSeconds: Int?): BookEdition =
         mockk<BookEdition>().also { edition ->
-            every { edition.isAudiobook } returns true
-            every { edition.audioSeconds } returns audioSeconds
+            every {
+                edition.isAudiobook
+            } returns true
+            every {
+                edition.audioSeconds
+            } returns audioSeconds
         }
 
     private fun stubBookWithCurrentEditionPages(
@@ -81,9 +92,15 @@ class OnUpdatePercentageProgressClickActionTest {
         mockk<Book>().also { book ->
             val edition = stubEditionWithPages(pages = pages)
 
-            every { book.id } returns id
-            every { book.currentEdition } returns edition
-            every { book.defaultEdition } returns null
+            every {
+                book.id
+            } returns id
+            every {
+                book.currentEdition
+            } returns edition
+            every {
+                book.defaultEdition
+            } returns null
         }
 
     private fun stubAudiobook(
@@ -93,9 +110,15 @@ class OnUpdatePercentageProgressClickActionTest {
         mockk<Book>().also { book ->
             val edition = stubAudiobookEdition(audioSeconds = audioSeconds)
 
-            every { book.id } returns id
-            every { book.currentEdition } returns edition
-            every { book.defaultEdition } returns null
+            every {
+                book.id
+            } returns id
+            every {
+                book.currentEdition
+            } returns edition
+            every {
+                book.defaultEdition
+            } returns null
         }
 
     @Nested
@@ -285,9 +308,15 @@ class OnUpdatePercentageProgressClickActionTest {
             val currentEdition = stubEditionWithPages(pages = null)
             val defaultEdition = stubEditionWithPages(pages = 400)
             val book = mockk<Book>().also { b ->
-                every { b.id } returns 99
-                every { b.currentEdition } returns currentEdition
-                every { b.defaultEdition } returns defaultEdition
+                every {
+                    b.id
+                } returns 99
+                every {
+                    b.currentEdition
+                } returns currentEdition
+                every {
+                    b.defaultEdition
+                } returns defaultEdition
             }
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
@@ -315,9 +344,15 @@ class OnUpdatePercentageProgressClickActionTest {
             val currentEdition = stubEditionWithPages(pages = null)
             val defaultEdition = stubEditionWithPages(pages = null)
             val book = mockk<Book>().also { b ->
-                every { b.id } returns 99
-                every { b.currentEdition } returns currentEdition
-                every { b.defaultEdition } returns defaultEdition
+                every {
+                    b.id
+                } returns 99
+                every {
+                    b.currentEdition
+                } returns currentEdition
+                every {
+                    b.defaultEdition
+                } returns defaultEdition
             }
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)

@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromJson
@@ -17,8 +19,6 @@ import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
-import nl.rhaydus.softcover.core.domain.logging.AppLog
-import nl.rhaydus.ui.common.AppDispatchers
 
 internal class PendingUserBookWriteSyncer(
     private val networkAvailability: NetworkAvailabilityProvider,

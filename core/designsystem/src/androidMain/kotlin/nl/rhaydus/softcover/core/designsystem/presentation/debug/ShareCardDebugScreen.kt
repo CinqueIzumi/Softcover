@@ -28,6 +28,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
@@ -44,7 +45,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.share.YearRecapShareC
 import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberGalleryWritePermissionRequester
 import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 object ShareCardDebugScreen : Screen {
     @Composable

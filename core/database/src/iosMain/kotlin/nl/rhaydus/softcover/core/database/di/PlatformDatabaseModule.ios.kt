@@ -6,8 +6,8 @@ import org.koin.dsl.module
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
-import nl.rhaydus.ui.common.AppDispatchers
 
 actual val platformDatabaseModule: Module = module {
     single<SoftcoverDatabase> {

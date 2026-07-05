@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
@@ -41,7 +42,7 @@ class OnDeadlinePickedActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): BookDetailDependencies {
+    private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
@@ -382,18 +383,34 @@ class OnDeadlinePickedActionTest {
             // (not an audiobook). Here we test the null guard: audioSeconds null → total = 0.
             // We stub isAudiobook=true explicitly to isolate the null-safety path.
             val edition = mockk<BookEdition> {
-                every { this@mockk.pages } returns null
-                every { this@mockk.audioSeconds } returns null
-                every { this@mockk.isAudiobook } returns true
+                every {
+                    this@mockk.pages
+                } returns null
+                every {
+                    this@mockk.audioSeconds
+                } returns null
+                every {
+                    this@mockk.isAudiobook
+                } returns true
             }
             val userBookRead = mockk<UserBookRead> {
-                every { this@mockk.currentPage } returns null
-                every { this@mockk.currentSeconds } returns 0
+                every {
+                    this@mockk.currentPage
+                } returns null
+                every {
+                    this@mockk.currentSeconds
+                } returns 0
             }
             val book = mockk<Book> {
-                every { this@mockk.id } returns 9
-                every { this@mockk.currentEdition } returns edition
-                every { this@mockk.userBookRead } returns userBookRead
+                every {
+                    this@mockk.id
+                } returns 9
+                every {
+                    this@mockk.currentEdition
+                } returns edition
+                every {
+                    this@mockk.userBookRead
+                } returns userBookRead
             }
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)
@@ -437,14 +454,26 @@ class OnDeadlinePickedActionTest {
         fun `uses zero for current when userBookRead is null for audiobook edition`() = runTest {
             // ----- Arrange -----
             val edition = mockk<BookEdition> {
-                every { this@mockk.pages } returns null
-                every { this@mockk.audioSeconds } returns 18000
-                every { this@mockk.isAudiobook } returns true
+                every {
+                    this@mockk.pages
+                } returns null
+                every {
+                    this@mockk.audioSeconds
+                } returns 18000
+                every {
+                    this@mockk.isAudiobook
+                } returns true
             }
             val book = mockk<Book> {
-                every { this@mockk.id } returns 10
-                every { this@mockk.currentEdition } returns edition
-                every { this@mockk.userBookRead } returns null
+                every {
+                    this@mockk.id
+                } returns 10
+                every {
+                    this@mockk.currentEdition
+                } returns edition
+                every {
+                    this@mockk.userBookRead
+                } returns null
             }
             stateFlow.value = BookDetailUiState(book = book)
             dependencies = stubDependencies(this)

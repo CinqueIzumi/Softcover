@@ -631,7 +631,9 @@ class BooksLocalDataSourceImplTest {
             // ----- Arrange -----
             val ids = listOf(10, 20, 30)
 
-            coEvery { dao.getBookIdByUserBookId(userBookId = any()) } returns null
+            coEvery {
+                dao.getBookIdByUserBookId(userBookId = any())
+            } returns null
 
             // ----- Act -----
             dataSource.removeUserBooksById(ids = ids)
@@ -738,7 +740,9 @@ class BooksLocalDataSourceImplTest {
         @Test
         fun `delegates to DAO deleteAllLocalData`() = runTest {
             // ----- Arrange -----
-            coEvery { dao.getAllEditionImageRefs() } returns emptyList()
+            coEvery {
+                dao.getAllEditionImageRefs()
+            } returns emptyList()
 
             // ----- Act -----
             dataSource.removeAllBooks()

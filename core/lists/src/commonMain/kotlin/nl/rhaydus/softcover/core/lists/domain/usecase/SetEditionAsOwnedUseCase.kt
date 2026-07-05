@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.lists.domain.usecase
 
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 
 class SetEditionAsOwnedUseCase(

@@ -11,10 +11,10 @@ import io.mockk.unmockkAll
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 import nl.rhaydus.softcover.core.preferences.data.security.SecureApiKeyStorage
-import nl.rhaydus.ui.common.AppDispatchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -49,8 +49,12 @@ class ApiKeyLocalDataSourceImplTest {
 
     private fun stubLegacyKey(apiKey: String) {
         val entity = AppSettingsEntity(apiKey = apiKey)
-        every { dataStore.data } returns flowOf(entity)
-        coEvery { dataStore.updateData(any()) } coAnswers {
+        every {
+            dataStore.data
+        } returns flowOf(entity)
+        coEvery {
+            dataStore.updateData(any())
+        } coAnswers {
             val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
             updater(entity)
         }
@@ -70,7 +74,9 @@ class ApiKeyLocalDataSourceImplTest {
             // ----- Arrange -----
             val legacyKey = "legacy-plaintext-api-key"
             stubLegacyKey(apiKey = legacyKey)
-            coEvery { secureStorage.read() } returns legacyKey
+            coEvery {
+                secureStorage.read()
+            } returns legacyKey
 
             // ----- Act -----
             buildDataSource()
@@ -86,13 +92,19 @@ class ApiKeyLocalDataSourceImplTest {
             val originalEntity = AppSettingsEntity(apiKey = legacyKey)
             var capturedResult: AppSettingsEntity? = null
 
-            every { dataStore.data } returns flowOf(originalEntity)
-            coEvery { dataStore.updateData(any()) } coAnswers {
+            every {
+                dataStore.data
+            } returns flowOf(originalEntity)
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
                 capturedResult = updater(originalEntity)
                 capturedResult!!
             }
-            coEvery { secureStorage.read() } returns legacyKey
+            coEvery {
+                secureStorage.read()
+            } returns legacyKey
 
             // ----- Act -----
             buildDataSource()
@@ -106,7 +118,9 @@ class ApiKeyLocalDataSourceImplTest {
             // ----- Arrange -----
             val legacyKey = "legacy-plaintext-api-key"
             stubLegacyKey(apiKey = legacyKey)
-            coEvery { secureStorage.read() } returns legacyKey
+            coEvery {
+                secureStorage.read()
+            } returns legacyKey
 
             // ----- Act -----
             val dataSource = buildDataSource()
@@ -122,7 +136,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `skips migration — does not call secureStorage write when legacy key is blank`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
 
             // ----- Act -----
             buildDataSource()
@@ -135,7 +151,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `skips migration — does not call updateData when legacy key is blank`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
 
             // ----- Act -----
             buildDataSource()
@@ -148,7 +166,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `flow initial value comes from secureStorage read when a key is stored`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns "stored-key"
+            coEvery {
+                secureStorage.read()
+            } returns "stored-key"
 
             // ----- Act -----
             val dataSource = buildDataSource()
@@ -164,7 +184,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `flow initial value is null when secureStorage read returns null`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
 
             // ----- Act -----
             val dataSource = buildDataSource()
@@ -183,7 +205,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `non-blank key — emits the new key on the flow`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
             val dataSource = buildDataSource()
             val newKey = "my-new-api-key"
 
@@ -201,7 +225,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `non-blank key — calls secureStorage write with the key`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
             val dataSource = buildDataSource()
             val newKey = "my-new-api-key"
 
@@ -216,7 +242,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `blank key — emits null on the flow`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
             val dataSource = buildDataSource()
             dataSource.updateApiKey(key = "initial-key")
 
@@ -234,7 +262,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `blank key — calls secureStorage delete`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
             val dataSource = buildDataSource()
 
             // ----- Act -----
@@ -248,7 +278,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `whitespace-only key — emits null on the flow`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
             val dataSource = buildDataSource()
             dataSource.updateApiKey(key = "initial-key")
 
@@ -266,7 +298,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `whitespace-only key — calls secureStorage delete`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
             val dataSource = buildDataSource()
 
             // ----- Act -----
@@ -283,7 +317,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `emits null on the flow after clear`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
             val dataSource = buildDataSource()
             dataSource.updateApiKey(key = "active-key")
 
@@ -301,7 +337,9 @@ class ApiKeyLocalDataSourceImplTest {
         fun `calls secureStorage delete after clear`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
-            coEvery { secureStorage.read() } returns null
+            coEvery {
+                secureStorage.read()
+            } returns null
             val dataSource = buildDataSource()
 
             // ----- Act -----
