@@ -38,14 +38,16 @@ import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.share.CapturableShareCard
+import nl.rhaydus.designsystem.share.SaveOutcome
+import nl.rhaydus.designsystem.share.ShareCardCapture
+import nl.rhaydus.designsystem.share.ShareOutcome
+import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.share.BookShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.CapturableShareCard
-import nl.rhaydus.softcover.core.designsystem.presentation.share.SaveOutcome
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCardCapture
+import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCard
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareOutcome
-import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberShareCardCapture
+import nl.rhaydus.softcover.core.designsystem.presentation.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -71,7 +73,7 @@ internal fun ShareBookBottomSheet(
         )
     }
 
-    val capture = rememberShareCardCapture()
+    val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
     val coroutineScope = rememberCoroutineScope()
 
     var isSharing by remember { mutableStateOf(false) }
@@ -160,6 +162,8 @@ internal fun ShareBookBottomSheet(
                         coroutineScope.launch {
                             when (val outcome = capture.share(displayName = book.title)) {
                                 is ShareOutcome.Shared -> Unit
+
+                                is ShareOutcome.Cancelled -> Unit
 
                                 is ShareOutcome.Failure -> {
                                     AppLog.e("Failed to share book card: ${outcome.reason}")
@@ -263,7 +267,6 @@ private fun ShareCardPreview(
     ) {
         CapturableShareCard(
             capture = capture,
-            content = content,
             modifier = Modifier.layout { measurable, _ ->
                 val placeable = measurable.measure(constraints = Constraints())
 
@@ -289,7 +292,9 @@ private fun ShareCardPreview(
                     }
                 }
             },
-        )
+        ) {
+            ShareCard(content = content)
+        }
     }
 }
 

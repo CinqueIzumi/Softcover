@@ -33,17 +33,19 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.share.CapturableShareCard
+import nl.rhaydus.designsystem.share.SaveOutcome
+import nl.rhaydus.designsystem.share.ShareCardCapture
+import nl.rhaydus.designsystem.share.rememberGalleryWritePermissionRequester
+import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.share.BookShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.CapturableShareCard
 import nl.rhaydus.softcover.core.designsystem.presentation.share.QuoteShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.SaveOutcome
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCardCapture
+import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCard
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.StatShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.YearRecapShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberGalleryWritePermissionRequester
-import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberShareCardCapture
+import nl.rhaydus.softcover.core.designsystem.presentation.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 object ShareCardDebugScreen : Screen {
@@ -61,10 +63,10 @@ object ShareCardDebugScreen : Screen {
 
         val scope = rememberCoroutineScope()
 
-        val bookCapture = rememberShareCardCapture()
-        val statCapture = rememberShareCardCapture()
-        val quoteCapture = rememberShareCardCapture()
-        val recapCapture = rememberShareCardCapture()
+        val bookCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
+        val statCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
+        val quoteCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
+        val recapCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
 
         var pendingSave by remember { mutableStateOf<(suspend () -> Unit)?>(null) }
 
@@ -210,10 +212,9 @@ object ShareCardDebugScreen : Screen {
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center,
             ) {
-                CapturableShareCard(
-                    capture = capture,
-                    content = content,
-                )
+                CapturableShareCard(capture = capture) {
+                    ShareCard(content = content)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

@@ -41,6 +41,9 @@ kotlin {
         }
 
         androidMain.dependencies {
+            // Provides the Material Components `Theme.Material3.*` XML themes the Android manifest/resources
+            // reference. Used only from XML (not Kotlin), so dependency-analysis can't see it — excluded from
+            // the buildHealth unused-check in the root build.
             implementation(libs.material.components)
         }
     }

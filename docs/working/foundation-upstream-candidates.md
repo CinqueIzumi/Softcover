@@ -79,8 +79,8 @@ The first foundation-adoption pass is **complete, green, and committed** across 
 
 | Batch | Theme | Home | Items |
 |---|---|---|---|
-| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` | F4, F5, F6, F12, F13, F14, F15, F16, F17 |
-| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F11, F18, F19, F20, F21, F23 |
+| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` | F4, F5, F6, F11, F12, F13, F14, F15, F16, F17 |
+| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F18, F19, F20, F21, F23 |
 | I | Shared build & gate tooling (residual) | `style-check` skill | F22 |
 
 ---
@@ -214,6 +214,24 @@ F12 and F15 landed together in `nl.rhaydus:designsystem-core` (Batch E — deskt
   Softcover's app-local fork triple `core/designsystem/.../modifier/PlatformModifierClick{,.jvm,.mobile}.kt` is
   deleted; the one call site (`LibraryShelf.kt`) is a pure import swap. `design-system.md` §Desktop selection updated.
 
+### F11 — `ShareCardCapture` (capture a composable to an image, save/share)
+
+- **Type:** enhancement (shared util / platform seam)
+- **Home:** `nl.rhaydus:designsystem-core` (`share/` package)
+- **Status:** **Implemented & adopted.** The capture/save/share seam ships in `nl.rhaydus.designsystem.share`
+  (`ShareCardCapture` + `rememberShareCardCapture(config)`, `CapturableShareCard` with a generic `@Composable`
+  slot, `ShareCardCaptureConfig`, `SaveOutcome` / `ShareOutcome` — now with a `Cancelled` case — and
+  `GalleryWritePermissionRequester`, with android/jvm/ios actuals). Softcover **deleted its 11 app-local seam
+  files** (the interface + `CapturableShareCard` + outcomes + requester + the android/jvm/ios actuals) and kept
+  its **card design** app-side (`ShareCard` — now `public` — `ShareContent` and the `*ShareContent` subtypes,
+  `ShareCardDimensions`). Adoption: a new app-side `softcoverShareCardCaptureConfig` (album `Softcover`, prefix
+  `softcover`, authority `nl.rhaydus.softcover.shareprovider`) is passed to `rememberShareCardCapture`; the two
+  call sites (`ShareBookBottomSheet.kt`, `ShareCardDebugScreen.kt`) re-point the seam imports, wrap the app's
+  `ShareCard` in `CapturableShareCard`'s slot, and `ShareBookBottomSheet` adds a no-op `ShareOutcome.Cancelled`
+  branch. The (from Kotlin) now-unused `com.google.android.material:material` — still needed for the Android
+  `Theme.Material3.*` XML themes — was added to the root buildHealth false-positive exclusions. `design-system.md`
+  §Share card updated.
+
 ## Implemented, not adopted
 
 ### F19 — Shared detekt config belongs in the foundation
@@ -308,40 +326,6 @@ ships its app-local forks and has not re-pointed its imports.
   `TwoPaneScaffold`, `BottomBarScaffold`, `NavPulse`). Softcover still ships its app-local
   `BottomBarPulseManager` + `libraryPulseKey` and the shell; adoption re-points `pulseLibrary()` onto a
   `NavPulse` instance keyed by the app's `LibraryTab` and passes the app bar into `BottomBarScaffold`.
-
----
-
-F11 landed on the foundation `release/0.3.0` branch — the image-export batch (Batch G), a standalone
-capture-to-image platform seam. Softcover still ships its app-local fork and has not re-pointed its imports.
-
-### F11 — `ShareCardCapture` (capture a composable to an image, save/share)
-
-- **Type:** enhancement (shared util / platform seam)
-- **Home:** `nl.rhaydus:designsystem-core` (new `share/` package)
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:designsystem-core` under a new `share/`
-  package (commonMain `ShareCardCapture` interface + `rememberShareCardCapture(config)` expect + `recordAndDraw`;
-  `CapturableShareCard`; `ShareCardCaptureConfig`; `SaveOutcome` / `ShareOutcome`; `GalleryWritePermissionRequester`;
-  android/jvm/ios actual impl classes). **Placed in `designsystem-core`, not `designsystem-image`** — the image
-  module is pure Coil async-loading (single commonMain set, no platform code); a capture/save/share seam there
-  would force Coil onto capture-only consumers and break its opt-in intent, whereas `designsystem-core` is
-  Coil-free, every consumer already depends on it, and it hosts the 3-actual seam precedent (`ClipboardReader`).
-  Generalized on the way in (it was **not** a clean lift): (1) **self-contained** — the Koin-injected
-  `AppDispatchers` and the desktop `AppLog` were dropped for kotlinx `Dispatchers.IO` / `.Main` (on K/N `IO` is
-  an extension property, reached via `import kotlinx.coroutines.IO`), and every save/share path returns a
-  `SaveOutcome.Failure` / `ShareOutcome.Failure` on error rather than throwing, so failures surface only through
-  those return types; (2) the brand bits (gallery album `"Softcover"`, filename prefix `"softcover-"`, the
-  Android `FileProvider` authority) became a `ShareCardCaptureConfig`; (3) `CapturableShareCard` took a generic
-  `@Composable` slot instead of the app-coupled `ShareContent` + `ShareCard`; (4) the desktop cache dir moved from
-  `desktopAppDataDirectory()` to `java.io.tmpdir`. designsystem-core's androidMain gained `androidx.core` +
-  `activity-compose` (catalog: `androidx-core-ktx` at 1.17.0). Review-hardened over the app original: the
-  iOS share now honours the share-sheet `completed` flag via a new `ShareOutcome.Cancelled` case (a user
-  dismissal is no longer reported as `Shared`) and dismisses a still-presented sheet on the main queue if the
-  coroutine is cancelled mid-share. Softcover still ships its app-local
-  `core/designsystem/.../presentation/share/*` (the seam + the app card design `ShareContent`/`ShareCard`/`ShareCardDimensions`).
-  Adoption re-points the seam import at the two call sites (`ShareBookBottomSheet.kt`, `ShareCardDebugScreen.kt`),
-  passes the app's `ShareCardCaptureConfig`, wraps the app's `ShareCard` in `CapturableShareCard`'s slot, adds a
-  `ShareOutcome.Cancelled` branch to the `share()` `when` in `ShareBookBottomSheet.kt` (treat as a no-op), and
-  deletes the forked seam (the card design stays app-side).
 
 ---
 

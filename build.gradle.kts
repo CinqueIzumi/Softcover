@@ -242,6 +242,7 @@ dependencyAnalysis {
                     "androidx.work:work-runtime-ktx", // CoroutineWorker
                     "androidx.camera:camera-camera2", // CameraX runtime backend, loaded via ServiceLoader (no compile ref)
                     "com.google.mlkit:barcode-scanning", // MLKit barcode model + API used by the scanner; DA mis-resolves to a transitive
+                    "com.google.android.material:material", // Material Components Theme.Material3.* XML themes (resource-only, no Kotlin ref)
                 )
 
                 // With foundation.local=true the nl.rhaydus:* coordinates are substituted by an includeBuild
