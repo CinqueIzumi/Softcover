@@ -22,7 +22,7 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
-- Foundation adoption onto **local 0.3.0** — **12 F-items landed & committed** (core-common, the designsystem-core components/seams, toad convention, ktlint gates), all green. Remaining batches (F2/F3 bottom bar, F9/F10→F8 core-platform+offline-sync, F19/F1 detekt, F18/F20/F21 build-logic, F22) each need a call/verification (iOS build, app run, perf/infra) — paused for those. Details: [foundation-upstream-candidates.md](foundation-upstream-candidates.md) → "✅ Adoption progress — LANDED".
+- Foundation adoption onto **local 0.3.0** — **13 F-items landed & committed** (core-common, the designsystem-core components/seams, toad convention, ktlint gates, F3 NavPulse), all green. F2 + F3's `BottomBarScaffold` half are a **deliberate skip** (shell already works). Remaining (F9/F10→F8 core-platform+offline-sync, F19/F1 detekt, F18/F20/F21 build-logic, F22) each need a call/verification (iOS build, perf/infra). Details: [foundation-upstream-candidates.md](foundation-upstream-candidates.md) → "✅ Adoption progress — LANDED".
 
 ---
 

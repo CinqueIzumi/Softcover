@@ -19,10 +19,12 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.Haptics
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
+import nl.rhaydus.designsystem.nav.NavPulse
+import nl.rhaydus.softcover.core.designsystem.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
+import org.koin.compose.koinInject
 
 /**
  * Drives the "mark as read" celebration shared by both platform layouts: it owns the slide-out
@@ -35,6 +37,7 @@ internal class MarkAsReadController(
     private val slideDistancePx: Float,
     private val playMotion: Boolean,
     private val haptics: Haptics,
+    private val navPulse: NavPulse,
     private val runAction: (ReadingAction) -> Unit,
 ) {
     var celebrationKey by mutableIntStateOf(0)
@@ -54,7 +57,7 @@ internal class MarkAsReadController(
 
         haptics.commit()
         celebrationKey++
-        BottomBarPulseManager.pulseLibrary()
+        navPulse.pulse(LibraryNavPulseKey)
 
         if (playMotion) {
             slidingBookId = book.id
@@ -103,15 +106,17 @@ internal fun rememberMarkAsReadController(
     val playMotion = playDecorativeMotion()
     val density = LocalDensity.current
     val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
+    val navPulse = koinInject<NavPulse>()
 
     val currentBooks by rememberUpdatedState(books)
     val currentRunAction by rememberUpdatedState(runAction)
 
-    val controller = remember(slideDistancePx, playMotion, haptics) {
+    val controller = remember(slideDistancePx, playMotion, haptics, navPulse) {
         MarkAsReadController(
             slideDistancePx = slideDistancePx,
             playMotion = playMotion,
             haptics = haptics,
+            navPulse = navPulse,
             runAction = { currentRunAction(it) },
         )
     }

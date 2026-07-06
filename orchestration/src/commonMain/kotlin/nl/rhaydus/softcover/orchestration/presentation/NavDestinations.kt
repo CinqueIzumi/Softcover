@@ -1,33 +1,25 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
-import kotlinx.coroutines.flow.drop
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
+import nl.rhaydus.designsystem.nav.NavPulse
+import nl.rhaydus.designsystem.nav.rememberPulseScale
+import nl.rhaydus.softcover.core.designsystem.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsTab
-
-private const val PULSE_PEAK_MS = 180
-private const val PULSE_SETTLE_MS = 240
-private const val PULSE_PEAK_SCALE = 1.22f
+import org.koin.compose.koinInject
 
 /**
  * The four root destinations in display order. The single source of the tab set consumed by every
@@ -70,7 +62,11 @@ internal expect val wideGridTabsUseDetailPane: Boolean
 internal fun rememberNavItems(): List<NavItemUi> {
     val tabNavigator = LocalTabNavigator.current
     val showSettingsBadge = LocalAppUpdateState.current != AppUpdateState.Idle
-    val libraryPulseScale = rememberLibraryPulseScale()
+    val navPulse = koinInject<NavPulse>()
+    val libraryPulseScale = rememberPulseScale(
+        pulse = navPulse,
+        key = LibraryNavPulseKey,
+    )
 
     return appNavTabs.map { tab ->
         NavItemUi(
@@ -110,28 +106,3 @@ internal fun NavItemIcon(
     }
 }
 
-@Composable
-private fun rememberLibraryPulseScale(): Float {
-    val playMotion = playDecorativeMotion()
-    val scale = remember { Animatable(initialValue = 1f) }
-
-    LaunchedEffect(playMotion) {
-        if (playMotion.not()) return@LaunchedEffect
-
-        snapshotFlow { BottomBarPulseManager.libraryPulseKey.intValue }
-            .drop(count = 1)
-            .collect {
-                scale.snapTo(targetValue = 1f)
-                scale.animateTo(
-                    targetValue = PULSE_PEAK_SCALE,
-                    animationSpec = tween(durationMillis = PULSE_PEAK_MS),
-                )
-                scale.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(durationMillis = PULSE_SETTLE_MS),
-                )
-            }
-    }
-
-    return scale.value
-}
