@@ -75,35 +75,13 @@ section() {
 # composable blank lines, and boolean `!` → `.not()` — are auto-fixed/gated by `./gradlew
 # ktlintFormat` / `ktlintCheck` and are intentionally NOT duplicated here. This script covers only
 # the rules ktlint does not.
-
-# Rule: no fully-qualified references inline — import and use the short name.
-# (Imprecise: KDoc/@see tags and string literals may match — review each.)
-check_fq_refs() {
-    local out
-    out=$(grep -HnE '(androidx|java|kotlin|kotlinx|nl\.rhaydus)\.[a-z][a-zA-Z._]+\.[A-Z]' "${targets[@]}" 2>/dev/null \
-        | grep -vE ':[0-9]+:[[:space:]]*(import |package |\*|//|/\*|@)')
-    if [ -n "$out" ]; then
-        section "[advisory] Inline fully-qualified reference — add an import, use the short name (§Imports)"
-        printf '%s\n' "$out"
-        advisory_hits=$((advisory_hits + 1))
-    fi
-}
-
-# Rule: one top-level type per file (data-source interface+Impl colocation is the sanctioned exception).
-check_one_type_per_file() {
-    local f count out=""
-    for f in "${targets[@]}"; do
-        count=$(grep -cE '^(class |data class |enum class |sealed class |sealed interface |interface |object )' "$f" 2>/dev/null)
-        if [ "${count:-0}" -gt 1 ]; then
-            out+="$f: $count top-level types"$'\n'
-        fi
-    done
-    if [ -n "$out" ]; then
-        section "[advisory] More than one top-level type in a file — one type per file, named after it (§Files & Organization)"
-        printf '%s' "$out"
-        advisory_hits=$((advisory_hits + 1))
-    fi
-}
+#
+# The five greppable recipes this script used to carry — inline fully-qualified references,
+# one-type-per-file, project-import ordering, inline mockk stubs, and bare runCatching in a use case —
+# were promoted to blocking rules in the foundation `nl.rhaydus:ktlint-rules` ruleset (F7) and are now
+# gated by `ktlintCheck`, so they were retired from here. Only the unguarded-terminal-flow-read recipe
+# remains: its type-resolved counterpart lives in `nl.rhaydus:detekt-rules` (F1), which Softcover has
+# not wired yet, so this advisory recipe stays until that detekt rule is adopted.
 
 # Rule: a terminal flow read must never be able to crash the app.
 # `.first()` / `.single()` throw on an empty flow, and any terminal re-throws an upstream error
@@ -128,78 +106,9 @@ check_unguarded_flow_terminal() {
     fi
 }
 
-# Rule: mockk `coEvery { ... }` / `every { ... }` stubs are never one-liners — open the block onto its
-# own line (and leave a blank line after each stub's closing `}`). Test source sets only.
-# (Imprecise: only the same-line open-and-close form is greppable; the blank-line-after-`}` part is
-# review-only. Nested braces inside the stub block are not matched — review those by hand.)
-check_inline_mockk_stubs() {
-    local f out=""
-    for f in "${targets[@]}"; do
-        case "$f" in
-            */src/*[Tt]est*/*) ;; # test source sets only
-            *) continue ;;
-        esac
-        local hits
-        hits=$(grep -HnE '(coEvery|every)[[:space:]]*\{[^{}]*\}[[:space:]]*(returns|returnsMany|answers|answersMany|coAnswers|throws|throwsMany|just)' "$f" 2>/dev/null)
-        [ -n "$hits" ] && out+="$hits"$'\n'
-    done
-    if [ -n "$out" ]; then
-        section "[advisory] Inline mockk stub — open the coEvery/every block onto its own line, blank line after its closing } (foundation code-style §Whitespace)"
-        printf '%s' "$out"
-        advisory_hits=$((advisory_hits + 1))
-    fi
-}
-
-# Rule: a use case wraps its body in `runCatchingLogged { … }`, never bare `runCatching { … }`. Bare
-# `runCatching` swallows `CancellationException` (breaking structured concurrency) and logs nothing, so
-# a failure dropped by the caller vanishes silently. `runCatchingLogged` is cancellation-safe and logs
-# once at the source; the pure `runCatchingCancellable` primitive is also allowed. Production use-case
-# source only (selected by the *UseCase*.kt filename, which catches feature and orchestration alike).
-# (Imprecise: comments mentioning `runCatching` also match — review each.)
-check_bare_runcatching_in_usecases() {
-    local f out=""
-    for f in "${targets[@]}"; do
-        case "$f" in
-            */src/*[Tt]est*/*) continue ;; # production source sets only
-            *UseCase*.kt) ;;
-            *) continue ;;
-        esac
-        local hits
-        hits=$(grep -HnE '\brunCatching\b' "$f" 2>/dev/null)
-        [ -n "$hits" ] && out+="$hits"$'\n'
-    done
-    if [ -n "$out" ]; then
-        section "[advisory] Bare runCatching in a use case — use runCatchingLogged (cancellation-safe + logged at the source) instead (§Error Handling)"
-        printf '%s' "$out"
-        advisory_hits=$((advisory_hits + 1))
-    fi
-}
-
-# Rule: project imports (nl.rhaydus.*) are alphabetical within their group.
-check_import_order() {
-    local f block out=""
-    for f in "${targets[@]}"; do
-        block=$(grep -E '^import nl\.rhaydus' "$f" 2>/dev/null)
-        [ -z "$block" ] && continue
-        if ! printf '%s\n' "$block" | sort -c >/dev/null 2>&1; then
-            out+="$f: nl.rhaydus.* import block is not alphabetically sorted"$'\n'
-        fi
-    done
-    if [ -n "$out" ]; then
-        section "[advisory] Project import block out of alphabetical order (§Imports)"
-        printf '%s' "$out"
-        advisory_hits=$((advisory_hits + 1))
-    fi
-}
-
 # ----- run --------------------------------------------------------------------------------
 
-check_fq_refs
-check_one_type_per_file
-check_import_order
 check_unguarded_flow_terminal
-check_inline_mockk_stubs
-check_bare_runcatching_in_usecases
 
 if [ "$error_hits" -gt 0 ]; then
     printf '\nstyle-check: %d error-tier rule(s), %d advisory rule(s) with findings.\n' "$error_hits" "$advisory_hits"

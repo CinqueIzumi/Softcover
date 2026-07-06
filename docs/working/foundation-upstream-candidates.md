@@ -79,8 +79,8 @@ The first foundation-adoption pass is **complete, green, and committed** across 
 
 | Batch | Theme | Home | Items |
 |---|---|---|---|
-| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` | F4, F5, F6, F11, F12, F13, F14, F15, F16, F17 |
-| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F7, F8, F9, F10, F18, F19, F20, F21, F23 |
+| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` / `ktlint-rules` | F4, F5, F6, F7, F11, F12, F13, F14, F15, F16, F17, F23 |
+| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `detekt-rules` | F1, F2, F3, F8, F9, F10, F18, F19, F20, F21 |
 | I | Shared build & gate tooling (residual) | `style-check` skill | F22 |
 
 ---
@@ -411,27 +411,27 @@ open. Softcover still ships its inline gates and has not re-pointed anything.
 
 - **Type:** gate (lint rule)
 - **Home:** `nl.rhaydus:ktlint-rules`
-- **Status:** **Implemented, not adopted.** Landed as the pure-AST ktlint rule `rhaydus:no-raw-logging` in
-  `nl.rhaydus:ktlint-rules` (not detekt — the foundation's `detektCheck` is syntactic, so a type-resolved
-  `ForbiddenMethodCall` would be inert; a ktlint rule gates on the foundation's own `ktlintCheck` immediately).
-  It flags unqualified `println(...)`, `System.out`/`System.err` `println`, and `Log.*` / `android.util.Log.*`
-  calls, steering to the `AppLog` facade (F6). Zero existing violations (pure ratchet); the ktlint CLI's own
-  `Main.kt` carries a documented `@file:Suppress` since its stdout is its report channel. Unit-tested
-  (`NoRawLoggingRuleTest`, 11 cases). Softcover's rule is review-only in `code-style.md`; adoption drops the
-  advisory wording once it consumes the new ktlint ruleset.
+- **Status:** **Implemented & adopted.** The pure-AST ktlint rule `rhaydus:no-raw-logging` (flags unqualified
+  `println(...)`, `System.out`/`System.err` `println`, and `Log.*` / `android.util.Log.*`, steering to the
+  `AppLog` facade — F6) ships in the `nl.rhaydus:ktlint-rules` 0.3.0 ruleset Softcover now consumes (adopted in
+  Batch A). Zero violations (pure ratchet), so no code changed; it now gates on `ktlintCheck`. The rule was
+  review-only in Softcover's `code-style.md` (no `style-check.sh` recipe existed), so nothing further to retire.
 
 ## Batch A (implemented, not adopted) — Style gates → blocking rules
 
 *Home: `nl.rhaydus:ktlint-rules` + `nl.rhaydus:detekt-rules`. Covers **F1, F7** - both landed on the
 foundation `release/0.3.0` branch (see their statuses below); kept here for the rationale. Five recipes
 became blocking ktlint rules; the flow-terminal one (F1) needed type resolution and became a detekt rule.
-Not yet adopted: Softcover still runs its local `scripts/style-check.sh` until it consumes the new release.*
+**F7 (sub-move 1) is adopted** — Softcover consumes the 0.3.0 ktlint ruleset, is clean against all five, and
+retired those recipes from `scripts/style-check.sh`. **F1 is not adopted** — the foundation `detekt-rules` is
+not wired, so the one `check_unguarded_flow_terminal` recipe stays; retiring `style-check.sh` entirely (F22)
+waits on it.*
 
 ### F1 — Crash-safety gate for terminal flow reads should be a blocking ktlint rule
 
 - **Type:** gate (lint rule)
 - **Home:** `nl.rhaydus:detekt-rules`
-- **Status:** **Implemented, not adopted.** Shipped as the type-resolved detekt rule `UnguardedFlowTerminalRead` in `nl.rhaydus:detekt-rules` (foundation `release/0.3.0`). ktlint cannot tell `Flow.first()` from `Collection.first()` without type resolution, so the blocking rule lives in detekt (resolving the receiver fqName); the guarded `firstOrNull()`/`singleOrNull()` forms and the collection operators are never flagged. Softcover still ships the advisory `check_unguarded_flow_terminal` recipe; dropped on adopt.
+- **Status:** **Implemented, not adopted.** Shipped as the type-resolved detekt rule `UnguardedFlowTerminalRead` in `nl.rhaydus:detekt-rules` (foundation `release/0.3.0`). ktlint cannot tell `Flow.first()` from `Collection.first()` without type resolution, so the blocking rule lives in detekt (resolving the receiver fqName); the guarded `firstOrNull()`/`singleOrNull()` forms and the collection operators are never flagged. **Not adopted** (Softcover has not wired the foundation `detekt-rules`), so it still ships the advisory `check_unguarded_flow_terminal` recipe — now the **sole remaining recipe** in `scripts/style-check.sh` after the five ktlint-promoted recipes were retired with F7; dropped on adopt.
 
 A bare `.first()` / `.single()` on a cold flow is a crash risk: it throws `NoSuchElementException` on
 an empty flow, and any terminal operator re-throws an upstream error (DataStore / network / Apollo /
@@ -454,7 +454,14 @@ is the defect.
 
 - **Type:** gate (lint rules) + tooling ownership
 - **Home:** `nl.rhaydus:ktlint-rules` (+ `nl.rhaydus:detekt-rules` for the type-resolved one)
-- **Status:** **Implemented, not adopted (sub-move 1).** Five recipes are now blocking ktlint rules in `nl.rhaydus:ktlint-rules` — `one-type-per-file`, `no-fully-qualified-reference`, `project-import-order`, `inline-mockk-stub`, and `use-case-run-catching` (which names the upstream `runCatchingLogged`); the sixth (flow-terminal) is F1's detekt rule. **Sub-move 2** (own the `style-check.sh` harness + on-touch hook in the `style-check` skill) is tracked as **F22** and lands at adopt, when Softcover retires the now-redundant recipes.
+- **Status:** **Implemented & adopted (sub-move 1); sub-move 2 partial.** The five recipes are blocking ktlint
+  rules in `nl.rhaydus:ktlint-rules` — `one-type-per-file`, `no-fully-qualified-reference`, `project-import-order`,
+  `inline-mockk-stub`, and `use-case-run-catching` (names the upstream `runCatchingLogged`); the sixth
+  (flow-terminal) is F1's detekt rule. Softcover consumes the 0.3.0 ruleset and is clean against all five (Batch A),
+  so the five now-redundant recipes were **retired from `scripts/style-check.sh`** and the `CLAUDE.md` Code Style
+  section updated to point at the ktlint gate. **Sub-move 2** (own the residual `style-check.sh` harness + on-touch hook in the `style-check` skill) is
+  tracked as **F22** and can't fully land until F1's detekt rule is adopted — the script still carries the one
+  `check_unguarded_flow_terminal` recipe until then, so it can't retire entirely yet.
 
 `scripts/style-check.sh` is an app-local bash port of the greppable code-style rules: inline
 fully-qualified references, one-type-per-file, project-import ordering, **inline mockk stubs**, unguarded
