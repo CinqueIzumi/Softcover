@@ -21,15 +21,27 @@ share a target module and a kind of work, so it can be designed and landed in on
 are stable identifiers (referenced from commits and other docs) and are **never reused or renumbered**, so
 they are not sequential within a batch. Batches are ordered to respect the dependencies noted on each.
 
-## ✅ First adoption pass — LANDED & committed (2026-07-06)
+## ✅ Adoption progress — LANDED & committed (updated 2026-07-06)
 
-The first foundation-adoption pass is **complete, green, and committed** across both repos. Softcover runs on the
-**local 0.3.0** foundation (`foundation.local=true` in `local.properties` — gitignored, so it stays local — includeBuild
-`../rhaydus-foundation` @ branch `release/0.3.0`). The full gate set — `ktlintCheck`, `styleCheck`, `buildHealth`,
-`checkModuleGraph`, Android+JVM compile, and the affected host tests — is **green**.
+Softcover runs on the **local 0.3.0** foundation (`foundation.local=true` in `local.properties` — gitignored, so it
+stays local — includeBuild `../rhaydus-foundation` @ branch `release/0.3.0`). Everything below is **committed and
+green** (`ktlintCheck`, `styleCheck`, `buildHealth`, `checkModuleGraph`, Android+JVM compile, affected host tests).
 
-- **Softcover** `hotfix/3.0.3` → `39df3489` — the 0.3.0 switch + F4/F5/F6 + Batch A ktlint cleanup.
-- **Foundation** `../rhaydus-foundation` `release/0.3.0` → `40b23bf` — the mockk-stub autocorrect + two carve-outs (+ tests).
+**Adopted so far (12 F-items):** F4/F5/F6 (core-common), F13/F14, F16/F17, F12/F15, F11 (designsystem-core), F17
+(toad convention), F7/F23 (ktlint gates). Commits on Softcover `hotfix/3.0.3`: `39df3489` (switch + F4/F5/F6 + Batch A)
+→ `9b29f108` (F13/F14) → `8cb8c976` (F16/F17) → `5530c5e5` (F12/F15) → `cbfecab4` (F11) → `9a79d874` (F7/F23), plus doc
+records. Foundation `release/0.3.0` `40b23bf` — the mockk-stub autocorrect + two ktlint carve-outs (+ tests).
+
+**Remaining (not adopted) — each needs a call/verification I can't do solo:**
+- **F2/F3** (bottom bar, designsystem-core) — touches the nav shell; compiles but needs a visual run to confirm.
+- **F9/F10 → F8** (core-platform SecureStorage/connectivity, then offline-sync) — iOS actuals the build hook won't
+  compile here, and F10↔F8 are entangled; best when iOS can be built/tested.
+- **F19/F1** (detekt) — requires switching the app's detekt from source-only to **type-resolved** (perf change) and
+  may surface a violation tail. F1's `check_unguarded_flow_terminal` recipe stays in `style-check.sh` until then.
+- **F18/F20/F21** (build-logic convention plugins) — likely need the foundation `build-logic` **published as Gradle
+  plugins** to apply in the app build; awkward under `foundation.local`.
+- **F22** — residual: move the `style-check.sh` harness + on-touch hook into the `style-check` skill (the script can't
+  retire entirely until F1/detekt lands).
 
 ⚠️ Because `foundation.local` stays out of git, the committed Softcover state resolves catalog `0.3.0` from the
 **published** `nl.rhaydus:*` artifacts — so **foundation 0.3.0 must be published** before CI / a fresh clone (without
