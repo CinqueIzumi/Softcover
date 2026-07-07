@@ -21,22 +21,20 @@ share a target module and a kind of work, so it can be designed and landed in on
 are stable identifiers (referenced from commits and other docs) and are **never reused or renumbered**, so
 they are not sequential within a batch. Batches are ordered to respect the dependencies noted on each.
 
-## ✅ Adoption progress — LANDED & committed (updated 2026-07-06)
+## ✅ Adoption progress — LANDED & committed (updated 2026-07-10)
 
 Softcover runs on the **local 0.3.0** foundation (`foundation.local=true` in `local.properties` — gitignored, so it
 stays local — includeBuild `../rhaydus-foundation` @ branch `release/0.3.0`). Everything below is **committed and
 green** (`ktlintCheck`, `styleCheck`, `buildHealth`, `checkModuleGraph`, Android+JVM compile, affected host tests).
 
-**Adopted so far (13 F-items):** F4/F5/F6 (core-common), F13/F14, F16/F17, F12/F15, F11 (designsystem-core), F17
-(toad convention), F7/F23 (ktlint gates), F3 NavPulse half (designsystem-core). Commits on Softcover `hotfix/3.0.3`:
-`39df3489` (switch + F4/F5/F6 + Batch A) → `9b29f108` (F13/F14) → `8cb8c976` (F16/F17) → `5530c5e5` (F12/F15) →
-`cbfecab4` (F11) → `9a79d874` (F7/F23) → F3 NavPulse (next), plus doc records. Foundation `release/0.3.0` `40b23bf` —
-the mockk-stub autocorrect + two ktlint carve-outs (+ tests).
+**Adopted so far (15 F-items):** F4/F5/F6 (core-common), F13/F14, F16/F17, F12/F15, F11 (designsystem-core), F17
+(toad convention), F7/F23 (ktlint gates), F3 (NavPulse + `BottomBarScaffold`), F2 (designsystem-core). Commits on
+Softcover `hotfix/3.0.3`: `39df3489` (switch + F4/F5/F6 + Batch A) → `9b29f108` (F13/F14) → `8cb8c976` (F16/F17) →
+`5530c5e5` (F12/F15) → `cbfecab4` (F11) → `9a79d874` (F7/F23) → `5e7467d5` (F3 NavPulse) → F2/F3 `BottomBarScaffold`,
+plus doc records. Foundation `release/0.3.0` `40b23bf` — the mockk-stub autocorrect + two ktlint carve-outs (+ tests) —
+and the `BottomBarPlacement` generalization landed for F2/F3.
 
 **Remaining (not adopted) — each needs a call/verification I can't do solo:**
-- **F2 + F3's `BottomBarScaffold` half** (bottom bar) — **deliberate skip** (2026-07-06): the app's `BottomBarScreen`
-  already provides `LocalBottomBarPadding`, so the foundation host is redundant; adopting it would be a risky
-  refactor of working nav chrome for marginal benefit. F3's `NavPulse` half **is** adopted (above).
 - **F9/F10 → F8** (core-platform SecureStorage/connectivity, then offline-sync) — iOS actuals the build hook won't
   compile here, and F10↔F8 are entangled; best when iOS can be built/tested.
 - **F19/F1** (detekt) — requires switching the app's detekt from source-only to **type-resolved** (perf change) and
@@ -86,7 +84,7 @@ the mockk-stub autocorrect + two ktlint carve-outs (+ tests).
    `inline-mockk-stub` autocorrect + the two carve-outs are new foundation enhancements. F1's detekt rule + F19 detekt
    config remain *not adopted* (the app hasn't wired the foundation `detekt-rules` yet). Reconcile F1/F7/F22 status on
    the next pass rather than piecemeal here.
-3. Continue with the next foundation batch (e.g. F19 detekt config, F9/F10 `core-platform`, F2/F3 bottom bar).
+3. Continue with the next foundation batch (e.g. F19 detekt config, F9/F10 `core-platform`).
 
 ---
 
@@ -94,8 +92,8 @@ the mockk-stub autocorrect + two ktlint carve-outs (+ tests).
 
 | Batch | Theme | Home | Items |
 |---|---|---|---|
-| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` / `ktlint-rules` | F3 (NavPulse half), F4, F5, F6, F7, F11, F12, F13, F14, F15, F16, F17, F23 |
-| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `designsystem-core` / `detekt-rules` | F1, F8, F9, F10, F18, F19, F20, F21 · **F2 = deliberate skip** (redundant; F3's `BottomBarScaffold` half likewise) |
+| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` / `ktlint-rules` | F2, F3, F4, F5, F6, F7, F11, F12, F13, F14, F15, F16, F17, F23 |
+| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `detekt-rules` | F1, F8, F9, F10, F18, F19, F20, F21 |
 | I | Shared build & gate tooling (residual) | `style-check` skill | F22 |
 
 ---
@@ -247,19 +245,66 @@ F12 and F15 landed together in `nl.rhaydus:designsystem-core` (Batch E — deskt
   `Theme.Material3.*` XML themes — was added to the root buildHealth false-positive exclusions. `design-system.md`
   §Share card updated.
 
-### F3 — Make bottom bars reusable — `NavPulse` half adopted (`BottomBarScaffold` skipped)
+### F3 — Make bottom bars reusable (`NavPulse` + `BottomBarScaffold`)
 
 - **Type:** enhancement (shared component)
 - **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Implemented & adopted (the `NavPulse` half).** The cross-tab pulse now uses the foundation
+- **Status:** **Implemented & adopted (both halves).**
+
+**The `BottomBarScaffold` half** (adopted 2026-07-10, reversing the 2026-07-06 skip — see F2). To host Softcover's
+*two* bar styles the foundation host was generalized: `BottomBarScaffold` gained a
+`placement: BottomBarPlacement` parameter (new `DOCKED` / `OVERLAY` enum, defaulted to `OVERLAY` so existing callers
+are untouched). `OVERLAY` is the old body verbatim (measure the laid-out bar, provide `footprint + barSpacing`);
+`DOCKED` hosts the bar in a Material `Scaffold` and provides `barSpacing` alone, since `innerPadding` already
+reserves the bar. Both routes share the pure `bottomBarContentPadding(barFootprint, barSpacing)`. This makes the
+`LocalBottomBarPadding` contract **uniform** — it is always "the trailing padding scrolling content reserves" — which
+is what let Softcover delete its read-side fork (F2). Softcover's `CompactNavShell` is now one `BottomBarScaffold`
+whose `placement` is mapped from the persisted `BottomBarStyle`, so flipping the preference re-places the bar without
+relocating the `movableContentOf` tab body; `WideNavShell` hosts its flush `SessionPeekBar` in the same scaffold
+(`OVERLAY`, `barSpacing = 0.dp`), retiring the last hand-rolled `onSizeChanged` measurement and a vestigial inner
+`Scaffold`. The `bottomPadding: Dp` parameter threaded through the shell is gone. `design-system.md` §3.1 + §4
+updated; the foundation `design-system-foundations.md` §5.2 rewritten around `placement`.
+
+**The `NavPulse` half.** The cross-tab pulse now uses the foundation
   `NavPulse` (an instance-owned, keyed signal) + `rememberPulseScale`. Softcover deleted its global
   `BottomBarPulseManager` + `libraryPulseKey`; a single `NavPulse` Koin singleton lives in `designSystemModule`,
   keyed by a shared `data object LibraryNavPulseKey` (in `core:designsystem`, so `feature:reading`'s trigger and
   `:orchestration`'s bottom bar name the same signal without either reaching the other's `LibraryTab`).
   `MarkAsReadController` injects the pulse and calls `navPulse.pulse(LibraryNavPulseKey)`; `NavDestinations` reads
   `rememberPulseScale(navPulse, LibraryNavPulseKey)` and the hand-rolled pulse animation is gone. `design-system.md`
-  §Mark-as-read choreography updated. **The `BottomBarScaffold` half of F3 is not adopted** — see F2: Softcover's
-  shell already provides `LocalBottomBarPadding`, so the reusable host is redundant here.
+  §Mark-as-read choreography updated.
+
+### F2 — `rememberBottomBarPadding()` does not work due to the way it's implemented
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core` (layout)
+- **Status:** **Implemented & adopted** (adopted 2026-07-10; the 2026-07-06 "deliberate skip" is reversed — the
+  reasoning was that Softcover's shell already worked around the missing write side, which is an argument for
+  keeping a fork, not a reason to have one).
+
+  **Upstream root cause.** `LocalBottomBarPadding` (default `0.dp`) was read by `rememberBottomBarPadding()` but
+  **never provided anywhere in the foundation** — no `CompositionLocalProvider(LocalBottomBarPadding provides …)`
+  existed — so the helper always resolved to `0.dp` and scrolling content was occluded.
+  `design-system-foundations.md` §5.2 delegated the write side to "the bottom-bar host screen," which the foundation
+  never shipped. Fixed by shipping that host as `BottomBarScaffold` (F3) and simplifying
+  `rememberBottomBarPadding()` to a direct `LocalBottomBarPadding.current` read (the old `remember(current){current}`
+  wrapper was a no-op). The host is double-inset-safe: it measures the laid-out bar (`onSizeChanged` outside
+  `windowInsetsPadding`) so the nav-bar inset is counted once, not recomputed and re-added.
+
+  **Adoption also fixed a live Softcover bug.** The app-local fork
+  (`core/designsystem/.../util/BottomBarPadding.kt`) branched the *read* side on `BottomBarStyle`
+  (`FLOATING` → the local, `DOCKED` → a hardcoded `16.dp`). But that preference only governs the **compact** bar. On
+  a medium/expanded window — rail or sidebar, no bottom bar at all — a `DOCKED`-preference user got `16.dp`,
+  discarding the `sessionPeekHeight + navBarsInset` that `WideNavShell` had correctly measured and provided, so with
+  a live reading session on desktop/tablet the last row of `LibraryShelf` (a `commonMain` surface) scrolled under
+  the session peek bar. Deleting the fork and re-pointing the four read sites (reading / settings / explore
+  `.mobile` layouts + `LibraryShelf`) at the foundation `rememberBottomBarPadding()` fixes it at a stroke: the write
+  side alone decides, per shell, what the padding means.
+
+  **Surface audit (F2's wider ask):** scanned the designsystem-core public surface for the same
+  "published-but-unusable / near-zero-value" class — the padding pair was *the* finding; no demotions or removals
+  (`BottomNavigationSpacer`, `pointerHandCursor`, `conditional`, and the one-line `model/*` enums all earn their
+  place).
 
 ## Implemented, not adopted
 
@@ -310,33 +355,6 @@ imports.
   app-local interface (`:core:domain` `connectivity/`) + data layer (`:core:connectivity`). Adoption
   re-points `NetworkAvailability.install(...)` and the DI onto the foundation types and deletes the app-local
   copies. (Unblocks Batch H's drain-on-network-return trigger.)
-
----
-
-### F2 — `rememberBottomBarPadding()` does not work due to the way it's implemented
-
-- **Type:** bug
-- **Home:** `nl.rhaydus:designsystem-core` (layout)
-- **Status:** **Implemented; deliberately NOT adopted in Softcover** (decided 2026-07-06). Root cause confirmed: `LocalBottomBarPadding` (default `0.dp`) was
-  read by `rememberBottomBarPadding()` but **never provided anywhere in the foundation** — no
-  `CompositionLocalProvider(LocalBottomBarPadding provides …)` existed — so the helper always resolved to
-  `0.dp` and scrolling content was occluded. `design-system-foundations.md` §5.2 delegated the write side to
-  "the bottom-bar host screen," which the foundation never shipped. Fixed by shipping that host as
-  `BottomBarScaffold` (see F3) and simplifying `rememberBottomBarPadding()` to a direct
-  `LocalBottomBarPadding.current` read (the old `remember(current){current}` wrapper was a no-op). The host is
-  double-inset-safe: it measures the laid-out bar (`onSizeChanged` outside `windowInsetsPadding`) so the
-  nav-bar inset is counted once, not recomputed and re-added the way Softcover's `BottomBarScreen` did.
-  **Surface audit (F2's wider ask):** scanned the designsystem-core public surface for the same
-  "published-but-unusable / near-zero-value" class — the padding pair was *the* finding; no demotions or
-  removals (`BottomNavigationSpacer`, `pointerHandCursor`, `conditional`, and the one-line `model/*` enums all
-  earn their place). **Softcover does not need this fix:** its `BottomBarScreen` shell long ago worked around the
-  missing write side by measuring the bar itself (`onSizeChanged`) and providing `LocalBottomBarPadding` across
-  its docked / floating / wide layouts, so the app's bottom padding already works. Adopting `BottomBarScaffold`
-  would be a **risky refactor of that working central nav chrome for only marginal (consistency) benefit**, so it
-  is a deliberate skip. The app keeps its shell provision + the `rememberBottomBarPadding()` fork
-  (`core/designsystem/.../util/BottomBarPadding.kt`, DOCKED→`16.dp` / FLOATING→local). Revisit only if the shell
-  is rewritten for another reason. (The foundation `BottomBarScaffold` fix remains valuable for apps that lack a
-  working provision.)
 
 ---
 

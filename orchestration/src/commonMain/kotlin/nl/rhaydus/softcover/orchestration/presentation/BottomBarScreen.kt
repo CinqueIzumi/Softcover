@@ -8,37 +8,25 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -46,7 +34,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import nl.rhaydus.designsystem.layout.LocalBottomBarPadding
+import nl.rhaydus.designsystem.layout.BottomBarPlacement
+import nl.rhaydus.designsystem.layout.BottomBarScaffold
 import nl.rhaydus.designsystem.layout.TwoPaneScaffold
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
@@ -133,13 +122,7 @@ internal object BottomBarScreen : Screen {
 
             CompositionLocalProvider(LocalBookDetailPresenter provides bookDetailPresenter) {
                 val tabBody = remember {
-                    movableContentOf { bottomPadding: Dp ->
-                        CompositionLocalProvider(
-                            LocalBottomBarPadding provides bottomPadding,
-                        ) {
-                            TabRootHost()
-                        }
-                    }
+                    movableContentOf { TabRootHost() }
                 }
 
                 when (widthClass) {
@@ -152,7 +135,7 @@ internal object BottomBarScreen : Screen {
 
                     WindowWidthClass.EXPANDED -> WideNavShell(
                         leading = { EditorialSidebar() },
-                        body = { bottomPadding ->
+                        body = {
                             // TwoPaneScaffold is rendered for EVERY expanded tab so the shared
                             // `tabBody` movable content stays in one stable slot (the list pane) —
                             // switching tabs never relocates it (a relocation tears down and rebuilds
@@ -172,7 +155,7 @@ internal object BottomBarScreen : Screen {
 
                                 TwoPaneScaffold(
                                     listPaneWidth = listPaneWidth,
-                                    list = { tabBody(bottomPadding) },
+                                    list = { tabBody() },
                                     detail = if (tabNavigator.current.isDetailCapable()) {
                                         {
                                             val destination = paneBook.value
@@ -202,68 +185,61 @@ internal object BottomBarScreen : Screen {
 
 /**
  * The phone-shaped shell (`< 600dp`): today's bottom bar — docked (attached) or floating (overlay)
- * per the user's [BottomBarStyle] preference — with the session peek bar riding above it.
+ * per the user's [BottomBarStyle] preference — with the session peek bar riding above it. The
+ * foundation `BottomBarScaffold` hosts both styles, so flipping the preference swaps a [placement]
+ * rather than relocating the body between two hosts, and the measure-and-provide of the padding
+ * contract is not re-derived here.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun CompactNavShell(body: @Composable (bottomPadding: Dp) -> Unit) {
-    var bottomBarHeight by remember { mutableStateOf(0.dp) }
-    val localDensity = LocalDensity.current
-
-    val bottomBarPadding = bottomBarHeight + 16.dp + WindowInsets.navigationBars
-        .asPaddingValues()
-        .calculateBottomPadding()
-
+private fun CompactNavShell(body: @Composable () -> Unit) {
     val themeConfig = LocalThemeConfiguration.current
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0),
-        bottomBar = {
-            if (themeConfig.bottomBarStyle == BottomBarStyle.DOCKED) {
-                Column {
-                    SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
+    BottomBarScaffold(
+        placement = themeConfig.bottomBarStyle.toPlacement(),
+        bottomBar = { CompactBottomChrome(style = themeConfig.bottomBarStyle) },
+        content = body,
+    )
+}
 
-                    DockedBottomNavigationBar()
-                }
-            }
-        },
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding),
-        ) {
-            body(bottomBarPadding)
+/**
+ * The compact bottom chrome: the session peek bar riding above the navigation bar, in whichever of the
+ * two bar styles the user prefers. Rendered into the `BottomBarScaffold` bar slot, so it neither measures
+ * itself nor applies the navigation-bar inset — the host does both.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun CompactBottomChrome(style: BottomBarStyle) {
+    when (style) {
+        BottomBarStyle.DOCKED -> Column {
+            SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
 
-            if (themeConfig.bottomBarStyle == BottomBarStyle.FLOATING) {
-                val shieldInteractionSource = remember { MutableInteractionSource() }
+            DockedBottomNavigationBar()
+        }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .onSizeChanged {
-                            bottomBarHeight = with(localDensity) { it.height.toDp() }
-                        }
-                        .clickable(
-                            interactionSource = shieldInteractionSource,
-                            indication = null,
-                            onClick = {},
-                        ),
-                ) {
-                    SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
+        BottomBarStyle.FLOATING -> {
+            // The floating bar hovers over live content, so it swallows taps that would otherwise fall
+            // through the gaps around the pill onto whatever scrolls beneath it.
+            val shieldInteractionSource = remember { MutableInteractionSource() }
 
-                    BottomFloatingBar(
-                        modifier = Modifier.padding(
-                            horizontal = 8.dp,
-                            vertical = 6.dp,
-                        ),
-                    )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable(
+                    interactionSource = shieldInteractionSource,
+                    indication = null,
+                    onClick = {},
+                ),
+            ) {
+                SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+                BottomFloatingBar(
+                    modifier = Modifier.padding(
+                        horizontal = 8.dp,
+                        vertical = 6.dp,
+                    ),
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -271,51 +247,40 @@ private fun CompactNavShell(body: @Composable (bottomPadding: Dp) -> Unit) {
 
 /**
  * The wide shell (`>= 600dp`): a leading navigation [leading] (rail at medium, sidebar at expanded)
- * beside the tab content. There is no bottom bar, so the session peek bar is bottom-anchored over
- * the content and the body reserves only the navigation-bar inset (plus the peek bar when a session
- * is live) at its foot.
+ * beside the tab content. There is no bottom bar, but the flush session peek bar is bottom-anchored
+ * chrome overlaying the content, so it takes the same host with no breathing gap: content reserves the
+ * peek bar's footprint when a session is live, and the bare navigation-bar inset when it is not.
+ *
+ * The peek bar spans the full width of [body] — on an expanded window that is *both* panes of the
+ * two-pane layout — so the host provides `LocalBottomBarPadding` to the whole body and the detail pane
+ * clears the bar just as the list pane does.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WideNavShell(
     leading: @Composable () -> Unit,
-    body: @Composable (bottomPadding: Dp) -> Unit,
+    body: @Composable () -> Unit,
 ) {
-    var sessionPeekHeight by remember { mutableStateOf(0.dp) }
-    val localDensity = LocalDensity.current
-
-    val navBarsInset = WindowInsets.navigationBars
-        .asPaddingValues()
-        .calculateBottomPadding()
-
     Row(modifier = Modifier.fillMaxSize()) {
         leading()
 
-        Scaffold(contentWindowInsets = WindowInsets(0)) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding),
-            ) {
-                body(sessionPeekHeight + navBarsInset)
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .onSizeChanged {
-                            sessionPeekHeight = with(localDensity) { it.height.toDp() }
-                        },
-                ) {
-                    // The wide shell has no bottom bar for a floating pill to ride over, so the
-                    // session bar docks as a flush, edge-to-edge strip across the content pane.
-                    SessionPeekBar(flush = true)
-                }
-            }
-        }
+        BottomBarScaffold(
+            // The wide shell has no bottom bar for a floating pill to ride over, so the session bar
+            // docks as a flush, edge-to-edge strip across the content pane.
+            bottomBar = {
+                SessionPeekBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    flush = true,
+                )
+            },
+            barSpacing = 0.dp,
+            content = body,
+        )
     }
+}
+
+private fun BottomBarStyle.toPlacement(): BottomBarPlacement = when (this) {
+    BottomBarStyle.DOCKED -> BottomBarPlacement.DOCKED
+    BottomBarStyle.FLOATING -> BottomBarPlacement.OVERLAY
 }
 
 @Composable

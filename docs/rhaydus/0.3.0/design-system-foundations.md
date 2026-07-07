@@ -126,26 +126,33 @@ is a layout bug. The concrete values are app-tunable but follow this doubling rh
 ### 5.2 Page scaffold and bottom-bar padding
 
 A page is, top to bottom: an optional top app bar, scrolling content with a consistent horizontal gutter,
-and bottom navigation when on a tab root. **The bottom of scrolling content reserves padding equal to the
-bottom bar's footprint** so the last item is never occluded.
+and bottom navigation when on a tab root. **The bottom of scrolling content reserves whatever trailing
+padding the bottom bar demands** so the last item is never occluded.
 
 This is wired through a CompositionLocal, not passed by hand down every screen:
 
-- A `LocalBottomBarPadding` CompositionLocal (default `0.dp`) carries the current bottom-bar footprint.
-- `BottomBarScaffold(bottomBar, barSpacing, content)` is the shipped host: the app hands it the brand-styled
-  bar as a slot, and it measures the bar's laid-out footprint, adds `barSpacing`, and **provides** that total
-  through `CompositionLocalProvider(LocalBottomBarPadding provides ...)`. No per-app host boilerplate.
-- **Measure once - never re-add the inset.** The host measures the *laid-out* bar (its `onSizeChanged` sits
-  outside the bar's `windowInsetsPadding`), so the `navigationBars` inset the bar reserves is already baked
-  into the measured height and counted exactly once. Recomputing and re-adding `WindowInsets.navigationBars`
-  on top of a measured height double-counts it.
-- **Floating vs docked.** `BottomBarScaffold` (and the `LocalBottomBarPadding` it writes) is for an
-  **overlay / floating** bar that draws *over* content - the only case a padding channel is needed, since an
-  overlay bar cannot be reserved by layout. A **docked** bar instead lives in a Material `Scaffold { bottomBar }`
-  and its space comes from `innerPadding`; there `LocalBottomBarPadding` correctly stays `0.dp`.
+- A `LocalBottomBarPadding` CompositionLocal (default `0.dp`) carries that trailing padding.
+- `BottomBarScaffold(bottomBar, placement, barSpacing, content)` is the shipped host: the app hands it the
+  brand-styled bar as a slot, and it **provides** the padding through
+  `CompositionLocalProvider(LocalBottomBarPadding provides ...)`. No per-app host boilerplate.
+- **`placement` decides the layout and the arithmetic.** With `BottomBarPlacement.OVERLAY` the bar draws
+  *over* content, so layout reserves nothing and the host measures the bar's laid-out footprint and provides
+  `footprint + barSpacing`. With `BottomBarPlacement.DOCKED` the bar is hosted in a Material `Scaffold`,
+  whose `innerPadding` already reserves it, so the host provides `barSpacing` alone — the breathing gap.
+- **One contract, so screens never branch.** Whatever the placement, the value that reaches content answers
+  exactly one question: *how much trailing padding do I reserve?* An app with a runtime docked/floating
+  preference flips `placement` and nothing else moves — no screen, and no read-side helper, second-guesses
+  the host. A read side that branches on the app's own bar-style enum will get the *other* shells wrong.
+- **Measure once - never re-add the inset.** In the overlay placement the host measures the *laid-out* bar
+  (its `onSizeChanged` sits outside the bar's `windowInsetsPadding`), so the `navigationBars` inset the bar
+  reserves is already baked into the measured height and counted exactly once. Recomputing and re-adding
+  `WindowInsets.navigationBars` on top of a measured height double-counts it.
 - Screens read it through a `rememberBottomBarPadding()` helper and apply it as trailing content padding.
 - A companion `BottomNavigationSpacer()` helper emits a `Spacer` sized to the bottom navigation-bar inset
   for screens that need the raw inset.
+
+Any bottom-anchored chrome that overlays content is a bottom bar for this purpose — a persistent player or
+session strip on a layout that has no tab bar is hosted the same way (`OVERLAY`, `barSpacing = 0.dp`).
 
 The **rendered bar and the tab host stay app-side** (they name concrete features and brand chrome; section
 8): the foundation ships the reusable pieces the shell leans on - `BottomBarScaffold`, the window-size
