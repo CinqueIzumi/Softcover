@@ -313,7 +313,7 @@ internal class BooksLocalDataSourceImpl(
         pathsToDelete.forEach { editionImageStorage.delete(path = it) }
     }
 
-    private suspend fun deleteStaleCovers(stalePaths: List<String>) {
+    private fun deleteStaleCovers(stalePaths: List<String>) {
         stalePaths.forEach { editionImageStorage.delete(path = it) }
     }
 

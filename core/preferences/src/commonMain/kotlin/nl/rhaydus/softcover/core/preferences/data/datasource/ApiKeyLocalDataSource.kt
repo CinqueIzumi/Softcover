@@ -5,13 +5,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.security.SecureApiKeyStorage
@@ -76,7 +77,18 @@ internal class ApiKeyLocalDataSourceImpl(
     }
 
     private suspend fun migrateLegacyKeyIfNeeded() {
-        val legacyKey = appSettingsDataStore.store.data.first().apiKey
+        // Runs from the unsupervised `init` coroutine, so nothing downstream would catch a throw. A
+        // terminal read re-throws an upstream failure even in its `firstOrNull()` form (DataStore raises
+        // `CorruptionException` on a damaged file), so the read is wrapped: an absent OR unreadable
+        // snapshot alike means there is nothing to migrate.
+        val legacyKey = runCatchingCancellable {
+            appSettingsDataStore.store.data.firstOrNull()?.apiKey
+        }.onFailure { error ->
+            AppLog.e(
+                error,
+                "Failed to read legacy settings while migrating the API key",
+            )
+        }.getOrNull().orEmpty()
 
         if (legacyKey.isBlank()) return
 

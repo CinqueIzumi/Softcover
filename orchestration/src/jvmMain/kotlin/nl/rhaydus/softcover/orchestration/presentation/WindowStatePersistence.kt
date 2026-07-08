@@ -14,9 +14,10 @@ import androidx.compose.ui.window.rememberWindowState
 import kotlin.math.roundToInt
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import org.koin.compose.koinInject
+import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.WindowPlacement as DomainWindowPlacement
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDesktopWindowStateAsFlowUseCase
@@ -39,7 +40,15 @@ fun rememberPersistedWindowState(): WindowState {
     val getDesktopWindowState = koinInject<GetDesktopWindowStateAsFlowUseCase>()
     val setDesktopWindowState = koinInject<SetDesktopWindowStateUseCase>()
 
-    val seed = remember { runBlocking { getDesktopWindowState().first() } }
+    // Fall back to the default geometry rather than crashing the window open on an unreadable store.
+    // The `runCatching` is load-bearing: a terminal read re-throws an upstream failure even as
+    // `firstOrNull()`, and a throw inside `remember { runBlocking { … } }` escapes the composition.
+    val seed = remember {
+        runBlocking {
+            runCatchingCancellable { getDesktopWindowState().firstOrNull() }.getOrNull()
+                ?: DesktopWindowState()
+        }
+    }
 
     val windowState = rememberWindowState(
         placement = seed.placement.toCompose(),

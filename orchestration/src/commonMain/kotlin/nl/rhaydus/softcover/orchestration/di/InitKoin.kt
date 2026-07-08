@@ -1,11 +1,12 @@
 package nl.rhaydus.softcover.orchestration.di
 
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.core.Koin
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
+import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
@@ -42,6 +43,6 @@ fun startAppServices(koin: Koin) {
     koin.get<ListWriteDrainer>().start(appScope)
 
     appScope.launch {
-        runCatching { koin.get<GetUserIdAsFlowUseCase>().invoke().first() }
+        runCatchingCancellable { koin.get<GetUserIdAsFlowUseCase>().invoke().firstOrNull() }
     }
 }

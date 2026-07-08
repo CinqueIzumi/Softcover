@@ -68,7 +68,7 @@ internal actual fun BookDetailScreenLayout(
         if (shouldBeExpanded.not()) {
             ""
         } else {
-            state.book?.title ?: ""
+            state.book?.title.orEmpty()
         }
     }
 

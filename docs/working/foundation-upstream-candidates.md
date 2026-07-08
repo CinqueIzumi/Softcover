@@ -27,22 +27,23 @@ Softcover runs on the **local 0.3.0** foundation (`foundation.local=true` in `lo
 stays local — includeBuild `../rhaydus-foundation` @ branch `release/0.3.0`). Everything below is **committed and
 green** (`ktlintCheck`, `styleCheck`, `buildHealth`, `checkModuleGraph`, Android+JVM compile, affected host tests).
 
-**Adopted so far (15 F-items):** F4/F5/F6 (core-common), F13/F14, F16/F17, F12/F15, F11 (designsystem-core), F17
-(toad convention), F7/F23 (ktlint gates), F3 (NavPulse + `BottomBarScaffold`), F2 (designsystem-core). Commits on
-Softcover `hotfix/3.0.3`: `39df3489` (switch + F4/F5/F6 + Batch A) → `9b29f108` (F13/F14) → `8cb8c976` (F16/F17) →
-`5530c5e5` (F12/F15) → `cbfecab4` (F11) → `9a79d874` (F7/F23) → `5e7467d5` (F3 NavPulse) → F2/F3 `BottomBarScaffold`,
-plus doc records. Foundation `release/0.3.0` `40b23bf` — the mockk-stub autocorrect + two ktlint carve-outs (+ tests) —
-and the `BottomBarPlacement` generalization landed for F2/F3.
+**Adopted so far (18 F-items):** F4/F5/F6 (core-common), F13/F14, F16/F17, F12/F15, F11 (designsystem-core), F17
+(toad convention), F7/F23 (ktlint gates), F3 (NavPulse + `BottomBarScaffold`), F2 (designsystem-core), F1/F19/F22
+(type-resolved detekt + shared baseline; `style-check.sh` retired). Commits on Softcover `hotfix/3.0.3`: `39df3489`
+(switch + F4/F5/F6 + Batch A) → `9b29f108` (F13/F14) → `8cb8c976` (F16/F17) → `5530c5e5` (F12/F15) → `cbfecab4` (F11)
+→ `9a79d874` (F7/F23) → `5e7467d5` (F3 NavPulse) → `b2662405` (F2/F3 `BottomBarScaffold`) → F1/F19/F22, plus doc
+records. Foundation `release/0.3.0`: `40b23bf` (mockk-stub autocorrect + two ktlint carve-outs) → `1e0a159`
+(`BottomBarPlacement`) → the detekt baseline's type-resolution calibration + the rule's hot-flow carve-out.
 
 **Remaining (not adopted) — each needs a call/verification I can't do solo:**
 - **F9/F10 → F8** (core-platform SecureStorage/connectivity, then offline-sync) — iOS actuals the build hook won't
   compile here, and F10↔F8 are entangled; best when iOS can be built/tested.
-- **F19/F1** (detekt) — requires switching the app's detekt from source-only to **type-resolved** (perf change) and
-  may surface a violation tail. F1's `check_unguarded_flow_terminal` recipe stays in `style-check.sh` until then.
 - **F18/F20/F21** (build-logic convention plugins) — likely need the foundation `build-logic` **published as Gradle
   plugins** to apply in the app build; awkward under `foundation.local`.
-- **F22** — residual: move the `style-check.sh` harness + on-touch hook into the `style-check` skill (the script can't
-  retire entirely until F1/detekt lands).
+
+⏱ **`styleCheck` is now ~24s warm (was ~2s).** It runs the type-resolved detekt tasks, which need the compile
+classpath and therefore compile Android + JVM. That is the accepted price of F1: the rule is `@RequiresTypeResolution`
+and is silently inert on the source-only `detekt` task, so a fast gate here would be a gate that never fires.
 
 ⚠️ Because `foundation.local` stays out of git, the committed Softcover state resolves catalog `0.3.0` from the
 **published** `nl.rhaydus:*` artifacts — so **foundation 0.3.0 must be published** before CI / a fresh clone (without
@@ -80,11 +81,10 @@ and the `BottomBarPlacement` generalization landed for F2/F3.
 ### Next up
 1. **Publish foundation `0.3.0`** (or keep everyone on `foundation.local=true`) so non-local builds resolve the
    catalog `0.3.0` coordinates — see the ⚠️ above.
-2. **Batch-index bookkeeping:** the F7 ktlint rules are now consumed and the app is clean against them, and the
-   `inline-mockk-stub` autocorrect + the two carve-outs are new foundation enhancements. F1's detekt rule + F19 detekt
-   config remain *not adopted* (the app hasn't wired the foundation `detekt-rules` yet). Reconcile F1/F7/F22 status on
-   the next pass rather than piecemeal here.
-3. Continue with the next foundation batch (e.g. F19 detekt config, F9/F10 `core-platform`).
+2. Continue with the next foundation batch: **F9/F10 → F8** (`core-platform` + `offline-sync`, wants an iOS build) or
+   **F18/F20/F21** (`build-logic` convention plugins, wants the foundation `build-logic` published as Gradle plugins).
+3. **Wire the foundation's own `detektCheck` into its `check`.** It is registered but attached to nothing, so the
+   foundation does not gate on the config it ships. Also tracked in `now.md`.
 
 ---
 
@@ -92,9 +92,8 @@ and the `BottomBarPlacement` generalization landed for F2/F3.
 
 | Batch | Theme | Home | Items |
 |---|---|---|---|
-| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` / `ktlint-rules` | F2, F3, F4, F5, F6, F7, F11, F12, F13, F14, F15, F16, F17, F23 |
-| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` / `detekt-rules` | F1, F8, F9, F10, F18, F19, F20, F21 |
-| I | Shared build & gate tooling (residual) | `style-check` skill | F22 |
+| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F11, F12, F13, F14, F15, F16, F17, F19, F22, F23 |
+| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` | F8, F9, F10, F18, F20, F21 |
 
 ---
 
@@ -306,15 +305,113 @@ updated; the foundation `design-system-foundations.md` §5.2 rewritten around `p
   (`BottomNavigationSpacer`, `pointerHandCursor`, `conditional`, and the one-line `model/*` enums all earn their
   place).
 
-## Implemented, not adopted
-
 ### F19 — Shared detekt config belongs in the foundation
 
 - **Type:** enhancement (shared gate config)
 - **Home:** `nl.rhaydus:detekt-rules`
-- **Status:** **Implemented, not adopted.** The foundation now ships a shared detekt baseline (`config/detekt.yml`, bundled in `nl.rhaydus:detekt-rules`) carrying the foundation-worthy calibrations only - Compose/TOAD `ignoreAnnotated` across the complexity/naming rules, `MagicNumber` off, `LargeClass`/`LongParameterList(constructor=30)`, guard-clause `ReturnCount`, snake_case `PackageNaming`; detekt's `formatting` ruleset stays off (ktlint owns layout). A `detektCheck` task runs it (plus the custom `rhaydus` ruleset) over the foundation's own source. App-specific thresholds (Room/DAO counts, Apollo exception policy, `Typos`) stay in each app's override file. On adopt, Softcover points its detekt at the shared config and drops the duplicated calibrations.
+- **Status:** **Implemented & adopted.** The foundation ships a shared detekt baseline (`config/detekt.yml`, bundled
+  in the `nl.rhaydus:detekt-rules` jar) carrying the foundation-worthy calibrations only — Compose/TOAD
+  `ignoreAnnotated` across the complexity/naming rules, `MagicNumber` off, `LargeClass` /
+  `LongParameterList(constructor=30)`, guard-clause `ReturnCount`, snake_case `PackageNaming`, `MaxLineLength: 140`.
+  detekt's `formatting` ruleset stays off (ktlint owns layout). Softcover now layers it: a root
+  `extractRhaydusDetektConfig` `Sync` task unpacks `config/detekt.yml` from the jar and
+  `config.setFrom(<baseline>, config/detekt/detekt.yml)` puts the app's deltas on top. The app's config shrank from
+  83 lines to the genuine Softcover-only calibration (Room/DAO `TooManyFunctions`, `LongMethod: 140`,
+  `ThrowsCount`, the Apollo `TooGenericExceptionThrown` policy).
 
-(Surfaced as one of the F18-F23 audit findings, but built now alongside F1 - standing up detekt for the type-resolved flow rule was the natural moment to centralize the config too.)
+  **The baseline gained a type-resolution section during adoption.** On a type-resolved run detekt activates rules
+  that are inert on a syntactic one, and detekt 1.23 embeds a **Kotlin 1.9** frontend while these apps are on
+  Kotlin 2.x. Three rules produce only false positives and are now off, with cause, in the shared baseline:
+  `UnreachableCode` (types an elvis whose RHS is `throw`/`return` as `Nothing`, so it flags the whole body of any
+  guard-clause function — 133 findings, zero real), `IgnoredReturnValue` (does not see a call in a lambda's
+  last-expression position as its return value — 22 findings, zero real), and `RedundantSuspendModifier` (cannot see
+  that a callee from a dependency jar is itself `suspend` — verified against the compiler: two of three findings did
+  not compile once the modifier was removed). `InjectDispatcher` is excluded on `**/di/**`, where naming the
+  dispatchers is the module's whole job. **Revisit all four when detekt 2.x (K2 frontend) is adopted.**
+
+  **A wiring subtlety worth keeping:** the extract task derives its file tree from `configuration.elements`, not from
+  `.singleFile` inside a bare `provider { }`. The latter resolves eagerly, severing the task dependency that rebuilds
+  the jar — the gate then silently runs against a stale config, which is worse than no gate.
+
+### F1 — Crash-safety gate for terminal flow reads
+
+- **Type:** gate (lint rule)
+- **Home:** `nl.rhaydus:detekt-rules`
+- **Status:** **Implemented & adopted.** The type-resolved detekt rule `rhaydus:UnguardedFlowTerminalRead` now gates
+  Softcover. ktlint cannot tell `Flow.first()` from `Collection.first()` without type resolution, so the blocking rule
+  lives in detekt (resolving the receiver's fqName); the guarded `firstOrNull()` / `singleOrNull()` forms are
+  different functions and never match.
+
+  **Adoption required switching detekt from source-only to type-resolved**, which is the whole point: the rule is
+  `@RequiresTypeResolution` and is **silently inert** on the plain `detekt` task, so wiring the ruleset without
+  switching tasks would have gated nothing. `styleCheck` and `check` now run `detektAndroidMain` / `detektJvmMain` /
+  `detektMain`; the source-only `detekt` task is disabled. Two traps, both load-bearing and both commented in the
+  root build: detekt seeds each KMP task with only that target's **own** source set (so a `commonMain` module reports
+  `NO-SOURCE` and analyses nothing), and the compilation's source set also carries **generated** code (KSP/Room,
+  Apollo, Compose resources — ~2700 findings we neither own nor can fix). Both are fixed by an `afterEvaluate`
+  `setSource(...)` naming the hand-written dirs, which detekt would otherwise overwrite from its own `afterEvaluate`.
+  `iosMain` stays uncovered: detekt offers no type resolution for native targets, and no real `Flow` terminal reads
+  live there.
+
+  **The rule gained a hot-flow carve-out** (foundation change, + 5 unit tests). It was flagging
+  `isOnline.first { it }` on a `StateFlow<Boolean>` — which is *the foundation's own*
+  `BaseNetworkAvailabilityProvider.awaitOnline()`. A `SharedFlow` / `StateFlow` never completes and never fails, so
+  neither hazard the rule guards against can occur; `first` on a hot flow is now exempt. `single()` stays flagged even
+  there (on a flow that never completes it either suspends forever or throws on the second emission). Note the rule
+  must stay on a conservative stdlib slice: it compiles against Kotlin 2.x but *runs* inside detekt's embedded 1.9
+  runtime, so `sequenceOf(element)` linked fine and then died with `NoSuchMethodError` mid-analysis.
+
+  **13 real findings fixed** — a `firstOrNull()` plus a *sensible default*, per the two hazards the rule names
+  (emptiness → `NoSuchElementException`; upstream error → re-thrown by every terminal, `firstOrNull()` included).
+  `GetUserIdUseCase`, `ReAuthenticateUseCaseImpl` (both now `?: NO_USER_ID`), `RefreshLibraryUseCaseImpl`
+  (`?: true` — never re-seed, and so never clobber the user's enabled lists, on a preference we failed to read),
+  `ApiKeyLocalDataSource`, `OfflineUserBookSyncImpl` (whose comment asserted the Room flow "always emits" — true for
+  emptiness, but it can still throw), `ReadingSessionRepositoryImpl` ×3, `OnRefreshAction`, `InitKoin` (which also had
+  a bare `runCatching` swallowing `CancellationException`), and the two desktop-startup `runBlocking { …first() }`
+  reads. An enclosing `runCatchingLogged` does **not** exempt a site: it addresses the error hazard only, turning an
+  empty flow into a logged failure and an error snackbar where the rule wants a default.
+
+  Type resolution also surfaced 44 further real findings, invisible before because the old `setSource` never looked at
+  `androidMain` / `jvmMain` / `mobileMain` and because several rules are themselves `@RequiresTypeResolution`: 29
+  `?: ""` → `orEmpty()`, two `!!` in `LibrarySort` (rewritten to drop both the `!!` and two unchecked casts), a
+  redundant `suspend`, a generic `catch (Throwable)` → `runCatchingCancellable`, a shadowed `it`, three long lines.
+
+### F7 — Promote the `style-check.sh` recipes to blocking ktlint rules (generalize F1)
+
+- **Type:** gate (lint rules) + tooling ownership
+- **Home:** `nl.rhaydus:ktlint-rules` (+ `nl.rhaydus:detekt-rules` for the type-resolved one)
+- **Status:** **Implemented & adopted (both sub-moves).** The five greppable recipes are blocking ktlint rules in
+  `nl.rhaydus:ktlint-rules` — `one-type-per-file`, `no-fully-qualified-reference`, `project-import-order`,
+  `inline-mockk-stub`, and `use-case-run-catching` (which names the upstream `runCatchingLogged`); the sixth
+  (flow-terminal) is F1's detekt rule. Softcover consumes the 0.3.0 ruleset and is clean against all five (Batch A),
+  and those recipes were retired from `scripts/style-check.sh`. **Sub-move 2** — own the residual harness rather than
+  copying it per app — is tracked as **F22** and completed once F1's detekt rule landed: the script retires entirely
+  rather than moving, since every recipe now has a blocking rule.
+
+### F22 — Retire the app-local style script
+
+- **Type:** tooling ownership
+- **Home:** the app (deletion); the `rhaydus-kotlin` `style-check` skill (wording)
+- **Status:** **Implemented & adopted.** F7's sub-move 2, and smaller than the entry assumed. Two discoveries:
+  `scripts/kt-style-hook.sh` claimed in its own header to be wired as a PostToolUse hook but **was never registered**
+  anywhere (`.claude/settings.json` carries only a PreToolUse Bash hook), so there was no on-touch hook to migrate;
+  and `scripts/style-check.sh` could no longer fail — `error_hits` was initialised to `0` and never incremented, so
+  the ERROR tier its header documented was dead code and the script always exited `0`.
+
+  Audited against the script's full git history before deleting: it carried exactly **six** recipes ever (three at
+  birth in `515c3427`, six at its fullest, one after `9a79d874`). All six have live, blocking replacements — five
+  ktlint rules (`InlineFullyQualifiedReferenceRule`, `OneTypePerFileRule`, `ProjectImportOrderRule`,
+  `InlineMockkStubRule`, `UseCaseRunCatchingRule`, all registered in `ktlint-rules/.../Main.kt` and gated by
+  `ktlintCheck`) and the detekt rule above. Each replacement is *stronger* than the recipe it replaced: blocking
+  rather than advisory, AST-accurate rather than grep-approximate. Both scripts are deleted; `styleCheck` keeps its
+  name and becomes the type-resolved detekt aggregator; the foundation `style-check` skill no longer calls it
+  advisory. (The script's header also advertised a boolean-`!` ERROR rule that never existed in any revision — that
+  has always been ktlint's `BooleanNotationRule`.)
+
+
+## Implemented, not adopted
+
+(F19's entry moved up to *Implemented & adopted*.)
 
 ---
 
@@ -446,85 +543,19 @@ open. Softcover still ships its inline gates and has not re-pointed anything.
   Batch A). Zero violations (pure ratchet), so no code changed; it now gates on `ktlintCheck`. The rule was
   review-only in Softcover's `code-style.md` (no `style-check.sh` recipe existed), so nothing further to retire.
 
-## Batch A (implemented, not adopted) — Style gates → blocking rules
+## Batch A (adopted) — Style gates → blocking rules
 
-*Home: `nl.rhaydus:ktlint-rules` + `nl.rhaydus:detekt-rules`. Covers **F1, F7** - both landed on the
-foundation `release/0.3.0` branch (see their statuses below); kept here for the rationale. Five recipes
-became blocking ktlint rules; the flow-terminal one (F1) needed type resolution and became a detekt rule.
-**F7 (sub-move 1) is adopted** — Softcover consumes the 0.3.0 ktlint ruleset, is clean against all five, and
-retired those recipes from `scripts/style-check.sh`. **F1 is not adopted** — the foundation `detekt-rules` is
-not wired, so the one `check_unguarded_flow_terminal` recipe stays; retiring `style-check.sh` entirely (F22)
-waits on it.*
+*Home: `nl.rhaydus:ktlint-rules` + `nl.rhaydus:detekt-rules`. Covered **F1, F7**, and the residual **F22**. Six
+greppable `style-check.sh` recipes became blocking rules: five ktlint rules (gated by `ktlintCheck`), and the
+flow-terminal one — which needs type resolution — a detekt rule (gated by `styleCheck` / `check`). With F1 adopted,
+`scripts/style-check.sh` retired entirely (F22). All three entries are now in *Implemented & adopted* above; this
+section is kept only for the rationale.*
 
-### F1 — Crash-safety gate for terminal flow reads should be a blocking ktlint rule
-
-- **Type:** gate (lint rule)
-- **Home:** `nl.rhaydus:detekt-rules`
-- **Status:** **Implemented, not adopted.** Shipped as the type-resolved detekt rule `UnguardedFlowTerminalRead` in `nl.rhaydus:detekt-rules` (foundation `release/0.3.0`). ktlint cannot tell `Flow.first()` from `Collection.first()` without type resolution, so the blocking rule lives in detekt (resolving the receiver fqName); the guarded `firstOrNull()`/`singleOrNull()` forms and the collection operators are never flagged. **Not adopted** (Softcover has not wired the foundation `detekt-rules`), so it still ships the advisory `check_unguarded_flow_terminal` recipe — now the **sole remaining recipe** in `scripts/style-check.sh` after the five ktlint-promoted recipes were retired with F7; dropped on adopt.
-
-A bare `.first()` / `.single()` on a cold flow is a crash risk: it throws `NoSuchElementException` on
-an empty flow, and any terminal operator re-throws an upstream error (DataStore / network / Apollo /
-repository). We added app-local enforcement — a `scripts/style-check.sh` recipe
-(`check_unguarded_flow_terminal`) plus the crash-safety rule in
-[`../reference/code-style.md`](../reference/code-style.md) (Error Handling) — but it is **advisory**:
-it surfaces for review and on every touched file via the PostToolUse hook, yet it does not gate CI.
-
-The foundation `nl.rhaydus:ktlint-rules` ruleset is the only mechanical layer that hard-gates the
-build (via `ktlintCheck` / the `check` lifecycle) for every consuming project. A custom rule there —
-flag unguarded terminal flow reads (`.first()` / `.single()`) in production source, ignoring guarded
-forms and test sources — would promote this from "advisory in Softcover" to "blocking everywhere."
-The rule is **crash-safety, not "always use a Collector"**: a guarded one-shot read (`.firstOrNull()`
-+ default + `.catch` / cancellation-aware `runCatching`) is acceptable; an unguarded throwing terminal
-is the defect.
-
----
-
-### F7 — Promote the `style-check.sh` recipes to blocking ktlint rules (generalize F1)
-
-- **Type:** gate (lint rules) + tooling ownership
-- **Home:** `nl.rhaydus:ktlint-rules` (+ `nl.rhaydus:detekt-rules` for the type-resolved one)
-- **Status:** **Implemented & adopted (sub-move 1); sub-move 2 partial.** The five recipes are blocking ktlint
-  rules in `nl.rhaydus:ktlint-rules` — `one-type-per-file`, `no-fully-qualified-reference`, `project-import-order`,
-  `inline-mockk-stub`, and `use-case-run-catching` (names the upstream `runCatchingLogged`); the sixth
-  (flow-terminal) is F1's detekt rule. Softcover consumes the 0.3.0 ruleset and is clean against all five (Batch A),
-  so the five now-redundant recipes were **retired from `scripts/style-check.sh`** and the `CLAUDE.md` Code Style
-  section updated to point at the ktlint gate. **Sub-move 2** (own the residual `style-check.sh` harness + on-touch hook in the `style-check` skill) is
-  tracked as **F22** and can't fully land until F1's detekt rule is adopted — the script still carries the one
-  `check_unguarded_flow_terminal` recipe until then, so it can't retire entirely yet.
-
-`scripts/style-check.sh` is an app-local bash port of the greppable code-style rules: inline
-fully-qualified references, one-type-per-file, project-import ordering, **inline mockk stubs**, unguarded
-terminal flow reads (F1), and bare `runCatching` in a use case (F5). Most of these are *foundation* style
-rules, not Softcover's — e.g. the inline-mockk-stub rule ("open the `coEvery`/`every` block onto its own
-line") is explicitly a foundation `code-style.md` rule. So they belong in `nl.rhaydus:ktlint-rules` as
-real auto-fixing / gating rules, where every consuming project gets them with zero setup and a hard CI
-gate — not re-derived as advisory greps in each app's `scripts/`. Two sub-moves:
-
-1. **Promote each greppable rule to a ktlint rule** (blocking, like the rest of the ruleset). F1 already
-   files the flow-terminal one; the same applies to inline mockk stubs, inline FQ refs, one-type-per-file,
-   and import ordering. The bare-`runCatching`-in-a-use-case rule is gated on F5 (it names the upstream
-   `runCatchingLogged`).
-2. **Own the script upstream, not per app.** The `rhaydus-kotlin` plugin already ships a `style-check`
-   skill; until a rule is promoted, its recipe (and the script harness) should live with that skill so
-   apps don't each copy and maintain `style-check.sh`. The app keeps only genuinely app-specific recipes.
-
----
-
-## Batch I — Shared build & gate tooling (residual: F22)
-
-*Home: the `rhaydus-kotlin` `style-check` skill. The rest of the batch (**F18, F20, F21, F23**) landed in the
-foundation (see *Implemented, not adopted*); **F22** is the one residual item, and it is **not** a
-foundation-library change — it is plugin/skill ownership work, done at adopt.*
-
-### F22 — On-touch style hook + script ownership in the `style-check` skill
-
-- **Type:** tooling ownership
-- **Home:** the `rhaydus-kotlin` `style-check` skill
-- **Status:** Open - this is F7's sub-move 2; no foundation-library deliverable, done at adopt
-
-The PostToolUse adapter (`scripts/kt-style-hook.sh`) that runs the style script on the just-edited file and
-feeds findings back for on-touch fixing is reusable infra. It - and any residual greppable recipes not yet
-promoted to rules - should live with the `style-check` skill so every app gets on-touch enforcement without
-copying the adapter. Done at adopt, alongside retiring the now-promoted recipes from Softcover's
-`scripts/style-check.sh`. (All six of those recipes are already promoted to foundation ktlint/detekt rules
-per F1/F7, so at adopt `scripts/style-check.sh` retires entirely and only the harness/hook move to the skill.)
+`scripts/style-check.sh` was an app-local bash port of the greppable code-style rules. Most were *foundation* style
+rules, not Softcover's — the inline-mockk-stub rule ("open the `coEvery`/`every` block onto its own line") is
+explicitly a foundation `code-style.md` rule. So they belonged in the foundation rulesets, where every consuming
+project gets them with zero setup and a hard CI gate, rather than re-derived as advisory greps in each app's
+`scripts/`. A bare `.first()` / `.single()` on a cold flow is the crash risk that motivated the detekt half: it
+throws `NoSuchElementException` on an empty flow, and any terminal operator re-throws an upstream error (DataStore /
+network / Apollo / repository). The rule is **crash-safety, not "always use a Collector"** — a guarded one-shot read
+is acceptable; an unguarded throwing terminal is the defect.

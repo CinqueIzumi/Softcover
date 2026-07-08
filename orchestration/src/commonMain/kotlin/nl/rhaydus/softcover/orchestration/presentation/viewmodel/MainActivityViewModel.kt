@@ -62,7 +62,7 @@ internal class MainActivityViewModel(
             // While onboarding (unauthenticated) the API-key screen already owns token entry.
             SessionExpiredNotifier.events.collect {
                 if (_state.value.authenticated) {
-                    _reAuthState.update { it.copy(visible = true) }
+                    _reAuthState.update { state -> state.copy(visible = true) }
                 }
             }
         }

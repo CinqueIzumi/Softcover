@@ -90,7 +90,7 @@ internal fun UserBook.toEntity(bookId: Int): UserBookEntity = UserBookEntity(
 )
 
 internal fun ReadingJournal.toEntity(userBookId: Int): ReadingJournalEntity = ReadingJournalEntity(
-    event = event ?: "",
+    event = event.orEmpty(),
     updatedAt = updatedAt,
     userBookId = userBookId,
 )

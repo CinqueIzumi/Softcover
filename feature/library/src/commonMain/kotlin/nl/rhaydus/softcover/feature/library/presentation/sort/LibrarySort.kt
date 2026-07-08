@@ -15,24 +15,19 @@ private inline fun <T, K : Comparable<K>> List<T>.sortedByCachedKey(
 ): List<T> {
     if (size <= 1) return this
 
-    val n = size
-    val items = arrayOfNulls<Any?>(n)
-    @Suppress("UNCHECKED_CAST")
-    val keys = arrayOfNulls<Comparable<Any>>(n) as Array<K?>
-
-    for (i in 0 until n) {
-        val item = this[i]
-        items[i] = item
-        keys[i] = selector(item)
+    // `selector` returns a non-null K, so the key cache needs no nullable slots — which is what let the
+    // previous array-of-nulls version reach for `!!` and two unchecked casts to undo its own erasure.
+    val keys = ArrayList<K>(size)
+    for (item in this) {
+        keys += selector(item)
     }
 
-    val indices = IntArray(n) { it }.toTypedArray()
-    indices.sortWith(Comparator { a, b -> keys[a]!!.compareTo(keys[b]!!) })
+    val indices = IntArray(size) { it }.toTypedArray()
+    indices.sortWith(Comparator { a, b -> keys[a].compareTo(keys[b]) })
 
-    val result = ArrayList<T>(n)
+    val result = ArrayList<T>(size)
     for (index in indices) {
-        @Suppress("UNCHECKED_CAST")
-        result.add(items[index] as T)
+        result.add(this[index])
     }
 
     return result

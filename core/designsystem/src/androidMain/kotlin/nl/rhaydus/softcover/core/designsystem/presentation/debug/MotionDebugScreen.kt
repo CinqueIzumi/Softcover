@@ -77,7 +77,8 @@ object MotionDebugScreen : Screen {
                 EditorialSectionHeader(
                     eyebrow = "Debug",
                     headline = "Motion & haptics.",
-                    description = "Fire individual animations and haptics in isolation. Useful for tuning timing and verifying reduced-motion behaviour.",
+                    description = "Fire individual animations and haptics in isolation. Useful for " +
+                        "tuning timing and verifying reduced-motion behaviour.",
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))

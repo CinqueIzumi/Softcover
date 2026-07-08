@@ -21,8 +21,16 @@ shared components, anything subtler) are caught in review.
 A second gate, the custom detekt ruleset `nl.rhaydus:detekt-rules` (`./gradlew detektCheck`, plus the
 shared `config/detekt.yml` baseline), adds the crash-safety checks that need type resolution - notably
 `UnguardedFlowTerminalRead`, which flags an unguarded terminal read of a `Flow` (`first()` / `single()`)
-without flagging the identically named `Collection` operators. detekt's `formatting` ruleset stays off:
-the mechanizable layout rules are owned by `ktlint-rules`.
+without flagging the identically named `Collection` operators. `first` on a **hot** flow (`SharedFlow` /
+`StateFlow`) is exempt - such a flow never completes and never fails, so neither hazard exists, which is
+what makes `isOnline.first { it }` a legal `awaitOnline()`; `single()` stays flagged even there.
+detekt's `formatting` ruleset stays off: the mechanizable layout rules are owned by `ktlint-rules`.
+
+The rule only fires under type resolution (`detektAndroidMain` / `detektJvmMain` / `detektMain`) and is
+silently **inert** on a syntactic run - a consuming app that wires the ruleset without switching to those
+tasks gates nothing. The shared baseline also switches off `UnreachableCode`, `IgnoredReturnValue`, and
+`RedundantSuspendModifier`: detekt 1.23 embeds a Kotlin 1.9 frontend, and on a Kotlin 2.x codebase those
+three report only false positives (see the config's own comments).
 
 ## Naming Conventions
 

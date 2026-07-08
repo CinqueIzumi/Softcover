@@ -400,7 +400,7 @@ internal fun GeneralBookInfoSection(
                         }
 
                         Text(
-                            text = title ?: "",
+                            text = title.orEmpty(),
                             color = Color.White,
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,

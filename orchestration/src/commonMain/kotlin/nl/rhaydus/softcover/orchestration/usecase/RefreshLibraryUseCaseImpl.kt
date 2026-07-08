@@ -2,7 +2,7 @@ package nl.rhaydus.softcover.orchestration.usecase
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.rhaydus.common.AppDispatchers
@@ -45,7 +45,10 @@ internal class RefreshLibraryUseCaseImpl(
     }
 
     private suspend fun refreshAll(userId: Int) = coroutineScope {
-        val seeded: Boolean = settingsRepository.listDefaultsSeeded.first()
+        // Default to `true` on an empty read: never re-seed (and so never clobber the user's enabled
+        // lists) on the strength of a preference we never saw. A read *failure* is a different matter —
+        // it propagates to this use case's own `runCatchingLogged`, which is where it belongs.
+        val seeded: Boolean = settingsRepository.listDefaultsSeeded.firstOrNull() ?: true
 
         val refreshDeferred = async {
             listsRepository.refreshUserLists(userId = userId)

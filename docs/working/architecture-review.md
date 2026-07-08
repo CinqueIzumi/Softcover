@@ -226,7 +226,7 @@ signal) was kept.
 ships `runCatchingCancellable` (the pure cancellation-aware `runCatching` primitive — the F4
 foundation-upstream candidate) plus `runCatchingLogged`, the use-case-body wrapper that composes it with a
 single `AppLog.e` at the source. All 53 `*UseCase*.kt` bodies were moved off bare `runCatching` onto
-`runCatchingLogged` (flagged advisory by `scripts/style-check.sh`), so a use-case failure is logged once at the boundary
+`runCatchingLogged` (gated by the ktlint `use-case-run-catching` rule), so a use-case failure is logged once at the boundary
 and `onApiFailure()` became **surface-only** (logging moved out of it). This closes the "forgotten fold →
 silently swallowed failure" gap: a missing presentation fold now costs at most a toast, never a lost log or a
 swallowed `CancellationException`.

@@ -34,13 +34,15 @@ A custom ktlint ruleset in `:ktlint-rules` **auto-fixes and gates** most mechani
 
 It owns: multi-arg one-per-line wrapping (incl. `.copy()`/constructors, the historical recurring miss), trailing commas on multi-line lists, blank line after `super.*()`/`Timber.e(...)`, `// region`/`// endregion` flush, no blank line after `{` / before `}`, blank line between sibling composables, and boolean `!` → `.not()` (gate-only — fix by hand).
 
-The remaining rules are covered by `scripts/style-check.sh` (`./gradlew styleCheck`), with documented false-positive filters:
+The remaining rules are **blocking ktlint rules** in the same ruleset (gate-only — fix by hand):
 - inline fully-qualified references
 - more than one top-level type per file
 - project-import (`nl.rhaydus.*`) alphabetical ordering
+- inline mockk stubs (`coEvery`/`every` one-liners open onto their own line)
+- bare `runCatching` in a use case (use `runCatchingLogged`)
 
-**Examine each flagged candidate** — advisory recipes have known false positives (`Modifier.padding(start = …, end = …)`, `setOf/mapOf/listOf`, lambda-type params with an internal comma, KDoc `[fully.qualified.Refs]`, data-source interface + Impl colocation). When in doubt, defer to the rule as written in §Argument and Property Layout.
+Crash-safe flow reads are gated separately by the type-resolved detekt rule `rhaydus:UnguardedFlowTerminalRead` (`./gradlew styleCheck`): a bare `Flow.first()` / `Flow.single()` in production source fails the build. It resolves the receiver, so `Collection.first()` is never flagged and there is no false-positive tail. `scripts/style-check.sh` is retired — do not look for it.
 
-The script can **not** mechanize the blank line between sibling composables (incl. `Spacer`) or the paragraph-spacing rules — spot-check those manually inside `Column` / `Row` / `Box` / `LazyColumn` scopes.
+No tool mechanizes the blank line between sibling composables (incl. `Spacer`) or the paragraph-spacing rules — spot-check those manually inside `Column` / `Row` / `Box` / `LazyColumn` scopes.
 
-**Do not report a clean style pass without running the script.**
+**Do not report a clean style pass without running `./gradlew ktlintCheck` and `./gradlew styleCheck`.**

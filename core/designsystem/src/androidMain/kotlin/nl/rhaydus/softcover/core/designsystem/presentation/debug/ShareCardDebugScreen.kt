@@ -29,6 +29,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
@@ -86,7 +87,7 @@ object ShareCardDebugScreen : Screen {
 
         val onSaveClick: (ShareCardCapture, String) -> Unit = { capture, filenameHint ->
             pendingSave = {
-                try {
+                runCatchingCancellable {
                     when (val outcome = capture.saveToGallery(filenameHint)) {
                         is SaveOutcome.Saved -> {
                             snackbarHostState.showSnackbar("Saved to gallery → ${outcome.displayPath}")
@@ -98,7 +99,7 @@ object ShareCardDebugScreen : Screen {
 
                         is SaveOutcome.Cached -> Unit
                     }
-                } catch (throwable: Throwable) {
+                }.onFailure { throwable ->
                     AppLog.e(
                         throwable,
                         "Failed to save share card $filenameHint to gallery",
@@ -132,7 +133,9 @@ object ShareCardDebugScreen : Screen {
                 EditorialSectionHeader(
                     eyebrow = "Debug",
                     headline = "Share card variants.",
-                    description = "Tap a card's “Save to gallery” button to write the rendered PNG to Pictures/Softcover. On Android 9 and below the system will ask for storage permission first.",
+                    description = "Tap a card's “Save to gallery” button to write the rendered PNG to " +
+                        "Pictures/Softcover. On Android 9 and below the system will ask for storage " +
+                        "permission first.",
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -236,7 +239,8 @@ object ShareCardDebugScreen : Screen {
         userRating = 9,
         releaseYear = 1985,
         pageCount = 945,
-        description = "A sprawling cattle drive from the dust of Texas to the high grass of Montana, told as one of the great American friendships and one of the longest goodbyes in the genre.",
+        description = "A sprawling cattle drive from the dust of Texas to the high grass of Montana, " +
+            "told as one of the great American friendships and one of the longest goodbyes in the genre.",
         quote = "It's a fine world, though rich in hardships at times.",
     )
 
