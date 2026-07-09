@@ -21,6 +21,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.rhaydus.corePlatform)
             api(project(":core:domain"))
             api(project(":core:book"))
 

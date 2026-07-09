@@ -5,10 +5,12 @@ import okio.Path.Companion.toPath
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import nl.rhaydus.platform.AndroidSecureStorage
+import nl.rhaydus.platform.SecureStorage
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.datastore.createAppSettingsDataStore
-import nl.rhaydus.softcover.core.preferences.data.security.AndroidSecureApiKeyStorage
-import nl.rhaydus.softcover.core.preferences.data.security.SecureApiKeyStorage
+import nl.rhaydus.softcover.core.preferences.data.security.AndroidLegacySecureApiKeyStorage
+import nl.rhaydus.softcover.core.preferences.data.security.LegacySecureApiKeyStorage
 
 actual val platformPreferencesModule: Module = module {
     single<AppSettingsDataStore> {
@@ -20,8 +22,15 @@ actual val platformPreferencesModule: Module = module {
         )
     }
 
-    single<SecureApiKeyStorage> {
-        AndroidSecureApiKeyStorage(
+    single<SecureStorage> {
+        AndroidSecureStorage(
+            context = androidContext(),
+            dispatchers = get(),
+        )
+    }
+
+    single<LegacySecureApiKeyStorage> {
+        AndroidLegacySecureApiKeyStorage(
             context = androidContext(),
             dispatchers = get(),
         )

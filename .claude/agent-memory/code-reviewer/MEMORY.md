@@ -9,3 +9,4 @@
 - [onStart + StateFlow double-emit](feedback_onstart_stateflow_double_emit.md) — a redundant `.onStart{ check-and-fire }` guard on a StateFlow-backed collector double-fires on startup; confirmed via instrumented test run, not just reasoning
 - [rhaydus-foundation Batch I build gates](project_rhaydus_foundation_batch_i_build_gates.md) — buildHealth NOT wired to check/CI despite docs claiming it is; checkModuleGraph has latent config-cache risk
 - [BottomBarScaffold F2/F3 adoption](project_bottombarscaffold_f2_f3_adoption.md) — padding math verified equivalent; LocalBottomBarPadding ambient now also reaches the EXPANDED detail pane (latent leak, currently inert)
+- [F9/F10/F8 adoption (SecureStorage/NetworkAvailability/offline-sync)](project_rhaydus_foundation_batch_f9_f10_f8.md) — migration ordering/crash-safety verified clean except one pre-existing unwrapped DataStore call; drainer semantic equivalence verified line-by-line against deleted syncers

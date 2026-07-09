@@ -55,7 +55,7 @@ internal class ListsRepositoryImpl(
     }
 
     override suspend fun refreshUserLists(userId: Int): ListsRefreshResult {
-        listWriteDrainer.drainPendingWrites()
+        listWriteDrainer.drain()
 
         val signatures: List<ListSignature> = listsRemoteDataSource.fetchListSignatures()
         val serverListIds: Set<Int> = signatures.map { it.listId }.toSet()
@@ -86,7 +86,7 @@ internal class ListsRepositoryImpl(
         userId: Int,
         listIds: Set<Int>?,
     ): List<BookList> {
-        listWriteDrainer.drainPendingWrites()
+        listWriteDrainer.drain()
 
         val deferred: Deferred<List<BookList>> = inflightMutex.withLock {
             inflightFetches[listIds]?.let { return@withLock it }

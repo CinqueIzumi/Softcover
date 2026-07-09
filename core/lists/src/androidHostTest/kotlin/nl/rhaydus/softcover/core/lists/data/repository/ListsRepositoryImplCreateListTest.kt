@@ -152,7 +152,7 @@ class ListsRepositoryImplCreateListTest {
             thrown shouldBe error
 
             coVerify(exactly = 1) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
 
             val enqueued = slot.first()
@@ -180,7 +180,7 @@ class ListsRepositoryImplCreateListTest {
             }
 
             coVerify(exactly = 0) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
         }
     }
@@ -193,7 +193,7 @@ class ListsRepositoryImplCreateListTest {
             val userId = 42
 
             coJustRun {
-                listWriteDrainer.drainPendingWrites()
+                listWriteDrainer.drain()
             }
 
             coEvery {
@@ -211,7 +211,7 @@ class ListsRepositoryImplCreateListTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                listWriteDrainer.drainPendingWrites()
+                listWriteDrainer.drain()
             }
 
             coVerify(exactly = 1) {

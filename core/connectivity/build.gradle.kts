@@ -15,10 +15,12 @@ kotlin {
             implementation(project(":core:lists"))
 
             implementation(libs.rhaydus.coreCommon)
+            implementation(libs.rhaydus.corePlatform)
+            implementation(libs.rhaydus.offlineSync)
         }
 
         androidMain.dependencies {
-            implementation(libs.androidx.core.ktx)
+            // `androidContext()` for the foundation's AndroidNetworkAvailabilityProvider.
             implementation(libs.koin.android)
         }
     }

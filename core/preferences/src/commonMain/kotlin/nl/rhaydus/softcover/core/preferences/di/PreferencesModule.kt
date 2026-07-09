@@ -44,6 +44,7 @@ val preferencesModule = module {
             secureStorage = get(),
             appSettingsDataStore = get(),
             dispatchers = get(),
+            legacySecureStorage = getOrNull(),
         )
     }
 

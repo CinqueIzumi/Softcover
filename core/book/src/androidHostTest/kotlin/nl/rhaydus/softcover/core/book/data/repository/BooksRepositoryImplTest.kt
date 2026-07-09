@@ -18,12 +18,12 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
-import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope

@@ -210,7 +210,7 @@ class ListsRepositoryImplReorderTest {
             }
 
             coVerify(exactly = 1) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
 
             val enqueued = slot.first()

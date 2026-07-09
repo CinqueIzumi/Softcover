@@ -16,9 +16,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
 import nl.rhaydus.softcover.core.designsystem.generated.resources.connectivity_offline_banner
-import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 
 @Composable
 fun ConnectivityBanner(

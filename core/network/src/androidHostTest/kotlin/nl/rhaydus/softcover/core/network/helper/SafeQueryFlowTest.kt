@@ -21,8 +21,8 @@ import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.GetUserIdQuery
-import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException

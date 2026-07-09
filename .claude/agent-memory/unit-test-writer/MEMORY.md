@@ -9,3 +9,4 @@
 - [mockk capture() needs no import](feedback_mockk_capture_no_import.md) — import only io.mockk.slot; `import io.mockk.capture` fails to resolve
 - [rhaydus-foundation Test Conventions](project_rhaydus_foundation_test_conventions.md) — sibling repo, same JUnit5/kotest/AAA idiom; commonTest now exists but has no test-annotation framework, JUnit5-only-androidHostTest breaks jvmTest/iosTest/check
 - [backgroundScope + explicit TestDispatcher + advanceUntilIdle gotcha](feedback_backgroundscope_advanceuntilidle.md) — use runCurrent() instead when driving a start(scope) collector test via backgroundScope.launch(explicitStandardTestDispatcher)
+- [Stateful mock for keyed SecureStorage](feedback_stateful_secure_storage_mock.md) — back read/write/delete stubs with a class-level var so migration tests see writes on later reads

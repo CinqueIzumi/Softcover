@@ -5,8 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.slot
 import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.common.AppDispatchers
@@ -20,20 +20,17 @@ import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import javax.crypto.spec.GCMParameterSpec
 
-class AndroidSecureApiKeyStorageTest {
+class AndroidLegacySecureApiKeyStorageTest {
     @TempDir
     lateinit var tempDir: File
 
     private lateinit var context: Context
     private lateinit var dispatchers: AppDispatchers
 
-    private lateinit var encryptCipher: Cipher
     private lateinit var decryptCipher: Cipher
     private lateinit var secretKey: SecretKey
     private lateinit var keyStore: KeyStore
-    private lateinit var keyGenerator: KeyGenerator
 
     private val fakeIv = ByteArray(12) { it.toByte() }
 
@@ -54,8 +51,6 @@ class AndroidSecureApiKeyStorageTest {
 
         secretKey = mockk()
         keyStore = mockk(relaxed = true)
-        keyGenerator = mockk(relaxed = true)
-        encryptCipher = mockk(relaxed = true)
         decryptCipher = mockk(relaxed = true)
 
         mockkStatic(Cipher::class)
@@ -65,28 +60,21 @@ class AndroidSecureApiKeyStorageTest {
         every {
             KeyStore.getInstance("AndroidKeyStore")
         } returns keyStore
-        every { keyStore.getKey(
-            "softcover_api_key",
-            null,
-        ) } returns secretKey
 
         every {
-            encryptCipher.iv
-        } returns fakeIv
-
-        val plaintextSlot = slot<ByteArray>()
-        every {
-            encryptCipher.doFinal(capture(plaintextSlot))
-        } answers { plaintextSlot.captured }
-
-        val ciphertextSlot = slot<ByteArray>()
-        every {
-            decryptCipher.doFinal(capture(ciphertextSlot))
-        } answers { ciphertextSlot.captured }
+            keyStore.getKey(
+                "softcover_api_key",
+                null,
+            )
+        } returns secretKey
 
         every {
             Cipher.getInstance("AES/GCM/NoPadding")
-        } returnsMany listOf(encryptCipher, decryptCipher)
+        } returns decryptCipher
+
+        every {
+            KeyGenerator.getInstance(any())
+        } returns mockk(relaxed = true)
     }
 
     @AfterEach
@@ -94,53 +82,49 @@ class AndroidSecureApiKeyStorageTest {
         unmockkAll()
     }
 
-    private fun buildStorage(): AndroidSecureApiKeyStorage =
-        AndroidSecureApiKeyStorage(
+    private fun buildStorage(): AndroidLegacySecureApiKeyStorage =
+        AndroidLegacySecureApiKeyStorage(
             context = context,
             dispatchers = dispatchers,
         )
 
-    @Nested
-    inner class Write {
-        @Test
-        fun `creates api_key enc file on disk after write`() = runTest {
-            // ----- Arrange -----
-            val storage = buildStorage()
-            val storageFile = File(
-                tempDir,
-                "api_key.enc",
-            )
+    private fun storageFile(): File = File(
+        tempDir,
+        "api_key.enc",
+    )
 
-            // ----- Act -----
-            storage.write("my-api-key")
-
-            // ----- Assert -----
-            storageFile.exists() shouldBe true
+    private fun writeLegacyFile(
+        iv: ByteArray = fakeIv,
+        ciphertext: ByteArray = "ciphertext".toByteArray(),
+    ) {
+        storageFile().outputStream().use { out ->
+            out.write(iv.size)
+            out.write(iv)
+            out.write(ciphertext)
         }
     }
 
     @Nested
     inner class Read {
         @Test
-        fun `returns the round-tripped value after write then read`() = runTest {
+        fun `returns the decrypted value when the legacy file and Keystore alias both exist`() = runTest {
             // ----- Arrange -----
             val storage = buildStorage()
-            storage.write("my-api-key")
+            writeLegacyFile()
 
-            // Reset so read gets decryptCipher on the next getInstance call.
             every {
-                Cipher.getInstance("AES/GCM/NoPadding")
-            } returns decryptCipher
+                decryptCipher.doFinal(any())
+            } returns "my-legacy-api-key".toByteArray(Charsets.UTF_8)
 
             // ----- Act -----
             val result = storage.read()
 
             // ----- Assert -----
-            result shouldBe "my-api-key"
+            result shouldBe "my-legacy-api-key"
         }
 
         @Test
-        fun `returns null when no file exists`() = runTest {
+        fun `returns null when the legacy file is absent`() = runTest {
             // ----- Arrange -----
             val storage = buildStorage()
 
@@ -150,25 +134,61 @@ class AndroidSecureApiKeyStorageTest {
             // ----- Assert -----
             result shouldBe null
         }
+
+        @Test
+        fun `returns null and never generates a new key when the Keystore alias is gone`() = runTest {
+            // ----- Arrange -----
+            val storage = buildStorage()
+            writeLegacyFile()
+
+            every {
+                keyStore.getKey(
+                    "softcover_api_key",
+                    null,
+                )
+            } returns null
+
+            // ----- Act -----
+            val result = storage.read()
+
+            // ----- Assert -----
+            result shouldBe null
+            verify(exactly = 0) { KeyGenerator.getInstance(any()) }
+        }
+
+        @Test
+        fun `returns null and deletes the file when decryption throws`() = runTest {
+            // ----- Arrange -----
+            val storage = buildStorage()
+            writeLegacyFile()
+
+            every {
+                decryptCipher.doFinal(any())
+            } throws RuntimeException("decryption failed")
+
+            // ----- Act -----
+            val result = storage.read()
+
+            // ----- Assert -----
+            result shouldBe null
+            storageFile().exists() shouldBe false
+        }
     }
 
     @Nested
     inner class Delete {
         @Test
-        fun `removes api_key enc file from disk after delete`() = runTest {
+        fun `removes both the file and the Keystore entry`() = runTest {
             // ----- Arrange -----
             val storage = buildStorage()
-            storage.write("key-to-delete")
-            val storageFile = File(
-                tempDir,
-                "api_key.enc",
-            )
+            writeLegacyFile()
 
             // ----- Act -----
             storage.delete()
 
             // ----- Assert -----
-            storageFile.exists() shouldBe false
+            storageFile().exists() shouldBe false
+            verify(exactly = 1) { keyStore.deleteEntry("softcover_api_key") }
         }
     }
 }

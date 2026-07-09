@@ -116,7 +116,7 @@ internal class OfflineUserBookSyncImpl(
     }
 
     override suspend fun drainAndReconcile(fetchFromServer: suspend () -> List<Book>): List<Book> {
-        val syncedWrites: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteDrainer.drainPendingUpdates()
+        val syncedWrites: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteDrainer.drain()
 
         val fetchedBooks: List<Book> = fetchFromServer()
 

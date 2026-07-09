@@ -76,6 +76,29 @@ by [`toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md). Softcover de
   kind via `Throwable.toUserMessage()` + the `Result.onApiFailure()` fold helper in `:core:designsystem`
   (see [code-style.md](code-style.md)).
 
+## Platform seams from the foundation
+
+Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core-platform` and
+`nl.rhaydus:offline-sync`. Reach for these rather than re-deriving them:
+
+- **Connectivity** — `nl.rhaydus.platform.NetworkAvailabilityProvider` (`isOnline: StateFlow<Boolean>`,
+  `awaitOnline()`) plus the `NetworkAvailability` instant-check singleton, which `startAppServices` installs.
+  `:core:connectivity`'s `platformModule` binds the foundation provider per platform; on jvm it is also bound as
+  `AutoCloseable` so desktop shutdown stops the reachability poll loop. There is no app-local connectivity data
+  source or repository.
+- **Secure storage** — `nl.rhaydus.platform.SecureStorage`, a **keyed** `read`/`write`/`delete` store. Softcover
+  keeps exactly one secret in it, under `"api_key"`. On desktop the app constructs the namespaced `KSafe` and
+  injects it: the OS secret store is user-scoped, so cross-app isolation is the caller's responsibility there
+  (unlike Android's per-UID Keystore and iOS's per-bundle Keychain access group).
+- **Offline write queue** — `nl.rhaydus.offlinesync.DefaultOfflineWriteDrainer` owns the drain loop, the
+  online-triggered restart, the mutex, the poison cap and the in-drain backoff. The app supplies only what is
+  genuinely its own: a `PendingWriteStore<P>` backed by Room (which is also the `WriteQueue<P>` — enqueue and
+  drain-ops live on one type), a `replay` dispatch (`UserBookWriteReplay` / `ListWriteReplay`), a `hintKey`, and an
+  `isTransient` classifier. `:core:domain`'s `UserBookWriteDrainer` / `ListWriteDrainer` are **named subinterfaces**
+  of the foundation's generic `OfflineWriteDrainer`, because its two instantiations erase to one class and Koin
+  could not otherwise tell them apart. The drain→fetch→reconcile composition and `preserveOwnedFields` stay
+  app-side, in `OfflineUserBookSyncImpl`.
+
 ## Local Storage
 
 - **Room**: relational data (books, user books, editions) with migration support. The Room database,

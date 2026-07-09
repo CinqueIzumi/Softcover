@@ -7,8 +7,8 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 import nl.rhaydus.common.runCatchingCancellable
+import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
-import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase

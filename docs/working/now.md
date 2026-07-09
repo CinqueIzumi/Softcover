@@ -22,7 +22,7 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
-- Foundation adoption onto **local 0.3.0** — **18 F-items landed & committed** (core-common, the designsystem-core components/seams, toad convention, ktlint gates, F3 NavPulse, F2 + F3's `BottomBarScaffold`, F1/F19/F22 type-resolved detekt), all green. Remaining (F9/F10→F8 core-platform+offline-sync, F18/F20/F21 build-logic) each need a call/verification (iOS build, plugin publishing). Details: [foundation-upstream-candidates.md](foundation-upstream-candidates.md) → "✅ Adoption progress — LANDED".
+- Foundation adoption onto **local 0.3.0** — **21 F-items landed & committed**: everything except the build-logic batch (F18/F20/F21), which is hard-blocked until the foundation publishes `build-logic` as Gradle plugins. Latest: F9/F10 (core-platform secure storage + connectivity) and F8 (offline-sync). Details: [foundation-upstream-candidates.md](foundation-upstream-candidates.md) → "✅ Adoption progress — LANDED".
 
 ---
 
@@ -38,3 +38,4 @@ _Small things to clear ASAP, outside the release cadence. One line each; delete 
 - [ ] Extend the crash-safety detekt gate to `iosMain`. `detektIosArm64Main` has no type resolution at all, so `rhaydus:UnguardedFlowTerminalRead` cannot run on iOS sources (no real `Flow` terminal reads live there today, so this is a coverage gap, not a live bug). Blocked on detekt supporting type resolution for native targets.
 - [ ] Wire the foundation's own `detektCheck` into its `check` lifecycle. It is registered in `detekt-rules/build.gradle.kts` but attached to nothing, so the foundation never gates on the shared config it ships to every app.
 - [ ] The 18 reading-session use cases in `core/personal/domain/usecase/` do not wrap their bodies in `runCatchingLogged`, so a repository throw (a Room I/O failure in `ReadingSessionRepositoryImpl.pause` / `resume` / `stop`) escapes to `ActiveSessionController`'s scope uncaught. The code-style rule says a use case wraps; these predate it. Fixing it changes their return types to `Result<T>` and touches every caller — hence a fix of its own, not a drive-by.
+- [ ] Delete `LegacySecureApiKeyStorage` and its two impls (`AndroidLegacySecureApiKeyStorage`, `IosLegacySecureApiKeyStorage`) once every install has passed through a build carrying the F9 migration, along with the `legacySecureStorage` parameter on `ApiKeyLocalDataSourceImpl` and its tests. They exist only to carry the API key out of Softcover's pre-foundation Keystore/Keychain locations; a user who skips the release simply re-authenticates.

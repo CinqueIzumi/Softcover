@@ -270,7 +270,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
             thrown shouldBe remoteError
 
             coVerify(exactly = 1) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
 
             val enqueued = slot.first()
@@ -317,7 +317,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
             }
 
             coVerify(exactly = 0) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
         }
     }
@@ -502,7 +502,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
             thrown shouldBe remoteError
 
             coVerify(exactly = 1) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
 
             val enqueued = slot.first()
@@ -549,7 +549,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
             }
 
             coVerify(exactly = 0) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
         }
     }

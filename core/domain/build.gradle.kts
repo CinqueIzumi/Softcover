@@ -14,6 +14,10 @@ kotlin {
 
             implementation(libs.rhaydus.coreCommon)
 
+            // `api`: the connectivity contracts below expose foundation supertypes
+            // (WriteQueue, OfflineWriteDrainer) on their own public surface.
+            api(libs.rhaydus.offlineSync)
+
             implementation(libs.kotlinx.serialization.json)
         }
     }

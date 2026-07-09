@@ -14,6 +14,7 @@ kotlin {
             api(project(":core:network"))
 
             implementation(libs.rhaydus.coreCommon)
+            implementation(libs.rhaydus.corePlatform)
             implementation(libs.okio)
         }
 

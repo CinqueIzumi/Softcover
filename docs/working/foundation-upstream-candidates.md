@@ -27,19 +27,29 @@ Softcover runs on the **local 0.3.0** foundation (`foundation.local=true` in `lo
 stays local — includeBuild `../rhaydus-foundation` @ branch `release/0.3.0`). Everything below is **committed and
 green** (`ktlintCheck`, `styleCheck`, `buildHealth`, `checkModuleGraph`, Android+JVM compile, affected host tests).
 
-**Adopted so far (18 F-items):** F4/F5/F6 (core-common), F13/F14, F16/F17, F12/F15, F11 (designsystem-core), F17
-(toad convention), F7/F23 (ktlint gates), F3 (NavPulse + `BottomBarScaffold`), F2 (designsystem-core), F1/F19/F22
-(type-resolved detekt + shared baseline; `style-check.sh` retired). Commits on Softcover `hotfix/3.0.3`: `39df3489`
+**Adopted so far (21 F-items) — all but the build-logic batch.** F4/F5/F6 (core-common), F13/F14, F16/F17, F12/F15,
+F11 (designsystem-core), F17 (toad convention), F7/F23 (ktlint gates), F3 (NavPulse + `BottomBarScaffold`), F2
+(designsystem-core), F1/F19/F22 (type-resolved detekt + shared baseline; `style-check.sh` retired), F9/F10
+(core-platform: secure storage + connectivity), F8 (offline-sync). Commits on Softcover `hotfix/3.0.3`: `39df3489`
 (switch + F4/F5/F6 + Batch A) → `9b29f108` (F13/F14) → `8cb8c976` (F16/F17) → `5530c5e5` (F12/F15) → `cbfecab4` (F11)
 → `9a79d874` (F7/F23) → `5e7467d5` (F3 NavPulse) → `b2662405` (F2/F3 `BottomBarScaffold`) → F1/F19/F22, plus doc
 records. Foundation `release/0.3.0`: `40b23bf` (mockk-stub autocorrect + two ktlint carve-outs) → `1e0a159`
 (`BottomBarPlacement`) → the detekt baseline's type-resolution calibration + the rule's hot-flow carve-out.
 
-**Remaining (not adopted) — each needs a call/verification I can't do solo:**
-- **F9/F10 → F8** (core-platform SecureStorage/connectivity, then offline-sync) — iOS actuals the build hook won't
-  compile here, and F10↔F8 are entangled; best when iOS can be built/tested.
-- **F18/F20/F21** (build-logic convention plugins) — likely need the foundation `build-logic` **published as Gradle
-  plugins** to apply in the app build; awkward under `foundation.local`.
+**Remaining (not adopted):**
+- **F18/F20/F21** (build-logic convention plugins) — hard-blocked. The foundation's `build-logic` declares real plugin
+  ids (`rhaydus.module-graph`, …), so under `foundation.local=true` the app could reach them via
+  `pluginManagement { includeBuild(...) }`. But `foundation.local` is gitignored: a CI run or fresh clone resolves
+  from published artifacts, and `build-logic` is not in the foundation's `mavenPublishing` set. Applying it would
+  leave the committed build unable to *configure* without a local foundation checkout. Needs a foundation release,
+  not an adoption pass.
+
+🔓 **The "iOS can't be built here" blocker was never real.** `.claude/hooks/block-slow-gradle.sh` matched any task
+containing `iosArm64`/`iosSimulatorArm64`, so it caught the 45-minute release-framework link *and* the ~20-second
+klib compile alike. The hook now allows `compileKotlinIos*` and still blocks `link*` / `*Framework` / `binaries` /
+`embedAndSign` / simulator test runs / `publish`; it also inspects only the Gradle segment of a command, so
+`./gradlew ktlintCheck | grep build` is no longer mistaken for `./gradlew build`. Verified against 17 cases.
+`:core:preferences:compileKotlinIosSimulatorArm64` runs in ~44s, and every iOS actual in this batch was compiled.
 
 ⏱ **`styleCheck` is now ~24s warm (was ~2s).** It runs the type-resolved detekt tasks, which need the compile
 classpath and therefore compile Android + JVM. That is the accepted price of F1: the rule is `@RequiresTypeResolution`
@@ -81,8 +91,8 @@ and is silently inert on the source-only `detekt` task, so a fast gate here woul
 ### Next up
 1. **Publish foundation `0.3.0`** (or keep everyone on `foundation.local=true`) so non-local builds resolve the
    catalog `0.3.0` coordinates — see the ⚠️ above.
-2. Continue with the next foundation batch: **F9/F10 → F8** (`core-platform` + `offline-sync`, wants an iOS build) or
-   **F18/F20/F21** (`build-logic` convention plugins, wants the foundation `build-logic` published as Gradle plugins).
+2. **Publish the foundation `build-logic` as Gradle plugins**, which is the only thing standing between F18/F20/F21
+   and adoption.
 3. **Wire the foundation's own `detektCheck` into its `check`.** It is registered but attached to nothing, so the
    foundation does not gate on the config it ships. Also tracked in `now.md`.
 
@@ -92,8 +102,8 @@ and is silently inert on the source-only `detekt` task, so a fast gate here woul
 
 | Batch | Theme | Home | Items |
 |---|---|---|---|
-| — | **Implemented & adopted** | `core-common` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1, F2, F3, F4, F5, F6, F7, F11, F12, F13, F14, F15, F16, F17, F19, F22, F23 |
-| — | **Implemented, not adopted** | `build-logic` / `core-platform` / `offline-sync` | F8, F9, F10, F18, F20, F21 |
+| — | **Implemented & adopted** | `core-common` / `core-platform` / `offline-sync` / `designsystem-core` / `toad` / `ktlint-rules` / `detekt-rules` | F1–F17, F19, F22, F23 (every item except the build-logic batch) |
+| — | **Implemented, not adopted** | `build-logic` | F18, F20, F21 |
 
 ---
 
@@ -409,88 +419,96 @@ updated; the foundation `design-system-foundations.md` §5.2 rewritten around `p
   has always been ktlint's `BooleanNotationRule`.)
 
 
-## Implemented, not adopted
-
-(F19's entry moved up to *Implemented & adopted*.)
-
----
-
-F9 and F10 landed together in the new `nl.rhaydus:core-platform` module on the foundation `release/0.3.0`
-branch (the two non-visual platform-capability seams of Batch B). During this work `core-ui` was **split**:
-the base non-visual primitives (`AppDispatchers`, `AppLog`, the `runCatching*` helpers, the formatters) were
-renamed into `nl.rhaydus:core-common` (package `nl.rhaydus.common`), and the platform-capability seams live
-one module out in `core-platform` (which `api`-depends on `core-common`). Both seams ship as an interface
-plus public per-platform implementation classes with **no Koin module** — matching the foundation precedent
-that each app wires its own DI. Softcover still ships its app-local copies and has not re-pointed its
-imports.
-
 ### F9 — Secure cross-platform secret storage seam
 
 - **Type:** enhancement (shared util / platform seam)
 - **Home:** `nl.rhaydus:core-platform`
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-platform` as `SecureStorage`
-  (`commonMain`) — the app's single-secret `SecureApiKeyStorage` generalized to a **keyed** read/write/delete
-  store (`read(key)` / `write(key, value)` / `delete(key)`). Public per-platform impls: `AndroidSecureStorage`
-  (AES/GCM in the Keystore, one ciphertext file per key under `filesDir`), `IosSecureStorage` (Keychain
-  generic-password keyed by account), `JvmSecureStorage` (KSafe over the desktop OS secret store; `ksafe`
-  added to the foundation catalog + `core-platform` jvmMain). Impls use `core-common`'s `AppLog`
-  + `AppDispatchers`. Softcover still ships its app-local `:core:preferences`
-  `data/security/SecureApiKeyStorage.kt` (+ the three actuals). Adoption re-points the preferences DI/data
-  code onto `SecureStorage` (keyed by the app's `"api_key"`) and deletes the app-local copies.
+- **Status:** **Implemented & adopted.** Softcover's single-secret `SecureApiKeyStorage` (interface + three impls) is
+  deleted; `ApiKeyLocalDataSourceImpl` now holds the foundation's keyed `SecureStorage`, reading and writing under
+  `"api_key"`. The three `PlatformPreferencesModule` actuals bind `AndroidSecureStorage` / `IosSecureStorage` /
+  `JvmSecureStorage`; the desktop module keeps constructing the namespaced `KSafe` and injecting it.
+
+  **Adoption relocated the secret on two platforms, so it ships with a one-shot migration.** This is the part worth
+  remembering:
+
+  | | Softcover before | Foundation |
+  |---|---|---|
+  | Android alias | `softcover_api_key` | `rhaydus_secure_storage` |
+  | Android file | `api_key.enc` | `secure_api_95_key.enc` (the sanitizer escapes `_`) |
+  | iOS service | `nl.rhaydus.softcover` | `nl.rhaydus.secure_storage` |
+  | iOS account | `softcover_api_key` | the key itself, `api_key` |
+
+  On Android the ciphertext is encrypted under a *different* Keystore key, so it is unreadable by the new store even
+  where found. Desktop is unaffected: the app owns the `KSafe` namespace and `"api_key"` is unchanged. Without a
+  migration every upgrading Android/iOS user would land on the login screen. `migrateLegacyKeyIfNeeded()` — which
+  already carried a plain-text key out of the old DataStore field — gained a second, higher-priority leg that reads
+  the pre-foundation secure location, writes it forward, and only then deletes the old copy. `LegacySecureApiKeyStorage`
+  + its two read-and-delete-only impls exist solely for that and are **deleted next release** (tracked in `now.md`).
+  The legacy Android reader deliberately never *generates* a Keystore key: a missing alias means nothing to migrate.
+
+  Parameterizing the foundation's names instead was rejected. Reproducing `api_key.enc` needs a
+  `fileNameFor: (String) -> String` that ignores its key argument — which silently overwrites the first secret the day
+  a second is stored — and it would pin Softcover to a pre-foundation layout permanently, making the adoption nominal.
+
+  **Cross-app isolation does not depend on those names**, which the foundation's KDoc now says out loud: the Android
+  Keystore is per-UID and `filesDir` is per-app; an iOS Keychain item is scoped to the app's default access group.
+  **Desktop is the exception** — the OS secret store is *user*-scoped and `JvmSecureStorage` passes the key through
+  verbatim, so isolation comes entirely from the caller's `KSafe` `appNamespace`. Softcover sets it; a second rhaydus
+  desktop app that forgot would collide. Also upstreamed: `AndroidSecureStorageTest` (the foundation impl had none, and
+  Softcover's equivalent test died with the class it covered).
 
 ### F10 — `NetworkAvailabilityProvider` (reactive + instant connectivity seam)
 
 - **Type:** enhancement (shared util / platform seam)
 - **Home:** `nl.rhaydus:core-platform`
-- **Status:** **Implemented, not adopted.** Landed in `nl.rhaydus:core-platform`: the
-  `NetworkAvailabilityProvider` interface (`isOnline: StateFlow<Boolean>`, `awaitOnline()`), the
-  `NetworkAvailability` instant-check singleton, and a `BaseNetworkAvailabilityProvider` that implements the
-  shared `awaitOnline()`. Softcover's `ConnectivityDataSource` + `ConnectivityRepositoryImpl` two-layer split
-  is **collapsed** into one provider per platform: `AndroidNetworkAvailabilityProvider`
-  (`ConnectivityManager`), `IosNetworkAvailabilityProvider` (`nw_path_monitor`),
-  `JvmNetworkAvailabilityProvider` (reachability polling, `AutoCloseable`). Softcover still ships the
-  app-local interface (`:core:domain` `connectivity/`) + data layer (`:core:connectivity`). Adoption
-  re-points `NetworkAvailability.install(...)` and the DI onto the foundation types and deletes the app-local
-  copies. (Unblocks Batch H's drain-on-network-return trigger.)
+- **Status:** **Implemented & adopted.** A pure swap — the foundation's providers match Softcover's semantics exactly
+  on all three platforms (Android `NET_CAPABILITY_INTERNET && NET_CAPABILITY_VALIDATED` seeded from `activeNetwork`;
+  JVM a 15s socket probe to `1.1.1.1:443` starting optimistically `true`; iOS `nw_path_monitor` starting `false`), so
+  there is no behavioural drift to reason about. Deleted: `:core:domain` `connectivity/NetworkAvailabilityProvider.kt`
+  and `NetworkAvailability.kt`; `:core:connectivity` `ConnectivityDataSource` + its three actuals and
+  `ConnectivityRepositoryImpl` — the app's two-layer split collapses into one provider per platform. The
+  `PlatformModule` actuals bind the foundation providers directly (jvm still double-bound as `AutoCloseable` so
+  desktop shutdown stops the poll loop). Twelve call sites re-point to `nl.rhaydus.platform.*`; `:core:network`,
+  `:core:designsystem`, `:core:book`, `:core:connectivity` and `:orchestration` now declare `core-platform` directly
+  rather than reaching the types through `:core:domain`.
 
----
-
-F8 landed on the foundation `release/0.3.0` branch as the **new `nl.rhaydus:offline-sync` module** — the
-offline mutation queue batch (Batch H). Per the standing caution, the Softcover-specific shapes were **not**
-lifted: only the generic skeleton was extracted, with the persistence and remote-replay as injected seams.
-Softcover still ships its app-local engine and has not re-pointed anything.
+  Incidentally this deletes `ConnectivityRepositoryImpl`, the one `StateFlow.first { }` site the previous batch's
+  hot-flow carve-out was written for. The carve-out remains correct and still protects the foundation's own
+  `BaseNetworkAvailabilityProvider`.
 
 ### F8 — Offline mutation queue + drain-and-reconcile pattern
 
 - **Type:** enhancement (shared infra) — generic-skeleton extraction
-- **Home:** `nl.rhaydus:offline-sync` (new module, `commonMain`-only, depends on `core-platform` + `core-common`)
-- **Status:** **Implemented, not adopted.** Landed as the new `nl.rhaydus:offline-sync` module (package
-  `nl.rhaydus.offlinesync`), extracting only the generic engine from Softcover's two entangled syncers:
-  `WriteQueue<P>` (enqueue facade) + `PendingWriteStore<P>` (the pluggable persistence seam — `enqueue` /
-  `getPending(maxAttempts)` / `delete` / `incrementAttempts`, so **Room stays app-side**), `PendingWrite<P>`
-  (localId + attempts + payload row), `ReplayOutcome` (SYNCED / DISCARDED), `DrainPolicy` (poison cap +
-  in-drain exponential backoff), `OfflineWriteDrainer<I, K>` + `DefaultOfflineWriteDrainer<P, I, K>` (the
-  drain loop: online-triggered + startup drain under a mutex; per ordered row → backoff replay → SYNCED:delete
-  +hint / DISCARDED:delete / transient:incrementAttempts+halt / terminal:discard; `drain()` returns the
-  `Map<I, Set<K>>` reconciliation hints). The engine takes the app's `replay` dispatch, `hintKey`,
-  `isTransient` classifier, and `NetworkAvailabilityProvider` (F10) as injected inputs; it uses
-  `AppDispatchers` + `runCatchingCancellable` / `runCatchingLogged` from `core-common`. The two Softcover
-  asymmetries collapse into config: `isTransient` (user-book `{ it is RetryableSyncException }` vs list
-  `{ true }`) and `DrainPolicy.inDrainRetries` (1 vs 3). **Drainer only** — the app owns the
-  drain→fetch→reconcile composition (`OfflineUserBookSync.preserveOwnedFields` is inherently app-specific).
-  Unit-tested (`DefaultOfflineWriteDrainerTest`, `commonTest`, fakes + coroutines-test). Softcover still ships
-  its app-local `core/connectivity/.../data/sync/PendingUserBookWriteSyncer.kt` + `PendingListWriteSyncer.kt`,
-  the `core/domain/connectivity/` queue+drainer contracts, the Room DAOs/entities, and `OfflineUserBookSync`.
-  Adoption re-points the two syncers onto `DefaultOfflineWriteDrainer` (payloads/kinds/replay/reconcile stay),
-  makes the Room DAOs back a `PendingWriteStore<P>` impl, and deletes the duplicated drain-loop/backoff code.
+- **Home:** `nl.rhaydus:offline-sync`
+- **Status:** **Implemented & adopted.** `PendingUserBookWriteSyncer` and `PendingListWriteSyncer` are deleted: their
+  drain loop, mutex, online-trigger, in-drain backoff and poison cap all live in `DefaultOfflineWriteDrainer`. What
+  stayed app-side is what is genuinely Softcover's — the replay dispatch, lifted into `UserBookWriteReplay` /
+  `ListWriteReplay` so it remains unit-testable, and `OfflineUserBookSyncImpl.preserveOwnedFields`, which is
+  inherently app-specific. The two asymmetries collapsed to config exactly as predicted: `isTransient`
+  (`{ it is RetryableSyncException }` vs `{ true }`) and `DrainPolicy.inDrainRetries` (1 vs 3).
 
----
+  Two structural notes worth keeping:
+  - **The four domain contracts became named subinterfaces of the foundation's, not typealiases.**
+    `OfflineWriteDrainer<Int, PendingUserBookWriteKind>` and `OfflineWriteDrainer<Unit, Unit>` erase to one class, so
+    Koin could not tell the two drainers apart. `UserBookWriteDrainer` / `ListWriteDrainer` name them; because
+    `DefaultOfflineWriteDrainer` is a *class*, the app wraps it by delegation (`UserBookWriteDrainerImpl`).
+  - **`PendingWriteStore<P>` extends `WriteQueue<P>`**, so each `*WriteQueueImpl` merged with its DAO access into one
+    Room-backed store (`PendingUserBookWriteStore`, `PendingListWriteStore`) owning both enqueue and drain-ops.
+    `:core:domain` now `api`-depends on `offline-sync`, since its contracts expose foundation supertypes.
 
-F18, F20, F21, and F23 landed on the foundation `release/0.3.0` branch — the shared build & gate tooling batch
-(Batch I), in `build-logic` (the convention plugins + root) and `nl.rhaydus:ktlint-rules`. Each extracts a
-reusable gate mechanism from Softcover's inline build config, with the concrete app data left configurable.
-The fifth item, **F22**, is not a foundation-library change (plugin/skill ownership, done at adopt) and stays
-open. Softcover still ships its inline gates and has not re-pointed anything.
+  **One deliberate behaviour change.** A queued row whose persisted `kind` names no known write can never be replayed.
+  The old syncers incremented its attempt count and skipped it, so it sat in the table forever behind the poison cap;
+  the stores now delete it and log via `AppLog.e`.
+
+
+## Implemented, not adopted
+
+Only the **build-logic** batch remains. F18, F20 and F21 landed on the foundation `release/0.3.0` branch in
+`build-logic` (the convention plugins + root); each extracts a reusable gate mechanism from Softcover's inline build
+config, with the concrete app data left configurable. They are **hard-blocked on publishing**: the plugins resolve
+under `foundation.local=true` via `pluginManagement { includeBuild(...) }`, but `foundation.local` is gitignored, so a
+CI run or fresh clone would fail to *configure* — `build-logic` is not in the foundation's `mavenPublishing` set.
+(F19, F22 and F23 from this batch are adopted; their entries moved up.)
 
 ### F18 — `checkModuleGraph` tier-DAG + api-visibility enforcement
 

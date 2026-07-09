@@ -58,7 +58,7 @@ class ListsRepositoryImplRefreshTest {
             // ----- Arrange -----
             val userId = 10
 
-            coJustRun { listWriteDrainer.drainPendingWrites() }
+            coJustRun { listWriteDrainer.drain() }
 
             coEvery {
                 listsRemoteDataSource.fetchListSignatures()
@@ -73,7 +73,7 @@ class ListsRepositoryImplRefreshTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                listWriteDrainer.drainPendingWrites()
+                listWriteDrainer.drain()
             }
         }
 

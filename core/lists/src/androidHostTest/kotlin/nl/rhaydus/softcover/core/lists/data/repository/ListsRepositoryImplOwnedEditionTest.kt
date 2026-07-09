@@ -419,7 +419,7 @@ class ListsRepositoryImplOwnedEditionTest {
             caught.exceptionOrNull() shouldBe remoteError
 
             coVerify(exactly = 1) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
 
             coVerify(exactly = 0) {

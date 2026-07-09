@@ -129,7 +129,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             coVerify {
                 userBookWriteQueue.enqueue(
-                    update = match { write ->
+                    payload = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
@@ -163,7 +163,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             coVerify {
                 userBookWriteQueue.enqueue(
-                    update = match { write ->
+                    payload = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
                             write.progressSeconds == 120
                     },
@@ -192,7 +192,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(update = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
 
         @Test
@@ -216,7 +216,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(update = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
     }
 
@@ -245,7 +245,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             coVerify {
                 userBookWriteQueue.enqueue(
-                    update = match { write ->
+                    payload = match { write ->
                         write.kind == PendingUserBookWriteKind.MARK_AS_READ &&
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
@@ -273,7 +273,7 @@ class OfflineUserBookSyncImplTest {
             syncImpl.enqueueMarkAsRead(book = book)
 
             // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(update = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
 
         @Test
@@ -293,7 +293,7 @@ class OfflineUserBookSyncImplTest {
             syncImpl.enqueueMarkAsRead(book = book)
 
             // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(update = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
     }
 
@@ -322,7 +322,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             coVerify {
                 userBookWriteQueue.enqueue(
-                    update = match { write ->
+                    payload = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_RATING &&
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
@@ -350,7 +350,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             coVerify {
                 userBookWriteQueue.enqueue(
-                    update = match { write ->
+                    payload = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_RATING &&
                             write.userBookReadId == 0 &&
                             write.rating == 3.0
@@ -375,7 +375,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(update = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
     }
 
@@ -408,7 +408,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             coVerify {
                 userBookWriteQueue.enqueue(
-                    update = match { write ->
+                    payload = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
@@ -438,7 +438,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             coVerify {
                 userBookWriteQueue.enqueue(
-                    update = match { write ->
+                    payload = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
                             write.userBookReadId == 0 &&
                             write.reviewSlateJson == review.toJson() &&
@@ -465,7 +465,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(update = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
     }
 
@@ -481,7 +481,7 @@ class OfflineUserBookSyncImplTest {
             val order = mutableListOf<String>()
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } coAnswers {
                 order += "drain"
                 emptyMap()
@@ -502,7 +502,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Arrange -----
             val fetchedBook = stubBook(userBook = stubUserBook(id = 1))
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } returns emptyMap()
 
             // ----- Act -----
@@ -521,7 +521,7 @@ class OfflineUserBookSyncImplTest {
             val fetchedBook = stubBook(userBook = stubUserBook(id = 10)) // different userBookId
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_RATING),
             )
@@ -601,7 +601,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS),
             )
@@ -661,7 +661,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS),
             )
@@ -741,7 +741,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_RATING),
             )
@@ -822,7 +822,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.MARK_AS_READ),
             )
@@ -888,7 +888,7 @@ class OfflineUserBookSyncImplTest {
             val localBook = fetchedBook.copy(userBook = localUserBook)
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_REVIEW),
             )
@@ -964,7 +964,7 @@ class OfflineUserBookSyncImplTest {
             val otherFetchedBook = stubBook(userBook = serverUserBookForOther)
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_RATING),
             )
@@ -1032,7 +1032,7 @@ class OfflineUserBookSyncImplTest {
             val localBook = fetchedBook.copy(userBook = localUserBook)
 
             coEvery {
-                userBookWriteDrainer.drainPendingUpdates()
+                userBookWriteDrainer.drain()
             } returns mapOf(
                 syncedUserBookId to setOf(
                     PendingUserBookWriteKind.UPDATE_RATING,
