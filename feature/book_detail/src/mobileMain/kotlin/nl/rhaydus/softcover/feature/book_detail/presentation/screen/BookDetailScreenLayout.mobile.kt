@@ -29,13 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.layout.BottomNavigationSpacer
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -101,7 +101,11 @@ internal actual fun BookDetailScreenLayout(
         contentWindowInsets = WindowInsets(),
     ) { innerPadding ->
         if (showOfflinePlaceholder) {
-            OfflineScreenContent(modifier = Modifier.padding(innerPadding))
+            OfflineScreenContent(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(bottom = bottomChromePadding()),
+            )
 
             SoftcoverTopBar(
                 title = "",
@@ -278,7 +282,7 @@ internal actual fun BookDetailScreenLayout(
 
             item { Spacer(modifier = Modifier.height(32.dp)) }
 
-            item { BottomNavigationSpacer() }
+            item { Spacer(modifier = Modifier.height(bottomChromePadding())) }
         }
 
         SoftcoverTopBar(

@@ -44,6 +44,7 @@ import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
@@ -394,7 +395,10 @@ private fun ShelfSidebar(
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
-            .padding(vertical = 16.dp),
+            .padding(
+                top = 16.dp,
+                bottom = 16.dp + rememberBottomBarPadding(),
+            ),
     ) {
         SidebarSectionLabel(text = "Shelves")
 

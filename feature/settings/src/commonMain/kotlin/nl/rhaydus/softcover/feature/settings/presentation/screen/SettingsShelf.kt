@@ -45,6 +45,7 @@ import androidx.compose.ui.zIndex
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.noRippleClickable
@@ -745,8 +746,10 @@ internal fun LibraryVisibilitySaveBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = 24.dp,
-                        vertical = 16.dp,
+                        start = 24.dp,
+                        end = 24.dp,
+                        top = 16.dp,
+                        bottom = 16.dp + rememberBottomBarPadding(),
                     ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -216,7 +217,7 @@ private fun SettingsCategorySidebar(
                 start = 26.dp,
                 end = 16.dp,
                 top = 8.dp,
-                bottom = 16.dp,
+                bottom = 16.dp + rememberBottomBarPadding(),
             ),
         )
     }
@@ -354,7 +355,10 @@ private fun AppearancePane(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(vertical = 24.dp),
+                .padding(
+                    top = 24.dp,
+                    bottom = 24.dp + rememberBottomBarPadding(),
+                ),
         ) {
             Column(
                 modifier = Modifier
@@ -446,7 +450,10 @@ private fun AboutPane(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(vertical = 24.dp),
+                .padding(
+                    top = 24.dp,
+                    bottom = 24.dp + rememberBottomBarPadding(),
+                ),
         ) {
             Column(
                 modifier = Modifier

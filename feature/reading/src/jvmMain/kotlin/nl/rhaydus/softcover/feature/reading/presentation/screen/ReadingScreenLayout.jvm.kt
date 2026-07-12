@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
@@ -164,7 +165,7 @@ private fun DesktopReadingContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(readingScrollState)
-                    .padding(top = 8.dp, bottom = 24.dp),
+                    .padding(top = 8.dp, bottom = 24.dp + rememberBottomBarPadding()),
             ) {
                 if (planTodayMessage != null && isPlanTodayDismissed.not()) {
                     PlanTodayNudge(

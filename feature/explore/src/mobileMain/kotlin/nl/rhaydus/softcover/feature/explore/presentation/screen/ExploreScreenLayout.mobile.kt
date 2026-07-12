@@ -88,7 +88,11 @@ internal actual fun ExploreScreenLayout(
         },
     ) { padding ->
         if (isOnline.not()) {
-            OfflineScreenContent(modifier = Modifier.padding(padding))
+            OfflineScreenContent(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(bottom = rememberBottomBarPadding()),
+            )
             return@Scaffold
         }
 
@@ -333,6 +337,7 @@ private fun ActiveSearchContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 items(state.queriedBooks, key = { it.id }) { book ->

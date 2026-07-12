@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.core.database.dao.DismissedContinueSeriesDao
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesBookEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 
-interface DismissedContinueSeriesLocalDataSource {
+internal interface DismissedContinueSeriesLocalDataSource {
     val dismissedBookIds: Flow<List<Int>>
     val dismissedSeriesIds: Flow<List<Int>>
     val dismissedBooks: Flow<List<DismissedContinueSeriesBookEntity>>
