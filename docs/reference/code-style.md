@@ -4,6 +4,57 @@ The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.3.0/
 
 This file keeps only Softcover-specific deltas.
 
+## Formatting (Softcover deltas)
+
+### Trailing lambda over a multi-line body — no brace glomming
+
+The foundation §Argument and Property Layout exempts a trailing lambda from the one-per-line rule
+and its examples show the inline glommed form (e.g. `scope.setState { it.copy(link = …) }`,
+`.onFailure { AppLog.e(…) }`). **Softcover tightens this:** when a trailing lambda's body is a
+**multi-line** construct — a wrapped multi-argument call, a multi-line `it.copy(...)`,
+`AppLog.e(...)`, `async { call(...) }`, etc. — the lambda's opening `{` and closing `}` each go on
+their own line. Never glom the closer as `) }`.
+
+```kotlin
+// Bad — closing paren + brace glommed onto one line.
+scope.setState { it.copy(
+    hiddenBooks = books,
+    initialized = true,
+) }
+
+.onFailure { AppLog.e(
+    it,
+    "Failed to unblock book $bookId",
+) }
+
+// Good — braces on their own lines.
+scope.setState {
+    it.copy(
+        hiddenBooks = books,
+        initialized = true,
+    )
+}
+
+.onFailure {
+    AppLog.e(
+        it,
+        "Failed to unblock book $bookId",
+    )
+}
+```
+
+A trailing lambda whose body **fits on one line** stays inline (`repository.observe { it.first() }`),
+and a single-argument call inside a trailing lambda is not forced to wrap. Only the multi-line body
+case is affected.
+
+**Not yet tool-enforced.** `.editorconfig` disables ktlint's standard ruleset, and the foundation
+`nl.rhaydus:ktlint-rules` multi-arg wrapping rule currently *exempts* trailing-lambda calls (and even
+produces the glommed `) }` when it wraps a call inside one), so `ktlintCheck` does **not** catch this
+today — it is enforced by the guide + review. The un-glommed form is stable under `ktlintFormat`
+(verified: the formatter never collapses it back). This rule is filed as a foundation ktlint-rule
+candidate — see [`../working/foundation-upstream-candidates.md`](../working/foundation-upstream-candidates.md);
+once that rule lands it will auto-fix and gate the whole codebase.
+
 ## Error Handling & Logging (Softcover concretizations)
 
 The layered error model (data sources/repositories throw, use cases return `Result<T>` via a cancellation-aware `runCatching`, actions fold with `.onSuccess` / `.onFailure`) is the foundation's — including the `runCatchingCancellable` / `runCatchingLogged` helpers and the `AppLog` facade, which now live in `nl.rhaydus:core-common` (package `nl.rhaydus.common`). The project-specific bindings (the typed `ApiException` model, the presentation-authored copy, the `"Softcover"` tag passed to `AppLog.install`) are:

@@ -1,2 +1,3 @@
 - [OfflineSync mocking pattern in BooksRepositoryImplTest](feedback_offline_sync_mocking_pattern.md) — relaxed offlineSync mock silences initializeBooks; every refreshUserBooks test needs a pass-through drainAndReconcile stub
 - [Kotest reference equality: always parenthesise ===](feedback_kotest_reference_equality.md) — `a === b shouldBe true` is wrong (=== < infix precedence); write `(a === b) shouldBe true`
+- [Coroutine-safe tests: share ONE TestDispatcher/scheduler](feedback_coroutine_safe_tests.md) — mismatched schedulers (e.g. Room `queryContext` dispatcher ≠ `runTest`'s) hang the worker at 0% CPU or pass by luck; use one dispatcher field everywhere + `runTest(testDispatcher)` + `setMain`/`resetMain`; verify with a bounded run
