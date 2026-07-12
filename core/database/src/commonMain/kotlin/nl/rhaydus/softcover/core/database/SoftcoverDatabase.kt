@@ -68,7 +68,7 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 43,
+    version = 44,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1146,6 +1146,24 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // Hidden "up next in your series" entries only stored bare IDs, so once dismissed a book or
+        // series could never be shown to the user for review/unblock. These columns let a dismiss write
+        // capture display metadata alongside the ID, making the row self-describing and the Hidden
+        // Suggestions screen offline-renderable with no follow-up network fetch. Existing rows default
+        // to NULL and are backfilled lazily by `EnrichDismissedContinueSeriesMetadataUseCase` the first
+        // time that screen loads.
+        private val MIGRATION_43_44 = object : Migration(43, 44) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN bookTitle TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN coverUrl TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN authorText TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN seriesName TEXT DEFAULT NULL")
+
+                connection.execSQL("ALTER TABLE dismissed_continue_series ADD COLUMN seriesName TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series ADD COLUMN coverUrl TEXT DEFAULT NULL")
+            }
+        }
+
         private val MIGRATION_29_30 = object : Migration(29, 30) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL(
@@ -1266,6 +1284,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_40_41,
             MIGRATION_41_42,
             MIGRATION_42_43,
+            MIGRATION_43_44,
         )
     }
 }

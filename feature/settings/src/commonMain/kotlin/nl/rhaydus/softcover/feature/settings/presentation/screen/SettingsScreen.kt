@@ -76,6 +76,9 @@ object SettingsScreen : Screen {
             navigateToLibraryVisibility = {
                 navigator.parent?.push(LibraryVisibilitySettingsScreen())
             },
+            navigateToHiddenSuggestions = {
+                navigator.parent?.push(appNavigator.screen(ScreenDestination.HiddenSuggestions))
+            },
             libraryVisibilityState = libraryVisibilityState,
             libraryVisibilityRunAction = { action -> libraryVisibilityModel?.runAction(action) },
             onCreateListClick = {
@@ -113,6 +116,7 @@ internal expect fun SettingsScreenLayout(
     navigateToProfile: () -> Unit,
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
+    navigateToHiddenSuggestions: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     onCreateListClick: () -> Unit,

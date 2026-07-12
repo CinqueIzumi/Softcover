@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
-import nl.rhaydus.designsystem.component.DesktopTooltip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -34,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.modifier.hoverHighlight
@@ -77,6 +77,7 @@ internal actual fun SettingsScreenLayout(
     navigateToProfile: () -> Unit,
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
+    navigateToHiddenSuggestions: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     onCreateListClick: () -> Unit,
@@ -93,6 +94,7 @@ internal actual fun SettingsScreenLayout(
             versionCode = state.appVersionCode,
             onSelect = { selected = it },
             onProfileClick = navigateToProfile,
+            onHiddenSuggestionsClick = navigateToHiddenSuggestions,
             modifier = Modifier
                 .width(SETTINGS_SIDEBAR_WIDTH)
                 .fillMaxHeight(),
@@ -136,6 +138,7 @@ private fun SettingsCategorySidebar(
     versionCode: Int,
     onSelect: (SettingsCategory) -> Unit,
     onProfileClick: () -> Unit,
+    onHiddenSuggestionsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -178,6 +181,18 @@ private fun SettingsCategorySidebar(
                 selected = selected == SettingsCategory.LIBRARY_TABS,
                 showTrailingArrow = false,
                 onClick = { onSelect(SettingsCategory.LIBRARY_TABS) },
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SidebarSectionLabel(text = "Privacy")
+
+            SettingsSidebarRow(
+                label = "Hidden suggestions",
+                icon = SoftcoverIcon.FilterList,
+                selected = false,
+                showTrailingArrow = true,
+                onClick = onHiddenSuggestionsClick,
             )
 
             Spacer(modifier = Modifier.height(16.dp))

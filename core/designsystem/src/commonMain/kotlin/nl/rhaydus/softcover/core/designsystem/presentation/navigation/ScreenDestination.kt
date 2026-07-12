@@ -25,4 +25,6 @@ sealed interface ScreenDestination {
     data object FocusMode : ScreenDestination
 
     data object Profile : ScreenDestination
+
+    data object HiddenSuggestions : ScreenDestination
 }

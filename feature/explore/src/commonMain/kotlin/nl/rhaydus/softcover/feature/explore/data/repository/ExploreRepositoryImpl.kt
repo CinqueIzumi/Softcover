@@ -1,10 +1,14 @@
 package nl.rhaydus.softcover.feature.explore.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSource
+import nl.rhaydus.softcover.feature.explore.data.mapper.toDomain
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
 internal class ExploreRepositoryImpl(
@@ -22,6 +26,16 @@ internal class ExploreRepositoryImpl(
 
     override val dismissedContinueSeriesIds: Flow<List<Int>> =
         dismissedContinueSeriesLocalDataSource.dismissedSeriesIds
+
+    override val dismissedContinueSeriesBooks: Flow<List<DismissedSeriesBook>> =
+        dismissedContinueSeriesLocalDataSource.dismissedBooks.map { entities ->
+            entities.map { it.toDomain() }
+        }
+
+    override val dismissedContinueSeries: Flow<List<DismissedSeries>> =
+        dismissedContinueSeriesLocalDataSource.dismissedSeries.map { entities ->
+            entities.map { it.toDomain() }
+        }
 
     override suspend fun fetchNextInSeries(
         seriesId: Int,
@@ -53,12 +67,32 @@ internal class ExploreRepositoryImpl(
         searchLocalDataSource.removeAllSearchQueries()
     }
 
-    override suspend fun dismissContinueSeriesBook(bookId: Int) {
-        dismissedContinueSeriesLocalDataSource.dismissBook(bookId = bookId)
+    override suspend fun dismissContinueSeriesBook(
+        bookId: Int,
+        title: String?,
+        coverUrl: String?,
+        authorText: String?,
+        seriesName: String?,
+    ) {
+        dismissedContinueSeriesLocalDataSource.dismissBook(
+            bookId = bookId,
+            title = title,
+            coverUrl = coverUrl,
+            authorText = authorText,
+            seriesName = seriesName,
+        )
     }
 
-    override suspend fun dismissContinueSeries(seriesId: Int) {
-        dismissedContinueSeriesLocalDataSource.dismissSeries(seriesId = seriesId)
+    override suspend fun dismissContinueSeries(
+        seriesId: Int,
+        seriesName: String?,
+        coverUrl: String?,
+    ) {
+        dismissedContinueSeriesLocalDataSource.dismissSeries(
+            seriesId = seriesId,
+            seriesName = seriesName,
+            coverUrl = coverUrl,
+        )
     }
 
     override suspend fun undoContinueSeriesBookDismissal(bookId: Int) {

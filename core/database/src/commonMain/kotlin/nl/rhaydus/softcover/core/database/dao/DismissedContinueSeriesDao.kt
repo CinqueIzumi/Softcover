@@ -15,6 +15,12 @@ interface DismissedContinueSeriesDao {
     @Query("SELECT seriesId FROM dismissed_continue_series")
     fun observeDismissedSeriesIds(): Flow<List<Int>>
 
+    @Query("SELECT * FROM dismissed_continue_series_books")
+    fun observeDismissedBooks(): Flow<List<DismissedContinueSeriesBookEntity>>
+
+    @Query("SELECT * FROM dismissed_continue_series")
+    fun observeDismissedSeries(): Flow<List<DismissedContinueSeriesEntity>>
+
     @Upsert
     suspend fun dismissBook(entity: DismissedContinueSeriesBookEntity)
 

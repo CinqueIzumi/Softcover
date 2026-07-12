@@ -8,10 +8,22 @@ import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 interface DismissedContinueSeriesLocalDataSource {
     val dismissedBookIds: Flow<List<Int>>
     val dismissedSeriesIds: Flow<List<Int>>
+    val dismissedBooks: Flow<List<DismissedContinueSeriesBookEntity>>
+    val dismissedSeries: Flow<List<DismissedContinueSeriesEntity>>
 
-    suspend fun dismissBook(bookId: Int)
+    suspend fun dismissBook(
+        bookId: Int,
+        title: String?,
+        coverUrl: String?,
+        authorText: String?,
+        seriesName: String?,
+    )
 
-    suspend fun dismissSeries(seriesId: Int)
+    suspend fun dismissSeries(
+        seriesId: Int,
+        seriesName: String?,
+        coverUrl: String?,
+    )
 
     suspend fun undoBookDismissal(bookId: Int)
 
@@ -25,12 +37,40 @@ internal class DismissedContinueSeriesLocalDataSourceImpl(
 
     override val dismissedSeriesIds = dao.observeDismissedSeriesIds()
 
-    override suspend fun dismissBook(bookId: Int) {
-        dao.dismissBook(DismissedContinueSeriesBookEntity(bookId = bookId))
+    override val dismissedBooks = dao.observeDismissedBooks()
+
+    override val dismissedSeries = dao.observeDismissedSeries()
+
+    override suspend fun dismissBook(
+        bookId: Int,
+        title: String?,
+        coverUrl: String?,
+        authorText: String?,
+        seriesName: String?,
+    ) {
+        dao.dismissBook(
+            DismissedContinueSeriesBookEntity(
+                bookId = bookId,
+                bookTitle = title,
+                coverUrl = coverUrl,
+                authorText = authorText,
+                seriesName = seriesName,
+            ),
+        )
     }
 
-    override suspend fun dismissSeries(seriesId: Int) {
-        dao.dismissSeries(DismissedContinueSeriesEntity(seriesId = seriesId))
+    override suspend fun dismissSeries(
+        seriesId: Int,
+        seriesName: String?,
+        coverUrl: String?,
+    ) {
+        dao.dismissSeries(
+            DismissedContinueSeriesEntity(
+                seriesId = seriesId,
+                seriesName = seriesName,
+                coverUrl = coverUrl,
+            ),
+        )
     }
 
     override suspend fun undoBookDismissal(bookId: Int) {

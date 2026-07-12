@@ -11,16 +11,27 @@ import nl.rhaydus.toad.ActionScope
 internal class OnDismissContinueSeriesBookAction(
     val bookId: Int,
     val bookTitle: String,
+    val coverUrl: String?,
+    val authorText: String?,
+    val seriesName: String?,
 ) : ExploreAction {
     override suspend fun execute(
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        dependencies.dismissContinueSeriesBookUseCase(bookId = bookId)
-            .onFailure { AppLog.e(
-                it,
-                "Failed to dismiss book $bookId from continue-series",
-            ) }
+        dependencies.dismissContinueSeriesBookUseCase(
+            bookId = bookId,
+            title = bookTitle,
+            coverUrl = coverUrl,
+            authorText = authorText,
+            seriesName = seriesName,
+        )
+            .onFailure {
+                AppLog.e(
+                    it,
+                    "Failed to dismiss book $bookId from continue-series",
+                )
+            }
             .onSuccess {
                 SnackBarManager.showSnackBar(
                     title = "\"$bookTitle\" won't be suggested again",
@@ -28,10 +39,12 @@ internal class OnDismissContinueSeriesBookAction(
                     onActionClick = {
                         dependencies.launch {
                             dependencies.undoContinueSeriesBookDismissalUseCase(bookId = bookId)
-                                .onFailure { AppLog.e(
-                                    it,
-                                    "Failed to undo book dismissal",
-                                ) }
+                                .onFailure {
+                                    AppLog.e(
+                                        it,
+                                        "Failed to undo book dismissal",
+                                    )
+                                }
                         }
                     },
                 )

@@ -11,16 +11,23 @@ import nl.rhaydus.toad.ActionScope
 internal class OnDismissContinueSeriesAction(
     val seriesId: Int,
     val seriesName: String,
+    val coverUrl: String?,
 ) : ExploreAction {
     override suspend fun execute(
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        dependencies.dismissContinueSeriesUseCase(seriesId = seriesId)
-            .onFailure { AppLog.e(
-                it,
-                "Failed to dismiss series $seriesId",
-            ) }
+        dependencies.dismissContinueSeriesUseCase(
+            seriesId = seriesId,
+            seriesName = seriesName,
+            coverUrl = coverUrl,
+        )
+            .onFailure {
+                AppLog.e(
+                    it,
+                    "Failed to dismiss series $seriesId",
+                )
+            }
             .onSuccess {
                 SnackBarManager.showSnackBar(
                     title = "\"$seriesName\" won't be suggested again",
@@ -28,10 +35,12 @@ internal class OnDismissContinueSeriesAction(
                     onActionClick = {
                         dependencies.launch {
                             dependencies.undoContinueSeriesDismissalUseCase(seriesId = seriesId)
-                                .onFailure { AppLog.e(
-                                    it,
-                                    "Failed to undo series dismissal",
-                                ) }
+                                .onFailure {
+                                    AppLog.e(
+                                        it,
+                                        "Failed to undo series dismissal",
+                                    )
+                                }
                         }
                     },
                 )

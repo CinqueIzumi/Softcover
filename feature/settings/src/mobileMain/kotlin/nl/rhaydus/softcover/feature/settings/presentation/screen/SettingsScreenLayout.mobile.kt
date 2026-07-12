@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
-import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.noRippleClickable
@@ -59,6 +59,7 @@ internal actual fun SettingsScreenLayout(
     navigateToProfile: () -> Unit,
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
+    navigateToHiddenSuggestions: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     onCreateListClick: () -> Unit,
@@ -141,6 +142,17 @@ internal actual fun SettingsScreenLayout(
                         contentDescription = "Library tabs icon",
                     ),
                     onClick = navigateToLibraryVisibility,
+                )
+
+                SettingsRowDivider()
+
+                SettingsRow(
+                    title = "Hidden suggestions",
+                    icon = drawableIconResource(
+                        icon = SoftcoverIcon.FilterList,
+                        contentDescription = "Hidden suggestions icon",
+                    ),
+                    onClick = navigateToHiddenSuggestions,
                 )
             }
 
@@ -234,6 +246,7 @@ private fun SettingsScreenPreview() {
             navigateToProfile = {},
             navigateToAppearanceSettings = {},
             navigateToLibraryVisibility = {},
+            navigateToHiddenSuggestions = {},
             libraryVisibilityState = LibraryVisibilitySettingsUiState(),
             libraryVisibilityRunAction = {},
             onCreateListClick = {},

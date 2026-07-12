@@ -2,12 +2,16 @@ package nl.rhaydus.softcover.feature.explore.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 
 interface ExploreRepository {
     val previousSearchQueries: Flow<List<String>>
     val queriedBooks: Flow<List<Book>>
     val dismissedContinueSeriesBookIds: Flow<List<Int>>
     val dismissedContinueSeriesIds: Flow<List<Int>>
+    val dismissedContinueSeriesBooks: Flow<List<DismissedSeriesBook>>
+    val dismissedContinueSeries: Flow<List<DismissedSeries>>
 
     suspend fun fetchNextInSeries(
         seriesId: Int,
@@ -25,9 +29,19 @@ interface ExploreRepository {
 
     suspend fun removeAllSearchQueries()
 
-    suspend fun dismissContinueSeriesBook(bookId: Int)
+    suspend fun dismissContinueSeriesBook(
+        bookId: Int,
+        title: String? = null,
+        coverUrl: String? = null,
+        authorText: String? = null,
+        seriesName: String? = null,
+    )
 
-    suspend fun dismissContinueSeries(seriesId: Int)
+    suspend fun dismissContinueSeries(
+        seriesId: Int,
+        seriesName: String? = null,
+        coverUrl: String? = null,
+    )
 
     suspend fun undoContinueSeriesBookDismissal(bookId: Int)
 
