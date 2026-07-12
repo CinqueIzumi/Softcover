@@ -49,13 +49,20 @@ internal class GitHubReleaseSource(private val appDispatchers: AppDispatchers) :
     // JDK default is NEVER, which would surface the 302 as a failed download). NORMAL follows
     // same-scheme redirects — GitHub stays on HTTPS — without allowing an HTTPS→HTTP downgrade.
     //
+    // Built lazily so class linking happens on the first update check (inside the runCatching in
+    // requestLatestRelease/downloadTo), not when Koin constructs this at graph build time during the
+    // first composition. If java.net.http is ever missing from the packaged runtime again, that
+    // degrades the updater to a logged no-op instead of taking the whole app down at launch.
+    //
     // Deliberately not closed on shutdown: the JDK HttpClient's selector/executor threads are daemon
     // (they never block JVM exit), and `HttpClient.close()` on JDK 21+ *blocks* until in-flight
     // requests finish — so closing it during the desktop shutdown path could stall a window-close
     // mid-download. The guaranteed `exitProcess(0)` reclaims it instead.
-    private val httpClient: HttpClient = HttpClient.newBuilder()
-        .followRedirects(HttpClient.Redirect.NORMAL)
-        .build()
+    private val httpClient: HttpClient by lazy {
+        HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build()
+    }
 
     private val json = Json { ignoreUnknownKeys = true }
 

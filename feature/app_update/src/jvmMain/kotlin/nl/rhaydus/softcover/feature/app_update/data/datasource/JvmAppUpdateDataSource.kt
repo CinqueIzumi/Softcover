@@ -10,6 +10,7 @@ import java.io.File
 import kotlin.system.exitProcess
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerLauncher
@@ -52,7 +53,11 @@ internal class JvmAppUpdateDataSource(
     }
 
     override suspend fun checkForUpdate() {
-        val release = releaseSource.fetchLatestRelease()
+        // Fail soft: a throw from the release provider (e.g. a runtime that stripped java.net.http)
+        // degrades the check to `Idle` rather than escaping into composition and crashing the app.
+        val release = runCatchingLogged("Desktop update check failed.") {
+            releaseSource.fetchLatestRelease()
+        }.getOrNull()
 
         val isNewer = release != null &&
             VersionComparator.isNewer(

@@ -49,9 +49,20 @@ compose.desktop {
             // Required for KSafe's OS-backed key custody in a trimmed release distributable: the
             // native secret-store access needs sun.misc.Unsafe (jdk.unsupported); without these the
             // packaged app silently drops to KSafe's software-key fallback tier.
+            // jlink strips every module not listed here from the bundled runtime, so a missing entry
+            // surfaces as a launch-time NoClassDefFoundError in the packaged app only — a `:run`
+            // launch uses the full local JDK and never reproduces it. Keep this reconciled with
+            // `./gradlew :desktopApp:suggestRuntimeModules` (jdeps) whenever a dependency changes.
             modules(
                 "jdk.unsupported",
                 "java.management",
+                // Flagged as required by jdeps (`suggestRuntimeModules`); a transitive dependency in
+                // the runtime classpath references the JVM instrumentation API.
+                "java.instrument",
+                // The desktop self-updater (GitHubReleaseSource) talks to GitHub over the JDK's
+                // java.net.http client; without this the packaged app died at launch with a
+                // NoClassDefFoundError for java/net/http/HttpClient.
+                "java.net.http",
             )
 
             // App icons. macOS gets the rounded/padded native variant; Windows + Linux use the flat
