@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSer
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSource
 import nl.rhaydus.softcover.feature.explore.data.mapper.toDomain
+import nl.rhaydus.softcover.feature.explore.data.mapper.toEntity
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
@@ -20,9 +21,6 @@ internal class ExploreRepositoryImpl(
         searchLocalDataSource.previousSearchQueries
 
     override val queriedBooks: Flow<List<Book>> = searchRemoteDataSource.queriedBooks
-
-    override val dismissedContinueSeriesBookIds: Flow<List<Int>> =
-        dismissedContinueSeriesLocalDataSource.dismissedBookIds
 
     override val dismissedContinueSeriesIds: Flow<List<Int>> =
         dismissedContinueSeriesLocalDataSource.dismissedSeriesIds
@@ -67,20 +65,8 @@ internal class ExploreRepositoryImpl(
         searchLocalDataSource.removeAllSearchQueries()
     }
 
-    override suspend fun dismissContinueSeriesBook(
-        bookId: Int,
-        title: String?,
-        coverUrl: String?,
-        authorText: String?,
-        seriesName: String?,
-    ) {
-        dismissedContinueSeriesLocalDataSource.dismissBook(
-            bookId = bookId,
-            title = title,
-            coverUrl = coverUrl,
-            authorText = authorText,
-            seriesName = seriesName,
-        )
+    override suspend fun dismissContinueSeriesBook(book: DismissedSeriesBook) {
+        dismissedContinueSeriesLocalDataSource.dismissBook(entity = book.toEntity())
     }
 
     override suspend fun dismissContinueSeries(

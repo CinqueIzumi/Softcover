@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -9,36 +10,26 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiSt
 import nl.rhaydus.toad.ActionScope
 
 internal class OnDismissContinueSeriesBookAction(
-    val bookId: Int,
-    val bookTitle: String,
-    val coverUrl: String?,
-    val authorText: String?,
-    val seriesName: String?,
+    val book: DismissedSeriesBook,
 ) : ExploreAction {
     override suspend fun execute(
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        dependencies.dismissContinueSeriesBookUseCase(
-            bookId = bookId,
-            title = bookTitle,
-            coverUrl = coverUrl,
-            authorText = authorText,
-            seriesName = seriesName,
-        )
+        dependencies.dismissContinueSeriesBookUseCase(book = book)
             .onFailure {
                 AppLog.e(
                     it,
-                    "Failed to dismiss book $bookId from continue-series",
+                    "Failed to dismiss book ${book.bookId} from continue-series",
                 )
             }
             .onSuccess {
                 SnackBarManager.showSnackBar(
-                    title = "\"$bookTitle\" won't be suggested again",
+                    title = "\"${book.title ?: "Book"}\" won't be suggested again",
                     actionLabel = "Undo",
                     onActionClick = {
                         dependencies.launch {
-                            dependencies.undoContinueSeriesBookDismissalUseCase(bookId = bookId)
+                            dependencies.undoContinueSeriesBookDismissalUseCase(bookId = book.bookId)
                                 .onFailure {
                                     AppLog.e(
                                         it,

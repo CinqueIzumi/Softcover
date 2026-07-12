@@ -57,6 +57,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnDismissContinueSeriesAction
@@ -363,11 +364,17 @@ internal fun ContinueSeriesMenuSheet(
             onDismissBookClick = {
                 runAction(
                     OnDismissContinueSeriesBookAction(
-                        bookId = book.id,
-                        bookTitle = book.title,
-                        coverUrl = book.coverUrl,
-                        authorText = book.authorString,
-                        seriesName = book.bookSeries?.name,
+                        book = DismissedSeriesBook(
+                            bookId = book.id,
+                            title = book.title,
+                            coverUrl = book.coverUrl,
+                            authorText = book.authorString,
+                            seriesName = book.bookSeries?.name,
+                            seriesId = book.bookSeries?.id,
+                            // The series cursor moves past this book's *last* position, so an omnibus
+                            // spanning several positions can't re-match on the next fetch.
+                            seriesPosition = book.positionsInSeries.lastOrNull(),
+                        ),
                     ),
                 )
 

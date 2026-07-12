@@ -33,6 +33,7 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDis
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedSeriesCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichDismissedMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ExploreCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.HiddenSuggestionsCollector
@@ -69,6 +70,7 @@ val exploreModule = module {
             dismissContinueSeriesUseCase = get(),
             undoContinueSeriesBookDismissalUseCase = get(),
             undoContinueSeriesDismissalUseCase = get(),
+            enrichDismissedContinueSeriesMetadataUseCase = get(),
             flows = getAll(),
             appDispatchers = get(),
         )
@@ -81,6 +83,8 @@ val exploreModule = module {
     factory { TrendingBooksCollector() } bind ExploreCollector::class
 
     factory { ContinueSeriesBooksCollector() } bind ExploreCollector::class
+
+    factory { EnrichDismissedMetadataCollector() } bind ExploreCollector::class
 
     factory {
         HiddenSuggestionsScreenModel(

@@ -96,15 +96,7 @@ private fun HiddenBooksSection(
             HiddenBookRow(
                 book = book,
                 onUnblock = {
-                    runAction(
-                        OnUnblockBookAction(
-                            bookId = book.bookId,
-                            title = book.title,
-                            coverUrl = book.coverUrl,
-                            authorText = book.authorText,
-                            seriesName = book.seriesName,
-                        ),
-                    )
+                    runAction(OnUnblockBookAction(book = book))
                 },
             )
         }

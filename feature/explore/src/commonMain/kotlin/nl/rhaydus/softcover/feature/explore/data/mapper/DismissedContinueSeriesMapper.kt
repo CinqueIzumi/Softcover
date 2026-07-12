@@ -11,6 +11,18 @@ internal fun DismissedContinueSeriesBookEntity.toDomain(): DismissedSeriesBook =
     coverUrl = coverUrl,
     authorText = authorText,
     seriesName = seriesName,
+    seriesId = seriesId,
+    seriesPosition = seriesPosition,
+)
+
+internal fun DismissedSeriesBook.toEntity(): DismissedContinueSeriesBookEntity = DismissedContinueSeriesBookEntity(
+    bookId = bookId,
+    bookTitle = title,
+    coverUrl = coverUrl,
+    authorText = authorText,
+    seriesName = seriesName,
+    seriesId = seriesId,
+    seriesPosition = seriesPosition,
 )
 
 internal fun DismissedContinueSeriesEntity.toDomain(): DismissedSeries = DismissedSeries(

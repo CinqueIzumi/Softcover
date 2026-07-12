@@ -23,9 +23,6 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
         dao = mockk(relaxed = true)
 
         every {
-            dao.observeDismissedBookIds()
-        } returns flowOf(emptyList())
-        every {
             dao.observeDismissedSeriesIds()
         } returns flowOf(emptyList())
         every {
@@ -36,27 +33,6 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
         } returns flowOf(emptyList())
 
         dataSource = DismissedContinueSeriesLocalDataSourceImpl(dao = dao)
-    }
-
-    @Nested
-    inner class DismissedBookIds {
-        @Test
-        fun `is wired to dao observeDismissedBookIds`() = runTest {
-            // ----- Arrange -----
-            val expectedIds = listOf(1, 2, 3)
-
-            every {
-                dao.observeDismissedBookIds()
-            } returns flowOf(expectedIds)
-
-            val freshDataSource = DismissedContinueSeriesLocalDataSourceImpl(dao = dao)
-
-            // ----- Act & Assert -----
-            freshDataSource.dismissedBookIds.test {
-                awaitItem() shouldBe expectedIds
-                awaitComplete()
-            }
-        }
     }
 
     @Nested
@@ -83,54 +59,38 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
     @Nested
     inner class DismissBook {
         @Test
-        fun `delegates to dao with correct entity including metadata`() = runTest {
+        fun `delegates to dao with the given entity including series cursor metadata`() = runTest {
             // ----- Arrange -----
-            val bookId = 42
-            val title = "Dune"
-            val coverUrl = "https://example.com/dune.jpg"
-            val authorText = "Frank Herbert"
-            val seriesName = "Dune Saga"
+            val entity = DismissedContinueSeriesBookEntity(
+                bookId = 42,
+                bookTitle = "Dune",
+                coverUrl = "https://example.com/dune.jpg",
+                authorText = "Frank Herbert",
+                seriesName = "Dune Saga",
+                seriesId = 7,
+                seriesPosition = 2.0,
+            )
 
             // ----- Act -----
-            dataSource.dismissBook(
-                bookId = bookId,
-                title = title,
-                coverUrl = coverUrl,
-                authorText = authorText,
-                seriesName = seriesName,
-            )
+            dataSource.dismissBook(entity = entity)
 
             // ----- Assert -----
             coVerify {
-                dao.dismissBook(
-                    DismissedContinueSeriesBookEntity(
-                        bookId = bookId,
-                        bookTitle = title,
-                        coverUrl = coverUrl,
-                        authorText = authorText,
-                        seriesName = seriesName,
-                    ),
-                )
+                dao.dismissBook(entity = entity)
             }
         }
 
         @Test
-        fun `delegates to dao with null metadata when none is provided`() = runTest {
+        fun `delegates to dao with an entity that has null metadata`() = runTest {
             // ----- Arrange -----
-            val bookId = 43
+            val entity = DismissedContinueSeriesBookEntity(bookId = 43)
 
             // ----- Act -----
-            dataSource.dismissBook(
-                bookId = bookId,
-                title = null,
-                coverUrl = null,
-                authorText = null,
-                seriesName = null,
-            )
+            dataSource.dismissBook(entity = entity)
 
             // ----- Assert -----
             coVerify {
-                dao.dismissBook(DismissedContinueSeriesBookEntity(bookId = bookId))
+                dao.dismissBook(entity = entity)
             }
         }
     }

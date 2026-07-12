@@ -6,18 +6,11 @@ import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesBookEntit
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 
 internal interface DismissedContinueSeriesLocalDataSource {
-    val dismissedBookIds: Flow<List<Int>>
     val dismissedSeriesIds: Flow<List<Int>>
     val dismissedBooks: Flow<List<DismissedContinueSeriesBookEntity>>
     val dismissedSeries: Flow<List<DismissedContinueSeriesEntity>>
 
-    suspend fun dismissBook(
-        bookId: Int,
-        title: String?,
-        coverUrl: String?,
-        authorText: String?,
-        seriesName: String?,
-    )
+    suspend fun dismissBook(entity: DismissedContinueSeriesBookEntity)
 
     suspend fun dismissSeries(
         seriesId: Int,
@@ -33,30 +26,14 @@ internal interface DismissedContinueSeriesLocalDataSource {
 internal class DismissedContinueSeriesLocalDataSourceImpl(
     private val dao: DismissedContinueSeriesDao,
 ) : DismissedContinueSeriesLocalDataSource {
-    override val dismissedBookIds = dao.observeDismissedBookIds()
-
     override val dismissedSeriesIds = dao.observeDismissedSeriesIds()
 
     override val dismissedBooks = dao.observeDismissedBooks()
 
     override val dismissedSeries = dao.observeDismissedSeries()
 
-    override suspend fun dismissBook(
-        bookId: Int,
-        title: String?,
-        coverUrl: String?,
-        authorText: String?,
-        seriesName: String?,
-    ) {
-        dao.dismissBook(
-            DismissedContinueSeriesBookEntity(
-                bookId = bookId,
-                bookTitle = title,
-                coverUrl = coverUrl,
-                authorText = authorText,
-                seriesName = seriesName,
-            ),
-        )
+    override suspend fun dismissBook(entity: DismissedContinueSeriesBookEntity) {
+        dao.dismissBook(entity = entity)
     }
 
     override suspend fun dismissSeries(

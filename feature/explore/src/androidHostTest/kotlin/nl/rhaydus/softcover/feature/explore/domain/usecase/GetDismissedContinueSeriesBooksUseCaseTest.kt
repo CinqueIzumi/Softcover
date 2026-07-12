@@ -34,6 +34,8 @@ class GetDismissedContinueSeriesBooksUseCaseTest {
                     coverUrl = "cover.jpg",
                     authorText = "Frank Herbert",
                     seriesName = "Dune Saga",
+                    seriesId = 7,
+                    seriesPosition = 2.0,
                 ),
             )
 

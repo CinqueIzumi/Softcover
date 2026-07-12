@@ -8,7 +8,6 @@ import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 interface ExploreRepository {
     val previousSearchQueries: Flow<List<String>>
     val queriedBooks: Flow<List<Book>>
-    val dismissedContinueSeriesBookIds: Flow<List<Int>>
     val dismissedContinueSeriesIds: Flow<List<Int>>
     val dismissedContinueSeriesBooks: Flow<List<DismissedSeriesBook>>
     val dismissedContinueSeries: Flow<List<DismissedSeries>>
@@ -29,13 +28,7 @@ interface ExploreRepository {
 
     suspend fun removeAllSearchQueries()
 
-    suspend fun dismissContinueSeriesBook(
-        bookId: Int,
-        title: String? = null,
-        coverUrl: String? = null,
-        authorText: String? = null,
-        seriesName: String? = null,
-    )
+    suspend fun dismissContinueSeriesBook(book: DismissedSeriesBook)
 
     suspend fun dismissContinueSeries(
         seriesId: Int,

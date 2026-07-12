@@ -21,26 +21,26 @@ import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBookDismissalUseCase
-import nl.rhaydus.softcover.feature.explore.presentation.event.HiddenSuggestionsEvent
-import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsDependencies
-import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsLocalVariables
-import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
+import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
+import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
+import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
 
-class OnUnblockBookActionTest {
-    private lateinit var undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase
+class OnDismissContinueSeriesBookActionTest {
     private lateinit var dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase
-    private lateinit var stateFlow: MutableStateFlow<HiddenSuggestionsUiState>
-    private lateinit var scope: ActionScope<HiddenSuggestionsUiState, HiddenSuggestionsEvent, HiddenSuggestionsLocalVariables>
+    private lateinit var undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase
+    private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
+    private lateinit var scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>
 
     @BeforeEach
     fun setUp() {
-        undoContinueSeriesBookDismissalUseCase = mockk()
-        dismissContinueSeriesBookUseCase = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(HiddenSuggestionsUiState())
+        dismissContinueSeriesBookUseCase = mockk()
+        undoContinueSeriesBookDismissalUseCase = mockk(relaxed = true)
+        stateFlow = MutableStateFlow(ExploreScreenUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(HiddenSuggestionsLocalVariables()),
+            localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
 
@@ -67,16 +67,16 @@ class OnUnblockBookActionTest {
         unmockkObject(SnackBarManager)
     }
 
-    private fun stubDependencies(testScope: TestScope): HiddenSuggestionsDependencies {
+    private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
-        return mockk<HiddenSuggestionsDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.undoContinueSeriesBookDismissalUseCase
-            } returns undoContinueSeriesBookDismissalUseCase
-
+        return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.dismissContinueSeriesBookUseCase
             } returns dismissContinueSeriesBookUseCase
+
+            every {
+                mock.undoContinueSeriesBookDismissalUseCase
+            } returns undoContinueSeriesBookDismissalUseCase
 
             every {
                 mock.coroutineScope
@@ -95,14 +95,9 @@ class OnUnblockBookActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `invokes undoContinueSeriesBookDismissalUseCase with the given bookId`() = runTest {
+        fun `invokes dismissContinueSeriesBookUseCase with the given book`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-
-            coEvery {
-                undoContinueSeriesBookDismissalUseCase(bookId = 42)
-            } returns Result.success(Unit)
-
             val book = DismissedSeriesBook(
                 bookId = 42,
                 title = "Dune",
@@ -112,7 +107,12 @@ class OnUnblockBookActionTest {
                 seriesId = 99,
                 seriesPosition = 3.0,
             )
-            val action = OnUnblockBookAction(book = book)
+
+            coEvery {
+                dismissContinueSeriesBookUseCase(book = book)
+            } returns Result.success(Unit)
+
+            val action = OnDismissContinueSeriesBookAction(book = book)
 
             // ----- Act -----
             action.execute(
@@ -122,7 +122,7 @@ class OnUnblockBookActionTest {
 
             // ----- Assert -----
             coVerify {
-                undoContinueSeriesBookDismissalUseCase(bookId = 42)
+                dismissContinueSeriesBookUseCase(book = book)
             }
         }
 
@@ -130,11 +130,6 @@ class OnUnblockBookActionTest {
         fun `shows an Undo snackbar with the book title on success`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-
-            coEvery {
-                undoContinueSeriesBookDismissalUseCase(bookId = 42)
-            } returns Result.success(Unit)
-
             val book = DismissedSeriesBook(
                 bookId = 42,
                 title = "Dune",
@@ -144,7 +139,12 @@ class OnUnblockBookActionTest {
                 seriesId = 99,
                 seriesPosition = 3.0,
             )
-            val action = OnUnblockBookAction(book = book)
+
+            coEvery {
+                dismissContinueSeriesBookUseCase(book = book)
+            } returns Result.success(Unit)
+
+            val action = OnDismissContinueSeriesBookAction(book = book)
 
             // ----- Act -----
             action.execute(
@@ -155,7 +155,7 @@ class OnUnblockBookActionTest {
             // ----- Assert -----
             verify {
                 SnackBarManager.showSnackBar(
-                    title = "\"Dune\" unblocked",
+                    title = "\"Dune\" won't be suggested again",
                     actionLabel = "Undo",
                     duration = any(),
                     onActionClick = any(),
@@ -168,11 +168,6 @@ class OnUnblockBookActionTest {
         fun `falls back to a generic label when title is null`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-
-            coEvery {
-                undoContinueSeriesBookDismissalUseCase(bookId = 7)
-            } returns Result.success(Unit)
-
             val book = DismissedSeriesBook(
                 bookId = 7,
                 title = null,
@@ -182,7 +177,12 @@ class OnUnblockBookActionTest {
                 seriesId = null,
                 seriesPosition = null,
             )
-            val action = OnUnblockBookAction(book = book)
+
+            coEvery {
+                dismissContinueSeriesBookUseCase(book = book)
+            } returns Result.success(Unit)
+
+            val action = OnDismissContinueSeriesBookAction(book = book)
 
             // ----- Act -----
             action.execute(
@@ -193,7 +193,7 @@ class OnUnblockBookActionTest {
             // ----- Assert -----
             verify {
                 SnackBarManager.showSnackBar(
-                    title = "\"Book\" unblocked",
+                    title = "\"Book\" won't be suggested again",
                     actionLabel = "Undo",
                     duration = any(),
                     onActionClick = any(),
@@ -206,11 +206,6 @@ class OnUnblockBookActionTest {
         fun `does not show a snackbar when the use case fails`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-
-            coEvery {
-                undoContinueSeriesBookDismissalUseCase(bookId = 42)
-            } returns Result.failure(RuntimeException("db error"))
-
             val book = DismissedSeriesBook(
                 bookId = 42,
                 title = "Dune",
@@ -220,7 +215,12 @@ class OnUnblockBookActionTest {
                 seriesId = 99,
                 seriesPosition = 3.0,
             )
-            val action = OnUnblockBookAction(book = book)
+
+            coEvery {
+                dismissContinueSeriesBookUseCase(book = book)
+            } returns Result.failure(RuntimeException("db error"))
+
+            val action = OnDismissContinueSeriesBookAction(book = book)
 
             // ----- Act -----
             action.execute(
@@ -241,25 +241,10 @@ class OnUnblockBookActionTest {
         }
 
         @Test
-        fun `clicking Undo re-dismisses the book with seriesId and seriesPosition intact`() = runTest {
+        fun `clicking Undo on the snackbar undoes the dismissal by bookId only`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val onActionClickSlot = slot<() -> Unit>()
-
-            coEvery {
-                undoContinueSeriesBookDismissalUseCase(bookId = 42)
-            } returns Result.success(Unit)
-
-            every {
-                SnackBarManager.showSnackBar(
-                    title = any(),
-                    actionLabel = any(),
-                    duration = any(),
-                    onActionClick = capture(onActionClickSlot),
-                    onDismiss = any(),
-                )
-            } returns Unit
-
             val book = DismissedSeriesBook(
                 bookId = 42,
                 title = "Dune",
@@ -274,7 +259,21 @@ class OnUnblockBookActionTest {
                 dismissContinueSeriesBookUseCase(book = book)
             } returns Result.success(Unit)
 
-            val action = OnUnblockBookAction(book = book)
+            every {
+                SnackBarManager.showSnackBar(
+                    title = any(),
+                    actionLabel = any(),
+                    duration = any(),
+                    onActionClick = capture(onActionClickSlot),
+                    onDismiss = any(),
+                )
+            } returns Unit
+
+            coEvery {
+                undoContinueSeriesBookDismissalUseCase(bookId = 42)
+            } returns Result.success(Unit)
+
+            val action = OnDismissContinueSeriesBookAction(book = book)
 
             action.execute(
                 dependencies = dependencies,
@@ -286,7 +285,7 @@ class OnUnblockBookActionTest {
 
             // ----- Assert -----
             coVerify {
-                dismissContinueSeriesBookUseCase(book = book)
+                undoContinueSeriesBookDismissalUseCase(bookId = 42)
             }
         }
     }

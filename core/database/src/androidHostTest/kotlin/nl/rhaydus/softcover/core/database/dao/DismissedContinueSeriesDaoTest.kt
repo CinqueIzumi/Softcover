@@ -47,6 +47,8 @@ class DismissedContinueSeriesDaoTest {
                 coverUrl = "https://example.com/dune.jpg",
                 authorText = "Frank Herbert",
                 seriesName = "Dune Saga",
+                seriesId = 5,
+                seriesPosition = 2.0,
             )
 
             // ----- Act -----
@@ -55,22 +57,6 @@ class DismissedContinueSeriesDaoTest {
             // ----- Assert -----
             dao.observeDismissedBooks().test {
                 awaitItem() shouldBe listOf(entity)
-            }
-        }
-
-        @Test
-        fun `observeDismissedBookIds returns the bookId projection after dismissBook`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            dao.dismissBook(
-                DismissedContinueSeriesBookEntity(
-                    bookId = 2,
-                    bookTitle = "Neuromancer",
-                ),
-            )
-
-            // ----- Act & Assert -----
-            dao.observeDismissedBookIds().test {
-                awaitItem() shouldBe listOf(2)
             }
         }
 

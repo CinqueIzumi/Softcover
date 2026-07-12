@@ -12,6 +12,7 @@ import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.model.SeriesContinuationSeed
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
@@ -22,13 +23,14 @@ class GetContinueSeriesBooksUseCase(
     @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(): Flow<List<Book>> = combine(
         booksRepository.books,
-        exploreRepository.dismissedContinueSeriesBookIds,
+        exploreRepository.dismissedContinueSeriesBooks,
         exploreRepository.dismissedContinueSeriesIds,
-    ) { books, dismissedBookIds, dismissedSeriesIds ->
+    ) { books, dismissedBooks, dismissedSeriesIds ->
         deriveSeeds(
             books = books,
+            dismissedBooks = dismissedBooks,
             dismissedSeriesIds = dismissedSeriesIds.toSet(),
-        ) to dismissedBookIds.toSet()
+        ) to dismissedBooks.map { it.bookId }.toSet()
     }
         .distinctUntilChanged()
         .mapLatest { (seeds, dismissedBookIds) ->
@@ -38,8 +40,11 @@ class GetContinueSeriesBooksUseCase(
 
     private fun deriveSeeds(
         books: List<Book>,
+        dismissedBooks: List<DismissedSeriesBook>,
         dismissedSeriesIds: Set<Int>,
     ): List<SeriesContinuationSeed> {
+        val dismissedFloors = dismissedFloorsBySeries(dismissedBooks = dismissedBooks)
+
         val seriesIdsWithDnf = books
             .asSequence()
             .filter { it.userBook?.status == BookStatus.DidNotFinish }
@@ -60,14 +65,41 @@ class GetContinueSeriesBooksUseCase(
                 val maxRead = group.maxOf { it.positionsInSeries.last() }
                 val series = group.first().bookSeries!!
 
-                if (maxRead >= series.amountOfBooks) return@mapNotNull null
+                // The cursor is the furthest point in the series the user has settled: read through,
+                // or explicitly hidden. Hiding a suggestion has to move it, otherwise the next-in-
+                // series query (`position > cursor`, `limit 1`) keeps returning the hidden book and
+                // the series suggests nothing ever again.
+                val cursor = maxOf(
+                    maxRead,
+                    dismissedFloors[seriesId] ?: maxRead,
+                )
+
+                if (cursor >= series.amountOfBooks) return@mapNotNull null
 
                 SeriesContinuationSeed(
                     seriesId = seriesId,
-                    afterPosition = maxRead,
+                    afterPosition = cursor,
                 )
             }
     }
+
+    /**
+     * The highest position hidden per series. Rows dismissed before schema v45 carry no position and
+     * cannot move the cursor; they stay covered by the id filter until the metadata backfill fills
+     * them in.
+     */
+    private fun dismissedFloorsBySeries(dismissedBooks: List<DismissedSeriesBook>): Map<Int, Double> = dismissedBooks
+        .mapNotNull { book ->
+            val seriesId = book.seriesId ?: return@mapNotNull null
+            val position = book.seriesPosition ?: return@mapNotNull null
+
+            seriesId to position
+        }
+        .groupBy(
+            keySelector = { it.first },
+            valueTransform = { it.second },
+        )
+        .mapValues { (_, positions) -> positions.max() }
 
     private suspend fun fetchNextBooks(seeds: List<SeriesContinuationSeed>): List<Book> = coroutineScope {
         seeds

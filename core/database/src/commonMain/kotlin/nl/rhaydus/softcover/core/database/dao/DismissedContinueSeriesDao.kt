@@ -9,9 +9,6 @@ import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 
 @Dao
 interface DismissedContinueSeriesDao {
-    @Query("SELECT bookId FROM dismissed_continue_series_books")
-    fun observeDismissedBookIds(): Flow<List<Int>>
-
     @Query("SELECT seriesId FROM dismissed_continue_series")
     fun observeDismissedSeriesIds(): Flow<List<Int>>
 
