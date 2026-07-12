@@ -6,11 +6,11 @@ import androidx.sqlite.execSQL
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 
 class Migration42To43Test {
     private lateinit var connection: SQLiteConnection

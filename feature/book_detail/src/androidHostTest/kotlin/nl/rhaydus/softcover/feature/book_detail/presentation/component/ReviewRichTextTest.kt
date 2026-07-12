@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.canonical
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ReviewRichTextTest {
     // -------------------------------------------------------------------------

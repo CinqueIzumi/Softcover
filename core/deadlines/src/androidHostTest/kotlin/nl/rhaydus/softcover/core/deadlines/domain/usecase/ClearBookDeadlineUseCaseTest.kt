@@ -5,10 +5,10 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
 
 class ClearBookDeadlineUseCaseTest {
     private lateinit var repository: BookDeadlineRepository

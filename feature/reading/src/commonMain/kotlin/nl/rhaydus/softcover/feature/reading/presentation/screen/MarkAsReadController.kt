@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.haptics.Haptics
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
@@ -24,7 +25,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.util.LibraryNavPulseK
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
-import org.koin.compose.koinInject
 
 /**
  * Drives the "mark as read" celebration shared by both platform layouts: it owns the slide-out

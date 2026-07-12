@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.di
 
+import org.koin.dsl.bind
+import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
@@ -17,8 +19,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollec
 import nl.rhaydus.softcover.feature.reading.presentation.collector.TrendingBooksLoader
 import nl.rhaydus.softcover.feature.reading.presentation.collector.WantToReadCollector
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
-import org.koin.dsl.bind
-import org.koin.dsl.module
 
 val readingModule = module {
     includes(

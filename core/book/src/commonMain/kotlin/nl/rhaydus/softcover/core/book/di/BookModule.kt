@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.book.di
 
+import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
@@ -37,7 +38,6 @@ import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
-import org.koin.dsl.module
 
 val bookModule = module {
     includes(

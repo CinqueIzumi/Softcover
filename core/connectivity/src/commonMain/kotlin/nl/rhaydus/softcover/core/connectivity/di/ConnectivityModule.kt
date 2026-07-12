@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.connectivity.di
 
+import org.koin.dsl.module
 import nl.rhaydus.offlinesync.DefaultOfflineWriteDrainer
 import nl.rhaydus.offlinesync.DrainPolicy
 import nl.rhaydus.softcover.core.book.di.bookModule
@@ -20,7 +21,6 @@ import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.lists.di.listsModule
-import org.koin.dsl.module
 
 // The drain loop, its online trigger, the mutex, the poison cap, and the in-drain backoff all live in the
 // foundation's DefaultOfflineWriteDrainer. What stays here is what is genuinely Softcover's: the replay

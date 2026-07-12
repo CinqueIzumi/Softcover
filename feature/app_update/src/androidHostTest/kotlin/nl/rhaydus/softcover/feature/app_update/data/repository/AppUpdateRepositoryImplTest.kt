@@ -8,11 +8,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.AppUpdateState
-import nl.rhaydus.softcover.feature.app_update.data.datasource.AppUpdateDataSource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.feature.app_update.data.datasource.AppUpdateDataSource
 
 class AppUpdateRepositoryImplTest {
     private lateinit var appUpdateDataSource: AppUpdateDataSource

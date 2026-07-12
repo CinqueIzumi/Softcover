@@ -8,13 +8,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.softcover.core.domain.app.AppVersionInfo
-import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.domain.app.AppVersionInfo
+import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsScreenScreenModelTest {

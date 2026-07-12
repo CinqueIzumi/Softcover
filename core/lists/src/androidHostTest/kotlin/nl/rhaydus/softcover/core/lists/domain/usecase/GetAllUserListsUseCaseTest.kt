@@ -6,11 +6,11 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 
 class GetAllUserListsUseCaseTest {
     private lateinit var listsRepository: ListsRepository

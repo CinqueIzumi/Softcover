@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
+import kotlin.math.roundToInt
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ReadingUpdateKind
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ReadingUpdateShareContent
@@ -9,7 +10,6 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.domain.model.isBlank
-import kotlin.math.roundToInt
 
 /**
  * Builds the personalised "reading update" card, or null when there's nothing personal to share —

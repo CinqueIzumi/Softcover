@@ -9,11 +9,11 @@ import io.mockk.slot
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.GetUserBookListsQuery
-import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.GetUserBookListsQuery
+import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 
 class AuthInterceptorTest {
     private lateinit var authTokenProvider: AuthTokenProvider

@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
-import nl.rhaydus.common.currentLocalDate
-import nl.rhaydus.common.formatDecimalNumber
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -83,6 +81,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
+import nl.rhaydus.common.currentLocalDate
+import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.RhaydusButton

@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.di
 
-import nl.rhaydus.designsystem.nav.NavPulse
 import org.koin.dsl.module
+import nl.rhaydus.designsystem.nav.NavPulse
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 

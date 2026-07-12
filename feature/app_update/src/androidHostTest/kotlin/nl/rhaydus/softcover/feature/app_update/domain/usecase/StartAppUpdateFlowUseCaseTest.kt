@@ -2,10 +2,10 @@ package nl.rhaydus.softcover.feature.app_update.domain.usecase
 
 import io.mockk.mockk
 import io.mockk.verify
-import nl.rhaydus.softcover.feature.app_update.domain.launcher.AppUpdateFlowLauncher
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.feature.app_update.domain.launcher.AppUpdateFlowLauncher
 
 class StartAppUpdateFlowUseCaseTest {
     private lateinit var useCase: StartAppUpdateFlowUseCase

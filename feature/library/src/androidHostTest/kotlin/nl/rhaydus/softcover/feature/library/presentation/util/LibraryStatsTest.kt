@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.util
 
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -8,8 +10,6 @@ import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class LibraryStatsTest {
     // region Fixtures

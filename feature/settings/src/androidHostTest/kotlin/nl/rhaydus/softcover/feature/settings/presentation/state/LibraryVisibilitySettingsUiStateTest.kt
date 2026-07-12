@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class LibraryVisibilitySettingsUiStateTest {
     private fun stubBookList(

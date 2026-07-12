@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.concurrent.Volatile
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingCancellable
@@ -17,7 +18,6 @@ import nl.rhaydus.platform.SecureStorage
 import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.security.LegacySecureApiKeyStorage
-import kotlin.concurrent.Volatile
 
 /** The single key Softcover stores in the foundation's keyed [SecureStorage]. */
 private const val API_KEY = "api_key"

@@ -6,10 +6,10 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class GetUserIdAsFlowUseCaseTest {
     private lateinit var settingsRepository: SettingsRepository

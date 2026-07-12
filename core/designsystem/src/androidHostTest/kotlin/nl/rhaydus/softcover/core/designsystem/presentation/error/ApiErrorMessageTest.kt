@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.error
 
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ApiErrorMessageTest {
     @Nested

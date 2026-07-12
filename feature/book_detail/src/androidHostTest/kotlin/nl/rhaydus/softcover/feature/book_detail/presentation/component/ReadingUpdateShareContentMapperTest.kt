@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ReadingUpdateKind
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -12,8 +14,6 @@ import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ReadingUpdateShareContentMapperTest {
     // ----- Fixtures -----

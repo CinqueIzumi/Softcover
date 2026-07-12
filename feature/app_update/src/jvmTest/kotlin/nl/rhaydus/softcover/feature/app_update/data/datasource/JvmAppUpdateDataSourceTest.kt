@@ -10,6 +10,12 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.app.AppVersionInfo
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
@@ -17,12 +23,6 @@ import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerLauncher
 import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
 import nl.rhaydus.softcover.feature.app_update.data.release.ReleaseSource
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class JvmAppUpdateDataSourceTest {

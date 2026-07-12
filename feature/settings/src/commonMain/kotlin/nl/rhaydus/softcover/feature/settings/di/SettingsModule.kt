@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.di
 
+import org.koin.dsl.bind
+import org.koin.dsl.module
 import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
@@ -24,8 +26,6 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleColle
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
-import org.koin.dsl.bind
-import org.koin.dsl.module
 
 val settingsModule = module {
     includes(
