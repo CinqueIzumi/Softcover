@@ -59,7 +59,9 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ### Explore
 - Browse trending books on Hardcover.
-- Pick up where you left off with a **Continue Series** shelf for series you're partway through.
+- Pick up where you left off with an **Up next in your series** shelf for series you're partway through.
+- Hide a suggestion you're not interested in — a single book or a whole series — and the series moves on to the next entry.
+- Review everything you've hidden on the **Hidden suggestions** screen and unblock it to bring it back.
 - Search the Hardcover catalogue by title and add or remove books directly from results.
 - Scan a book's barcode to look it up by ISBN and add it to your library, with manual ISBN entry and a fallback flow for unknown ISBNs.
 - Review and manage your search history.
@@ -87,6 +89,10 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 ### Onboarding
 - Connect your Hardcover account on first launch by entering your API token, after a short introductory walkthrough.
 
+### Offline
+- Keep browsing your library from the local cache when the connection drops, with a banner telling you you're offline and actions that can't work offline held back.
+- Progress and library changes you make offline are queued and replayed automatically once you're back online.
+
 ---
 
 ## Tech Stack
@@ -106,10 +112,13 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 |---|---|
 | `nl.rhaydus:toad` | TOAD presentation runtime — `ToadScreenModel`, `UiState` / `UiAction` / `UiEvent`, `Collector`, `ActionDependencies` |
 | `nl.rhaydus:core-common` | Non-visual UI seams — `AppDispatchers`, time / date / number formatting |
+| `nl.rhaydus:core-platform` | Platform seams — secure storage, connectivity provider, platform info |
+| `nl.rhaydus:offline-sync` | Offline write queue — `PendingWriteStore`, drain policy, replay outcomes |
 | `nl.rhaydus:designsystem-core` | Brand-agnostic Compose skeleton — theme scaffold (`RhaydusTheme`), layout primitives, modifiers, the button family, adaptive/desktop components, the `RhaydusIconResource` token |
 | `nl.rhaydus:designsystem-editorial` | Editorial design language — the typography role contract + editorial components |
 | `nl.rhaydus:designsystem-image` | Coil-based async image components |
 | `nl.rhaydus:ktlint-rules` | Custom ktlint ruleset (the mechanizable layout rules + gate) |
+| `nl.rhaydus:detekt-rules` | Custom type-resolved detekt ruleset + the shared detekt baseline config |
 
 These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `EditionImage`) on top. See [`docs/rhaydus/0.3.0/CAPABILITIES.md`](docs/rhaydus/0.3.0/CAPABILITIES.md).
 
