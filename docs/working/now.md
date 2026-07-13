@@ -22,7 +22,9 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
-- Foundation adoption onto **local 0.3.0** — **21 F-items landed & committed**: everything except the build-logic batch (F18/F20/F21), which is hard-blocked until the foundation publishes `build-logic` as Gradle plugins. Latest: F9/F10 (core-platform secure storage + connectivity) and F8 (offline-sync). Details: [foundation-upstream-candidates.md](foundation-upstream-candidates.md) → "✅ Adoption progress — LANDED".
+- _(nothing in focus — pick the next release's first step from [release-plan.md](release-plan.md); **3.1.0** is next up.)_
+
+> Foundation adoption onto local 0.3.0 is **done** (21 F-items landed). The only residue is the build-logic batch (F18/F20/F21), hard-blocked until the foundation publishes `build-logic` as Gradle plugins — tracked in [foundation-upstream-candidates.md](foundation-upstream-candidates.md), not here.
 
 ---
 
@@ -32,7 +34,6 @@ _Small things to clear ASAP, outside the release cadence. One line each; delete 
 
 - [ ] Complete the AGP 9 migration: flip `android.builtInKotlin` / `android.newDsl` back to defaults in `gradle.properties` and drop the explicit `org.jetbrains.kotlin.android` plugin once KSP supports AGP 9's built-in Kotlin (currently blocked — see architecture-review B2). Verify the Room KSP path still works after the switch.
 - [ ] Replace the deprecated `FlowRowOverflow.expandIndicator` overflow API in `ExpandableFlowRow` once Compose ships a maintained replacement (currently `@file:Suppress("DEPRECATION")`; the successor `ContextualFlowRow` is also deprecated, so there is no stable target yet).
-- [ ] Investigate and fix an HttpClient crash a user reported when starting the **Linux desktop client** (JVM/desktop target). Reproduce on Linux, identify the failing Ktor/HttpClient path, and fix in this version.
 - [ ] Silence the Room "Schema export directory was not provided" warning from `:core:database:kspAndroidMain`: the Room Gradle plugin (2.7.2) wires `room.schemaLocation` for the jvm/iOS KSP targets but not the AGP 9 KMP `androidLibrary` target, so only the android KSP run warns (the schema still exports correctly via the other targets and is committed). Revisit when the Room plugin recognises the new KMP android target, or wire the location to the android KSP without conflicting with the plugin's other-target wiring.
 - [ ] Re-enable the three detekt rules the shared foundation baseline switches off — `UnreachableCode`, `IgnoredReturnValue`, `RedundantSuspendModifier` — once detekt 2.x (K2 frontend) is adopted, and re-triage. They are off only because detekt 1.23 embeds a Kotlin 1.9 frontend and, on a Kotlin 2.x codebase, all three report exclusively false positives (verified against the compiler). Reasons are documented in `detekt-rules/src/main/resources/config/detekt.yml`.
 - [ ] Extend the crash-safety detekt gate to `iosMain`. `detektIosArm64Main` has no type resolution at all, so `rhaydus:UnguardedFlowTerminalRead` cannot run on iOS sources (no real `Flow` terminal reads live there today, so this is a coverage gap, not a live bug). Blocked on detekt supporting type resolution for native targets.

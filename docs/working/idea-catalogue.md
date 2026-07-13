@@ -3,48 +3,43 @@ A long-form catalogue of upgrades for Softcover — split into *look & feel* (vi
 
 > Style note: every entry below is meant to fit the editorial voice in [design-system.md](../reference/design-system.md). Where an idea pulls toward "Material dashboard" rather than "editorial spread", that's flagged. Anything brand-new that adds a foundation, component, or pattern must update `../reference/design-system.md` in the same change (per the maintenance rule).
 
+> **Maintenance rule.** A **shipped idea is deleted from this file** — what's left is what's still wanted. Tags are **never reused or renumbered**, so a gap (or a reference from another doc to a tag that isn't here) means "that one shipped", exactly as with `roadmap-steps.md`. Where an idea shipped only in part, the entry stays and is narrowed to the part that remains.
+
 ---
 
 ## Part A — Look & feel
 
 ### A.1 Motion vocabulary
 
-The system already has: press scale, mark-as-read burst, shake-on-error, lazy-item mutation, staggered entry, cover-to-detail morph, wavy progress, animated stat number, expressive easing.
+The system already has: press scale, mark-as-read burst (with the slide-to-shelf exit + Library tab pulse), shake-on-error, lazy-item mutation, staggered entry, cover-to-detail morph, tab-root cross-fade with vertical drift, wavy progress, animated stat number with its integer-crossing micro-tick, expressive easing.
 
 The vocabulary still has gaps:
 
 - **A.1.1 Long-press cover peek.** Long-press on any book cover (carousel card, library tile, reading featured cover, search result) → cover lifts slightly, dims its neighbours, and reveals a translucent peek card with title, byline, deadline state, and shelf chip. Releasing without dragging dismisses; dragging up commits to detail. Replaces the need to commit to navigation just to glance at a book.
 - **A.1.2 Hero parallax on book detail.** Blurred backdrop scrolls at ~0.5x while the cover and metadata scroll at 1x. Adds depth without leaving the editorial register. Suppressed under reduced motion.
-- **A.1.3 Tab-root cross-fade with vertical drift.** Currently `EnterTransition.None` between tabs. A 200ms cross-fade with a 12dp vertical drift makes tab changes feel like turning to a new spread in a magazine rather than instant teleportation.
 - **A.1.4 Bottom-bar collapse on scroll.** Docked/floating bar collapses to a thin pill on downward scroll, expands again on upward scroll. Keeps content area larger while the reader is moving through a long shelf or detail page. Mirrors the print idea of a footer that retreats while you're mid-spread.
 - **A.1.5 Shelf-chip ink-fill on selection.** When a shelf chip on book detail toggles to "selected", primary colour fills from the leading edge in a 180ms ink wipe rather than swapping background colour instantly.
-- **A.1.6 Mark-as-read "slide to shelf".** When a book is committed to Read from the Reading screen, the row slides down/out, the bottom-nav Library tab does a single subtle "pulse" indicating the book has joined a shelf there. Connects the celebration to the destination, not just the moment.
 - **A.1.7 Progress sheet number tween.** When the user types a number, the wavy progress bar tweens to the new percentage on a single 300ms ease; today this animates via `animateFloatAsState` but the *number* changes feel discrete on rapid typing — debounce by 80ms then tween.
 - **A.1.8 Empty-state quote sway.** The decorative `quoteGlyph` in empty states does a very subtle, slow infinite drift (±2deg over 12s) — barely perceptible but stops the page feeling frozen. Suppressed under reduced motion.
 - **A.1.9 Pull-to-refresh eyebrow swap.** While refreshing, the screen's eyebrow swaps from its normal label to a contextual one ("Refreshing your shelf…", "Catching up on your reading…"). Reverts on completion with a brief italic flash.
 - **A.1.10 Carousel page edge hint.** Carousels show a 2dp accent bar tucked under the rightmost partially-visible card on first composition, fading after 1s, as a "scroll me" affordance — replaces the conventional left-edge gradient hint.
 - **A.1.11 Cover-back flip on long-press in detail.** On book detail, long-pressing the hero cover flips it 180° to a generated "jacket back" with description, ISBN, publisher, format. A literal print metaphor that fits the editorial tone better than another sheet.
-- **A.1.12 Stat number micro-tick.** When `AnimatedStatNumber` is tweening, a single hairline accent bar under the digit pulses on each integer crossing — turns the count-up into a perceptible event rather than a fade.
-- **A.1.13 Drag-to-reorder for "Currently reading" priority.** Reordering a book in the Reading list uses a press-and-hold lift with a soft shadow, drop-with-snap. Pair with haptics (§A.2.4).
-- **A.1.14 Reading-session timer breathe.** When a reading session is active (see B.2.1), the cover of the currently-reading book "breathes" with a 4s in/out scale of ±0.5%. Almost invisible — but if you look at the screen during reading, the book is alive.
+- **A.1.13 Drag-to-reorder for "Currently reading" priority.** Reordering a book in the Reading list uses a press-and-hold lift with a soft shadow, drop-with-snap. The gesture and its `lift`/`drop` haptics already exist on the library's custom-list grids and the settings tab order — this is about bringing them to the Reading list, not building them.
+- **A.1.14 Reading-session timer breathe.** While a reading session is active, the cover of the currently-reading book "breathes" with a 4s in/out scale of ±0.5%. Almost invisible — but if you look at the screen during reading, the book is alive.
 - **A.1.15 Series-completion cascade.** When the user marks the *last* book of a series as Read, every cover of that series in the carousel does a short staggered fade-to-monochrome-then-back, ending in a "Complete" stamp overlay. A second tier of celebration above mark-as-read.
 
 ### A.2 Haptics vocabulary
 
-The system has `commit` and `reject`. Two states is intentional, but a few extensions are worth considering.
+The foundation `Haptics` helper (DS §4) now carries the full vocabulary — `commit`, `reject`, `select`, `threshold`, `lift`, `drop`, `tickle`, `milestone` — and `select` / `threshold` / `lift` / `drop` are wired into real surfaces (shelf chips, library filters, the streak strip, pull-to-refresh, list drag-reorder).
 
-- **A.2.1 `select` (light tick).** Adds a soft tick on neutral selection events: shelf chip toggle to a non-read state, segmented switch in the progress sheet, tab change in carousel filters. Distinct from `commit` (which celebrates) and `reject` (which rolls back).
-- **A.2.2 `threshold` (single firm tap).** Fires when the user crosses a meaningful boundary — pull-to-refresh trigger point, drag-to-reorder pickup, long-press peek activation. Single firm tap, no celebratory texture.
-- **A.2.3 `tickle` (rapid repeated soft taps).** While dragging a slider/picker (progress, rating). Each integer crossing fires one tick. Used on the rating control and the progress page-number input.
-- **A.2.4 `lift` and `drop`.** Drag-to-reorder pickup → `lift`; settle → `drop`. Both are short, distinguishable taps. The haptic should *say* the item has left and returned to the page.
-- **A.2.5 `milestone`.** A two-pulse haptic that fires once on natural progress events: completing a year-end reading goal, hitting a 30-day streak, finishing the last book in a series. Distinct from `commit` so the user feels "this is bigger than a save".
+Two exist in the helper but have **no production call site** — the gap is the call sites, not the haptic:
 
-`Haptics helper` (DS §4) is the single entry point — adding these is an extension to that helper, not new call-site code.
+- **A.2.3 `tickle` (rapid repeated soft taps).** While dragging a slider/picker. Each integer crossing fires one tick. Wants the rating control and the progress page-number input.
+- **A.2.5 `milestone`.** A two-pulse haptic for natural progress events: completing a year-end reading goal, hitting a 30-day streak, finishing the last book in a series. Distinct from `commit` so the user feels "this is bigger than a save". Its call sites arrive with the reading challenge (B.5.2) and the series-completion cascade (A.1.15) — wire it then rather than inventing an event for it now.
 
 ### A.3 Visual refinements
 
 - **A.3.1 Cover shadow + edge highlight tuned to cover colour.** `EditionImage` already paints a soft shadow; tint it from the cover's dominant edge colour rather than neutral so a teal cover sits on a teal-tinted bloom. Treat as a tonal change, not a glow.
-- **A.3.2 Drop-cap on book descriptions.** First letter of the description on book detail rendered as a Fraunces drop-cap (3 lines tall, primary-tinted). A direct print-magazine borrow.
 - **A.3.3 Print-style folio on stat tiles.** Hero stat tiles carry a small "—01—" / "—02—" folio number in the bottom corner using `eyebrowSmall`. Pure decoration but reinforces the "magazine spread" register.
 - **A.3.4 Quote-glyph as section flourish.** Pages with a single dominant block of running prose (a long review, a book description, the profile bio) get a single huge low-alpha `quoteGlyph` floating in the page margin, anchored to the section's leading edge.
 - **A.3.5 Page-edge serif on carousels.** A 1px hairline at the leading edge of every carousel section column, half-page tall, `onSurfaceVariant` at low alpha — the visual equivalent of the gutter line in a printed table of contents.
@@ -72,15 +67,13 @@ The system has `commit` and `reject`. Two states is intentional, but a few exten
 - **B.1.3 Smart shelves.** Auto-computed tabs alongside user statuses: "Owned & unread", "Started but stalled" (Currently Reading with no progress in 30d), "Finished this year", "Highest rated", "Quick wins" (<200pp), "Long hauls" (>500pp).
 - **B.1.7 Deadline urgency pinned section.** When any book on the active tab has a deadline within 14 days, render an "Up against the clock" editorial section at the top, separate from the grid.
 - **B.1.10 Inline edition swap.** Long-press a tile → edition picker quick action without going into book detail.
-- **B.1.11 Tag system.** User-defined freeform tags ("dnf-but-might-revisit", "lent-to-mom") visible as a chip strip under each book in list layout, and filterable from the library filter chips.
+- **B.1.11 Tag system (remaining half).** The tag *write* path shipped — a tag editor on book detail backed by a save-tags mutation. What's left is the **library side**: a chip strip of the user's own tags under each book in list layout, and filtering the library by them. Today the library filter chips filter *community genre tags*, not the user's own — so a user can tag a book "lent-to-mom" and then not be able to find it that way.
 - **B.1.12 Custom-list creation in-app.** Today lists are toggleable visibility but not creatable. Add a "+" entry at the tab strip that opens a sheet to create a list, then drag-to-fill from any shelf.
 - **B.1.13 Library export.** Export current view as CSV or as a styled "shelf card" image (see B.7.4 sharing).
 
 ### B.2 Reading
 
-- **B.2.1 Reading session timer.** "Start session" affordance on the featured card — captures duration, starting and ending page, can pause/resume. Sessions feed B.2.5 streaks and the Stats Atlas (C.3). Session UI lives as a peek bar above the bottom nav while active.
-- **B.2.3 Streak indicator.** A small heatmap-strip near the greeting: last 21 days, each day a small dot, today highlighted. Tap to expand to a fuller calendar view.
-- **B.2.4 Reorder currently-reading priority.** Drag the order in which books are shown; first non-featured becomes featured. Use A.1.13 + A.2.4.
+- **B.2.4 Reorder currently-reading priority.** Drag the order in which books are shown; first non-featured becomes featured. Needs an ordering preference to persist (there is none today); the drag gesture and haptics come free from A.1.13.
 - **B.2.5 Pace card per book.** Below the progress strip in each compact row, an italic editorial line: "At your weekly average, you'll finish on 18 March." Lives next to the deadline line — both never appear together, the more informative one wins.
 - **B.2.6 Quick-add highlight.** A "Save a passage" action on the featured card opens a tiny sheet for typing/dictating a quote + optional page number. Feeds the Notes & Highlights inbox (C.7).
 - **B.2.7 Audiobook mini-player.** When the active book is an audiobook with a connected playback target (or just a local stopwatch), the featured card shows play/pause + 30s skips alongside the wavy bar. Editorial styling, not Material chrome.
@@ -103,8 +96,6 @@ The system has `commit` and `reject`. Two states is intentional, but a few exten
 
 ### B.4 Book detail
 
-- **B.4.1 Personal rating.** A 5-star (or 1–10) personal rating field below the shelf-chip row, with `tickle` haptic on each star pass. Distinct from the community rating already shown.
-- **B.4.2 Personal review.** A "Write a few words" affordance — opens a sheet with editorial typography in the input field. Stores draft locally; publish when the user is ready.
 - **B.4.3 Personal highlights / quotes.** A "Voices" section already shows community reviews. Add a personal "Passages" section above it: highlights the user has saved from this book, with optional page numbers. Tappable to share or add as the home-widget quote.
 - **B.4.4 Reading log (multiple read-throughs).** Some books get re-read. Replace the single-status approach with a log of read-throughs: each entry is start date + end date + rating + optional note. The summary line in detail shows "Read 2× — 2023, 2026".
 - **B.4.5 Similar books carousel.** A "If this resonated…" section under reviews — algorithmic similar-book recommendations, editorial-styled.
@@ -118,7 +109,6 @@ The system has `commit` and `reject`. Two states is intentional, but a few exten
 - **B.4.14 Audiobook ETA.** If audiobook and the user has a known listening pace (avg minutes/day), the deadline summary swaps to a predicted finish date.
 - **B.4.16 Reviews filters & sorts.** Inside the "Voices" section, chip row: friends only, top-rated, recent, with spoilers, in your language.
 - **B.4.17 Lent-out tracking.** "Loaned to" field on owned editions — name + date + reminder option.
-- **B.4.18 Add-to-list action sheet.** Today the data layer has read + remove-from-list but no add-to-list mutation, so "Owned" is added via a separate `MarkEditionAsOwned` mutation and other lists can only have books *taken out* of them. Adds a real add-to-list GraphQL mutation and surfaces a sheet from book detail (and from bulk-select in Library): the user's lists rendered with their current spine-count and a "create new list" entry at the bottom. Selecting a list toggles membership with the existing chip-ink-fill animation (A.1.5) and `commit` haptic. Differs from B.4.13 in that it ships the *write path* — B.4.13 assumed the mutation existed. Treat "Owned" as a special-cased list that still routes through `MarkEditionAsOwned` so the rest of the surface remains uniform.
 - **B.4.19 Author identity tags (personal, optional).** A quiet panel on the byline (and on the Author detail screen once C.1 lands) where the user can flag — privately, for themselves — the author's gender, BIPOC affiliation, LGBTQ+ affiliation, and (optional) country of birth. Strictly local; never written back to Hardcover. Editorial framing: a single italic eyebrow line under the byline ("you tagged: woman · queer · Nigerian"), not a Material chip cluster. Feeds the new diversity & representation stats (B.5.15) and any future wrap-ups (C.17).
 - **B.4.20 Book representation tags (personal).** "Who's in this book?" — personal flags at the *book* level for LGBTQ+ characters and BIPOC characters/protagonists, distinct from author identity tagging (B.4.19). Same private/local storage rule as above. Renders as a separate italic line ("you tagged: queer leads · sapphic") below the about block, opt-in to reveal so spoilers don't leak. Feeds B.5.15 and C.17.
 - **B.4.21 Personal moods (book + chapter).** A private mood log. The user can rate one or more moods for the book overall (e.g., "devastated", "hopeful", "exhausted") and, optionally, for a per-chapter / per-percentage anchor ("at 62% — wrecked"). Distinct from B.3.1 (community moods used for discovery): these moods never leave the device. Moods are **graded, not binary** — each mood the user lights up carries an intensity, so "tense 62% · sad 66% · funny 8%" is expressible and the mood profile can be averaged across a shelf or a year (feeds B.5.16). Surfaces as an italic mood column on book detail with hairline intensity bars, and as a per-chapter mood ribbon along the wavy progress bar where anchors exist. Picker uses a small curated vocabulary plus a "your moods" free-text option; grading is optional — a mood left ungraded reads as "present".
@@ -264,8 +254,10 @@ Local + (optional) push. Triggers: deadline reminders, release-day for Want-to-R
 - **D.2.6 Trending this week.** Shows trending books (from Explore's trending data); tap to open.
 - **D.2.7 Reading activity calendar.** A mini month / streak view of the user's reading activity (sessions + finishes); reads the same data as the full Reading Activity Calendar screen (C.14).
 
-### D.3 Sharing surface
-A single shared "share card" composition that renders into PNG/JPG: editorial layout, cover + a chosen stat or quote + Softcover sign-off. Used by Book detail, Profile, Library, Year in Books. All shares route through this surface so the brand is consistent.
+### D.3 Sharing surface — *the surface is built; the callers aren't*
+The shared "share card" composition **shipped**: one editorial layout (cover + a chosen stat or quote + Softcover sign-off), five content types (Book / ReadingUpdate / Quote / Stat / YearRecap), rendered to an image through the foundation's capture seam. Every share in the app routes through it, so the brand stays consistent.
+
+What remains is **entry points**: only book detail can share today. Profile, Library (B.1.13), the Notes & Highlights inbox (C.7), Year in Books (C.4) and the wrap-up generator (C.17) each need to hand their content to this surface — that work belongs to those items, not here. This entry stays only as the contract they render against.
 
 ### D.4 Wear OS / quick-settings tile
 - Currently-reading complication for Wear faces.

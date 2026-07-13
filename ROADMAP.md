@@ -2,7 +2,7 @@
 
 What we're building next for [Softcover](https://hardcover.app/), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: 2.4.0.**
+**Current release: 3.0.3** — Softcover is now on iPhone, iPad and desktop as well as Android.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
@@ -12,21 +12,6 @@ A few honest caveats:
 > Reading this inside the app? It's the same file, fetched live — so it's always current.
 
 ---
-
-## 3.0.0 — Now on iOS & desktop
-
-Softcover arrives on **iPhone, iPad, and desktop** — one app, your whole library, everywhere. This release also lands a wave of reliability fixes:
-
-- Faster library sync (lists only re-fetch when they've actually changed).
-- More accurate "finished" dates across your shelves.
-- Reading-progress updates show up instantly on your Currently Reading strip.
-- Reading streaks now count the day you actually read — in your own time zone, so late-night reading no longer breaks your streak.
-- Progress you log offline or during a hiccup retries automatically.
-- Covers refresh properly when a book's artwork changes.
-- A renewable login — an expired key no longer means losing your local data.
-- Reliable audiobook handling, including time tracking for audiobooks without a listed length.
-- Progress entry remembers whether you last logged by page, time, or percent.
-- A toggle to hide the reading-streak strip, and it now shows on an empty Reading screen too.
 
 ## 3.1.0 — Quick wins
 
