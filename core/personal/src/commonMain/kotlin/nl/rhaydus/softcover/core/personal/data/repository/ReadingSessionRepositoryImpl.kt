@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.personal.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -48,7 +48,7 @@ internal class ReadingSessionRepositoryImpl(
         endPage: Int?,
         endSeconds: Int?,
     ) {
-        val existing = localDataSource.observeById(id = id).first() ?: return
+        val existing = localDataSource.observeById(id = id).firstOrNull() ?: return
 
         val now = Clock.System.now()
 
@@ -66,7 +66,7 @@ internal class ReadingSessionRepositoryImpl(
     }
 
     override suspend fun pause(id: Long) {
-        val existing = localDataSource.observeById(id = id).first() ?: return
+        val existing = localDataSource.observeById(id = id).firstOrNull() ?: return
 
         if (existing.endedAt != null || existing.lastPausedAt != null) return
 
@@ -76,7 +76,7 @@ internal class ReadingSessionRepositoryImpl(
     }
 
     override suspend fun resume(id: Long) {
-        val existing = localDataSource.observeById(id = id).first() ?: return
+        val existing = localDataSource.observeById(id = id).firstOrNull() ?: return
 
         if (existing.lastPausedAt == null) return
 

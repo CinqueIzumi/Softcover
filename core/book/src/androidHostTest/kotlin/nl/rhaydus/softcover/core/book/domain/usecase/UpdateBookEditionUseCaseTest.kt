@@ -6,12 +6,12 @@ import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.UserBook
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.UserBook
 
 class UpdateBookEditionUseCaseTest {
     private lateinit var repository: BooksRepository

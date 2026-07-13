@@ -1,37 +1,37 @@
-# Softcover detekt configuration.
+# Softcover detekt overrides — layered ON TOP of the shared nl.rhaydus baseline.
 #
-# Runs with `buildUponDefaultConfig = true` (this file only overrides defaults) and NO baseline —
-# detekt gates from zero, so every active rule's findings are real debt to fix. detekt analyses
-# `src/main` only (test sources are excluded in the Gradle wiring).
+# The baseline (`config/detekt.yml`, bundled in `nl.rhaydus:detekt-rules`, unpacked by the root
+# `extractRhaydusDetektConfig` task) carries everything every nl.rhaydus app wants: the Compose/TOAD
+# `ignoreAnnotated` sets, `MagicNumber` off, `LargeClass`, the generous DI constructor threshold,
+# guard-clause `ReturnCount`, snake_case `PackageNaming`, `MaxLineLength: 140`, `UnusedPrivateMember`,
+# and the type-resolution calibration. Both files reach `config.setFrom(...)` in that order, so THIS
+# file wins on conflict.
 #
-# Where a default rule is relaxed or disabled below, it is because detekt's default disagrees with a
-# DOCUMENTED Softcover convention (see ARCHITECTURE.md / MODULE_STRUCTURE_GUIDELINES.md / CODE_STYLE_GUIDE.md)
-# or with an unavoidable Jetpack Compose pattern — i.e. calibration to this project, not debt-hiding.
-# Layout / whitespace / import formatting is owned by the custom ktlint ruleset (:ktlint-rules), so
-# detekt's `formatting` ruleset is intentionally not on the classpath.
+# Keep only Softcover-specific calibration here. Where a rule is relaxed below, it is because detekt's
+# default disagrees with a DOCUMENTED Softcover convention (docs/reference/architecture.md,
+# docs/reference/module-structure.md, docs/reference/code-style.md) or with an unavoidable Apollo/Room
+# shape — calibration to this project, not debt-hiding. Nothing is disabled to make a finding go away.
+#
+# Runs with `buildUponDefaultConfig = true` and NO baseline file: detekt gates from zero, so every active
+# rule's findings are real debt to fix. Analysis is TYPE-RESOLVED and covers commonMain plus the platform
+# source sets (androidMain / jvmMain / mobileMain); generated code is excluded in the Gradle wiring.
+# Layout / whitespace / import formatting is owned by nl.rhaydus:ktlint-rules, so detekt's `formatting`
+# ruleset is intentionally not on the classpath.
 
 complexity:
   LongMethod:
     # Room migration blocks and the nav host legitimately run long; accept up to 140 lines.
     threshold: 140
-    ignoreAnnotated: ['Composable']
-  LargeClass:
-    # Compose screen files (the Voyager Screen + its private @Composable members) are large by design.
-    threshold: 2500
   CyclomaticComplexMethod:
     threshold: 25
-    ignoreAnnotated: ['Composable']
   ComplexCondition:
     threshold: 6
   NestedBlockDepth:
     threshold: 6
   LongParameterList:
-    # TOAD *ScreenModel / *Dependencies constructors inject many use cases via Koin — a "parameter
-    # object" is not idiomatic for DI. Accept large constructors; keep a sane bound on plain functions.
+    # The baseline already relaxes the DI constructor threshold; keep a sane bound on plain functions.
     functionThreshold: 12
-    constructorThreshold: 30
     ignoreDefaultParameters: true
-    ignoreAnnotated: ['Composable', 'Preview', 'StandardPreview']
   TooManyFunctions:
     # DAOs (BookDao has ~90 queries), operation repositories, and Compose screen objects legitimately
     # hold many members; @Composable members are not counted.
@@ -43,18 +43,13 @@ complexity:
     ignoreAnnotatedFunctions: ['Composable', 'Preview', 'StandardPreview']
 
 style:
-  MagicNumber:
-    # Compose UI is saturated with literal dp / sp / weight / alpha values; flagging them is pure noise.
-    active: false
+  UnusedPrivateMember:
+    # The shared baseline also exempts `Composable`. Softcover deliberately does not: an unused private
+    # @Composable is dead UI code and should be caught. Only previews are exempt (they are entry points).
+    ignoreAnnotated: ['Preview', 'StandardPreview']
   ForbiddenComment:
     # TODO / FIXME / etc. are legitimate, tracked markers in this codebase — not a code smell to gate on.
     active: false
-  MaxLineLength:
-    maxLineLength: 140
-  ReturnCount:
-    # CODE_STYLE_GUIDE endorses guard-clause style (many early returns); don't count guard clauses.
-    max: 8
-    excludeGuardClauses: true
   LoopWithTooManyJumpStatements:
     # Two jumps in a filtering/iteration loop is readable; the default of one is too strict. The one
     # outlier (the HTML parser's single-pass loop) carries a justified per-site @Suppress instead.
@@ -62,22 +57,9 @@ style:
   ThrowsCount:
     # requireData() validates several response invariants up-front with descriptive throws.
     max: 4
-  UnusedPrivateMember:
-    ignoreAnnotated: ['Preview', 'StandardPreview']
 
 exceptions:
   TooGenericExceptionThrown:
-    # ARCHITECTURE.md mandates wrapping Apollo / data errors in RuntimeException with a descriptive
-    # message; throwing RuntimeException is therefore an intentional, documented convention.
+    # docs/reference/architecture.md mandates wrapping Apollo / data errors in RuntimeException with a
+    # descriptive message; throwing RuntimeException is therefore an intentional, documented convention.
     active: false
-
-naming:
-  PackageNaming:
-    # Module/package names use intentional snake_case (feature.book_detail, feature.app_update) per
-    # MODULE_STRUCTURE_GUIDELINES; allow underscores in package segments.
-    packagePattern: '[a-z][A-Za-z0-9_]*(\.[a-z][A-Za-z0-9_]*)*'
-  FunctionNaming:
-    # @Composable functions are intentionally PascalCase per Compose convention.
-    ignoreAnnotated: ['Composable']
-  TopLevelPropertyNaming:
-    ignoreAnnotated: ['Composable']

@@ -10,11 +10,11 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.feature.explore.data.datastore.SearchHistoryDataStore
-import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHistoryEntity
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.feature.explore.data.datastore.SearchHistoryDataStore
+import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHistoryEntity
 
 class SearchLocalDataSourceImplTest {
     private lateinit var storeDouble: DataStore<SearchHistoryEntity>

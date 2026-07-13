@@ -1,0 +1,2 @@
+- [TOAD one-shot init convention](architecture_toad_init_side_effects.md) — one-shot ScreenModel init work should go through a Collector.onLaunch or dispatch(Action), not a raw `dependencies.launch{}` in `init`
+- [Import grouping: guide-enforced, not ktlint](project_import_order_debt.md) — guide mandates Android→third-party→`nl.rhaydus.*`; ktlint does NOT catch it (standard ruleset disabled); fix deviations wherever found, not just on touched files

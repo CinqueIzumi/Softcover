@@ -10,16 +10,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class GetContinueSeriesBooksUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -31,8 +32,12 @@ class GetContinueSeriesBooksUseCaseTest {
         booksRepository = mockk()
         exploreRepository = mockk()
 
-        every { exploreRepository.dismissedContinueSeriesBookIds } returns flowOf(emptyList())
-        every { exploreRepository.dismissedContinueSeriesIds } returns flowOf(emptyList())
+        every {
+            exploreRepository.dismissedContinueSeriesBooks
+        } returns flowOf(emptyList())
+        every {
+            exploreRepository.dismissedContinueSeriesIds
+        } returns flowOf(emptyList())
 
         useCase = GetContinueSeriesBooksUseCase(
             booksRepository = booksRepository,
@@ -41,7 +46,9 @@ class GetContinueSeriesBooksUseCaseTest {
     }
 
     private fun stubUserBook(status: BookStatus): UserBook = mockk {
-        every { this@mockk.status } returns status
+        every {
+            this@mockk.status
+        } returns status
     }
 
     private fun bookInSeries(
@@ -63,6 +70,20 @@ class GetContinueSeriesBooksUseCaseTest {
         userBookRead = null,
     )
 
+    private fun dismissedBook(
+        bookId: Int,
+        seriesId: Int? = null,
+        seriesPosition: Double? = null,
+    ): DismissedSeriesBook = DismissedSeriesBook(
+        bookId = bookId,
+        title = null,
+        coverUrl = null,
+        authorText = null,
+        seriesName = null,
+        seriesId = seriesId,
+        seriesPosition = seriesPosition,
+    )
+
     // ----- Invoke -----
 
     @Nested
@@ -70,7 +91,9 @@ class GetContinueSeriesBooksUseCaseTest {
         @Test
         fun `returns empty list when books flow emits empty list`() = runTest {
             // ----- Arrange -----
-            every { booksRepository.books } returns flowOf(emptyList())
+            every {
+                booksRepository.books
+            } returns flowOf(emptyList())
 
             // ----- Act -----
             val result = useCase().first()
@@ -95,7 +118,9 @@ class GetContinueSeriesBooksUseCaseTest {
                 status = BookStatus.Read,
             )
 
-            every { booksRepository.books } returns flowOf(listOf(dnfBook, readBook))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(dnfBook, readBook))
 
             // ----- Act -----
             val result = useCase().first()
@@ -123,7 +148,9 @@ class GetContinueSeriesBooksUseCaseTest {
             )
             val nextBook: Book = mockk(relaxed = true)
 
-            every { booksRepository.books } returns flowOf(listOf(lowerBook, higherBook))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(lowerBook, higherBook))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -150,17 +177,21 @@ class GetContinueSeriesBooksUseCaseTest {
                 status = BookStatus.Read,
             )
 
-            every { booksRepository.books } returns flowOf(listOf(finalBook))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(finalBook))
 
             // ----- Act -----
             val result = useCase().first()
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -174,17 +205,21 @@ class GetContinueSeriesBooksUseCaseTest {
                 status = BookStatus.WantToRead,
             )
 
-            every { booksRepository.books } returns flowOf(listOf(wantToReadBook))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(wantToReadBook))
 
             // ----- Act -----
             val result = useCase().first()
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -198,17 +233,21 @@ class GetContinueSeriesBooksUseCaseTest {
                 status = BookStatus.None,
             )
 
-            every { booksRepository.books } returns flowOf(listOf(noneBook))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(noneBook))
 
             // ----- Act -----
             val result = useCase().first()
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -221,17 +260,21 @@ class GetContinueSeriesBooksUseCaseTest {
                 userBook = stubUserBook(BookStatus.Read),
             )
 
-            every { booksRepository.books } returns flowOf(listOf(noSeriesBook))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(noSeriesBook))
 
             // ----- Act -----
             val result = useCase().first()
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -248,17 +291,21 @@ class GetContinueSeriesBooksUseCaseTest {
                 userBook = stubUserBook(BookStatus.Read),
             )
 
-            every { booksRepository.books } returns flowOf(listOf(noPositionBook))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(noPositionBook))
 
             // ----- Act -----
             val result = useCase().first()
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -273,7 +320,9 @@ class GetContinueSeriesBooksUseCaseTest {
             )
             val nextBook: Book = mockk(relaxed = true)
 
-            every { booksRepository.books } returns flowOf(listOf(book))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(book))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -301,7 +350,9 @@ class GetContinueSeriesBooksUseCaseTest {
             )
             val nextBook: Book = mockk(relaxed = true)
 
-            every { booksRepository.books } returns flowOf(listOf(book))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(book))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -337,7 +388,9 @@ class GetContinueSeriesBooksUseCaseTest {
             val nextA: Book = mockk(relaxed = true)
             val nextB: Book = mockk(relaxed = true)
 
-            every { booksRepository.books } returns flowOf(listOf(bookA, bookB))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(bookA, bookB))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -379,7 +432,9 @@ class GetContinueSeriesBooksUseCaseTest {
             )
             val nextB: Book = mockk(relaxed = true)
 
-            every { booksRepository.books } returns flowOf(listOf(bookA, bookB))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(bookA, bookB))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -421,7 +476,9 @@ class GetContinueSeriesBooksUseCaseTest {
             )
             val nextB: Book = mockk(relaxed = true)
 
-            every { booksRepository.books } returns flowOf(listOf(bookA, bookB))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(bookA, bookB))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -456,7 +513,9 @@ class GetContinueSeriesBooksUseCaseTest {
             )
             val nextBook: Book = mockk(relaxed = true)
 
-            every { booksRepository.books } returns flowOf(listOf(compilation))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(compilation))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -484,7 +543,9 @@ class GetContinueSeriesBooksUseCaseTest {
             )
             val nextBook: Book = mockk(relaxed = true)
 
-            every { booksRepository.books } returns flowOf(listOf(compilation))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(compilation))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -519,7 +580,9 @@ class GetContinueSeriesBooksUseCaseTest {
             )
             val nextBook: Book = mockk(relaxed = true)
 
-            every { booksRepository.books } returns flowOf(listOf(compilation, singleton))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(compilation, singleton))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -546,17 +609,21 @@ class GetContinueSeriesBooksUseCaseTest {
                 status = BookStatus.Read,
             )
 
-            every { booksRepository.books } returns flowOf(listOf(compilation))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(compilation))
 
             // ----- Act -----
             val result = useCase().first()
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -570,18 +637,24 @@ class GetContinueSeriesBooksUseCaseTest {
                 status = BookStatus.Read,
             )
 
-            every { booksRepository.books } returns flowOf(listOf(book))
-            every { exploreRepository.dismissedContinueSeriesIds } returns flowOf(listOf(1600))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(book))
+            every {
+                exploreRepository.dismissedContinueSeriesIds
+            } returns flowOf(listOf(1600))
 
             // ----- Act -----
             val result = useCase().first()
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) { exploreRepository.fetchNextInSeries(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -595,11 +668,17 @@ class GetContinueSeriesBooksUseCaseTest {
                 status = BookStatus.Read,
             )
             val nextBook: Book = mockk {
-                every { id } returns 999
+                every {
+                    id
+                } returns 999
             }
 
-            every { booksRepository.books } returns flowOf(listOf(book))
-            every { exploreRepository.dismissedContinueSeriesBookIds } returns flowOf(listOf(999))
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(book))
+            every {
+                exploreRepository.dismissedContinueSeriesBooks
+            } returns flowOf(listOf(dismissedBook(bookId = 999)))
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -629,8 +708,12 @@ class GetContinueSeriesBooksUseCaseTest {
 
             val dismissedSeriesIds = MutableStateFlow(emptyList<Int>())
 
-            every { booksRepository.books } returns flowOf(listOf(book))
-            every { exploreRepository.dismissedContinueSeriesIds } returns dismissedSeriesIds
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(book))
+            every {
+                exploreRepository.dismissedContinueSeriesIds
+            } returns dismissedSeriesIds
 
             coEvery {
                 exploreRepository.fetchNextInSeries(
@@ -649,6 +732,187 @@ class GetContinueSeriesBooksUseCaseTest {
 
                 // Second emission: series dismissed, result should be empty
                 awaitItem() shouldBe emptyList()
+            }
+        }
+    }
+
+    // ----- DismissalCursorAdvance -----
+
+    @Nested
+    inner class DismissalCursorAdvance {
+        @Test
+        fun `dismissing the suggested book advances the cursor past it instead of refetching the same position`() = runTest {
+            // ----- Arrange -----
+            val readBook = bookInSeries(
+                id = 2001,
+                seriesId = 2000,
+                amountOfBooks = 5,
+                positionsInSeries = listOf(2.0),
+                status = BookStatus.Read,
+            )
+            val nextBook: Book = mockk {
+                every {
+                    id
+                } returns 2004
+            }
+
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(readBook))
+            every {
+                exploreRepository.dismissedContinueSeriesBooks
+            } returns flowOf(
+                listOf(
+                    dismissedBook(
+                        bookId = 2003,
+                        seriesId = 2000,
+                        seriesPosition = 3.0,
+                    ),
+                ),
+            )
+
+            coEvery {
+                exploreRepository.fetchNextInSeries(
+                    seriesId = 2000,
+                    afterPosition = 3.0,
+                )
+            } returns nextBook
+
+            // ----- Act -----
+            val result = useCase().first()
+
+            // ----- Assert -----
+            result shouldBe listOf(nextBook)
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    seriesId = 2000,
+                    afterPosition = 2.0,
+                )
+            }
+        }
+
+        @Test
+        fun `dismissed position recorded under a different series does not move this series' cursor`() = runTest {
+            // ----- Arrange -----
+            val readBook = bookInSeries(
+                id = 2101,
+                seriesId = 2100,
+                amountOfBooks = 5,
+                positionsInSeries = listOf(2.0),
+                status = BookStatus.Read,
+            )
+            val nextBook: Book = mockk(relaxed = true)
+
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(readBook))
+            every {
+                exploreRepository.dismissedContinueSeriesBooks
+            } returns flowOf(
+                listOf(
+                    dismissedBook(
+                        bookId = 9998,
+                        seriesId = 9999,
+                        seriesPosition = 100.0,
+                    ),
+                ),
+            )
+
+            coEvery {
+                exploreRepository.fetchNextInSeries(
+                    seriesId = 2100,
+                    afterPosition = 2.0,
+                )
+            } returns nextBook
+
+            // ----- Act -----
+            val result = useCase().first()
+
+            // ----- Assert -----
+            result shouldBe listOf(nextBook)
+        }
+
+        @Test
+        fun `legacy dismissed row with no series metadata does not corrupt the cursor and is still excluded by the id filter`() = runTest {
+            // ----- Arrange -----
+            val readBook = bookInSeries(
+                id = 2201,
+                seriesId = 2200,
+                amountOfBooks = 5,
+                positionsInSeries = listOf(2.0),
+                status = BookStatus.Read,
+            )
+            val nextBook: Book = mockk {
+                every {
+                    id
+                } returns 2299
+            }
+
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(readBook))
+            every {
+                exploreRepository.dismissedContinueSeriesBooks
+            } returns flowOf(
+                listOf(
+                    dismissedBook(
+                        bookId = 2299,
+                        seriesId = null,
+                        seriesPosition = null,
+                    ),
+                ),
+            )
+
+            coEvery {
+                exploreRepository.fetchNextInSeries(
+                    seriesId = 2200,
+                    afterPosition = 2.0,
+                )
+            } returns nextBook
+
+            // ----- Act -----
+            val result = useCase().first()
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+        }
+
+        @Test
+        fun `dismissed position at or beyond amountOfBooks drops the series entirely`() = runTest {
+            // ----- Arrange -----
+            val readBook = bookInSeries(
+                id = 2301,
+                seriesId = 2300,
+                amountOfBooks = 3,
+                positionsInSeries = listOf(1.0),
+                status = BookStatus.Read,
+            )
+
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(readBook))
+            every {
+                exploreRepository.dismissedContinueSeriesBooks
+            } returns flowOf(
+                listOf(
+                    dismissedBook(
+                        bookId = 2302,
+                        seriesId = 2300,
+                        seriesPosition = 3.0,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = useCase().first()
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    any(),
+                    any(),
+                )
             }
         }
     }

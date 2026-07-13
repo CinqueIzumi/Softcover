@@ -4,8 +4,8 @@ import androidx.room.Room
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
-import nl.rhaydus.ui.common.AppDispatchers
 
 actual val platformDatabaseModule: Module = module {
     single<SoftcoverDatabase> {

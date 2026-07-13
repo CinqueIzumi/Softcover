@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -20,9 +23,6 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class BookListsCollectorTest {
     private lateinit var getAllUserListsUseCase: GetAllUserListsUseCase
@@ -66,15 +66,27 @@ class BookListsCollectorTest {
     }
 
     private fun stubEdition(): BookEdition = mockk {
-        every { url } returns "https://example.com/cover.jpg"
-        every { localImagePath } returns null
+        every {
+            url
+        } returns "https://example.com/cover.jpg"
+        every {
+            localImagePath
+        } returns null
     }
 
     private fun stubListBook(edition: BookEdition?): ListBook = mockk {
-        every { this@mockk.edition } returns edition
-        every { this@mockk.editionId } returns 0
-        every { this@mockk.addedAt } returns null
-        every { this@mockk.book } returns null
+        every {
+            this@mockk.edition
+        } returns edition
+        every {
+            this@mockk.editionId
+        } returns 0
+        every {
+            this@mockk.addedAt
+        } returns null
+        every {
+            this@mockk.book
+        } returns null
     }
 
     private fun stubBookList(

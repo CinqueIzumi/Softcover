@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.di
 
+import org.koin.dsl.bind
+import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
@@ -18,8 +20,6 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollec
 import nl.rhaydus.softcover.feature.library.presentation.collector.SortModeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.VisibleTabsCollector
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
-import org.koin.dsl.bind
-import org.koin.dsl.module
 
 val libraryModule = module {
     includes(

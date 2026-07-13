@@ -6,12 +6,12 @@ import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
-import nl.rhaydus.softcover.core.domain.model.Book
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
+import nl.rhaydus.softcover.core.domain.model.Book
 
 class UpdateBookProgressUseCaseTest {
     private lateinit var repository: BooksRepository
@@ -21,7 +21,9 @@ class UpdateBookProgressUseCaseTest {
     @BeforeEach
     fun setUp() {
         repository = mockk()
-        markReadingActivityTodayUseCase = mockk { coEvery { this@mockk() } returns Unit }
+        markReadingActivityTodayUseCase = mockk { coEvery {
+            this@mockk()
+        } returns Unit }
         useCase = UpdateBookProgressUseCase(
             repository = repository,
             markReadingActivityTodayUseCase = markReadingActivityTodayUseCase,

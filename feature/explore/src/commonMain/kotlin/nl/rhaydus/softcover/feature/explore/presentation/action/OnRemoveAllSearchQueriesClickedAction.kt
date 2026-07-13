@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables

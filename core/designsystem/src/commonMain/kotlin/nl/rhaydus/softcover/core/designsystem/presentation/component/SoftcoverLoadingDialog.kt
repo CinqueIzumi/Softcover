@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

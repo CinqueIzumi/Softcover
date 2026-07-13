@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.usecase
 
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.model.UserTag
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
 
 /**

@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.core.database.mapper
 
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ReviewSlateMapperTest {
     // ----- Shared fixture — the golden document from the spec -----

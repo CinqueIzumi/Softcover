@@ -6,12 +6,12 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.profile.data.datastore.ProfileCacheDataStore
-import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
-import nl.rhaydus.softcover.core.profile.data.model.UserProfileDataEntity
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.profile.data.datastore.ProfileCacheDataStore
+import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
+import nl.rhaydus.softcover.core.profile.data.model.UserProfileDataEntity
 
 class ProfileLocalDataSourceImplTest {
     private lateinit var store: DataStore<ProfileCacheEntity>
@@ -46,7 +46,9 @@ class ProfileLocalDataSourceImplTest {
                 profile = baseProfile.copy(recentReadingDays = listOf("2026-06-17")),
             )
             var result = seed
-            coEvery { store.updateData(any()) } coAnswers {
+            coEvery {
+                store.updateData(any())
+            } coAnswers {
                 val transform = firstArg<suspend (ProfileCacheEntity) -> ProfileCacheEntity>()
                 transform(seed).also { result = it }
             }
@@ -69,7 +71,9 @@ class ProfileLocalDataSourceImplTest {
                 profile = baseProfile.copy(recentReadingDays = listOf("2026-06-19")),
             )
             var result = seed
-            coEvery { store.updateData(any()) } coAnswers {
+            coEvery {
+                store.updateData(any())
+            } coAnswers {
                 val transform = firstArg<suspend (ProfileCacheEntity) -> ProfileCacheEntity>()
                 transform(seed).also { result = it }
             }
@@ -90,7 +94,9 @@ class ProfileLocalDataSourceImplTest {
             // ----- Arrange -----
             val seed = ProfileCacheEntity(profile = null)
             var result = seed
-            coEvery { store.updateData(any()) } coAnswers {
+            coEvery {
+                store.updateData(any())
+            } coAnswers {
                 val transform = firstArg<suspend (ProfileCacheEntity) -> ProfileCacheEntity>()
                 transform(seed).also { result = it }
             }

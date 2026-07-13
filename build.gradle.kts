@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -26,6 +27,42 @@ dependencies {
         .forEach { kover(it) }
 }
 
+// The foundation's shared detekt baseline (F19) ships INSIDE the `nl.rhaydus:detekt-rules` jar as
+// `config/detekt.yml`, so it has to be unpacked before detekt can point `config.setFrom(...)` at it.
+// Under `foundation.local=true` the coordinate substitutes to the included build's jar — the same path
+// the `ktlintRules` configuration takes.
+val rhaydusDetektConfig by configurations.creating { isTransitive = false }
+
+dependencies {
+    add("rhaydusDetektConfig", libs.rhaydus.detektRules)
+}
+
+val extractRhaydusDetektConfig = tasks.register<Sync>("extractRhaydusDetektConfig") {
+    group = "verification"
+    description = "Unpacks the shared nl.rhaydus detekt baseline from the detekt-rules jar."
+
+    // Derive the file tree from `configuration.elements`, not from `.singleFile` inside a bare
+    // `provider { }`. The Provider that `elements` returns carries the task dependencies that BUILD the
+    // jar, so editing the baseline in the included foundation rebuilds it and re-runs this Sync.
+    // Resolving `.singleFile` eagerly severs that link and silently extracts a stale config — a gate
+    // that quietly ignores upstream changes is worse than no gate.
+    from(rhaydusDetektConfig.elements.map { jars -> jars.map { zipTree(it.asFile) } }) {
+        include("config/detekt.yml")
+    }
+    into(layout.buildDirectory.dir("rhaydus-detekt"))
+}
+
+// The production detekt tasks that carry TYPE RESOLUTION, by module shape: KMP libraries get one task per
+// target, the Android application and the desktop JVM app get a single all-variants `detektMain`. Only
+// these can run the foundation's `rhaydus:UnguardedFlowTerminalRead` rule (F1) — it is `@RequiresTypeResolution`,
+// so it resolves `Flow.first()` apart from `Collection.first()` via the compile classpath, and is silently
+// INERT on the source-only `detekt` task. Test-source and per-variant tasks are deliberately excluded.
+val typeResolvedDetektTasks = setOf("detektAndroidMain", "detektJvmMain", "detektMain")
+
+// Captured here because the generated `libs` accessor is scoped to this script's project and is not
+// resolvable from inside the `subprojects { }` block below.
+val rhaydusDetektRules = libs.rhaydus.detektRules
+
 // Apply detekt uniformly to every Kotlin module (no baseline — gates from zero on the shared config).
 // Wired centrally here, alongside the ktlint/styleCheck/checkModuleGraph gates, rather than per module.
 subprojects {
@@ -33,29 +70,84 @@ subprojects {
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
     // Coverage instrumentation for every shipped module; the merged report is wired at the root above.
-    // :ktlint-rules is build tooling, so it stays uninstrumented.
     if (path != ":ktlint-rules") {
         apply(plugin = "org.jetbrains.kotlinx.kover")
     }
 
+    dependencies {
+        // The custom `rhaydus` ruleset, discovered via its META-INF/services entry.
+        add("detektPlugins", rhaydusDetektRules)
+    }
+
     configure<DetektExtension> {
         buildUponDefaultConfig = true
-        config.setFrom(rootProject.files("config/detekt/detekt.yml"))
+        // Layered, later wins: the shared foundation baseline, then Softcover's own deltas on top.
+        config.setFrom(
+            rootProject.layout.buildDirectory.file("rhaydus-detekt/config/detekt.yml"),
+            rootProject.files("config/detekt/detekt.yml"),
+        )
         parallel = true
     }
 
     tasks.withType<Detekt>().configureEach {
+        dependsOn(extractRhaydusDetektConfig)
         jvmTarget = "11"
-        // Analyse production code only; test sources follow their own (looser) patterns.
-        // `commonMain/kotlin` covers the KMP modules' shared production code (Android-only modules
-        // have none, so the extra path is a harmless no-op for them).
-        setSource(project.files("src/main/java", "src/main/kotlin", "src/commonMain/kotlin"))
         reports {
             html.required.set(true)
             xml.required.set(true)
             txt.required.set(false)
             sarif.required.set(false)
         }
+    }
+
+    // Point each type-resolved task at the HAND-WRITTEN sources of the compilation it belongs to, keeping
+    // the compilation's classpath (which is what type resolution actually needs) untouched. Two reasons this
+    // has to be spelled out rather than left to detekt's defaults:
+    //
+    //  1. detekt seeds a KMP task with only that target's OWN source set, so a module whose code lives in
+    //     `commonMain` would analyse nothing and silently report NO-SOURCE. `commonMain` is otherwise
+    //     reachable only via `detektMetadataCommonMain`, which has no type resolution and therefore cannot
+    //     run the crash-safety rule at all.
+    //  2. The compilation's source set also carries GENERATED code — KSP/Room DAO impls, Apollo operations,
+    //     Compose resource accessors. Analysing it produced ~2700 findings we neither own nor can fix.
+    //
+    // This must run in `afterEvaluate`: detekt seeds the KMP task sources from its own `afterEvaluate`, so a
+    // plain `configureEach` here would be overwritten afterwards.
+    //
+    // `commonMain` is consequently analysed twice on a KMP module with a jvm target (once per compilation).
+    // That is deliberate: a jvm-only file referencing a commonMain declaration needs commonMain in scope for
+    // its receiver type to resolve, and an unresolved receiver makes the crash-safety rule silently miss.
+    // Duplicate findings are visible only while a violation exists; the steady state is zero.
+    afterEvaluate {
+        tasks.withType<Detekt>().configureEach {
+            when (name) {
+                "detektAndroidMain" -> setSource(
+                    project.files(
+                        "src/commonMain/kotlin",
+                        "src/mobileMain/kotlin",
+                        "src/androidMain/kotlin",
+                    ),
+                )
+
+                "detektJvmMain" -> setSource(project.files("src/commonMain/kotlin", "src/jvmMain/kotlin"))
+
+                // `:desktopApp`'s own `detektMain`, and the per-variant tasks `:app`'s aggregating
+                // `detektMain` fans out to. All three read the same non-KMP `src/main` layout.
+                "detektMain", "detektDebug", "detektRelease" ->
+                    setSource(project.files("src/main/java", "src/main/kotlin"))
+            }
+        }
+    }
+
+    // The source-only `detekt` task parses without a classpath, so the crash-safety rule is inert on it and
+    // its remaining findings are a strict subset of what the type-resolved tasks report. Disabled so it
+    // neither double-reports nor lends a false sense of coverage.
+    tasks.matching { it.name == "detekt" }.configureEach {
+        enabled = false
+    }
+
+    tasks.matching { it.name == "check" }.configureEach {
+        dependsOn(tasks.matching { it.name in typeResolvedDetektTasks })
     }
 }
 
@@ -173,6 +265,13 @@ val allowedApiDataEdges = setOf(
     ":feature:settings" to ":core:preferences",
 )
 
+// Mirrors settings.gradle.kts: true when developing against the local foundation checkout (the
+// nl.rhaydus:* coordinates are substituted by an includeBuild of ../rhaydus-foundation).
+val foundationLocal = Properties().apply {
+    val localProperties = rootDir.resolve("local.properties")
+    if (localProperties.exists()) localProperties.inputStream().use { load(it) }
+}.getProperty("foundation.local").toBoolean()
+
 // dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
 // unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
 // staying out of the way of the convention-plugin design: the uniform runtime + test bundle provided
@@ -234,7 +333,24 @@ dependencyAnalysis {
                     "androidx.work:work-runtime-ktx", // CoroutineWorker
                     "androidx.camera:camera-camera2", // CameraX runtime backend, loaded via ServiceLoader (no compile ref)
                     "com.google.mlkit:barcode-scanning", // MLKit barcode model + API used by the scanner; DA mis-resolves to a transitive
+                    "com.google.android.material:material", // Material Components Theme.Material3.* XML themes (resource-only, no Kotlin ref)
                 )
+
+                // With foundation.local=true the nl.rhaydus:* coordinates are substituted by an includeBuild
+                // of ../rhaydus-foundation; dependency-analysis cannot resolve the composite-build ABI and
+                // false-flags every foundation dependency as unused. Exclude them in local mode only — against
+                // the published artifacts (CI / normal builds) DA resolves them and the gate stays effective.
+                if (foundationLocal) {
+                    exclude(
+                        "nl.rhaydus:core-common",
+                        "nl.rhaydus:core-platform",
+                        "nl.rhaydus:toad",
+                        "nl.rhaydus:designsystem-core",
+                        "nl.rhaydus:designsystem-editorial",
+                        "nl.rhaydus:designsystem-image",
+                        "nl.rhaydus:offline-sync",
+                    )
+                }
             }
 
             onIncorrectConfiguration {
@@ -330,25 +446,21 @@ tasks.register("checkModuleGraph") {
     }
 }
 
-// Runs the deterministic mechanical-style checks (scripts/style-check.sh) so CI / pre-commit can
-// gate on them. By default the script checks the changed .kt files; pass files via -PstyleCheckFiles
-// to scope it. Fails the build only on ERROR-tier findings (see the script header for the tiers).
+// The per-change style gate: type-resolved detekt across every module — the shared nl.rhaydus baseline
+// plus the custom `rhaydus` ruleset, gating from zero with no baseline file.
 //
-// Also runs `detekt` across every module. detekt is wired into the heavy `check` lifecycle by default,
-// but the lightweight per-change gate developers actually run is `styleCheck` — so without this, detekt
-// violations only surface in a rarely-run full build and silently accumulate. Folding it in here keeps
-// detekt a first-class part of the fast gate (it is source-only / no type resolution, so it stays fast).
-tasks.register<Exec>("styleCheck") {
+// detekt's own tasks are wired into the heavy `check` lifecycle, but the gate developers actually run
+// per change is `styleCheck` — so without this, findings would only surface in a rarely-run full build
+// and silently accumulate. It runs the TYPE-RESOLVED tasks, which is what makes the crash-safety rule
+// (`rhaydus:UnguardedFlowTerminalRead`) fire at all; the cost is that it compiles Android + JVM rather
+// than merely parsing source. That cost is the point: an inert gate is not a gate.
+//
+// (This task used to also shell out to `scripts/style-check.sh`. All six of that script's recipes are now
+// blocking rules — five in nl.rhaydus:ktlint-rules via `ktlintCheck`, the sixth the detekt rule above — so
+// the script was retired. See docs/working/foundation-upstream-candidates.md F1/F7/F22.)
+tasks.register("styleCheck") {
     group = "verification"
-    description = "Runs detekt (all modules) + scripts/style-check.sh over changed Kotlin files."
+    description = "Runs type-resolved detekt (shared baseline + rhaydus crash-safety ruleset) across all modules."
 
-    dependsOn(subprojects.map { "${it.path}:detekt" })
-
-    val script = "${rootProject.projectDir}/scripts/style-check.sh"
-    val extraFiles = (project.findProperty("styleCheckFiles") as String?)
-        ?.split(Regex("\\s+"))
-        ?.filter { it.isNotBlank() }
-        ?: emptyList()
-
-    commandLine(listOf("bash", script) + extraFiles)
+    dependsOn(subprojects.map { sp -> sp.tasks.matching { it.name in typeResolvedDetektTasks } })
 }

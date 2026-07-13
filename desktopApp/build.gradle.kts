@@ -14,8 +14,9 @@ dependencies {
     // Orchestration tier (composes every feature + core module and hosts DesktopApp()).
     implementation(project(":orchestration"))
 
-    // core:domain for the logging facade the entry point installs (mirrors Android's SoftCoverApp).
-    implementation(project(":core:domain"))
+    // The logging facade the entry point installs (AppLog.install, mirrors Android's SoftCoverApp)
+    // now lives in the foundation core-common module.
+    implementation(libs.rhaydus.coreCommon)
 
     implementation(compose.desktop.currentOs)
 
@@ -38,7 +39,7 @@ compose.desktop {
             // Desktop release version — the marketing version (mirrors Android versionName /
             // iOS MARKETING_VERSION). Kept in sync by the set-version-name / release skills. Desktop
             // has no separate build-number field, so versionCode has no desktop counterpart.
-            packageVersion = "3.0.2"
+            packageVersion = "3.0.3"
             description = "Softcover — a Hardcover.app book tracking client"
             // Maintainer/vendor for the package metadata (jpackage Deb/Msi); without it the Linux
             // package falls back to "Unknown". This is package metadata, not the runtime window name
@@ -48,9 +49,20 @@ compose.desktop {
             // Required for KSafe's OS-backed key custody in a trimmed release distributable: the
             // native secret-store access needs sun.misc.Unsafe (jdk.unsupported); without these the
             // packaged app silently drops to KSafe's software-key fallback tier.
+            // jlink strips every module not listed here from the bundled runtime, so a missing entry
+            // surfaces as a launch-time NoClassDefFoundError in the packaged app only — a `:run`
+            // launch uses the full local JDK and never reproduces it. Keep this reconciled with
+            // `./gradlew :desktopApp:suggestRuntimeModules` (jdeps) whenever a dependency changes.
             modules(
                 "jdk.unsupported",
                 "java.management",
+                // Flagged as required by jdeps (`suggestRuntimeModules`); a transitive dependency in
+                // the runtime classpath references the JVM instrumentation API.
+                "java.instrument",
+                // The desktop self-updater (GitHubReleaseSource) talks to GitHub over the JDK's
+                // java.net.http client; without this the packaged app died at launch with a
+                // NoClassDefFoundError for java/net/http/HttpClient.
+                "java.net.http",
             )
 
             // App icons. macOS gets the rounded/padded native variant; Windows + Linux use the flat

@@ -52,6 +52,8 @@ kotlin {
             implementation(project(":feature:settings"))
             implementation(project(":feature:app_update"))
 
+            implementation(libs.rhaydus.coreCommon)
+            implementation(libs.rhaydus.corePlatform)
             implementation(libs.rhaydus.designsystemCore)
 
             // Owns MainActivityViewModel (the one app-level ViewModel) since M1 moved it out of

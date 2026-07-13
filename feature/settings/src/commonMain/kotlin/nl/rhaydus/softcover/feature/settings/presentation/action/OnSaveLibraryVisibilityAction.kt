@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
 import kotlinx.coroutines.launch
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables

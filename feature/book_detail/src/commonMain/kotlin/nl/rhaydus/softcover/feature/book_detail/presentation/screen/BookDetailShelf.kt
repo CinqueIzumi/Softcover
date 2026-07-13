@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
-import nl.rhaydus.designsystem.component.DesktopTooltip
-import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -83,6 +81,12 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
+import nl.rhaydus.common.currentLocalDate
+import nl.rhaydus.common.formatDecimalNumber
+import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.editorial.component.DropCapText
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
@@ -104,7 +108,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembers
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.StarRatingInput
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
@@ -173,9 +176,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.component.ReviewEdi
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import nl.rhaydus.ui.common.currentLocalDate
-import nl.rhaydus.ui.common.formatDecimalNumber
-import nl.rhaydus.ui.common.secondsToHm
 
 private const val REVIEW_COLLAPSED_LINES = 8
 
@@ -400,7 +400,7 @@ internal fun GeneralBookInfoSection(
                         }
 
                         Text(
-                            text = title ?: "",
+                            text = title.orEmpty(),
                             color = Color.White,
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
@@ -751,6 +751,11 @@ internal fun PersonalRatingRow(
                     rating = rating,
                 ),)
             },
+            starIcon = drawableIconResource(
+                contentDescription = "",
+                icon = SoftcoverIcon.StarFilled,
+            ),
+            filledColor = RatingGold,
         )
     }
 }

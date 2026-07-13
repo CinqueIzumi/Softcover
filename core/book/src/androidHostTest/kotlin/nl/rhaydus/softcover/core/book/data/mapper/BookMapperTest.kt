@@ -40,28 +40,60 @@ class BookMapperTest {
         fun `maps all scalar fields from EditionFragment to BookEdition`() {
             // ----- Arrange -----
             val publisher = mockk<EditionFragment.Publisher> {
-                every { name } returns "Penguin"
+                every {
+                    name
+                } returns "Penguin"
             }
 
             val image = mockk<EditionFragment.Image> {
-                every { url } returns "https://example.com/cover.jpg"
+                every {
+                    url
+                } returns "https://example.com/cover.jpg"
             }
 
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns "Edition Title"
-                every { book_id } returns 1
-                every { isbn_10 } returns "1234567890"
-                every { isbn_13 } returns null
-                every { pages } returns 300
-                every { this@mockk.publisher } returns publisher
-                every { this@mockk.image } returns image
-                every { release_year } returns 2020
-                every { release_date } returns null
-                every { edition_format } returns "Paperback"
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns "Edition Title"
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns "1234567890"
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns 300
+                every {
+                    this@mockk.publisher
+                } returns publisher
+                every {
+                    this@mockk.image
+                } returns image
+                every {
+                    release_year
+                } returns 2020
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns "Paperback"
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -89,21 +121,51 @@ class BookMapperTest {
             )
 
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -119,21 +181,51 @@ class BookMapperTest {
         fun `maps null publisher name as null`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -147,24 +239,54 @@ class BookMapperTest {
         fun `url uses image url when image is present`() {
             // ----- Arrange -----
             val image = mockk<EditionFragment.Image> {
-                every { url } returns "https://example.com/primary.jpg"
+                every {
+                    url
+                } returns "https://example.com/primary.jpg"
             }
 
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { this@mockk.image } returns image
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    this@mockk.image
+                } returns image
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -178,25 +300,57 @@ class BookMapperTest {
         fun `url falls back to first fallbackImages url when image is null`() {
             // ----- Arrange -----
             val fallback = mockk<EditionFragment.FallbackImage> {
-                every { url } returns "https://example.com/fallback.jpg"
+                every {
+                    url
+                } returns "https://example.com/fallback.jpg"
             }
 
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns listOf(fallback)
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns listOf(fallback)
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -210,21 +364,51 @@ class BookMapperTest {
         fun `url is null when image is null and fallbackImages is empty`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -238,25 +422,57 @@ class BookMapperTest {
         fun `url is null when image is null and all fallbackImages have null url`() {
             // ----- Arrange -----
             val fallback = mockk<EditionFragment.FallbackImage> {
-                every { url } returns null
+                every {
+                    url
+                } returns null
             }
 
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns listOf(fallback)
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns listOf(fallback)
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -270,21 +486,51 @@ class BookMapperTest {
         fun `maps null release_year as -1`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -298,21 +544,51 @@ class BookMapperTest {
         fun `maps null edition_format as empty string`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -326,21 +602,51 @@ class BookMapperTest {
         fun `defaults authors to empty list when not supplied`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -354,21 +660,51 @@ class BookMapperTest {
         fun `maps non-null canonical_id on fragment to canonicalId on BookEdition`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns 55
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns 55
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -382,21 +718,51 @@ class BookMapperTest {
         fun `maps null canonical_id on fragment to null canonicalId on BookEdition`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -410,21 +776,51 @@ class BookMapperTest {
         fun `maps non-null audio_seconds from fragment to audioSeconds on BookEdition`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns 3600
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns 3600
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -438,21 +834,51 @@ class BookMapperTest {
         fun `maps null audio_seconds from fragment to null audioSeconds on BookEdition`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -466,21 +892,51 @@ class BookMapperTest {
         fun `release_date in EditionFragment is parsed into BookEdition releaseDate`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns "2026-05-05"
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns "2026-05-05"
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -498,21 +954,51 @@ class BookMapperTest {
         fun `null release_date maps to null releaseDate`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -526,21 +1012,51 @@ class BookMapperTest {
         fun `malformed release_date maps to null releaseDate`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns "not-a-date"
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns "not-a-date"
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -554,21 +1070,51 @@ class BookMapperTest {
         fun `maps non-null isbn_13 from EditionFragment to BookEdition`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns "9780451524935"
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns "9780451524935"
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -585,31 +1131,69 @@ class BookMapperTest {
         fun `extracts authors from contributions and maps them`() {
             // ----- Arrange -----
             val authorInner = mockk<EditionDetailFragment.Contribution.Author> {
-                every { id } returns 5
-                every { name } returns "George Orwell"
+                every {
+                    id
+                } returns 5
+                every {
+                    name
+                } returns "George Orwell"
             }
 
             val contribution = mockk<EditionDetailFragment.Contribution> {
-                every { author } returns authorInner
+                every {
+                    author
+                } returns authorInner
             }
 
             val fragment = mockk<EditionDetailFragment> {
-                every { id } returns 20
-                every { canonical_id } returns null
-                every { title } returns "Animal Farm"
-                every { book_id } returns 2
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns 112
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns 1945
-                every { release_date } returns null
-                every { edition_format } returns "Hardcover"
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
-                every { contributions } returns listOf(contribution)
+                every {
+                    id
+                } returns 20
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns "Animal Farm"
+                every {
+                    book_id
+                } returns 2
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns 112
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns 1945
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns "Hardcover"
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
+                every {
+                    contributions
+                } returns listOf(contribution)
             }
 
             // ----- Act -----
@@ -625,26 +1209,60 @@ class BookMapperTest {
         fun `skips contributions whose author is null`() {
             // ----- Arrange -----
             val contribution = mockk<EditionDetailFragment.Contribution> {
-                every { author } returns null
+                every {
+                    author
+                } returns null
             }
 
             val fragment = mockk<EditionDetailFragment> {
-                every { id } returns 20
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 2
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
-                every { contributions } returns listOf(contribution)
+                every {
+                    id
+                } returns 20
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 2
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
+                every {
+                    contributions
+                } returns listOf(contribution)
             }
 
             // ----- Act -----
@@ -658,22 +1276,54 @@ class BookMapperTest {
         fun `produces empty authors list when contributions is empty`() {
             // ----- Arrange -----
             val fragment = mockk<EditionDetailFragment> {
-                every { id } returns 20
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 2
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
-                every { contributions } returns emptyList()
+                every {
+                    id
+                } returns 20
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 2
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
+                every {
+                    contributions
+                } returns emptyList()
             }
 
             // ----- Act -----
@@ -687,22 +1337,54 @@ class BookMapperTest {
         fun `maps scalar edition fields correctly`() {
             // ----- Arrange -----
             val fragment = mockk<EditionDetailFragment> {
-                every { id } returns 77
-                every { canonical_id } returns null
-                every { title } returns "1984"
-                every { book_id } returns 3
-                every { isbn_10 } returns "0451524934"
-                every { isbn_13 } returns null
-                every { pages } returns 328
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns 1949
-                every { release_date } returns null
-                every { edition_format } returns "Paperback"
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
-                every { contributions } returns emptyList()
+                every {
+                    id
+                } returns 77
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns "1984"
+                every {
+                    book_id
+                } returns 3
+                every {
+                    isbn_10
+                } returns "0451524934"
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns 328
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns 1949
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns "Paperback"
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
+                every {
+                    contributions
+                } returns emptyList()
             }
 
             // ----- Act -----
@@ -722,22 +1404,54 @@ class BookMapperTest {
         fun `maps non-null audio_seconds from EditionDetailFragment to audioSeconds on BookEdition`() {
             // ----- Arrange -----
             val fragment = mockk<EditionDetailFragment> {
-                every { id } returns 20
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 2
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns 7200
-                every { reading_format_id } returns 0
-                every { contributions } returns emptyList()
+                every {
+                    id
+                } returns 20
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 2
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns 7200
+                every {
+                    reading_format_id
+                } returns 0
+                every {
+                    contributions
+                } returns emptyList()
             }
 
             // ----- Act -----
@@ -751,21 +1465,51 @@ class BookMapperTest {
         fun `always sets localImagePath to null on the resulting BookEdition`() {
             // ----- Arrange -----
             val fragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             // ----- Act -----
@@ -785,7 +1529,9 @@ class BookMapperTest {
 
             val bookInner = mockk<UserBookFragment.Book>()
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookInner
+                every {
+                    book
+                } returns bookInner
             }
 
             every {
@@ -806,46 +1552,116 @@ class BookMapperTest {
 
             val bookListFragment = mockk<UserBookFragment.Book>()
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns null
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns null
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns null
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns null
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
                 with(UserBookFragment.Book.Companion) { bookListFragment.bookListFragment() }
             } returns mockk {
-                every { id } returns 100
-                every { canonical } returns null
-                every { title } returns "Test"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns null
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "Test"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             // ----- Act -----
@@ -867,62 +1683,162 @@ class BookMapperTest {
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns "My Edition"
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns "My Edition"
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns 4.0
-                every { image } returns null
-                every { release_year } returns 2020
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 250
-                every { ratings_count } returns 0
-                every { description } returns null
-                every { headline } returns null
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns 4.0
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns 2020
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 250
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -956,62 +1872,162 @@ class BookMapperTest {
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { description } returns "some description"
-                every { headline } returns null
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns "some description"
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -1040,62 +2056,162 @@ class BookMapperTest {
             val editionInner = mockk<UserBookFragment.Edition>()
 
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { description } returns null
-                every { headline } returns "A short tagline"
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns "A short tagline"
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -1124,62 +2240,162 @@ class BookMapperTest {
             val editionInner = mockk<UserBookFragment.Edition>()
 
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { description } returns null
-                every { headline } returns null
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -1207,62 +2423,162 @@ class BookMapperTest {
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { canonical } returns null
-                every { title } returns null
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 1234
-                every { ratings_count } returns 0
-                every { description } returns null
-                every { headline } returns null
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 1234
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -1288,68 +2604,170 @@ class BookMapperTest {
             mockkObject(UserBookFragment.User_book_read.Companion)
 
             val canonical = mockk<nl.rhaydus.softcover.fragment.BookListFragment.Canonical> {
-                every { id } returns 999
+                every {
+                    id
+                } returns 999
             }
 
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { this@mockk.canonical } returns canonical
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { description } returns null
-                every { headline } returns null
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100
+                every {
+                    this@mockk.canonical
+                } returns canonical
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -1375,68 +2793,170 @@ class BookMapperTest {
             mockkObject(UserBookFragment.User_book_read.Companion)
 
             val canonical = mockk<nl.rhaydus.softcover.fragment.BookListFragment.Canonical> {
-                every { id } returns 100
+                every {
+                    id
+                } returns 100
             }
 
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { this@mockk.canonical } returns canonical
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { description } returns null
-                every { headline } returns null
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100
+                every {
+                    this@mockk.canonical
+                } returns canonical
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -1467,62 +2987,162 @@ class BookMapperTest {
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 999 // differs from parent book id
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 999 // differs from parent book id
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100 // parent book id
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { description } returns null
-                every { headline } returns null
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100 // parent book id
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -1554,38 +3174,98 @@ class BookMapperTest {
             val bookInner = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { canonical } returns null
-                every { title } returns "Test Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 0
-                every { ratings_count } returns ratingsCount
-                every { description } returns null
-                every { headline } returns null
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 100
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "Test Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns ratingsCount
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -1596,26 +3276,66 @@ class BookMapperTest {
             } returns editionFragment
 
             return mockk<UserBookFragment> {
-                every { book } returns bookInner
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns progressUpdated
-                every { user_book_read_started_journal } returns userBookReadStarted
-                every { user_book_read_finished_journal } returns userBookReadFinished
-                every { status_stopped_journal } returns statusStopped
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns reviewSlate
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns createdAt
+                every {
+                    book
+                } returns bookInner
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns progressUpdated
+                every {
+                    user_book_read_started_journal
+                } returns userBookReadStarted
+                every {
+                    user_book_read_finished_journal
+                } returns userBookReadFinished
+                every {
+                    status_stopped_journal
+                } returns statusStopped
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns reviewSlate
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns createdAt
             }
         }
 
@@ -1623,8 +3343,12 @@ class BookMapperTest {
             event: String,
             updatedAt: String = "2024-01-01",
         ): ReadingJournalFragment = mockk {
-            every { this@mockk.event } returns event
-            every { this@mockk.updated_at } returns updatedAt
+            every {
+                this@mockk.event
+            } returns event
+            every {
+                this@mockk.updated_at
+            } returns updatedAt
         }
 
         @Test
@@ -1636,7 +3360,9 @@ class BookMapperTest {
 
             val journalFragment = stubReadingJournalFragment(event = "progress_updated")
             val journalEntry = mockk<UserBookFragment.Progress_updated_journal> {
-                every { with(UserBookFragment.Progress_updated_journal.Companion) { progressUpdatedJournalFragment() } } returns journalFragment
+                every {
+                    with(UserBookFragment.Progress_updated_journal.Companion) { progressUpdatedJournalFragment() }
+                } returns journalFragment
             }
             val fragment = stubMinimalUserBookFragment(progressUpdated = listOf(journalEntry))
 
@@ -1657,7 +3383,9 @@ class BookMapperTest {
 
             val journalFragment = stubReadingJournalFragment(event = "user_book_read_started")
             val journalEntry = mockk<UserBookFragment.User_book_read_started_journal> {
-                every { with(UserBookFragment.User_book_read_started_journal.Companion) { userBookReadStartedJournalFragment() } } returns journalFragment
+                every {
+                    with(UserBookFragment.User_book_read_started_journal.Companion) { userBookReadStartedJournalFragment() }
+                } returns journalFragment
             }
             val fragment = stubMinimalUserBookFragment(userBookReadStarted = listOf(journalEntry))
 
@@ -1678,7 +3406,9 @@ class BookMapperTest {
 
             val journalFragment = stubReadingJournalFragment(event = "user_book_read_finished")
             val journalEntry = mockk<UserBookFragment.User_book_read_finished_journal> {
-                every { with(UserBookFragment.User_book_read_finished_journal.Companion) { userBookReadFinishedJournalFragment() } } returns journalFragment
+                every {
+                    with(UserBookFragment.User_book_read_finished_journal.Companion) { userBookReadFinishedJournalFragment() }
+                } returns journalFragment
             }
             val fragment = stubMinimalUserBookFragment(userBookReadFinished = listOf(journalEntry))
 
@@ -1699,7 +3429,9 @@ class BookMapperTest {
 
             val journalFragment = stubReadingJournalFragment(event = "status_stopped")
             val journalEntry = mockk<UserBookFragment.Status_stopped_journal> {
-                every { with(UserBookFragment.Status_stopped_journal.Companion) { statusStoppedJournalFragment() } } returns journalFragment
+                every {
+                    with(UserBookFragment.Status_stopped_journal.Companion) { statusStoppedJournalFragment() }
+                } returns journalFragment
             }
             val fragment = stubMinimalUserBookFragment(statusStopped = listOf(journalEntry))
 
@@ -1722,16 +3454,24 @@ class BookMapperTest {
             mockkObject(UserBookFragment.Status_stopped_journal.Companion)
 
             val progressEntry = mockk<UserBookFragment.Progress_updated_journal> {
-                every { with(UserBookFragment.Progress_updated_journal.Companion) { progressUpdatedJournalFragment() } } returns stubReadingJournalFragment("progress_updated")
+                every {
+                    with(UserBookFragment.Progress_updated_journal.Companion) { progressUpdatedJournalFragment() }
+                } returns stubReadingJournalFragment("progress_updated")
             }
             val currentlyReadingEntry = mockk<UserBookFragment.User_book_read_started_journal> {
-                every { with(UserBookFragment.User_book_read_started_journal.Companion) { userBookReadStartedJournalFragment() } } returns stubReadingJournalFragment("user_book_read_started")
+                every {
+                    with(UserBookFragment.User_book_read_started_journal.Companion) { userBookReadStartedJournalFragment() }
+                } returns stubReadingJournalFragment("user_book_read_started")
             }
             val readEntry = mockk<UserBookFragment.User_book_read_finished_journal> {
-                every { with(UserBookFragment.User_book_read_finished_journal.Companion) { userBookReadFinishedJournalFragment() } } returns stubReadingJournalFragment("user_book_read_finished")
+                every {
+                    with(UserBookFragment.User_book_read_finished_journal.Companion) { userBookReadFinishedJournalFragment() }
+                } returns stubReadingJournalFragment("user_book_read_finished")
             }
             val stoppedEntry = mockk<UserBookFragment.Status_stopped_journal> {
-                every { with(UserBookFragment.Status_stopped_journal.Companion) { statusStoppedJournalFragment() } } returns stubReadingJournalFragment("status_stopped")
+                every {
+                    with(UserBookFragment.Status_stopped_journal.Companion) { statusStoppedJournalFragment() }
+                } returns stubReadingJournalFragment("status_stopped")
             }
             val fragment = stubMinimalUserBookFragment(
                 progressUpdated = listOf(progressEntry),
@@ -1843,85 +3583,201 @@ class BookMapperTest {
             mockkObject(UserBookFragment.User_book_read.Companion)
 
             val tagCategory = mockk<BookListTagCategory> {
-                every { this@mockk.category } returns "Genre"
+                every {
+                    this@mockk.category
+                } returns "Genre"
             }
 
             val tag = mockk<BookListTaggableTag> {
-                every { id } returns 7L
-                every { tag } returns "Science Fiction"
-                every { tag_category } returns tagCategory
+                every {
+                    id
+                } returns 7L
+                every {
+                    tag
+                } returns "Science Fiction"
+                every {
+                    tag_category
+                } returns tagCategory
             }
 
             val taggableCountGenre = mockk<BookListTaggableCount> {
-                every { count } returns 15
-                every { this@mockk.tag } returns tag
+                every {
+                    count
+                } returns 15
+                every {
+                    this@mockk.tag
+                } returns tag
             }
 
             val nullTagEntry = mockk<BookListTaggableCount> {
-                every { count } returns 1
-                every { this@mockk.tag } returns null
+                every {
+                    count
+                } returns 1
+                every {
+                    this@mockk.tag
+                } returns null
             }
 
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
 
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { description } returns null
-                every { headline } returns null
-                every { taggable_counts } returns listOf(taggableCountGenre, nullTagEntry)
+                every {
+                    id
+                } returns 100
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns listOf(taggableCountGenre, nullTagEntry)
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -1951,80 +3807,192 @@ class BookMapperTest {
             mockkObject(UserBookFragment.User_book_read.Companion)
 
             val tagCategory = mockk<BookListTagCategory> {
-                every { this@mockk.category } returns null
+                every {
+                    this@mockk.category
+                } returns null
             }
 
             val tag = mockk<BookListTaggableTag> {
-                every { id } returns 3L
-                every { tag } returns "Dark"
-                every { tag_category } returns tagCategory
+                every {
+                    id
+                } returns 3L
+                every {
+                    tag
+                } returns "Dark"
+                every {
+                    tag_category
+                } returns tagCategory
             }
 
             val taggableCount = mockk<BookListTaggableCount> {
-                every { count } returns 2
-                every { this@mockk.tag } returns tag
+                every {
+                    count
+                } returns 2
+                every {
+                    this@mockk.tag
+                } returns tag
             }
 
             val bookListFragment = mockk<UserBookFragment.Book>()
             val editionInner = mockk<UserBookFragment.Edition>()
 
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 100
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 100
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val bookListFragmentModel = mockk<nl.rhaydus.softcover.fragment.BookListFragment> {
-                every { id } returns 100
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { description } returns null
-                every { headline } returns null
-                every { taggable_counts } returns listOf(taggableCount)
+                every {
+                    id
+                } returns 100
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    taggable_counts
+                } returns listOf(taggableCount)
             }
 
             val fragment = mockk<UserBookFragment> {
-                every { book } returns bookListFragment
-                every { edition } returns editionInner
-                every { progress_updated_journal } returns emptyList()
-                every { user_book_read_started_journal } returns emptyList()
-                every { user_book_read_finished_journal } returns emptyList()
-                every { status_stopped_journal } returns emptyList()
-                every { user_book_reads } returns emptyList()
-                every { id } returns 1
-                every { status_id } returns 1
-                every { edition_id } returns 10
-                every { last_read_date } returns null
-                every { date_added } returns "2024-01-01"
-                every { privacy_setting_id } returns 1
-                every { rating } returns null
-                every { referrer_user_id } returns null
-                every { review_has_spoilers } returns false
-                every { review_slate } returns emptyList<Map<String, Any?>>()
-                every { reviewed_at } returns null
-                every { updated_at } returns null
-                every { created_at } returns "2024-01-01"
+                every {
+                    book
+                } returns bookListFragment
+                every {
+                    edition
+                } returns editionInner
+                every {
+                    progress_updated_journal
+                } returns emptyList()
+                every {
+                    user_book_read_started_journal
+                } returns emptyList()
+                every {
+                    user_book_read_finished_journal
+                } returns emptyList()
+                every {
+                    status_stopped_journal
+                } returns emptyList()
+                every {
+                    user_book_reads
+                } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    status_id
+                } returns 1
+                every {
+                    edition_id
+                } returns 10
+                every {
+                    last_read_date
+                } returns null
+                every {
+                    date_added
+                } returns "2024-01-01"
+                every {
+                    privacy_setting_id
+                } returns 1
+                every {
+                    rating
+                } returns null
+                every {
+                    referrer_user_id
+                } returns null
+                every {
+                    review_has_spoilers
+                } returns false
+                every {
+                    review_slate
+                } returns emptyList<Map<String, Any?>>()
+                every {
+                    reviewed_at
+                } returns null
+                every {
+                    updated_at
+                } returns null
+                every {
+                    created_at
+                } returns "2024-01-01"
             }
 
             every {
@@ -2051,22 +4019,54 @@ class BookMapperTest {
             mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns null
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { default_cover_edition } returns null
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    default_cover_edition
+                } returns null
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             // ----- Act -----
@@ -2085,40 +4085,102 @@ class BookMapperTest {
 
             val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns "Hardcover Edition"
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns 400
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns 2021
-                every { release_date } returns null
-                every { edition_format } returns "Hardcover"
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns "Hardcover Edition"
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns 400
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns 2021
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns "Hardcover"
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns 4.5
-                every { image } returns null
-                every { release_year } returns 2021
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns "A great book."
-                every { headline } returns null
-                every { users_count } returns 500
-                every { ratings_count } returns 0
-                every { default_cover_edition } returns defaultEditionInner
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns 4.5
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns 2021
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns "A great book."
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 500
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    default_cover_edition
+                } returns defaultEditionInner
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -2149,40 +4211,102 @@ class BookMapperTest {
 
             val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1
-                every { canonical } returns null
-                every { title } returns null
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns null
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { default_cover_edition } returns defaultEditionInner
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    default_cover_edition
+                } returns defaultEditionInner
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -2206,40 +4330,102 @@ class BookMapperTest {
             val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
 
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1
-                every { canonical } returns null
-                every { title } returns null
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns "A gripping thriller"
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { default_cover_edition } returns defaultEditionInner
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns "A gripping thriller"
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    default_cover_edition
+                } returns defaultEditionInner
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -2263,40 +4449,102 @@ class BookMapperTest {
             val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
 
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1
-                every { canonical } returns null
-                every { title } returns null
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns null
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { default_cover_edition } returns defaultEditionInner
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    default_cover_edition
+                } returns defaultEditionInner
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -2318,45 +4566,109 @@ class BookMapperTest {
             mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
             val canonical = mockk<BookDetailFragment.Canonical> {
-                every { id } returns 999
+                every {
+                    id
+                } returns 999
             }
 
             val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1
-                every { this@mockk.canonical } returns canonical
-                every { title } returns null
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns null
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { default_cover_edition } returns defaultEditionInner
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    this@mockk.canonical
+                } returns canonical
+                every {
+                    title
+                } returns null
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    default_cover_edition
+                } returns defaultEditionInner
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -2378,45 +4690,109 @@ class BookMapperTest {
             mockkObject(BookDetailFragment.Default_cover_edition.Companion)
 
             val canonical = mockk<BookDetailFragment.Canonical> {
-                every { id } returns 1
+                every {
+                    id
+                } returns 1
             }
 
             val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1
-                every { this@mockk.canonical } returns canonical
-                every { title } returns null
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns null
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { default_cover_edition } returns defaultEditionInner
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    this@mockk.canonical
+                } returns canonical
+                every {
+                    title
+                } returns null
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    default_cover_edition
+                } returns defaultEditionInner
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -2442,40 +4818,102 @@ class BookMapperTest {
 
             val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 999 // differs from parent book id
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 999 // differs from parent book id
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1 // parent book id
-                every { canonical } returns null
-                every { title } returns null
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns null
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { default_cover_edition } returns defaultEditionInner
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1 // parent book id
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    default_cover_edition
+                } returns defaultEditionInner
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -2499,40 +4937,102 @@ class BookMapperTest {
 
             val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns null
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1
-                every { canonical } returns null
-                every { title } returns null
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns emptyList()
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns null
-                every { users_count } returns 0
-                every { ratings_count } returns 312
-                every { default_cover_edition } returns defaultEditionInner
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns null
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns emptyList()
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 312
+                every {
+                    default_cover_edition
+                } returns defaultEditionInner
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -2666,42 +5166,104 @@ class BookMapperTest {
             val defaultEditionInner = mockk<BookDetailFragment.Default_cover_edition>()
 
             val editionFragment = mockk<EditionFragment> {
-                every { id } returns 10
-                every { canonical_id } returns null
-                every { title } returns "Title"
-                every { book_id } returns 1
-                every { isbn_10 } returns null
-                every { isbn_13 } returns null
-                every { pages } returns null
-                every { publisher } returns null
-                every { image } returns null
-                every { fallbackImages } returns emptyList()
-                every { release_year } returns null
-                every { release_date } returns null
-                every { edition_format } returns null
-                every { audio_seconds } returns null
-                every { reading_format_id } returns 0
+                every {
+                    id
+                } returns 10
+                every {
+                    canonical_id
+                } returns null
+                every {
+                    title
+                } returns "Title"
+                every {
+                    book_id
+                } returns 1
+                every {
+                    isbn_10
+                } returns null
+                every {
+                    isbn_13
+                } returns null
+                every {
+                    pages
+                } returns null
+                every {
+                    publisher
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    fallbackImages
+                } returns emptyList()
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    edition_format
+                } returns null
+                every {
+                    audio_seconds
+                } returns null
+                every {
+                    reading_format_id
+                } returns 0
             }
 
             val seriesList = listOfNotNull(bookSeriesEntry)
 
             val fragment = mockk<BookDetailFragment> {
-                every { id } returns 1
-                every { canonical } returns null
-                every { title } returns "My Book"
-                every { rating } returns null
-                every { image } returns null
-                every { release_year } returns null
-                every { release_date } returns null
-                every { book_series } returns seriesList
-                every { compilation } returns false
-                every { contributions } returns emptyList()
-                every { description } returns null
-                every { headline } returns null
-                every { users_count } returns 0
-                every { ratings_count } returns 0
-                every { default_cover_edition } returns defaultEditionInner
-                every { taggable_counts } returns emptyList()
+                every {
+                    id
+                } returns 1
+                every {
+                    canonical
+                } returns null
+                every {
+                    title
+                } returns "My Book"
+                every {
+                    rating
+                } returns null
+                every {
+                    image
+                } returns null
+                every {
+                    release_year
+                } returns null
+                every {
+                    release_date
+                } returns null
+                every {
+                    book_series
+                } returns seriesList
+                every {
+                    compilation
+                } returns false
+                every {
+                    contributions
+                } returns emptyList()
+                every {
+                    description
+                } returns null
+                every {
+                    headline
+                } returns null
+                every {
+                    users_count
+                } returns 0
+                every {
+                    ratings_count
+                } returns 0
+                every {
+                    default_cover_edition
+                } returns defaultEditionInner
+                every {
+                    taggable_counts
+                } returns emptyList()
             }
 
             every {
@@ -2717,10 +5279,18 @@ class BookMapperTest {
             details: String?,
             position: Double?,
         ): BookDetailFragment.Book_series = mockk<BookDetailFragment.Book_series> {
-            every { this@mockk.details } returns details
-            every { this@mockk.position } returns position
-            every { this@mockk.series } returns null
-            every { this@mockk.__typename } returns "book_series"
+            every {
+                this@mockk.details
+            } returns details
+            every {
+                this@mockk.position
+            } returns position
+            every {
+                this@mockk.series
+            } returns null
+            every {
+                this@mockk.__typename
+            } returns "book_series"
         }
 
         @Test

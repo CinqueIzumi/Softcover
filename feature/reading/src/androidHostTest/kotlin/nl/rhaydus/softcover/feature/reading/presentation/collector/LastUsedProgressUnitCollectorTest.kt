@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -16,9 +19,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScre
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class LastUsedProgressUnitCollectorTest {
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
@@ -36,7 +36,9 @@ class LastUsedProgressUnitCollectorTest {
 
     private fun buildDependencies(unit: ProgressUnit): ReadingScreenDependencies =
         mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
-            every { mock.getLastUsedProgressUnitAsFlowUseCase() } returns flowOf(unit)
+            every {
+                mock.getLastUsedProgressUnitAsFlowUseCase()
+            } returns flowOf(unit)
         }
 
     @Nested

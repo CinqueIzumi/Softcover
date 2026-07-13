@@ -5,9 +5,9 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
 import okio.FileSystem
 import okio.Path
+import kotlin.jvm.JvmInline
 import nl.rhaydus.softcover.core.preferences.data.datastore.serializer.AppSettingsSerializer
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
-import kotlin.jvm.JvmInline
 
 @JvmInline
 internal value class AppSettingsDataStore(val store: DataStore<AppSettingsEntity>)

@@ -6,12 +6,12 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
-import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class GetThemeConfigurationUseCaseTest {
     private lateinit var settingsRepository: SettingsRepository

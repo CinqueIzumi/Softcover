@@ -1,10 +1,12 @@
 package nl.rhaydus.softcover.core.connectivity.di
 
-import nl.rhaydus.softcover.core.connectivity.data.datasource.ConnectivityDataSource
-import nl.rhaydus.softcover.core.connectivity.data.datasource.ConnectivityDataSourceImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
+import nl.rhaydus.platform.AndroidNetworkAvailabilityProvider
+import nl.rhaydus.platform.NetworkAvailabilityProvider
 
 actual val platformModule = module {
-    single<ConnectivityDataSource> { ConnectivityDataSourceImpl(context = androidContext()) }
+    single<NetworkAvailabilityProvider> {
+        AndroidNetworkAvailabilityProvider(context = androidContext())
+    }
 }

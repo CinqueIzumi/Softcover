@@ -1,10 +1,11 @@
 package nl.rhaydus.softcover.orchestration.usecase
 
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
+import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
@@ -19,7 +20,7 @@ internal class ReAuthenticateUseCaseImpl(
             .removePrefix("Bearer")
             .trim()
 
-        val previousUserId = settingsRepository.getUserId().first()
+        val previousUserId = settingsRepository.getUserId().firstOrNull() ?: NO_USER_ID
 
         // Apply the new token first so the identifying query authenticates with it (the interceptor
         // reads the token fresh per request). A rejected token throws here, leaving data untouched.
@@ -29,7 +30,7 @@ internal class ReAuthenticateUseCaseImpl(
 
         // A different account: wipe the previous user's local data before loading the new one. The
         // reset clears the token too, so restore the just-validated key afterwards.
-        if (previousUserId != -1 && previousUserId != newUserId) {
+        if (previousUserId != NO_USER_ID && previousUserId != newUserId) {
             resetUserDataUseCase().getOrThrow()
 
             settingsRepository.updateApiKey(key = sanitizedKey)

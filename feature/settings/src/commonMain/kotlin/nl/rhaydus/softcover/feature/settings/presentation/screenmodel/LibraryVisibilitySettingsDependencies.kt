@@ -2,8 +2,8 @@ package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
+import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase

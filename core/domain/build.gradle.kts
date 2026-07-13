@@ -12,9 +12,12 @@ kotlin {
         commonMain.dependencies {
             api(libs.kotlinx.datetime)
 
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
 
-            implementation(libs.kermit)
+            // `api`: the connectivity contracts below expose foundation supertypes
+            // (WriteQueue, OfflineWriteDrainer) on their own public surface.
+            api(libs.rhaydus.offlineSync)
+
             implementation(libs.kotlinx.serialization.json)
         }
     }

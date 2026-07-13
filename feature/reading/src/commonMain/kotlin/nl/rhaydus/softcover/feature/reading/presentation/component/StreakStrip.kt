@@ -32,6 +32,7 @@ import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.haptics.rememberHaptics
@@ -40,7 +41,6 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
-import nl.rhaydus.ui.common.currentLocalDate
 
 private val DOT_ROW_HEIGHT = 18.dp
 private val DOT = 9.dp

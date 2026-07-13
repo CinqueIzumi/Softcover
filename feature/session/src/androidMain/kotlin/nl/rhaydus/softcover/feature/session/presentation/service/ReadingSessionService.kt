@@ -27,13 +27,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.resolveEditionImageSource
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppEntryPoint
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
 
 /**

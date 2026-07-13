@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.screenmodel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarState
 import cafe.adriel.voyager.core.model.screenModelScope
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
@@ -31,7 +32,6 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ToadScreenModel
-import nl.rhaydus.ui.common.AppDispatchers
 
 internal class LibraryScreenScreenModel(
     private val getSortedAllUserBooksUseCase: GetSortedAllUserBooksUseCase,

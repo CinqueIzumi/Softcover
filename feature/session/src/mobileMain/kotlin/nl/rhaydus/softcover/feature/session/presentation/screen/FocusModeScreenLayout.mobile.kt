@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.session.presentation.screen
 
-import nl.rhaydus.designsystem.layout.cappedContentWidth
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession

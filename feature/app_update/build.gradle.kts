@@ -17,6 +17,9 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.play.app.update)
             implementation(libs.play.app.update.ktx)
+
+            // AppLog, for logging the in-app-update flow on Android.
+            implementation(libs.rhaydus.coreCommon)
         }
 
         jvmMain.dependencies {
@@ -24,7 +27,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
 
             // AppDispatchers, for running the update check/download off the main thread.
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
         }
 
         // The desktop updater lives in jvmMain, so its tests need the JUnit5 + MockK stack the

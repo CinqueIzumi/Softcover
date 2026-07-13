@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
@@ -19,9 +22,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class UserTagsCollectorTest {
     private lateinit var getUserTagsUseCase: GetUserTagsUseCase
@@ -40,18 +40,28 @@ class UserTagsCollectorTest {
         )
 
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also { mock ->
-            every { mock.getUserTagsUseCase } returns getUserTagsUseCase
+            every {
+                mock.getUserTagsUseCase
+            } returns getUserTagsUseCase
         }
     }
 
     private fun stubShelvedBook(id: Int = 1): Book = mockk {
-        every { this@mockk.id } returns id
-        every { this@mockk.userBook } returns mockk<UserBook>()
+        every {
+            this@mockk.id
+        } returns id
+        every {
+            this@mockk.userBook
+        } returns mockk<UserBook>()
     }
 
     private fun stubUnshelvedBook(id: Int = 2): Book = mockk {
-        every { this@mockk.id } returns id
-        every { this@mockk.userBook } returns null
+        every {
+            this@mockk.id
+        } returns id
+        every {
+            this@mockk.userBook
+        } returns null
     }
 
     @Nested
@@ -65,7 +75,9 @@ class UserTagsCollectorTest {
                 category = TagCategory.GENRE,
             ),)
 
-            coEvery { getUserTagsUseCase(bookId = 10) } returns Result.success(tags)
+            coEvery {
+                getUserTagsUseCase(bookId = 10)
+            } returns Result.success(tags)
 
             val collector = UserTagsCollector()
             val job = launch { collector.onLaunch(
@@ -126,7 +138,9 @@ class UserTagsCollectorTest {
             ),)
             stateFlow.value = stateFlow.value.copy(userTags = existingTags)
 
-            coEvery { getUserTagsUseCase(bookId = 3) } returns Result.failure(RuntimeException("network error"))
+            coEvery {
+                getUserTagsUseCase(bookId = 3)
+            } returns Result.failure(RuntimeException("network error"))
 
             val collector = UserTagsCollector()
             val job = launch { collector.onLaunch(
@@ -156,8 +170,12 @@ class UserTagsCollectorTest {
                 category = TagCategory.GENRE,
             ),)
 
-            coEvery { getUserTagsUseCase(bookId = 1) } returns Result.success(tagsA)
-            coEvery { getUserTagsUseCase(bookId = 2) } returns Result.success(tagsB)
+            coEvery {
+                getUserTagsUseCase(bookId = 1)
+            } returns Result.success(tagsA)
+            coEvery {
+                getUserTagsUseCase(bookId = 2)
+            } returns Result.success(tagsB)
 
             val collector = UserTagsCollector()
             val job = launch { collector.onLaunch(
@@ -185,7 +203,9 @@ class UserTagsCollectorTest {
                 category = TagCategory.GENRE,
             ),)
 
-            coEvery { getUserTagsUseCase(bookId = 1) } returns Result.success(tags)
+            coEvery {
+                getUserTagsUseCase(bookId = 1)
+            } returns Result.success(tags)
 
             val collector = UserTagsCollector()
             val job = launch { collector.onLaunch(
@@ -215,7 +235,9 @@ class UserTagsCollectorTest {
                 category = TagCategory.GENRE,
             ),)
 
-            coEvery { getUserTagsUseCase(bookId = 1) } returns Result.success(tags)
+            coEvery {
+                getUserTagsUseCase(bookId = 1)
+            } returns Result.success(tags)
 
             val collector = UserTagsCollector()
             val job = launch { collector.onLaunch(

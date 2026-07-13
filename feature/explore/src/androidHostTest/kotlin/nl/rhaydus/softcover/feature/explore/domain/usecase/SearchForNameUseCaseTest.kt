@@ -5,11 +5,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
-import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
 class SearchForNameUseCaseTest {
     private lateinit var searchRepository: ExploreRepository

@@ -2,7 +2,7 @@ package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.app_update.domain.launcher.AppUpdateFlowLauncher
 
 // iOS updates are an App Store concern — there is no in-app update flow. The observed update state is

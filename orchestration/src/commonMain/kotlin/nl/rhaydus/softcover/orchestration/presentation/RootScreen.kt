@@ -25,11 +25,11 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.ScreenTransition
 import kotlinx.coroutines.flow.combine
 import org.koin.compose.koinInject
+import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ConnectivityBanner
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
-import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 
 internal object RootScreen : Screen {

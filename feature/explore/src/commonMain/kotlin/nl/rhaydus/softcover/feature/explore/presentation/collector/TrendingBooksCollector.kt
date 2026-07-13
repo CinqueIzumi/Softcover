@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies

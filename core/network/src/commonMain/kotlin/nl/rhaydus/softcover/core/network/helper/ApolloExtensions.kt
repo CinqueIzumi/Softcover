@@ -13,7 +13,7 @@ import com.apollographql.cache.normalized.fetchPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
-import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailability
+import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException

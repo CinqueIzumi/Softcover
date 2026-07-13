@@ -8,6 +8,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
@@ -16,9 +19,6 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 import nl.rhaydus.softcover.core.lists.domain.model.ListSignature
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ListsRepositoryImplRefreshTest {
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
@@ -46,7 +46,9 @@ class ListsRepositoryImplRefreshTest {
     }
 
     private fun stubBookList(id: Int = 1): BookList = mockk {
-        io.mockk.every { this@mockk.id } returns id
+        io.mockk.every {
+            this@mockk.id
+        } returns id
     }
 
     @Nested
@@ -56,7 +58,7 @@ class ListsRepositoryImplRefreshTest {
             // ----- Arrange -----
             val userId = 10
 
-            coJustRun { listWriteDrainer.drainPendingWrites() }
+            coJustRun { listWriteDrainer.drain() }
 
             coEvery {
                 listsRemoteDataSource.fetchListSignatures()
@@ -71,7 +73,7 @@ class ListsRepositoryImplRefreshTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                listWriteDrainer.drainPendingWrites()
+                listWriteDrainer.drain()
             }
         }
 

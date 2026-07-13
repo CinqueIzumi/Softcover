@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.core.book.domain.usecase
 
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 class MarkBookAsReadUseCase(
     private val repository: BooksRepository,

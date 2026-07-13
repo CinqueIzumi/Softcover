@@ -68,7 +68,7 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 43,
+    version = 45,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1146,6 +1146,37 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // Hidden "up next in your series" entries only stored bare IDs, so once dismissed a book or
+        // series could never be shown to the user for review/unblock. These columns let a dismiss write
+        // capture display metadata alongside the ID, making the row self-describing and the Hidden
+        // Suggestions screen offline-renderable with no follow-up network fetch. Existing rows default
+        // to NULL and are backfilled lazily by `EnrichDismissedContinueSeriesMetadataUseCase` the first
+        // time that screen loads.
+        private val MIGRATION_43_44 = object : Migration(43, 44) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN bookTitle TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN coverUrl TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN authorText TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN seriesName TEXT DEFAULT NULL")
+
+                connection.execSQL("ALTER TABLE dismissed_continue_series ADD COLUMN seriesName TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series ADD COLUMN coverUrl TEXT DEFAULT NULL")
+            }
+        }
+
+        // A hidden "up next in your series" book only stored its ID, so the series cursor
+        // (`GetNextBookInSeries` walks forward from the last position the user read) could never move
+        // past it: the same book was fetched and filtered out forever, and the series stopped
+        // suggesting anything. These columns record where in the series the hidden book sits, so a
+        // dismissal advances the cursor to the book after it. Existing rows default to NULL and are
+        // backfilled lazily by `EnrichDismissedContinueSeriesMetadataUseCase`.
+        private val MIGRATION_44_45 = object : Migration(44, 45) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN seriesId INTEGER DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series_books ADD COLUMN seriesPosition REAL DEFAULT NULL")
+            }
+        }
+
         private val MIGRATION_29_30 = object : Migration(29, 30) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL(
@@ -1266,6 +1297,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_40_41,
             MIGRATION_41_42,
             MIGRATION_42_43,
+            MIGRATION_43_44,
+            MIGRATION_44_45,
         )
     }
 }

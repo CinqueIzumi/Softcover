@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.core.lists.data.mapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.lists.data.mapper.buildListSignature
 import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ListFragment
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ListMapperTest {
     private fun stubAggregate(
@@ -16,19 +16,27 @@ class ListMapperTest {
     ): ListFragment.List_books_aggregate {
         val max: ListFragment.List_books_aggregate.Aggregate.Max? = if (maxUpdatedAt != null) {
             mockk {
-                every { updated_at } returns maxUpdatedAt
+                every {
+                    updated_at
+                } returns maxUpdatedAt
             }
         } else {
             null
         }
 
         val inner: ListFragment.List_books_aggregate.Aggregate = mockk {
-            every { this@mockk.count } returns count
-            every { this@mockk.max } returns max
+            every {
+                this@mockk.count
+            } returns count
+            every {
+                this@mockk.max
+            } returns max
         }
 
         return mockk {
-            every { aggregate } returns inner
+            every {
+                aggregate
+            } returns inner
         }
     }
 
@@ -41,13 +49,27 @@ class ListMapperTest {
         updatedAt: String? = null,
         listBooksAggregate: ListFragment.List_books_aggregate = stubAggregate(),
     ): ListFragment = mockk {
-        every { this@mockk.id } returns id
-        every { this@mockk.name } returns name
-        every { this@mockk.slug } returns slug
-        every { this@mockk.ranked } returns ranked
-        every { list_books } returns listBooks
-        every { updated_at } returns updatedAt
-        every { list_books_aggregate } returns listBooksAggregate
+        every {
+            this@mockk.id
+        } returns id
+        every {
+            this@mockk.name
+        } returns name
+        every {
+            this@mockk.slug
+        } returns slug
+        every {
+            this@mockk.ranked
+        } returns ranked
+        every {
+            list_books
+        } returns listBooks
+        every {
+            updated_at
+        } returns updatedAt
+        every {
+            list_books_aggregate
+        } returns listBooksAggregate
     }
 
     // =========================================================
@@ -64,12 +86,24 @@ class ListMapperTest {
             position: Int? = null,
             createdAt: String? = null,
         ): ListBookFragment = mockk {
-            every { this@mockk.id } returns id
-            every { list_id } returns listId
-            every { book_id } returns bookId
-            every { edition_id } returns editionId
-            every { this@mockk.position } returns position
-            every { created_at } returns createdAt
+            every {
+                this@mockk.id
+            } returns id
+            every {
+                list_id
+            } returns listId
+            every {
+                book_id
+            } returns bookId
+            every {
+                edition_id
+            } returns editionId
+            every {
+                this@mockk.position
+            } returns position
+            every {
+                created_at
+            } returns createdAt
         }
 
         @Test
@@ -244,7 +278,9 @@ class ListMapperTest {
         fun `populates signature with count 0 when aggregate is absent`() {
             // ----- Arrange -----
             val noAggregate: ListFragment.List_books_aggregate = mockk {
-                every { aggregate } returns null
+                every {
+                    aggregate
+                } returns null
             }
             val fragment = stubListFragment(
                 updatedAt = "2024-06-01",

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.book.data.sync
 
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlin.time.Clock
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
@@ -116,7 +116,7 @@ internal class OfflineUserBookSyncImpl(
     }
 
     override suspend fun drainAndReconcile(fetchFromServer: suspend () -> List<Book>): List<Book> {
-        val syncedWrites: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteDrainer.drainPendingUpdates()
+        val syncedWrites: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteDrainer.drain()
 
         val fetchedBooks: List<Book> = fetchFromServer()
 
@@ -140,9 +140,12 @@ internal class OfflineUserBookSyncImpl(
     ): List<Book> {
         if (syncedWrites.isEmpty()) return fetchedBooks
 
-        // allUserBooks is a Room DAO flow; it always emits (at least an empty list), so .first() is safe.
+        // A Room DAO flow always emits (at least an empty list), so `firstOrNull()` only removes the
+        // empty-flow throw; an upstream failure still propagates, and is caught by the `runCatchingLogged`
+        // wrapping the calling use case. An absent snapshot means "nothing to reconcile".
         val snapshots: Map<Int, Book> = booksLocalDataSource.allUserBooks
-            .first()
+            .firstOrNull()
+            .orEmpty()
             .mapNotNull { book ->
                 val userBookId: Int = book.userBook?.id ?: return@mapNotNull null
 

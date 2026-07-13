@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 
 enum class BookStatus(
     val code: Int,

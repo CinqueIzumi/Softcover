@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.icon
 
+import org.jetbrains.compose.resources.DrawableResource
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_account
@@ -42,7 +43,6 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_star_filled
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_stop
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_storefront
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_view_layout
-import org.jetbrains.compose.resources.DrawableResource
 
 /**
  * The design system's bundled icon catalog. Each entry maps a stable name to a Compose Multiplatform

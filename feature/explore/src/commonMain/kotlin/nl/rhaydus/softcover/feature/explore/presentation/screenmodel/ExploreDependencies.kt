@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.EnrichDismissedContinueSeriesMetadataUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
@@ -34,6 +35,7 @@ internal data class ExploreDependencies(
     val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
     val undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase,
     val undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase,
+    val enrichDismissedContinueSeriesMetadataUseCase: EnrichDismissedContinueSeriesMetadataUseCase,
     // Bumping this re-subscribes the continue-series flow in its collector, forcing
     // the `fetchNextInSeries` network calls to run again on user-triggered refresh.
     val continueSeriesRefreshTrigger: MutableStateFlow<Long> = MutableStateFlow(0L),

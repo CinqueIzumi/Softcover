@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables

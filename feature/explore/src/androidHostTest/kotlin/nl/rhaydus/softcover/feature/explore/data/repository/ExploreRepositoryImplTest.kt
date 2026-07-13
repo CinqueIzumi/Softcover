@@ -5,15 +5,20 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesBookEntity
+import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSource
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 
 
 class ExploreRepositoryImplTest {
@@ -183,31 +188,6 @@ class ExploreRepositoryImplTest {
     }
 
     @Nested
-    inner class DismissedContinueSeriesBookIds {
-        @Test
-        fun `is wired to dismissedContinueSeriesLocalDataSource dismissedBookIds`() = runTest {
-            // ----- Arrange -----
-            val expectedIds = listOf(10, 20, 30)
-
-            every {
-                dismissedContinueSeriesLocalDataSource.dismissedBookIds
-            } returns flowOf(expectedIds)
-
-            val freshRepository = ExploreRepositoryImpl(
-                searchRemoteDataSource = searchRemoteDataSource,
-                searchLocalDataSource = searchLocalDataSource,
-                dismissedContinueSeriesLocalDataSource = dismissedContinueSeriesLocalDataSource,
-            )
-
-            // ----- Act & Assert -----
-            freshRepository.dismissedContinueSeriesBookIds.test {
-                awaitItem() shouldBe expectedIds
-                awaitComplete()
-            }
-        }
-    }
-
-    @Nested
     inner class DismissedContinueSeriesIds {
         @Test
         fun `is wired to dismissedContinueSeriesLocalDataSource dismissedSeriesIds`() = runTest {
@@ -235,33 +215,226 @@ class ExploreRepositoryImplTest {
     @Nested
     inner class DismissContinueSeriesBook {
         @Test
-        fun `delegates to dismissedContinueSeriesLocalDataSource with correct bookId`() = runTest {
+        fun `delegates to dismissedContinueSeriesLocalDataSource with an entity mapped from the book`() = runTest {
             // ----- Arrange -----
-            val bookId = 42
+            val book = DismissedSeriesBook(
+                bookId = 42,
+                title = "Dune",
+                coverUrl = "https://example.com/dune.jpg",
+                authorText = "Frank Herbert",
+                seriesName = "Dune Saga",
+                seriesId = 7,
+                seriesPosition = 2.0,
+            )
+            val entitySlot = slot<DismissedContinueSeriesBookEntity>()
 
             // ----- Act -----
-            repository.dismissContinueSeriesBook(bookId = bookId)
+            repository.dismissContinueSeriesBook(book = book)
 
             // ----- Assert -----
             coVerify {
-                dismissedContinueSeriesLocalDataSource.dismissBook(bookId = bookId)
+                dismissedContinueSeriesLocalDataSource.dismissBook(entity = capture(entitySlot))
             }
+            entitySlot.captured shouldBe DismissedContinueSeriesBookEntity(
+                bookId = book.bookId,
+                bookTitle = book.title,
+                coverUrl = book.coverUrl,
+                authorText = book.authorText,
+                seriesName = book.seriesName,
+                seriesId = book.seriesId,
+                seriesPosition = book.seriesPosition,
+            )
+        }
+
+        @Test
+        fun `carries the series cursor through so the series can advance past the hidden book`() = runTest {
+            // ----- Arrange -----
+            val book = DismissedSeriesBook(
+                bookId = 43,
+                title = null,
+                coverUrl = null,
+                authorText = null,
+                seriesName = null,
+                seriesId = 9,
+                seriesPosition = 5.0,
+            )
+            val entitySlot = slot<DismissedContinueSeriesBookEntity>()
+
+            // ----- Act -----
+            repository.dismissContinueSeriesBook(book = book)
+
+            // ----- Assert -----
+            coVerify {
+                dismissedContinueSeriesLocalDataSource.dismissBook(entity = capture(entitySlot))
+            }
+            entitySlot.captured.seriesId shouldBe book.seriesId
+            entitySlot.captured.seriesPosition shouldBe book.seriesPosition
         }
     }
 
     @Nested
     inner class DismissContinueSeries {
         @Test
-        fun `delegates to dismissedContinueSeriesLocalDataSource with correct seriesId`() = runTest {
+        fun `delegates to dismissedContinueSeriesLocalDataSource with correct arguments`() = runTest {
             // ----- Arrange -----
             val seriesId = 99
+            val seriesName = "Foundation"
+            val coverUrl = "https://example.com/foundation.jpg"
+
+            // ----- Act -----
+            repository.dismissContinueSeries(
+                seriesId = seriesId,
+                seriesName = seriesName,
+                coverUrl = coverUrl,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                dismissedContinueSeriesLocalDataSource.dismissSeries(
+                    seriesId = seriesId,
+                    seriesName = seriesName,
+                    coverUrl = coverUrl,
+                )
+            }
+        }
+
+        @Test
+        fun `delegates to dismissedContinueSeriesLocalDataSource with null metadata defaults`() = runTest {
+            // ----- Arrange -----
+            val seriesId = 100
 
             // ----- Act -----
             repository.dismissContinueSeries(seriesId = seriesId)
 
             // ----- Assert -----
             coVerify {
-                dismissedContinueSeriesLocalDataSource.dismissSeries(seriesId = seriesId)
+                dismissedContinueSeriesLocalDataSource.dismissSeries(
+                    seriesId = seriesId,
+                    seriesName = null,
+                    coverUrl = null,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class DismissedContinueSeriesBooks {
+        @Test
+        fun `maps entities from dismissedContinueSeriesLocalDataSource dismissedBooks to domain models`() = runTest {
+            // ----- Arrange -----
+            val entities = listOf(
+                DismissedContinueSeriesBookEntity(
+                    bookId = 1,
+                    bookTitle = "Dune",
+                    coverUrl = "cover.jpg",
+                    authorText = "Frank Herbert",
+                    seriesName = "Dune Saga",
+                    seriesId = 7,
+                    seriesPosition = 2.0,
+                ),
+            )
+
+            every {
+                dismissedContinueSeriesLocalDataSource.dismissedBooks
+            } returns flowOf(entities)
+
+            val freshRepository = ExploreRepositoryImpl(
+                searchRemoteDataSource = searchRemoteDataSource,
+                searchLocalDataSource = searchLocalDataSource,
+                dismissedContinueSeriesLocalDataSource = dismissedContinueSeriesLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshRepository.dismissedContinueSeriesBooks.test {
+                awaitItem() shouldBe listOf(
+                    DismissedSeriesBook(
+                        bookId = 1,
+                        title = "Dune",
+                        coverUrl = "cover.jpg",
+                        authorText = "Frank Herbert",
+                        seriesName = "Dune Saga",
+                        seriesId = 7,
+                        seriesPosition = 2.0,
+                    ),
+                )
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits empty list when dismissedBooks emits empty list`() = runTest {
+            // ----- Arrange -----
+            every {
+                dismissedContinueSeriesLocalDataSource.dismissedBooks
+            } returns flowOf(emptyList())
+
+            val freshRepository = ExploreRepositoryImpl(
+                searchRemoteDataSource = searchRemoteDataSource,
+                searchLocalDataSource = searchLocalDataSource,
+                dismissedContinueSeriesLocalDataSource = dismissedContinueSeriesLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshRepository.dismissedContinueSeriesBooks.test {
+                awaitItem() shouldBe emptyList()
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class DismissedContinueSeriesCollection {
+        @Test
+        fun `maps entities from dismissedContinueSeriesLocalDataSource dismissedSeries to domain models`() = runTest {
+            // ----- Arrange -----
+            val entities = listOf(
+                DismissedContinueSeriesEntity(
+                    seriesId = 10,
+                    seriesName = "Foundation",
+                    coverUrl = "cover.jpg",
+                ),
+            )
+
+            every {
+                dismissedContinueSeriesLocalDataSource.dismissedSeries
+            } returns flowOf(entities)
+
+            val freshRepository = ExploreRepositoryImpl(
+                searchRemoteDataSource = searchRemoteDataSource,
+                searchLocalDataSource = searchLocalDataSource,
+                dismissedContinueSeriesLocalDataSource = dismissedContinueSeriesLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshRepository.dismissedContinueSeries.test {
+                awaitItem() shouldBe listOf(
+                    DismissedSeries(
+                        seriesId = 10,
+                        seriesName = "Foundation",
+                        coverUrl = "cover.jpg",
+                    ),
+                )
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits empty list when dismissedSeries emits empty list`() = runTest {
+            // ----- Arrange -----
+            every {
+                dismissedContinueSeriesLocalDataSource.dismissedSeries
+            } returns flowOf(emptyList())
+
+            val freshRepository = ExploreRepositoryImpl(
+                searchRemoteDataSource = searchRemoteDataSource,
+                searchLocalDataSource = searchLocalDataSource,
+                dismissedContinueSeriesLocalDataSource = dismissedContinueSeriesLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshRepository.dismissedContinueSeries.test {
+                awaitItem() shouldBe emptyList()
+                awaitComplete()
             }
         }
     }

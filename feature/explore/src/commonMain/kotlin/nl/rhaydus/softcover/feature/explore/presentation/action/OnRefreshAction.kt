@@ -1,8 +1,9 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -20,7 +21,11 @@ internal data object OnRefreshAction : ExploreAction {
 
         dependencies.getTrendingBooksUseCase()
             .onSuccess { trending ->
-                val allUserBooks = dependencies.getAllUserBooksUseCase().first()
+                // Nothing catches a throw between here and the screen model's scope, and a terminal read
+                // re-throws an upstream failure even as `firstOrNull()`. No overlay is the safe default.
+                val allUserBooks = runCatchingCancellable {
+                    dependencies.getAllUserBooksUseCase().firstOrNull()
+                }.getOrNull().orEmpty()
 
                 val overlaid = trending.map { book ->
                     allUserBooks.find { it.id == book.id } ?: book

@@ -5,13 +5,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.baseBook
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class AddBookByIsbnUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -45,7 +45,9 @@ class AddBookByIsbnUseCaseTest {
                 editionId = editionId,
             )
 
-            coEvery { fetchBookByIdUseCase(id = bookId) } returns Result.success(book)
+            coEvery {
+                fetchBookByIdUseCase(id = bookId)
+            } returns Result.success(book)
 
             // ----- Act -----
             val result = useCase(isbn)
@@ -71,7 +73,9 @@ class AddBookByIsbnUseCaseTest {
                 editionId = null,
             )
 
-            coEvery { fetchBookByIdUseCase(id = bookId) } returns Result.success(book)
+            coEvery {
+                fetchBookByIdUseCase(id = bookId)
+            } returns Result.success(book)
 
             // ----- Act -----
             val result = useCase(isbn)
@@ -89,7 +93,9 @@ class AddBookByIsbnUseCaseTest {
         @Test
         fun `repository addBookByIsbn throws returns failure`() = runTest {
             // ----- Arrange -----
-            coEvery { booksRepository.addBookByIsbn(isbn = isbn) } throws OfflineException()
+            coEvery {
+                booksRepository.addBookByIsbn(isbn = isbn)
+            } throws OfflineException()
 
             // ----- Act -----
             val result = useCase(isbn)

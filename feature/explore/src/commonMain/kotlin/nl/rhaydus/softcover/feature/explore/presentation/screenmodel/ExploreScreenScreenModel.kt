@@ -1,12 +1,14 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.EnrichDismissedContinueSeriesMetadataUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
@@ -21,7 +23,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ToadScreenModel
-import nl.rhaydus.ui.common.AppDispatchers
 
 internal class ExploreScreenScreenModel(
     private val getPreviousSearchQueriesUseCase: GetPreviousSearchQueriesUseCase,
@@ -38,6 +39,7 @@ internal class ExploreScreenScreenModel(
     private val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
     private val undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase,
     private val undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase,
+    private val enrichDismissedContinueSeriesMetadataUseCase: EnrichDismissedContinueSeriesMetadataUseCase,
     flows: List<ExploreCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<ExploreScreenUiState, ExploreEvent, ExploreDependencies, ExploreCollector, ExploreLocalVariables>(
@@ -62,6 +64,7 @@ internal class ExploreScreenScreenModel(
         dismissContinueSeriesUseCase = dismissContinueSeriesUseCase,
         undoContinueSeriesBookDismissalUseCase = undoContinueSeriesBookDismissalUseCase,
         undoContinueSeriesDismissalUseCase = undoContinueSeriesDismissalUseCase,
+        enrichDismissedContinueSeriesMetadataUseCase = enrichDismissedContinueSeriesMetadataUseCase,
     )
 
     init {

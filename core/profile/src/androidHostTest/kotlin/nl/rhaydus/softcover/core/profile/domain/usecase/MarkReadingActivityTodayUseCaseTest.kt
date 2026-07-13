@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
@@ -69,10 +70,10 @@ class MarkReadingActivityTodayUseCaseTest {
             // ----- Arrange -----
             coEvery {
                 profileRepository.markActiveReadingDate(any())
-            } throws kotlin.coroutines.cancellation.CancellationException("cancelled")
+            } throws CancellationException("cancelled")
 
             // ----- Act & Assert -----
-            shouldThrow<kotlin.coroutines.cancellation.CancellationException> {
+            shouldThrow<CancellationException> {
                 useCase()
             }
         }

@@ -5,13 +5,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class FetchBookByIdUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -75,8 +75,12 @@ class FetchBookByIdUseCaseTest {
             val remoteEditions = listOf(buildEdition(id = 1), buildEdition(id = 2))
             val remoteBook = buildBook(id = bookId)
 
-            coEvery { booksRepository.fetchBookById(id = bookId) } returns remoteBook
-            coEvery { booksRepository.getEditionsByBookId(bookId = bookId) } returns remoteEditions
+            coEvery {
+                booksRepository.fetchBookById(id = bookId)
+            } returns remoteBook
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = bookId)
+            } returns remoteEditions
 
             // ----- Act -----
             val result = useCase(bookId)
@@ -94,8 +98,12 @@ class FetchBookByIdUseCaseTest {
             val edition2 = buildEdition(id = 20)
             val remoteBook = buildBook(id = bookId)
 
-            coEvery { booksRepository.fetchBookById(id = bookId) } returns remoteBook
-            coEvery { booksRepository.getEditionsByBookId(bookId = bookId) } returns listOf(edition1, edition2)
+            coEvery {
+                booksRepository.fetchBookById(id = bookId)
+            } returns remoteBook
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = bookId)
+            } returns listOf(edition1, edition2)
 
             // ----- Act -----
             val result = useCase(bookId)
@@ -113,8 +121,12 @@ class FetchBookByIdUseCaseTest {
             val bookId = 42
             val remoteBook = buildBook(id = bookId)
 
-            coEvery { booksRepository.fetchBookById(id = bookId) } returns remoteBook
-            coEvery { booksRepository.getEditionsByBookId(bookId = bookId) } returns emptyList()
+            coEvery {
+                booksRepository.fetchBookById(id = bookId)
+            } returns remoteBook
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = bookId)
+            } returns emptyList()
 
             // ----- Act -----
             useCase(bookId)
@@ -132,9 +144,15 @@ class FetchBookByIdUseCaseTest {
             val canonicalEditions = listOf(buildEdition(id = 2), buildEdition(id = 3))
             val remoteBook = buildBook(id = canonicalId)
 
-            coEvery { booksRepository.fetchBookById(id = requestedId) } returns remoteBook
-            coEvery { booksRepository.getEditionsByBookId(bookId = requestedId) } returns initialEditions
-            coEvery { booksRepository.getEditionsByBookId(bookId = canonicalId) } returns canonicalEditions
+            coEvery {
+                booksRepository.fetchBookById(id = requestedId)
+            } returns remoteBook
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = requestedId)
+            } returns initialEditions
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = canonicalId)
+            } returns canonicalEditions
 
             // ----- Act -----
             useCase(requestedId)
@@ -153,9 +171,15 @@ class FetchBookByIdUseCaseTest {
             val canonicalEditions = listOf(buildEdition(id = 2), buildEdition(id = 3))
             val remoteBook = buildBook(id = canonicalId)
 
-            coEvery { booksRepository.fetchBookById(id = requestedId) } returns remoteBook
-            coEvery { booksRepository.getEditionsByBookId(bookId = requestedId) } returns initialEditions
-            coEvery { booksRepository.getEditionsByBookId(bookId = canonicalId) } returns canonicalEditions
+            coEvery {
+                booksRepository.fetchBookById(id = requestedId)
+            } returns remoteBook
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = requestedId)
+            } returns initialEditions
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = canonicalId)
+            } returns canonicalEditions
 
             // ----- Act -----
             val result = useCase(requestedId)
@@ -171,8 +195,12 @@ class FetchBookByIdUseCaseTest {
             val bookId = 42
             val remoteBook = buildBook(id = bookId)
 
-            coEvery { booksRepository.fetchBookById(id = bookId) } returns remoteBook
-            coEvery { booksRepository.getEditionsByBookId(bookId = bookId) } returns emptyList()
+            coEvery {
+                booksRepository.fetchBookById(id = bookId)
+            } returns remoteBook
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = bookId)
+            } returns emptyList()
 
             // ----- Act -----
             useCase(bookId)
@@ -187,8 +215,12 @@ class FetchBookByIdUseCaseTest {
             val bookId = 5
             val expectedError = IllegalStateException("network error")
 
-            coEvery { booksRepository.fetchBookById(id = bookId) } throws expectedError
-            coEvery { booksRepository.getEditionsByBookId(bookId = bookId) } returns emptyList()
+            coEvery {
+                booksRepository.fetchBookById(id = bookId)
+            } throws expectedError
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = bookId)
+            } returns emptyList()
 
             // ----- Act -----
             val result = useCase(bookId)
@@ -205,8 +237,12 @@ class FetchBookByIdUseCaseTest {
             val remoteBook = buildBook(id = bookId)
             val expectedError = IllegalStateException("editions fetch failed")
 
-            coEvery { booksRepository.fetchBookById(id = bookId) } returns remoteBook
-            coEvery { booksRepository.getEditionsByBookId(bookId = bookId) } throws expectedError
+            coEvery {
+                booksRepository.fetchBookById(id = bookId)
+            } returns remoteBook
+            coEvery {
+                booksRepository.getEditionsByBookId(bookId = bookId)
+            } throws expectedError
 
             // ----- Act -----
             val result = useCase(bookId)

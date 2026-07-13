@@ -1,6 +1,6 @@
 # Architecture
 
-Clean Architecture layering, the core/feature/orchestration tiers, the TOAD pattern, DI, navigation, and dispatchers are governed by the foundation [`docs/rhaydus/0.2.0/architecture.md`](../rhaydus/0.2.0/architecture.md) and [`docs/rhaydus/0.2.0/toad-architecture.md`](../rhaydus/0.2.0/toad-architecture.md). Read those first — they are the source of truth for the two axes, the layer rules, placing a new type, the generic TOAD framework + per-feature boilerplate, Koin wiring, the `AppNavigator` contract, and the `AppDispatchers` abstraction.
+Clean Architecture layering, the core/feature/orchestration tiers, the TOAD pattern, DI, navigation, and dispatchers are governed by the foundation [`docs/rhaydus/0.3.0/architecture.md`](../rhaydus/0.3.0/architecture.md) and [`docs/rhaydus/0.3.0/toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md). Read those first — they are the source of truth for the two axes, the layer rules, placing a new type, the generic TOAD framework + per-feature boilerplate, Koin wiring, the `AppNavigator` contract, and the `AppDispatchers` abstraction.
 
 This file keeps only Softcover's concrete deltas.
 
@@ -29,7 +29,7 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 ## TOAD — Softcover-specific notes
 
 The generic TOAD framework, the five generic parameters, and the per-feature boilerplate are covered
-by [`toad-architecture.md`](../rhaydus/0.2.0/toad-architecture.md). Softcover deltas:
+by [`toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md). Softcover deltas:
 
 - **TOAD is per-Voyager-screen only.** `MainActivityViewModel` is a plain `ViewModel`, not a TOAD
   `ScreenModel`. It is the one app-level view model and lives in `:orchestration`
@@ -45,15 +45,16 @@ by [`toad-architecture.md`](../rhaydus/0.2.0/toad-architecture.md). Softcover de
   vendored in the app. Softcover's per-feature flow-collector interfaces are named `XxxCollector`
   (e.g. `BookDetailCollector`, in each feature's `presentation/collector/`) and implement the foundation
   `nl.rhaydus.toad.Collector` role.
-- **Error-slot convention (provisional).** A screen that can fail a load/submit exposes a nullable
-  `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
-  `OnboardingUiState.submissionError`). The action sets it — copy authored in presentation via
-  `Throwable.toUserMessage()` plus a screen-specific fallback — clears it on edit/retry, and the screen
-  renders it with `InlineErrorState` (in `:core:designsystem`), whose retry re-dispatches the screen's
-  own action. Do **not** re-handle `CancellationException` in the fold: `runCatchingLogged` guarantees it
-  at the use-case boundary, so the slot only holds a real failure. This is a Softcover convention only
-  because the foundation TOAD baseline defines no error contract yet — it is queued to move upstream (see
-  `../working/foundation-upstream-candidates.md`, F16/F17); keep the local treatment minimal until it does.
+- **Error-slot convention.** A screen that can fail a load/submit follows the foundation TOAD error-slot
+  convention ([`../rhaydus/0.3.0/toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md) §Conventions):
+  a nullable `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
+  `OnboardingUiState.submissionError`), set by the action, cleared on any invalidating edit and on retry,
+  and rendered with `InlineErrorState` whose retry re-dispatches the screen's own action. Do **not**
+  re-handle `CancellationException` in the fold: `runCatchingLogged` guarantees it at the use-case boundary,
+  so the slot only holds a real failure. The Softcover-specific bindings: the copy is authored in
+  presentation via `Throwable.toUserMessage()` plus a screen-specific fallback, and the renderer is the
+  foundation `nl.rhaydus.designsystem.component.InlineErrorState` (call sites pass the editorial `bodySmall`
+  as `textStyle`).
 
 ## Network Layer
 
@@ -74,6 +75,29 @@ by [`toad-architecture.md`](../rhaydus/0.2.0/toad-architecture.md). Softcover de
   in `:core:domain/exception`. The seam does **not** author user-facing copy; presentation maps the
   kind via `Throwable.toUserMessage()` + the `Result.onApiFailure()` fold helper in `:core:designsystem`
   (see [code-style.md](code-style.md)).
+
+## Platform seams from the foundation
+
+Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core-platform` and
+`nl.rhaydus:offline-sync`. Reach for these rather than re-deriving them:
+
+- **Connectivity** — `nl.rhaydus.platform.NetworkAvailabilityProvider` (`isOnline: StateFlow<Boolean>`,
+  `awaitOnline()`) plus the `NetworkAvailability` instant-check singleton, which `startAppServices` installs.
+  `:core:connectivity`'s `platformModule` binds the foundation provider per platform; on jvm it is also bound as
+  `AutoCloseable` so desktop shutdown stops the reachability poll loop. There is no app-local connectivity data
+  source or repository.
+- **Secure storage** — `nl.rhaydus.platform.SecureStorage`, a **keyed** `read`/`write`/`delete` store. Softcover
+  keeps exactly one secret in it, under `"api_key"`. On desktop the app constructs the namespaced `KSafe` and
+  injects it: the OS secret store is user-scoped, so cross-app isolation is the caller's responsibility there
+  (unlike Android's per-UID Keystore and iOS's per-bundle Keychain access group).
+- **Offline write queue** — `nl.rhaydus.offlinesync.DefaultOfflineWriteDrainer` owns the drain loop, the
+  online-triggered restart, the mutex, the poison cap and the in-drain backoff. The app supplies only what is
+  genuinely its own: a `PendingWriteStore<P>` backed by Room (which is also the `WriteQueue<P>` — enqueue and
+  drain-ops live on one type), a `replay` dispatch (`UserBookWriteReplay` / `ListWriteReplay`), a `hintKey`, and an
+  `isTransient` classifier. `:core:domain`'s `UserBookWriteDrainer` / `ListWriteDrainer` are **named subinterfaces**
+  of the foundation's generic `OfflineWriteDrainer`, because its two instantiations erase to one class and Koin
+  could not otherwise tell them apart. The drain→fetch→reconcile composition and `preserveOwnedFields` stay
+  app-side, in `OfflineUserBookSyncImpl`.
 
 ## Local Storage
 

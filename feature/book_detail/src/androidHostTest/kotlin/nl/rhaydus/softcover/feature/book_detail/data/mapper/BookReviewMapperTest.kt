@@ -3,6 +3,9 @@ package nl.rhaydus.softcover.feature.book_detail.data.mapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromSlate
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
@@ -10,9 +13,6 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
 import nl.rhaydus.softcover.fragment.BookReviewFragment
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class BookReviewMapperTest {
     private lateinit var fragment: BookReviewFragment
@@ -48,7 +48,9 @@ class BookReviewMapperTest {
 
         val image: BookReviewFragment.User.Image? = if (avatarUrl != null) {
             mockk<BookReviewFragment.User.Image>().also { img ->
-                every { img.url } returns avatarUrl
+                every {
+                    img.url
+                } returns avatarUrl
             }
         } else {
             null

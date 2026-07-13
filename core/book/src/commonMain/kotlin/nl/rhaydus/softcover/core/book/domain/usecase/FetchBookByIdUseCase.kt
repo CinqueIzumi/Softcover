@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 class FetchBookByIdUseCase(
     private val booksRepository: BooksRepository,

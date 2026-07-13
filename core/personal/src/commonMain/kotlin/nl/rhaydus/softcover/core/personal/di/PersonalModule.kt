@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.personal.di
 
+import org.koin.dsl.module
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
@@ -33,7 +34,6 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseC
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.UpdateHighlightUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.UpdateReadingLogEntryUseCase
-import org.koin.dsl.module
 
 val personalModule = module {
     includes(

@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.core.preferences.data.model
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
-import nl.rhaydus.softcover.core.domain.model.WindowPlacement
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
+import nl.rhaydus.softcover.core.domain.model.WindowPlacement
 
 class DesktopWindowStateEntityTest {
     @Nested

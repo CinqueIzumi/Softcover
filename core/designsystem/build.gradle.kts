@@ -21,10 +21,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.rhaydus.corePlatform)
             api(project(":core:domain"))
             api(project(":core:book"))
 
-            api(libs.rhaydus.coreUi)
+            api(libs.rhaydus.coreCommon)
             api(libs.rhaydus.designsystemCore)
             implementation(libs.rhaydus.designsystemEditorial)
             implementation(libs.rhaydus.designsystemImage)
@@ -41,6 +42,9 @@ kotlin {
         }
 
         androidMain.dependencies {
+            // Provides the Material Components `Theme.Material3.*` XML themes the Android manifest/resources
+            // reference. Used only from XML (not Kotlin), so dependency-analysis can't see it — excluded from
+            // the buildHealth unused-check in the root build.
             implementation(libs.material.components)
         }
     }

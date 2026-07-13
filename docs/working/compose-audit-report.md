@@ -1,6 +1,6 @@
 # Jetpack Compose Audit Report
 
-Target: /Users/bartbos/Documents/projects/Softcover
+Target: Softcover (repository root)
 Date: 2026-06-17
 Scope: Compose Multiplatform UI in `commonMain` of `:feature:*` (lists, profile, onboarding, explore, library, book_detail, reading, session, scan, settings, app_update) and `:core:designsystem`; platform leaves in `androidMain` / `jvmMain` / `iosMain` / `mobileMain`
 Excluded from scoring: external `nl.rhaydus.*` foundation components (library code, not this repo); test sources; previews

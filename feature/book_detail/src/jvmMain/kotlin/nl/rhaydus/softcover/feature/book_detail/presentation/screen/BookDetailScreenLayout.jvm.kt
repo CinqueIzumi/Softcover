@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
-import nl.rhaydus.designsystem.component.DesktopTooltip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -29,12 +29,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shakeOnError
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
@@ -87,7 +89,11 @@ internal actual fun BookDetailScreenLayout(
             )
 
             if (showOfflinePlaceholder) {
-                OfflineScreenContent(modifier = Modifier.fillMaxSize())
+                OfflineScreenContent(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = bottomChromePadding()),
+                )
             } else {
                 BoxWithConstraints(
                     modifier = Modifier
@@ -206,7 +212,7 @@ private fun TwoColumnContent(
                 runAction = runAction,
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp + bottomChromePadding()))
         }
 
         VerticalDivider()
@@ -232,6 +238,7 @@ private fun NarrativeColumn(
     Box(modifier = modifier) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = bottomChromePadding()),
             state = listState,
         ) {
             narrativeItems(
@@ -264,6 +271,7 @@ private fun SingleColumnContent(
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = bottomChromePadding()),
             state = listState,
         ) {
             item {

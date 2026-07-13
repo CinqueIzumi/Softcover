@@ -7,17 +7,18 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class OnReadingStreakToggledActionTest {
     private lateinit var setReadingStreakEnabledUseCase: SetReadingStreakEnabledUseCase
@@ -36,7 +37,7 @@ class OnReadingStreakToggledActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): SettingsScreenDependencies {
+    private fun stubDependencies(testScope: TestScope): SettingsScreenDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<SettingsScreenDependencies>(relaxed = true).also { mock ->
             every {

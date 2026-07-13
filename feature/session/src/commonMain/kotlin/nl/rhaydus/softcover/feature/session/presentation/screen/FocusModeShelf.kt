@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.session.presentation.screen
 
-import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
+import nl.rhaydus.common.currentInstant
+import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import nl.rhaydus.designsystem.haptics.rememberHaptics
@@ -43,7 +44,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.ui.common.currentInstant
 
 /**
  * The distraction-free reading hero shared by both platforms: eyebrow → cover → title/author → the

@@ -13,6 +13,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.common.AppLog
+import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
@@ -20,10 +23,8 @@ import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
-import nl.rhaydus.softcover.core.domain.connectivity.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -37,7 +38,6 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
-import nl.rhaydus.ui.common.AppDispatchers
 
 private const val TRENDING_LIMIT = 10
 private const val TRENDING_OFFSET = 0

@@ -32,10 +32,10 @@ internal class ProfileRemoteDataSourceImpl(
             ?: throw Exception("User could not be initialized")
 
         return UserProfileSnapshot(
-            profileImageUrl = me.image?.url ?: "",
-            name = me.name ?: "",
-            username = me.username?.toString() ?: "",
-            bio = me.bio ?: "",
+            profileImageUrl = me.image?.url.orEmpty(),
+            name = me.name.orEmpty(),
+            username = me.username?.toString().orEmpty(),
+            bio = me.bio.orEmpty(),
             booksRead = me.books_read.aggregate?.count ?: 0,
             totalPagesRead = me.user_books_pages.sumOf { it.pagesRead() },
             averageRating = me.rated_books.aggregate?.avg?.rating ?: 0.0,

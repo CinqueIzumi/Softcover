@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.scan.presentation.screen
 
-import nl.rhaydus.designsystem.component.DesktopBackStrip
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.DesktopBackStrip
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 

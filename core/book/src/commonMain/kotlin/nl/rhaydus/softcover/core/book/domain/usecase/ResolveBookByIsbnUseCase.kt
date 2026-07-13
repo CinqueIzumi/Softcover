@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.book.domain.usecase
 
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.util.IsbnNormalizer
 
 /**

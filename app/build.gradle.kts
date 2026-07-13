@@ -16,8 +16,8 @@ android {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
         targetSdk = 37
-        versionCode = 32
-        versionName = "3.0.2"
+        versionCode = 33
+        versionName = "3.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -79,6 +79,10 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:domain"))
     implementation(project(":core:notification"))
+
+    // The logging facade the Application entry point installs (AppLog.install) now lives in the
+    // foundation core-common module.
+    implementation(libs.rhaydus.coreCommon)
 
     // DI
     implementation(libs.koin.core)

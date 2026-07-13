@@ -12,9 +12,11 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import org.koin.compose.koinInject
+import nl.rhaydus.common.runCatchingCancellable
+import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CheckForAppUpdateUseCase
 
@@ -58,7 +60,12 @@ fun DesktopApp() {
     // Seed the scale synchronously (a single small local-file read at window open, mirroring
     // rememberPersistedWindowState) so the very first frame renders at the saved scale instead of
     // flashing at 100% and reflowing once DataStore emits — a whole-window pop for a scaled-up user.
-    val uiScaleSeed = remember { runBlocking { getUiScaleAsFlowUseCase().first() } }
+    val uiScaleSeed = remember {
+        runBlocking {
+            runCatchingCancellable { getUiScaleAsFlowUseCase().firstOrNull() }.getOrNull()
+                ?: UiScale.PERCENT_100
+        }
+    }
 
     val uiScale by getUiScaleAsFlowUseCase().collectAsStateWithLifecycle(initialValue = uiScaleSeed)
 

@@ -8,8 +8,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -19,9 +23,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class OnMarkBookAsReadClickActionTest {
     private lateinit var markBookAsReadUseCase: MarkBookAsReadUseCase
@@ -45,7 +46,7 @@ class OnMarkBookAsReadClickActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): BookDetailDependencies {
+    private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
@@ -67,11 +68,15 @@ class OnMarkBookAsReadClickActionTest {
     }
 
     private fun stubBook(id: Int = 42): Book = mockk<Book>().also { mock ->
-        every { mock.id } returns id
+        every {
+            mock.id
+        } returns id
     }
 
     private fun stubEdition(id: Int = 55): BookEdition = mockk<BookEdition>().also { mock ->
-        every { mock.id } returns id
+        every {
+            mock.id
+        } returns id
     }
 
     @Nested

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
@@ -23,7 +24,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEven
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ToadScreenModel
-import nl.rhaydus.ui.common.AppDispatchers
 
 internal class ReadingScreenScreenModel(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,

@@ -13,6 +13,7 @@ import kotlin.time.Instant
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
@@ -26,7 +27,6 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.PauseReadingSessionUseC
 import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
-import nl.rhaydus.ui.common.AppDispatchers
 
 class ActiveSessionControllerImplTest {
     private val sessionFlow = MutableStateFlow<ReadingSession?>(null)
@@ -86,14 +86,22 @@ class ActiveSessionControllerImplTest {
         currentPage: Int? = 100,
         currentSeconds: Int? = null,
     ): Book = mockk<Book>().also { book ->
-        every { book.id } returns id
+        every {
+            book.id
+        } returns id
 
         val userBookRead = mockk<UserBookRead> {
-            every { this@mockk.currentPage } returns currentPage
-            every { this@mockk.currentSeconds } returns currentSeconds
+            every {
+                this@mockk.currentPage
+            } returns currentPage
+            every {
+                this@mockk.currentSeconds
+            } returns currentSeconds
         }
 
-        every { book.userBookRead } returns userBookRead
+        every {
+            book.userBookRead
+        } returns userBookRead
     }
 
     @BeforeEach
@@ -101,8 +109,12 @@ class ActiveSessionControllerImplTest {
         observeActiveSessionUseCase = mockk()
         getCurrentlyReadingBooksUseCase = mockk()
 
-        every { observeActiveSessionUseCase() } returns sessionFlow
-        every { getCurrentlyReadingBooksUseCase() } returns booksFlow
+        every {
+            observeActiveSessionUseCase()
+        } returns sessionFlow
+        every {
+            getCurrentlyReadingBooksUseCase()
+        } returns booksFlow
 
         startReadingSessionUseCase = mockk(relaxed = true)
         stopReadingSessionUseCase = mockk(relaxed = true)

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.domain.usecase
 
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 

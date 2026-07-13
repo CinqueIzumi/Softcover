@@ -7,12 +7,12 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.UserBook
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.UserBook
 
 class UpdateBookRatingUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -31,7 +31,9 @@ class UpdateBookRatingUseCaseTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
 
-            every { inputBook.userBook } returns null
+            every {
+                inputBook.userBook
+            } returns null
 
             // ----- Act -----
             val result = useCase(
@@ -55,8 +57,12 @@ class UpdateBookRatingUseCaseTest {
             val userBook = mockk<UserBook>()
             val inputBook = mockk<Book>()
 
-            every { inputBook.userBook } returns userBook
-            every { userBook.rating } returns rating
+            every {
+                inputBook.userBook
+            } returns userBook
+            every {
+                userBook.rating
+            } returns rating
 
             // ----- Act -----
             val result = useCase(
@@ -81,8 +87,12 @@ class UpdateBookRatingUseCaseTest {
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
 
-            every { inputBook.userBook } returns userBook
-            every { userBook.rating } returns 3.0
+            every {
+                inputBook.userBook
+            } returns userBook
+            every {
+                userBook.rating
+            } returns 3.0
 
             coEvery {
                 booksRepository.updateBookRating(
@@ -118,8 +128,12 @@ class UpdateBookRatingUseCaseTest {
             val inputBook = mockk<Book>()
             val expectedError = RuntimeException("network error")
 
-            every { inputBook.userBook } returns userBook
-            every { userBook.rating } returns 2.0
+            every {
+                inputBook.userBook
+            } returns userBook
+            every {
+                userBook.rating
+            } returns 2.0
 
             coEvery {
                 booksRepository.updateBookRating(

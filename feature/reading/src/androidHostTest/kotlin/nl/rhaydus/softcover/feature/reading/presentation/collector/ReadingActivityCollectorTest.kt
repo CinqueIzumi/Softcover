@@ -9,9 +9,13 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
@@ -21,9 +25,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScre
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ReadingActivityCollectorTest {
     private lateinit var getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase
@@ -48,21 +49,37 @@ class ReadingActivityCollectorTest {
             eventChannel = Channel(Channel.BUFFERED),
         )
 
-        every { getReadingStreakEnabledAsFlowUseCase() } returns streakEnabledFlow
-        every { observeRecentReadingActivityUseCase() } returns activityFlow
+        every {
+            getReadingStreakEnabledAsFlowUseCase()
+        } returns streakEnabledFlow
+        every {
+            observeRecentReadingActivityUseCase()
+        } returns activityFlow
     }
 
-    private fun buildDependencies(testScope: kotlinx.coroutines.test.TestScope): ReadingScreenDependencies {
+    private fun buildDependencies(testScope: TestScope): ReadingScreenDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
-            every { mock.getReadingStreakEnabledAsFlowUseCase } returns getReadingStreakEnabledAsFlowUseCase
-            every { mock.observeRecentReadingActivityUseCase } returns observeRecentReadingActivityUseCase
-            every { mock.refreshUserProfileDataUseCase } returns refreshUserProfileDataUseCase
+            every {
+                mock.getReadingStreakEnabledAsFlowUseCase
+            } returns getReadingStreakEnabledAsFlowUseCase
+            every {
+                mock.observeRecentReadingActivityUseCase
+            } returns observeRecentReadingActivityUseCase
+            every {
+                mock.refreshUserProfileDataUseCase
+            } returns refreshUserProfileDataUseCase
 
-            every { mock.coroutineScope } returns testScope
-            every { mock.mainDispatcher } returns dispatcher
+            every {
+                mock.coroutineScope
+            } returns testScope
+            every {
+                mock.mainDispatcher
+            } returns dispatcher
 
-            every { mock.launch(any()) } answers { callOriginal() }
+            every {
+                mock.launch(any())
+            } answers { callOriginal() }
         }
     }
 
@@ -80,7 +97,9 @@ class ReadingActivityCollectorTest {
         @Test
         fun `sets streakEnabled to true when enabled flow emits true`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
             val job = launch { collector.onLaunch(
@@ -136,7 +155,9 @@ class ReadingActivityCollectorTest {
         @Test
         fun `populates recentReadingActivity from observe flow when enabled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             val activity = listOf(stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
@@ -157,7 +178,9 @@ class ReadingActivityCollectorTest {
         @Test
         fun `invokes refreshUserProfileDataUseCase when enabled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
             val job = launch { collector.onLaunch(
@@ -176,7 +199,9 @@ class ReadingActivityCollectorTest {
         @Test
         fun `updates recentReadingActivity to latest emission when enabled flow emits multiple activity lists`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             val firstList = listOf(stubActivity())
             val secondList = listOf(stubActivity(), stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
@@ -199,7 +224,9 @@ class ReadingActivityCollectorTest {
         @Test
         fun `clears recentReadingActivity when toggled from true to false`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             val activity = listOf(stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
@@ -245,7 +272,9 @@ class ReadingActivityCollectorTest {
         @Test
         fun `preserves other state fields when updating streakEnabled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
@@ -266,7 +295,9 @@ class ReadingActivityCollectorTest {
         @Test
         fun `retains last state after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             val activity = listOf(stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()

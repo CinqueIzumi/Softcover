@@ -5,9 +5,9 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
 import okio.FileSystem
 import okio.Path
+import kotlin.jvm.JvmInline
 import nl.rhaydus.softcover.core.profile.data.datastore.serializer.ProfileCacheSerializer
 import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
-import kotlin.jvm.JvmInline
 
 @JvmInline
 internal value class ProfileCacheDataStore(val store: DataStore<ProfileCacheEntity>)

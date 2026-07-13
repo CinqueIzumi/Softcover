@@ -10,6 +10,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
@@ -19,10 +23,6 @@ import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
-import nl.rhaydus.ui.common.AppDispatchers
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class RefreshLibraryUseCaseImplTest {
     private lateinit var getUserIdUseCase: GetUserIdUseCase

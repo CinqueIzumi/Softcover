@@ -6,11 +6,11 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 
 class RecordBookProgressUseCaseTest {
     private lateinit var markBookAsReadUseCase: MarkBookAsReadUseCase
@@ -33,15 +33,23 @@ class RecordBookProgressUseCaseTest {
         audioSeconds: Int? = null,
     ): Book = mockk<Book>().also { book ->
         val edition = mockk<BookEdition> {
-            every { this@mockk.pages } returns pages
-            every { this@mockk.audioSeconds } returns audioSeconds
+            every {
+                this@mockk.pages
+            } returns pages
+            every {
+                this@mockk.audioSeconds
+            } returns audioSeconds
         }
 
-        every { book.currentEdition } returns edition
+        every {
+            book.currentEdition
+        } returns edition
     }
 
     private fun stubBookWithNullEdition(): Book = mockk<Book>().also { book ->
-        every { book.currentEdition } returns null
+        every {
+            book.currentEdition
+        } returns null
     }
 
     @Nested

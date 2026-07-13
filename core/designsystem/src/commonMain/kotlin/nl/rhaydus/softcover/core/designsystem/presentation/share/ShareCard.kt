@@ -32,11 +32,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.StarRatingInput
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -46,7 +49,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 private const val TABULAR_NUMS = "tnum"
 
 @Composable
-internal fun ShareCard(
+fun ShareCard(
     content: ShareContent,
     modifier: Modifier = Modifier,
 ) {
@@ -308,6 +311,11 @@ private fun ReadingUpdateShareCardBody(content: ReadingUpdateShareContent) {
                     StarRatingInput(
                         rating = content.ratingStars,
                         onRatingChange = {},
+                        starIcon = drawableIconResource(
+                            contentDescription = "",
+                            icon = SoftcoverIcon.StarFilled,
+                        ),
+                        filledColor = RatingGold,
                         enabled = false,
                         starSize = 20.dp,
                     )

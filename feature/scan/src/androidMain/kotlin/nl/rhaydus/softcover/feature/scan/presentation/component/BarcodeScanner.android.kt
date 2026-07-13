@@ -43,8 +43,8 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 /**
  * Android implementation: a CameraX barcode-scanning surface backed by the bundled ML Kit model

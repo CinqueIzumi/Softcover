@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -28,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader

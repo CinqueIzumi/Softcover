@@ -12,16 +12,16 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetIdsForQuery
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.fragment.BookDetailFragment
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class SearchRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient

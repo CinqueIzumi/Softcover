@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDest
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
+import nl.rhaydus.softcover.feature.explore.presentation.screen.HiddenSuggestionsScreen
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreen
@@ -37,6 +38,8 @@ internal class AppNavigatorImpl : AppNavigator {
         ScreenDestination.FocusMode -> FocusModeScreen
 
         ScreenDestination.Profile -> ProfileScreen()
+
+        ScreenDestination.HiddenSuggestions -> HiddenSuggestionsScreen()
     }
 
     override fun tab(destination: TabDestination): Tab = when (destination) {

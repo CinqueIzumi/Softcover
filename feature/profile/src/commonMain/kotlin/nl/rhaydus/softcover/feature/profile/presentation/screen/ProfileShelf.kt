@@ -29,13 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.common.formatDecimalNumber
+import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedStatNumber
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
-import nl.rhaydus.ui.common.formatDecimalNumber
-import nl.rhaydus.ui.common.formatGroupedNumber
 
 /**
  * Shared Profile content reused by both the mobile ([ProfileScreenLayout] in `mobileMain`) and desktop

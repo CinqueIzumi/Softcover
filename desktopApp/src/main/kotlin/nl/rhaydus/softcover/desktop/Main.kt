@@ -6,7 +6,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import java.awt.Dimension
 import kotlin.system.exitProcess
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.orchestration.presentation.DesktopApp
 import nl.rhaydus.softcover.orchestration.presentation.bootstrapDesktop
 import nl.rhaydus.softcover.orchestration.presentation.rememberPersistedWindowState
@@ -38,7 +38,10 @@ fun main() {
         "Softcover",
     )
 
-    AppLog.install(debug = true)
+    AppLog.install(
+        tag = "Softcover",
+        debug = true,
+    )
     val bootstrap = bootstrapDesktop()
 
     // `exitApplication` only ends the Compose `application {}` block; it never calls exit. Tear the

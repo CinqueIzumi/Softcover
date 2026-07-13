@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.component
 
-import nl.rhaydus.designsystem.component.DesktopTooltip
-import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +28,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab

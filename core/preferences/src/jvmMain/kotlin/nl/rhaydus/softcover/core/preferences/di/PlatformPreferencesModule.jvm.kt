@@ -6,11 +6,11 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import nl.rhaydus.platform.JvmSecureStorage
+import nl.rhaydus.platform.SecureStorage
 import nl.rhaydus.softcover.core.domain.platform.desktopAppDataDirectory
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.datastore.createAppSettingsDataStore
-import nl.rhaydus.softcover.core.preferences.data.security.JvmSecureApiKeyStorage
-import nl.rhaydus.softcover.core.preferences.data.security.SecureApiKeyStorage
 
 actual val platformPreferencesModule: Module = module {
     single<AppSettingsDataStore> {
@@ -25,8 +25,10 @@ actual val platformPreferencesModule: Module = module {
     // key nor its on-disk data file can collide with other apps sharing the same OS user.
     single { KSafe(config = KSafeConfig(appNamespace = "nl.rhaydus.softcover")) }
 
-    single<SecureApiKeyStorage> {
-        JvmSecureApiKeyStorage(
+    // No LegacySecureApiKeyStorage on desktop: the key string is unchanged and KSafe is namespaced by
+    // this module, so the foundation store reads exactly what the old one wrote.
+    single<SecureStorage> {
+        JvmSecureStorage(
             ksafe = get(),
             dispatchers = get(),
         )

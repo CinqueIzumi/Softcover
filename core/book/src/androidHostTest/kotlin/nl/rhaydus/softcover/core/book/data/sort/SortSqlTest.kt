@@ -3,10 +3,10 @@ package nl.rhaydus.softcover.core.book.data.sort
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldEndWith
-import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.core.domain.model.SortDirection
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.SortDirection
 
 class SortSqlTest {
     @Nested

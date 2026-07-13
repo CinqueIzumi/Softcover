@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.preferences.di
 
+import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.auth.AuthTokenProvider
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
@@ -30,7 +31,6 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayout
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
-import org.koin.dsl.module
 
 val preferencesModule = module {
     includes(
@@ -44,6 +44,7 @@ val preferencesModule = module {
             secureStorage = get(),
             appSettingsDataStore = get(),
             dispatchers = get(),
+            legacySecureStorage = getOrNull(),
         )
     }
 

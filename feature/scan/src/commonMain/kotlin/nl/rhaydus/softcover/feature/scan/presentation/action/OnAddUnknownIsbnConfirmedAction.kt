@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent

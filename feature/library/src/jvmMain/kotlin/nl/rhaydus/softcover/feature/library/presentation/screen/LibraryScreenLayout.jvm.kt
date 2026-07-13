@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
-import nl.rhaydus.designsystem.component.DesktopTooltip
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -41,13 +40,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
@@ -394,7 +395,10 @@ private fun ShelfSidebar(
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
-            .padding(vertical = 16.dp),
+            .padding(
+                top = 16.dp,
+                bottom = 16.dp + rememberBottomBarPadding(),
+            ),
     ) {
         SidebarSectionLabel(text = "Shelves")
 

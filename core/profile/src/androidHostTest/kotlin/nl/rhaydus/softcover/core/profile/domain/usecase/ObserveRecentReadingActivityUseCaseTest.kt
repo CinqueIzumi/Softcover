@@ -60,7 +60,9 @@ class ObserveRecentReadingActivityUseCaseTest {
         @Test
         fun `emits exactly 21 entries`() = runTest {
             // ----- Arrange -----
-            every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(emptySet()))
+            every {
+                profileRepository.observeUserProfileData()
+            } returns flowOf(profileWith(emptySet()))
 
             // ----- Act & Assert -----
             useCase().test {
@@ -72,7 +74,9 @@ class ObserveRecentReadingActivityUseCaseTest {
         @Test
         fun `entries are in ascending date order and last entry date equals today`() = runTest {
             // ----- Arrange -----
-            every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(emptySet()))
+            every {
+                profileRepository.observeUserProfileData()
+            } returns flowOf(profileWith(emptySet()))
 
             // ----- Act & Assert -----
             useCase().test {
@@ -86,7 +90,9 @@ class ObserveRecentReadingActivityUseCaseTest {
         @Test
         fun `first entry date is 20 days before today`() = runTest {
             // ----- Arrange -----
-            every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(emptySet()))
+            every {
+                profileRepository.observeUserProfileData()
+            } returns flowOf(profileWith(emptySet()))
 
             // ----- Act & Assert -----
             useCase().test {
@@ -102,7 +108,9 @@ class ObserveRecentReadingActivityUseCaseTest {
         @Test
         fun `all entries have didRead false when active dates set is empty`() = runTest {
             // ----- Arrange -----
-            every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(emptySet()))
+            every {
+                profileRepository.observeUserProfileData()
+            } returns flowOf(profileWith(emptySet()))
 
             // ----- Act & Assert -----
             useCase().test {
@@ -114,7 +122,9 @@ class ObserveRecentReadingActivityUseCaseTest {
         @Test
         fun `null profile emits 21 entries all with didRead false`() = runTest {
             // ----- Arrange -----
-            every { profileRepository.observeUserProfileData() } returns flowOf(null)
+            every {
+                profileRepository.observeUserProfileData()
+            } returns flowOf(null)
 
             // ----- Act & Assert -----
             useCase().test {
@@ -136,7 +146,9 @@ class ObserveRecentReadingActivityUseCaseTest {
                 DateTimeUnit.DAY,
             ),)
 
-            every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(activeDates))
+            every {
+                profileRepository.observeUserProfileData()
+            } returns flowOf(profileWith(activeDates))
 
             // ----- Act & Assert -----
             useCase().test {
@@ -178,7 +190,9 @@ class ObserveRecentReadingActivityUseCaseTest {
                 DateTimeUnit.DAY,
             )
 
-            every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(activeDates))
+            every {
+                profileRepository.observeUserProfileData()
+            } returns flowOf(profileWith(activeDates))
 
             // ----- Act & Assert -----
             useCase().test {
@@ -208,7 +222,9 @@ class ObserveRecentReadingActivityUseCaseTest {
             )
             val activeDates = setOf(outsideDate)
 
-            every { profileRepository.observeUserProfileData() } returns flowOf(profileWith(activeDates))
+            every {
+                profileRepository.observeUserProfileData()
+            } returns flowOf(profileWith(activeDates))
 
             // ----- Act & Assert -----
             useCase().test {

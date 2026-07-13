@@ -1,0 +1,2 @@
+- [Softcover on local foundation 0.3.0](project_softcover_foundation_0.3.0_local.md) — foundation.local=true, core-ui split into core-common/core-platform, docs vendored at docs/rhaydus/0.3.0/
+- [Wiring passes must not adopt F-item batches](feedback_rhaydus_adopt_scope.md) — even when the target module is being wired in the same pass, leave app-local forks/F-item migrations for a separate step

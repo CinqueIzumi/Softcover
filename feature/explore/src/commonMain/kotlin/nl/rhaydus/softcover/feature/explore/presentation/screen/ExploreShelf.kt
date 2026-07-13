@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlin.time.Duration.Companion.seconds
+import nl.rhaydus.common.formatDecimalNumber
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.component.mutationAnimated
@@ -55,6 +57,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnDismissContinueSeriesAction
@@ -63,8 +66,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAct
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveAllSearchQueriesClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQueryClickedAction
-import nl.rhaydus.ui.common.formatDecimalNumber
-import kotlin.time.Duration.Companion.seconds
 
 internal const val TRENDING_SKELETON_COUNT = 4
 internal const val CONTINUE_SERIES_SKELETON_COUNT = 4
@@ -363,8 +364,17 @@ internal fun ContinueSeriesMenuSheet(
             onDismissBookClick = {
                 runAction(
                     OnDismissContinueSeriesBookAction(
-                        bookId = book.id,
-                        bookTitle = book.title,
+                        book = DismissedSeriesBook(
+                            bookId = book.id,
+                            title = book.title,
+                            coverUrl = book.coverUrl,
+                            authorText = book.authorString,
+                            seriesName = book.bookSeries?.name,
+                            seriesId = book.bookSeries?.id,
+                            // The series cursor moves past this book's *last* position, so an omnibus
+                            // spanning several positions can't re-match on the next fetch.
+                            seriesPosition = book.positionsInSeries.lastOrNull(),
+                        ),
                     ),
                 )
 
@@ -377,6 +387,7 @@ internal fun ContinueSeriesMenuSheet(
                     OnDismissContinueSeriesAction(
                         seriesId = series.id,
                         seriesName = series.name,
+                        coverUrl = book.coverUrl,
                     ),
                 )
 

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.delay
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.haptics.rememberHaptics
@@ -44,7 +45,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedSta
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import kotlinx.coroutines.delay
 
 object MotionDebugScreen : Screen {
     @Composable
@@ -77,7 +77,8 @@ object MotionDebugScreen : Screen {
                 EditorialSectionHeader(
                     eyebrow = "Debug",
                     headline = "Motion & haptics.",
-                    description = "Fire individual animations and haptics in isolation. Useful for tuning timing and verifying reduced-motion behaviour.",
+                    description = "Fire individual animations and haptics in isolation. Useful for " +
+                        "tuning timing and verifying reduced-motion behaviour.",
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))

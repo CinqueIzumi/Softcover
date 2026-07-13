@@ -5,12 +5,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.database.model.EditionImageRef
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.database.model.EditionImageRef
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 
 class EditionCachePlannerTest {
     @AfterEach
@@ -35,23 +35,57 @@ class EditionCachePlannerTest {
         format: String = "Paperback",
         readingFormat: ReadingFormat? = null,
     ): BookEdition = mockk {
-        every { this@mockk.id } returns id
-        every { this@mockk.canonicalId } returns canonicalId
-        every { this@mockk.bookId } returns bookId
-        every { this@mockk.publisher } returns publisher
-        every { this@mockk.title } returns title
-        every { this@mockk.url } returns url
-        every { this@mockk.localImagePath } returns localImagePath
-        every { this@mockk.isbn10 } returns isbn10
-        every { this@mockk.isbn13 } returns isbn13
-        every { this@mockk.pages } returns pages
-        every { this@mockk.audioSeconds } returns audioSeconds
-        every { this@mockk.authors } returns emptyList()
-        every { this@mockk.releaseYear } returns releaseYear
-        every { this@mockk.releaseDate } returns releaseDate
-        every { this@mockk.format } returns format
-        every { this@mockk.readingFormat } returns readingFormat
-        every { this@mockk.owned } returns false
+        every {
+            this@mockk.id
+        } returns id
+        every {
+            this@mockk.canonicalId
+        } returns canonicalId
+        every {
+            this@mockk.bookId
+        } returns bookId
+        every {
+            this@mockk.publisher
+        } returns publisher
+        every {
+            this@mockk.title
+        } returns title
+        every {
+            this@mockk.url
+        } returns url
+        every {
+            this@mockk.localImagePath
+        } returns localImagePath
+        every {
+            this@mockk.isbn10
+        } returns isbn10
+        every {
+            this@mockk.isbn13
+        } returns isbn13
+        every {
+            this@mockk.pages
+        } returns pages
+        every {
+            this@mockk.audioSeconds
+        } returns audioSeconds
+        every {
+            this@mockk.authors
+        } returns emptyList()
+        every {
+            this@mockk.releaseYear
+        } returns releaseYear
+        every {
+            this@mockk.releaseDate
+        } returns releaseDate
+        every {
+            this@mockk.format
+        } returns format
+        every {
+            this@mockk.readingFormat
+        } returns readingFormat
+        every {
+            this@mockk.owned
+        } returns false
     }
 
     @Nested

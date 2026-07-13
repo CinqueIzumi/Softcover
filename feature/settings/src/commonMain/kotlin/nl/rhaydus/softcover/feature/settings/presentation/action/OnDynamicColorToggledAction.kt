@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables

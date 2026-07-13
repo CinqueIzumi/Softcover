@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.illustration
 
-import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
 import nl.rhaydus.softcover.core.designsystem.generated.resources.illu_sign_up
 import nl.rhaydus.softcover.core.designsystem.generated.resources.illu_writing
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 
 /**
  * The design system's bundled illustration catalog — the editorial, full-bleed artwork used on

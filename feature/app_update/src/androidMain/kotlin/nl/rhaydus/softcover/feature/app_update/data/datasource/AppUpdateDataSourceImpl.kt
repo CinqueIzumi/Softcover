@@ -8,7 +8,7 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.ktx.requestAppUpdateInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 
 internal class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateManager) : AppUpdateDataSource {

@@ -7,10 +7,12 @@ import org.koin.dsl.module
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
+import nl.rhaydus.platform.IosSecureStorage
+import nl.rhaydus.platform.SecureStorage
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.datastore.createAppSettingsDataStore
-import nl.rhaydus.softcover.core.preferences.data.security.IosSecureApiKeyStorage
-import nl.rhaydus.softcover.core.preferences.data.security.SecureApiKeyStorage
+import nl.rhaydus.softcover.core.preferences.data.security.IosLegacySecureApiKeyStorage
+import nl.rhaydus.softcover.core.preferences.data.security.LegacySecureApiKeyStorage
 
 actual val platformPreferencesModule: Module = module {
     single<AppSettingsDataStore> {
@@ -21,8 +23,12 @@ actual val platformPreferencesModule: Module = module {
         )
     }
 
-    single<SecureApiKeyStorage> {
-        IosSecureApiKeyStorage(dispatchers = get())
+    single<SecureStorage> {
+        IosSecureStorage(dispatchers = get())
+    }
+
+    single<LegacySecureApiKeyStorage> {
+        IosLegacySecureApiKeyStorage(dispatchers = get())
     }
 }
 

@@ -6,11 +6,11 @@ import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.model.Book
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.model.Book
 
 class RemoveBookFromLibraryUseCaseTest {
     private lateinit var booksRepository: BooksRepository

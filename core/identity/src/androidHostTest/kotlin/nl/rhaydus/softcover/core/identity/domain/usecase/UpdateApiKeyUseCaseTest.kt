@@ -5,10 +5,10 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class UpdateApiKeyUseCaseTest {
     private lateinit var settingsRepository: SettingsRepository

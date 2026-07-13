@@ -7,6 +7,7 @@ import androidx.room.RoomRawQuery
 import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.database.mapper.planEditionCaching
 import nl.rhaydus.softcover.core.database.mapper.toBookAuthorRefs
 import nl.rhaydus.softcover.core.database.mapper.toEditionAuthorRefs
@@ -31,7 +32,6 @@ import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList

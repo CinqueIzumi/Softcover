@@ -6,6 +6,8 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -13,12 +15,12 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class BookDetailUiStateTest {
     private fun stubEdition(id: Int = 1): BookEdition = mockk<BookEdition>().also { mock ->
-        every { mock.id } returns id
+        every {
+            mock.id
+        } returns id
     }
 
     private fun stubBook(
@@ -26,13 +28,21 @@ class BookDetailUiStateTest {
         currentEdition: BookEdition?,
         editions: List<BookEdition> = emptyList(),
     ): Book = mockk<Book>().also { mock ->
-        every { mock.userBook } returns userBook
-        every { mock.currentEdition } returns currentEdition
-        every { mock.editions } returns editions
+        every {
+            mock.userBook
+        } returns userBook
+        every {
+            mock.currentEdition
+        } returns currentEdition
+        every {
+            mock.editions
+        } returns editions
     }
 
     private fun stubUserBook(editionId: Int? = null): UserBook = mockk<UserBook>().also { mock ->
-        every { mock.editionId } returns editionId
+        every {
+            mock.editionId
+        } returns editionId
     }
 
     @Nested

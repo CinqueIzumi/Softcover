@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies

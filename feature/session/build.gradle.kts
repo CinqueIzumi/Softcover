@@ -12,7 +12,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:designsystem"))
 
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)
             implementation(libs.rhaydus.designsystemEditorial)
 

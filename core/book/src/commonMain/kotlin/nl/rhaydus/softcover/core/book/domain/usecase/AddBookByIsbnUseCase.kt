@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.book.domain.usecase
 
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.result.runCatchingLogged
 
 /**
  * Adds a not-yet-catalogued ISBN to Hardcover via `upsert_book`, then hydrates the freshly-created

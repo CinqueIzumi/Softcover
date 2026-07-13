@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.model
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 
 class ProgressSheetTabMappingTest {
     @Nested

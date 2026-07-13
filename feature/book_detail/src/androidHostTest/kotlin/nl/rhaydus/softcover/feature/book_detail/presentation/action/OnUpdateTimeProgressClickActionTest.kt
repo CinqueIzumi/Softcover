@@ -6,8 +6,12 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -16,9 +20,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class OnUpdateTimeProgressClickActionTest {
     private lateinit var updateBookProgress: RecordBookProgressUseCase
@@ -37,7 +38,7 @@ class OnUpdateTimeProgressClickActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): BookDetailDependencies {
+    private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
@@ -60,9 +61,13 @@ class OnUpdateTimeProgressClickActionTest {
 
     private fun stubBookWithAudioSeconds(audioSeconds: Int?): Book = mockk<Book>().also { book ->
         val edition = mockk<BookEdition>().also { e ->
-            every { e.audioSeconds } returns audioSeconds
+            every {
+                e.audioSeconds
+            } returns audioSeconds
         }
-        every { book.currentEdition } returns edition
+        every {
+            book.currentEdition
+        } returns edition
     }
 
     @Nested

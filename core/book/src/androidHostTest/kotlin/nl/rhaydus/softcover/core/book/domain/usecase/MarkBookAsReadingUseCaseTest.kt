@@ -7,12 +7,12 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookStatus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 
 class MarkBookAsReadingUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -32,7 +32,9 @@ class MarkBookAsReadingUseCaseTest {
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
 
-            every { inputBook.status } returns BookStatus.WantToRead
+            every {
+                inputBook.status
+            } returns BookStatus.WantToRead
 
             coEvery {
                 booksRepository.markBookAsReading(book = inputBook)
@@ -58,7 +60,9 @@ class MarkBookAsReadingUseCaseTest {
             val inputBook = mockk<Book>()
             val expectedError = RuntimeException("network error")
 
-            every { inputBook.status } returns BookStatus.WantToRead
+            every {
+                inputBook.status
+            } returns BookStatus.WantToRead
 
             coEvery {
                 booksRepository.markBookAsReading(book = inputBook)
@@ -80,7 +84,9 @@ class MarkBookAsReadingUseCaseTest {
             val updatedBook = mockk<Book>()
             val expectedError = RuntimeException("cache error")
 
-            every { inputBook.status } returns BookStatus.WantToRead
+            every {
+                inputBook.status
+            } returns BookStatus.WantToRead
 
             coEvery {
                 booksRepository.markBookAsReading(book = inputBook)
@@ -103,7 +109,9 @@ class MarkBookAsReadingUseCaseTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
 
-            every { inputBook.status } returns BookStatus.Reading
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
 
             // ----- Act -----
             val result = useCase(inputBook)

@@ -14,6 +14,11 @@ import io.mockk.slot
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.CreateListBookMutation
 import nl.rhaydus.softcover.CreateListBookMutation.Data.Insert_list_book.List_book.Companion.listBookFragment as createListBookListBookFragment
 import nl.rhaydus.softcover.CreateListMutation
@@ -39,11 +44,6 @@ import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.fragment.ListFragment
 import nl.rhaydus.softcover.type.ListInput
-import nl.rhaydus.ui.common.AppDispatchers
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ListsRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
@@ -111,15 +111,33 @@ class ListsRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserListSignaturesQuery>())
             } returns queryData
 
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.lists } returns listOf(listEntry)
-            every { listEntry.id } returns 42
-            every { listEntry.updated_at } returns updatedAt
-            every { listEntry.list_books_aggregate } returns aggregate
-            every { aggregate.aggregate } returns aggregateInner
-            every { aggregateInner.count } returns count
-            every { aggregateInner.max } returns max
-            every { max.updated_at } returns maxBookUpdatedAt
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+            every {
+                meEntry.lists
+            } returns listOf(listEntry)
+            every {
+                listEntry.id
+            } returns 42
+            every {
+                listEntry.updated_at
+            } returns updatedAt
+            every {
+                listEntry.list_books_aggregate
+            } returns aggregate
+            every {
+                aggregate.aggregate
+            } returns aggregateInner
+            every {
+                aggregateInner.count
+            } returns count
+            every {
+                aggregateInner.max
+            } returns max
+            every {
+                max.updated_at
+            } returns maxBookUpdatedAt
 
             // ----- Act -----
             val result = dataSource.fetchListSignatures()
@@ -148,14 +166,30 @@ class ListsRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserListSignaturesQuery>())
             } returns queryData
 
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.lists } returns listOf(listEntry)
-            every { listEntry.id } returns 7
-            every { listEntry.updated_at } returns null
-            every { listEntry.list_books_aggregate } returns aggregate
-            every { aggregate.aggregate } returns aggregateInner
-            every { aggregateInner.count } returns 5
-            every { aggregateInner.max } returns null
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+            every {
+                meEntry.lists
+            } returns listOf(listEntry)
+            every {
+                listEntry.id
+            } returns 7
+            every {
+                listEntry.updated_at
+            } returns null
+            every {
+                listEntry.list_books_aggregate
+            } returns aggregate
+            every {
+                aggregate.aggregate
+            } returns aggregateInner
+            every {
+                aggregateInner.count
+            } returns 5
+            every {
+                aggregateInner.max
+            } returns null
 
             // ----- Act -----
             val result = dataSource.fetchListSignatures()
@@ -177,12 +211,24 @@ class ListsRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserListSignaturesQuery>())
             } returns queryData
 
-            every { queryData.me } returns listOf(meEntry)
-            every { meEntry.lists } returns listOf(listEntry)
-            every { listEntry.id } returns 9
-            every { listEntry.updated_at } returns "2024-02-01"
-            every { listEntry.list_books_aggregate } returns aggregate
-            every { aggregate.aggregate } returns null
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+            every {
+                meEntry.lists
+            } returns listOf(listEntry)
+            every {
+                listEntry.id
+            } returns 9
+            every {
+                listEntry.updated_at
+            } returns "2024-02-01"
+            every {
+                listEntry.list_books_aggregate
+            } returns aggregate
+            every {
+                aggregate.aggregate
+            } returns null
 
             // ----- Act -----
             val result = dataSource.fetchListSignatures()
@@ -200,7 +246,9 @@ class ListsRemoteDataSourceImplTest {
                 apolloClient.safeQuery(query = any<GetUserListSignaturesQuery>())
             } returns queryData
 
-            every { queryData.me } returns emptyList()
+            every {
+                queryData.me
+            } returns emptyList()
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {

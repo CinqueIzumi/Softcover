@@ -12,7 +12,7 @@ internal fun ListFragment.toBookList(): BookList {
     return BookList(
         id = id,
         name = name,
-        slug = slug ?: "",
+        slug = slug.orEmpty(),
         ranked = ranked == true,
         books = listBooks,
         signature = buildListSignature(

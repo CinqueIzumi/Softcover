@@ -7,13 +7,13 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
+import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
 class ReAuthenticateUseCaseImplTest {
     private lateinit var settingsRepository: SettingsRepository
@@ -35,9 +35,15 @@ class ReAuthenticateUseCaseImplTest {
             refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
         )
 
-        coEvery { resetUserDataUseCase() } returns Result.success(Unit)
-        coEvery { refreshLibraryUseCase() } returns Result.success(Unit)
-        coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+        coEvery {
+            resetUserDataUseCase()
+        } returns Result.success(Unit)
+        coEvery {
+            refreshLibraryUseCase()
+        } returns Result.success(Unit)
+        coEvery {
+            refreshUserProfileDataUseCase()
+        } returns Result.success(Unit)
     }
 
     @Nested
@@ -45,8 +51,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `returns success when same account logs in again`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 42
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 42
 
             // ----- Act -----
             val result = useCase(apiKey = "valid-token")
@@ -58,8 +68,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `does not call resetUserDataUseCase when account is the same`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 42
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 42
 
             // ----- Act -----
             useCase(apiKey = "valid-token")
@@ -71,8 +85,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `calls updateApiKey once when account is the same`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 42
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 42
 
             // ----- Act -----
             useCase(apiKey = "valid-token")
@@ -84,8 +102,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `calls updateUserId with backend id when account is the same`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 42
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 42
 
             // ----- Act -----
             useCase(apiKey = "valid-token")
@@ -97,8 +119,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `calls refreshLibraryUseCase when account is the same`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 42
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 42
 
             // ----- Act -----
             useCase(apiKey = "valid-token")
@@ -110,8 +136,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `calls resetUserDataUseCase when a different account authenticates`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 99
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 99
 
             // ----- Act -----
             useCase(apiKey = "new-token")
@@ -123,8 +153,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `calls updateApiKey twice when a different account authenticates`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 99
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 99
 
             // ----- Act -----
             useCase(apiKey = "new-token")
@@ -136,8 +170,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `calls updateUserId with new backend id when a different account authenticates`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 99
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 99
 
             // ----- Act -----
             useCase(apiKey = "new-token")
@@ -149,8 +187,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `does not call resetUserDataUseCase on first login`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(-1)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 99
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(-1)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 99
 
             // ----- Act -----
             useCase(apiKey = "first-token")
@@ -162,8 +204,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `calls updateUserId with backend id on first login`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(-1)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 99
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(-1)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 99
 
             // ----- Act -----
             useCase(apiKey = "first-token")
@@ -175,8 +221,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `returns failure when getUserIdFromBackend throws`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } throws RuntimeException("invalid token")
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } throws RuntimeException("invalid token")
 
             // ----- Act -----
             val result = useCase(apiKey = "bad-token")
@@ -188,8 +238,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `does not call resetUserDataUseCase when token is invalid`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } throws RuntimeException("invalid token")
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } throws RuntimeException("invalid token")
 
             // ----- Act -----
             useCase(apiKey = "bad-token")
@@ -201,8 +255,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `does not call updateUserId when token is invalid`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(42)
-            coEvery { settingsRepository.getUserIdFromBackend() } throws RuntimeException("invalid token")
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(42)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } throws RuntimeException("invalid token")
 
             // ----- Act -----
             useCase(apiKey = "bad-token")
@@ -214,8 +272,12 @@ class ReAuthenticateUseCaseImplTest {
         @Test
         fun `strips Bearer prefix and surrounding whitespace from api key`() = runTest {
             // ----- Arrange -----
-            every { settingsRepository.getUserId() } returns flowOf(-1)
-            coEvery { settingsRepository.getUserIdFromBackend() } returns 99
+            every {
+                settingsRepository.getUserId()
+            } returns flowOf(-1)
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 99
 
             // ----- Act -----
             useCase(apiKey = "Bearer  abc-123 ")

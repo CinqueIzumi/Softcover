@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.core.database.mapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.database.model.BookEditionView
@@ -19,11 +21,10 @@ import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.database.model.UserBookWithJournals
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ListBook
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ListEntityMapperTest {
     // region Shared stubs for UI -> Entity section
@@ -35,12 +36,24 @@ class ListEntityMapperTest {
         books: List<ListBook> = emptyList(),
         signature: String? = null,
     ): BookList = mockk {
-        every { this@mockk.id } returns id
-        every { this@mockk.name } returns name
-        every { this@mockk.slug } returns slug
-        every { this@mockk.ranked } returns ranked
-        every { this@mockk.books } returns books
-        every { this@mockk.signature } returns signature
+        every {
+            this@mockk.id
+        } returns id
+        every {
+            this@mockk.name
+        } returns name
+        every {
+            this@mockk.slug
+        } returns slug
+        every {
+            this@mockk.ranked
+        } returns ranked
+        every {
+            this@mockk.books
+        } returns books
+        every {
+            this@mockk.signature
+        } returns signature
     }
 
     private fun stubListBook(
@@ -51,16 +64,32 @@ class ListEntityMapperTest {
         position: Int? = null,
         addedAt: String? = null,
         book: Book? = null,
-        edition: nl.rhaydus.softcover.core.domain.model.BookEdition? = null,
+        edition: BookEdition? = null,
     ): ListBook = mockk {
-        every { this@mockk.listId } returns listId
-        every { this@mockk.listBookId } returns listBookId
-        every { this@mockk.bookId } returns bookId
-        every { this@mockk.editionId } returns editionId
-        every { this@mockk.position } returns position
-        every { this@mockk.addedAt } returns addedAt
-        every { this@mockk.book } returns book
-        every { this@mockk.edition } returns edition
+        every {
+            this@mockk.listId
+        } returns listId
+        every {
+            this@mockk.listBookId
+        } returns listBookId
+        every {
+            this@mockk.bookId
+        } returns bookId
+        every {
+            this@mockk.editionId
+        } returns editionId
+        every {
+            this@mockk.position
+        } returns position
+        every {
+            this@mockk.addedAt
+        } returns addedAt
+        every {
+            this@mockk.book
+        } returns book
+        every {
+            this@mockk.edition
+        } returns edition
     }
     // endregion
     // region Shared stubs for Entity -> Model section

@@ -32,3 +32,8 @@ Helper patterns:
 - Call `stmt.bindText(1, value)` before stepping prepared statements with parameters.
 
 **Why:** `BundledSQLiteDriver().open(":memory:")` gives a real in-memory SQLite connection per test — no emulator, no Room, no schema JSONs needed. Synchronous `migration.migrate(connection)` calls make `runTest` unnecessary.
+
+## Correct Gradle task name for this KMP module's androidHostTest
+
+`:core:database:testDebugUnitTest` does **not** exist (that's the plain-Android-module naming). The real task is `:core:database:testAndroidHostTest`. When filtering, `--tests "*ClassName*"` works fine against it. Confirmed working:
+`./gradlew :core:database:testAndroidHostTest --tests "*Migration44To45Test*" --tests "*DismissedContinueSeriesDaoTest*"`

@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
-import nl.rhaydus.designsystem.component.DesktopTooltip
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -34,11 +34,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -75,7 +77,11 @@ internal actual fun ExploreScreenLayout(
     isOnline: Boolean,
 ) {
     if (isOnline.not()) {
-        OfflineScreenContent(modifier = Modifier.fillMaxSize())
+        OfflineScreenContent(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = rememberBottomBarPadding()),
+        )
         return
     }
 
@@ -214,7 +220,7 @@ private fun DesktopDiscovery(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(discoveryScrollState)
-                .padding(bottom = 24.dp),
+                .padding(bottom = 24.dp + rememberBottomBarPadding()),
             verticalArrangement = Arrangement.spacedBy(40.dp),
         ) {
             DesktopTrendingSection(
@@ -392,6 +398,7 @@ private fun DesktopSearchResults(
                 state = searchResultsGridState,
                 columns = GridCells.Adaptive(minSize = 380.dp),
                 modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {

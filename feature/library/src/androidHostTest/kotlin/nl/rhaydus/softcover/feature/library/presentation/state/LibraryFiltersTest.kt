@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.Tag
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class LibraryFiltersTest {
     // region Fixtures

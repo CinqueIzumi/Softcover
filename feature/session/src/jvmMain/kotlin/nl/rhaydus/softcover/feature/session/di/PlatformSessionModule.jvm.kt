@@ -2,8 +2,8 @@ package nl.rhaydus.softcover.feature.session.di
 
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ReadingSessionLauncher
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 // Desktop has no foreground-service equivalent for the lock-screen reading surface. The in-app
 // session UI (peek bar + Focus Mode) still works; only the OS-level surface is absent, so the

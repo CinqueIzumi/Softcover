@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
 import nl.rhaydus.softcover.SaveTagsMutation
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.type.BasicTag
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class UserTagMapperTest {
     // ----- FindTagsByUserAndTaggableQuery.Data.Tagging helpers -----

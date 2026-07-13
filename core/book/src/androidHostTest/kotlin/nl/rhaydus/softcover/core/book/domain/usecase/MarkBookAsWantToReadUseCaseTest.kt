@@ -6,12 +6,12 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookStatus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 
 class MarkBookAsWantToReadUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -31,7 +31,9 @@ class MarkBookAsWantToReadUseCaseTest {
             val book = mockk<Book>()
             val updatedBook = mockk<Book>()
 
-            every { book.status } returns BookStatus.None
+            every {
+                book.status
+            } returns BookStatus.None
 
             coEvery {
                 booksRepository.markBookAsWantToRead(
@@ -60,7 +62,9 @@ class MarkBookAsWantToReadUseCaseTest {
             val editionId = 42
             val updatedBook = mockk<Book>()
 
-            every { book.status } returns BookStatus.None
+            every {
+                book.status
+            } returns BookStatus.None
 
             coEvery {
                 booksRepository.markBookAsWantToRead(
@@ -88,7 +92,9 @@ class MarkBookAsWantToReadUseCaseTest {
             val book = mockk<Book>()
             val updatedBook = mockk<Book>()
 
-            every { book.status } returns BookStatus.None
+            every {
+                book.status
+            } returns BookStatus.None
 
             coEvery {
                 booksRepository.markBookAsWantToRead(
@@ -113,7 +119,9 @@ class MarkBookAsWantToReadUseCaseTest {
             val book = mockk<Book>()
             val expectedError = RuntimeException("network error")
 
-            every { book.status } returns BookStatus.None
+            every {
+                book.status
+            } returns BookStatus.None
 
             coEvery {
                 booksRepository.markBookAsWantToRead(
@@ -135,7 +143,9 @@ class MarkBookAsWantToReadUseCaseTest {
             // ----- Arrange -----
             val book = mockk<Book>()
 
-            every { book.status } returns BookStatus.WantToRead
+            every {
+                book.status
+            } returns BookStatus.WantToRead
 
             // ----- Act -----
             val result = useCase(book)

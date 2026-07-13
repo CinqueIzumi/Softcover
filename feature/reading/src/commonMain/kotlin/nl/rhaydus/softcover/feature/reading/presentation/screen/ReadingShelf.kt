@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
-import nl.rhaydus.designsystem.component.RhaydusButton
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
@@ -68,6 +67,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import nl.rhaydus.common.currentLocalDate
+import nl.rhaydus.common.currentLocalDateTime
+import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.component.RhaydusSplitButton
 import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
@@ -75,6 +78,7 @@ import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.Haptics
 import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.model.RhaydusMenuItem
@@ -100,7 +104,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.rememberBook
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.designsystem.presentation.util.BottomBarPulseManager
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
@@ -120,9 +123,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import nl.rhaydus.ui.common.currentLocalDate
-import nl.rhaydus.ui.common.currentLocalDateTime
-import nl.rhaydus.ui.common.secondsToHm
 
 /**
  * The scrolling currently-reading column shared by both platforms: a [header] slot (the mobile
@@ -890,7 +890,8 @@ internal fun EmptyCurrentlyReadingScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 32.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = rememberBottomBarPadding()),
         verticalArrangement = if (showAdaptive) Arrangement.Top else Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

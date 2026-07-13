@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
-import nl.rhaydus.designsystem.layout.BottomNavigationSpacer
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScre
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -68,7 +68,7 @@ internal actual fun BookDetailScreenLayout(
         if (shouldBeExpanded.not()) {
             ""
         } else {
-            state.book?.title ?: ""
+            state.book?.title.orEmpty()
         }
     }
 
@@ -101,7 +101,11 @@ internal actual fun BookDetailScreenLayout(
         contentWindowInsets = WindowInsets(),
     ) { innerPadding ->
         if (showOfflinePlaceholder) {
-            OfflineScreenContent(modifier = Modifier.padding(innerPadding))
+            OfflineScreenContent(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(bottom = bottomChromePadding()),
+            )
 
             SoftcoverTopBar(
                 title = "",
@@ -278,7 +282,7 @@ internal actual fun BookDetailScreenLayout(
 
             item { Spacer(modifier = Modifier.height(32.dp)) }
 
-            item { BottomNavigationSpacer() }
+            item { Spacer(modifier = Modifier.height(bottomChromePadding())) }
         }
 
         SoftcoverTopBar(

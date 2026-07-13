@@ -7,14 +7,14 @@ import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlin.coroutines.cancellation.CancellationException
-import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
-import nl.rhaydus.softcover.core.domain.exception.OfflineException
-import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 
 class ApiFailureHandlingTest {
     @BeforeEach

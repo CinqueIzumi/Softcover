@@ -8,7 +8,7 @@ import coil3.SingletonImageLoader
 import coil3.memory.MemoryCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import org.koin.android.ext.koin.androidContext
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
 import nl.rhaydus.softcover.di.appModule
 import nl.rhaydus.softcover.di.debugRoutesModule
@@ -19,7 +19,10 @@ internal class SoftCoverApp : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
 
-        AppLog.install(debug = BuildConfig.DEBUG)
+        AppLog.install(
+            tag = "Softcover",
+            debug = BuildConfig.DEBUG,
+        )
 
         val koin = initKoin {
             androidContext(this@SoftCoverApp)

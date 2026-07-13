@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.debug
 
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource

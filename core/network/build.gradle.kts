@@ -10,6 +10,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.rhaydus.corePlatform)
             implementation(project(":core:domain"))
         }
     }

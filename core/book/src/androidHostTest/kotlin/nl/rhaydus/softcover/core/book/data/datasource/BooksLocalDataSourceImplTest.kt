@@ -13,6 +13,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.mapper.toModel
@@ -27,9 +30,6 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class BooksLocalDataSourceImplTest {
     private lateinit var dao: BookDao
@@ -631,7 +631,9 @@ class BooksLocalDataSourceImplTest {
             // ----- Arrange -----
             val ids = listOf(10, 20, 30)
 
-            coEvery { dao.getBookIdByUserBookId(userBookId = any()) } returns null
+            coEvery {
+                dao.getBookIdByUserBookId(userBookId = any())
+            } returns null
 
             // ----- Act -----
             dataSource.removeUserBooksById(ids = ids)
@@ -738,7 +740,9 @@ class BooksLocalDataSourceImplTest {
         @Test
         fun `delegates to DAO deleteAllLocalData`() = runTest {
             // ----- Arrange -----
-            coEvery { dao.getAllEditionImageRefs() } returns emptyList()
+            coEvery {
+                dao.getAllEditionImageRefs()
+            } returns emptyList()
 
             // ----- Act -----
             dataSource.removeAllBooks()

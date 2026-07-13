@@ -28,23 +28,26 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.share.CapturableShareCard
+import nl.rhaydus.designsystem.share.SaveOutcome
+import nl.rhaydus.designsystem.share.ShareCardCapture
+import nl.rhaydus.designsystem.share.rememberGalleryWritePermissionRequester
+import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.share.BookShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.CapturableShareCard
 import nl.rhaydus.softcover.core.designsystem.presentation.share.QuoteShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.SaveOutcome
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCardCapture
+import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCard
 import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.StatShareContent
 import nl.rhaydus.softcover.core.designsystem.presentation.share.YearRecapShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberGalleryWritePermissionRequester
-import nl.rhaydus.softcover.core.designsystem.presentation.share.rememberShareCardCapture
+import nl.rhaydus.softcover.core.designsystem.presentation.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.logging.AppLog
 
 object ShareCardDebugScreen : Screen {
     @Composable
@@ -61,10 +64,10 @@ object ShareCardDebugScreen : Screen {
 
         val scope = rememberCoroutineScope()
 
-        val bookCapture = rememberShareCardCapture()
-        val statCapture = rememberShareCardCapture()
-        val quoteCapture = rememberShareCardCapture()
-        val recapCapture = rememberShareCardCapture()
+        val bookCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
+        val statCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
+        val quoteCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
+        val recapCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
 
         var pendingSave by remember { mutableStateOf<(suspend () -> Unit)?>(null) }
 
@@ -84,7 +87,7 @@ object ShareCardDebugScreen : Screen {
 
         val onSaveClick: (ShareCardCapture, String) -> Unit = { capture, filenameHint ->
             pendingSave = {
-                try {
+                runCatchingCancellable {
                     when (val outcome = capture.saveToGallery(filenameHint)) {
                         is SaveOutcome.Saved -> {
                             snackbarHostState.showSnackbar("Saved to gallery → ${outcome.displayPath}")
@@ -96,7 +99,7 @@ object ShareCardDebugScreen : Screen {
 
                         is SaveOutcome.Cached -> Unit
                     }
-                } catch (throwable: Throwable) {
+                }.onFailure { throwable ->
                     AppLog.e(
                         throwable,
                         "Failed to save share card $filenameHint to gallery",
@@ -130,7 +133,9 @@ object ShareCardDebugScreen : Screen {
                 EditorialSectionHeader(
                     eyebrow = "Debug",
                     headline = "Share card variants.",
-                    description = "Tap a card's “Save to gallery” button to write the rendered PNG to Pictures/Softcover. On Android 9 and below the system will ask for storage permission first.",
+                    description = "Tap a card's “Save to gallery” button to write the rendered PNG to " +
+                        "Pictures/Softcover. On Android 9 and below the system will ask for storage " +
+                        "permission first.",
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -210,10 +215,9 @@ object ShareCardDebugScreen : Screen {
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center,
             ) {
-                CapturableShareCard(
-                    capture = capture,
-                    content = content,
-                )
+                CapturableShareCard(capture = capture) {
+                    ShareCard(content = content)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -235,7 +239,8 @@ object ShareCardDebugScreen : Screen {
         userRating = 9,
         releaseYear = 1985,
         pageCount = 945,
-        description = "A sprawling cattle drive from the dust of Texas to the high grass of Montana, told as one of the great American friendships and one of the longest goodbyes in the genre.",
+        description = "A sprawling cattle drive from the dust of Texas to the high grass of Montana, " +
+            "told as one of the great American friendships and one of the longest goodbyes in the genre.",
         quote = "It's a fine world, though rich in hardships at times.",
     )
 

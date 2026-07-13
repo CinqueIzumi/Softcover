@@ -9,8 +9,12 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
@@ -19,9 +23,6 @@ import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDepe
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class UserInformationCollectorTest {
     private lateinit var observeUserProfileDataUseCase: ObserveUserProfileDataUseCase
@@ -49,7 +50,7 @@ class UserInformationCollectorTest {
         } returns profileDataFlow
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): ProfileDependencies {
+    private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
@@ -90,7 +91,9 @@ class UserInformationCollectorTest {
         @Test
         fun `invokes refreshUserProfileDataUseCase on launch`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
             val job = launch { initializer.onLaunch(
@@ -109,7 +112,9 @@ class UserInformationCollectorTest {
         @Test
         fun `updates state to userProfileData and isLoading false when observe emits non-null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             val profileData = buildProfileData()
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
@@ -130,7 +135,9 @@ class UserInformationCollectorTest {
         @Test
         fun `does not update state when observe emits null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            coEvery { refreshUserProfileDataUseCase() } returns Result.success(Unit)
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
             val job = launch { initializer.onLaunch(

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
-import nl.rhaydus.designsystem.component.DesktopContextMenu
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -64,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
+import nl.rhaydus.designsystem.component.DesktopContextMenu
 import nl.rhaydus.designsystem.component.DesktopContextMenuItem
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.component.mutationAnimated
@@ -72,9 +72,11 @@ import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.WindowWidthClass
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.hoverHighlight
+import nl.rhaydus.designsystem.modifier.platformModifierClick
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
@@ -84,13 +86,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImag
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab as LibraryContentTab
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.platformModifierClick
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition

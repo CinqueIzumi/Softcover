@@ -33,18 +33,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.designsystem.presentation.component.InlineErrorState
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSearchTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.util.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
@@ -88,7 +88,11 @@ internal actual fun ExploreScreenLayout(
         },
     ) { padding ->
         if (isOnline.not()) {
-            OfflineScreenContent(modifier = Modifier.padding(padding))
+            OfflineScreenContent(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(bottom = rememberBottomBarPadding()),
+            )
             return@Scaffold
         }
 
@@ -310,6 +314,7 @@ private fun ActiveSearchContent(
                 message = state.searchError,
                 onRetry = { runAction(OnRetrySearchAction) },
                 modifier = Modifier.fillMaxSize(),
+                textStyle = MaterialTheme.editorialTypography.bodySmall,
             )
         } else {
             Spacer(modifier = Modifier.height(16.dp))
@@ -332,6 +337,7 @@ private fun ActiveSearchContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 items(state.queriedBooks, key = { it.id }) { book ->

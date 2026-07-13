@@ -9,6 +9,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
@@ -19,9 +22,6 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ListsRepositoryImplCreateListTest {
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
@@ -152,7 +152,7 @@ class ListsRepositoryImplCreateListTest {
             thrown shouldBe error
 
             coVerify(exactly = 1) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
 
             val enqueued = slot.first()
@@ -180,7 +180,7 @@ class ListsRepositoryImplCreateListTest {
             }
 
             coVerify(exactly = 0) {
-                listWriteQueue.enqueue(write = any())
+                listWriteQueue.enqueue(payload = any())
             }
         }
     }
@@ -193,7 +193,7 @@ class ListsRepositoryImplCreateListTest {
             val userId = 42
 
             coJustRun {
-                listWriteDrainer.drainPendingWrites()
+                listWriteDrainer.drain()
             }
 
             coEvery {
@@ -211,7 +211,7 @@ class ListsRepositoryImplCreateListTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                listWriteDrainer.drainPendingWrites()
+                listWriteDrainer.drain()
             }
 
             coVerify(exactly = 1) {

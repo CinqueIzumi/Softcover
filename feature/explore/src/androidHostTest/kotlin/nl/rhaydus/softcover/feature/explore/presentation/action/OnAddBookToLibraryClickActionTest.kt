@@ -7,8 +7,12 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -17,9 +21,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDepe
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class OnAddBookToLibraryClickActionTest {
     private lateinit var markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase
@@ -38,7 +39,7 @@ class OnAddBookToLibraryClickActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: kotlinx.coroutines.test.TestScope): ExploreDependencies {
+    private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {

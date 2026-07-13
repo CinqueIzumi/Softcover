@@ -7,11 +7,11 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
 class GetQueriedBooksUseCaseTest {
     private lateinit var searchRepository: ExploreRepository

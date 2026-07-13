@@ -7,15 +7,15 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class UpdateBookReviewUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -34,7 +34,9 @@ class UpdateBookReviewUseCaseTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
 
-            every { inputBook.userBook } returns null
+            every {
+                inputBook.userBook
+            } returns null
 
             // ----- Act -----
             val result = useCase(
@@ -63,7 +65,9 @@ class UpdateBookReviewUseCaseTest {
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
 
-            every { inputBook.userBook } returns userBook
+            every {
+                inputBook.userBook
+            } returns userBook
 
             coEvery {
                 booksRepository.updateBookReview(

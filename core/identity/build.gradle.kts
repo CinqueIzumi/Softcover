@@ -11,6 +11,8 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":core:domain"))
             api(project(":core:preferences"))
+
+            implementation(libs.rhaydus.coreCommon)
         }
     }
 }

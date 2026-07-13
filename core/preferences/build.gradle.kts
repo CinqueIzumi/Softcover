@@ -13,7 +13,8 @@ kotlin {
             api(project(":core:domain"))
             implementation(project(":core:network"))
 
-            implementation(libs.rhaydus.coreUi)
+            implementation(libs.rhaydus.coreCommon)
+            implementation(libs.rhaydus.corePlatform)
 
             implementation(libs.datastore.core)
             implementation(libs.datastore.core.okio)
@@ -26,7 +27,8 @@ kotlin {
         }
 
         jvmMain.dependencies {
-            // Backs the desktop SecureApiKeyStorage actual (OS secret store + software fallback).
+            // The app constructs the namespaced KSafe and injects it into the foundation's
+            // JvmSecureStorage (OS secret store + software fallback).
             implementation(libs.ksafe)
         }
     }

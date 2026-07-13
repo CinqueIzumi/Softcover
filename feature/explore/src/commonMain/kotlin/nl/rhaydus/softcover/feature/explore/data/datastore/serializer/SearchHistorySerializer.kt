@@ -5,7 +5,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import okio.BufferedSink
 import okio.BufferedSource
-import nl.rhaydus.softcover.core.domain.logging.AppLog
+import nl.rhaydus.common.AppLog
 
 internal object SearchHistorySerializer : OkioSerializer<SearchHistoryEntity> {
     override val defaultValue: SearchHistoryEntity
