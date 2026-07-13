@@ -269,8 +269,12 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 
 ## Star History
 
-<a href="https://star-history.com/#CinqueIzumi/Softcover&Date">
-  <img src="https://api.star-history.com/svg?repos=CinqueIzumi/Softcover&type=Date" alt="Star History Chart" width="600">
+<a href="https://www.star-history.com/?repos=CinqueIzumi%2FSoftcover&type=date&legend=top-left">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=CinqueIzumi/Softcover&type=date&theme=dark&legend=top-left&sealed_token=Ta3_nkSq6R7CaCM9GtReog_-NKdEyWnyjToVdjT_RFZ-H9U1lR46Ae7x3FnkqRxRF6NxET7lIdSgSH2qFEFiegwJORNuP8JWdy1Uwtf9eBdFweGGqGT04w" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=CinqueIzumi/Softcover&type=date&legend=top-left&sealed_token=Ta3_nkSq6R7CaCM9GtReog_-NKdEyWnyjToVdjT_RFZ-H9U1lR46Ae7x3FnkqRxRF6NxET7lIdSgSH2qFEFiegwJORNuP8JWdy1Uwtf9eBdFweGGqGT04w" />
+    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=CinqueIzumi/Softcover&type=date&legend=top-left&sealed_token=Ta3_nkSq6R7CaCM9GtReog_-NKdEyWnyjToVdjT_RFZ-H9U1lR46Ae7x3FnkqRxRF6NxET7lIdSgSH2qFEFiegwJORNuP8JWdy1Uwtf9eBdFweGGqGT04w" />
+  </picture>
 </a>
 
 ---
