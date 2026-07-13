@@ -87,10 +87,14 @@ Small, high-value features on already-shipped foundations.
 
 *The personal-data surfaces that live on book detail — all add to its scroll, so they precede 4.12.*
 
+This is the release a tracking-minded user is really waiting for: it's the whole private corpus in one drop. It's also the **heaviest release on the plan** — five M-steps. They share one Room schema and one book-detail panel, so splitting them costs more than it saves; but if it needs to shed weight, Step 3.13 + 3.14 are the clean cut line and move together to 3.6.0.
+
 - **Step 3.3** — Personal highlights / Passages + quick-add from Reading (M).
 - **Step 3.9** — Personal identity & representation tagging (M) — *deps: 0.3 (shipped)*.
-- **Step 3.10** — Personal moods (book + chapter) (M) — *deps: 0.3 (shipped)*.
+- **Step 3.10** — Personal moods (book + chapter), **graded** (M) — *deps: 0.3 (shipped)*. Moods carry an intensity from day one; the schema must not ship as a boolean and migrate later (7.15 depends on it).
 - **Step 3.11** — Personal notes (book + characters) (M) — *deps: 0.3 (shipped)*.
+- **Step 3.13** — Personal book traits, graded (M) — *deps: 0.3 (shipped)*. Pace, plot-vs-character, characters, writing style. *(User request.)*
+- **Step 3.14** — Acquisition source, "where I got it" (S) — *deps: 0.3 (shipped)*. Rides in 3.13's panel.
 - **Step 4.7** — Reviews filters & sorts (S).
 
 ---
@@ -99,6 +103,7 @@ Small, high-value features on already-shipped foundations.
 
 - **Step 3.4** — Notes & Highlights inbox screen (M) — *deps: 3.3 (3.5.0)*.
 - **Step 3.6** — Reading Sessions log screen (S).
+- **Step 8.13** — Personal-data export & import, JSON (S–M) — *deps: the Phase 3 corpus (3.5.0)*. **Pulled forward out of 9.8 deliberately**: the private corpus lands in 3.5.0 and lives nowhere but the device, so it cannot wait until 3.15.0 for a way out. Ships one release after the data exists. 9.8's full archive still follows and supersedes it.
 - **Step 4.8** — Share sheet: link + deep-link modes (S).
 - **Step 4.12** — Book-detail tabs / sectioning (M) — lands **after** all detail-enrichment (3.3–3.5.0 + 4.x). Design spike first.
 
@@ -154,7 +159,9 @@ Small, high-value features on already-shipped foundations.
 - **Step 7.9** — Reading Stats Atlas screen (M).
 - **Step 7.10** — Public activity log (M).
 - **Step 7.13** — Diversity & representation stats (M) — *deps: 3.9 (3.5.0), 7.9 (same release)*.
-- **OPEN — "L" (expanded statistics + image export)** — *unplaced*. Natural home is this release (around 7.9 / 7.13), but it stays open until the metrics are specified and the "own database" question is settled (which may pull a new-data-source foundation earlier).
+- **Step 7.15** — "How you read" stats (M) — *deps: 3.13 (3.5.0), 7.9 (same release)*. Plot-vs-character balance, pace mix, writing-style mix, mood profile. *(User request.)*
+- **Step 7.16** — Publication & provenance stats (S–M) — *deps: 7.9 (same release), 3.9 + 3.14 (3.5.0), 6.14 (3.8.0) for the audience mix*. Nationality, language & share-translated, year published, audience, where you got it.
+- ~~**OPEN — "L" (expanded statistics + image export)**~~ — **closed.** The metrics are now specified (7.13 + 7.15 + 7.16) and the image export is 7.14's share surface in 3.12.0. The "own database" question is settled too: the private corpus lives in our own Room tables and is made portable by Step 8.13 — it is **not** smuggled into Hardcover's private-notes field.
 
 ---
 
@@ -162,7 +169,7 @@ Small, high-value features on already-shipped foundations.
 
 - **Step 7.12** — Reading Activity Calendar (M) — *deps: 3.7 (3.2.0), 7.7 (3.11.0)*.
 - **Step 7.11** — Year in Books recap (M) — seasonal; gate behind a December trigger.
-- **Step 7.14** — Custom-scope wrap-up generator (M) — *deps: 7.11 (same release)*.
+- **Step 7.14** — Custom-scope wrap-up generator (M) — *deps: 7.11 (same release); draws on 7.13 / 7.15 / 7.16 (3.11.0)*. Day / week / month / year / since-you-joined, every slide exportable as an image via the 0.2 share surface — the "send my month to a friend who doesn't use a tracking app" ask. *(User request.)*
 
 ---
 
@@ -195,7 +202,7 @@ Small, high-value features on already-shipped foundations.
 - **Step 9.7** — Offline mutation queue, full (M) — *deps: 2.12 (shipped); extends the 3.0.0 progress-retry fix* to ratings/reviews/sessions/highlights + shake-on-conflict.
 - **Improvement (M)** — Pending-sync indicator (+ tap-to-force-sync) — surfaces the 9.7 queue's pending count; rides with 9.7 so it isn't a near-empty indicator.
 - **Fix/polish (N)** — Error feedback when a progress update via the reading-session notification fails; messaging aligns with the 3.0.0 retry behavior. Android.
-- **Step 9.8** — Backup & restore (M) — *deps: 8.5 (3.13.0)*.
+- **Step 9.8** — Backup & restore (M) — *deps: 8.5 (3.13.0), 8.13 (3.6.0)*. The full single-archive backup; supersedes 8.13's standalone JSON while still reading its format.
 - **Step 9.9** — Voice & TalkBack polish (M).
 - **Step 9.3 (second wave)** — streak, quote-of-day, year-in-books widgets — *deps: widget infra (3.2.0)*.
 - **Step 9.4** — Quote-of-day surface + notification + widget link (S) — *deps: 9.3 second wave (same release)*.
@@ -244,8 +251,12 @@ Heavy on small polish; reorder freely within. Step 0.2 (share/render foundation)
 
 ```
 3.2.0 (3.7) ──> 3.12.0 (7.12)
-3.5.0 (3.9) ──> 3.11.0 (7.13)
+3.5.0 (3.9) ──> 3.11.0 (7.13, 7.16)
+3.5.0 (3.13) ──> 3.11.0 (7.15) ──┐
+3.5.0 (3.14) ──> 3.11.0 (7.16) ──┴──> 3.12.0 (7.14)
+3.5.0 (Phase 3 corpus) ──> 3.6.0 (8.13) ──> 3.15.0 (9.8)
 3.5.0 (Phase 3) ──> 3.9.0 (6.5) ──> 3.14.0 (8.11)
+3.8.0 (6.14) ──> 3.11.0 (7.16)
 
 3.7.0 (5.1, 5.3) ──┬──> 3.8.0 (6.4)
                    ├──> 3.9.0 (6.9)

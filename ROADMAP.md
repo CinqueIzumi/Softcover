@@ -50,13 +50,17 @@ Genre and mood chips, awards & accolades, an opt-in content-warnings reveal (wit
 
 ## 3.5.0 — Make a book yours
 
+Everything you might want to record about a book, for your eyes only — none of it leaves your device.
+
 - A **Passages** section for the highlights you save, with quick-add from Reading.
-- Tag authors and books with the identities and representation that matter to you (all private), log personal **moods** (overall or chapter-by-chapter), and keep private **notes** against the book or its characters.
+- Tag authors and books with the identities and representation that matter to you, log personal **moods** (overall or chapter-by-chapter, with how strongly you felt them), and keep private **notes** against the book or its characters.
+- Grade each book on **how it read**: pace, plot- or character-driven, its characters, its writing style — and note **where you got it** (library, bought, borrowed, a subscription credit).
 - Filter reviews by friends, top-rated, recent or language.
 
 ## 3.6.0 — Inboxes + a tidier book detail
 
 - A **Notes & Highlights** inbox you can search across, and a **Reading Sessions** log.
+- **Export and import your private data** as a file you keep — so your tags, moods, notes and gradings survive a reinstall or a move to a new device.
 - Share a book as a plain link or a send-to-a-friend deep link (on top of the image card).
 - A cleaner book-detail layout that tames the long scroll.
 
@@ -80,11 +84,16 @@ An editable profile, a set of reading stats (genre & rating distributions, readi
 
 ## 3.11.0 — Reading Stats Atlas
 
-A long editorial **Stats Atlas**: streak and time-of-day heatmaps, a diversity & representation section driven by your own tags, and an optional public activity log.
+A long editorial **Stats Atlas**, and the payoff for everything you recorded in 3.5.0:
+
+- Streak and time-of-day heatmaps, and an optional public activity log.
+- **Diversity & representation** — your reading by author gender, background and country, drawn from your own private tags.
+- **How you read** — whether your year leaned plot- or character-driven, your pace and writing-style mix, and the moods you reach for most.
+- **Publication & provenance** — author nationality, language and how much you read in translation, publication years, audience, and where your books came from.
 
 ## 3.12.0 — Calendars & recap
 
-A **Reading Activity Calendar** (every day you read, with covers, sessions and finishes), **Year in Books**, and shareable wrap-ups for any span — a day, a week, a month, since you joined.
+A **Reading Activity Calendar** (every day you read, with covers, sessions and finishes), **Year in Books**, and shareable wrap-ups for any span — a day, a week, a month, since you joined. Every slide exports as an image, so you can send your month in books to a friend who doesn't track anything at all.
 
 ## 3.13.0 — Make it yours (Appearance, accessibility, account)
 
@@ -113,5 +122,4 @@ Motion and polish: long-press cover peek, hero parallax, a collapsing bottom bar
 Ideas we like but haven't committed to a release — they may land later, change shape, or not happen:
 
 - **Smart shelves** — virtual tabs like "owned & unread" or "started but stalled" (now that library filtering has shipped, we're weighing whether these add anything on top of it).
-- **Expanded statistics** — a deeper, exportable stats set (still being defined).
 - **Book club / group reading** — a deliberate step further into the social arc beyond the Friend Feed.
