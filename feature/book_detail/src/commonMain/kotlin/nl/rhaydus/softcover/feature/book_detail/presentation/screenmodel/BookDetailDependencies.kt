@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
@@ -49,6 +50,7 @@ internal class BookDetailDependencies(
     val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
+    val getReadingJournalHistoryUseCase: GetReadingJournalHistoryUseCase,
     val updateBookReviewUseCase: UpdateBookReviewUseCase,
     val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     val getUserTagsUseCase: GetUserTagsUseCase,

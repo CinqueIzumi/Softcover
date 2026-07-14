@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
@@ -27,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,9 +42,15 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -254,6 +263,45 @@ private fun EditorialProgressIndicator(fraction: Float) {
     )
 }
 
+/**
+ * A −/+ stepper flanking a hero number field (design-system.md's Update-progress sheet steppers
+ * pattern). 44dp circle, `surfaceContainerHigh` fill, primary glyph.
+ */
+@Composable
+private fun StepperCircle(
+    symbol: String,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier
+            .size(44.dp)
+            // The visible "−"/"+" glyph would otherwise merge into the announced label alongside
+            // the content description; clear it and re-declare only what a screen reader should
+            // say — the description plus the button role/action Surface's own onClick provides.
+            .clearAndSetSemantics {
+                role = Role.Button
+                this.contentDescription = contentDescription
+                onClick(label = null) {
+                    onClick()
+                    true
+                }
+            },
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.primary,
+        onClick = onClick,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = symbol,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+            )
+        }
+    }
+}
+
 @Composable
 private fun ColumnScope.ProgressBottomSheetPageContent(
     book: Book,
@@ -282,10 +330,37 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
         0f
     }
 
+    fun stepPageBy(delta: Int) {
+        val next = (parsed + delta).let {
+            if (hasTotal) {
+                it.coerceIn(
+                    0,
+                    totalPages,
+                )
+            } else {
+                it.coerceAtLeast(0)
+            }
+        }
+
+        number = number.copy(
+            text = next.toString(),
+            selection = TextRange(next.toString().length),
+        )
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        StepperCircle(
+            symbol = "−",
+            contentDescription = "Decrease page",
+            onClick = { stepPageBy(-1) },
+        )
+
+        Spacer(modifier = Modifier.width(18.dp))
+
         HeroStatNumberField(
             value = number,
             charCount = 4,
@@ -335,6 +410,14 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
                 )
             },
         )
+
+        Spacer(modifier = Modifier.width(18.dp))
+
+        StepperCircle(
+            symbol = "+",
+            contentDescription = "Increase page",
+            onClick = { stepPageBy(1) },
+        )
     }
 
     if (hasTotal) {
@@ -383,62 +466,92 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
         maximumValue = 1f,
     )
 
+    fun stepPercentageBy(delta: Int) {
+        val next = (parsed + delta).coerceIn(
+            0,
+            100,
+        )
+
+        number = number.copy(
+            text = next.toString(),
+            selection = TextRange(next.toString().length),
+        )
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        HeroStatNumberField(
-            value = number,
-            charCount = 3,
-            onValueChange = { newValue ->
-                if (firstTimeFocusedGained.not()) {
-                    number = number.copy(selection = newValue.selection)
-                } else {
-                    firstTimeFocusedGained = false
-                }
-
-                if (newValue.text == number.text) return@HeroStatNumberField
-
-                if (newValue.text.isEmpty()) {
-                    number = newValue
-                    return@HeroStatNumberField
-                }
-
-                val newNumber = newValue.text.toIntOrNull() ?: run {
-                    number = number.copy(
-                        text = "",
-                        selection = newValue.selection,
-                    )
-                    return@HeroStatNumberField
-                }
-
-                val updatedNumber = min(
-                    newNumber,
-                    100,
-                )
-
-                number = newValue.copy(text = updatedNumber.toString())
-            },
-            onFocusReset = {
-                firstTimeFocusedGained = true
-                number = number.copy(selection = TextRange.Zero)
-            },
-            onFocusGained = {
-                number = number.copy(
-                    selection = TextRange(
-                        start = 0,
-                        end = number.text.length,
-                    ),
-                )
-            },
+        StepperCircle(
+            symbol = "−",
+            contentDescription = "Decrease percentage",
+            onClick = { stepPercentageBy(-1) },
         )
 
-        Text(
-            text = "%",
-            modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Spacer(modifier = Modifier.width(18.dp))
+
+        Row(verticalAlignment = Alignment.Bottom) {
+            HeroStatNumberField(
+                value = number,
+                charCount = 3,
+                onValueChange = { newValue ->
+                    if (firstTimeFocusedGained.not()) {
+                        number = number.copy(selection = newValue.selection)
+                    } else {
+                        firstTimeFocusedGained = false
+                    }
+
+                    if (newValue.text == number.text) return@HeroStatNumberField
+
+                    if (newValue.text.isEmpty()) {
+                        number = newValue
+                        return@HeroStatNumberField
+                    }
+
+                    val newNumber = newValue.text.toIntOrNull() ?: run {
+                        number = number.copy(
+                            text = "",
+                            selection = newValue.selection,
+                        )
+                        return@HeroStatNumberField
+                    }
+
+                    val updatedNumber = min(
+                        newNumber,
+                        100,
+                    )
+
+                    number = newValue.copy(text = updatedNumber.toString())
+                },
+                onFocusReset = {
+                    firstTimeFocusedGained = true
+                    number = number.copy(selection = TextRange.Zero)
+                },
+                onFocusGained = {
+                    number = number.copy(
+                        selection = TextRange(
+                            start = 0,
+                            end = number.text.length,
+                        ),
+                    )
+                },
+            )
+
+            Text(
+                text = "%",
+                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                style = MaterialTheme.editorialTypography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Spacer(modifier = Modifier.width(18.dp))
+
+        StepperCircle(
+            symbol = "+",
+            contentDescription = "Increase percentage",
+            onClick = { stepPercentageBy(1) },
         )
     }
 
@@ -516,6 +629,19 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
 
         TimeColon(textStyle = timeStyle)
 
+        StepperCircle(
+            symbol = "−",
+            contentDescription = "Decrease minutes",
+            onClick = {
+                val next = ((minutes.text.toIntOrNull() ?: 0) - 1).coerceIn(
+                    0,
+                    59,
+                )
+                minutes = minutes.copy(text = next.toString())
+            },
+            modifier = Modifier.padding(end = 6.dp),
+        )
+
         TimeField(
             value = minutes,
             charCount = 2,
@@ -533,6 +659,19 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
                     )
                 }
             },
+        )
+
+        StepperCircle(
+            symbol = "+",
+            contentDescription = "Increase minutes",
+            onClick = {
+                val next = ((minutes.text.toIntOrNull() ?: 0) + 1).coerceIn(
+                    0,
+                    59,
+                )
+                minutes = minutes.copy(text = next.toString())
+            },
+            modifier = Modifier.padding(start = 6.dp),
         )
 
         TimeColon(textStyle = timeStyle)

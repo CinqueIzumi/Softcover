@@ -1,10 +1,16 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -36,7 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,10 +64,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -83,6 +92,7 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.common.formatDecimalNumber
+import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.RhaydusButton
@@ -175,10 +185,10 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBo
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ReviewEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLens
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 private const val REVIEW_COLLAPSED_LINES = 8
-
 // region Hero
 @Composable
 internal fun GeneralBookInfoSection(
@@ -599,16 +609,169 @@ private fun OwnedCoverBadge(modifier: Modifier = Modifier) {
     }
 }
 // endregion
-// region Shelf Action Bar
+// region Lens Toggle
+/**
+ * The sticky lens toggle (design-system.md's lens-toggle pattern): a full-width segmented pill on a
+ * `surfaceContainer` track that switches the sections below between "Yours" and "The Book". Both
+ * segments are always visible; "Yours" is disabled (dimmed, non-interactive) until the book has a
+ * user copy. The active segment crossfades over ~220ms, gated by [playDecorativeMotion]; a `select`
+ * haptic fires on switch. The caller composes this as a `stickyHeader` under the top bar.
+ */
 @Composable
-internal fun ShelfActionBar(
+internal fun LensToggle(
+    selectedLens: BookDetailLens,
+    onLensSelected: (BookDetailLens) -> Unit,
+    yoursEnabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val haptics = rememberHaptics()
+
+    // The caller composes this as a `stickyHeader`, so the root paints an opaque, edge-to-edge
+    // page-background layer first — otherwise content scrolling underneath would show through the
+    // padded pill's own margin while the header is pinned.
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background),
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 8.dp,
+                ),
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(percent = 50),
+        ) {
+            Row(modifier = Modifier.padding(4.dp)) {
+                LensSegment(
+                    label = "The Book",
+                    selected = selectedLens == BookDetailLens.THE_BOOK,
+                    enabled = true,
+                    onClick = {
+                        haptics.select()
+                        onLensSelected(BookDetailLens.THE_BOOK)
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+
+                LensSegment(
+                    label = "Yours",
+                    selected = selectedLens == BookDetailLens.YOURS,
+                    enabled = yoursEnabled,
+                    onClick = {
+                        haptics.select()
+                        onLensSelected(BookDetailLens.YOURS)
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LensSegment(
+    label: String,
+    selected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val playMotion = playDecorativeMotion()
+    val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
+
+    val containerColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        animationSpec = colorSpec,
+        label = "LensSegmentContainer",
+    )
+
+    val contentColor by animateColorAsState(
+        targetValue = if (selected) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        animationSpec = colorSpec,
+        label = "LensSegmentContent",
+    )
+
+    Surface(
+        modifier = modifier.alpha(if (enabled) 1f else 0.4f),
+        color = containerColor,
+        contentColor = contentColor,
+        shape = RoundedCornerShape(percent = 50),
+        onClick = onClick,
+        enabled = enabled && selected.not(),
+    ) {
+        Box(
+            modifier = Modifier.padding(vertical = 9.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            )
+        }
+    }
+}
+
+/**
+ * Crossfades between the "Yours" and "The Book" lens content on [BookDetailUiState.selectedLens]
+ * switch — a subtle fade consistent with the app's motion register, gated by [playDecorativeMotion].
+ * Sections belonging to the inactive lens are simply not composed. Shared by both the mobile and
+ * desktop layouts so the switch behaves identically everywhere.
+ */
+@Composable
+internal fun LensContent(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
+) {
+    val playMotion = playDecorativeMotion()
+    val fadeSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap()
+
+    AnimatedContent(
+        targetState = state.selectedLens,
+        transitionSpec = {
+            fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
+        },
+        label = "BookDetailLensContent",
+    ) { lens ->
+        when (lens) {
+            BookDetailLens.YOURS -> YoursLensContent(
+                state = state,
+                runAction = runAction,
+            )
+
+            BookDetailLens.THE_BOOK -> TheBookLensContent(
+                state = state,
+                runAction = runAction,
+            )
+        }
+    }
+}
+// endregion
+// region Shelve Control
+/**
+ * The "Shelve this book" control (design-system.md §5 shelve-rows). A `surfaceContainerLow` card of
+ * three VERTICAL rows — Want to read / Reading / Read — replacing the earlier horizontal chip strip.
+ * The active row fills `primary`/`onPrimary` and shows a live trailing status; the section opener is
+ * the inline 20×1 bar + `eyebrowSmall` contract (never the full section bar). All prior behavior is
+ * preserved: optimistic writes, [Modifier.shakeOnError] + "Couldn't save — tap to retry", the
+ * [MarkAsReadBurst] + commit haptic celebration on Read, and Reading disabled while `status == None`.
+ */
+@Composable
+internal fun ShelveControlCard(
+    state: BookDetailUiState,
+    runAction: (BookDetailAction) -> Unit,
+    dateStyle: DateStyle,
     celebrationKey: Int,
 ) {
     SkeletonCrossfade(
         isLoading = state.loadingBookDetails && state.book == null,
-        label = "ShelfActionBar",
+        label = "ShelveControlCard",
     ) { loading ->
         if (loading) {
             Column(
@@ -616,24 +779,17 @@ internal fun ShelfActionBar(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
             ) {
-                SectionLabel(text = "Your shelf")
+                InlineAccentLabel(text = "Shelve this book")
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    repeat(3) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(72.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .shimmer(isLoading = true),
-                        )
-                    }
-                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(186.dp)
+                        .clip(RoundedCornerShape(15.dp))
+                        .shimmer(isLoading = true),
+                )
             }
         } else {
             val book = state.book
@@ -652,70 +808,75 @@ internal fun ShelfActionBar(
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         if (mutationFailed) {
-                            SectionLabel(
+                            InlineAccentLabel(
                                 text = "Couldn't save — tap to retry",
                                 color = MaterialTheme.colorScheme.error,
                             )
                         } else {
-                            SectionLabel(
-                                text = "Your shelf",
-                                pulseKey = celebrationKey,
-                            )
+                            InlineAccentLabel(text = "Shelve this book")
                         }
 
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shakeOnError(
-                                    trigger = mutationFailed,
-                                    onShakeEnd = {
-                                        runAction(OnClearMutationFailureAction(bookId = book.id))
-                                    },
-                                ),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                            shape = RoundedCornerShape(15.dp),
                         ) {
-                            ShelfChip(
-                                label = "Want to read",
-                                iconRes = drawableIconResource(
-                                    icon = SoftcoverIcon.BookmarkAdd,
-                                    contentDescription = "",
-                                ),
-                                selected = status == BookStatus.WantToRead,
-                                onClick = {
-                                    haptics.select()
-                                    runAction(OnMarkBookAsWantToReadClickAction(book = book))
-                                },
-                                modifier = Modifier.weight(1f),
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .shakeOnError(
+                                        trigger = mutationFailed,
+                                        onShakeEnd = {
+                                            runAction(OnClearMutationFailureAction(bookId = book.id))
+                                        },
+                                    ),
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                ShelveRow(
+                                    label = "Want to read",
+                                    iconRes = drawableIconResource(
+                                        icon = SoftcoverIcon.BookmarkAdd,
+                                        contentDescription = "",
+                                    ),
+                                    selected = status == BookStatus.WantToRead,
+                                    onClick = {
+                                        haptics.select()
+                                        runAction(OnMarkBookAsWantToReadClickAction(book = book))
+                                    },
+                                )
 
-                            ShelfChip(
-                                label = "Reading",
-                                iconRes = drawableIconResource(
-                                    icon = SoftcoverIcon.Reading,
-                                    contentDescription = "",
-                                ),
-                                selected = status == BookStatus.Reading,
-                                onClick = {
-                                    haptics.select()
-                                    runAction(OnMarkBookAsReadingClickAction(book = book))
-                                },
-                                modifier = Modifier.weight(1f),
-                                enabled = status != BookStatus.None,
-                            )
+                                ShelveRow(
+                                    label = "Reading",
+                                    iconRes = drawableIconResource(
+                                        icon = SoftcoverIcon.Reading,
+                                        contentDescription = "",
+                                    ),
+                                    selected = status == BookStatus.Reading,
+                                    onClick = {
+                                        haptics.select()
+                                        runAction(OnMarkBookAsReadingClickAction(book = book))
+                                    },
+                                    enabled = status != BookStatus.None,
+                                    trailingStatus = readingTrailingStatus(book = book),
+                                )
 
-                            ShelfChip(
-                                label = "Read",
-                                iconRes = drawableIconResource(
-                                    icon = SoftcoverIcon.BookmarkCheck,
-                                    contentDescription = "",
-                                ),
-                                selected = status == BookStatus.Read,
-                                onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
-                                modifier = Modifier.weight(1f),
-                                celebrationKey = celebrationKey,
-                            )
+                                ShelveRow(
+                                    label = "Read",
+                                    iconRes = drawableIconResource(
+                                        icon = SoftcoverIcon.BookmarkCheck,
+                                        contentDescription = "",
+                                    ),
+                                    selected = status == BookStatus.Read,
+                                    onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
+                                    celebrationKey = celebrationKey,
+                                    trailingStatus = readStatusDateTrailing(
+                                        book = book,
+                                        dateStyle = dateStyle,
+                                    ),
+                                )
+                            }
                         }
                     }
 
@@ -729,6 +890,32 @@ internal fun ShelfActionBar(
     }
 }
 
+/** Live "Reading" trailing status: `{pct}% · p. {page}`, time-based for audiobooks. */
+private fun readingTrailingStatus(book: Book): String? {
+    val read = book.userBookRead ?: return null
+    val edition = book.currentEdition
+    val pct = read.progress.roundToInt()
+
+    return if (edition?.isAudiobook == true) {
+        "$pct% · ${secondsToHm(seconds = read.currentSeconds ?: 0)}"
+    } else {
+        "$pct% · p. ${read.currentPage ?: 0}"
+    }
+}
+
+/** Live "Read" trailing status: the read date, when known. */
+private fun readStatusDateTrailing(
+    book: Book,
+    dateStyle: DateStyle,
+): String? {
+    val userBook = book.userBook ?: return null
+
+    return userBook.getReadDateString(
+        style = dateStyle,
+        finishedAt = book.userBookRead?.finishedAt,
+    )
+}
+
 @Composable
 internal fun PersonalRatingRow(
     book: Book,
@@ -739,24 +926,45 @@ internal fun PersonalRatingRow(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
     ) {
-        SectionLabel(text = "Your rating")
+        SmallSectionLabel(text = "Your rating")
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        StarRatingInput(
-            rating = book.userBook?.rating?.takeIf { it > 0.0 },
-            onRatingChange = { rating ->
-                runAction(OnRateBookAction(
-                    book = book,
-                    rating = rating,
-                ),)
-            },
-            starIcon = drawableIconResource(
-                contentDescription = "",
-                icon = SoftcoverIcon.StarFilled,
-            ),
-            filledColor = RatingGold,
-        )
+        val rating = book.userBook?.rating?.takeIf { it > 0.0 }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            StarRatingInput(
+                rating = rating,
+                onRatingChange = { newRating ->
+                    runAction(
+                        OnRateBookAction(
+                            book = book,
+                            rating = newRating,
+                        ),
+                    )
+                },
+                starIcon = drawableIconResource(
+                    contentDescription = "",
+                    icon = SoftcoverIcon.StarFilled,
+                ),
+                filledColor = RatingGold,
+            )
+
+            if (rating != null) {
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = "Your ${
+                        formatDecimalNumber(
+                            value = rating,
+                            fractionDigits = 0,
+                        )
+                    }/10",
+                    style = MaterialTheme.editorialTypography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
     }
 }
 
@@ -771,7 +979,22 @@ internal fun PersonalReviewSection(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
     ) {
-        SectionLabel(text = "Your review")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SmallSectionLabel(text = "Your review")
+
+            if (reviewDocument != null && reviewDocument.isBlank().not()) {
+                Text(
+                    text = "Edit",
+                    style = MaterialTheme.editorialTypography.eyebrowSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable(onClick = { runAction(OnOpenReviewSheetAction()) }),
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -792,12 +1015,12 @@ internal fun PersonalReviewSection(
         } else {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 onClick = { runAction(OnOpenReviewSheetAction()) },
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+                    modifier = Modifier.padding(18.dp),
                 ) {
                     ReviewDocumentText(
                         document = reviewDocument,
@@ -826,19 +1049,20 @@ internal fun PersonalReviewSection(
 }
 
 @Composable
-private fun ShelfChip(
+private fun ShelveRow(
     label: String,
     iconRes: RhaydusIconResource,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    trailingStatus: String? = null,
     celebrationKey: Int = 0,
     enabled: Boolean = true,
 ) {
-    val selectedContainer = MaterialTheme.colorScheme.secondaryContainer
-    val unselectedContainer = MaterialTheme.colorScheme.surfaceContainer
-    val selectedContent = MaterialTheme.colorScheme.onSecondaryContainer
-    val unselectedContent = MaterialTheme.colorScheme.onSurface
+    val selectedContainer = MaterialTheme.colorScheme.primary
+    val unselectedContainer = Color.Transparent
+    val selectedContent = MaterialTheme.colorScheme.onPrimary
+    val unselectedContent = MaterialTheme.colorScheme.onSurfaceVariant
 
     val playMotion = playDecorativeMotion()
 
@@ -900,9 +1124,9 @@ private fun ShelfChip(
 
     Surface(
         modifier = modifier
-            .height(72.dp)
+            .fillMaxWidth()
             .alpha(if (enabled) 1f else 0.4f)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(11.dp))
             .drawBehind {
                 drawRect(color = fromContainer)
                 clipRect(right = size.width * wipeProgress) {
@@ -911,22 +1135,21 @@ private fun ShelfChip(
             },
         color = Color.Transparent,
         contentColor = contentColor,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(11.dp),
         onClick = onClick,
         enabled = enabled && selected.not(),
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+                .padding(horizontal = 13.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 painter = iconRes.getIconPainter(),
                 contentDescription = iconRes.contentDescription,
                 modifier = Modifier
-                    .size(22.dp)
+                    .size(18.dp)
                     .graphicsLayer {
                         scaleX = iconScale
                         scaleY = iconScale
@@ -938,16 +1161,69 @@ private fun ShelfChip(
                     },
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium.copy(
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                 ),
             )
+
+            if (selected && trailingStatus != null) {
+                Text(
+                    text = trailingStatus,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontFeatureSettings = "tnum",
+                    ),
+                    color = contentColor.copy(alpha = 0.9f),
+                )
+            }
         }
     }
+}
+
+/**
+ * Small in-flow section label with the 20×1 inline hairline bar + `eyebrowSmall` (design-system.md
+ * §2.3 "inline bar" contract). Used for compact labels living inside a card or hero region — here,
+ * the "Shelve this book" opener — never mixed with the full [SectionLabel] bar.
+ */
+@Composable
+private fun InlineAccentLabel(
+    text: String,
+    color: Color = MaterialTheme.colorScheme.primary,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .height(1.dp)
+                .width(20.dp)
+                .background(color),
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(
+            text = text.uppercase(),
+            style = MaterialTheme.editorialTypography.eyebrowSmall,
+            color = color,
+        )
+    }
+}
+
+/**
+ * Small in-flow label with NO accent bar (design-system.md's "small in-flow labels" contract) — used
+ * for the compact labels that sit directly inside a section's flow rather than opening a new region:
+ * YOUR RATING / YOUR TAGS / YOUR REVIEW / TAGS / FIND IT.
+ */
+@Composable
+private fun SmallSectionLabel(text: String) {
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.editorialTypography.eyebrowSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 // endregion
 // region Top Bar Overflow / Status
@@ -1077,10 +1353,12 @@ internal fun BookOverflowMenu(
                         },
                         onClick = {
                             dismiss()
-                            runAction(OnEditionOwnedToggleAction(
-                                edition = ownedEdition,
-                                owned = isOwned.not(),
-                            ),)
+                            runAction(
+                                OnEditionOwnedToggleAction(
+                                    edition = ownedEdition,
+                                    owned = isOwned.not(),
+                                ),
+                            )
                         },
                     )
                 }
@@ -1171,74 +1449,16 @@ internal fun BookOverflowMenu(
     }
 }
 
+/**
+ * The "In progress" section (Yours lens, `status == Reading`). Section-opener bar + eyebrow, a
+ * trailing "Update" pill opening the existing Update-progress sheet, the percent as a `statHero`
+ * (tabular), the M3 expressive **wavy** progress indicator (never the flat bar — design-system.md's
+ * "wavy always" rule), the `p. x of y` / `n pages to go` counts row, the reading-pace forecast line
+ * (hidden when unavailable), and the existing [DeadlineRow] when a deadline is set.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun ShelfStatusPanel(
-    state: BookDetailUiState,
-    runAction: (BookDetailAction) -> Unit,
-) {
-    SkeletonCrossfade(
-        isLoading = state.loadingBookDetails && state.book == null,
-        label = "ShelfStatusPanel",
-    ) { loading ->
-        if (loading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .shimmer(isLoading = true),
-            )
-        } else {
-            val book = state.book
-
-            if (book != null) {
-                when (book.status) {
-                    BookStatus.Reading -> ReadingProgressCard(
-                        state = state,
-                        runAction = runAction,
-                    )
-
-                    BookStatus.DidNotFinish -> DnfInfoCallout(state = state)
-                    BookStatus.Read,
-                    BookStatus.WantToRead,
-                    BookStatus.None,
-                        -> Unit
-                }
-            }
-        }
-    }
-}
-
-@Composable
-internal fun BelowDescriptionStatusPanel(
-    state: BookDetailUiState,
-    topSpacing: Dp,
-) {
-    if (state.loadingBookDetails) return
-
-    val book = state.book ?: return
-
-    when (book.status) {
-        BookStatus.Read -> {
-            Spacer(modifier = Modifier.height(topSpacing))
-            ReadInfoCallout(state = state)
-        }
-
-        BookStatus.WantToRead -> {
-            Spacer(modifier = Modifier.height(topSpacing))
-            WantToReadInfoCallout(state = state)
-        }
-
-        BookStatus.Reading,
-        BookStatus.DidNotFinish,
-        BookStatus.None,
-            -> Unit
-    }
-}
-
-@Composable
-private fun ReadingProgressCard(
+internal fun InProgressSection(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
@@ -1248,110 +1468,116 @@ private fun ReadingProgressCard(
     val progress = read.progress
     val isAudiobook = edition.isAudiobook
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Surface(
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shape = RoundedCornerShape(20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(
-                modifier = Modifier.padding(
-                    start = 16.dp,
-                    end = 8.dp,
-                    top = 12.dp,
-                    bottom = 16.dp,
-                ),
+            SectionLabel(text = "In progress")
+
+            Surface(
+                shape = RoundedCornerShape(percent = 50),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.primary,
+                onClick = { runAction(OnShowUpdateProgressSheetClickAction()) },
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val progressIcon = drawableIconResource(
-                        icon = if (isAudiobook) SoftcoverIcon.Headset else SoftcoverIcon.MenuBook,
-                        contentDescription = "Progress icon",
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val updateProgressIcon = drawableIconResource(
+                        icon = SoftcoverIcon.Edit,
+                        contentDescription = "Update progress",
                     )
 
                     Icon(
-                        painter = progressIcon.getIconPainter(),
-                        contentDescription = progressIcon.contentDescription,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp),
+                        painter = updateProgressIcon.getIconPainter(),
+                        contentDescription = updateProgressIcon.contentDescription,
+                        modifier = Modifier.size(15.dp),
                     )
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
 
                     Text(
-                        text = if (isAudiobook) "Listening progress" else "Reading progress",
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        text = "Update",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                        ),
                     )
-
-                    Text(
-                        text = "${progress.roundToInt()}%",
-                        style = MaterialTheme.editorialTypography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-
-                    IconButton(
-                        onClick = {
-                            runAction(OnShowUpdateProgressSheetClickAction())
-                        },
-                    ) {
-                        val updateProgressIcon = drawableIconResource(
-                            icon = SoftcoverIcon.Edit,
-                            contentDescription = "Update progress",
-                        )
-
-                        Icon(
-                            painter = updateProgressIcon.getIconPainter(),
-                            contentDescription = updateProgressIcon.contentDescription,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                LinearProgressIndicator(
-                    progress = { (progress / 100f).coerceIn(
-                        0f,
-                        1f,
-                    ) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp),
-                    drawStopIndicator = {},
-                    gapSize = (-2).dp,
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                val summaryText = if (isAudiobook) {
-                    val totalSeconds = edition.audioSeconds ?: 0
-                    val currentSeconds = read.currentSeconds ?: 0
-                    val remainingSeconds = (totalSeconds - currentSeconds).coerceAtLeast(0)
-
-                    "${secondsToHm(currentSeconds)} of ${secondsToHm(totalSeconds)} • ${
-                        secondsToHm(
-                            remainingSeconds,
-                        )
-                    } left"
-                } else {
-                    val pageProgress = read.currentPage ?: 0
-                    val left = edition.pages?.minus(pageProgress) ?: 0
-
-                    "$pageProgress of ${edition.pages ?: 0} pages • $left pages left"
-                }
-
-                Text(
-                    text = summaryText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
         }
 
-        state.deadlineProgress?.let { deadline ->
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = "${progress.roundToInt()}%",
+            style = MaterialTheme.editorialTypography.statHero,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LinearWavyProgressIndicator(
+            progress = { (progress / 100f).coerceIn(
+                0f,
+                1f,
+            ) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(14.dp),
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        val summaryLeft: String
+        val summaryRight: String
+
+        if (isAudiobook) {
+            val totalSeconds = edition.audioSeconds ?: 0
+            val currentSeconds = read.currentSeconds ?: 0
+            val remainingSeconds = (totalSeconds - currentSeconds).coerceAtLeast(0)
+
+            summaryLeft = "${secondsToHm(currentSeconds)} of ${secondsToHm(totalSeconds)}"
+            summaryRight = "${secondsToHm(remainingSeconds)} left"
+        } else {
+            val pageProgress = read.currentPage ?: 0
+            val left = edition.pages?.minus(pageProgress) ?: 0
+
+            summaryLeft = "p. $pageProgress of ${edition.pages ?: 0}"
+            summaryRight = "$left pages to go"
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = summaryLeft,
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Text(
+                text = summaryRight,
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        state.readingPaceForecast?.let { forecast ->
             Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Finish in ${forecast.forecastReadingDays} reading days",
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        state.deadlineProgress?.let { deadline ->
+            Spacer(modifier = Modifier.height(16.dp))
 
             DeadlineRow(
                 progress = deadline,
@@ -1525,6 +1751,61 @@ private fun StatusCallout(
         }
     }
 }
+
+/**
+ * The "Yours" lens content (design-system.md's lens-toggle pattern): your-copy sections in order —
+ * in-progress / DNF / read / want-to-read status, your rating, your tags, your review. Each section
+ * keeps its existing visibility gate, so a section with nothing to show simply doesn't compose.
+ */
+@Composable
+internal fun YoursLensContent(
+    state: BookDetailUiState,
+    runAction: (BookDetailAction) -> Unit,
+) {
+    val book = state.book ?: return
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        when (book.status) {
+            BookStatus.Reading -> InProgressSection(
+                state = state,
+                runAction = runAction,
+            )
+
+            BookStatus.DidNotFinish -> DnfInfoCallout(state = state)
+            BookStatus.Read -> ReadInfoCallout(state = state)
+            BookStatus.WantToRead -> WantToReadInfoCallout(state = state)
+            BookStatus.None -> Unit
+        }
+
+        if (book.status == BookStatus.Read) {
+            Spacer(modifier = Modifier.height(28.dp))
+
+            PersonalRatingRow(
+                book = book,
+                runAction = runAction,
+            )
+        }
+
+        if (book.userBook != null) {
+            Spacer(modifier = Modifier.height(28.dp))
+
+            UserTagsSection(
+                state = state,
+                runAction = runAction,
+            )
+        }
+
+        if (book.status == BookStatus.Read) {
+            Spacer(modifier = Modifier.height(28.dp))
+
+            PersonalReviewSection(
+                reviewDocument = book.userBook?.reviewDocument,
+                hasSpoilers = book.userBook?.reviewHasSpoilers == true,
+                runAction = runAction,
+            )
+        }
+    }
+}
 // endregion
 // region About
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -1677,13 +1958,13 @@ internal fun UserTagsSection(
     val tags = state.userTags
 
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        SectionLabel(text = "Your tags")
+        SmallSectionLabel(text = "Your tags")
 
         Spacer(modifier = Modifier.height(16.dp))
 
         if (tags.isEmpty()) {
-            PillChip(
-                label = "Add tags",
+            DashedTagOpenerChip(
+                label = "+ Add tags",
                 onClick = { runAction(OnOpenTagEditorAction()) },
             )
         } else {
@@ -1698,9 +1979,8 @@ internal fun UserTagsSection(
                     }
                 }
 
-                PillChip(
+                DashedTagOpenerChip(
                     label = "Edit tags",
-                    selected = true,
                     onClick = { runAction(OnOpenTagEditorAction()) },
                 )
             }
@@ -1708,6 +1988,51 @@ internal fun UserTagsSection(
     }
 }
 
+/**
+ * A dashed-`outline` pill with a primary label (design-system.md's "your tags" opener) — the "+ Add
+ * tags" / "Edit tags" affordance that opens [TagEditorBottomSheet]. Distinct from the solid
+ * [PillChip] used for read-only tags.
+ */
+@Composable
+private fun DashedTagOpenerChip(
+    label: String,
+    onClick: () -> Unit,
+) {
+    val color = MaterialTheme.colorScheme.primary
+    val shape = RoundedCornerShape(percent = 50)
+
+    Surface(
+        modifier = Modifier
+            .clip(shape)
+            .drawBehind {
+                drawRoundRect(
+                    color = color,
+                    style = Stroke(
+                        width = 1.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(intervals = floatArrayOf(6f, 4f)),
+                    ),
+                    cornerRadius = CornerRadius(size.height / 2f),
+                )
+            },
+        color = Color.Transparent,
+        contentColor = color,
+        shape = shape,
+        onClick = onClick,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+        )
+    }
+}
+
+/**
+ * The "Tags" section (The Book lens): the community tag block (grouped by category, top-5,
+ * content-warning tags concealed via [ConcealableTagChip]'s spoiler reveal-in-place), followed by the
+ * edition colophon line (publisher · format, year · ISBN-13) — folded into one section per the spec,
+ * rather than two separate strips.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TagsSection(state: BookDetailUiState) {
@@ -1730,12 +2055,17 @@ internal fun TagsSection(state: BookDetailUiState) {
         }
     }
 
-    if (groups.isEmpty()) return
+    val edition = state.displayedEdition
+    val colophon = editionColophonLine(edition = edition)
+
+    if (groups.isEmpty() && colophon == null) return
+
+    Spacer(modifier = Modifier.height(36.dp))
 
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        Spacer(modifier = Modifier.height(28.dp))
-
-        SectionLabel(text = "Tags")
+        if (groups.isNotEmpty()) {
+            SmallSectionLabel(text = "Tags")
+        }
 
         groups.forEach { (category, categoryTags) ->
             Spacer(modifier = Modifier.height(16.dp))
@@ -1765,7 +2095,42 @@ internal fun TagsSection(state: BookDetailUiState) {
                 }
             }
         }
+
+        if (colophon != null) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = colophon,
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
+}
+
+/** `{publisher} · {format}, {year} · ISBN-13 {isbn13}`, keeping only the parts that are known. */
+private fun editionColophonLine(edition: BookEdition?): String? {
+    if (edition == null) return null
+
+    val publisher = edition.publisher?.takeIf { it.isNotBlank() }
+
+    val formatAndYear = buildString {
+        val format = edition.format.takeIf { it.isNotBlank() }
+        val year = edition.releaseYear.takeIf { it != -1 && it > 0 }
+
+        if (format != null) append(format)
+
+        if (year != null) {
+            if (format != null) append(", ")
+            append(year)
+        }
+    }.takeIf { it.isNotBlank() }
+
+    val isbn13 = edition.isbn13?.takeIf { it.isNotBlank() }?.let { "ISBN-13 $it" }
+
+    val parts = listOfNotNull(publisher, formatAndYear, isbn13)
+
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(separator = " · ")
 }
 
 @Composable
@@ -1790,35 +2155,13 @@ private fun ConcealableTagChip(label: String) {
     }
 }
 
+/**
+ * The "Find it" section (The Book lens): labeled outline pills — icon + label, hairline `outline`
+ * border, `999` radius — replacing the earlier icon-only strip (design-system.md §5 external-links
+ * pattern). Same UiEvent-based handoff, same ISBN gating, same verbose content descriptions.
+ */
 @Composable
-internal fun EditionMetadataStrip(state: BookDetailUiState) {
-    val edition = state.displayedEdition ?: return
-
-    val publisher = edition.publisher?.takeIf { it.isNotBlank() }
-    val isbn13 = edition.isbn13?.takeIf { it.isNotBlank() }
-    val isbn10 = edition.isbn10?.takeIf { it.isNotBlank() }
-
-    if (publisher == null && isbn13 == null && isbn10 == null) return
-
-    val parts = listOfNotNull(
-        publisher,
-        isbn13?.let { "ISBN-13 $it" },
-        isbn10?.let { "ISBN-10 $it" },
-    )
-
-    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = parts.joinToString(separator = "  ·  "),
-            style = MaterialTheme.editorialTypography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-internal fun ExternalLinksStrip(
+internal fun ExternalLinksSection(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
@@ -1828,15 +2171,19 @@ internal fun ExternalLinksStrip(
         ?: edition.isbn10?.takeIf { it.isNotBlank() }
         ?: return
 
+    Spacer(modifier = Modifier.height(36.dp))
+
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        Spacer(modifier = Modifier.height(28.dp))
+        SmallSectionLabel(text = "Find it")
 
-        SectionLabel(text = "Find it")
+        Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ExternalLinkButton(
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            ExternalLinkPill(
+                label = "Bookshop",
                 iconRes = drawableIconResource(
                     icon = SoftcoverIcon.Storefront,
                     contentDescription = "Find on Bookshop.org",
@@ -1850,7 +2197,8 @@ internal fun ExternalLinksStrip(
                 },
             )
 
-            ExternalLinkButton(
+            ExternalLinkPill(
+                label = "Amazon",
                 iconRes = drawableIconResource(
                     icon = SoftcoverIcon.ShoppingBag,
                     contentDescription = "Find on Amazon",
@@ -1864,7 +2212,8 @@ internal fun ExternalLinksStrip(
                 },
             )
 
-            ExternalLinkButton(
+            ExternalLinkPill(
+                label = "OpenLibrary",
                 iconRes = drawableIconResource(
                     icon = SoftcoverIcon.LibraryBooks,
                     contentDescription = "Find on OpenLibrary",
@@ -1882,76 +2231,69 @@ internal fun ExternalLinksStrip(
 }
 
 @Composable
-private fun ExternalLinkButton(
+private fun ExternalLinkPill(
+    label: String,
     iconRes: RhaydusIconResource,
     onClick: () -> Unit,
 ) {
-    IconButton(onClick = onClick) {
-        Icon(
-            painter = iconRes.getIconPainter(),
-            contentDescription = iconRes.contentDescription,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+    Surface(
+        shape = RoundedCornerShape(percent = 50),
+        color = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant,
+        ),
+        onClick = onClick,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = iconRes.getIconPainter(),
+                contentDescription = iconRes.contentDescription,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(16.dp),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+            )
+        }
     }
 }
 // endregion
 // region Reviews
+/**
+ * "Voices" (The Book lens): section-opener bar + eyebrow, the "What readers think" italic headline,
+ * the community review cards, and a footer summary line (`★ avg across N ratings`).
+ */
 @Composable
 internal fun ReviewsSection(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
-    dateStyle: DateStyle,
 ) {
     if (state.loadingBookDetails || state.loadingReviews) return
 
     if (state.reviews.isEmpty()) return
 
+    Spacer(modifier = Modifier.height(36.dp))
+
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                SectionLabel(text = "Voices")
+        SectionLabel(text = "Voices")
 
-                Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
-                Text(
-                    text = "What readers think",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-
-            state.book?.let { book ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val reviewsStarIcon = drawableIconResource(
-                        icon = SoftcoverIcon.StarFilled,
-                        contentDescription = "",
-                    )
-
-                    Icon(
-                        painter = reviewsStarIcon.getIconPainter(),
-                        contentDescription = reviewsStarIcon.contentDescription,
-                        tint = RatingGold,
-                        modifier = Modifier.size(18.dp),
-                    )
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    Text(
-                        text = formatDecimalNumber(
-                            value = book.rating,
-                            fractionDigits = 1,
-                        ),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-        }
+        Text(
+            text = "What readers think",
+            style = MaterialTheme.editorialTypography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 8.dp),
+        )
 
         Spacer(modifier = Modifier.height(14.dp))
 
@@ -1963,11 +2305,46 @@ internal fun ReviewsSection(
             ReviewCard(
                 review = review,
                 isSpoilerRevealed = review.id in state.revealedSpoilerReviewIds,
-                dateStyle = dateStyle,
                 onRevealSpoilerClick = {
                     runAction(OnRevealReviewSpoilerAction(reviewId = review.id))
                 },
             )
+        }
+
+        state.book?.let { book ->
+            if (book.ratingsCount > 0) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val footerStarIcon = drawableIconResource(
+                        icon = SoftcoverIcon.StarFilled,
+                        contentDescription = "",
+                    )
+
+                    Icon(
+                        painter = footerStarIcon.getIconPainter(),
+                        contentDescription = footerStarIcon.contentDescription,
+                        tint = RatingGold,
+                        modifier = Modifier.size(14.dp),
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = "${
+                            formatDecimalNumber(
+                                value = book.rating,
+                                fractionDigits = 1,
+                            )
+                        } across ${formatGroupedNumber(book.ratingsCount)} ratings",
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
 }
@@ -1976,15 +2353,12 @@ internal fun ReviewsSection(
 private fun ReviewCard(
     review: BookReview,
     isSpoilerRevealed: Boolean,
-    dateStyle: DateStyle,
     onRevealSpoilerClick: () -> Unit,
 ) {
-    val formattedDate = review.getFormattedDate(style = dateStyle)
-
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(20.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             val quoteAlpha = if (isSystemInDarkTheme()) 0.22f else 0.32f
@@ -2003,13 +2377,14 @@ private fun ReviewCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        horizontal = 20.dp,
-                        vertical = 20.dp,
-                    ),
+                    .padding(22.dp),
             ) {
                 Spacer(modifier = Modifier.height(28.dp))
 
+                // Whole-review spoiler gate (HEAD behavior): a review flagged as containing
+                // spoilers withholds its body entirely behind a quiet "Show spoiler" text button —
+                // never rendered underneath, unlike an inline-span reveal. Reveal state is
+                // transient, held by the caller per review id.
                 if (review.hasSpoilers && isSpoilerRevealed.not()) {
                     TextButton(onClick = onRevealSpoilerClick) {
                         Text(text = "Show spoiler")
@@ -2020,9 +2395,7 @@ private fun ReviewCard(
 
                     ReviewDocumentText(
                         document = review.reviewDocument,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            lineHeight = 22.sp,
-                        ),
+                        style = MaterialTheme.editorialTypography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = if (expanded) Int.MAX_VALUE else REVIEW_COLLAPSED_LINES,
                         overflow = TextOverflow.Ellipsis,
@@ -2058,19 +2431,25 @@ private fun ReviewCard(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = review.reviewer.name?.takeIf { it.isNotBlank() }
-                                ?: review.reviewer.username,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
+                        val reviewerName = review.reviewer.name?.takeIf { it.isNotBlank() }
+                            ?: review.reviewer.username
 
-                        formattedDate?.let {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                text = reviewerName.uppercase(),
+                                style = MaterialTheme.editorialTypography.eyebrowSmall,
+                                color = MaterialTheme.colorScheme.primary,
                             )
+
+                            review.getReviewedMonthYear()?.let { monthYear ->
+                                Spacer(modifier = Modifier.width(6.dp))
+
+                                Text(
+                                    text = monthYear,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
 
@@ -2116,6 +2495,36 @@ private fun ReviewCard(
                 }
             }
         }
+    }
+}
+
+/**
+ * The "The Book" lens content (design-system.md's lens-toggle pattern): the book's own facts, in
+ * order — About, Tags (community tags + edition colophon), Find it, Voices. 36dp gaps between
+ * sections, per the design system's "gap between distinct content blocks" rhythm.
+ */
+@Composable
+internal fun TheBookLensContent(
+    state: BookDetailUiState,
+    runAction: (BookDetailAction) -> Unit,
+) {
+    // Each section below (Tags, Find it, Voices) supplies its own leading 36dp gap, guarded on the
+    // same early-return that decides whether it renders anything — so a book missing one of them
+    // (e.g. no ISBN, no community tags or colophon) never leaves a dead gap between its neighbors.
+    Column(modifier = Modifier.fillMaxWidth()) {
+        AboutSection(state = state)
+
+        TagsSection(state = state)
+
+        ExternalLinksSection(
+            state = state,
+            runAction = runAction,
+        )
+
+        ReviewsSection(
+            state = state,
+            runAction = runAction,
+        )
     }
 }
 // endregion

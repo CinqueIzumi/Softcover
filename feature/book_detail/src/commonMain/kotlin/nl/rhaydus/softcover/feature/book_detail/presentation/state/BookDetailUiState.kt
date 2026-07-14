@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
+import nl.rhaydus.softcover.feature.book_detail.domain.model.ReadingPaceForecast
 import nl.rhaydus.toad.UiState
 
 internal data class BookDetailUiState(
@@ -30,9 +31,11 @@ internal data class BookDetailUiState(
     val showUpdateProgressSheet: Boolean = false,
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+    val selectedLens: BookDetailLens = BookDetailLens.THE_BOOK,
 
     val deadline: BookDeadline? = null,
     val deadlineProgress: DeadlineProgress? = null,
+    val readingPaceForecast: ReadingPaceForecast? = null,
     val showDeadlinePicker: Boolean = false,
 
     val reviews: List<BookReview> = emptyList(),

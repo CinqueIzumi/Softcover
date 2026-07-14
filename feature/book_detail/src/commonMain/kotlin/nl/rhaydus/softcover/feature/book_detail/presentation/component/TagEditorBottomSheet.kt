@@ -53,6 +53,19 @@ private val EDITABLE_CATEGORIES: List<TagCategory> = listOf(
     TagCategory.CONTENT_WARNING,
 )
 
+/**
+ * The name-field hint per category. Deliberately not "Name a ${'$'}{label} tag" — that template
+ * degenerates to "Name a Tag tag" for the plain Tag category.
+ */
+private val TagCategory.namingHint: String
+    get() = when (this) {
+        TagCategory.GENRE -> "Name a genre…"
+        TagCategory.MOOD -> "Name a mood…"
+        TagCategory.TAG -> "Name a tag…"
+        TagCategory.CONTENT_WARNING -> "Name a content warning…"
+        TagCategory.OTHER -> "Name a tag…"
+    }
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TagEditorBottomSheet(
@@ -129,7 +142,7 @@ internal fun TagEditorBottomSheet(
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(text = "Name a ${selectedCategory.label} tag") },
+                placeholder = { Text(text = selectedCategory.namingHint) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
                     onDone = {

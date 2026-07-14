@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
@@ -59,6 +60,7 @@ internal class BookDetailScreenScreenModel(
     private val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     private val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     private val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
+    private val getReadingJournalHistoryUseCase: GetReadingJournalHistoryUseCase,
     private val updateBookReviewUseCase: UpdateBookReviewUseCase,
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val getUserTagsUseCase: GetUserTagsUseCase,
@@ -97,6 +99,7 @@ internal class BookDetailScreenScreenModel(
         setBookDeadlineUseCase = setBookDeadlineUseCase,
         clearBookDeadlineUseCase = clearBookDeadlineUseCase,
         getTopBookReviewsUseCase = getTopBookReviewsUseCase,
+        getReadingJournalHistoryUseCase = getReadingJournalHistoryUseCase,
         updateBookReviewUseCase = updateBookReviewUseCase,
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         getUserTagsUseCase = getUserTagsUseCase,

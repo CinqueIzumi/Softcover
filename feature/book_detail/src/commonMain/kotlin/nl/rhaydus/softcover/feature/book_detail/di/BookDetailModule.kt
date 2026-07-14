@@ -15,12 +15,17 @@ import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.ReadingJournalHistoryRemoteDataSource
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.ReadingJournalHistoryRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.BookReviewsRepositoryImpl
+import nl.rhaydus.softcover.feature.book_detail.data.repository.ReadingJournalHistoryRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.UserTagsRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.BookReviewsRepository
+import nl.rhaydus.softcover.feature.book_detail.domain.repository.ReadingJournalHistoryRepository
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
@@ -29,6 +34,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetai
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserBooksFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserListsFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
@@ -55,6 +61,7 @@ val bookDetailModule = module {
     factory { CurrentUserCollector() } bind BookDetailCollector::class
     factory { UserTagsCollector() } bind BookDetailCollector::class
     factory { LastUsedProgressUnitCollector() } bind BookDetailCollector::class
+    factory { ReadingPaceForecastCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -87,6 +94,21 @@ val bookDetailModule = module {
         SaveUserTagsUseCase(userTagsRepository = get())
     }
 
+    single<ReadingJournalHistoryRemoteDataSource> {
+        ReadingJournalHistoryRemoteDataSourceImpl(
+            apolloClient = get(),
+            getUserIdUseCase = get(),
+        )
+    }
+
+    single<ReadingJournalHistoryRepository> {
+        ReadingJournalHistoryRepositoryImpl(readingJournalHistoryRemoteDataSource = get())
+    }
+
+    factory {
+        GetReadingJournalHistoryUseCase(readingJournalHistoryRepository = get())
+    }
+
     factory { params ->
         BookDetailScreenScreenModel(
             bookId = params.get(),
@@ -112,6 +134,7 @@ val bookDetailModule = module {
             setBookDeadlineUseCase = get(),
             clearBookDeadlineUseCase = get(),
             getTopBookReviewsUseCase = get(),
+            getReadingJournalHistoryUseCase = get(),
             updateBookReviewUseCase = get(),
             observeUserProfileDataUseCase = get(),
             getUserTagsUseCase = get(),
