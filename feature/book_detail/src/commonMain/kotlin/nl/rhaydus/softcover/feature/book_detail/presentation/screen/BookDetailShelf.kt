@@ -953,10 +953,12 @@ internal fun PersonalRatingRow(
             if (rating != null) {
                 Spacer(modifier = Modifier.width(12.dp))
 
+                // The stars run 0–5 in half-star steps; the label speaks the 10-point scale, so the
+                // value doubles — every half star lands on an exact integer (4.5 stars = 9/10).
                 Text(
                     text = "Your ${
                         formatDecimalNumber(
-                            value = rating,
+                            value = rating * 2,
                             fractionDigits = 0,
                         )
                     }/10",
