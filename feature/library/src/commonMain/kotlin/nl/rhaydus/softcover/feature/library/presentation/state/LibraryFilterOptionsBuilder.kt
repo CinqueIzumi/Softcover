@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.feature.library.presentation.util.availableFinishedYears
 
 /**
  * Rating thresholds offered as filter chips. Each is included only if the underlying tab has at
@@ -16,7 +17,10 @@ private val RATING_BUCKETS = listOf(4.5, 4.0, 3.5, 3.0)
  * (rather than as members of [LibraryUiState]) so [FilterOptionsCollector] can call them on
  * `Dispatchers.Default` without keeping a reference to the whole UI state on the worker thread.
  */
-internal fun buildBookFilterOptions(books: List<Book>): LibraryFilterOptions {
+internal fun buildBookFilterOptions(
+    books: List<Book>,
+    isReadTab: Boolean = false,
+): LibraryFilterOptions {
     if (books.isEmpty()) return LibraryFilterOptions()
 
     val tags = books
@@ -37,6 +41,8 @@ internal fun buildBookFilterOptions(books: List<Book>): LibraryFilterOptions {
         .distinct()
         .sortedDescending()
 
+    val readYears = if (isReadTab) books.availableFinishedYears() else emptyList()
+
     val supportsOwned = books.any { book -> book.editions.any { it.owned } }
 
     val maxRating = books.maxOfOrNull { it.rating } ?: 0.0
@@ -46,6 +52,7 @@ internal fun buildBookFilterOptions(books: List<Book>): LibraryFilterOptions {
         tags = tags,
         formats = formats,
         releaseYears = years,
+        readYears = readYears,
         supportsOwnedFilter = supportsOwned,
         ratingBuckets = ratingBuckets,
     )

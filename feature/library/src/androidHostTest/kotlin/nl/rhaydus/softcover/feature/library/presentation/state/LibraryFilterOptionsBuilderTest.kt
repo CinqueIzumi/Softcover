@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserBookRead
 
 class LibraryFilterOptionsBuilderTest {
     private val tagFiction = Tag(
@@ -250,6 +251,71 @@ class LibraryFilterOptionsBuilderTest {
             // ----- Assert -----
             result.tags.map { it.id } shouldBe listOf(tagGenre.id)
         }
+
+        @Nested
+        inner class ReadYears {
+            @Test
+            fun `is empty when isReadTab is false even though books have finishedYear`() {
+                // ----- Arrange -----
+                val book = buildBook(
+                    id = 1,
+                    finishedYear = 2021,
+                )
+
+                // ----- Act -----
+                val result = buildBookFilterOptions(
+                    books = listOf(book),
+                    isReadTab = false,
+                )
+
+                // ----- Assert -----
+                result.readYears shouldBe emptyList()
+            }
+
+            @Test
+            fun `is empty when isReadTab is true but no book has a finishedYear`() {
+                // ----- Arrange -----
+                val book = buildBook(
+                    id = 1,
+                    finishedYear = null,
+                )
+
+                // ----- Act -----
+                val result = buildBookFilterOptions(
+                    books = listOf(book),
+                    isReadTab = true,
+                )
+
+                // ----- Assert -----
+                result.readYears shouldBe emptyList()
+            }
+
+            @Test
+            fun `returns distinct finishedYears sorted descending when isReadTab is true`() {
+                // ----- Arrange -----
+                val book1 = buildBook(
+                    id = 1,
+                    finishedYear = 2019,
+                )
+                val book2 = buildBook(
+                    id = 2,
+                    finishedYear = 2021,
+                )
+                val book3 = buildBook(
+                    id = 3,
+                    finishedYear = 2019,
+                )
+
+                // ----- Act -----
+                val result = buildBookFilterOptions(
+                    books = listOf(book1, book2, book3),
+                    isReadTab = true,
+                )
+
+                // ----- Assert -----
+                result.readYears shouldBe listOf(2021, 2019)
+            }
+        }
     }
 
     @Nested
@@ -402,6 +468,7 @@ class LibraryFilterOptionsBuilderTest {
         ),),
         releaseYear: Int = 2020,
         rating: Double = 0.0,
+        finishedYear: Int? = null,
     ): Book = Book(
         id = id,
         title = "Book $id",
@@ -422,7 +489,16 @@ class LibraryFilterOptionsBuilderTest {
         isCompilation = false,
         tags = tags,
         userBook = null,
-        userBookRead = null,
+        userBookRead = finishedYear?.let {
+            UserBookRead(
+                id = id,
+                currentPage = null,
+                currentSeconds = null,
+                progress = 1f,
+                startedAt = null,
+                finishedAt = "$it-06-15",
+            )
+        },
     )
 
     private fun buildEdition(

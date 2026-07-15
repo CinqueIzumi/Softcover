@@ -98,8 +98,8 @@ private fun ActiveFilterChip(
     onClick: () -> Unit,
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         shape = RoundedCornerShape(percent = 50),
         onClick = onClick,
     ) {
@@ -177,6 +177,16 @@ private fun LibraryFilters.toChipDescriptors(): List<FilterChipDescriptor> = bui
                 key = "year-$year",
                 label = year.toString(),
                 value = LibraryFilterValue.ReleaseYear(year = year),
+            ),
+        )
+    }
+
+    readYear?.let { year ->
+        add(
+            FilterChipDescriptor(
+                key = "read-year-$year",
+                label = "Finished $year",
+                value = LibraryFilterValue.ReadYear(year = year),
             ),
         )
     }

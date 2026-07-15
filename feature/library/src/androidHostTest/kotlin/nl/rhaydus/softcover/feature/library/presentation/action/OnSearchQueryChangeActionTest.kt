@@ -101,7 +101,6 @@ class OnSearchQueryChangeActionTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 isLoading = false,
-                isSearchActive = true,
                 searchQuery = "",
             )
             val action = OnSearchQueryChangeAction(query = "fantasy")
@@ -114,7 +113,6 @@ class OnSearchQueryChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isSearchActive shouldBe true
             stateFlow.value.searchQuery shouldBe "fantasy"
         }
     }

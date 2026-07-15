@@ -9,6 +9,9 @@ internal sealed interface LibraryFilterValue {
 
     data class ReleaseYear(val year: Int) : LibraryFilterValue
 
+    /** Year-finished facet, offered on the Read tab only (see [LibraryFilterOptions.readYears]). */
+    data class ReadYear(val year: Int) : LibraryFilterValue
+
     data class Owned(val owned: Boolean) : LibraryFilterValue
 
     data class RatingMin(val threshold: Double) : LibraryFilterValue
@@ -25,6 +28,10 @@ internal fun LibraryFilters.toggle(value: LibraryFilterValue): LibraryFilters = 
 
     is LibraryFilterValue.ReleaseYear -> copy(
         releaseYears = releaseYears.toggleElement(value.year),
+    )
+
+    is LibraryFilterValue.ReadYear -> copy(
+        readYear = if (readYear == value.year) null else value.year,
     )
 
     is LibraryFilterValue.Owned -> copy(

@@ -33,7 +33,7 @@ class OnEnterSelectionModeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets selectionMode to true with the given bookId`() = runTest {
+        fun `sets selectionMode to true with the given bookId seeded (long-press entry point)`() = runTest {
             // ----- Arrange -----
             val action = OnEnterSelectionModeAction(bookId = 42)
 
@@ -49,11 +49,62 @@ class OnEnterSelectionModeActionTest {
         }
 
         @Test
-        fun `clears isRearranging when entering selection mode`() = runTest {
+        fun `sets selectionMode to true with an empty selection when bookId is null (toolbar Select entry point)`() =
+            runTest {
+                // ----- Arrange -----
+                val action = OnEnterSelectionModeAction(bookId = null)
+
+                // ----- Act -----
+                action.execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+
+                // ----- Assert -----
+                stateFlow.value.selectionMode shouldBe true
+                stateFlow.value.selectedBookIds shouldBe emptySet()
+            }
+
+        @Test
+        fun `sets selectionMode to true with an empty selection when bookId is omitted, defaulting to null`() =
+            runTest {
+                // ----- Arrange -----
+                val action = OnEnterSelectionModeAction()
+
+                // ----- Act -----
+                action.execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+
+                // ----- Assert -----
+                stateFlow.value.selectionMode shouldBe true
+                stateFlow.value.selectedBookIds shouldBe emptySet()
+            }
+
+        @Test
+        fun `clears isRearranging when entering selection mode with a seeded bookId`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(isRearranging = true)
 
             val action = OnEnterSelectionModeAction(bookId = 7)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isRearranging shouldBe false
+        }
+
+        @Test
+        fun `clears isRearranging when entering selection mode with no bookId`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(isRearranging = true)
+
+            val action = OnEnterSelectionModeAction(bookId = null)
 
             // ----- Act -----
             action.execute(

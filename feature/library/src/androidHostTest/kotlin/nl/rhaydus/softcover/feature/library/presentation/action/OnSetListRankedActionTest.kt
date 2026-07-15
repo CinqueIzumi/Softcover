@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
-import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
@@ -70,11 +69,10 @@ class OnSetListRankedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `ranked=true happy path — sort switched to ORDER before ranked use case, dropdown closed, no snackbar`() =
+        fun `ranked=true happy path — sort switched to ORDER before ranked use case, no snackbar`() =
             runTest {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    isSortMenuExpanded = true,
                     customLists = listOf(
                         BookList(
                             id = listId,
@@ -104,8 +102,6 @@ class OnSetListRankedActionTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.isSortMenuExpanded shouldBe false
-
                 coVerifyOrder {
                     setLibrarySortUseCase(
                         tabId = tabId,
@@ -130,7 +126,6 @@ class OnSetListRankedActionTest {
                 val previousDirection = SortDirection.DESCENDING
 
                 stateFlow.value = LibraryUiState(
-                    isSortMenuExpanded = true,
                     sortModeByTab = mapOf(tabId to previousMode),
                     sortDirectionByTab = mapOf(tabId to previousDirection),
                     customLists = listOf(

@@ -5,13 +5,10 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.library.presentation.sort.applyEditionSort
-import nl.rhaydus.softcover.feature.library.presentation.util.finishedYear
 
 internal fun computeDisplayBooks(
     raw: List<Book>,
     query: String,
-    isReadTab: Boolean,
-    selectedReadYear: Int?,
     filters: LibraryFilters,
 ): List<Book> {
     val q = query.trim()
@@ -31,13 +28,7 @@ internal fun computeDisplayBooks(
         }
     }
 
-    val yearFiltered = if (isReadTab && selectedReadYear != null) {
-        searchFiltered.filter { it.finishedYear() == selectedReadYear }
-    } else {
-        searchFiltered
-    }
-
-    return if (filters.isEmpty) yearFiltered else yearFiltered.filter { filters.matchesBook(book = it) }
+    return if (filters.isEmpty) searchFiltered else searchFiltered.filter { filters.matchesBook(book = it) }
 }
 
 internal fun computeDisplayEditions(
@@ -82,4 +73,38 @@ internal fun computeDisplayEditions(
             )
         }
     }
+}
+
+/**
+ * The "Show N titles" preview count for the Filter sheet: how many of [tabId]'s items would be
+ * visible under [draftFilters] (the sheet's uncommitted draft) plus the *current* search query —
+ * sort/layout never affect this count, so the Arrange sheet doesn't need this helper and can use
+ * the already-committed [LibraryUiState.tabStatsFor] instead. Reuses [computeDisplayBooks] /
+ * [computeDisplayEditions] verbatim rather than re-implementing the search/filter predicates, so a
+ * draft preview can never drift from what actually renders once committed via [OnApplyFiltersAction].
+ */
+internal fun libraryPreviewCount(
+    state: LibraryUiState,
+    tabId: String,
+    draftFilters: LibraryFilters,
+): Int {
+    state.booksByTab[tabId]?.let { books ->
+        return computeDisplayBooks(
+            raw = books,
+            query = state.searchQuery,
+            filters = draftFilters,
+        ).size
+    }
+
+    val editions = state.editionsByTab[tabId] ?: return 0
+
+    return computeDisplayEditions(
+        raw = editions,
+        query = state.searchQuery,
+        mode = state.sortModeFor(tabId = tabId),
+        direction = state.sortDirectionFor(tabId = tabId),
+        addedAtByEditionId = state.addedAtByTab[tabId].orEmpty(),
+        filters = draftFilters,
+        bookByBookId = state.bookByBookId,
+    ).size
 }

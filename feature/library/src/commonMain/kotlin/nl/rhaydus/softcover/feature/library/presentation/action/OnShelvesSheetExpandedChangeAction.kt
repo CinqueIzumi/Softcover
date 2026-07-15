@@ -6,13 +6,13 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class OnLayoutMenuExpandedChangeAction(
+internal class OnShelvesSheetExpandedChangeAction(
     private val expanded: Boolean,
 ) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        scope.setState { it.copy(isLayoutMenuExpanded = expanded) }
+        scope.setState { it.copy(isShelvesSheetExpanded = expanded) }
     }
 }

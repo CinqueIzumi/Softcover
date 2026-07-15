@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 
 /**
  * The slice of [LibraryUiState] that the per-tab filter options derive from. [FilterOptionsCollector]
@@ -14,8 +16,13 @@ internal data class FilterOptionsInputs(
     val bookByBookId: Map<Int, Book>,
 ) {
     fun compute(): Map<String, LibraryFilterOptions> {
-        val bookSide = booksByTab.mapValues { (_, books) ->
-            buildBookFilterOptions(books = books)
+        val readTabId = LibraryTab.Status.of(UserBookStatus.READ).id
+
+        val bookSide = booksByTab.mapValues { (tabId, books) ->
+            buildBookFilterOptions(
+                books = books,
+                isReadTab = tabId == readTabId,
+            )
         }
 
         val editionSide = editionsByTab.mapValues { (_, editions) ->

@@ -14,7 +14,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Precomputes the display lists (search + year + filter + sort applied) for every visible tab off
+ * Precomputes the display lists (search + filter + sort applied) for every visible tab off
  * the main thread, so [LibraryUiState.displayBooksFor] and [LibraryUiState.displayEditionsFor] are
  * O(1) map lookups during composition. This eliminates the full-list `.filter {}` allocation that
  * previously ran on every scroll frame for large libraries.
@@ -38,7 +38,6 @@ internal class DisplayListsCollector : LibraryCollector {
                     booksByTab = state.booksByTab,
                     editionsByTab = state.editionsByTab,
                     searchQuery = state.searchQuery,
-                    selectedReadYear = state.selectedReadYear,
                     filtersByTab = state.filtersByTab,
                     sortModeByTab = state.sortModeByTab,
                     sortDirectionByTab = state.sortDirectionByTab,
@@ -66,7 +65,6 @@ internal class DisplayListsCollector : LibraryCollector {
                         displayBooksByTab = result.displayBooksByTab,
                         displayEditionsByTab = result.displayEditionsByTab,
                         tabStatsByTab = result.tabStatsByTab,
-                        availableReadYearsCached = result.availableReadYearsCached,
                     )
                 }
             }

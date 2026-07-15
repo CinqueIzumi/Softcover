@@ -131,7 +131,6 @@ class LibraryUiStateTest {
         editionsByTab: Map<String, List<BookEdition>> = emptyMap(),
         bookByBookId: Map<Int, Book> = emptyMap(),
         searchQuery: String = "",
-        selectedReadYear: Int? = null,
         sortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
         sortDirectionByTab: Map<String, SortDirection> = emptyMap(),
         filtersByTab: Map<String, LibraryFilters> = emptyMap(),
@@ -142,7 +141,6 @@ class LibraryUiStateTest {
             booksByTab = booksByTab,
             editionsByTab = editionsByTab,
             searchQuery = searchQuery,
-            selectedReadYear = selectedReadYear,
             filtersByTab = filtersByTab,
             sortModeByTab = sortModeByTab,
             sortDirectionByTab = sortDirectionByTab,
@@ -157,7 +155,6 @@ class LibraryUiStateTest {
             editionsByTab = editionsByTab,
             bookByBookId = bookByBookId,
             searchQuery = searchQuery,
-            selectedReadYear = selectedReadYear,
             sortModeByTab = sortModeByTab,
             sortDirectionByTab = sortDirectionByTab,
             filtersByTab = filtersByTab,
@@ -165,7 +162,6 @@ class LibraryUiStateTest {
             displayBooksByTab = displayResult.displayBooksByTab,
             displayEditionsByTab = displayResult.displayEditionsByTab,
             tabStatsByTab = displayResult.tabStatsByTab,
-            availableReadYearsCached = displayResult.availableReadYearsCached,
         )
     }
     // endregion
@@ -343,7 +339,7 @@ class LibraryUiStateTest {
         }
 
         @Test
-        fun `Read tab filters by selectedReadYear when non-null`() {
+        fun `Read tab filters by LibraryFilters readYear when non-null`() {
             // ----- Arrange -----
             val book2023 = buildBook(
                 id = 1,
@@ -360,7 +356,7 @@ class LibraryUiStateTest {
 
             val state = buildState(
                 booksByTab = mapOf(readTabId to listOf(book2023, book2022)),
-                selectedReadYear = 2023,
+                filtersByTab = mapOf(readTabId to LibraryFilters(readYear = 2023)),
             )
 
             // ----- Act -----
@@ -371,7 +367,7 @@ class LibraryUiStateTest {
         }
 
         @Test
-        fun `Read tab year filter is NOT applied when selectedReadYear is null`() {
+        fun `Read tab year filter is NOT applied when readYear is null`() {
             // ----- Arrange -----
             val book2023 = buildBook(
                 id = 1,
@@ -388,7 +384,6 @@ class LibraryUiStateTest {
 
             val state = buildState(
                 booksByTab = mapOf(readTabId to listOf(book2023, book2022)),
-                selectedReadYear = null,
             )
 
             // ----- Act -----
@@ -399,7 +394,7 @@ class LibraryUiStateTest {
         }
 
         @Test
-        fun `Read tab applies both search query and year filter together`() {
+        fun `Read tab applies both search query and readYear filter together`() {
             // ----- Arrange -----
             val matchBoth = buildBook(
                 id = 1,
@@ -426,7 +421,7 @@ class LibraryUiStateTest {
             val state = buildState(
                 booksByTab = mapOf(readTabId to listOf(matchBoth, wrongYear, wrongTitle)),
                 searchQuery = "foundation",
-                selectedReadYear = 2023,
+                filtersByTab = mapOf(readTabId to LibraryFilters(readYear = 2023)),
             )
 
             // ----- Act -----
@@ -555,54 +550,6 @@ class LibraryUiStateTest {
 
             // ----- Assert -----
             result!!.map { it.id } shouldBe listOf(2, 1)
-        }
-    }
-
-    @Nested
-    inner class AvailableReadYears {
-        @Test
-        fun `returns empty list when booksByTab has no Read-tab entry`() {
-            // ----- Arrange -----
-            val state = buildState(booksByTab = emptyMap())
-
-            // ----- Act -----
-            val result = state.availableReadYears
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-        }
-
-        @Test
-        fun `returns descending distinct finished years from Read-tab books`() {
-            // ----- Arrange -----
-            val book2021a = buildBook(
-                id = 1,
-                userBook = buildUserBook(
-                    journals = listOf(buildFinishedJournal("2021-06-01T00:00:00")),
-                ),
-            )
-            val book2023 = buildBook(
-                id = 2,
-                userBook = buildUserBook(
-                    journals = listOf(buildFinishedJournal("2023-01-01T00:00:00")),
-                ),
-            )
-            val book2021b = buildBook(
-                id = 3,
-                userBook = buildUserBook(
-                    journals = listOf(buildFinishedJournal("2021-12-31T00:00:00")),
-                ),
-            )
-
-            val state = buildState(
-                booksByTab = mapOf(readTabId to listOf(book2021a, book2023, book2021b)),
-            )
-
-            // ----- Act -----
-            val result = state.availableReadYears
-
-            // ----- Assert -----
-            result shouldBe listOf(2023, 2021)
         }
     }
 

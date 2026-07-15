@@ -12,6 +12,8 @@ internal data class LibraryFilterOptions(
     val tags: List<Tag> = emptyList(),
     val formats: List<String> = emptyList(),
     val releaseYears: List<Int> = emptyList(),
+    /** Year-finished facet values, populated for the Read tab only — see [buildBookFilterOptions]. */
+    val readYears: List<Int> = emptyList(),
     val supportsOwnedFilter: Boolean = false,
     val ratingBuckets: List<Double> = emptyList(),
 ) {
@@ -19,6 +21,7 @@ internal data class LibraryFilterOptions(
         get() = tags.isEmpty() &&
             formats.isEmpty() &&
             releaseYears.isEmpty() &&
+            readYears.isEmpty() &&
             supportsOwnedFilter.not() &&
             ratingBuckets.isEmpty()
 }

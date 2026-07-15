@@ -110,6 +110,45 @@ class LibraryFilterValueTest {
     }
 
     @Nested
+    inner class ToggleReadYear {
+        @Test
+        fun `sets readYear when previously null`() {
+            // ----- Arrange -----
+            val filters = LibraryFilters(readYear = null)
+
+            // ----- Act -----
+            val result = filters.toggle(value = LibraryFilterValue.ReadYear(2021))
+
+            // ----- Assert -----
+            result.readYear shouldBe 2021
+        }
+
+        @Test
+        fun `clears readYear to null when toggling the same year twice`() {
+            // ----- Arrange -----
+            val filters = LibraryFilters(readYear = 2021)
+
+            // ----- Act -----
+            val result = filters.toggle(value = LibraryFilterValue.ReadYear(2021))
+
+            // ----- Assert -----
+            result.readYear shouldBe null
+        }
+
+        @Test
+        fun `replaces readYear when toggling a different year — single-select`() {
+            // ----- Arrange -----
+            val filters = LibraryFilters(readYear = 2021)
+
+            // ----- Act -----
+            val result = filters.toggle(value = LibraryFilterValue.ReadYear(2019))
+
+            // ----- Assert -----
+            result.readYear shouldBe 2019
+        }
+    }
+
+    @Nested
     inner class ToggleOwned {
         @Test
         fun `sets owned to true when previously null`() {
@@ -196,6 +235,7 @@ class LibraryFilterValueTest {
                 tags = setOf(tagFiction),
                 formats = setOf("paperback"),
                 releaseYears = setOf(2020),
+                readYear = 2019,
                 owned = true,
                 ratingMin = 4.0,
             )
@@ -206,6 +246,7 @@ class LibraryFilterValueTest {
             // ----- Assert -----
             result.tags shouldBe setOf(tagFiction)
             result.formats shouldBe setOf("paperback")
+            result.readYear shouldBe 2019
             result.owned shouldBe true
             result.ratingMin shouldBe 4.0
         }

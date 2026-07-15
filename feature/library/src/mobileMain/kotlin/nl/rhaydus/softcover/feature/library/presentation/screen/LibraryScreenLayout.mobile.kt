@@ -10,19 +10,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,32 +33,22 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -72,6 +61,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfAction
@@ -82,15 +72,15 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnClearFiltersAc
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnReadYearSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnShelvesSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleFilterValueAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAction
-import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlStrip
+import nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet
+import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlLine
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
+import nl.rhaydus.softcover.feature.library.presentation.component.LibraryShelvesSheet
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @OptIn(
@@ -109,61 +99,10 @@ internal actual fun LibraryScreenLayout(
     gridStateFor: (String) -> LazyGridState,
     topAppBarState: TopAppBarState,
 ) {
-    val tabs = state.visibleTabs
-    val scope = rememberCoroutineScope()
+    val currentTab = state.visibleTabs.firstOrNull { it.id == state.selectedTabId }
+        ?: state.visibleTabs.firstOrNull()
 
     val pullToRefreshState = rememberPullToRefreshState()
-
-    val density = LocalDensity.current
-    val containerSize = LocalWindowInfo.current.containerSize
-    val screenWidthDp = with(density) { containerSize.width.toDp() }
-    val maxTabLabelWidth = (screenWidthDp - 168.dp).coerceAtLeast(120.dp)
-
-    val initialPage = remember(state.tabsLoaded) {
-        tabs.indexOfFirst { it.id == state.selectedTabId }.coerceAtLeast(0)
-    }
-
-    val pagerState = key(state.tabsLoaded) {
-        rememberPagerState(
-            initialPage = initialPage,
-            pageCount = { tabs.size },
-        )
-    }
-
-    LaunchedEffect(tabs, state.selectedTabId) {
-        val targetIndex = tabs.indexOfFirst { it.id == state.selectedTabId }
-
-        if (targetIndex >= 0 && targetIndex != pagerState.currentPage) {
-            pagerState.scrollToPage(targetIndex)
-        }
-    }
-
-    val currentTabs by rememberUpdatedState(tabs)
-    val currentSelectedTabId by rememberUpdatedState(state.selectedTabId)
-
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.settledPage }
-            .distinctUntilChanged()
-            .drop(1)
-            .collect { page ->
-                currentTabs.getOrNull(page)?.id?.let { id ->
-                    if (id != currentSelectedTabId) {
-                        runAction(OnTabSelectedAction(tabId = id))
-                    }
-                }
-            }
-    }
-
-    val currentTabIndex = pagerState.currentPage.coerceAtMost(tabs.lastIndex.coerceAtLeast(0))
-    val currentTab = tabs.getOrNull(currentTabIndex)
-    val isReadTab = currentTab is LibraryContentTab.Status &&
-            currentTab.status == UserBookStatus.READ
-
-    val currentTabStats = currentTab?.id?.let { state.tabStatsFor(tabId = it) }
-    val currentTabBookCount: Int? = currentTabStats?.itemCount
-    val currentTabPageCount: Int = currentTabStats?.totalPages ?: 0
-
-    val availableReadYears = if (isReadTab) state.availableReadYears else emptyList()
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = topAppBarState)
 
@@ -215,16 +154,16 @@ internal actual fun LibraryScreenLayout(
                     },
                 )
             } else {
-                EditorialHeader(
-                    tabLabel = currentTab?.label,
-                    bookCount = currentTabBookCount,
-                    totalPages = currentTabPageCount,
+                val currentTabStats = currentTab?.let { tab -> state.tabStatsFor(tabId = tab.id) }
+
+                MastheadHeader(
                     tab = currentTab,
-                    isSearchActive = state.isSearchActive,
-                    onToggleSearchClick = { runAction(OnToggleSearchAction()) },
+                    bookCount = currentTabStats?.itemCount,
+                    totalPages = currentTabStats?.totalPages ?: 0,
                     pullToRefreshState = pullToRefreshState,
                     isRefreshing = state.isLoading,
                     topAppBarState = topAppBarState,
+                    onTitleClick = { runAction(OnShelvesSheetExpandedChangeAction(expanded = true)) },
                     onCollapsibleSized = { measured ->
                         val newLimit = -measured.toFloat()
 
@@ -244,13 +183,8 @@ internal actual fun LibraryScreenLayout(
                         }
                     },
                 )
-            }
 
-            AnimatedVisibility(
-                visible = state.isSearchActive && state.selectionMode.not(),
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
-            ) {
+                // Search is persistent (no toggle) per the redesign — always rendered outside selection mode.
                 Column {
                     Spacer(modifier = Modifier.height(4.dp))
 
@@ -270,93 +204,47 @@ internal actual fun LibraryScreenLayout(
                             icon = SoftcoverIcon.Close,
                             contentDescription = "Clear search",
                         ),
-                        placeholder = "Search this shelf…",
+                        placeholder = "Search your collection",
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
+                    Spacer(modifier = Modifier.height(16.dp))
 
-            AnimatedVisibility(
-                visible = state.selectionMode.not(),
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
-            ) {
-                ShelfTabRow(
-                    tabs = tabs,
-                    currentPage = currentTabIndex,
-                    maxLabelWidth = maxTabLabelWidth,
-                    onTabClick = { index ->
-                        scope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    },
-                    onTabLongPress = onTabLongPress,
-                )
-            }
-
-            AnimatedVisibility(
-                visible = isReadTab && availableReadYears.isNotEmpty() && state.selectionMode.not(),
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
-            ) {
-                Column {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    ReadYearChipRow(
-                        years = availableReadYears,
-                        selectedYear = state.selectedReadYear,
-                        onYearClick = { year ->
-                            runAction(OnReadYearSelectedAction(year = year))
-                        },
-                    )
-                }
-            }
-
-            AnimatedVisibility(
-                visible = state.selectionMode.not(),
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
-            ) {
-                Column {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    LibraryControlStrip(
+                    LibraryControlLine(
                         state = state,
                         tab = currentTab,
                         runAction = runAction,
                     )
                 }
-            }
 
-            val activeFilters = currentTab?.id?.let { state.filtersFor(tabId = it) }
+                val activeFilters = currentTab?.id?.let { state.filtersFor(tabId = it) }
 
-            AnimatedVisibility(
-                visible = activeFilters != null && activeFilters.isEmpty.not() && state.selectionMode.not(),
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
-            ) {
-                val tabId = currentTab?.id
-                val filters = activeFilters
+                AnimatedVisibility(
+                    visible = activeFilters != null && activeFilters.isEmpty.not(),
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    val tabId = currentTab?.id
+                    val filters = activeFilters
 
-                if (tabId != null && filters != null) {
-                    Column {
-                        Spacer(modifier = Modifier.height(8.dp))
+                    if (tabId != null && filters != null) {
+                        Column {
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                        LibraryFilterChipRow(
-                            filters = filters,
-                            onRemove = { value ->
-                                runAction(
-                                    OnToggleFilterValueAction(
-                                        tabId = tabId,
-                                        value = value,
-                                    ),
-                                )
-                            },
-                            onClearAll = {
-                                runAction(OnClearFiltersAction(tabId = tabId))
-                            },
-                        )
+                            LibraryFilterChipRow(
+                                filters = filters,
+                                onRemove = { value ->
+                                    runAction(
+                                        OnToggleFilterValueAction(
+                                            tabId = tabId,
+                                            value = value,
+                                        ),
+                                    )
+                                },
+                                onClearAll = {
+                                    runAction(OnClearFiltersAction(tabId = tabId))
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -382,50 +270,62 @@ internal actual fun LibraryScreenLayout(
                     .weight(1f)
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
             ) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxSize(),
-                    userScrollEnabled = state.selectionMode.not(),
-                ) { page ->
-                    val tab = tabs.getOrNull(page) ?: return@HorizontalPager
+                when (val tab = currentTab) {
+                    is LibraryContentTab.CustomList -> EditionList(
+                        tab = tab,
+                        state = state,
+                        gridState = gridStateFor(tab.id),
+                        onEditionClick = onEditionClick,
+                        runAction = runAction,
+                    )
 
-                    when (tab) {
-                        is LibraryContentTab.CustomList -> EditionList(
+                    is LibraryContentTab.All,
+                    is LibraryContentTab.Status,
+                        -> BookList(
                             tab = tab,
                             state = state,
                             gridState = gridStateFor(tab.id),
-                            onEditionClick = onEditionClick,
+                            onBookClick = onBookClick,
                             runAction = runAction,
                         )
 
-                        is LibraryContentTab.All,
-                        is LibraryContentTab.Status,
-                            -> BookList(
-                                tab = tab,
-                                state = state,
-                                gridState = gridStateFor(tab.id),
-                                onBookClick = onBookClick,
-                                runAction = runAction,
-                            )
-                    }
+                    null -> Unit
                 }
             }
         }
     }
 
+    if (state.isShelvesSheetExpanded) {
+        LibraryShelvesSheet(
+            state = state,
+            runAction = runAction,
+            onManageClick = {
+                runAction(OnShelvesSheetExpandedChangeAction(expanded = false))
+
+                onTabLongPress()
+            },
+            onDismissRequest = {
+                runAction(OnShelvesSheetExpandedChangeAction(expanded = false))
+            },
+        )
+    }
+
+    if (state.isArrangeSheetExpanded && currentTab != null) {
+        LibraryArrangeSheet(
+            tab = currentTab,
+            state = state,
+            runAction = runAction,
+            onDismissRequest = {
+                runAction(OnArrangeSheetExpandedChangeAction(expanded = false))
+            },
+        )
+    }
+
     if (state.isFilterSheetExpanded && currentTab != null) {
         LibraryFilterSheet(
-            filters = state.filtersFor(tabId = currentTab.id),
-            options = state.availableFilterOptionsFor(tabId = currentTab.id),
-            onToggle = { value ->
-                runAction(
-                    OnToggleFilterValueAction(
-                        tabId = currentTab.id,
-                        value = value,
-                    ),
-                )
-            },
-            onClearAll = { runAction(OnClearFiltersAction(tabId = currentTab.id)) },
+            tabId = currentTab.id,
+            state = state,
+            runAction = runAction,
             onDismissRequest = {
                 runAction(OnFilterSheetExpandedChangeAction(expanded = false))
             },
@@ -472,16 +372,14 @@ internal actual fun LibraryScreenLayout(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EditorialHeader(
-    tabLabel: String?,
+private fun MastheadHeader(
+    tab: LibraryContentTab?,
     bookCount: Int?,
     totalPages: Int,
-    tab: LibraryContentTab?,
-    isSearchActive: Boolean,
-    onToggleSearchClick: () -> Unit,
     pullToRefreshState: PullToRefreshState,
     isRefreshing: Boolean,
     topAppBarState: TopAppBarState,
+    onTitleClick: () -> Unit,
     onCollapsibleSized: (Int) -> Unit,
 ) {
     // Reads heightOffset only inside graphicsLayer/layout lambdas so a per-frame offset
@@ -511,18 +409,6 @@ private fun EditorialHeader(
                 refreshingText = "Refreshing your shelf…",
                 modifier = Modifier.weight(1f),
             )
-
-            IconButton(onClick = onToggleSearchClick) {
-                val searchToggleIcon = drawableIconResource(
-                    icon = if (isSearchActive) SoftcoverIcon.Close else SoftcoverIcon.Search,
-                    contentDescription = if (isSearchActive) "Close library search" else "Search in library",
-                )
-
-                Icon(
-                    painter = searchToggleIcon.getIconPainter(),
-                    contentDescription = searchToggleIcon.contentDescription,
-                )
-            }
         }
 
         Box(
@@ -546,15 +432,43 @@ private fun EditorialHeader(
             Column {
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Text(
-                    text = tabLabel ?: "Library",
-                    style = MaterialTheme.editorialTypography.pageTitle,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    minLines = 2,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(end = 16.dp),
-                )
+                // The masthead title IS the shelf switcher (redesign brief): tapping it opens the
+                // Shelves sheet, replacing the retired pill tab row.
+                Row(
+                    modifier = Modifier
+                        .pointerHandCursor()
+                        .pressScaleClickable(onClick = onTitleClick)
+                        .padding(end = 16.dp),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    Text(
+                        text = tab?.label ?: "Library",
+                        style = MaterialTheme.editorialTypography.pageTitle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        autoSize = TextAutoSize.StepBased(
+                            maxFontSize = MaterialTheme.editorialTypography.pageTitle.fontSize,
+                        ),
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+
+                    Spacer(modifier = Modifier.width(9.dp))
+
+                    val chevronIcon = drawableIconResource(
+                        icon = SoftcoverIcon.ArrowDropDown,
+                        contentDescription = "Switch shelf",
+                    )
+
+                    Icon(
+                        painter = chevronIcon.getIconPainter(),
+                        contentDescription = chevronIcon.contentDescription,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(top = 7.dp)
+                            .size(24.dp),
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(6.dp))
 

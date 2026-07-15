@@ -8,14 +8,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
-class OnLayoutMenuExpandedChangeActionTest {
+class OnShelvesSheetExpandedChangeActionTest {
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -34,10 +33,10 @@ class OnLayoutMenuExpandedChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isLayoutMenuExpanded to true when expanded is true`() = runTest {
+        fun `sets isShelvesSheetExpanded to true when expanded is true`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isLayoutMenuExpanded = false)
-            val action = OnLayoutMenuExpandedChangeAction(expanded = true)
+            stateFlow.value = LibraryUiState(isShelvesSheetExpanded = false)
+            val action = OnShelvesSheetExpandedChangeAction(expanded = true)
 
             // ----- Act -----
             action.execute(
@@ -46,14 +45,14 @@ class OnLayoutMenuExpandedChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isLayoutMenuExpanded shouldBe true
+            stateFlow.value.isShelvesSheetExpanded shouldBe true
         }
 
         @Test
-        fun `sets isLayoutMenuExpanded to false when expanded is false`() = runTest {
+        fun `sets isShelvesSheetExpanded to false when expanded is false`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isLayoutMenuExpanded = true)
-            val action = OnLayoutMenuExpandedChangeAction(expanded = false)
+            stateFlow.value = LibraryUiState(isShelvesSheetExpanded = true)
+            val action = OnShelvesSheetExpandedChangeAction(expanded = false)
 
             // ----- Act -----
             action.execute(
@@ -62,18 +61,17 @@ class OnLayoutMenuExpandedChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isLayoutMenuExpanded shouldBe false
+            stateFlow.value.isShelvesSheetExpanded shouldBe false
         }
 
         @Test
-        fun `preserves other state fields when updating isLayoutMenuExpanded`() = runTest {
+        fun `preserves other state fields when updating isShelvesSheetExpanded`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 isLoading = false,
-                isLayoutMenuExpanded = false,
-                gridLayout = LibraryGridLayout.LIST_COMPACT,
+                isShelvesSheetExpanded = false,
             )
-            val action = OnLayoutMenuExpandedChangeAction(expanded = true)
+            val action = OnShelvesSheetExpandedChangeAction(expanded = true)
 
             // ----- Act -----
             action.execute(
@@ -83,24 +81,7 @@ class OnLayoutMenuExpandedChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.gridLayout shouldBe LibraryGridLayout.LIST_COMPACT
-            stateFlow.value.isLayoutMenuExpanded shouldBe true
-        }
-
-        @Test
-        fun `setting the same value does not change other state fields`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isLayoutMenuExpanded = true)
-            val action = OnLayoutMenuExpandedChangeAction(expanded = true)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isLayoutMenuExpanded shouldBe true
+            stateFlow.value.isShelvesSheetExpanded shouldBe true
         }
     }
 }

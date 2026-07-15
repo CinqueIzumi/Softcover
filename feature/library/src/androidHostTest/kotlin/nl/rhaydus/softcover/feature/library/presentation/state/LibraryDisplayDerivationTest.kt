@@ -108,8 +108,6 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = books,
                 query = "",
-                isReadTab = false,
-                selectedReadYear = null,
                 filters = LibraryFilters(),
             )
 
@@ -135,8 +133,6 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = books,
                 query = "   ",
-                isReadTab = false,
-                selectedReadYear = null,
                 filters = LibraryFilters(),
             )
 
@@ -160,8 +156,6 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = listOf(matching, nonMatching),
                 query = "kotlin",
-                isReadTab = false,
-                selectedReadYear = null,
                 filters = LibraryFilters(),
             )
 
@@ -191,8 +185,6 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = listOf(matching, nonMatching),
                 query = "ROBERT",
-                isReadTab = false,
-                selectedReadYear = null,
                 filters = LibraryFilters(),
             )
 
@@ -218,8 +210,6 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = books,
                 query = "xyzzy",
-                isReadTab = false,
-                selectedReadYear = null,
                 filters = LibraryFilters(),
             )
 
@@ -228,7 +218,7 @@ class LibraryDisplayDerivationTest {
         }
 
         @Test
-        fun `isReadTab true with null selectedReadYear skips year filter`() {
+        fun `null readYear on filters skips year narrowing`() {
             // ----- Arrange -----
             val book2023 = buildBook(
                 id = 1,
@@ -243,9 +233,7 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = listOf(book2023, book2022),
                 query = "",
-                isReadTab = true,
-                selectedReadYear = null,
-                filters = LibraryFilters(),
+                filters = LibraryFilters(readYear = null),
             )
 
             // ----- Assert -----
@@ -253,32 +241,7 @@ class LibraryDisplayDerivationTest {
         }
 
         @Test
-        fun `isReadTab false ignores selectedReadYear even when set`() {
-            // ----- Arrange -----
-            val book2023 = buildBook(
-                id = 1,
-                userBook = buildUserBook(lastReadDate = "2023-06-15"),
-            )
-            val book2022 = buildBook(
-                id = 2,
-                userBook = buildUserBook(lastReadDate = "2022-06-15"),
-            )
-
-            // ----- Act -----
-            val result = computeDisplayBooks(
-                raw = listOf(book2023, book2022),
-                query = "",
-                isReadTab = false,
-                selectedReadYear = 2023,
-                filters = LibraryFilters(),
-            )
-
-            // ----- Assert -----
-            result shouldBe listOf(book2023, book2022)
-        }
-
-        @Test
-        fun `isReadTab true with selectedReadYear keeps only books whose finishedYear matches`() {
+        fun `readYear on filters keeps only books whose finishedYear matches`() {
             // ----- Arrange -----
             val book2023 = buildBook(
                 id = 1,
@@ -297,9 +260,7 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = listOf(book2023, book2022, bookNoDate),
                 query = "",
-                isReadTab = true,
-                selectedReadYear = 2023,
-                filters = LibraryFilters(),
+                filters = LibraryFilters(readYear = 2023),
             )
 
             // ----- Assert -----
@@ -307,7 +268,7 @@ class LibraryDisplayDerivationTest {
         }
 
         @Test
-        fun `empty filters short-circuits chip filter and returns year-filtered list`() {
+        fun `empty filters short-circuits chip filter and returns the search-filtered list`() {
             // ----- Arrange -----
             val book = buildBook(
                 id = 1,
@@ -318,8 +279,6 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = listOf(book),
                 query = "",
-                isReadTab = false,
-                selectedReadYear = null,
                 filters = LibraryFilters(),
             )
 
@@ -351,8 +310,6 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = listOf(ebookBook, paperbackBook),
                 query = "",
-                isReadTab = false,
-                selectedReadYear = null,
                 filters = LibraryFilters(formats = setOf("ebook")),
             )
 
@@ -361,7 +318,7 @@ class LibraryDisplayDerivationTest {
         }
 
         @Test
-        fun `search and year filters are both applied before chip filters`() {
+        fun `search, readYear and tag filters are all applied together`() {
             // ----- Arrange -----
             val tagFiction = Tag(
                 id = 1,
@@ -390,13 +347,93 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = listOf(matchingBook, wrongYearBook, wrongTagBook),
                 query = "kotlin",
-                isReadTab = true,
-                selectedReadYear = 2023,
-                filters = LibraryFilters(tags = setOf(tagFiction)),
+                filters = LibraryFilters(
+                    tags = setOf(tagFiction),
+                    readYear = 2023,
+                ),
             )
 
             // ----- Assert -----
             result shouldBe listOf(matchingBook)
+        }
+
+        @Test
+        fun `owned filter keeps only books with at least one owned edition`() {
+            // ----- Arrange -----
+            val ownedBook = buildBook(
+                id = 1,
+                editions = listOf(
+                    buildEdition(
+                        id = 10,
+                        owned = true,
+                    ),
+                ),
+            )
+            val unownedBook = buildBook(
+                id = 2,
+                editions = listOf(
+                    buildEdition(
+                        id = 11,
+                        owned = false,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = computeDisplayBooks(
+                raw = listOf(ownedBook, unownedBook),
+                query = "",
+                filters = LibraryFilters(owned = true),
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(ownedBook)
+        }
+
+        @Test
+        fun `ratingMin filter keeps only books meeting or exceeding the threshold`() {
+            // ----- Arrange -----
+            val highRated = buildBook(
+                id = 1,
+                rating = 4.5,
+            )
+            val lowRated = buildBook(
+                id = 2,
+                rating = 2.0,
+            )
+
+            // ----- Act -----
+            val result = computeDisplayBooks(
+                raw = listOf(highRated, lowRated),
+                query = "",
+                filters = LibraryFilters(ratingMin = 4.0),
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(highRated)
+        }
+
+        @Test
+        fun `releaseYears filter keeps only books whose release year is in the set`() {
+            // ----- Arrange -----
+            val book2020 = buildBook(
+                id = 1,
+                releaseYear = 2020,
+            )
+            val book2019 = buildBook(
+                id = 2,
+                releaseYear = 2019,
+            )
+
+            // ----- Act -----
+            val result = computeDisplayBooks(
+                raw = listOf(book2020, book2019),
+                query = "",
+                filters = LibraryFilters(releaseYears = setOf(2020)),
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(book2020)
         }
     }
 
@@ -694,6 +731,291 @@ class LibraryDisplayDerivationTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
+        }
+
+        @Test
+        fun `ratingMin filter resolves rating via the parent book, defaulting unresolved editions to 0`() {
+            // ----- Arrange -----
+            val highRatedBook = buildBook(
+                id = 100,
+                rating = 4.5,
+            )
+            val highRatedEdition = buildEdition(
+                id = 1,
+                bookId = 100,
+                title = "High Rated",
+            )
+            val orphanEdition = buildEdition(
+                id = 2,
+                bookId = 999,
+                title = "Orphan",
+            )
+
+            // ----- Act -----
+            val result = computeDisplayEditions(
+                raw = listOf(highRatedEdition, orphanEdition),
+                query = "",
+                mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
+                addedAtByEditionId = emptyMap(),
+                filters = LibraryFilters(ratingMin = 4.0),
+                bookByBookId = mapOf(100 to highRatedBook),
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(highRatedEdition)
+        }
+
+        @Test
+        fun `releaseYears filter prefers the parent book's release year over the edition's own`() {
+            // ----- Arrange -----
+            val book2020 = buildBook(
+                id = 100,
+                releaseYear = 2020,
+            )
+            val editionUnderBook = buildEdition(
+                id = 1,
+                bookId = 100,
+                title = "Under Book",
+                releaseYear = 2019,
+            )
+            val orphanEdition2020 = buildEdition(
+                id = 2,
+                bookId = 999,
+                title = "Orphan",
+                releaseYear = 2020,
+            )
+
+            // ----- Act -----
+            val result = computeDisplayEditions(
+                raw = listOf(editionUnderBook, orphanEdition2020),
+                query = "",
+                mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
+                addedAtByEditionId = emptyMap(),
+                filters = LibraryFilters(releaseYears = setOf(2020)),
+                bookByBookId = mapOf(100 to book2020),
+            )
+
+            // ----- Assert -----
+            // Both match (editionUnderBook resolves 2020 via its book despite its own releaseYear
+            // being 2019; orphanEdition2020 has no book so falls back to its own releaseYear).
+            // TITLE ASCENDING sorts "Orphan" before "Under Book".
+            result shouldBe listOf(orphanEdition2020, editionUnderBook)
+        }
+    }
+
+    @Nested
+    inner class LibraryPreviewCount {
+        @Test
+        fun `book-tab path counts items matching the draft filters`() {
+            // ----- Arrange -----
+            val tabId = "status-read"
+            val ebookBook = buildBook(
+                id = 1,
+                editions = listOf(
+                    buildEdition(
+                        id = 10,
+                        format = "ebook",
+                    ),
+                ),
+            )
+            val paperbackBook = buildBook(
+                id = 2,
+                editions = listOf(
+                    buildEdition(
+                        id = 11,
+                        format = "paperback",
+                    ),
+                ),
+            )
+
+            val state = LibraryUiState(
+                booksByTab = mapOf(tabId to listOf(ebookBook, paperbackBook)),
+            )
+
+            // ----- Act -----
+            val result = libraryPreviewCount(
+                state = state,
+                tabId = tabId,
+                draftFilters = LibraryFilters(formats = setOf("ebook")),
+            )
+
+            // ----- Assert -----
+            result shouldBe 1
+        }
+
+        @Test
+        fun `book-tab path combines the committed search query with the draft filters`() {
+            // ----- Arrange -----
+            val tabId = "status-read"
+            val matching = buildBook(
+                id = 1,
+                title = "Kotlin Novel",
+                editions = listOf(
+                    buildEdition(
+                        id = 10,
+                        format = "ebook",
+                    ),
+                ),
+            )
+            val wrongFormat = buildBook(
+                id = 2,
+                title = "Kotlin Guide",
+                editions = listOf(
+                    buildEdition(
+                        id = 11,
+                        format = "paperback",
+                    ),
+                ),
+            )
+            val wrongTitle = buildBook(
+                id = 3,
+                title = "Other Book",
+                editions = listOf(
+                    buildEdition(
+                        id = 12,
+                        format = "ebook",
+                    ),
+                ),
+            )
+
+            val state = LibraryUiState(
+                booksByTab = mapOf(tabId to listOf(matching, wrongFormat, wrongTitle)),
+                searchQuery = "kotlin",
+            )
+
+            // ----- Act -----
+            val result = libraryPreviewCount(
+                state = state,
+                tabId = tabId,
+                draftFilters = LibraryFilters(formats = setOf("ebook")),
+            )
+
+            // ----- Assert -----
+            result shouldBe 1
+        }
+
+        @Test
+        fun `custom-list edition-tab path counts editions matching the draft filters`() {
+            // ----- Arrange -----
+            val tabId = "list-5"
+            val ownedEdition = buildEdition(
+                id = 1,
+                title = "Owned Ed",
+                owned = true,
+            )
+            val unownedEdition = buildEdition(
+                id = 2,
+                title = "Unowned Ed",
+                owned = false,
+            )
+
+            val state = LibraryUiState(
+                editionsByTab = mapOf(tabId to listOf(ownedEdition, unownedEdition)),
+            )
+
+            // ----- Act -----
+            val result = libraryPreviewCount(
+                state = state,
+                tabId = tabId,
+                draftFilters = LibraryFilters(owned = true),
+            )
+
+            // ----- Assert -----
+            result shouldBe 1
+        }
+
+        @Test
+        fun `unknown tabId absent from both books and editions returns 0`() {
+            // ----- Arrange -----
+            val state = LibraryUiState(
+                booksByTab = emptyMap(),
+                editionsByTab = emptyMap(),
+            )
+
+            // ----- Act -----
+            val result = libraryPreviewCount(
+                state = state,
+                tabId = "unknown-tab",
+                draftFilters = LibraryFilters(),
+            )
+
+            // ----- Assert -----
+            result shouldBe 0
+        }
+
+        @Test
+        fun `book-tab with an empty collected list returns 0 without falling through to editions`() {
+            // ----- Arrange -----
+            val tabId = "status-read"
+            val state = LibraryUiState(
+                booksByTab = mapOf(tabId to emptyList()),
+                editionsByTab = mapOf(tabId to listOf(buildEdition(id = 1))),
+            )
+
+            // ----- Act -----
+            val result = libraryPreviewCount(
+                state = state,
+                tabId = tabId,
+                draftFilters = LibraryFilters(),
+            )
+
+            // ----- Assert -----
+            result shouldBe 0
+        }
+
+        @Test
+        fun `reads the draft filters rather than the tab's committed filtersByTab entry`() {
+            // ----- Arrange -----
+            val tabId = "status-read"
+            val ebookBook = buildBook(
+                id = 1,
+                editions = listOf(
+                    buildEdition(
+                        id = 10,
+                        format = "ebook",
+                    ),
+                ),
+            )
+            val paperbackBook = buildBook(
+                id = 2,
+                editions = listOf(
+                    buildEdition(
+                        id = 11,
+                        format = "paperback",
+                    ),
+                ),
+            )
+            val audiobookBook = buildBook(
+                id = 3,
+                editions = listOf(
+                    buildEdition(
+                        id = 12,
+                        format = "audiobook",
+                    ),
+                ),
+            )
+
+            // Committed filters would narrow to just the paperback book (count 1); the draft below
+            // is empty, so the correct result is all 3 books. Asserting 3 proves committed filters
+            // were not consulted.
+            val committedFilters = LibraryFilters(formats = setOf("paperback"))
+
+            val state = LibraryUiState(
+                booksByTab = mapOf(tabId to listOf(ebookBook, paperbackBook, audiobookBook)),
+                filtersByTab = mapOf(tabId to committedFilters),
+            )
+
+            // ----- Act -----
+            val result = libraryPreviewCount(
+                state = state,
+                tabId = tabId,
+                draftFilters = LibraryFilters(),
+            )
+
+            // ----- Assert -----
+            result shouldBe 3
         }
     }
 }

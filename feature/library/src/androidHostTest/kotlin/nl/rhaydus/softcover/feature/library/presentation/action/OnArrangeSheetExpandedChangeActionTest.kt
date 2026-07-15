@@ -14,7 +14,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
-class OnFilterSheetExpandedChangeActionTest {
+class OnArrangeSheetExpandedChangeActionTest {
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -33,10 +33,10 @@ class OnFilterSheetExpandedChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isFilterSheetExpanded to true when expanded is true`() = runTest {
+        fun `sets isArrangeSheetExpanded to true when expanded is true`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isFilterSheetExpanded = false)
-            val action = OnFilterSheetExpandedChangeAction(expanded = true)
+            stateFlow.value = LibraryUiState(isArrangeSheetExpanded = false)
+            val action = OnArrangeSheetExpandedChangeAction(expanded = true)
 
             // ----- Act -----
             action.execute(
@@ -45,14 +45,14 @@ class OnFilterSheetExpandedChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isFilterSheetExpanded shouldBe true
+            stateFlow.value.isArrangeSheetExpanded shouldBe true
         }
 
         @Test
-        fun `sets isFilterSheetExpanded to false when expanded is false`() = runTest {
+        fun `sets isArrangeSheetExpanded to false when expanded is false`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isFilterSheetExpanded = true)
-            val action = OnFilterSheetExpandedChangeAction(expanded = false)
+            stateFlow.value = LibraryUiState(isArrangeSheetExpanded = true)
+            val action = OnArrangeSheetExpandedChangeAction(expanded = false)
 
             // ----- Act -----
             action.execute(
@@ -61,17 +61,17 @@ class OnFilterSheetExpandedChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isFilterSheetExpanded shouldBe false
+            stateFlow.value.isArrangeSheetExpanded shouldBe false
         }
 
         @Test
-        fun `preserves other state fields when updating isFilterSheetExpanded`() = runTest {
+        fun `preserves other state fields when updating isArrangeSheetExpanded`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 isLoading = false,
-                isFilterSheetExpanded = false,
+                isArrangeSheetExpanded = false,
             )
-            val action = OnFilterSheetExpandedChangeAction(expanded = true)
+            val action = OnArrangeSheetExpandedChangeAction(expanded = true)
 
             // ----- Act -----
             action.execute(
@@ -81,7 +81,7 @@ class OnFilterSheetExpandedChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isFilterSheetExpanded shouldBe true
+            stateFlow.value.isArrangeSheetExpanded shouldBe true
         }
     }
 }

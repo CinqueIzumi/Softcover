@@ -6,17 +6,13 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class OnToggleSearchAction : LibraryAction {
+internal class OnArrangeSheetExpandedChangeAction(
+    private val expanded: Boolean,
+) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        scope.setState {
-            val wasActive = it.isSearchActive
-            it.copy(
-                isSearchActive = wasActive.not(),
-                searchQuery = if (wasActive) "" else it.searchQuery,
-            )
-        }
+        scope.setState { it.copy(isArrangeSheetExpanded = expanded) }
     }
 }
