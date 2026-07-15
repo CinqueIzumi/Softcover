@@ -1,14 +1,19 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -698,8 +703,18 @@ private fun LensSegment(
         label = "LensSegmentContent",
     )
 
+    // "Yours" flips enabled the instant a shelved book lands (t1 of the load choreography) — an
+    // un-animated alpha snap reads as a flash amid everything else settling at once, so this rides
+    // the same color-spec tween/snap gate as the selection crossfade above.
+    val floatSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap()
+    val disabledAlpha by animateFloatAsState(
+        targetValue = if (enabled) 1f else 0.4f,
+        animationSpec = floatSpec,
+        label = "LensSegmentEnabledAlpha",
+    )
+
     Surface(
-        modifier = modifier.alpha(if (enabled) 1f else 0.4f),
+        modifier = modifier.alpha(disabledAlpha),
         color = containerColor,
         contentColor = contentColor,
         shape = RoundedCornerShape(percent = 50),
@@ -783,13 +798,30 @@ internal fun ShelveControlCard(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(186.dp)
-                        .clip(RoundedCornerShape(15.dp))
-                        .shimmer(isLoading = true),
-                )
+                // Mirrors the loaded card's own anatomy — the same outer Surface plus three
+                // 42dp row-shaped bars at the same 5dp padding / 2dp gap / 11dp corner radius —
+                // rather than one oversized blob, so the shimmer resolves into the real rows at
+                // an identical height instead of visibly shrinking.
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    shape = RoundedCornerShape(15.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(5.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        repeat(3) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(42.dp)
+                                    .clip(RoundedCornerShape(11.dp))
+                                    .shimmer(isLoading = true),
+                            )
+                        }
+                    }
+                }
             }
         } else {
             val book = state.book
@@ -1568,23 +1600,70 @@ internal fun InProgressSection(
             )
         }
 
-        state.readingPaceForecast?.let { forecast ->
-            Spacer(modifier = Modifier.height(12.dp))
+        // Both the pace forecast and the deadline row arrive on their own timers well after the
+        // progress block above is already settled (the forecast is a separate network round trip;
+        // the deadline collector is independent too) — and either may never arrive at all for a
+        // given book. Reserving their height permanently would leave a dead gap far more often than
+        // it earns its keep, so both reveal with the app's standard vertical-reveal register (§5
+        // "Book-detail in-progress stat") instead of popping in and shoving the row(s) beneath them
+        // down in a single frame.
+        val playMotion = playDecorativeMotion()
+        val revealEnter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None
+        val revealExit = if (playMotion) shrinkVertically() + fadeOut() else ExitTransition.None
 
-            Text(
-                text = "Finish in ${forecast.forecastReadingDays} reading days",
-                style = MaterialTheme.editorialTypography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        // AnimatedVisibility's exit transition animates whatever the content lambda renders during
+        // PostExit — if that reads the live nullable directly, `?.let` collapses to nothing the same
+        // recomposition `visible` flips false, so shrinkVertically()/fadeOut() have no content left
+        // to shrink/fade and the row disappears in one frame. Render off a "sticky" last-known value
+        // instead, updated only while the live value is non-null, so the exiting row keeps its
+        // content through the whole shrink/fade.
+        val paceForecast = state.readingPaceForecast
+        var lastPaceForecast by remember { mutableStateOf(paceForecast) }
+
+        if (paceForecast != null) {
+            lastPaceForecast = paceForecast
         }
 
-        state.deadlineProgress?.let { deadline ->
-            Spacer(modifier = Modifier.height(16.dp))
+        AnimatedVisibility(
+            visible = paceForecast != null,
+            enter = revealEnter,
+            exit = revealExit,
+        ) {
+            lastPaceForecast?.let { forecast ->
+                Column {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-            DeadlineRow(
-                progress = deadline,
-                dateStyle = state.dateStyle,
-            )
+                    Text(
+                        text = "Finish in ${forecast.forecastReadingDays} reading days",
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+
+        val deadlineProgress = state.deadlineProgress
+        var lastDeadlineProgress by remember { mutableStateOf(deadlineProgress) }
+
+        if (deadlineProgress != null) {
+            lastDeadlineProgress = deadlineProgress
+        }
+
+        AnimatedVisibility(
+            visible = deadlineProgress != null,
+            enter = revealEnter,
+            exit = revealExit,
+        ) {
+            lastDeadlineProgress?.let { deadline ->
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    DeadlineRow(
+                        progress = deadline,
+                        dateStyle = state.dateStyle,
+                    )
+                }
+            }
         }
     }
 }
@@ -2059,53 +2138,66 @@ internal fun TagsSection(state: BookDetailUiState) {
 
     val edition = state.displayedEdition
     val colophon = editionColophonLine(edition = edition)
+    val hasContent = groups.isNotEmpty() || colophon != null
 
-    if (groups.isEmpty() && colophon == null) return
+    // Community tags and the edition colophon are both unknown until the book/edition resolves
+    // (rarely before, since neither travels on `initialCover`), so this section is entirely absent
+    // through the loading phase — a bare content-dependent condition, exactly like the DS's
+    // "Actionable inline banner" precedent, so no skeleton is reserved for it. What DOES need
+    // fixing is the pop itself: appearing mid-column with no transition shoves Find it / Voices
+    // down in a single frame, so the reveal rides the standard vertical-reveal register instead.
+    val playMotion = playDecorativeMotion()
 
-    Spacer(modifier = Modifier.height(36.dp))
+    AnimatedVisibility(
+        visible = hasContent,
+        enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
+        exit = ExitTransition.None,
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Spacer(modifier = Modifier.height(36.dp))
 
-    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        if (groups.isNotEmpty()) {
-            SmallSectionLabel(text = "Tags")
-        }
+            if (groups.isNotEmpty()) {
+                SmallSectionLabel(text = "Tags")
+            }
 
-        groups.forEach { (category, categoryTags) ->
-            Spacer(modifier = Modifier.height(16.dp))
+            groups.forEach { (category, categoryTags) ->
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = category.label,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+                Text(
+                    text = category.label,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
 
-            Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                categoryTags.forEach { tag ->
-                    if (category == TagCategory.CONTENT_WARNING) {
-                        key(tag.id) {
-                            ConcealableTagChip(label = tag.name)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    categoryTags.forEach { tag ->
+                        if (category == TagCategory.CONTENT_WARNING) {
+                            key(tag.id) {
+                                ConcealableTagChip(label = tag.name)
+                            }
+                        } else {
+                            PillChip(label = tag.name)
                         }
-                    } else {
-                        PillChip(label = tag.name)
                     }
                 }
             }
-        }
 
-        if (colophon != null) {
-            Spacer(modifier = Modifier.height(20.dp))
+            if (colophon != null) {
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
-                text = colophon,
-                style = MaterialTheme.editorialTypography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+                Text(
+                    text = colophon,
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -2167,67 +2259,80 @@ internal fun ExternalLinksSection(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
-    val edition = state.displayedEdition ?: return
+    val isbn = state.displayedEdition?.let { edition ->
+        edition.isbn13?.takeIf { it.isNotBlank() } ?: edition.isbn10?.takeIf { it.isNotBlank() }
+    }
 
-    val isbn = edition.isbn13?.takeIf { it.isNotBlank() }
-        ?: edition.isbn10?.takeIf { it.isNotBlank() }
-        ?: return
+    // The ISBN is unknown until the edition resolves, almost always after t0 — so, like Tags, this
+    // section is condition-gated rather than skeleton-reserved, but its arrival still animates in
+    // (§5 "Book-detail lens-section reveal") instead of popping and shoving Voices down.
+    // `AnimatedVisibility` must stay composed across the null→non-null flip for the enter transition
+    // to play at all, so this reads `isbn` inside the content slot rather than guard-returning early.
+    val playMotion = playDecorativeMotion()
 
-    Spacer(modifier = Modifier.height(36.dp))
+    AnimatedVisibility(
+        visible = isbn != null,
+        enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
+        exit = ExitTransition.None,
+    ) {
+        isbn?.let { knownIsbn ->
+            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                Spacer(modifier = Modifier.height(36.dp))
 
-    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        SmallSectionLabel(text = "Find it")
+                SmallSectionLabel(text = "Find it")
 
-        Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            ExternalLinkPill(
-                label = "Bookshop",
-                iconRes = drawableIconResource(
-                    icon = SoftcoverIcon.Storefront,
-                    contentDescription = "Find on Bookshop.org",
-                ),
-                onClick = {
-                    runAction(
-                        OnExternalLinkClickAction(
-                            url = "https://bookshop.org/search?keywords=$isbn",
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    ExternalLinkPill(
+                        label = "Bookshop",
+                        iconRes = drawableIconResource(
+                            icon = SoftcoverIcon.Storefront,
+                            contentDescription = "Find on Bookshop.org",
                         ),
+                        onClick = {
+                            runAction(
+                                OnExternalLinkClickAction(
+                                    url = "https://bookshop.org/search?keywords=$knownIsbn",
+                                ),
+                            )
+                        },
                     )
-                },
-            )
 
-            ExternalLinkPill(
-                label = "Amazon",
-                iconRes = drawableIconResource(
-                    icon = SoftcoverIcon.ShoppingBag,
-                    contentDescription = "Find on Amazon",
-                ),
-                onClick = {
-                    runAction(
-                        OnExternalLinkClickAction(
-                            url = "https://www.amazon.com/s?k=$isbn",
+                    ExternalLinkPill(
+                        label = "Amazon",
+                        iconRes = drawableIconResource(
+                            icon = SoftcoverIcon.ShoppingBag,
+                            contentDescription = "Find on Amazon",
                         ),
+                        onClick = {
+                            runAction(
+                                OnExternalLinkClickAction(
+                                    url = "https://www.amazon.com/s?k=$knownIsbn",
+                                ),
+                            )
+                        },
                     )
-                },
-            )
 
-            ExternalLinkPill(
-                label = "OpenLibrary",
-                iconRes = drawableIconResource(
-                    icon = SoftcoverIcon.LibraryBooks,
-                    contentDescription = "Find on OpenLibrary",
-                ),
-                onClick = {
-                    runAction(
-                        OnExternalLinkClickAction(
-                            url = "https://openlibrary.org/search?isbn=$isbn",
+                    ExternalLinkPill(
+                        label = "OpenLibrary",
+                        iconRes = drawableIconResource(
+                            icon = SoftcoverIcon.LibraryBooks,
+                            contentDescription = "Find on OpenLibrary",
                         ),
+                        onClick = {
+                            runAction(
+                                OnExternalLinkClickAction(
+                                    url = "https://openlibrary.org/search?isbn=$knownIsbn",
+                                ),
+                            )
+                        },
                     )
-                },
-            )
+                }
+            }
         }
     }
 }
@@ -2279,9 +2384,15 @@ internal fun ReviewsSection(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
-    if (state.loadingBookDetails || state.loadingReviews) return
+    // Reviews fetch on their own timer, separate from and typically slower than the book itself
+    // (`loadingReviews`), so this stayed entirely absent through both phases before — the "second
+    // pop" once the rest of the lens had already settled. It now shows a skeleton matching the real
+    // card anatomy (same `surfaceContainerLow` shimmer, same header) for the whole `isLoading` span,
+    // the same crossfade idiom `AboutSection` / `ShelveControlCard` already use, and only collapses
+    // to nothing once loading is truly finished and the book turns out to have no reviews.
+    val isLoading = state.loadingBookDetails || state.loadingReviews
 
-    if (state.reviews.isEmpty()) return
+    if (isLoading.not() && state.reviews.isEmpty()) return
 
     Spacer(modifier = Modifier.height(36.dp))
 
@@ -2299,52 +2410,73 @@ internal fun ReviewsSection(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        state.reviews.forEachIndexed { index, review ->
-            if (index > 0) {
-                Spacer(modifier = Modifier.height(12.dp))
-            }
+        SkeletonCrossfade(
+            isLoading = isLoading,
+            label = "ReviewsSection",
+        ) { loading ->
+            if (loading) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    repeat(2) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .shimmer(isLoading = true),
+                        )
+                    }
+                }
+            } else {
+                Column {
+                    state.reviews.forEachIndexed { index, review ->
+                        if (index > 0) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
 
-            ReviewCard(
-                review = review,
-                isSpoilerRevealed = review.id in state.revealedSpoilerReviewIds,
-                onRevealSpoilerClick = {
-                    runAction(OnRevealReviewSpoilerAction(reviewId = review.id))
-                },
-            )
-        }
+                        ReviewCard(
+                            review = review,
+                            isSpoilerRevealed = review.id in state.revealedSpoilerReviewIds,
+                            onRevealSpoilerClick = {
+                                runAction(OnRevealReviewSpoilerAction(reviewId = review.id))
+                            },
+                        )
+                    }
 
-        state.book?.let { book ->
-            if (book.ratingsCount > 0) {
-                Spacer(modifier = Modifier.height(16.dp))
+                    state.book?.let { book ->
+                        if (book.ratingsCount > 0) {
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val footerStarIcon = drawableIconResource(
-                        icon = SoftcoverIcon.StarFilled,
-                        contentDescription = "",
-                    )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                val footerStarIcon = drawableIconResource(
+                                    icon = SoftcoverIcon.StarFilled,
+                                    contentDescription = "",
+                                )
 
-                    Icon(
-                        painter = footerStarIcon.getIconPainter(),
-                        contentDescription = footerStarIcon.contentDescription,
-                        tint = RatingGold,
-                        modifier = Modifier.size(14.dp),
-                    )
+                                Icon(
+                                    painter = footerStarIcon.getIconPainter(),
+                                    contentDescription = footerStarIcon.contentDescription,
+                                    tint = RatingGold,
+                                    modifier = Modifier.size(14.dp),
+                                )
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
 
-                    Text(
-                        text = "${
-                            formatDecimalNumber(
-                                value = book.rating,
-                                fractionDigits = 1,
-                            )
-                        } across ${formatGroupedNumber(book.ratingsCount)} ratings",
-                        style = MaterialTheme.editorialTypography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                                Text(
+                                    text = "${
+                                        formatDecimalNumber(
+                                            value = book.rating,
+                                            fractionDigits = 1,
+                                        )
+                                    } across ${formatGroupedNumber(book.ratingsCount)} ratings",
+                                    style = MaterialTheme.editorialTypography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
