@@ -2829,6 +2829,9 @@ internal fun BookDetailOverlays(
 
     if (state.showTagEditorSheet && state.book != null) {
         TagEditorBottomSheet(
+            bookTitle = state.book.title,
+            edition = state.displayedEdition,
+            defaultEdition = state.book.defaultEdition,
             userTags = state.userTags,
             selectedCategory = state.tagEditorCategory,
             draft = state.tagEditorInput,

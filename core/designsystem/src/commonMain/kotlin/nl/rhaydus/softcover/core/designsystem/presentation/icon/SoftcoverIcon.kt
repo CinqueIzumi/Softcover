@@ -43,6 +43,8 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_star_filled
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_stop
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_storefront
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_view_layout
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_visibility
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_visibility_off
 
 /**
  * The design system's bundled icon catalog. Each entry maps a stable name to a Compose Multiplatform
@@ -93,4 +95,6 @@ enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Stop(Res.drawable.ic_stop),
     Storefront(Res.drawable.ic_storefront),
     ViewLayout(Res.drawable.ic_view_layout),
+    Visibility(Res.drawable.ic_visibility),
+    VisibilityOff(Res.drawable.ic_visibility_off),
 }
