@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -38,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
@@ -49,6 +47,7 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.noRippleClickable
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -788,6 +787,15 @@ internal fun SettingsRowDivider() {
     )
 }
 
+/**
+ * The Settings screen's one tinted surface: a `primaryContainer` editorial highlight, led by the
+ * accent-bar + eyebrow ceremony (hand-composed rather than [EditorialSectionHeader], since the
+ * headline needs `onPrimaryContainer` rather than that component's fixed `onSurface`). No badge, no
+ * chevron, no alert chrome — the state's action is the pill button (or, while downloading, an
+ * indeterminate wavy progress bar; the client has no reliable percentage to show). Headlines and body
+ * copy are deliberately version-less: [appUpdateState] carries no version string or download percent.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun AppUpdateSection(
     appUpdateState: AppUpdateState,
@@ -801,82 +809,130 @@ internal fun AppUpdateSection(
     }
 
     val headline = when (appUpdateState) {
-        AppUpdateState.Downloading -> "Hold tight, the new build is on its way."
-        AppUpdateState.Downloaded -> "Restart Softcover to finish installing."
-        AppUpdateState.Failed -> "Something went wrong — tap to try again."
-        else -> "A new version of Softcover is ready."
+        AppUpdateState.Downloading -> "Bringing the update down"
+        AppUpdateState.Downloaded -> "The update is ready"
+        AppUpdateState.Failed -> "That didn't go through"
+        else -> "A new version is ready"
     }
 
-    val isClickable = appUpdateState != AppUpdateState.Downloading
+    val body = when (appUpdateState) {
+        AppUpdateState.Downloading -> "You can keep reading — it'll finish in the background."
+        AppUpdateState.Downloaded -> "Downloaded and waiting. Softcover will restart once."
+        AppUpdateState.Failed -> "Tap to try again."
+        else -> "A newer Softcover is ready whenever you are."
+    }
+
+    val buttonLabel = when (appUpdateState) {
+        AppUpdateState.Downloaded -> "Install & restart"
+        AppUpdateState.Failed -> "Try again"
+        else -> "Download update"
+    }
 
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .noRippleClickable { if (isClickable) onClick() },
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        shape = RoundedCornerShape(12.dp),
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = 20.dp,
-                    vertical = 20.dp,
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = 20.dp,
+                    bottom = 22.dp,
                 ),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            BadgedBox(
-                badge = { Badge() },
-            ) {
-                val apkInstallIcon = drawableIconResource(
-                    icon = SoftcoverIcon.ApkInstall,
-                    contentDescription = "Update icon",
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .height(4.dp)
+                        .width(30.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(MaterialTheme.colorScheme.primary),
                 )
 
-                Icon(
-                    painter = apkInstallIcon.getIconPainter(),
-                    contentDescription = apkInstallIcon.contentDescription,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
+                Spacer(modifier = Modifier.width(12.dp))
 
-            Spacer(modifier = Modifier.width(20.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = eyebrow.uppercase(),
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = headline,
-                    style = MaterialTheme.editorialTypography.body,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
             }
 
-            if (isClickable) {
-                Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.height(9.dp))
 
-                val arrowIcon = drawableIconResource(
-                    icon = SoftcoverIcon.KeyboardArrowRight,
-                    contentDescription = "",
+            Text(
+                text = headline,
+                style = MaterialTheme.editorialTypography.headlineMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = body,
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+
+            if (appUpdateState == AppUpdateState.Downloading) {
+                Spacer(modifier = Modifier.height(14.dp))
+
+                LinearWavyProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant,
+                    modifier = Modifier.fillMaxWidth(),
                 )
+            } else {
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Icon(
-                    painter = arrowIcon.getIconPainter(),
-                    contentDescription = arrowIcon.contentDescription,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                UpdatePillButton(
+                    label = buttonLabel,
+                    onClick = onClick,
                 )
             }
         }
     }
 }
 
+/**
+ * The update card's fully-rounded call to action. Hand-rolled (rather than [RhaydusButton]) so the
+ * pill is guaranteed fully rounded at any label width — the same `Surface(onClick, shape = percent(50))`
+ * shape already used for [PillChip][nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip]
+ * and the Library control-line pills.
+ */
+@Composable
+private fun UpdatePillButton(
+    label: String,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        shape = RoundedCornerShape(percent = 50),
+        modifier = Modifier
+            .height(40.dp)
+            .pointerHandCursor(),
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = 22.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.editorialTypography.titleSmall,
+            )
+        }
+    }
+}
+
+/**
+ * The quiet, tabular-numeral build string, centred between two `outlineVariant` hairlines so it reads
+ * as a plain closing rule rather than a row.
+ */
 @Composable
 internal fun VersionFooter(
     versionName: String,
@@ -884,12 +940,23 @@ internal fun VersionFooter(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+
         Text(
             text = "Version $versionName ($versionCode)",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 12.dp),
+        )
+
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.outlineVariant,
         )
     }
 }
