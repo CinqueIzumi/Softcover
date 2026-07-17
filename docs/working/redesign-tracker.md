@@ -22,7 +22,7 @@ redesign in the app yet?".
 | Explore | `Explore 3a - Spec Sheet.dc.html` | ⬜ Not started |
 | Reading | `Reading 1a - Spec Sheet.dc.html` | ⬜ Not started |
 | Library | `Library Spec Sheet.dc.html` | ✅ Implemented |
-| Profile | `Profile 1a - Spec Sheet.dc.html` | ⬜ Not started |
+| Profile | `Profile 1a - Spec Sheet.dc.html` | ✅ Implemented |
 | Settings | `Settings 1a - Spec Sheet.dc.html` | ✅ Implemented |
 | Appearance | `Appearance 1a - Spec Sheet.dc.html` | ⬜ Not started |
 | Library tabs | `Library Tabs 1a - Spec Sheet.dc.html` | ⬜ Not started |

@@ -10,6 +10,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
@@ -17,34 +18,41 @@ import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 class RefreshUserProfileDataUseCase(
     private val profileRepository: ProfileRepository,
     private val getUserIdUseCase: GetUserIdUseCase,
+    private val profileRefreshGate: ProfileRefreshGate,
     private val clock: Clock,
     private val timeZone: TimeZone,
 ) {
+    // Skips the network fetch once this session has already refreshed successfully - every other
+    // Profile visit renders from the DataStore cache. runOnce guards check-fetch-mark atomically
+    // and marks only after a successful cache write, so a transient failure leaves the gate open
+    // and the next visit retries.
     suspend operator fun invoke(): Result<Unit> = runCatchingLogged {
-        val userId = getUserIdUseCase().getOrThrow()
-        val today = clock.todayIn(timeZone)
-        val windowStart = today.minus(
-            READING_ACTIVITY_WINDOW_DAYS - 1,
-            DateTimeUnit.DAY,
-        )
-        val snapshot = profileRepository.fetchUserProfileSnapshot()
-        val readingStreak = computeStreak(
-            days = collectStreakDays(
-                userId = userId,
+        profileRefreshGate.runOnce {
+            val userId = getUserIdUseCase().getOrThrow()
+            val today = clock.todayIn(timeZone)
+            val windowStart = today.minus(
+                READING_ACTIVITY_WINDOW_DAYS - 1,
+                DateTimeUnit.DAY,
+            )
+            val snapshot = profileRepository.fetchUserProfileSnapshot()
+            val readingStreak = computeStreak(
+                days = collectStreakDays(
+                    userId = userId,
+                    today = today,
+                ),
                 today = today,
-            ),
-            today = today,
-        )
-        val recentReadingDays = profileRepository.getActiveReadingDaysSince(
-            userId = userId,
-            since = windowStart,
-        )
-        val data = snapshot.toUserProfileData(
-            readingStreak = readingStreak,
-            recentReadingDays = recentReadingDays,
-        )
+            )
+            val recentReadingDays = profileRepository.getActiveReadingDaysSince(
+                userId = userId,
+                since = windowStart,
+            )
+            val data = snapshot.toUserProfileData(
+                readingStreak = readingStreak,
+                recentReadingDays = recentReadingDays,
+            )
 
-        profileRepository.cacheUserProfileData(data = data)
+            profileRepository.cacheUserProfileData(data = data)
+        }
     }
 
     // Walks the descending reading-day stream newest-to-oldest, adding each date before
@@ -101,6 +109,13 @@ class RefreshUserProfileDataUseCase(
         averageRating = averageRating,
         readingStreak = readingStreak,
         recentReadingDays = recentReadingDays,
+        booksByYear = booksByYear,
+        pagesByYear = pagesByYear,
+        pagesByMonth = pagesByMonth,
+        genres = genres,
+        ratings = ratings,
+        recentlyLoved = recentlyLoved,
+        trackedYears = trackedYears,
     )
 
     // Grace day: a user who hasn't logged yet today should not see their streak break, so the

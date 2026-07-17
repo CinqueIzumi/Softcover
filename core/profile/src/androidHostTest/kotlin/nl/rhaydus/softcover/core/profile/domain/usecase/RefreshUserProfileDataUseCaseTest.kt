@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlinx.datetime.TimeZone
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
@@ -40,15 +41,22 @@ class RefreshUserProfileDataUseCaseTest {
 
     private lateinit var profileRepository: ProfileRepository
     private lateinit var getUserIdUseCase: GetUserIdUseCase
+
+    // A real gate (not mocked): it has no external dependencies, and using the real
+    // check-fetch-mark logic is what lets the GateBehavior tests below observe it actually
+    // skipping or retrying the network fetch across successive useCase() calls.
+    private lateinit var profileRefreshGate: ProfileRefreshGate
     private lateinit var useCase: RefreshUserProfileDataUseCase
 
     @BeforeEach
     fun setUp() {
         profileRepository = mockk()
         getUserIdUseCase = mockk()
+        profileRefreshGate = ProfileRefreshGate()
         useCase = RefreshUserProfileDataUseCase(
             profileRepository = profileRepository,
             getUserIdUseCase = getUserIdUseCase,
+            profileRefreshGate = profileRefreshGate,
             clock = fixedClock,
             timeZone = TimeZone.UTC,
         )
@@ -62,6 +70,7 @@ class RefreshUserProfileDataUseCaseTest {
         booksRead = 42,
         totalPagesRead = 12000,
         averageRating = 4.2,
+        trackedYears = 7,
     )
 
     // Drives readingStreak via streamReadingDaysDescending (must be strictly descending) and
@@ -117,6 +126,7 @@ class RefreshUserProfileDataUseCaseTest {
                 averageRating = profileSnapshot.averageRating,
                 readingStreak = 0,
                 recentReadingDays = emptySet(),
+                trackedYears = profileSnapshot.trackedYears,
             )
 
             coEvery {
@@ -190,7 +200,7 @@ class RefreshUserProfileDataUseCaseTest {
         }
 
         @Test
-        fun `username from snapshot propagates into the cached UserProfileData`() = runTest {
+        fun `username and trackedYears from snapshot propagate into the cached UserProfileData`() = runTest {
             // ----- Act -----
             val cached = capturedDataFor(
                 streamedDaysDescending = emptyList(),
@@ -199,6 +209,7 @@ class RefreshUserProfileDataUseCaseTest {
 
             // ----- Assert -----
             cached.username shouldBe "cinque"
+            cached.trackedYears shouldBe 7
         }
     }
 
@@ -255,10 +266,12 @@ class RefreshUserProfileDataUseCaseTest {
                 // 30 consecutive days ending on today, strictly descending. Only the most recent
                 // 21 days fall inside the activity window, but the streak itself is unbounded —
                 // it must not be truncated by any page-like limit.
-                val streamedDays = (0 until 30).map { today.minus(
-                    it,
-                    DateTimeUnit.DAY,
-                ) }
+                val streamedDays = (0 until 30).map {
+                    today.minus(
+                        it,
+                        DateTimeUnit.DAY,
+                    )
+                }
 
                 // ----- Act & Assert -----
                 streakFor(streamedDaysDescending = streamedDays) shouldBe 30
@@ -334,6 +347,80 @@ class RefreshUserProfileDataUseCaseTest {
 
             // ----- Assert -----
             cached.readingStreak shouldBe 3
+        }
+    }
+
+    @Nested
+    inner class GateBehavior {
+        private fun arrangeSuccessfulRepository() {
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(42)
+            coEvery {
+                profileRepository.fetchUserProfileSnapshot()
+            } returns snapshot()
+            coEvery {
+                profileRepository.streamReadingDaysDescending(userId = 42)
+            } returns flowOf()
+            coEvery {
+                profileRepository.getActiveReadingDaysSince(
+                    userId = 42,
+                    since = windowStart,
+                )
+            } returns emptySet()
+            coEvery {
+                profileRepository.cacheUserProfileData(data = any())
+            } returns Unit
+        }
+
+        @Test
+        fun `a second invoke within the same session skips the network fetch entirely`() = runTest {
+            // ----- Arrange -----
+            arrangeSuccessfulRepository()
+
+            // ----- Act -----
+            useCase()
+            useCase()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { profileRepository.fetchUserProfileSnapshot() }
+        }
+
+        @Test
+        fun `a failed fetch leaves the gate open so the next invoke retries`() = runTest {
+            // ----- Arrange -----
+            var fetchCallCount = 0
+
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(42)
+            coEvery {
+                profileRepository.fetchUserProfileSnapshot()
+            } coAnswers {
+                fetchCallCount++
+                if (fetchCallCount == 1) throw RuntimeException("network error") else snapshot()
+            }
+            coEvery {
+                profileRepository.streamReadingDaysDescending(userId = 42)
+            } returns flowOf()
+            coEvery {
+                profileRepository.getActiveReadingDaysSince(
+                    userId = 42,
+                    since = windowStart,
+                )
+            } returns emptySet()
+            coEvery {
+                profileRepository.cacheUserProfileData(data = any())
+            } returns Unit
+
+            // ----- Act -----
+            val firstResult = useCase()
+            val secondResult = useCase()
+
+            // ----- Assert -----
+            firstResult.isFailure shouldBe true
+            secondResult.isSuccess shouldBe true
+            coVerify(exactly = 2) { profileRepository.fetchUserProfileSnapshot() }
         }
     }
 }

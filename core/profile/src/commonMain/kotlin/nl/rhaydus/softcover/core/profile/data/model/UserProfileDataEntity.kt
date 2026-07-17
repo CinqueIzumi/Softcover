@@ -15,6 +15,13 @@ internal data class UserProfileDataEntity(
     val averageRating: Double,
     val readingStreak: Int,
     val recentReadingDays: List<String> = emptyList(),
+    val booksByYear: List<YearCountEntity> = emptyList(),
+    val pagesByYear: List<YearCountEntity> = emptyList(),
+    val pagesByMonth: List<MonthCountEntity> = emptyList(),
+    val genres: List<GenreSliceEntity> = emptyList(),
+    val ratings: RatingsDistributionEntity = RatingsDistributionEntity(),
+    val recentlyLoved: List<LovedBookEntity> = emptyList(),
+    val trackedYears: Int = 0,
 )
 
 internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
@@ -29,6 +36,13 @@ internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
     recentReadingDays = recentReadingDays
         .mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
         .toSet(),
+    booksByYear = booksByYear.map { it.toModel() },
+    pagesByYear = pagesByYear.map { it.toModel() },
+    pagesByMonth = pagesByMonth.map { it.toModel() },
+    genres = genres.map { it.toModel() },
+    ratings = ratings.toModel(),
+    recentlyLoved = recentlyLoved.map { it.toModel() },
+    trackedYears = trackedYears,
 )
 
 internal fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileDataEntity(
@@ -43,4 +57,11 @@ internal fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileData
     recentReadingDays = recentReadingDays
         .sorted()
         .map { it.toString() },
+    booksByYear = booksByYear.map { it.toEntity() },
+    pagesByYear = pagesByYear.map { it.toEntity() },
+    pagesByMonth = pagesByMonth.map { it.toEntity() },
+    genres = genres.map { it.toEntity() },
+    ratings = ratings.toEntity(),
+    recentlyLoved = recentlyLoved.map { it.toEntity() },
+    trackedYears = trackedYears,
 )

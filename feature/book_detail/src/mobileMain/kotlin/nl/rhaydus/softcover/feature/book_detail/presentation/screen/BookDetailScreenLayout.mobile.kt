@@ -205,7 +205,7 @@ internal actual fun BookDetailScreenLayout(
             stickyHeader {
                 LensToggle(
                     selectedLens = state.selectedLens,
-                    onLensSelected = { runAction(OnLensSelectedAction(lens = it)) },
+                    onLensSelected = { lens -> runAction(OnLensSelectedAction(lens = lens)) },
                     yoursEnabled = yoursEnabled,
                 )
             }

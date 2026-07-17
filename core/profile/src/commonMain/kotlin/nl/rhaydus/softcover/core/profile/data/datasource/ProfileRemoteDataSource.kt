@@ -1,16 +1,32 @@
 package nl.rhaydus.softcover.core.profile.data.datasource
 
 import com.apollographql.apollo.ApolloClient
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.char
+import kotlinx.datetime.todayIn
 import kotlinx.datetime.toLocalDateTime
+import nl.rhaydus.softcover.GetReadUserBooksForStatsQuery
 import nl.rhaydus.softcover.GetReadingActivityDaysQuery
 import nl.rhaydus.softcover.GetUserProfileDataQuery
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.core.profile.data.mapper.toBooksByYear
+import nl.rhaydus.softcover.core.profile.data.mapper.toGenreSlices
+import nl.rhaydus.softcover.core.profile.data.mapper.toPagesByMonth
+import nl.rhaydus.softcover.core.profile.data.mapper.toPagesByYear
+import nl.rhaydus.softcover.core.profile.data.mapper.toRatedCount
+import nl.rhaydus.softcover.core.profile.data.mapper.toRatingAverage
+import nl.rhaydus.softcover.core.profile.data.mapper.toRatingHalfStarBuckets
+import nl.rhaydus.softcover.core.profile.data.mapper.toTotalPages
+import nl.rhaydus.softcover.core.profile.data.mapper.toTrackedYears
+import nl.rhaydus.softcover.core.profile.data.model.StatsBook
+import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
+import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 
 interface ProfileRemoteDataSource {
@@ -19,17 +35,27 @@ interface ProfileRemoteDataSource {
     fun streamReadingDaysDescending(userId: Int): Flow<LocalDate>
 }
 
+private val monthYearLabelFormat = LocalDate.Format {
+    monthName(MonthNames.ENGLISH_ABBREVIATED)
+    char(' ')
+    year()
+}
+
 internal class ProfileRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
+    private val clock: Clock,
     private val timeZone: TimeZone,
 ) : ProfileRemoteDataSource {
+    // region Fetch + snapshot assembly
     override suspend fun getUserProfileSnapshot(): UserProfileSnapshot {
+        val currentYear = clock.todayIn(timeZone).year
         val data = apolloClient.safeQuery(query = GetUserProfileDataQuery())
-
         val me = data
             .me
             .firstOrNull()
             ?: throw Exception("User could not be initialized")
+
+        val statsBooks = fetchAllStatsBooks()
 
         return UserProfileSnapshot(
             profileImageUrl = me.image?.url.orEmpty(),
@@ -37,11 +63,96 @@ internal class ProfileRemoteDataSourceImpl(
             username = me.username?.toString().orEmpty(),
             bio = me.bio.orEmpty(),
             booksRead = me.books_read.aggregate?.count ?: 0,
-            totalPagesRead = me.user_books_pages.sumOf { it.pagesRead() },
+            totalPagesRead = statsBooks.toTotalPages(),
             averageRating = me.rated_books.aggregate?.avg?.rating ?: 0.0,
+            booksByYear = statsBooks.toBooksByYear(currentYear = currentYear),
+            pagesByYear = statsBooks.toPagesByYear(currentYear = currentYear),
+            pagesByMonth = statsBooks.toPagesByMonth(currentYear = currentYear),
+            genres = statsBooks.toGenreSlices(),
+            trackedYears = statsBooks.toTrackedYears(),
+            // Scoped to the same read-books dataset as the histogram (not me.rated_books, which is
+            // all-status) so the bars sum to totalRatings and RatingBand's bimodal math isn't
+            // deflated. The hero "Avg. rating" tile above stays on the server's all-status average.
+            ratings = RatingsDistribution(
+                average = statsBooks.toRatingAverage(),
+                totalRatings = statsBooks.toRatedCount(),
+                halfStarBuckets = statsBooks.toRatingHalfStarBuckets(),
+            ),
+            recentlyLoved = me.recentlyLoved(),
         )
     }
 
+    // Pages through every finished book once per session (same pattern as
+    // streamReadingDaysDescending): a large page size keeps the round-trip count low, and
+    // STATS_MAX_PAGES guards against a pathological account turning this into an unbounded loop.
+    // Unlike the reading-day stream, every row is needed to compute accurate aggregates, so this
+    // collects eagerly into a list rather than staying a lazily-cancellable Flow.
+    private suspend fun fetchAllStatsBooks(): List<StatsBook> {
+        val books = mutableListOf<StatsBook>()
+        var offset = 0
+        var pages = 0
+
+        while (pages < STATS_MAX_PAGES) {
+            val data = apolloClient.safeQuery(
+                query = GetReadUserBooksForStatsQuery(
+                    limit = STATS_PAGE_SIZE,
+                    offset = offset,
+                ),
+            )
+            val rows = data.me.firstOrNull()?.user_books.orEmpty()
+
+            books += rows.map { it.toStatsBook() }
+
+            offset += rows.size
+            pages++
+
+            // A partial page (including empty) means this was the last one - a full page always
+            // requests one more to confirm, but a short page already proves there's nothing left.
+            if (rows.size < STATS_PAGE_SIZE) break
+        }
+
+        return books
+    }
+
+    private fun GetReadUserBooksForStatsQuery.Data.Me.User_book.toStatsBook(): StatsBook {
+        val journalFinishDate = user_book_read_finished_journal
+            .firstOrNull()
+            ?.updated_at
+            ?.let(::parseDateOrNull)
+
+        val finishDate = last_read_date?.let(::parseDateOrNull) ?: journalFinishDate
+
+        return StatsBook(
+            rating = rating,
+            finishDate = finishDate,
+            pages = edition?.pages ?: book.pages ?: 0,
+            genreNames = book.taggable_counts
+                .mapNotNull { it.tag?.tag }
+                .distinct(),
+        )
+    }
+    // endregion
+    // region me{} response mapping
+    private fun GetUserProfileDataQuery.Data.Me.recentlyLoved(): List<LovedBook> = recently_loved.map { loved ->
+        LovedBook(
+            coverUrl = loved.book.image?.url.orEmpty(),
+            title = loved.book.title.orEmpty(),
+            author = loved.book.contributions
+                .mapNotNull { it.author?.name }
+                .joinToString(", "),
+            ratingStars = loved.rating ?: 0.0,
+            monthLabel = loved.last_read_date.toMonthYearLabel(),
+        )
+    }
+
+    private fun String?.toMonthYearLabel(): String {
+        val date = this
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            ?: return ""
+
+        return monthYearLabelFormat.format(date)
+    }
+    // endregion
     // Cold: pages GetReadingActivityDaysQuery (ordered action_at desc) lazily, one page at a
     // time, only while a collector keeps requesting values. A collector that stops early (e.g.
     // ProfileRepository's takeWhile) cancels this flow before the next page is ever fetched, so
@@ -72,27 +183,11 @@ internal class ProfileRemoteDataSourceImpl(
         }
     }
 
-    private fun GetUserProfileDataQuery.Data.Me.User_books_page.pagesRead(): Int {
-        val maxProgress = user_book_reads_aggregate.aggregate?.max?.progress_pages ?: 0
-
-        // A book marked Read should always credit at least its full page count, even if
-        // the user never logged that final progress event (or imported it without a log).
-        if (status_id == UserBookStatus.READ.code) {
-            val fullBookPages = edition?.pages ?: book.pages ?: 0
-            return maxOf(
-                maxProgress,
-                fullBookPages,
-            )
-        }
-        return maxProgress
-    }
-
-    // The live API serves action_at as either a bare date ("2026-05-04") or a full
-    // ISO timestamp ("2026-05-04T06:20:37.939189+00:00"). A bare date is already a calendar
-    // day, so it passes through unchanged; only timestamps carry a time-of-day that needs a
-    // zone. Bucket those into the user's local timezone so a reading-day matches the calendar
-    // day they actually read on — counting in UTC pushes a late-evening session onto the next
-    // UTC day and can manufacture a phantom gap that wrongly breaks the streak.
+    // The live API serves dates as either a bare date ("2026-05-04") or a full ISO timestamp
+    // ("2026-05-04T06:20:37.939189+00:00"). A bare date is already a calendar day, so it passes
+    // through unchanged; only timestamps carry a time-of-day that needs a zone. Bucket those into
+    // the user's local timezone so a day matches the calendar day the user actually acted on -
+    // counting in UTC can push a late-evening event onto the next UTC day.
     private fun parseDateOrNull(value: String): LocalDate? = runCatching {
         if (value.contains('T')) {
             Instant.parse(value).toLocalDateTime(timeZone).date
@@ -108,5 +203,11 @@ internal class ProfileRemoteDataSourceImpl(
 
         // Runaway guard so a pathological account can never turn this into an unbounded loop.
         const val MAX_PAGES = 100
+
+        // Matches the app-wide per-request page size the live API is known to serve. STATS_MAX_PAGES
+        // then caps the once-per-session stats fetch at 10,000 books — a generous ceiling for a
+        // personal library — so a pathological account can never turn paging into an unbounded loop.
+        const val STATS_PAGE_SIZE = 100
+        const val STATS_MAX_PAGES = 100
     }
 }

@@ -15,23 +15,33 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopBackStrip
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
-import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
+import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -48,13 +58,14 @@ private val TWO_COLUMN_MIN_WIDTH = 720.dp
 
 /**
  * Desktop Profile. On a wide surface it is a fixed identity column (cookie-cut avatar, the reader's
- * name and bio, the log-out action) beside a wider scrolling "Reading atlas" stats column with a
+ * name and bio, the account foot) beside a wider scrolling "reading life" stats column with a
  * persistent desktop scrollbar. On a narrow desktop window it collapses to a single centered scrolling
- * column. A static top strip carries the back control; there is no scroll-collapsing top bar. The whole
- * surface paints an opaque [Surface] background so a pushed Profile never lets the screen beneath it
- * bleed through during the navigation transition. The avatar, section labels, and the entire stat block
- * are shared shelf code ([ProfileAvatar], [SectionLabel], [ReadingAtlasSection]) — only the arrangement
- * is desktop-specific.
+ * column. A static top strip carries the back control plus a share glyph; there is no scroll-collapsing
+ * top bar. The whole surface paints an opaque [Surface] background so a pushed Profile never lets the
+ * screen beneath it bleed through during the navigation transition. The avatar, section labels, and the
+ * whole reading-life content block are shared shelf code ([ProfileAvatar], [SectionLabel],
+ * [ReadingAtlasSection] and the new "reading life" sections in `ProfileShelf.kt`) — only the
+ * arrangement is desktop-specific.
  */
 @Composable
 internal actual fun ProfileScreenLayout(
@@ -66,40 +77,104 @@ internal actual fun ProfileScreenLayout(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        ProfileContent(
+            state = state,
+            runAction = runAction,
+            onNavigateUp = onNavigateUp,
+        )
+    }
+}
+
+@Composable
+private fun ProfileContent(
+    state: ProfileUiState,
+    runAction: (ProfileAction) -> Unit,
+    onNavigateUp: () -> Unit,
+) {
+    var showShareSheet by remember { mutableStateOf(false) }
+    var showLogOutConfirm by remember { mutableStateOf(false) }
+
+    val shareContent = remember(state.readingLife, state.userProfileData) {
+        val life = state.readingLife
+        val profile = state.userProfileData
+
+        if (life != null && profile != null) life.toShareContent(profile) else null
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             DesktopBackStrip(
                 onNavigateBack = onNavigateUp,
                 backIcon = drawableIconResource(
                     contentDescription = "Navigate back icon",
                     icon = SoftcoverIcon.ArrowBack,
                 ),
+                modifier = Modifier.weight(1f),
             )
 
-            BoxWithConstraints(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            ) {
-                if (maxWidth >= TWO_COLUMN_MIN_WIDTH) {
-                    TwoColumnProfile(
-                        state = state,
-                        runAction = runAction,
+            DesktopTooltip(text = "Share your reading year") {
+                IconButton(
+                    onClick = { showShareSheet = true },
+                    enabled = shareContent != null,
+                    modifier = Modifier.pointerHandCursor(),
+                ) {
+                    val icon = drawableIconResource(
+                        icon = SoftcoverIcon.Share,
+                        contentDescription = "Share your reading year",
                     )
-                } else {
-                    SingleColumnProfile(
-                        state = state,
-                        runAction = runAction,
+
+                    Icon(
+                        painter = icon.getIconPainter(),
+                        contentDescription = icon.contentDescription,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
         }
+
+        BoxWithConstraints(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        ) {
+            if (maxWidth >= TWO_COLUMN_MIN_WIDTH) {
+                TwoColumnProfile(
+                    state = state,
+                    onShareClick = { showShareSheet = true },
+                    onLogOutClick = { showLogOutConfirm = true },
+                )
+            } else {
+                SingleColumnProfile(
+                    state = state,
+                    onShareClick = { showShareSheet = true },
+                    onLogOutClick = { showLogOutConfirm = true },
+                )
+            }
+        }
+    }
+
+    if (showShareSheet && shareContent != null) {
+        ProfileShareBottomSheet(
+            content = shareContent,
+            onDismissRequest = { showShareSheet = false },
+        )
+    }
+
+    if (showLogOutConfirm) {
+        LogOutConfirmBottomSheet(
+            onLogOutClick = { runAction(OnLogOutClickAction()) },
+            onDismissRequest = { showLogOutConfirm = false },
+        )
     }
 }
 
 @Composable
 private fun TwoColumnProfile(
     state: ProfileUiState,
-    runAction: (ProfileAction) -> Unit,
+    onShareClick: () -> Unit,
+    onLogOutClick: () -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -116,12 +191,10 @@ private fun TwoColumnProfile(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            RhaydusButton(
-                label = "Log out",
-                onClick = { runAction(OnLogOutClickAction()) },
-                style = ButtonStyle.TONAL,
-                modifier = Modifier.fillMaxWidth(),
+            AccountFootSection(
+                onLogOutClick = onLogOutClick,
                 enabled = state.isLoading.not(),
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
@@ -140,9 +213,9 @@ private fun TwoColumnProfile(
                     .verticalScroll(scrollState)
                     .padding(start = 32.dp, end = 24.dp, top = 8.dp, bottom = 24.dp),
             ) {
-                ReadingAtlasSection(
-                    userProfileData = state.userProfileData,
-                    isLoading = state.isLoading,
+                ReadingLifeContent(
+                    state = state,
+                    onShareClick = onShareClick,
                     modifier = Modifier.widthIn(max = STATS_CONTENT_MAX_WIDTH),
                 )
             }
@@ -161,7 +234,8 @@ private fun TwoColumnProfile(
 @Composable
 private fun SingleColumnProfile(
     state: ProfileUiState,
-    runAction: (ProfileAction) -> Unit,
+    onShareClick: () -> Unit,
+    onLogOutClick: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
@@ -181,20 +255,18 @@ private fun SingleColumnProfile(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            ReadingAtlasSection(
-                userProfileData = state.userProfileData,
-                isLoading = state.isLoading,
+            ReadingLifeContent(
+                state = state,
+                onShareClick = onShareClick,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            RhaydusButton(
-                label = "Log out",
-                onClick = { runAction(OnLogOutClickAction()) },
-                style = ButtonStyle.TONAL,
-                modifier = Modifier.fillMaxWidth(),
+            AccountFootSection(
+                onLogOutClick = onLogOutClick,
                 enabled = state.isLoading.not(),
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
@@ -204,6 +276,66 @@ private fun SingleColumnProfile(
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
                 .padding(vertical = 4.dp),
+        )
+    }
+}
+
+/**
+ * The whole "reading life" stack shared by both desktop column arrangements: the atlas hero, the share
+ * entry row, and every new reading-life section, in the same top-to-bottom order the mobile layout
+ * uses.
+ */
+@Composable
+private fun ReadingLifeContent(
+    state: ProfileUiState,
+    onShareClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // ReadingAtlasSection reads state.isLoading directly (it is driven by userProfileData alone),
+    // but every section below also needs readingLife to have arrived — the two land via separate
+    // collectors, so gating on isLoading alone risks a section briefly rendering its permanent
+    // "nothing yet" copy before readingLife has actually resolved.
+    val readingLifeLoading = state.isLoading || state.readingLife == null
+
+    Column(modifier = modifier) {
+        ReadingAtlasSection(
+            userProfileData = state.userProfileData,
+            isLoading = state.isLoading,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ShareEntryRow(
+            isLoading = readingLifeLoading,
+            onClick = onShareClick,
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        YearColumnHistorySection(
+            readingLife = state.readingLife,
+            isLoading = readingLifeLoading,
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        GenreStackSection(
+            genres = state.readingLife?.genres.orEmpty(),
+            isLoading = readingLifeLoading,
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        RatingsHistogramSection(
+            ratings = state.readingLife?.ratings ?: RatingsDistribution(),
+            isLoading = readingLifeLoading,
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        RecentlyLovedSection(
+            books = state.readingLife?.recentlyLoved.orEmpty(),
+            isLoading = readingLifeLoading,
         )
     }
 }
@@ -262,3 +394,42 @@ private fun ReaderIdentity(
         }
     }
 }
+
+@StandardPreview
+@Composable
+private fun ProfileScreenDesktopLightPreview() {
+    SoftcoverTheme(darkTheme = false) {
+        ProfileScreenLayout(
+            state = ProfileScreenDesktopPreviewState,
+            runAction = {},
+            onNavigateUp = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ProfileScreenDesktopDarkPreview() {
+    SoftcoverTheme(darkTheme = true) {
+        ProfileScreenLayout(
+            state = ProfileScreenDesktopPreviewState,
+            runAction = {},
+            onNavigateUp = {},
+        )
+    }
+}
+
+private val ProfileScreenDesktopPreviewState = ProfileUiState(
+    isLoading = false,
+    userProfileData = UserProfileData(
+        profileImageUrl = "",
+        name = "Elena Marchetti",
+        username = "elenam",
+        bio = "Mostly literary fiction, the occasional doorstop fantasy.",
+        booksRead = 214,
+        totalPagesRead = 128_406,
+        averageRating = 4.2,
+        readingStreak = 31,
+    ),
+    readingLife = profileReadingLifePreview(),
+)

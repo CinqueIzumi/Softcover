@@ -13,27 +13,32 @@ query GetUserProfileData {
         }
         rated_books: user_books_aggregate(where: { rating: { _is_null: false } }) {
             aggregate {
+                count
                 avg {
                     rating
                 }
             }
         }
-        # Pages read is computed client-side as the sum, per user_book, of the highest
-        # logged progress (max progress_pages across its user_book_reads). For books
-        # marked Read with no per-session progress, we fall back to edition.pages or
-        # book.pages so imported "Read" books still contribute their full page count.
-        user_books_pages: user_books {
-            status_id
-            edition {
-                pages
-            }
+
+        # The last few highly-rated finished books, newest first - a small targeted list, not a
+        # full pull. Cover/title/author only; no series/description/tags (those belong to the full
+        # book-detail fragments, not this small preview list).
+        recently_loved: user_books(
+            where: { status_id: { _eq: 3 }, rating: { _gte: 4.0 } }
+            order_by: { last_read_date: desc_nulls_last }
+            limit: 3
+        ) {
+            id
+            rating
+            last_read_date
             book {
-                pages
-            }
-            user_book_reads_aggregate {
-                aggregate {
-                    max {
-                        progress_pages
+                title
+                image {
+                    url
+                }
+                contributions {
+                    author {
+                        name
                     }
                 }
             }

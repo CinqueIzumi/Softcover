@@ -16,21 +16,25 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
+import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 
 class ProfileRepositoryImplTest {
     private lateinit var profileRemoteDataSource: ProfileRemoteDataSource
     private lateinit var profileLocalDataSource: ProfileLocalDataSource
+    private lateinit var profileRefreshGate: ProfileRefreshGate
     private lateinit var repository: ProfileRepositoryImpl
 
     @BeforeEach
     fun setUp() {
         profileRemoteDataSource = mockk(relaxed = true)
         profileLocalDataSource = mockk(relaxed = true)
+        profileRefreshGate = mockk(relaxed = true)
         repository = ProfileRepositoryImpl(
             profileRemoteDataSource = profileRemoteDataSource,
             profileLocalDataSource = profileLocalDataSource,
+            profileRefreshGate = profileRefreshGate,
         )
     }
 
@@ -232,6 +236,18 @@ class ProfileRepositoryImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) { profileLocalDataSource.clear() }
+        }
+
+        @Test
+        fun `resets the refresh gate so the next session can refetch`() = runTest {
+            // ----- Arrange -----
+            // (refresh gate is relaxed)
+
+            // ----- Act -----
+            repository.clearProfileCache()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { profileRefreshGate.reset() }
         }
     }
 

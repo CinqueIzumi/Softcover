@@ -12,8 +12,10 @@ import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSourceI
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
+import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.MarkReadingActivityTodayUseCaseImpl
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
@@ -29,6 +31,7 @@ val profileModule = module {
     single<ProfileRemoteDataSource> {
         ProfileRemoteDataSourceImpl(
             apolloClient = get(),
+            clock = get(),
             timeZone = get(),
         )
     }
@@ -37,15 +40,22 @@ val profileModule = module {
         ProfileLocalDataSourceImpl(profileCacheDataStore = get())
     }
 
+    single { ProfileRefreshGate() }
+
     single<ProfileRepository> {
         ProfileRepositoryImpl(
             profileRemoteDataSource = get(),
             profileLocalDataSource = get(),
+            profileRefreshGate = get(),
         )
     }
 
     factory {
         ObserveUserProfileDataUseCase(profileRepository = get())
+    }
+
+    factory {
+        ObserveReadingLifeUseCase(observeUserProfileDataUseCase = get())
     }
 
     factory {
@@ -68,6 +78,7 @@ val profileModule = module {
         RefreshUserProfileDataUseCase(
             profileRepository = get(),
             getUserIdUseCase = get(),
+            profileRefreshGate = get(),
             clock = get(),
             timeZone = get(),
         )
