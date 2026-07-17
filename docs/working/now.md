@@ -3,6 +3,7 @@
 The day-to-day working surface. This is the **only** planning doc you need open while working: what's getting attention right now, and the small things to clear ASAP. The long-horizon plan lives elsewhere and is unchanged — this file just points into it.
 
 - **Focus** is the 1–2 topics being actively driven. Each is a pointer to its real place in the plan (`[[step]]` / roadmap tag), never a fork of it.
+- **Incoming user requests** is a holding pen for asks that have no catalogue entry or step yet. Triage each into `idea-catalogue.md` + `roadmap-steps.md` before scheduling it.
 - **Fast-track fixes** is a flat, unordered backlog of small things to do soon, independent of the release cadence. They don't wait for a phase slot.
 
 **How this relates to the rest:**
@@ -14,6 +15,7 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 **Maintenance rules.**
 - A **focus** item is a step pulled to the front — link it to its step number / roadmap tag so it stays anchored. When it ships, it follows its step's normal lifecycle (deleted from `roadmap-steps.md`); remove it from Focus here too.
+- An **incoming user request** is deleted from here the moment it has a catalogue tag and a step — it then lives in the plan like anything else, not in two places.
 - A **fast-track fix** is one line, checked off and **deleted** when it ships (same discipline as `roadmap-steps.md`). When a fix ships, fold it into the next release's notes in `release-plan.md` (the "+ fixes and polish" line) rather than listing it individually on the public roadmap.
 
 ---
@@ -25,6 +27,23 @@ _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 - _(nothing in focus — pick the next release's first step from [release-plan.md](release-plan.md); **3.1.0** is next up.)_
 
 > Foundation adoption onto local 0.3.0 is **done** (21 F-items landed). The only residue is the build-logic batch (F18/F20/F21), hard-blocked until the foundation publishes `build-logic` as Gradle plugins — tracked in [foundation-upstream-candidates.md](foundation-upstream-candidates.md), not here.
+
+---
+
+## Incoming user requests
+
+_New asks that aren't in the plan yet. Each needs a catalogue entry (`idea-catalogue.md`) and a step (`roadmap-steps.md`) before it can be scheduled — this section is the holding pen, not their home. Delete a line once it's been promoted._
+
+- [ ] **API-sourced author metadata + author stats in wrap-ups.** **Schema-verified:** `type authors` carries `born_date`, `death_date`, `location`, `is_bipoc`, `is_lgbtq` and `gender_id`. So a large slice of what Step 3.9 asks the user to hand-tag is already fetchable, and `born_date` additionally yields "how old were the authors I read" (age at publication / age now), which nothing on the plan covers. Needs: a real author→book/edition link so the fields are trackable per read book, then author-demographic slides in the wrap-up generator (Step 7.14) and a section in the Atlas. **This materially reshapes Steps 3.9 / 7.13 / 7.16**: those were specified as *purely* private manual tagging (nationality comes from a hand-entered country-of-birth field). The clean shape is API-sourced as the default with the private tag as an override/fill-in for what the API lacks or gets wrong — decide that before 3.5.0 builds the schema, since it changes the Room tables and the 8.13 export format.
+  - **`gender_id`** has no lookup type in the schema; the mapping (`1` = male, `2` = female, `3` = other, `null` = unknown) is confirmed and documented in [architecture.md → Unresolvable API enums](../reference/architecture.md#unresolvable-api-enums), along with the rendering rules that go with it. Read that before building any gender-based stat.
+  - `location` is a free-text `String`, not a country code, so 7.16's nationality chart needs normalising before it can bucket. *(User request.)*
+- [ ] **Book-character representation in stats & wrap-ups.** ⚠️ **Blocked upstream — the fields exist but carry no data.** `type characters` does declare `is_lgbtq`, `is_poc` (note: `is_poc`, *not* `is_bipoc` as on authors — the two tables disagree on the name), `gender_id` and a bonus `has_disability`. But confirmed empty **table-wide, across all four fields**, against the live API: `distinct_on: [gender_id]` with `_is_null: false` returns zero rows, and a `_or` filter for `is_lgbtq` / `is_poc` / `has_disability` `_eq: true` also returns zero rows. Not a sampling artefact — no character row in the table carries any demographic value at all. The character rows themselves are also poor source material for this — the top entries are real people, not characters ("Jesus Christ", "Adolf Hitler (1889-1945)", "Abraham Lincoln (1809-1865)"), with date-suffixed names suggesting bulk library-metadata import.
+  - **Therefore: not schedulable.** Nothing to compute a "share of books with LGBTQ+ characters" stat from. Park it until Hardcover populates the fields; re-probe before reconsidering. The manual-tag path (Step 3.9 / B.4.20) remains the only working route to this stat today, which also means the API-vs-manual decision noted above does **not** apply here — for characters, manual is the only option.
+  - The original ask, if the data ever lands: per book, whether it had such characters, and across a scope, the share of books read that did. Overlaps Step 3.9's *book representation tags* (B.4.20) the same way the item above overlaps author tags — same API-vs-manual decision, same schema consequence. Also touches Step 3.11, which already assumes a character list is available. Spoiler-leak rule from B.4.20 still applies: opt-in to reveal on book detail. *(User request.)*
+- [ ] **Backdate a reading-journal entry.** **This is about `reading_journals`, not `user_book_read`** — the two are different surfaces and only the journal one is the ask. **Schema-verified and supported:** the `reading_journals` table has full CRUD (`insert_reading_journal`, `update_reading_journal`, `delete_reading_journal`, `delete_reading_journals_for_book`) and both `ReadingJournalCreateType` and `ReadingJournalUpdateType` carry **`action_at: date`** — settable at creation *and* editable afterwards, which is exactly the backdating affordance wanted. Full field set: `book_id`, `edition_id`, `entry`, `event`, `metadata: jsonb`, `privacy_setting_id`, `tags`.
+  - **Current state — journals are read-only in the app.** `ReadingJournalEntity`, `UserBookWithJournals` and `ReadingJournalFragment` already exist, but the fragment selects only `event` + `updated_at` (not `action_at`), and there is **no journal mutation anywhere in `graphql/mutation/`**. So this is a new write path plus a widened fragment and entity, not a tweak to an existing call. Still small, but not free.
+  - **Unknown to resolve first:** `event` is an unconstrained `String!`, not an enum — the valid event names have to be discovered empirically against the live API before writing anything.
+  - **Explicitly not this item:** editing a read-through's `started_at` / `finished_at` via `DatesReadInput`. That is a separate (also small) capability which belongs to Step 3.7's reading log, and `DatesReadInput` has no per-update timestamp regardless — a progress bump mutates the read-through row rather than appending a dated event. *(User request.)*
 
 ---
 

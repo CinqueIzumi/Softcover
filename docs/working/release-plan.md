@@ -9,6 +9,8 @@ This is an **internal** doc: the step list, dependencies, and bundling reasoning
 
 Scope key from steps file: **S** ≈ 1–2 day, **M** ≈ 3–6 day, **L** ≈ 7+ day.
 
+**Progress markers.** Within a release that hasn't shipped yet, a finished step is prefixed **✅** and stays in place until the whole release ships — at which point the entire section is deleted per the maintenance rule above. Anything unmarked is still outstanding, so the next release section doubles as the "what's left" list. The ✅ is a convenience view, not the source of truth: a step counts as done when it has been **deleted from `roadmap-steps.md`**, and the two should always agree.
+
 **Versioning convention:**
 - **3.x.0** — additive feature releases. (3.0.0 — the KMP-era iOS + desktop launch — shipped, along with hotfixes through 3.0.3.)
 - **3.x.y** — patch releases (`y > 0`) are reserved for hotfixes shipped *between* planned feature drops; planned releases always bump the minor.
@@ -24,10 +26,11 @@ Dependencies are noted only where they cross a release boundary; same-release de
 
 Small, high-value features on already-shipped foundations.
 
-- **Step 10.15** — Auto-resize coverless title text (S).
+- ✅ **Step 10.15** — Auto-resize coverless title text (S) — **done** (`04116c58`, which also covers never leaving a cover slot blank). Already deleted from `roadmap-steps.md`.
 - **Improvement** — Batch edition-by-ISBN with an `_or` filter (S) — internal refactor; cleaner fetch path and an enabler for Step 8.6 (ISBN-list import).
 - **Step 10.16** — Local tag cache + tag suggestions (S–M) — works around the API's no-`_ilike` tag search.
 - **Step 3.12** — Rating/review prompt on mark-as-read (S–M) — reuses shipped 3.1 / 3.2 controls.
+- **Step 2.14** — Directly add a book to Currently Reading (S–M) — *pulled forward from 3.3.0 on user request.*
 
 ---
 
@@ -42,7 +45,6 @@ Small, high-value features on already-shipped foundations.
 
 - **Step 5.2** — Series detail screen (M).
 - **Step 5.4** — Series-completion cascade (S) — *deps: 5.2 (same release)*.
-- **Step 2.14** — Directly add a book to Currently Reading (S–M).
 - **Step 4.10** — Format in the edition selector (S).
 
 ---
@@ -131,7 +133,7 @@ This is the release a tracking-minded user is really waiting for: it's the whole
 
 ## 3.11.0 — Stats Atlas + heatmaps
 
-- **Step 7.7** — Streak heatmap on Profile (M) — *deps: 3.5 (shipped); subsumed by 7.12 next release*.
+- **Step 7.7** — Streak heatmap on Profile (M) — *deps: 3.5 (shipped); subsumed by 7.12 next release*. User asked for a **readable yearly** scope (Hardcover's own site heatmap is being removed as unreadable) — ship the 12-month view alongside the 12-week one, not 12-week only.
 - **Step 7.8** — Time-of-day reading heatmap (M) — *deps: 3.5 (shipped)*.
 - **Step 7.9** — Reading Stats Atlas screen (M).
 - **Step 7.10** — Public activity log (M).

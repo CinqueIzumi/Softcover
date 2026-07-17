@@ -18,6 +18,7 @@ A few honest caveats:
 - Long titles on coverless books resize to stay readable.
 - Tag suggestions while you tag, drawn from tags you've used before.
 - A gentle prompt to rate or review a book the moment you mark it Read.
+- Add a book straight to **Currently Reading** in one tap, instead of shelving it first.
 
 ## 3.2.0 — Widgets (Android)
 
@@ -26,7 +27,6 @@ Home-screen widgets: **Currently Reading**, a **random pick from Want-to-Read**,
 ## 3.3.0 — Series, shelving & editions
 
 - A full **Series** page — reading-order checklist and your progress through it; finishing the last book triggers a quiet celebration.
-- Add a book straight to **Currently Reading** in one tap.
 - See each edition's **format** (ebook / physical / audiobook) when you pick one.
 
 ## 3.4.0 — Richer book detail
