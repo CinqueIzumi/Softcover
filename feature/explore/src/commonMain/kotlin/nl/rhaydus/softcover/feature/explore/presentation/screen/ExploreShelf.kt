@@ -100,6 +100,7 @@ internal fun TrendingCard(
                 defaultEdition = book.defaultEdition,
                 isLoading = false,
                 fallbackCoverUrl = book.coverUrl,
+                coverlessTitle = book.title,
                 modifier = Modifier.fillMaxWidth(),
                 elevation = 6.dp,
                 cornerRadius = 6.dp,
@@ -228,6 +229,7 @@ internal fun SeriesCard(
                 defaultEdition = book.defaultEdition,
                 isLoading = false,
                 fallbackCoverUrl = book.coverUrl,
+                coverlessTitle = book.title,
                 modifier = Modifier.fillMaxWidth(),
                 elevation = 4.dp,
                 cornerRadius = 6.dp,
@@ -586,6 +588,7 @@ internal fun SearchResultRow(
             isLoading = false,
             defaultEdition = book.defaultEdition,
             fallbackCoverUrl = book.coverUrl,
+            coverlessTitle = book.title,
             sharedTransitionKey = bookCoverTransitionKey(
                 editionId = book.currentEdition?.id,
                 bookId = book.id,

@@ -898,6 +898,7 @@ private fun LayoutBookEntry(
                                 isLoading = false,
                                 defaultEdition = book.defaultEdition,
                                 fallbackCoverUrl = book.coverUrl,
+                                coverlessTitle = book.title,
                                 elevation = 6.dp,
                                 cornerRadius = LIBRARY_COVER_CORNER_RADIUS,
                                 sharedTransitionKey = bookCoverTransitionKey(
@@ -988,6 +989,7 @@ private fun LayoutBookEntry(
                         isLoading = false,
                         defaultEdition = book.defaultEdition,
                         fallbackCoverUrl = book.coverUrl,
+                        coverlessTitle = book.title,
                         elevation = 6.dp,
                         cornerRadius = LIBRARY_COVER_CORNER_RADIUS,
                         sharedTransitionKey = bookCoverTransitionKey(
@@ -1182,6 +1184,7 @@ private fun LayoutEditionEntry(
                         modifier = coverModifier,
                         isLoading = false,
                         defaultEdition = edition,
+                        coverlessTitle = title,
                         elevation = 6.dp,
                         cornerRadius = 10.dp,
                         sharedTransitionKey = bookCoverTransitionKey(
@@ -1245,6 +1248,7 @@ private fun LayoutEditionEntry(
                     modifier = coverModifier,
                     isLoading = false,
                     defaultEdition = edition,
+                    coverlessTitle = title,
                     elevation = 6.dp,
                     cornerRadius = 10.dp,
                     sharedTransitionKey = bookCoverTransitionKey(

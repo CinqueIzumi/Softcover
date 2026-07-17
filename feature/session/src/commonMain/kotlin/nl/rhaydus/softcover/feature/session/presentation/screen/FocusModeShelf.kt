@@ -94,6 +94,7 @@ internal fun FocusReadingPanel(
             defaultEdition = active.book.defaultEdition,
             isLoading = false,
             fallbackCoverUrl = active.book.coverUrl,
+            coverlessTitle = active.book.title,
             elevation = 20.dp,
             cornerRadius = 8.dp,
             shadowColor = Color.Black.copy(alpha = 0.5f),

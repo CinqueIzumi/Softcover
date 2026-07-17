@@ -230,8 +230,13 @@ internal fun GeneralBookInfoSection(
         EditionImage(
             edition = edition,
             defaultEdition = fallBackEdition,
-            fallbackCoverUrl = fallbackCoverUrl,
             isLoading = coverIsLoading,
+            // No coverlessTitle here on purpose: this is the blurred decorative backdrop behind
+            // the hero cover below, not a cover the user reads. A typographic jacket rendered
+            // here would just be blurred noise — the readable cover (with its own
+            // coverlessTitle) is the one at the hero EditionImage below.
+            coverlessTitle = null,
+            fallbackCoverUrl = fallbackCoverUrl,
             modifier = Modifier
                 .matchParentSize()
                 .blur(8.dp)
@@ -276,6 +281,7 @@ internal fun GeneralBookInfoSection(
                     defaultEdition = fallBackEdition,
                     fallbackCoverUrl = fallbackCoverUrl,
                     isLoading = coverIsLoading,
+                    coverlessTitle = title,
                     modifier = Modifier.height(imageHeight * 0.8f),
                     cornerRadius = 16.dp,
                     sharedTransitionKey = bookCoverTransitionKey(

@@ -230,6 +230,7 @@ private fun EditionItem(
                 modifier = Modifier.width(width = 60.dp),
                 isLoading = false,
                 defaultEdition = defaultEdition,
+                coverlessTitle = edition.title,
             )
 
             Spacer(modifier = Modifier.width(16.dp))

@@ -451,6 +451,7 @@ internal fun FeaturedBookCard(
                         isLoading = false,
                         defaultEdition = book.defaultEdition,
                         fallbackCoverUrl = book.coverUrl,
+                        coverlessTitle = book.title,
                         elevation = 24.dp,
                         cornerRadius = 10.dp,
                         shadowColor = Color.Black.copy(alpha = 0.7f),
@@ -685,6 +686,7 @@ internal fun CompactBookEntry(
                     isLoading = false,
                     defaultEdition = book.defaultEdition,
                     fallbackCoverUrl = book.coverUrl,
+                    coverlessTitle = book.title,
                     elevation = 6.dp,
                     cornerRadius = 8.dp,
                     sharedTransitionKey = bookCoverTransitionKey(
@@ -1047,6 +1049,7 @@ private fun PickUpNextTile(
                 isLoading = false,
                 defaultEdition = book.defaultEdition,
                 fallbackCoverUrl = book.coverUrl,
+                coverlessTitle = book.title,
                 elevation = 4.dp,
                 cornerRadius = 10.dp,
                 sharedTransitionKey = bookCoverTransitionKey(
@@ -1102,6 +1105,7 @@ private fun TrendingTileSection(
                     isLoading = false,
                     defaultEdition = book.defaultEdition,
                     fallbackCoverUrl = book.coverUrl,
+                    coverlessTitle = book.title,
                     elevation = 4.dp,
                     cornerRadius = 8.dp,
                     sharedTransitionKey = bookCoverTransitionKey(
