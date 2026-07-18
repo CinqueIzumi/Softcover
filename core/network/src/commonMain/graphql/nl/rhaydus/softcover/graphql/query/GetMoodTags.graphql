@@ -1,0 +1,19 @@
+# Top Mood tags by popularity - the "Browse by mood" grid's tiles. Selected inline (rather than
+# via TagFragment) because the grid needs `slug` to drive the mood-filtered book query, which the
+# shared TagFragment does not carry.
+query GetMoodTags(
+    $limit: Int!,
+) {
+    tags(
+        where: {
+            tag_category: { category: { _eq: "Mood" } }
+        }
+        order_by: [{ count: desc }]
+        limit: $limit
+    ) {
+        id
+        tag
+        slug
+        count
+    }
+}

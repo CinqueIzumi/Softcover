@@ -1,0 +1,34 @@
+# Books carrying a given Genre tag, ranked by how strongly each book carries THAT genre - not by
+# global popularity. Genres are extremely broad, so ordering by `users_count` (as this query
+# originally did, from the `books` root) collapsed every genre's top page to the same handful of
+# globally-popular books, since those carry nearly every common genre tag. `taggable_counts` rows
+# carry a per-(book, tag) `count` - how strongly a given book is associated with that specific tag -
+# so ordering by it surfaces books that actually earn the genre rather than ones popular for any
+# reason. Same fix as GetBooksByMoodTag.graphql, applied here with a genre-category tag match
+# instead of a slug match.
+#
+# This used to also exclude the requesting user's already-owned/listed books here, via a
+# server-side `_not: { _or: [ user_books, list_books ] } }` correlated anti-join over the entire
+# `books` root - the likely source of this rail's reported slowness. That exclusion now happens
+# CLIENT-SIDE instead (see GetBecauseYouReadBooksUseCase), so this query no longer takes a
+# $userId. $limit should overfetch past the rail's display size, since the client-side exclusion
+# removes some of what comes back.
+query GetBooksByGenreTag(
+    $genre: String!,
+    $limit: Int!,
+) {
+    taggable_counts(
+        where: {
+            tag: {
+                tag: { _eq: $genre }
+                tag_category: { category: { _eq: "Genre" } }
+            }
+        }
+        order_by: [{ count: desc }]
+        limit: $limit
+    ) {
+        book {
+            ...BookDetailFragment
+        }
+    }
+}

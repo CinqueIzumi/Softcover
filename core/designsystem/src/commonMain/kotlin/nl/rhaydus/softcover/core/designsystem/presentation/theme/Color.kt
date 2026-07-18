@@ -93,3 +93,28 @@ val ColorScheme.spoilerEditorHighlight: Color
 
 internal val ColorScheme.spoilerCover: Color
     get() = onSurfaceVariant.copy(alpha = 0.90f)
+
+/**
+ * Fixed warm inks for the Explore "Browse by mood" tiles and the unreleased-book monogram cover
+ * (explore-3a). Like [RatingGold] these sit outside the Material scheme — the spec states they read
+ * identically in both themes, as a deliberate signal (a printed-jacket ink) rather than a theme role.
+ * Never re-declare one of these hexes at a call site; two of the four mood tiles stay on ordinary
+ * theme roles instead (`surfaceContainerHigh` / `onSurface` / `primary` / `onSurfaceVariant`) because
+ * only two of the spec's tiles are ink-tinted — see `docs/reference/design-system.md`.
+ */
+val MoodInkCosyBackground = Color(0xFF3A3016)
+val MoodInkCosyForeground = Color(0xFFF5E1A7)
+
+val MoodInkDreadBackground = Color(0xFF2B1A15)
+val MoodInkDreadForeground = Color(0xFFFFEDE8)
+val MoodInkDreadEyebrow = Color(0xFFFFDBD1)
+
+val MoodInkHeartWrenchBackground = Color(0xFF3A1E22)
+val MoodInkHeartWrenchForeground = Color(0xFFFFD9DE)
+
+/**
+ * The fixed dark ink behind the app-wide coverless-cover monogram - used whenever no cover art
+ * resolves, independent of release status.
+ */
+val MonogramCoverInk = Color(0xFF1A110F)
+val MonogramCoverForeground = Color(0xFFFFEDE8)

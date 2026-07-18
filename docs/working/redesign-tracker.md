@@ -19,7 +19,7 @@ redesign in the app yet?".
 | Screen | Spec sheet | Status |
 | --- | --- | --- |
 | Book detail | `Book Detail 2a - Spec Sheet.dc.html` (+ `Book Detail Sheets - Spec Sheet.dc.html`) | ✅ Implemented |
-| Explore | `Explore 3a - Spec Sheet.dc.html` | ⬜ Not started |
+| Explore | `Explore 3a - Spec Sheet.dc.html` | ✅ Implemented |
 | Reading | `Reading 1a - Spec Sheet.dc.html` | ⬜ Not started |
 | Library | `Library Spec Sheet.dc.html` | ✅ Implemented |
 | Profile | `Profile 1a - Spec Sheet.dc.html` | ✅ Implemented |
@@ -41,3 +41,12 @@ redesign in the app yet?".
   predates them).
 - `Typography Option A - Newsreader.dc.html` in the design project is a typography
   exploration, not a screen redesign spec sheet, so it is intentionally not tracked here.
+- **Explore 3a** was built with two approved deviations from the spec sheet: the featured
+  card's *Remind me* affordance and its release-reminder bottom sheet were dropped (the app has
+  no future-notification scheduling yet — the card ships with *Want to read* only), and the
+  *"Because you read {book}"* rail was implemented as *"Because you read {genre}"* (the Hardcover
+  API has no recommendation/similar-books capability, so the rail is driven by the reader's
+  most-read genre with a user-selectable override persisted locally). The spec's search
+  sort/filter is limited to the two proven Typesense sort keys (Relevance / Popularity). The
+  monogram cover from the spec's unreleased card became the app-wide coverless fallback
+  (`CoverlessTitleCover`), keyed on missing art rather than release status.

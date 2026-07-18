@@ -1,0 +1,27 @@
+# Books carrying a given Mood tag, ranked by how strongly each book carries THAT mood - not by
+# global popularity. Moods are extremely broad (60k+ books each), so ordering by `users_count`
+# (as this query originally did) collapses every mood's top page to the same handful of
+# globally-popular books, since those books carry nearly every common mood tag. `taggable_counts`
+# rows carry a per-(book, tag) `count` - how strongly a given book is associated with that specific
+# tag - so ordering by it surfaces books that actually earn the mood rather than ones popular for
+# any reason. Queried from the `taggable_counts` root (rather than `books` root, ordered by a
+# mood-specific aggregate) since the mood-specific strength is only exposed per (book, tag) row
+# here. $offset still pages forward exactly, same contract as before.
+query GetBooksByMoodTag(
+    $slug: String!,
+    $limit: Int!,
+    $offset: Int = 0,
+) {
+    taggable_counts(
+        where: {
+            tag: { slug: { _eq: $slug } }
+        }
+        order_by: [{ count: desc }]
+        limit: $limit
+        offset: $offset
+    ) {
+        book {
+            ...BookDetailFragment
+        }
+    }
+}

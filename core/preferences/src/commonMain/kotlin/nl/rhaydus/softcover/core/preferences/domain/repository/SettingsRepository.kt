@@ -90,4 +90,9 @@ interface SettingsRepository {
     val lastUsedProgressUnit: Flow<ProgressUnit>
 
     suspend fun setLastUsedProgressUnit(unit: ProgressUnit)
+
+    /** Null means "use the auto-derived most-read genre" - see GetBecauseYouReadBooksUseCase. */
+    val becauseYouReadGenre: Flow<String?>
+
+    suspend fun setBecauseYouReadGenre(genre: String?)
 }

@@ -1,9 +1,12 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,23 +18,28 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
@@ -48,24 +56,36 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
+import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnLoadMoreSearchResultsAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRetrySearchAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchFocusChangedAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
+import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreSearchPhase
 
 // File-level so scroll position survives recomposition when the shared tab body movableContent moves
 // between the compact/rail/sidebar chrome layouts on a window resize.
 private val editorialScrollState = ScrollState(initial = 0)
+private val focusScrollState = ScrollState(initial = 0)
 private val trendingListState = LazyListState()
 private val continueSeriesListState = LazyListState()
+private val becauseYouReadListState = LazyListState()
+
+private val TRENDING_CARD_WIDTH = 118.dp
+private val BECAUSE_YOU_READ_CARD_WIDTH = 118.dp
+private val UP_NEXT_CARD_WIDTH = 126.dp
 
 /**
- * Mobile Explore: the search-first Scaffold — a [SoftcoverSearchTopBar] over either the editorial
- * discovery feed (trending + up-next carousels + recent searches, with pull-to-refresh) or the active
- * search results list. The cards, the dismiss sheet, and the recent-searches block are the shared
- * shelf pieces ([TrendingCard], [SeriesCard], [ContinueSeriesMenuSheet], [RecentSearchesSection],
- * [SearchResultRow]); only this carousel-and-Scaffold framing is mobile-specific.
+ * Mobile Explore (explore-3a): a [SoftcoverSearchTopBar] search chrome over one of four bodies,
+ * branched on [ExploreScreenUiState.searchPhase] — the editorial feed, the search-focus overlay
+ * (recent + "try a mood"), the loading state, or the results list. The cards, the dismiss sheet, the
+ * mood grid, and the recent-searches block are the shared shelf pieces (`ExploreShelf.kt`); only this
+ * Scaffold-and-phase framing is mobile-specific.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -84,6 +104,8 @@ internal actual fun ExploreScreenLayout(
                 onSearchValueChange = { runAction(OnQueryChangeAction(newQuery = it)) },
                 onScanClick = onScanClick,
                 isLoading = state.isLoading,
+                active = state.searchPhase != ExploreSearchPhase.FEED,
+                onFocusChange = { focused -> runAction(OnSearchFocusChangedAction(focused = focused)) },
             )
         },
     ) { padding ->
@@ -96,20 +118,65 @@ internal actual fun ExploreScreenLayout(
             return@Scaffold
         }
 
-        when {
-            state.searchText.isEmpty() -> EditorialContent(
+        when (state.searchPhase) {
+            ExploreSearchPhase.FEED -> EditorialContent(
                 state = state,
                 runAction = runAction,
                 onBookClick = onBookClick,
                 contentPadding = padding,
             )
 
-            else -> ActiveSearchContent(
+            ExploreSearchPhase.FOCUS -> SearchFocusScreen(
+                state = state,
+                runAction = runAction,
+                contentPadding = padding,
+            )
+
+            ExploreSearchPhase.LOADING, ExploreSearchPhase.RESULTS -> ActiveSearchContent(
                 state = state,
                 runAction = runAction,
                 onBookClick = onBookClick,
                 contentPadding = padding,
             )
+        }
+    }
+}
+
+@Composable
+private fun SearchFocusScreen(
+    state: ExploreScreenUiState,
+    runAction: (ExploreAction) -> Unit,
+    contentPadding: PaddingValues,
+) {
+    // Feedback item 11: tapping outside the focused field dismisses the focus surface, but the
+    // BasicTextField living in `SoftcoverSearchTopBar` kept its platform focus/cursor. Clearing it
+    // here reaches into the same composition the top bar's field is part of.
+    val focusManager = LocalFocusManager.current
+
+    Box(
+        modifier = Modifier
+            .padding(contentPadding)
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures {
+                    focusManager.clearFocus()
+                    runAction(OnSearchFocusChangedAction(focused = false))
+                }
+            },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(focusScrollState)
+                .padding(top = 18.dp),
+        ) {
+            SearchFocusContent(
+                queries = state.previousSearchQueries,
+                moods = state.moodTags,
+                runAction = runAction,
+            )
+
+            Spacer(modifier = Modifier.height(rememberBottomBarPadding()))
         }
     }
 }
@@ -145,9 +212,32 @@ private fun EditorialContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(editorialScrollState),
-            verticalArrangement = Arrangement.spacedBy(40.dp),
+            verticalArrangement = Arrangement.spacedBy(36.dp),
         ) {
             Spacer(modifier = Modifier.height(8.dp))
+
+            FeaturedSection(
+                book = state.featuredUpcomingRelease,
+                isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
+                onBookClick = onBookClick,
+                runAction = runAction,
+            )
+
+            ContinueSeriesSection(
+                books = state.continueSeriesBooks,
+                isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
+                onBookClick = onBookClick,
+                runAction = runAction,
+            )
+
+            BecauseYouReadSection(
+                genre = state.becauseYouReadGenre,
+                genreOptions = state.becauseYouReadGenreOptions,
+                books = state.becauseYouReadBooks,
+                isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
+                onBookClick = onBookClick,
+                runAction = runAction,
+            )
 
             TrendingSection(
                 books = state.trendingBooks,
@@ -155,10 +245,9 @@ private fun EditorialContent(
                 onBookClick = onBookClick,
             )
 
-            ContinueSeriesSection(
-                books = state.continueSeriesBooks,
-                isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
-                onBookClick = onBookClick,
+            MoodGrid(
+                moods = state.moodTags,
+                isLoading = state.loadingMoodTags && state.moodTags.isEmpty(),
                 runAction = runAction,
             )
 
@@ -173,6 +262,41 @@ private fun EditorialContent(
 }
 
 @Composable
+private fun FeaturedSection(
+    book: Book?,
+    isLoading: Boolean,
+    onBookClick: (Book, String?) -> Unit,
+    runAction: (ExploreAction) -> Unit,
+) {
+    // Terminal empty (no upcoming release to feature) collapses away with no reserved space;
+    // every other state - loading or loaded - keeps the card's own footprint so the crossfade
+    // below never resizes the feed around it.
+    if (isLoading.not() && book == null) return
+
+    SkeletonCrossfade(
+        isLoading = isLoading,
+        modifier = Modifier.padding(horizontal = 16.dp),
+        label = "FeaturedSection",
+    ) { loading ->
+        if (loading) {
+            FeaturedCardSkeleton()
+        } else if (book != null) {
+            FeaturedCard(
+                book = book,
+                onClick = {
+                    onBookClick(
+                        book,
+                        SURFACE_FEATURED,
+                    )
+                },
+                onWantToReadClick = { runAction(OnAddBookToLibraryClickAction(book = book)) },
+                onRemoveFromLibraryClick = { runAction(OnRemoveBookFromLibraryClickAction(book = book)) },
+            )
+        }
+    }
+}
+
+@Composable
 private fun TrendingSection(
     books: List<Book>,
     isLoading: Boolean,
@@ -180,16 +304,24 @@ private fun TrendingSection(
 ) {
     if (isLoading.not() && books.isEmpty()) return
 
+    // Hoisted above the crossfade so the coordinator's first-composition timestamp is stamped as
+    // soon as this section mounts - typically while still loading - not at the moment content
+    // arrives. By the time a real network fetch resolves, the stagger window has usually already
+    // elapsed, so the item entrance defers entirely to the crossfade below instead of double-
+    // animating alongside it; the stagger only plays when content is already on hand at the
+    // section's very first paint (design-system.md §2.5 "Staggered entry on first composition").
+    val entry = rememberStaggeredEntryCoordinator(key = "explore:trending")
+
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         EditorialSectionHeader(
-            eyebrow = "This week",
-            headline = "Trending",
+            eyebrow = "Trending this week",
+            headline = "What everyone's reading",
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 
         SkeletonCrossfade(
             isLoading = isLoading,
-            label = "TrendingRow",
+            label = "TrendingRail",
         ) { loading ->
             if (loading) {
                 LazyRow(
@@ -197,12 +329,10 @@ private fun TrendingSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     items(TRENDING_SKELETON_COUNT) {
-                        TrendingCardSkeleton(modifier = Modifier.width(150.dp))
+                        TrendingCardSkeleton(modifier = Modifier.width(TRENDING_CARD_WIDTH))
                     }
                 }
             } else {
-                val entry = rememberStaggeredEntryCoordinator(key = "explore:trending")
-
                 LazyRow(
                     state = trendingListState,
                     contentPadding = PaddingValues(horizontal = 24.dp),
@@ -211,13 +341,107 @@ private fun TrendingSection(
                     itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
                         TrendingCard(
                             modifier = Modifier
-                                .width(150.dp)
+                                .width(TRENDING_CARD_WIDTH)
                                 .staggeredEntry(coordinator = entry, index = index),
                             book = book,
                             onClick = {
                                 onBookClick(
                                     book,
                                     SURFACE_TRENDING,
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BecauseYouReadSection(
+    genre: String?,
+    genreOptions: List<String>,
+    books: List<Book>,
+    isLoading: Boolean,
+    onBookClick: (Book, String?) -> Unit,
+    runAction: (ExploreAction) -> Unit,
+) {
+    // Terminal empty: the fetch is done and this reader has no genre to recommend from (or,
+    // defensively, no books despite a resolved genre) - nothing to show, so the section collapses
+    // with no reserved space. Any other state - still loading, regardless of whether genre/books
+    // happen to have arrived yet - keeps the header+rail's full footprint reserved below, which is
+    // what fixes the section popping into the feed at full height once the genre resolves: it used
+    // to gate on `if (genre == null) return` unconditionally, hiding the whole section - header
+    // included - for the entire loading window, not just the genuinely-empty terminal state.
+    if (isLoading.not() && (genre == null || books.isEmpty())) return
+
+    // Hoisted above the crossfade - see TrendingSection's comment for why.
+    val entry = rememberStaggeredEntryCoordinator(key = "explore:because_you_read")
+
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SkeletonCrossfade(
+            isLoading = isLoading,
+            modifier = Modifier.padding(horizontal = 24.dp),
+            label = "BecauseYouReadHeader",
+        ) { loading ->
+            if (loading) {
+                EditorialSectionHeaderSkeleton()
+            } else if (genre != null) {
+                EditorialSectionHeader(
+                    eyebrow = "Because you read",
+                    headline = genre,
+                )
+            }
+        }
+
+        // Crossfaded too, not just gated on `genre != null` directly: genre and `isLoading` flip
+        // together (see the guard above), so an ungated appearance would hard-pop this control in
+        // alongside the header/rail's smooth 150ms fade — a small but visible inconsistency next
+        // to the very transition this file's crossfade work exists to smooth out.
+        SkeletonCrossfade(
+            isLoading = isLoading,
+            modifier = Modifier.padding(horizontal = 24.dp),
+            label = "BecauseYouReadGenreControl",
+        ) { loading ->
+            if (loading.not() && genre != null) {
+                BecauseYouReadGenreControl(
+                    genre = genre,
+                    options = genreOptions,
+                    runAction = runAction,
+                )
+            }
+        }
+
+        SkeletonCrossfade(
+            isLoading = isLoading,
+            label = "BecauseYouReadRail",
+        ) { loading ->
+            if (loading) {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    items(BECAUSE_YOU_READ_SKELETON_COUNT) {
+                        BecauseYouReadCardSkeleton(modifier = Modifier.width(BECAUSE_YOU_READ_CARD_WIDTH))
+                    }
+                }
+            } else {
+                LazyRow(
+                    state = becauseYouReadListState,
+                    contentPadding = PaddingValues(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
+                        BecauseYouReadCard(
+                            modifier = Modifier
+                                .width(BECAUSE_YOU_READ_CARD_WIDTH)
+                                .staggeredEntry(coordinator = entry, index = index),
+                            book = book,
+                            onClick = {
+                                onBookClick(
+                                    book,
+                                    SURFACE_BECAUSE_YOU_READ,
                                 )
                             },
                         )
@@ -239,6 +463,9 @@ private fun ContinueSeriesSection(
 
     var sheetBook by remember { mutableStateOf<Book?>(null) }
 
+    // Hoisted above the crossfade - see TrendingSection's comment for why.
+    val entry = rememberStaggeredEntryCoordinator(key = "explore:continue_series")
+
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         EditorialSectionHeader(
             eyebrow = "Pick up where you left off",
@@ -248,7 +475,7 @@ private fun ContinueSeriesSection(
 
         SkeletonCrossfade(
             isLoading = isLoading,
-            label = "ContinueSeriesRow",
+            label = "ContinueSeriesRail",
         ) { loading ->
             if (loading) {
                 LazyRow(
@@ -256,31 +483,45 @@ private fun ContinueSeriesSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     items(CONTINUE_SERIES_SKELETON_COUNT) {
-                        SeriesCardSkeleton(modifier = Modifier.width(120.dp))
+                        SeriesCardSkeleton(modifier = Modifier.width(UP_NEXT_CARD_WIDTH))
                     }
                 }
             } else {
-                val entry = rememberStaggeredEntryCoordinator(key = "explore:continue_series")
-
                 LazyRow(
                     state = continueSeriesListState,
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
-                        SeriesCard(
-                            modifier = Modifier
-                                .width(120.dp)
-                                .staggeredEntry(coordinator = entry, index = index),
-                            book = book,
-                            onClick = {
-                                onBookClick(
-                                    book,
-                                    SURFACE_UP_NEXT,
-                                )
-                            },
-                            onMenuClick = { sheetBook = book },
-                        )
+                        val cardModifier = Modifier
+                            .width(UP_NEXT_CARD_WIDTH)
+                            .staggeredEntry(coordinator = entry, index = index)
+
+                        if (book.isUnreleased) {
+                            UnreleasedSeriesCard(
+                                modifier = cardModifier,
+                                book = book,
+                                onClick = {
+                                    onBookClick(
+                                        book,
+                                        SURFACE_UP_NEXT,
+                                    )
+                                },
+                                onMenuClick = { sheetBook = book },
+                            )
+                        } else {
+                            SeriesCard(
+                                modifier = cardModifier,
+                                book = book,
+                                onClick = {
+                                    onBookClick(
+                                        book,
+                                        SURFACE_UP_NEXT,
+                                    )
+                                },
+                                onMenuClick = { sheetBook = book },
+                            )
+                        }
                     }
                 }
             }
@@ -296,6 +537,7 @@ private fun ContinueSeriesSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ActiveSearchContent(
     state: ExploreScreenUiState,
@@ -306,46 +548,89 @@ private fun ActiveSearchContent(
     Column(
         modifier = Modifier
             .padding(contentPadding)
-            .padding(horizontal = 24.dp)
             .fillMaxSize(),
     ) {
         if (state.searchError != null) {
             InlineErrorState(
                 message = state.searchError,
                 onRetry = { runAction(OnRetrySearchAction) },
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
                 textStyle = MaterialTheme.editorialTypography.bodySmall,
             )
-        } else {
-            Spacer(modifier = Modifier.height(16.dp))
 
-            val text = when {
-                state.isLoading -> "Loading..."
-                state.queriedBooks.isEmpty() -> "No results found"
-                else -> "Showing ${state.queriedBooks.size} results"
+            return
+        }
+
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+        ) {
+            SortChip(
+                sortMode = state.sortMode,
+                runAction = runAction,
+            )
+        }
+
+        val subtitle = when {
+            state.searchText.isNotEmpty() -> "for \"${state.searchText}\""
+            state.activeMoodFilter != null -> "for \"${state.activeMoodFilter.label}\""
+            else -> null
+        }
+
+        SearchResultsHeader(
+            resultCount = state.queriedBooks.size,
+            subtitle = subtitle,
+            modifier = Modifier.padding(horizontal = 20.dp),
+        )
+
+        val resultsListState = rememberLazyListState()
+
+        // Feedback item 7: append the next page once the visible window nears the fetched end.
+        // There's no server-side total (Typesense returns no hit count), so `queriedBooksHasMore`
+        // is the only stop condition — the action itself is the re-entrancy guard (a no-op while a
+        // fetch is already in flight), so this can dispatch freely on every qualifying scroll frame.
+        LaunchedEffect(resultsListState, state.queriedBooks.size, state.queriedBooksHasMore) {
+            val itemCount = state.queriedBooks.size
+            if (state.queriedBooksHasMore.not() || itemCount == 0) return@LaunchedEffect
+
+            snapshotFlow { resultsListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+                .collect { lastVisibleIndex ->
+                    val nearEnd = lastVisibleIndex != null &&
+                        lastVisibleIndex >= itemCount - SEARCH_RESULTS_LOAD_MORE_THRESHOLD
+
+                    if (nearEnd) {
+                        runAction(OnLoadMoreSearchResultsAction)
+                    }
+                }
+        }
+
+        LazyColumn(
+            state = resultsListState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+        ) {
+            items(state.queriedBooks, key = { it.id }) { book ->
+                SearchResultRow(
+                    book = book,
+                    onBookClick = onBookClick,
+                    runAction = runAction,
+                )
             }
 
-            Text(
-                text = text,
-                style = MaterialTheme.editorialTypography.eyebrowSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(state.queriedBooks, key = { it.id }) { book ->
-                    SearchResultRow(
-                        book = book,
-                        onBookClick = onBookClick,
-                        runAction = runAction,
-                    )
+            if (state.loadingMoreQueriedBooks) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularWavyProgressIndicator()
+                    }
                 }
             }
         }
@@ -364,6 +649,9 @@ private val previewMockState = ExploreScreenUiState(
     loadingTrendingBooks = false,
     continueSeriesBooks = ExploreMockData.continueSeries,
     loadingContinueSeriesBooks = false,
+    loadingFeaturedUpcomingRelease = false,
+    loadingBecauseYouReadBooks = false,
+    loadingMoodTags = false,
 )
 
 @StandardPreview
@@ -395,6 +683,9 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
                 continueSeriesBooks = emptyList(),
                 loadingContinueSeriesBooks = false,
                 previousSearchQueries = emptyList(),
+                loadingFeaturedUpcomingRelease = false,
+                loadingBecauseYouReadBooks = false,
+                loadingMoodTags = false,
             ),
         )
     }
@@ -415,6 +706,9 @@ private fun LoadingTrendingExploreScreenPreview() {
                 continueSeriesBooks = ExploreMockData.continueSeries,
                 loadingContinueSeriesBooks = false,
                 previousSearchQueries = listOf("Bubblegum", "Earthlings"),
+                loadingFeaturedUpcomingRelease = false,
+                loadingBecauseYouReadBooks = false,
+                loadingMoodTags = false,
             ),
         )
     }
@@ -435,6 +729,39 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
                 continueSeriesBooks = emptyList(),
                 loadingContinueSeriesBooks = true,
                 previousSearchQueries = emptyList(),
+                loadingFeaturedUpcomingRelease = false,
+                loadingBecauseYouReadBooks = false,
+                loadingMoodTags = false,
+            ),
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun SearchFocusExploreScreenPreview() {
+    SoftcoverTheme {
+        ExploreScreenLayout(
+            runAction = {},
+            onBookClick = { _, _ -> },
+            onScanClick = {},
+            isOnline = true,
+            state = previewMockState.copy(
+                searchFocused = true,
+                moodTags = listOf(
+                    MoodTag(
+                        id = 1,
+                        label = "Cosy & comforting",
+                        slug = "cosy",
+                        bookCount = 820,
+                    ),
+                    MoodTag(
+                        id = 2,
+                        label = "Dread & unease",
+                        slug = "dread",
+                        bookCount = 1540,
+                    ),
+                ),
             ),
         )
     }

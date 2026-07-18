@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.data.repository
 
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -19,6 +20,7 @@ import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSourc
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSource
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
+import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 
 
 class ExploreRepositoryImplTest {
@@ -113,6 +115,29 @@ class ExploreRepositoryImplTest {
     }
 
     @Nested
+    inner class QueriedBooksHasMore {
+        @Test
+        fun `queriedBooksHasMore is wired to remote data source`() = runTest {
+            // ----- Arrange -----
+            every {
+                searchRemoteDataSource.queriedBooksHasMore
+            } returns flowOf(true)
+
+            val freshRepository = ExploreRepositoryImpl(
+                searchRemoteDataSource = searchRemoteDataSource,
+                searchLocalDataSource = searchLocalDataSource,
+                dismissedContinueSeriesLocalDataSource = dismissedContinueSeriesLocalDataSource,
+            )
+
+            // ----- Act & Assert -----
+            freshRepository.queriedBooksHasMore.test {
+                awaitItem() shouldBe true
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
     inner class SearchForName {
         @Test
         fun `delegates to remote data source with correct arguments`() = runTest {
@@ -124,6 +149,7 @@ class ExploreRepositoryImplTest {
             repository.searchForName(
                 name = name,
                 userId = userId,
+                sortMode = ExploreSortMode.POPULARITY,
             )
 
             // ----- Assert -----
@@ -131,7 +157,58 @@ class ExploreRepositoryImplTest {
                 searchRemoteDataSource.searchForName(
                     name = name,
                     userId = userId,
+                    sortMode = ExploreSortMode.POPULARITY,
                 )
+            }
+        }
+    }
+
+    @Nested
+    inner class FetchBooksByGenre {
+        @Test
+        fun `delegates to remote data source and returns the mapped result`() = runTest {
+            // ----- Arrange -----
+            val genre = "Fantasy"
+            val limit = 50
+            val expectedBooks = listOf(stubBook())
+
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = genre,
+                    limit = limit,
+                )
+            } returns expectedBooks
+
+            // ----- Act -----
+            val result = repository.fetchBooksByGenre(
+                genre = genre,
+                limit = limit,
+            )
+
+            // ----- Assert -----
+            result shouldBe expectedBooks
+            coVerify {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = genre,
+                    limit = limit,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class ClearSearchResults {
+        @Test
+        fun `delegates to remote data source`() = runTest {
+            // ----- Arrange -----
+            // (searchRemoteDataSource is relaxed — no additional setup needed)
+
+            // ----- Act -----
+            repository.clearSearchResults()
+
+            // ----- Assert -----
+            coVerify {
+                searchRemoteDataSource.clearSearchResults()
             }
         }
     }

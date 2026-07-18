@@ -6,14 +6,21 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.EnrichDismissedContinueSeriesMetadataUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetBecauseYouReadBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetFeaturedUpcomingReleaseUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetMoodTagsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksHasMoreUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveAllSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchByMoodUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBookDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
@@ -27,7 +34,9 @@ import nl.rhaydus.toad.ToadScreenModel
 internal class ExploreScreenScreenModel(
     private val getPreviousSearchQueriesUseCase: GetPreviousSearchQueriesUseCase,
     private val getQueriedBooksUseCase: GetQueriedBooksUseCase,
+    private val getQueriedBooksHasMoreUseCase: GetQueriedBooksHasMoreUseCase,
     private val searchForNameUseCase: SearchForNameUseCase,
+    private val clearSearchResultsUseCase: ClearSearchResultsUseCase,
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     private val removeSearchQueryUseCase: RemoveSearchQueryUseCase,
     private val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
@@ -40,6 +49,11 @@ internal class ExploreScreenScreenModel(
     private val undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase,
     private val undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase,
     private val enrichDismissedContinueSeriesMetadataUseCase: EnrichDismissedContinueSeriesMetadataUseCase,
+    private val getFeaturedUpcomingReleaseUseCase: GetFeaturedUpcomingReleaseUseCase,
+    private val getBecauseYouReadBooksUseCase: GetBecauseYouReadBooksUseCase,
+    private val getMoodTagsUseCase: GetMoodTagsUseCase,
+    private val searchByMoodUseCase: SearchByMoodUseCase,
+    private val setBecauseYouReadGenreUseCase: SetBecauseYouReadGenreUseCase,
     flows: List<ExploreCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<ExploreScreenUiState, ExploreEvent, ExploreDependencies, ExploreCollector, ExploreLocalVariables>(
@@ -49,7 +63,9 @@ internal class ExploreScreenScreenModel(
 ) {
     override val dependencies: ExploreDependencies = ExploreDependencies(
         searchForNameUseCase = searchForNameUseCase,
+        clearSearchResultsUseCase = clearSearchResultsUseCase,
         getQueriedBooksUseCase = getQueriedBooksUseCase,
+        getQueriedBooksHasMoreUseCase = getQueriedBooksHasMoreUseCase,
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,
         getPreviousSearchQueriesUseCase = getPreviousSearchQueriesUseCase,
@@ -65,6 +81,11 @@ internal class ExploreScreenScreenModel(
         undoContinueSeriesBookDismissalUseCase = undoContinueSeriesBookDismissalUseCase,
         undoContinueSeriesDismissalUseCase = undoContinueSeriesDismissalUseCase,
         enrichDismissedContinueSeriesMetadataUseCase = enrichDismissedContinueSeriesMetadataUseCase,
+        getFeaturedUpcomingReleaseUseCase = getFeaturedUpcomingReleaseUseCase,
+        getBecauseYouReadBooksUseCase = getBecauseYouReadBooksUseCase,
+        getMoodTagsUseCase = getMoodTagsUseCase,
+        searchByMoodUseCase = searchByMoodUseCase,
+        setBecauseYouReadGenreUseCase = setBecauseYouReadGenreUseCase,
     )
 
     init {

@@ -27,4 +27,6 @@ internal data class AppSettingsEntity(
     val readingStreakEnabled: Boolean = true,
     val lastUsedProgressUnit: ProgressUnit = ProgressUnit.PAGE,
     val uiScale: UiScale = UiScale.DEFAULT,
+    // Null means "use the auto-derived most-read genre" - see GetBecauseYouReadBooksUseCase.
+    val becauseYouReadGenre: String? = null,
 )
