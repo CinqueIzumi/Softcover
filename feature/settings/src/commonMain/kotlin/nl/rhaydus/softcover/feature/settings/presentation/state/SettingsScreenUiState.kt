@@ -9,6 +9,7 @@ internal data class SettingsScreenUiState(
     val useDynamicColorChecked: Boolean = false,
     val readingStreakEnabledChecked: Boolean = true,
     val userDateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+    val dateStyleExamples: Map<DateStyle, String> = emptyMap(),
     val dropDownExpanded: Boolean = false,
     val appVersionName: String = "",
     val appVersionCode: Int = 0,

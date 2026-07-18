@@ -1,8 +1,12 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import kotlin.time.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
+import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
@@ -36,6 +40,9 @@ internal class SettingsScreenScreenModel(
     initialState = SettingsScreenUiState(
         appVersionName = appVersionProvider.versionInfo.name,
         appVersionCode = appVersionProvider.versionInfo.code,
+        dateStyleExamples = DateStyle.entries.associateWith {
+            it.format(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+        },
     ),
     initialLocalVariables = SettingsLocalVariables(),
     initializers = flows,

@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.screen
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
@@ -39,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
@@ -71,11 +70,14 @@ import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicCo
 // region Appearance content
 /**
  * The Appearance settings body, shared by the mobile [AppearanceSettingsScreen] page and the desktop
- * Settings master–detail pane. The Dynamic-colour section is gated on [supportsDynamicColor] (always
- * `false` on desktop). [showBottomBarToggle] hides the floating-bottom-bar preference on desktop,
- * where there is no bottom bar (it is a compact-only preference). [showUiScaleControl] is desktop-only
- * (hidden on mobile, where the OS handles DPI) and surfaces the "Display scale" picker first, since on
- * desktop it is the most relevant appearance control. The caller supplies the scroll / width [modifier].
+ * Settings master–detail pane. Rows sit flat on the page background, hairline-divided — never boxed
+ * cards. The Display section collapses the dynamic-colour, floating-bar, and reading-streak switches
+ * into one flat toggle-row stack: dynamic colour is gated on [supportsDynamicColor] (always `false` on
+ * desktop), [showBottomBarToggle] hides the floating-bottom-bar row on desktop (there is no bottom bar
+ * there — it is a compact-only preference), and reading streak always shows. [showUiScaleControl] is
+ * desktop-only (hidden on mobile, where the OS handles DPI) and surfaces the "Display scale" picker
+ * first, since on desktop it is the most relevant appearance control. The caller supplies the scroll /
+ * width [modifier].
  */
 @Composable
 internal fun AppearanceSettingsContent(
@@ -86,6 +88,14 @@ internal fun AppearanceSettingsContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
+        Text(
+            text = "How Softcover looks in your hands, and how it reads dates back to you.",
+            style = MaterialTheme.editorialTypography.body,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
         if (showUiScaleControl) {
             UiScaleSection(
                 state = state,
@@ -95,26 +105,9 @@ internal fun AppearanceSettingsContent(
             Spacer(modifier = Modifier.height(40.dp))
         }
 
-        if (supportsDynamicColor()) {
-            DynamicColorSection(
-                state = state,
-                runAction = runAction,
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-        }
-
-        if (showBottomBarToggle) {
-            BottomBarSection(
-                state = state,
-                runAction = runAction,
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-        }
-
-        ReadingStreakSection(
+        DisplaySection(
             state = state,
+            showBottomBarToggle = showBottomBarToggle,
             runAction = runAction,
         )
 
@@ -145,12 +138,14 @@ private fun UiScaleSection(
 
         UiScale.entries.forEachIndexed { index, scale ->
             if (index > 0) {
-                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
 
-            UiScaleOption(
-                scale = scale,
+            SettingsSelectableRow(
+                label = scale.label,
+                example = null,
                 isSelected = state.uiScale == scale,
+                checkContentDescription = "Current scale",
                 onClick = { runAction(OnUiScaleSelectedAction(scale = scale)) },
             )
         }
@@ -166,165 +161,118 @@ private fun UiScaleSection(
     }
 }
 
+/**
+ * The three appearance switches, collapsed into one flat, hairline-divided stack (no boxed cards, no
+ * per-row accent bar or icon). Each applicable row is built as a [ToggleRowSpec] first so the divider
+ * placement (between rows, never before the first) doesn't need to special-case the platform gating.
+ */
 @Composable
-private fun UiScaleOption(
-    scale: UiScale,
-    isSelected: Boolean,
-    onClick: () -> Unit,
+private fun DisplaySection(
+    state: SettingsScreenUiState,
+    showBottomBarToggle: Boolean,
+    runAction: (SettingsAction) -> Unit,
 ) {
-    val containerColor = if (isSelected) {
-        MaterialTheme.colorScheme.surfaceContainerHigh
-    } else {
-        MaterialTheme.colorScheme.surfaceContainer
+    val rows = buildList {
+        if (supportsDynamicColor()) {
+            add(
+                ToggleRowSpec(
+                    label = "Dynamic colour",
+                    gloss = "Recolour Softcover from your wallpaper's palette.",
+                    checked = state.useDynamicColorChecked,
+                    onCheckedChange = { runAction(OnDynamicColorToggledAction(newValue = it)) },
+                ),
+            )
+        }
+
+        if (showBottomBarToggle) {
+            add(
+                ToggleRowSpec(
+                    label = "Floating bottom bar",
+                    gloss = "Lift the nav off the edge, with rounded corners.",
+                    checked = state.useFloatingBarChecked,
+                    onCheckedChange = { runAction(OnFloatingBarToggledAction(newValue = it)) },
+                ),
+            )
+        }
+
+        add(
+            ToggleRowSpec(
+                label = "Reading streak",
+                gloss = "Count the days you read in a row, shown on your profile.",
+                checked = state.readingStreakEnabledChecked,
+                onCheckedChange = { runAction(OnReadingStreakToggledAction(newValue = it)) },
+            ),
+        )
     }
 
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .noRippleClickable(onClick = onClick),
-        color = containerColor,
-        shape = RoundedCornerShape(20.dp),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 18.dp,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SelectionIndicator(isSelected = isSelected)
+    Column(modifier = Modifier.fillMaxWidth()) {
+        EditorialSectionHeader(
+            eyebrow = "Display",
+            headline = "The look",
+        )
 
-            Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
-                text = scale.label,
-                style = MaterialTheme.editorialTypography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
+        rows.forEachIndexed { index, row ->
+            if (index > 0) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+
+            SettingsToggleRow(
+                label = row.label,
+                gloss = row.gloss,
+                checked = row.checked,
+                onCheckedChange = row.onCheckedChange,
             )
         }
     }
 }
 
+private data class ToggleRowSpec(
+    val label: String,
+    val gloss: String,
+    val checked: Boolean,
+    val onCheckedChange: (Boolean) -> Unit,
+)
+
+/**
+ * One flat toggle row: label over an italic Fraunces gloss on the left, an M3 [Switch] on the right —
+ * no card, no "On/Off" caption, no per-row accent. Dividers between rows are drawn by the caller.
+ */
 @Composable
-private fun DynamicColorSection(
-    state: SettingsScreenUiState,
-    runAction: (SettingsAction) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Material You",
-            headline = "Tint to your wallpaper",
-            description = "Recolour Softcover with the system palette from your wallpaper.",
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        ToggleCard(
-            label = "Dynamic colour",
-            checked = state.useDynamicColorChecked,
-            onCheckedChange = { runAction(OnDynamicColorToggledAction(newValue = it)) },
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = "The source palette is picked in the system Wallpaper & style settings.",
-            style = MaterialTheme.editorialTypography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp),
-        )
-    }
-}
-
-@Composable
-private fun BottomBarSection(
-    state: SettingsScreenUiState,
-    runAction: (SettingsAction) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Bottom bar",
-            headline = "Floating navigation",
-            description = "When turned off, a docked bottom bar is shown instead of the floating variant.",
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        ToggleCard(
-            label = "Floating bottom bar",
-            checked = state.useFloatingBarChecked,
-            onCheckedChange = { runAction(OnFloatingBarToggledAction(newValue = it)) },
-        )
-    }
-}
-
-@Composable
-private fun ToggleCard(
+private fun SettingsToggleRow(
     label: String,
+    gloss: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = RoundedCornerShape(20.dp),
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 18.dp,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.editorialTypography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.editorialTypography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
 
-                Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-                Text(
-                    text = if (checked) "On" else "Off",
-                    style = MaterialTheme.editorialTypography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
+            Text(
+                text = gloss,
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-    }
-}
 
-@Composable
-private fun ReadingStreakSection(
-    state: SettingsScreenUiState,
-    runAction: (SettingsAction) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Reading streak",
-            headline = "Track your reading days",
-            description = "Shows a 21-day dot strip above your currently-reading list.",
-        )
+        Spacer(modifier = Modifier.width(16.dp))
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        ToggleCard(
-            label = "Reading streak",
-            checked = state.readingStreakEnabledChecked,
-            onCheckedChange = { runAction(OnReadingStreakToggledAction(newValue = it)) },
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
         )
     }
 }
@@ -338,93 +286,84 @@ private fun DateStyleSection(
         EditorialSectionHeader(
             eyebrow = "Date notation",
             headline = "How dates read",
-            description = "The format used wherever a date appears in the app.",
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         DateStyle.entries.forEachIndexed { index, style ->
             if (index > 0) {
-                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
 
-            DateStyleOption(
-                style = style,
+            SettingsSelectableRow(
+                label = style.label,
+                example = state.dateStyleExamples[style].orEmpty(),
                 isSelected = state.userDateStyle == style,
+                checkContentDescription = "Current date format",
                 onClick = { runAction(OnDateStyleClickAction(style = style)) },
             )
         }
     }
 }
 
+/**
+ * One flat, radio-semantics selectable row, shared by the date-notation rows (label + today's example,
+ * tabular-numeral) and the desktop UI-scale rows (label only, [example] `null`) — no radio circle, no
+ * box; the active row is marked only by a `primary`-tinted label and a trailing check glyph.
+ */
 @Composable
-private fun DateStyleOption(
-    style: DateStyle,
+private fun SettingsSelectableRow(
+    label: String,
+    example: String?,
     isSelected: Boolean,
+    checkContentDescription: String,
     onClick: () -> Unit,
 ) {
-    val containerColor = if (isSelected) {
-        MaterialTheme.colorScheme.surfaceContainerHigh
-    } else {
-        MaterialTheme.colorScheme.surfaceContainer
-    }
-
-    Surface(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .noRippleClickable(onClick = onClick),
-        color = containerColor,
-        shape = RoundedCornerShape(20.dp),
+            .noRippleClickable(onClick = onClick)
+            .padding(vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 18.dp,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SelectionIndicator(isSelected = isSelected)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.editorialTypography.titleMedium,
+                color = if (isSelected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+            )
 
+            if (example != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = example,
+                    style = MaterialTheme.editorialTypography.bodySmall.copy(
+                        letterSpacing = 0.3.sp,
+                        fontFeatureSettings = "tnum",
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
+        if (isSelected) {
             Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = style.label,
-                style = MaterialTheme.editorialTypography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
+            val checkIcon = drawableIconResource(
+                icon = SoftcoverIcon.Check,
+                contentDescription = checkContentDescription,
             )
-        }
-    }
-}
 
-@Composable
-private fun SelectionIndicator(isSelected: Boolean) {
-    val borderColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outline
-    }
-
-    Box(
-        modifier = Modifier
-            .size(22.dp)
-            .border(
-                width = 1.5.dp,
-                color = borderColor,
-                shape = CircleShape,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape,
-                    ),
+            Icon(
+                painter = checkIcon.getIconPainter(),
+                contentDescription = checkIcon.contentDescription,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp),
             )
         }
     }
