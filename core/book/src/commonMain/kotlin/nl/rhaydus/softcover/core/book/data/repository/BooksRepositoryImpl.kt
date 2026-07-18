@@ -8,9 +8,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
@@ -38,10 +36,6 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
-
-private const val TRENDING_LIMIT = 10
-private const val TRENDING_OFFSET = 0
-private const val TRENDING_WINDOW_DAYS = 7L
 
 internal class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
@@ -303,19 +297,7 @@ internal class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchBooksByIds(ids = ids)
     }
 
-    override suspend fun fetchTrendingBooks(): List<Book> {
-        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-
-        return booksRemoteDataSource.fetchTrendingBooks(
-            from = today.minus(
-                TRENDING_WINDOW_DAYS.toInt(),
-                DateTimeUnit.DAY,
-            ).toString(),
-            to = today.toString(),
-            limit = TRENDING_LIMIT,
-            offset = TRENDING_OFFSET,
-        )
-    }
+    override suspend fun fetchTrendingBooks(): List<Book> = booksRemoteDataSource.fetchTrendingBooks()
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
         if (networkAvailability.isOnline.value.not()) {

@@ -69,12 +69,7 @@ interface BooksRemoteDataSource {
         forceNetwork: Boolean = false,
     ): List<Book>
 
-    suspend fun fetchTrendingBooks(
-        from: String,
-        to: String,
-        limit: Int,
-        offset: Int,
-    ): List<Book>
+    suspend fun fetchTrendingBooks(): List<Book>
 
     suspend fun markBookAsWantToRead(
         bookId: Int,
@@ -276,20 +271,8 @@ internal class BooksRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun fetchTrendingBooks(
-        from: String,
-        to: String,
-        limit: Int,
-        offset: Int,
-    ): List<Book> {
-        val trendingIds: List<Int> = apolloClient.safeQuery(
-            query = GetTrendingBookIdsQuery(
-                from = from,
-                to = to,
-                limit = limit,
-                offset = offset,
-            ),
-        )
+    override suspend fun fetchTrendingBooks(): List<Book> {
+        val trendingIds: List<Int> = apolloClient.safeQuery(query = GetTrendingBookIdsQuery())
             .books_trending
             ?.ids
             ?.mapNotNull { it }

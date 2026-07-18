@@ -88,8 +88,9 @@ interface BooksRepository {
     suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
     /**
-     * Fetches the books trending on Hardcover over the recent window. A book-discovery query
-     * (consumed by the reading and explore surfaces), so it lives with the other book queries.
+     * Fetches the books trending on Hardcover this week - the app's single trending cadence, no
+     * monthly/other fallback. A book-discovery query (consumed by the reading and explore
+     * surfaces), so it lives with the other book queries.
      */
     suspend fun fetchTrendingBooks(): List<Book>
 

@@ -1988,10 +1988,12 @@ class BooksRepositoryImplTest {
             } throws remoteError
 
             // ----- Act -----
-            val caught = runCatching { repository.updateBookRating(
-                book = book,
-                rating = newRating,
-            ) }
+            val caught = runCatching {
+                repository.updateBookRating(
+                    book = book,
+                    rating = newRating,
+                )
+            }
 
             // ----- Assert -----
             caught.exceptionOrNull() shouldBe remoteError
@@ -2106,10 +2108,12 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
 
-            coVerify { offlineSync.enqueueRatingUpdate(
-                book = any(),
-                rating = newRating,
-            ) }
+            coVerify {
+                offlineSync.enqueueRatingUpdate(
+                    book = any(),
+                    rating = newRating,
+                )
+            }
         }
 
         @Test
@@ -2171,10 +2175,12 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
 
-            coVerify { offlineSync.enqueueRatingUpdate(
-                book = any(),
-                rating = newRating,
-            ) }
+            coVerify {
+                offlineSync.enqueueRatingUpdate(
+                    book = any(),
+                    rating = newRating,
+                )
+            }
         }
 
         @Test
@@ -2227,10 +2233,12 @@ class BooksRepositoryImplTest {
                 )
             }
 
-            coVerify { offlineSync.enqueueRatingUpdate(
-                book = any(),
-                rating = newRating,
-            ) }
+            coVerify {
+                offlineSync.enqueueRatingUpdate(
+                    book = any(),
+                    rating = newRating,
+                )
+            }
         }
     }
 
@@ -2371,11 +2379,13 @@ class BooksRepositoryImplTest {
                 )
             }
 
-            coVerify { offlineSync.enqueueReviewUpdate(
-                book = any(),
-                review = body,
-                hasSpoilers = hasSpoilers,
-            ) }
+            coVerify {
+                offlineSync.enqueueReviewUpdate(
+                    book = any(),
+                    review = body,
+                    hasSpoilers = hasSpoilers,
+                )
+            }
         }
 
         @Test
@@ -2446,11 +2456,13 @@ class BooksRepositoryImplTest {
                 )
             }
 
-            coVerify { offlineSync.enqueueReviewUpdate(
-                book = any(),
-                review = body,
-                hasSpoilers = hasSpoilers,
-            ) }
+            coVerify {
+                offlineSync.enqueueReviewUpdate(
+                    book = any(),
+                    review = body,
+                    hasSpoilers = hasSpoilers,
+                )
+            }
         }
 
         @Test
@@ -2521,11 +2533,13 @@ class BooksRepositoryImplTest {
                 )
             }
 
-            coVerify { offlineSync.enqueueReviewUpdate(
-                book = any(),
-                review = body,
-                hasSpoilers = hasSpoilers,
-            ) }
+            coVerify {
+                offlineSync.enqueueReviewUpdate(
+                    book = any(),
+                    review = body,
+                    hasSpoilers = hasSpoilers,
+                )
+            }
         }
 
         @Test
@@ -2564,11 +2578,13 @@ class BooksRepositoryImplTest {
             } throws remoteError
 
             // ----- Act -----
-            val caught = runCatching { repository.updateBookReview(
-                book = book,
-                review = body,
-                hasSpoilers = hasSpoilers,
-            ) }
+            val caught = runCatching {
+                repository.updateBookReview(
+                    book = book,
+                    review = body,
+                    hasSpoilers = hasSpoilers,
+                )
+            }
 
             // ----- Assert -----
             caught.exceptionOrNull() shouldBe remoteError
@@ -2837,10 +2853,12 @@ class BooksRepositoryImplTest {
             } throws RuntimeException("network failure")
 
             // ----- Act -----
-            runCatching { repository.updateBookProgress(
-                book = book,
-                newPage = 50,
-            ) }
+            runCatching {
+                repository.updateBookProgress(
+                    book = book,
+                    newPage = 50,
+                )
+            }
 
             // ----- Assert -----
             coVerify {
@@ -2982,11 +3000,13 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
 
-            coVerify { offlineSync.enqueueProgressUpdate(
-                book = any(),
-                newPage = any(),
-                newSeconds = any(),
-            ) }
+            coVerify {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                )
+            }
         }
     }
 
@@ -3604,11 +3624,13 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.cacheBook(book = any())
             }
 
-            coVerify { offlineSync.enqueueProgressUpdate(
-                book = any(),
-                newPage = any(),
-                newSeconds = any(),
-            ) }
+            coVerify {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                )
+            }
 
             coVerify(exactly = 0) {
                 booksRemoteDataSource.updateBookProgress(
@@ -3655,12 +3677,7 @@ class BooksRepositoryImplTest {
             val trendingBooks = listOf(stubBook(userBookId = null), stubBook(userBookId = null))
 
             coEvery {
-                booksRemoteDataSource.fetchTrendingBooks(
-                    from = any(),
-                    to = any(),
-                    limit = 10,
-                    offset = 0,
-                )
+                booksRemoteDataSource.fetchTrendingBooks()
             } returns trendingBooks
 
             // ----- Act -----
@@ -3671,15 +3688,10 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `calls remote data source with limit 10 and offset 0`() = runTest {
+        fun `delegates to remote data source`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksRemoteDataSource.fetchTrendingBooks(
-                    from = any(),
-                    to = any(),
-                    limit = any(),
-                    offset = any(),
-                )
+                booksRemoteDataSource.fetchTrendingBooks()
             } returns emptyList()
 
             // ----- Act -----
@@ -3687,13 +3699,27 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksRemoteDataSource.fetchTrendingBooks(
-                    from = any(),
-                    to = any(),
-                    limit = 10,
-                    offset = 0,
-                )
+                booksRemoteDataSource.fetchTrendingBooks()
             }
+        }
+
+        @Test
+        fun `round-trips the result from the remote data source unchanged`() = runTest {
+            // ----- Arrange -----
+            val trendingBooks = listOf(stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns trendingBooks
+
+            // ----- Act -----
+            val result = repository.fetchTrendingBooks()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            result shouldBe trendingBooks
         }
     }
 }
