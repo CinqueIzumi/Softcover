@@ -23,3 +23,14 @@ the pattern.
 **How to apply:** in every reviewed file, explicitly scan trailing-lambda calls (`.map {`, `.let {`,
 `scope.setState {`, `.also {`, etc.) whose body spans multiple lines — grep for `) }` glommed patterns
 literally, since `ktlintCheck`/`ktlintFormat` will not surface them.
+
+**Scale check (2026-07-20, Explore 3a final review):** grepping `^\s*\)\s*\}[,)]?\s*$` across every
+file touched by a branch found ~30 instances in a single PR, spread across production code
+(`ExploreShelf.kt`, both `ExploreScreenLayout.{mobile,jvm}.kt` — mostly `onClick = { onBookClick(\n book,\n
+SURFACE_X,\n) },` card-click callbacks) AND test code (`BecauseYouReadCollectorTest.kt`,
+`FeaturedUpcomingReleaseCollectorTest.kt`, `BooksRepositoryImplTest.kt` — mostly `launch {
+collector.onLaunch(\n scope = scope,\n dependencies = dependencies,\n) }`). This confirms the violation
+is not a one-off slip but a systemic blind spot for both humans and agents writing this codebase's Compose
+callbacks and coroutine-test bodies — budget time for a dedicated grep-and-fix pass rather than expecting
+to catch every instance by eye during a large-diff review. A quick repo-scoped shell one-liner (grep for
+lines matching `^\s*\)\s*\}` in touched files) is the fastest way to enumerate them.
