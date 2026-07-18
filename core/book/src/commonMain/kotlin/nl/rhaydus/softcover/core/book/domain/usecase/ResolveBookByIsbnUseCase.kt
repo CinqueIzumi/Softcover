@@ -22,7 +22,8 @@ class ResolveBookByIsbnUseCase(
         val normalized = IsbnNormalizer.normalize(raw = isbn)
             ?: return@runCatchingLogged IsbnLookupResult.InvalidIsbn
 
-        val match = booksRepository.fetchEditionMatchForIsbn(isbn = normalized)
+        val match = booksRepository
+            .fetchEditionMatchesForIsbns(isbns = listOf(normalized))[normalized]
             ?: return@runCatchingLogged IsbnLookupResult.UnknownEdition(normalizedIsbn = normalized)
 
         val book = fetchBookByIdUseCase(id = match.bookId).getOrThrow()

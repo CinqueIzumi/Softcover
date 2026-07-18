@@ -3456,48 +3456,50 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
-    inner class FetchEditionMatchForIsbn {
+    inner class FetchEditionMatchesForIsbns {
         @Test
-        fun `online — delegates to remote and returns IsbnEditionMatch`() = runTest {
+        fun `online — delegates to remote and returns the match map`() = runTest {
             // ----- Arrange -----
             val isbn = "9780451524935"
-            val expectedMatch = IsbnEditionMatch(
-                bookId = 42,
-                editionId = 99,
+            val expectedMatches = mapOf(
+                isbn to IsbnEditionMatch(
+                    bookId = 42,
+                    editionId = 99,
+                ),
             )
 
             coEvery {
-                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
-            } returns expectedMatch
+                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
+            } returns expectedMatches
 
             // ----- Act -----
-            val result = repository.fetchEditionMatchForIsbn(isbn = isbn)
+            val result = repository.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
 
             // ----- Assert -----
-            result shouldBe expectedMatch
+            result shouldBe expectedMatches
 
             coVerify(exactly = 1) {
-                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
             }
         }
 
         @Test
-        fun `online — remote returns null — returns null`() = runTest {
+        fun `online — remote reports no match — returns emptyMap`() = runTest {
             // ----- Arrange -----
             val isbn = "9780451524935"
 
             coEvery {
-                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
-            } returns null
+                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
+            } returns emptyMap()
 
             // ----- Act -----
-            val result = repository.fetchEditionMatchForIsbn(isbn = isbn)
+            val result = repository.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
 
             // ----- Assert -----
-            result shouldBe null
+            result shouldBe emptyMap()
 
             coVerify(exactly = 1) {
-                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
             }
         }
 
@@ -3512,11 +3514,29 @@ class BooksRepositoryImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<OfflineException> {
-                repository.fetchEditionMatchForIsbn(isbn = isbn)
+                repository.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
             }
 
             coVerify(exactly = 0) {
-                booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = any())
+                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = any())
+            }
+        }
+
+        @Test
+        fun `empty isbns list — returns emptyMap without calling remote, even offline`() = runTest {
+            // ----- Arrange -----
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
+
+            // ----- Act -----
+            val result = repository.fetchEditionMatchesForIsbns(isbns = emptyList())
+
+            // ----- Assert -----
+            result shouldBe emptyMap()
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = any())
             }
         }
     }

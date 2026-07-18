@@ -26,9 +26,9 @@ import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
-import nl.rhaydus.softcover.GetEditionByIsbnQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
+import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.MarkBookAsReadingMutation
@@ -3035,106 +3035,318 @@ class BooksRemoteDataSourceImplTest {
     }
 
     @Nested
-    inner class FetchEditionMatchForIsbn {
+    inner class FetchEditionMatchesForIsbns {
         @Test
-        fun `isbn13 match — returns IsbnEditionMatch from first isbn13 row`() = runTest {
+        fun `isbn13 match — returns IsbnEditionMatch keyed by the requested isbn`() = runTest {
             // ----- Arrange -----
             val isbn = "9780451524935"
-            val queryData = mockk<GetEditionByIsbnQuery.Data>()
-            val isbn13Row = mockk<GetEditionByIsbnQuery.Data.Isbn13>()
+            val queryData = mockk<GetEditionsByIsbnsQuery.Data>()
+            val editionRow = mockk<GetEditionsByIsbnsQuery.Data.Edition>()
 
             coEvery {
                 apolloClient.safeQuery(
-                    query = any<GetEditionByIsbnQuery>(),
+                    query = any<GetEditionsByIsbnsQuery>(),
                     fetchPolicy = FetchPolicy.NetworkFirst,
                 )
             } returns queryData
 
             every {
-                queryData.isbn13
-            } returns listOf(isbn13Row)
+                queryData.editions
+            } returns listOf(editionRow)
             every {
-                queryData.isbn10
+                editionRow.book_id
+            } returns 10
+            every {
+                editionRow.id
+            } returns 110
+            every {
+                editionRow.isbn_13
+            } returns isbn
+            every {
+                editionRow.isbn_10
+            } returns null
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
+
+            // ----- Assert -----
+            result shouldBe mapOf(
+                isbn to IsbnEditionMatch(
+                    bookId = 10,
+                    editionId = 110,
+                ),
+            )
+        }
+
+        @Test
+        fun `isbn10 match — returns IsbnEditionMatch keyed by the requested isbn`() = runTest {
+            // ----- Arrange -----
+            val isbn = "0451524934"
+            val queryData = mockk<GetEditionsByIsbnsQuery.Data>()
+            val editionRow = mockk<GetEditionsByIsbnsQuery.Data.Edition>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIsbnsQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.editions
+            } returns listOf(editionRow)
+            every {
+                editionRow.book_id
+            } returns 20
+            every {
+                editionRow.id
+            } returns 220
+            every {
+                editionRow.isbn_13
+            } returns null
+            every {
+                editionRow.isbn_10
+            } returns isbn
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
+
+            // ----- Assert -----
+            result shouldBe mapOf(
+                isbn to IsbnEditionMatch(
+                    bookId = 20,
+                    editionId = 220,
+                ),
+            )
+        }
+
+        @Test
+        fun `no matching editions — returns emptyMap`() = runTest {
+            // ----- Arrange -----
+            val isbn = "0000000000000"
+            val queryData = mockk<GetEditionsByIsbnsQuery.Data>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIsbnsQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.editions
             } returns emptyList()
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
+
+            // ----- Assert -----
+            result shouldBe emptyMap()
+        }
+
+        @Test
+        fun `multiple isbns — one matches on isbn13 and another on isbn10, both correctly keyed`() = runTest {
+            // ----- Arrange -----
+            val isbn13 = "9780451524935"
+            val isbn10 = "0141439513"
+            val queryData = mockk<GetEditionsByIsbnsQuery.Data>()
+            val isbn13Row = mockk<GetEditionsByIsbnsQuery.Data.Edition>()
+            val isbn10Row = mockk<GetEditionsByIsbnsQuery.Data.Edition>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIsbnsQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.editions
+            } returns listOf(isbn13Row, isbn10Row)
             every {
                 isbn13Row.book_id
             } returns 10
             every {
                 isbn13Row.id
             } returns 110
-
-            // ----- Act -----
-            val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
-
-            // ----- Assert -----
-            result shouldBe IsbnEditionMatch(
-                bookId = 10,
-                editionId = 110,
-            )
-        }
-
-        @Test
-        fun `isbn13 empty — falls back to isbn10 and returns IsbnEditionMatch`() = runTest {
-            // ----- Arrange -----
-            val isbn = "0451524934"
-            val queryData = mockk<GetEditionByIsbnQuery.Data>()
-            val isbn10Row = mockk<GetEditionByIsbnQuery.Data.Isbn10>()
-
-            coEvery {
-                apolloClient.safeQuery(
-                    query = any<GetEditionByIsbnQuery>(),
-                    fetchPolicy = FetchPolicy.NetworkFirst,
-                )
-            } returns queryData
-
             every {
-                queryData.isbn13
-            } returns emptyList()
+                isbn13Row.isbn_13
+            } returns isbn13
             every {
-                queryData.isbn10
-            } returns listOf(isbn10Row)
+                isbn13Row.isbn_10
+            } returns null
             every {
                 isbn10Row.book_id
             } returns 20
             every {
                 isbn10Row.id
             } returns 220
+            every {
+                isbn10Row.isbn_13
+            } returns null
+            every {
+                isbn10Row.isbn_10
+            } returns isbn10
 
             // ----- Act -----
-            val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
+            val result = dataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn13, isbn10))
 
             // ----- Assert -----
-            result shouldBe IsbnEditionMatch(
-                bookId = 20,
-                editionId = 220,
+            result shouldBe mapOf(
+                isbn13 to IsbnEditionMatch(bookId = 10, editionId = 110),
+                isbn10 to IsbnEditionMatch(bookId = 20, editionId = 220),
             )
         }
 
         @Test
-        fun `both lists empty — returns null`() = runTest {
+        fun `unmatched requested isbn is absent while the other requested isbn is present`() = runTest {
             // ----- Arrange -----
-            val isbn = "0000000000000"
-            val queryData = mockk<GetEditionByIsbnQuery.Data>()
+            val matchedIsbn = "9780451524935"
+            val unmatchedIsbn = "0000000000000"
+            val queryData = mockk<GetEditionsByIsbnsQuery.Data>()
+            val editionRow = mockk<GetEditionsByIsbnsQuery.Data.Edition>()
 
             coEvery {
                 apolloClient.safeQuery(
-                    query = any<GetEditionByIsbnQuery>(),
+                    query = any<GetEditionsByIsbnsQuery>(),
                     fetchPolicy = FetchPolicy.NetworkFirst,
                 )
             } returns queryData
 
             every {
-                queryData.isbn13
-            } returns emptyList()
+                queryData.editions
+            } returns listOf(editionRow)
             every {
-                queryData.isbn10
-            } returns emptyList()
+                editionRow.book_id
+            } returns 10
+            every {
+                editionRow.id
+            } returns 110
+            every {
+                editionRow.isbn_13
+            } returns matchedIsbn
+            every {
+                editionRow.isbn_10
+            } returns null
 
             // ----- Act -----
-            val result = dataSource.fetchEditionMatchForIsbn(isbn = isbn)
+            val result = dataSource.fetchEditionMatchesForIsbns(isbns = listOf(matchedIsbn, unmatchedIsbn))
 
             // ----- Assert -----
-            result shouldBe null
+            result shouldBe mapOf(
+                matchedIsbn to IsbnEditionMatch(bookId = 10, editionId = 110),
+            )
+        }
+
+        @Test
+        fun `isbn13 row wins over a separate isbn10 row matching the same requested isbn`() = runTest {
+            // ----- Arrange -----
+            val isbn = "9780451524935"
+            val queryData = mockk<GetEditionsByIsbnsQuery.Data>()
+            val isbn13Row = mockk<GetEditionsByIsbnsQuery.Data.Edition>()
+            val isbn10Row = mockk<GetEditionsByIsbnsQuery.Data.Edition>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIsbnsQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.editions
+            } returns listOf(isbn10Row, isbn13Row)
+            every {
+                isbn13Row.book_id
+            } returns 10
+            every {
+                isbn13Row.id
+            } returns 110
+            every {
+                isbn13Row.isbn_13
+            } returns isbn
+            every {
+                isbn13Row.isbn_10
+            } returns null
+            every {
+                isbn10Row.book_id
+            } returns 99
+            every {
+                isbn10Row.id
+            } returns 999
+            every {
+                isbn10Row.isbn_13
+            } returns null
+            every {
+                isbn10Row.isbn_10
+            } returns isbn
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
+
+            // ----- Assert -----
+            result shouldBe mapOf(
+                isbn to IsbnEditionMatch(bookId = 10, editionId = 110),
+            )
+        }
+
+        @Test
+        fun `single row matches on both isbn13 and isbn10 — both requested isbns map to the same edition`() = runTest {
+            // ----- Arrange -----
+            val isbn13 = "9780451524935"
+            val isbn10 = "0141439513"
+            val queryData = mockk<GetEditionsByIsbnsQuery.Data>()
+            val editionRow = mockk<GetEditionsByIsbnsQuery.Data.Edition>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIsbnsQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.editions
+            } returns listOf(editionRow)
+            every {
+                editionRow.book_id
+            } returns 10
+            every {
+                editionRow.id
+            } returns 110
+            every {
+                editionRow.isbn_13
+            } returns isbn13
+            every {
+                editionRow.isbn_10
+            } returns isbn10
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn13, isbn10))
+
+            // ----- Assert -----
+            result shouldBe mapOf(
+                isbn13 to IsbnEditionMatch(bookId = 10, editionId = 110),
+                isbn10 to IsbnEditionMatch(bookId = 10, editionId = 110),
+            )
+        }
+
+        @Test
+        fun `returns empty map immediately when isbns input is empty`() = runTest {
+            // ----- Arrange -----
+            // (no Apollo call expected — short-circuit path)
+
+            // ----- Act -----
+            val result = dataSource.fetchEditionMatchesForIsbns(isbns = emptyList())
+
+            // ----- Assert -----
+            result shouldBe emptyMap()
+            coVerify(exactly = 0) {
+                apolloClient.safeQuery(
+                    query = any<GetEditionsByIsbnsQuery>(),
+                    fetchPolicy = any(),
+                )
+            }
         }
     }
 

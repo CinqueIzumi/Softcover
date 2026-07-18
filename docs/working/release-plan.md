@@ -27,7 +27,7 @@ Dependencies are noted only where they cross a release boundary; same-release de
 Small, high-value features on already-shipped foundations.
 
 - ✅ **Step 10.15** — Auto-resize coverless title text (S) — **done** (`04116c58`, which also covers never leaving a cover slot blank). Already deleted from `roadmap-steps.md`.
-- **Improvement** — Batch edition-by-ISBN with an `_or` filter (S) — internal refactor; cleaner fetch path and an enabler for Step 8.6 (ISBN-list import).
+- ✅ **Improvement** — Batch edition-by-ISBN with an `_or` filter (S) — **done**. `GetEditionByIsbn`'s two aliased selections collapsed into one `GetEditionsByIsbns($isbns: [String!]!)` query (`_or` over `isbn_13`/`isbn_10` `_in`); the repository/data-source surface is now batch-only (`fetchEditionMatchesForIsbns(isbns): Map<String, IsbnEditionMatch>`), so Step 8.6's ISBN-list import resolves a whole list in one round trip.
 - **Step 10.16** — Local tag cache + tag suggestions (S–M) — works around the API's no-`_ilike` tag search.
 - **Step 3.12** — Rating/review prompt on mark-as-read (S–M) — reuses shipped 3.1 / 3.2 controls.
 - **Step 2.14** — Directly add a book to Currently Reading (S–M) — *pulled forward from 3.3.0 on user request.*

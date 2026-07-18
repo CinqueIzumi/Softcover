@@ -285,10 +285,12 @@ internal class BooksRepositoryImpl(
         booksLocalDataSource.deleteOrphanBooks()
     }
 
-    override suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch? {
+    override suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch> {
+        if (isbns.isEmpty()) return emptyMap()
+
         if (networkAvailability.isOnline.value.not()) throw OfflineException()
 
-        return booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+        return booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = isbns)
     }
 
     override suspend fun addBookByIsbn(isbn: String): CreatedBook {

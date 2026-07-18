@@ -39,10 +39,12 @@ class ResolveBookByIsbnUseCaseTest {
         fun `valid ISBN with matching bookId returns Found with hydrated book`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn)
-            } returns IsbnEditionMatch(
-                bookId = bookId,
-                editionId = editionId,
+                booksRepository.fetchEditionMatchesForIsbns(isbns = listOf(validIsbn))
+            } returns mapOf(
+                validIsbn to IsbnEditionMatch(
+                    bookId = bookId,
+                    editionId = editionId,
+                ),
             )
 
             coEvery {
@@ -59,7 +61,7 @@ class ResolveBookByIsbnUseCaseTest {
                 editionId = editionId,
             )
 
-            coVerify(exactly = 1) { booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn) }
+            coVerify(exactly = 1) { booksRepository.fetchEditionMatchesForIsbns(isbns = listOf(validIsbn)) }
             coVerify(exactly = 1) { fetchBookByIdUseCase(id = bookId) }
         }
 
@@ -67,8 +69,8 @@ class ResolveBookByIsbnUseCaseTest {
         fun `valid ISBN with no matching bookId returns UnknownEdition without calling fetchBookByIdUseCase`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn)
-            } returns null
+                booksRepository.fetchEditionMatchesForIsbns(isbns = listOf(validIsbn))
+            } returns emptyMap()
 
             // ----- Act -----
             val result = useCase(validIsbn)
@@ -90,14 +92,14 @@ class ResolveBookByIsbnUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe IsbnLookupResult.InvalidIsbn
 
-            coVerify(exactly = 0) { booksRepository.fetchEditionMatchForIsbn(isbn = any()) }
+            coVerify(exactly = 0) { booksRepository.fetchEditionMatchesForIsbns(isbns = any()) }
         }
 
         @Test
         fun `repository throws returns failure`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn)
+                booksRepository.fetchEditionMatchesForIsbns(isbns = listOf(validIsbn))
             } throws OfflineException()
 
             // ----- Act -----
@@ -111,10 +113,12 @@ class ResolveBookByIsbnUseCaseTest {
         fun `fetchBookByIdUseCase returns failure causes overall failure via getOrThrow`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksRepository.fetchEditionMatchForIsbn(isbn = validIsbn)
-            } returns IsbnEditionMatch(
-                bookId = bookId,
-                editionId = editionId,
+                booksRepository.fetchEditionMatchesForIsbns(isbns = listOf(validIsbn))
+            } returns mapOf(
+                validIsbn to IsbnEditionMatch(
+                    bookId = bookId,
+                    editionId = editionId,
+                ),
             )
 
             coEvery {

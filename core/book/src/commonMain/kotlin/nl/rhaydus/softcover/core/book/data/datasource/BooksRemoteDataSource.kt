@@ -15,11 +15,11 @@ import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragm
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment as booksByIdsBookDetailFragment
-import nl.rhaydus.softcover.GetEditionByIsbnQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery.Data.Edition.Companion.editionDetailFragment
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.editionDetailFragment as editionsByIdsDetailFragment
+import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
@@ -60,7 +60,7 @@ interface BooksRemoteDataSource {
 
     suspend fun fetchBookIdForEdition(editionId: Int): Int?
 
-    suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch?
+    suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch>
 
     suspend fun addBookByIsbn(isbn: String): CreatedBook
 
@@ -195,25 +195,39 @@ internal class BooksRemoteDataSourceImpl(
         return result.editions.firstOrNull()?.book_id
     }
 
-    override suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch? {
+    override suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch> {
+        if (isbns.isEmpty()) return emptyMap()
+
         val result = apolloClient.safeQuery(
-            query = GetEditionByIsbnQuery(isbn = isbn),
+            query = GetEditionsByIsbnsQuery(isbns = isbns),
             fetchPolicy = FetchPolicy.NetworkFirst,
         )
 
-        result.isbn13.firstOrNull()?.let { edition ->
-            return IsbnEditionMatch(
-                bookId = edition.book_id,
-                editionId = edition.id,
-            )
+        val requested = isbns.toSet()
+        val matches = mutableMapOf<String, IsbnEditionMatch>()
+
+        // isbn_13 matches take precedence, so they are folded in before isbn_10 matches fill any gaps.
+        result.editions.forEach { edition ->
+            val isbn13 = edition.isbn_13
+            if (isbn13 != null && isbn13 in requested && isbn13 !in matches) {
+                matches[isbn13] = IsbnEditionMatch(
+                    bookId = edition.book_id,
+                    editionId = edition.id,
+                )
+            }
         }
 
-        return result.isbn10.firstOrNull()?.let { edition ->
-            IsbnEditionMatch(
-                bookId = edition.book_id,
-                editionId = edition.id,
-            )
+        result.editions.forEach { edition ->
+            val isbn10 = edition.isbn_10
+            if (isbn10 != null && isbn10 in requested && isbn10 !in matches) {
+                matches[isbn10] = IsbnEditionMatch(
+                    bookId = edition.book_id,
+                    editionId = edition.id,
+                )
+            }
         }
+
+        return matches
     }
 
     override suspend fun addBookByIsbn(isbn: String): CreatedBook {
