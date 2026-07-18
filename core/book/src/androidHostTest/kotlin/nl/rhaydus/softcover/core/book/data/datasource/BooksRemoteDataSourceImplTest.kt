@@ -3193,8 +3193,14 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe mapOf(
-                isbn13 to IsbnEditionMatch(bookId = 10, editionId = 110),
-                isbn10 to IsbnEditionMatch(bookId = 20, editionId = 220),
+                isbn13 to IsbnEditionMatch(
+                    bookId = 10,
+                    editionId = 110,
+                ),
+                isbn10 to IsbnEditionMatch(
+                    bookId = 20,
+                    editionId = 220,
+                ),
             )
         }
 
@@ -3234,7 +3240,10 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe mapOf(
-                matchedIsbn to IsbnEditionMatch(bookId = 10, editionId = 110),
+                matchedIsbn to IsbnEditionMatch(
+                    bookId = 10,
+                    editionId = 110,
+                ),
             )
         }
 
@@ -3286,7 +3295,10 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe mapOf(
-                isbn to IsbnEditionMatch(bookId = 10, editionId = 110),
+                isbn to IsbnEditionMatch(
+                    bookId = 10,
+                    editionId = 110,
+                ),
             )
         }
 
@@ -3326,8 +3338,14 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe mapOf(
-                isbn13 to IsbnEditionMatch(bookId = 10, editionId = 110),
-                isbn10 to IsbnEditionMatch(bookId = 10, editionId = 110),
+                isbn13 to IsbnEditionMatch(
+                    bookId = 10,
+                    editionId = 110,
+                ),
+                isbn10 to IsbnEditionMatch(
+                    bookId = 10,
+                    editionId = 110,
+                ),
             )
         }
 
