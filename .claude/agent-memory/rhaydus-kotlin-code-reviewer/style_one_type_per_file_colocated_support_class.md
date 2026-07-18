@@ -41,3 +41,12 @@ clean (only one type, rule doesn't fire) but failed `detektAndroidMain`/`detektJ
 `MatchingDeclarationName` because the file name doesn't match the enum's name. Check both angles:
 "does this file have 2+ types" (ktlint) AND "does this file's one type match the file name" (detekt,
 type-resolved — see [[project_detekt_gate_scope]]).
+
+**Found a third time, 2026-07-21** (Appearance 1a redesign review, [[architecture_appearance_1a_redesign]]):
+`SettingsShelf.kt` — an already-large multi-region shared component file with zero other top-level
+types — gained `private data class ToggleRowSpec(...)` as a single-caller helper for `DisplaySection`'s
+`buildList`. Same shape as `LibraryGridLayoutMapping.kt`: exactly one top-level type, name doesn't match
+file name, so it's a detekt `MatchingDeclarationName` hit, not a ktlint one. This confirms the pattern
+recurs specifically in files that already hold several composables/functions (screen/shelf files) — the
+author's attention is on the composables, and a small colocated data class slips through. Keep checking
+every new `data class`/`enum class` for this regardless of how clean the surrounding rewrite is.
