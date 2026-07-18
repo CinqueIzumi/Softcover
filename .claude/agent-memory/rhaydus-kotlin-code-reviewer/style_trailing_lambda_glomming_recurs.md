@@ -34,3 +34,12 @@ is not a one-off slip but a systemic blind spot for both humans and agents writi
 callbacks and coroutine-test bodies — budget time for a dedicated grep-and-fix pass rather than expecting
 to catch every instance by eye during a large-diff review. A quick repo-scoped shell one-liner (grep for
 lines matching `^\s*\)\s*\}` in touched files) is the fastest way to enumerate them.
+
+**Regression pattern (2026-07-21, Reading 1a redesign review):** `feature/reading/.../ReadingShelf.kt`
+had TWO fresh instances in `LinearWavyProgressIndicator(progress = { progressFraction.coerceIn(\n 0f,\n
+1f,\n) }, ...)` (FeaturedProgressStat + ProgressBlock) — and the interesting part is these were
+**regressions**: the pre-redesign code being replaced had the same `coerceIn` call correctly formatted
+(`{` alone, body indented, `}` alone) on the old `LinearProgressIndicator`. The rewrite to
+`LinearWavyProgressIndicator` reintroduced the glommed form. Lesson: when a diff swaps one component for
+a near-identical one, diff the *old* formatting against the *new* one for these lambda bodies specifically
+— a clean rewrite can silently un-fix a previously-compliant spot.

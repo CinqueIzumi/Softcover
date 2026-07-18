@@ -11,8 +11,8 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
-import nl.rhaydus.softcover.feature.book_detail.domain.model.ReadingPaceForecast
 import nl.rhaydus.toad.UiState
 
 internal data class BookDetailUiState(

@@ -13,6 +13,7 @@ kotlin {
             implementation(project(":core:domain"))
             implementation(project(":core:book"))
             implementation(project(":core:deadlines"))
+            implementation(project(":core:personal"))
             implementation(project(":core:preferences"))
             implementation(project(":core:profile"))
             implementation(project(":core:notification"))

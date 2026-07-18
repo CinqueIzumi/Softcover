@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.book_detail.presentation.collector
+package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
@@ -9,45 +9,49 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
+import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
+import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class ReadingPaceForecastCollector : BookDetailCollector {
+/**
+ * Mirrors book_detail's `ReadingPaceForecastCollector`, but for the Reading screen's featured/hero
+ * book only ([ReadingScreenUiState.books]`.firstOrNull()`) — secondary rows never carry a pace.
+ * Collectors are per-feature (they aren't shared across TOAD screens), so this duplicates the
+ * forecast-computation logic rather than importing the book_detail collector.
+ */
+internal class ReadingPaceForecastCollector : ReadingCollector {
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun onLaunch(
-        scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
-        dependencies: BookDetailDependencies,
+        scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
+        dependencies: ReadingScreenDependencies,
     ) {
-        val readingBookIdFlow = scope.state
-            .map { state -> state.book?.id.takeIf { state.book?.userBook?.status == BookStatus.Reading } }
+        val featuredBookIdFlow = scope.state
+            .map { it.books.firstOrNull()?.id }
             .distinctUntilChanged()
 
         val progressSnapshotFlow = scope.state
-            .map {
-                val edition = it.book?.currentEdition
+            .map { state ->
+                val book = state.books.firstOrNull()
+                val edition = book?.currentEdition
                 ProgressSnapshot(
-                    bookId = it.book?.id,
+                    bookId = book?.id,
                     totalPages = edition?.pages,
-                    currentPage = it.book?.userBookRead?.currentPage ?: 0,
+                    currentPage = book?.userBookRead?.currentPage ?: 0,
                     totalSeconds = edition?.audioSeconds,
-                    currentSeconds = it.book?.userBookRead?.currentSeconds ?: 0,
+                    currentSeconds = book?.userBookRead?.currentSeconds ?: 0,
                 )
             }
             .distinctUntilChanged()
 
-        // Keyed on the reading-gated bookId *and* the committed progress snapshot (not just
-        // bookId) so a landed progress write — which changes currentPage/currentSeconds in
-        // state only once the write actually commits, never per keystroke of the update sheet
-        // — refetches the journal history instead of leaving it stale (e.g. a session that
-        // crosses midnight needs the new day's entry to show up in the next average).
-        val journalHistoryFlow = combine(readingBookIdFlow, progressSnapshotFlow) { bookId, snapshot ->
+        // Keyed on the featured bookId *and* the committed progress snapshot (not just bookId) so a
+        // landed progress write — which changes currentPage/currentSeconds in state only once the
+        // write actually commits — refetches the journal history instead of leaving it stale.
+        val journalHistoryFlow = combine(featuredBookIdFlow, progressSnapshotFlow) { bookId, snapshot ->
             bookId to snapshot
         }
             .distinctUntilChanged()
@@ -71,7 +75,7 @@ internal class ReadingPaceForecastCollector : BookDetailCollector {
                 snapshot = snapshot,
             )
         }.collectLatest { forecast ->
-            scope.setState { it.copy(readingPaceForecast = forecast) }
+            scope.setState { it.copy(featuredBookPace = forecast) }
         }
     }
 
@@ -107,12 +111,10 @@ internal class ReadingPaceForecastCollector : BookDetailCollector {
     }
 
     /**
-     * Journal entries carry a cumulative position (mirroring [nl.rhaydus.softcover.core.domain.model.UserBookRead],
-     * which also stores the current position rather than a delta), not a per-day amount, so this
-     * takes the chronologically-last position logged on each calendar date — entries arrive
-     * ordered `updated_at` ascending, so `.last()` per date is the day's final position, not its
-     * peak — and diffs it against the previous date's position, clamping to 0 so a correction
-     * (an edited-down page number) never reads as negative progress.
+     * Journal entries carry a cumulative position, not a per-day amount, so this takes the
+     * chronologically-last position logged on each calendar date and diffs it against the previous
+     * date's position, clamping to 0 so a correction never reads as negative progress. Mirrors
+     * book_detail's `ReadingPaceForecastCollector.dailyUnitsRead`.
      */
     private fun dailyUnitsRead(
         entries: List<ReadingJournalEntry>,

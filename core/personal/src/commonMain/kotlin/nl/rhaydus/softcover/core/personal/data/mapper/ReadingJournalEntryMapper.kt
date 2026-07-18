@@ -1,8 +1,8 @@
-package nl.rhaydus.softcover.feature.book_detail.data.mapper
+package nl.rhaydus.softcover.core.personal.data.mapper
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
-import nl.rhaydus.softcover.feature.book_detail.domain.model.ReadingJournalEntry
+import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 
 private const val METADATA_PAGES_KEY = "progress_pages"
 private const val METADATA_SECONDS_KEY = "progress_seconds"

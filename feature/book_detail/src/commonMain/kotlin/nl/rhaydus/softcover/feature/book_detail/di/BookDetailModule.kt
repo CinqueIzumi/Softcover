@@ -11,21 +11,18 @@ import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
+import nl.rhaydus.softcover.core.personal.di.personalModule
+import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
-import nl.rhaydus.softcover.feature.book_detail.data.datasource.ReadingJournalHistoryRemoteDataSource
-import nl.rhaydus.softcover.feature.book_detail.data.datasource.ReadingJournalHistoryRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.BookReviewsRepositoryImpl
-import nl.rhaydus.softcover.feature.book_detail.data.repository.ReadingJournalHistoryRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.UserTagsRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.BookReviewsRepository
-import nl.rhaydus.softcover.feature.book_detail.domain.repository.ReadingJournalHistoryRepository
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
@@ -50,6 +47,7 @@ val bookDetailModule = module {
         preferencesModule,
         databaseModule,
         apolloModule,
+        personalModule,
         designSystemModule,
         dispatcherModule,
     )
@@ -92,21 +90,6 @@ val bookDetailModule = module {
 
     factory {
         SaveUserTagsUseCase(userTagsRepository = get())
-    }
-
-    single<ReadingJournalHistoryRemoteDataSource> {
-        ReadingJournalHistoryRemoteDataSourceImpl(
-            apolloClient = get(),
-            getUserIdUseCase = get(),
-        )
-    }
-
-    single<ReadingJournalHistoryRepository> {
-        ReadingJournalHistoryRepositoryImpl(readingJournalHistoryRemoteDataSource = get())
-    }
-
-    factory {
-        GetReadingJournalHistoryUseCase(readingJournalHistoryRepository = get())
     }
 
     factory { params ->

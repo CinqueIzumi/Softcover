@@ -4,16 +4,22 @@ import org.koin.dsl.module
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.identity.di.identityModule
+import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSourceImpl
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryRemoteDataSource
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSourceImpl
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSourceImpl
 import nl.rhaydus.softcover.core.personal.data.repository.HighlightRepositoryImpl
+import nl.rhaydus.softcover.core.personal.data.repository.ReadingJournalHistoryRepositoryImpl
 import nl.rhaydus.softcover.core.personal.data.repository.ReadingLogRepositoryImpl
 import nl.rhaydus.softcover.core.personal.data.repository.ReadingSessionRepositoryImpl
 import nl.rhaydus.softcover.core.personal.domain.repository.HighlightRepository
+import nl.rhaydus.softcover.core.personal.domain.repository.ReadingJournalHistoryRepository
 import nl.rhaydus.softcover.core.personal.domain.repository.ReadingLogRepository
 import nl.rhaydus.softcover.core.personal.domain.repository.ReadingSessionRepository
 import nl.rhaydus.softcover.core.personal.domain.usecase.AddHighlightUseCase
@@ -21,6 +27,7 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.AddReadingLogEntryUseCa
 import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteHighlightUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteReadingLogEntryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteReadingSessionUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveActiveSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllHighlightsUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllSessionsUseCase
@@ -39,6 +46,8 @@ val personalModule = module {
     includes(
         dispatcherModule,
         databaseModule,
+        apolloModule,
+        identityModule,
     )
 
     single { get<SoftcoverDatabase>().highlightDao() }
@@ -73,4 +82,17 @@ val personalModule = module {
     factory { AddReadingLogEntryUseCase(repository = get()) }
     factory { UpdateReadingLogEntryUseCase(repository = get()) }
     factory { DeleteReadingLogEntryUseCase(repository = get()) }
+
+    single<ReadingJournalHistoryRemoteDataSource> {
+        ReadingJournalHistoryRemoteDataSourceImpl(
+            apolloClient = get(),
+            getUserIdUseCase = get(),
+        )
+    }
+
+    single<ReadingJournalHistoryRepository> {
+        ReadingJournalHistoryRepositoryImpl(readingJournalHistoryRemoteDataSource = get())
+    }
+
+    factory { GetReadingJournalHistoryUseCase(readingJournalHistoryRepository = get()) }
 }

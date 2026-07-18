@@ -118,3 +118,13 @@ val MoodInkHeartWrenchForeground = Color(0xFFFFD9DE)
  */
 val MonogramCoverInk = Color(0xFF1A110F)
 val MonogramCoverForeground = Color(0xFFFFEDE8)
+
+/**
+ * The fixed warm-white foreground for text painted directly on the Reading screen's featured-hero
+ * backdrop (series eyebrow, hero title, byline, the "Your pace" row) - the backdrop itself is a
+ * blurred, dimmed book cover (a theme-role black scrim + a fade into the card's own surface colour,
+ * not a fixed-ink field), but the overlaid text still needs a colour that reads reliably against an
+ * arbitrary cover image regardless of theme, so it stays fixed rather than switching to `onSurface` /
+ * `onSurfaceVariant` - see `docs/reference/design-system.md`.
+ */
+val ReadingHeroBackdropForeground = Color(0xFFFFEDE8)

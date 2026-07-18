@@ -134,10 +134,10 @@ internal actual fun ReadingScreenLayout(
 }
 
 /**
- * The desktop currently-reading column: the featured card, the optional plan-today nudge, and the
- * "also reading" rows, in a non-lazy [verticalScroll] so the [DesktopVerticalScrollbar] thumb tracks
- * the true content height. Mirrors the item order of the shared [ReadingBooksColumn] (which the mobile
- * layout uses lazily), reusing the same shared cards.
+ * The desktop currently-reading column: the featured card (which fuses its own optional plan-today
+ * nudge to its top edge) and the "also reading" rows, in a non-lazy [verticalScroll] so the
+ * [DesktopVerticalScrollbar] thumb tracks the true content height. Mirrors the item order of the
+ * shared [ReadingBooksColumn] (which the mobile layout uses lazily), reusing the same shared cards.
  */
 @Composable
 private fun DesktopReadingContent(
@@ -167,31 +167,25 @@ private fun DesktopReadingContent(
                     .verticalScroll(readingScrollState)
                     .padding(top = 8.dp, bottom = 24.dp + rememberBottomBarPadding()),
             ) {
-                if (planTodayMessage != null && isPlanTodayDismissed.not()) {
-                    PlanTodayNudge(
-                        text = planTodayMessage,
-                        onDismiss = {
-                            runAction(OnDismissPlanTodayAction(bookId = featured.id))
-                        },
-                    )
-                }
-
                 FeaturedBookCard(
                     book = featured,
                     deadlineProgress = featuredDeadlineProgress,
-                    dateStyle = state.dateStyle,
                     mutationFailed = featured.id in state.failedMutationBookIds,
+                    paceForecast = state.featuredBookPace,
+                    planTodayMessage = planTodayMessage.takeIf { isPlanTodayDismissed.not() },
+                    onDismissPlanToday = {
+                        runAction(OnDismissPlanTodayAction(bookId = featured.id))
+                    },
                     runAction = runAction,
                     onBookClick = onBookClick,
-                    onMarkAsRead = controller::requestMarkAsRead,
                     modifier = controller.slideModifier(featured.id),
                 )
 
                 if (rest.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
 
                     Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                        SectionLabel(text = "Also between your fingers")
+                        AlsoReadingSectionHeader(count = rest.size)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -201,11 +195,9 @@ private fun DesktopReadingContent(
                             modifier = controller.slideModifier(book.id),
                             book = book,
                             deadlineProgress = book.deadlineProgressFrom(state),
-                            dateStyle = state.dateStyle,
                             mutationFailed = book.id in state.failedMutationBookIds,
                             runAction = runAction,
                             onBookClick = onBookClick,
-                            onMarkAsRead = controller::requestMarkAsRead,
                         )
                     }
                 }

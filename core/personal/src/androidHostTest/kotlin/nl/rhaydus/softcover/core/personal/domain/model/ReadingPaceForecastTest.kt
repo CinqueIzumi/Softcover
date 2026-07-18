@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.book_detail.domain.model
+package nl.rhaydus.softcover.core.personal.domain.model
 
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit

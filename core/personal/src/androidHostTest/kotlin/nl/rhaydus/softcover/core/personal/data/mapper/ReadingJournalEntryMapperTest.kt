@@ -1,10 +1,10 @@
-package nl.rhaydus.softcover.feature.book_detail.data.mapper
+package nl.rhaydus.softcover.core.personal.data.mapper
 
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.feature.book_detail.domain.model.ReadingJournalEntry
+import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 
 class ReadingJournalEntryMapperTest {
     private fun validPagesMetadata(pages: Any? = 120): Map<String, Any?> = mapOf(

@@ -69,6 +69,8 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.model.ModalSheetForm
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -84,6 +86,7 @@ fun UpdateProgressBottomSheet(
     onUpdatePageProgressClick: (String) -> Unit,
     onUpdateTimeProgressClick: (String, String, String) -> Unit,
     onDismissRequest: () -> Unit,
+    onMarkAsReadClick: () -> Unit,
 ) {
     AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
         ProgressBottomSheetContent(
@@ -93,6 +96,7 @@ fun UpdateProgressBottomSheet(
             onUpdatePercentageClick = onUpdatePercentageClick,
             onUpdatePageProgressClick = onUpdatePageProgressClick,
             onUpdateTimeProgressClick = onUpdateTimeProgressClick,
+            onMarkAsReadClick = onMarkAsReadClick,
         )
     }
 }
@@ -105,6 +109,7 @@ private fun ProgressBottomSheetContent(
     onUpdatePercentageClick: (String) -> Unit,
     onUpdatePageProgressClick: (String) -> Unit,
     onUpdateTimeProgressClick: (String, String, String) -> Unit = { _, _, _ -> },
+    onMarkAsReadClick: () -> Unit = {},
 ) {
     val edition = book.currentEdition
     val isAudiobook = edition?.isAudiobook == true
@@ -130,11 +135,12 @@ private fun ProgressBottomSheetContent(
 
     val focusManager = LocalFocusManager.current
 
-    // A 96dp-tall L button is the right phone thumb target; on the desktop panel it steps down to a
-    // 56dp M pointer target. The form is published by the hosting AdaptiveModalSheet.
+    // A moderate 56dp M button on both forms — the sheet form previously used a 96dp L button, but
+    // that read as oversized against the redline spec's ~52/48dp actions, so both the phone sheet
+    // and the desktop panel now share the same size. Still read through LocalModalSheetForm (rather
+    // than hardcoding M directly) so a future form-specific need has a seam to hook into.
     val actionButtonSize = when (LocalModalSheetForm.current) {
-        ModalSheetForm.PANEL -> ButtonSize.M
-        ModalSheetForm.SHEET -> ButtonSize.L
+        ModalSheetForm.PANEL, ModalSheetForm.SHEET -> ButtonSize.M
     }
 
     Column(
@@ -185,6 +191,20 @@ private fun ProgressBottomSheetContent(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        RhaydusButton(
+            label = "Mark as read",
+            style = ButtonStyle.OUTLINED,
+            size = actionButtonSize,
+            icon = drawableIconResource(
+                icon = SoftcoverIcon.Check,
+                contentDescription = "Mark as read icon",
+            ),
+            onClick = onMarkAsReadClick,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 

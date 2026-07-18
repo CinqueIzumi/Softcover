@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.toad.UiState
 
 internal data class ReadingScreenUiState(
@@ -25,4 +26,6 @@ internal data class ReadingScreenUiState(
 
     val recentReadingActivity: List<ReadingDayActivity> = emptyList(),
     val streakEnabled: Boolean = true,
+
+    val featuredBookPace: ReadingPaceForecast? = null,
 ) : UiState

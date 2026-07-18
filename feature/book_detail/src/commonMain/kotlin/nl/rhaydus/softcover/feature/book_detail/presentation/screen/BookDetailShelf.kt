@@ -2924,9 +2924,11 @@ internal fun BookDetailOverlays(
         )
     }
 
-    if (state.showUpdateProgressSheet && state.book != null) {
+    val bookToUpdate = state.book
+
+    if (state.showUpdateProgressSheet && bookToUpdate != null) {
         UpdateProgressBottomSheet(
-            bookToUpdate = state.book,
+            bookToUpdate = bookToUpdate,
             selectedTab = state.selectedProgressSheetTab,
             onDismissRequest = {
                 runAction(OnDismissProgressSheetAction())
@@ -2948,6 +2950,16 @@ internal fun BookDetailOverlays(
                         seconds = s,
                     ),
                 )
+            },
+            onMarkAsReadClick = {
+                // The same dispatchable action the Shelve control's "Read" row fires. Its celebration
+                // (commit haptic + MarkAsReadBurst) is driven screen-wide off the ScreenModel's
+                // BookMarkedAsReadEvent (BookDetailScreen.Content's ObserveAsEvents), not by anything
+                // local to that row, so dispatching it from the sheet gets the same commit haptic +
+                // burst for free — no new action/state needed.
+                runAction(OnMarkBookAsReadClickAction(book = bookToUpdate))
+
+                runAction(OnDismissProgressSheetAction())
             },
         )
     }

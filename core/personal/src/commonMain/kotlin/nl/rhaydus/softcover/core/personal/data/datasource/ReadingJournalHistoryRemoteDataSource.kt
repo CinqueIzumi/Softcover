@@ -1,11 +1,11 @@
-package nl.rhaydus.softcover.feature.book_detail.data.datasource
+package nl.rhaydus.softcover.core.personal.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import nl.rhaydus.softcover.GetReadingJournalHistoryQuery
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.network.helper.safeQuery
-import nl.rhaydus.softcover.feature.book_detail.data.mapper.toReadingJournalEntry
-import nl.rhaydus.softcover.feature.book_detail.domain.model.ReadingJournalEntry
+import nl.rhaydus.softcover.core.personal.data.mapper.toReadingJournalEntry
+import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 
 interface ReadingJournalHistoryRemoteDataSource {
     suspend fun getReadingJournalHistory(bookId: Int): List<ReadingJournalEntry>

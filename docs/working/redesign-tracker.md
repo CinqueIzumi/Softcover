@@ -20,7 +20,7 @@ redesign in the app yet?".
 | --- | --- | --- |
 | Book detail | `Book Detail 2a - Spec Sheet.dc.html` (+ `Book Detail Sheets - Spec Sheet.dc.html`) | ✅ Implemented |
 | Explore | `Explore 3a - Spec Sheet.dc.html` | ✅ Implemented |
-| Reading | `Reading 1a - Spec Sheet.dc.html` | ⬜ Not started |
+| Reading | `Reading 1a - Spec Sheet.dc.html` | ✅ Implemented |
 | Library | `Library Spec Sheet.dc.html` | ✅ Implemented |
 | Profile | `Profile 1a - Spec Sheet.dc.html` | ✅ Implemented |
 | Settings | `Settings 1a - Spec Sheet.dc.html` | ✅ Implemented |
