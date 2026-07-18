@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 
@@ -43,6 +44,7 @@ class ListWriteReplayTest {
         startPosition: Int? = null,
         orderedListBookIds: List<Int>? = null,
         enqueuedAt: String = "2026-05-10T10:00:00Z",
+        privacy: PrivacySetting? = null,
     ) = PendingListWrite(
         kind = kind,
         listId = listId,
@@ -53,6 +55,7 @@ class ListWriteReplayTest {
         startPosition = startPosition,
         orderedListBookIds = orderedListBookIds,
         enqueuedAt = enqueuedAt,
+        privacy = privacy,
     )
 
     @Nested
@@ -100,6 +103,85 @@ class ListWriteReplayTest {
             // ----- Act & Assert -----
             shouldThrow<IllegalStateException> { replay(payload = write) }
         }
+
+        @Test
+        fun `creates the list remotely as PRIVATE when queued with that privacy`() = runTest {
+            // ----- Arrange -----
+            val write = pendingListWrite(
+                kind = PendingListWriteKind.CREATE_LIST,
+                listName = "Science Fiction",
+                privacy = PrivacySetting.PRIVATE,
+            )
+            val created = BookList(
+                id = 1,
+                name = "Science Fiction",
+                slug = "science-fiction",
+                books = emptyList(),
+            )
+
+            coEvery {
+                listsRemoteDataSource.createList(
+                    name = "Science Fiction",
+                    privacy = PrivacySetting.PRIVATE,
+                )
+            } returns created
+
+            coJustRun {
+                listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
+            }
+
+            // ----- Act -----
+            val result = replay(payload = write)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.SYNCED
+            coVerify(exactly = 1) {
+                listsRemoteDataSource.createList(
+                    name = "Science Fiction",
+                    privacy = PrivacySetting.PRIVATE,
+                )
+            }
+        }
+
+        @Test
+        fun `falls back to PUBLIC when a row queued before the privacy column existed has no privacy`() =
+            runTest {
+                // ----- Arrange -----
+                val write = pendingListWrite(
+                    kind = PendingListWriteKind.CREATE_LIST,
+                    listName = "Science Fiction",
+                    privacy = null,
+                )
+                val created = BookList(
+                    id = 1,
+                    name = "Science Fiction",
+                    slug = "science-fiction",
+                    books = emptyList(),
+                )
+
+                coEvery {
+                    listsRemoteDataSource.createList(
+                        name = "Science Fiction",
+                        privacy = PrivacySetting.PUBLIC,
+                    )
+                } returns created
+
+                coJustRun {
+                    listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
+                }
+
+                // ----- Act -----
+                val result = replay(payload = write)
+
+                // ----- Assert -----
+                result shouldBe ReplayOutcome.SYNCED
+                coVerify(exactly = 1) {
+                    listsRemoteDataSource.createList(
+                        name = "Science Fiction",
+                        privacy = PrivacySetting.PUBLIC,
+                    )
+                }
+            }
     }
 
     @Nested

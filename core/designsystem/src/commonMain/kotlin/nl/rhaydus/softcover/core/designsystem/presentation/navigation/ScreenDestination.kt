@@ -16,8 +16,6 @@ sealed interface ScreenDestination {
         val transitionSurface: String? = null,
     ) : ScreenDestination
 
-    data object CreateList : ScreenDestination
-
     data object BarcodeScanner : ScreenDestination
 
     data object LibraryVisibilitySettings : ScreenDestination

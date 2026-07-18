@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
@@ -36,15 +37,24 @@ internal class ListsRepositoryImpl(
     private val inflightMutex = Mutex()
     private val inflightFetches = mutableMapOf<Set<Int>?, Deferred<List<BookList>>>()
 
-    override suspend fun createList(name: String): BookList {
+    override suspend fun createList(
+        name: String,
+        privacy: PrivacySetting,
+    ): BookList {
         val created: BookList = runCatching {
-            listsRemoteDataSource.createList(name = name)
+            listsRemoteDataSource.createList(
+                name = name,
+                privacy = privacy,
+            )
         }.getOrElse { error ->
             if (error is CancellationException) throw error
 
             if (error is ListNameTakenException) throw error
 
-            enqueueCreateList(name = name)
+            enqueueCreateList(
+                name = name,
+                privacy = privacy,
+            )
 
             throw error
         }
@@ -338,7 +348,10 @@ internal class ListsRepositoryImpl(
         listsLocalDataSource.cacheUserBookLists(lists = listOf(refreshed))
     }
 
-    private suspend fun enqueueCreateList(name: String) {
+    private suspend fun enqueueCreateList(
+        name: String,
+        privacy: PrivacySetting,
+    ) {
         runCatching {
             listWriteQueue.enqueue(
                 PendingListWrite(
@@ -351,6 +364,7 @@ internal class ListsRepositoryImpl(
                     startPosition = null,
                     orderedListBookIds = null,
                     enqueuedAt = Clock.System.now().toString(),
+                    privacy = privacy,
                 ),
             )
         }

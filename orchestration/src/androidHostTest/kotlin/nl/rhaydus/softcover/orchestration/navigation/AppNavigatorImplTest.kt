@@ -9,7 +9,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TabDestina
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
-import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreen
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.scan.presentation.screen.BarcodeScannerScreen
@@ -33,18 +32,6 @@ class AppNavigatorImplTest {
             // ----- Assert -----
             result.shouldBeInstanceOf<BookDetailScreen>()
             (result as BookDetailScreen).id shouldBe 42
-        }
-
-        @Test
-        fun `CreateList destination maps to CreateListScreen`() {
-            // ----- Arrange -----
-            val destination = ScreenDestination.CreateList
-
-            // ----- Act -----
-            val result = navigator.screen(destination)
-
-            // ----- Assert -----
-            result.shouldBeInstanceOf<CreateListScreen>()
         }
 
         @Test

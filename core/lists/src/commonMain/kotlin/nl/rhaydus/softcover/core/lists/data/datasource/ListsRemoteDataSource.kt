@@ -49,7 +49,10 @@ interface ListsRemoteDataSource {
         listIds: Set<Int>? = null,
     ): List<BookList>
 
-    suspend fun createList(name: String): BookList
+    suspend fun createList(
+        name: String,
+        privacy: PrivacySetting = PrivacySetting.PUBLIC,
+    ): BookList
 
     suspend fun markEditionAsOwned(edition: BookEdition): ListBook
 
@@ -138,11 +141,14 @@ internal class ListsRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun createList(name: String): BookList {
+    override suspend fun createList(
+        name: String,
+        privacy: PrivacySetting,
+    ): BookList {
         val input = ListInput(
             name = Optional.Present(name),
             description = Optional.Present(""),
-            privacy_setting_id = Optional.Present(PrivacySetting.PUBLIC.code),
+            privacy_setting_id = Optional.Present(privacy.code),
             ranked = Optional.Present(false),
             default_view = Optional.Present(DEFAULT_LIST_VIEW),
             url = Optional.Present(""),

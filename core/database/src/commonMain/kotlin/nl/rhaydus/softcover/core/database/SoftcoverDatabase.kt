@@ -68,7 +68,7 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 45,
+    version = 46,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1253,6 +1253,26 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // Lists gain a user-chosen privacy (public/private) rather than the create-list write always
+        // assuming PUBLIC, and a queued CREATE_LIST write carries that choice so an offline create
+        // doesn't silently replay as PUBLIC once connectivity returns.
+        //
+        // Both columns land in one migration because they are one feature and no build ever shipped
+        // between them — splitting them would invent an intermediate version no install can be on.
+        //
+        // book_lists.privacySettingId is NOT NULL defaulting to PUBLIC (1): the value every list on
+        // the server carries today, since the create path never sent anything else.
+        // pending_list_writes.privacySettingId is nullable — every other pending list write kind
+        // leaves it unset, and rows queued before this column existed fall back to PUBLIC at replay
+        // time (see ListWriteReplay).
+        private val MIGRATION_45_46 = object : Migration(45, 46) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_lists ADD COLUMN privacySettingId INTEGER NOT NULL DEFAULT 1")
+
+                connection.execSQL("ALTER TABLE pending_list_writes ADD COLUMN privacySettingId INTEGER DEFAULT NULL")
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1299,6 +1319,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_42_43,
             MIGRATION_43_44,
             MIGRATION_44_45,
+            MIGRATION_45_46,
         )
     }
 }

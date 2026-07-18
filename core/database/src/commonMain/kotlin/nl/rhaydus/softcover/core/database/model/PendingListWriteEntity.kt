@@ -17,4 +17,5 @@ data class PendingListWriteEntity(
     val orderedListBookIdsCsv: String?,
     val enqueuedAt: String,
     val attempts: Int = 0,
+    val privacySettingId: Int? = null,
 )

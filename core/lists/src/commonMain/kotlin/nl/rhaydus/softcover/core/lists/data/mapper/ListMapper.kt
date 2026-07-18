@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.lists.data.mapper
 
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ListFragment
 import nl.rhaydus.softcover.fragment.ListFragment.List_book.Companion.listBookFragment
@@ -14,6 +15,7 @@ internal fun ListFragment.toBookList(): BookList {
         name = name,
         slug = slug.orEmpty(),
         ranked = ranked == true,
+        privacy = PrivacySetting.entries.firstOrNull { it.code == privacy_setting_id } ?: PrivacySetting.PUBLIC,
         books = listBooks,
         signature = buildListSignature(
             updatedAt = updated_at,

@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.data.mapper.buildListSignature
 import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ListFragment
@@ -45,6 +46,7 @@ class ListMapperTest {
         name: String = "My List",
         slug: String? = "my-list",
         ranked: Boolean = false,
+        privacySettingId: Int = PrivacySetting.PUBLIC.code,
         listBooks: List<ListFragment.List_book> = emptyList(),
         updatedAt: String? = null,
         listBooksAggregate: ListFragment.List_books_aggregate = stubAggregate(),
@@ -61,6 +63,9 @@ class ListMapperTest {
         every {
             this@mockk.ranked
         } returns ranked
+        every {
+            privacy_setting_id
+        } returns privacySettingId
         every {
             list_books
         } returns listBooks
@@ -292,6 +297,44 @@ class ListMapperTest {
 
             // ----- Assert -----
             result.signature shouldBe "2024-06-01|0|"
+        }
+
+        @Test
+        fun `maps PUBLIC privacy_setting_id to PrivacySetting PUBLIC`() {
+            // ----- Arrange -----
+            val fragment = stubListFragment(privacySettingId = PrivacySetting.PUBLIC.code)
+
+            // ----- Act -----
+            val result = fragment.toBookList()
+
+            // ----- Assert -----
+            result.privacy shouldBe PrivacySetting.PUBLIC
+        }
+
+        @Test
+        fun `maps PRIVATE privacy_setting_id to PrivacySetting PRIVATE`() {
+            // ----- Arrange -----
+            val fragment = stubListFragment(privacySettingId = PrivacySetting.PRIVATE.code)
+
+            // ----- Act -----
+            val result = fragment.toBookList()
+
+            // ----- Assert -----
+            result.privacy shouldBe PrivacySetting.PRIVATE
+        }
+
+        @Test
+        fun `degrades an unrecognized privacy_setting_id to PUBLIC`() {
+            // ----- Arrange -----
+            // privacy_setting_id is a non-null Int on the fragment, so an unmapped code (rather
+            // than null) is the only way this branch can be reached.
+            val fragment = stubListFragment(privacySettingId = -1)
+
+            // ----- Act -----
+            val result = fragment.toBookList()
+
+            // ----- Assert -----
+            result.privacy shouldBe PrivacySetting.PUBLIC
         }
     }
 

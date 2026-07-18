@@ -3,6 +3,7 @@ fragment ListFragment on lists {
     name
     slug
     ranked
+    privacy_setting_id
     updated_at
 
     list_books_aggregate {

@@ -11,10 +11,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import org.koin.compose.koinInject
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPresenter
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.rememberBookDetailPrefetcher
@@ -22,8 +22,10 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToNewListAction
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import org.koin.compose.koinInject
 
 object LibraryScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +35,7 @@ object LibraryScreen : Screen {
 
         val appNavigator = koinInject<AppNavigator>()
         val bookDetailPresenter = LocalBookDetailPresenter.current
+        val createListPresenter = LocalCreateListPresenter.current
 
         val screenModel = koinScreenModel<LibraryScreenScreenModel>()
 
@@ -80,7 +83,20 @@ object LibraryScreen : Screen {
                 onCreateNewListClick = {
                     screenModel.runAction(OnBulkAddToListSheetShownAction(shown = false))
 
-                    navigator.parent?.push(item = appNavigator.screen(ScreenDestination.CreateList))
+                    // Creating a list is a detour out of "put these books on a list", not a new task,
+                    // so finishing it returns here: the selection lands on the new list and the chooser
+                    // reopens with it ticked. Without this the chooser closes, the list is created
+                    // empty, and the reader's original intent is silently dropped.
+                    createListPresenter?.open(
+                        onListCreated = { listId, listName ->
+                            screenModel.runAction(
+                                OnBulkAddToNewListAction(
+                                    listId = listId,
+                                    listName = listName,
+                                ),
+                            )
+                        },
+                    )
                 },
             )
         }

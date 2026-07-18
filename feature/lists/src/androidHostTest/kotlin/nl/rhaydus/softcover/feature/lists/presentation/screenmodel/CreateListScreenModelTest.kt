@@ -15,9 +15,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.feature.lists.domain.usecase.CreateListUseCase
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedAction
+import nl.rhaydus.softcover.feature.lists.presentation.action.OnPrivacyToggledAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnSubmitAction
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
 import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreatedEvent
@@ -335,6 +337,142 @@ class CreateListScreenModelTest {
 
             // ----- Assert -----
             stateFlow.value.isSubmitting shouldBe false
+        }
+
+        @Test
+        fun `passes default PUBLIC privacy through to the use case`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState(name = "Favourites")
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                createListUseCase(
+                    name = "Favourites",
+                    privacy = PrivacySetting.PUBLIC,
+                )
+            } returns stubBookList(name = "Favourites")
+
+            val action = OnSubmitAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                createListUseCase(
+                    name = "Favourites",
+                    privacy = PrivacySetting.PUBLIC,
+                )
+            }
+        }
+
+        @Test
+        fun `passes PRIVATE privacy through to the use case after toggling`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState(name = "Favourites")
+            val dependencies = stubDependencies(this)
+
+            OnPrivacyToggledAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            coEvery {
+                createListUseCase(
+                    name = "Favourites",
+                    privacy = PrivacySetting.PRIVATE,
+                )
+            } returns stubBookList(name = "Favourites")
+
+            val action = OnSubmitAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                createListUseCase(
+                    name = "Favourites",
+                    privacy = PrivacySetting.PRIVATE,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class OnPrivacyToggledActionTests {
+        @Test
+        fun `flips PUBLIC to PRIVATE`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState(privacy = PrivacySetting.PUBLIC)
+            val action = OnPrivacyToggledAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(this),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.privacy shouldBe PrivacySetting.PRIVATE
+        }
+
+        @Test
+        fun `flips PRIVATE to PUBLIC`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState(privacy = PrivacySetting.PRIVATE)
+            val action = OnPrivacyToggledAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(this),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.privacy shouldBe PrivacySetting.PUBLIC
+        }
+
+        @Test
+        fun `flips FOLLOWERS to PRIVATE`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState(privacy = PrivacySetting.FOLLOWERS)
+            val action = OnPrivacyToggledAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(this),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.privacy shouldBe PrivacySetting.PRIVATE
+        }
+
+        @Test
+        fun `toggling twice from the default returns to PUBLIC`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            val action = OnPrivacyToggledAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.privacy shouldBe PrivacySetting.PUBLIC
         }
     }
 

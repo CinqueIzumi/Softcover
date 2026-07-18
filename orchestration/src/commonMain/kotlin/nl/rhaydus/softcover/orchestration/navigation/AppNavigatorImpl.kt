@@ -9,7 +9,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailSc
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.explore.presentation.screen.HiddenSuggestionsScreen
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
-import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListScreen
 import nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreen
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.scan.presentation.screen.BarcodeScannerScreen
@@ -28,8 +27,6 @@ internal class AppNavigatorImpl : AppNavigator {
             initialCover = destination.initialCover,
             transitionSurface = destination.transitionSurface,
         )
-
-        ScreenDestination.CreateList -> CreateListScreen()
 
         ScreenDestination.BarcodeScanner -> BarcodeScannerScreen()
 

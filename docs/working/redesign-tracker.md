@@ -27,7 +27,7 @@ redesign in the app yet?".
 | Appearance | `Appearance 1a - Spec Sheet.dc.html` | ⬜ Not started |
 | Library tabs | `Library Tabs 1a - Spec Sheet.dc.html` | ⬜ Not started |
 | Hidden suggestions | `Hidden Suggestions 1a - Spec Sheet.dc.html` | ⬜ Not started |
-| List creation | `List Creation 1a - Spec Sheet.dc.html` | ⬜ Not started |
+| List creation | `List Creation 1a - Spec Sheet.dc.html` | ✅ Implemented (Create only — the sheet's Edit and Delete surfaces await Step 5.3's list CRUD in 3.7.0) |
 | Onboarding | `Onboarding 1b - Spec Sheet.dc.html` | ⬜ Not started |
 | Tag editor | `Tag Editor - Spec Sheet.dc.html` | ✅ Implemented |
 

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.database.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 
 @Entity(tableName = "book_lists")
 data class BookListEntity(
@@ -11,6 +12,7 @@ data class BookListEntity(
     val name: String,
     val slug: String,
     val ranked: Boolean = false,
+    val privacySettingId: Int = PrivacySetting.PUBLIC.code,
 
     /**
      * The freshness signature captured the last time this list's `list_books` were deep-fetched.
