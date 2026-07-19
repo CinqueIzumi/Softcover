@@ -71,6 +71,8 @@ interface ExploreRepository {
         seriesId: Int,
         seriesName: String? = null,
         coverUrl: String? = null,
+        authorText: String? = null,
+        bookCount: Int? = null,
     )
 
     suspend fun undoContinueSeriesBookDismissal(bookId: Int)

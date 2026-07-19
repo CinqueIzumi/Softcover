@@ -29,4 +29,6 @@ internal fun DismissedContinueSeriesEntity.toDomain(): DismissedSeries = Dismiss
     seriesId = seriesId,
     seriesName = seriesName,
     coverUrl = coverUrl,
+    authorText = authorText,
+    bookCount = bookCount,
 )

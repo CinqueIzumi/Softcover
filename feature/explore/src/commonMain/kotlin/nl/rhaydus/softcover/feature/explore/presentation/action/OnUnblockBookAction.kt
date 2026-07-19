@@ -25,7 +25,7 @@ internal class OnUnblockBookAction(
             }
             .onSuccess {
                 SnackBarManager.showSnackBar(
-                    title = "\"${book.title ?: "Book"}\" unblocked",
+                    title = "\"${book.title ?: "Book"}\" is back in your suggestions",
                     actionLabel = "Undo",
                     onActionClick = {
                         dependencies.launch {

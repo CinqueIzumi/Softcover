@@ -111,11 +111,15 @@ internal class ExploreRepositoryImpl(
         seriesId: Int,
         seriesName: String?,
         coverUrl: String?,
+        authorText: String?,
+        bookCount: Int?,
     ) {
         dismissedContinueSeriesLocalDataSource.dismissSeries(
             seriesId = seriesId,
             seriesName = seriesName,
             coverUrl = coverUrl,
+            authorText = authorText,
+            bookCount = bookCount,
         )
     }
 

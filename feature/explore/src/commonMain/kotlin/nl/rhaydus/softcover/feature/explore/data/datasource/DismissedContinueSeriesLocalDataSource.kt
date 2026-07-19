@@ -16,6 +16,8 @@ internal interface DismissedContinueSeriesLocalDataSource {
         seriesId: Int,
         seriesName: String?,
         coverUrl: String?,
+        authorText: String?,
+        bookCount: Int?,
     )
 
     suspend fun undoBookDismissal(bookId: Int)
@@ -40,12 +42,16 @@ internal class DismissedContinueSeriesLocalDataSourceImpl(
         seriesId: Int,
         seriesName: String?,
         coverUrl: String?,
+        authorText: String?,
+        bookCount: Int?,
     ) {
         dao.dismissSeries(
             DismissedContinueSeriesEntity(
                 seriesId = seriesId,
                 seriesName = seriesName,
                 coverUrl = coverUrl,
+                authorText = authorText,
+                bookCount = bookCount,
             ),
         )
     }

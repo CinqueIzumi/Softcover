@@ -32,6 +32,8 @@ class GetDismissedContinueSeriesUseCaseTest {
                     seriesId = 10,
                     seriesName = "Foundation",
                     coverUrl = "cover.jpg",
+                    authorText = null,
+                    bookCount = null,
                 ),
             )
 

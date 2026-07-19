@@ -12,6 +12,8 @@ internal class OnDismissContinueSeriesAction(
     val seriesId: Int,
     val seriesName: String,
     val coverUrl: String?,
+    val authorText: String?,
+    val bookCount: Int?,
 ) : ExploreAction {
     override suspend fun execute(
         dependencies: ExploreDependencies,
@@ -21,6 +23,8 @@ internal class OnDismissContinueSeriesAction(
             seriesId = seriesId,
             seriesName = seriesName,
             coverUrl = coverUrl,
+            authorText = authorText,
+            bookCount = bookCount,
         )
             .onFailure {
                 AppLog.e(

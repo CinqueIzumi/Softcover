@@ -84,6 +84,8 @@ class DismissedContinueSeriesDaoTest {
                 seriesId = 10,
                 seriesName = "Foundation",
                 coverUrl = "https://example.com/foundation.jpg",
+                authorText = "Isaac Asimov",
+                bookCount = 7,
             )
 
             // ----- Act -----

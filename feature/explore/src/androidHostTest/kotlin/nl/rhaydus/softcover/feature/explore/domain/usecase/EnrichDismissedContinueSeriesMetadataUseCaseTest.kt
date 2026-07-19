@@ -60,10 +60,14 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
     private fun dismissedSeries(
         seriesId: Int,
         seriesName: String? = null,
+        authorText: String? = null,
+        bookCount: Int? = null,
     ): DismissedSeries = DismissedSeries(
         seriesId = seriesId,
         seriesName = seriesName,
         coverUrl = null,
+        authorText = authorText,
+        bookCount = bookCount,
     )
 
     private fun bookInSeries(
@@ -105,6 +109,8 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     dismissedSeries(
                         seriesId = 10,
                         seriesName = "Already enriched",
+                        authorText = "Some Author",
+                        bookCount = 5,
                     ),
                 ),
             )
@@ -124,6 +130,8 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
             coVerify(exactly = 0) { exploreRepository.dismissContinueSeriesBook(any()) }
             coVerify(exactly = 0) {
                 exploreRepository.dismissContinueSeries(
+                    any(),
+                    any(),
                     any(),
                     any(),
                     any(),
@@ -164,6 +172,57 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
             // ----- Assert -----
             coVerify(exactly = 1) { booksRepository.fetchBookById(id = 1) }
             coVerify(exactly = 0) { booksRepository.fetchBookById(id = 2) }
+        }
+
+        @Test
+        fun `a series row with a seriesName but null authorText or bookCount is still resolved`() = runTest {
+            // ----- Arrange -----
+            val needsEnrichment = dismissedSeries(
+                seriesId = 10,
+                seriesName = "Foundation",
+                authorText = null,
+                bookCount = null,
+            )
+            val alreadyEnriched = dismissedSeries(
+                seriesId = 20,
+                seriesName = "Dune Saga",
+                authorText = "Frank Herbert",
+                bookCount = 6,
+            )
+
+            every {
+                exploreRepository.dismissedContinueSeries
+            } returns flowOf(listOf(needsEnrichment, alreadyEnriched))
+
+            val seed = bookInSeries(
+                id = 1,
+                seriesId = 10,
+                seriesName = "Foundation",
+            )
+
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(seed))
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerify {
+                exploreRepository.dismissContinueSeries(
+                    seriesId = 10,
+                    seriesName = "Foundation",
+                    coverUrl = seed.coverUrl,
+                    authorText = seed.authorString,
+                    bookCount = seed.bookSeries?.amountOfBooks,
+                )
+            }
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    seriesId = 20,
+                    afterPosition = any(),
+                )
+            }
         }
 
         @Test
@@ -368,6 +427,8 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     seriesId = 100,
                     seriesName = "Foundation",
                     coverUrl = localBook.coverUrl,
+                    authorText = localBook.authorString,
+                    bookCount = localBook.bookSeries?.amountOfBooks,
                 )
             }
             coVerify(exactly = 0) {
@@ -418,6 +479,8 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     seriesId = 200,
                     seriesName = "Foundation",
                     coverUrl = seed.coverUrl,
+                    authorText = seed.authorString,
+                    bookCount = seed.bookSeries?.amountOfBooks,
                 )
             }
         }
@@ -463,6 +526,8 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     seriesId = 300,
                     seriesName = any(),
                     coverUrl = any(),
+                    authorText = any(),
+                    bookCount = any(),
                 )
             }
         }
@@ -498,6 +563,8 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
             // ----- Assert -----
             coVerify(exactly = 0) {
                 exploreRepository.dismissContinueSeries(
+                    any(),
+                    any(),
                     any(),
                     any(),
                     any(),
@@ -610,11 +677,15 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     seriesId = 600,
                     seriesName = "Culture Series",
                     coverUrl = seed.coverUrl,
+                    authorText = seed.authorString,
+                    bookCount = seed.bookSeries?.amountOfBooks,
                 )
             }
             coVerify(exactly = 0) {
                 exploreRepository.dismissContinueSeries(
                     seriesId = 500,
+                    any(),
+                    any(),
                     any(),
                     any(),
                 )

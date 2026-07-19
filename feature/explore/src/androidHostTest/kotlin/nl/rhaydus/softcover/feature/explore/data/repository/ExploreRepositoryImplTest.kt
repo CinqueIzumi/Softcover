@@ -357,12 +357,16 @@ class ExploreRepositoryImplTest {
             val seriesId = 99
             val seriesName = "Foundation"
             val coverUrl = "https://example.com/foundation.jpg"
+            val authorText = "Isaac Asimov"
+            val bookCount = 7
 
             // ----- Act -----
             repository.dismissContinueSeries(
                 seriesId = seriesId,
                 seriesName = seriesName,
                 coverUrl = coverUrl,
+                authorText = authorText,
+                bookCount = bookCount,
             )
 
             // ----- Assert -----
@@ -371,6 +375,8 @@ class ExploreRepositoryImplTest {
                     seriesId = seriesId,
                     seriesName = seriesName,
                     coverUrl = coverUrl,
+                    authorText = authorText,
+                    bookCount = bookCount,
                 )
             }
         }
@@ -389,6 +395,8 @@ class ExploreRepositoryImplTest {
                     seriesId = seriesId,
                     seriesName = null,
                     coverUrl = null,
+                    authorText = null,
+                    bookCount = null,
                 )
             }
         }
@@ -489,6 +497,8 @@ class ExploreRepositoryImplTest {
                         seriesId = 10,
                         seriesName = "Foundation",
                         coverUrl = "cover.jpg",
+                        authorText = null,
+                        bookCount = null,
                     ),
                 )
                 awaitComplete()

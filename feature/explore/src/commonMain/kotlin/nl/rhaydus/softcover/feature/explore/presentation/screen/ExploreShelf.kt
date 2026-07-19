@@ -826,7 +826,7 @@ internal fun ContinueSeriesMenuSheet(
                             bookId = book.id,
                             title = book.title,
                             coverUrl = book.coverUrl,
-                            authorText = book.authorString,
+                            authorText = book.authorString.takeIf { it.isNotBlank() },
                             seriesName = book.bookSeries?.name,
                             seriesId = book.bookSeries?.id,
                             // The series cursor moves past this book's *last* position, so an omnibus
@@ -846,6 +846,8 @@ internal fun ContinueSeriesMenuSheet(
                         seriesId = series.id,
                         seriesName = series.name,
                         coverUrl = book.coverUrl,
+                        authorText = book.authorString.takeIf { it.isNotBlank() },
+                        bookCount = series.amountOfBooks,
                     ),
                 )
 

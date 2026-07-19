@@ -68,7 +68,7 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
     views = [
         BookEditionView::class
     ],
-    version = 46,
+    version = 47,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1273,6 +1273,18 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // The hidden-series row in Hidden Suggestions needs an italic scope caption ("Author ·
+        // N books"), which the row didn't carry before: only `seriesName`/`coverUrl` were persisted.
+        // These columns are display-only metadata, mirroring MIGRATION_43_44. Existing rows default
+        // to NULL and are backfilled lazily by `EnrichDismissedContinueSeriesMetadataUseCase` the
+        // first time that screen loads.
+        private val MIGRATION_46_47 = object : Migration(46, 47) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE dismissed_continue_series ADD COLUMN authorText TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series ADD COLUMN bookCount INTEGER DEFAULT NULL")
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1320,6 +1332,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_43_44,
             MIGRATION_44_45,
             MIGRATION_45_46,
+            MIGRATION_46_47,
         )
     }
 }
