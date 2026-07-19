@@ -1,1 +1,2 @@
 - [InlineErrorState pattern](project_inline_error_state.md) — shared `core/designsystem` component for TOAD `String?` error-slots; RhaydusButton OUTLINED S + error color bodySmall text
+- [Library Tabs 1a rebuild](project_library_tabs_redesign.md) — SettingsGroup/SettingsRowDivider retired; inline-dot-in-text technique; row press-wash without a row click

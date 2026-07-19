@@ -45,8 +45,18 @@ type-resolved — see [[project_detekt_gate_scope]]).
 **Found a third time, 2026-07-21** (Appearance 1a redesign review, [[architecture_appearance_1a_redesign]]):
 `SettingsShelf.kt` — an already-large multi-region shared component file with zero other top-level
 types — gained `private data class ToggleRowSpec(...)` as a single-caller helper for `DisplaySection`'s
-`buildList`. Same shape as `LibraryGridLayoutMapping.kt`: exactly one top-level type, name doesn't match
-file name, so it's a detekt `MatchingDeclarationName` hit, not a ktlint one. This confirms the pattern
-recurs specifically in files that already hold several composables/functions (screen/shelf files) — the
-author's attention is on the composables, and a small colocated data class slips through. Keep checking
-every new `data class`/`enum class` for this regardless of how clean the surrounding rewrite is.
+`buildList`. Flagged at the time as presumed `MatchingDeclarationName` bait, same shape as
+`LibraryGridLayoutMapping.kt`.
+
+**Correction (2026-07-21, Library Tabs redesign review, same file touched again):** actually ran
+`./gradlew :feature:settings:detektJvmMain --rerun` (forced, not up-to-date) against `SettingsShelf.kt`
+with `ToggleRowSpec` still present, unmodified, sole top-level type in the file — **zero findings**,
+checkstyle XML report genuinely empty. So `MatchingDeclarationName` does **not** fire here after all.
+The likely difference from the `LibraryGridLayoutMapping.kt` case that did fire: `ToggleRowSpec` is
+`private`, `LibraryLayoutChip` (the enum that fired) was not — the rule plausibly only considers
+non-private top-level declarations as "the file's matching type." Ktlint's one-type-per-file rule also
+doesn't fire (needs 2+ types; this file has exactly one). **Bottom line: don't flag a `private`
+single top-level data/enum class as a `MatchingDeclarationName` hit on assumption alone — verify with a
+forced (`--rerun`) detekt run before reporting it, since the up-to-date cache silently returns stale
+green/red results.** Still worth eyeballing every new `data class`/`enum class` for its own-file
+placement — the rule question is genuinely subtle and worth a real gate run, not a memory citation.
