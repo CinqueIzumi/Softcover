@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.settings.di
 
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
@@ -17,6 +18,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUse
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ReadingStreakCollector
@@ -33,6 +35,7 @@ val settingsModule = module {
         listsModule,
         preferencesModule,
         designSystemModule,
+        bookModule,
     )
 
     factory {
@@ -76,6 +79,8 @@ val settingsModule = module {
 
     factory { UserListsCollector() } bind LibraryVisibilityCollector::class
 
+    factory { LibraryTabCountsCollector() } bind LibraryVisibilityCollector::class
+
     factory {
         LibraryVisibilitySettingsScreenModel(
             getEnabledStatusCodesAsFlowUseCase = get(),
@@ -85,6 +90,11 @@ val settingsModule = module {
             setEnabledListIdsUseCase = get(),
             setLibraryTabOrderUseCase = get(),
             getAllUserListsUseCase = get(),
+            getAllUserBooksUseCase = get(),
+            getCurrentlyReadingUserBooksUseCase = get(),
+            getWantToReadUserBooksUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
             refreshLibraryUseCase = get(),
             applicationScope = get(),
             appDispatchers = get(),

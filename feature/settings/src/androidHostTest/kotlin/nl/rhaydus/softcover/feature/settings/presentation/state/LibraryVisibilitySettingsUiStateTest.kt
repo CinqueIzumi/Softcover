@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
+import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Nested
@@ -13,6 +15,7 @@ class LibraryVisibilitySettingsUiStateTest {
     private fun stubBookList(
         id: Int,
         name: String,
+        bookCount: Int = 0,
     ): BookList = mockk {
         every {
             this@mockk.id
@@ -20,6 +23,9 @@ class LibraryVisibilitySettingsUiStateTest {
         every {
             this@mockk.name
         } returns name
+        every {
+            this@mockk.books
+        } returns List(bookCount) { mockk() }
     }
 
     @Nested
@@ -105,9 +111,10 @@ class LibraryVisibilitySettingsUiStateTest {
             val entries = state.orderedEntries
 
             // ----- Assert -----
-            (entries[0] as LibraryTabEntry.CustomList).listId shouldBe 2
-            (entries[1] as LibraryTabEntry.Status).status shouldBe UserBookStatus.READ
-            (entries[2] as LibraryTabEntry.CustomList).listId shouldBe 1
+            entries[0].shouldBeInstanceOf<LibraryTabEntry.All>()
+            (entries[1] as LibraryTabEntry.CustomList).listId shouldBe 2
+            (entries[2] as LibraryTabEntry.Status).status shouldBe UserBookStatus.READ
+            (entries[3] as LibraryTabEntry.CustomList).listId shouldBe 1
         }
 
         @Test
@@ -151,6 +158,75 @@ class LibraryVisibilitySettingsUiStateTest {
             val listEntries = entries.filterIsInstance<LibraryTabEntry.CustomList>()
             listEntries[0].listId shouldBe 2
             listEntries[1].listId shouldBe 1
+        }
+
+        @Test
+        fun `first entry is always All with count equal to totalCount`() {
+            // ----- Arrange -----
+            val state = LibraryVisibilitySettingsUiState(
+                totalCount = 42,
+            )
+
+            // ----- Act -----
+            val entries = state.orderedEntries
+
+            // ----- Assert -----
+            entries[0].shouldBeInstanceOf<LibraryTabEntry.All>()
+            entries[0].count shouldBe 42
+        }
+
+        @Test
+        fun `count, isReorderable, canHide and isList are populated correctly per entry kind`() {
+            // ----- Arrange -----
+            val list = stubBookList(
+                id = 1,
+                name = "MyList",
+                bookCount = 7,
+            )
+            val statusCounts = mapOf(
+                UserBookStatus.CURRENTLY_READING.code to 3,
+                UserBookStatus.WANT_TO_READ.code to 5,
+                UserBookStatus.READ.code to 11,
+                UserBookStatus.DID_NOT_FINISH.code to 2,
+            )
+            val state = LibraryVisibilitySettingsUiState(
+                availableLists = listOf(list),
+                statusCounts = statusCounts,
+                totalCount = 21,
+            )
+
+            // ----- Act -----
+            val entries = state.orderedEntries
+
+            // ----- Assert -----
+            val allEntry = entries[0] as LibraryTabEntry.All
+            allEntry.isReorderable shouldBe false
+            allEntry.canHide shouldBe false
+            allEntry.isList shouldBe false
+            allEntry.count shouldBe 21
+
+            val currentlyReadingEntry = entries
+                .filterIsInstance<LibraryTabEntry.Status>()
+                .first { it.status == UserBookStatus.CURRENTLY_READING }
+            currentlyReadingEntry.isReorderable shouldBe true
+            currentlyReadingEntry.canHide shouldBe false
+            currentlyReadingEntry.count shouldBe 3
+
+            val otherStatusEntries = entries
+                .filterIsInstance<LibraryTabEntry.Status>()
+                .filterNot { it.status == UserBookStatus.CURRENTLY_READING }
+            otherStatusEntries.forAll { entry ->
+                entry.isReorderable shouldBe true
+                entry.canHide shouldBe true
+            }
+            otherStatusEntries.first { it.status == UserBookStatus.WANT_TO_READ }.count shouldBe 5
+            otherStatusEntries.first { it.status == UserBookStatus.READ }.count shouldBe 11
+            otherStatusEntries.first { it.status == UserBookStatus.DID_NOT_FINISH }.count shouldBe 2
+
+            val listEntry = entries.filterIsInstance<LibraryTabEntry.CustomList>().first()
+            listEntry.isList shouldBe true
+            listEntry.canHide shouldBe true
+            listEntry.count shouldBe 7
         }
     }
 

@@ -16,6 +16,8 @@ internal data class LibraryVisibilitySettingsUiState(
     val initialized: Boolean = false,
     val isSaving: Boolean = false,
     val availableLists: List<BookList> = emptyList(),
+    val statusCounts: Map<Int, Int> = emptyMap(),
+    val totalCount: Int = 0,
 ) : UiState {
     val isDirty: Boolean
         get() = initialized && (
@@ -31,6 +33,7 @@ internal data class LibraryVisibilitySettingsUiState(
                     LibraryTabEntry.Status(
                         status = status,
                         statusLabel = LibraryTab.Status.labelFor(status = status),
+                        statusCount = statusCounts[status.code] ?: 0,
                     )
                 }
 
@@ -40,19 +43,26 @@ internal data class LibraryVisibilitySettingsUiState(
                     LibraryTabEntry.CustomList(
                         listId = list.id,
                         listName = list.name,
+                        listCount = list.books.size,
                     )
                 }
 
-            val universe: List<LibraryTabEntry> = statusEntries + listEntries
+            val reorderableUniverse: List<LibraryTabEntry> = statusEntries + listEntries
 
-            if (draftTabOrder.isEmpty()) return universe
+            val reorderableOrdered = if (draftTabOrder.isEmpty()) {
+                reorderableUniverse
+            } else {
+                val byId = reorderableUniverse.associateBy { it.id }
+                val ordered = draftTabOrder.mapNotNull { byId[it] }
+                val orderedIds = ordered.map { it.id }.toSet()
+                val appended = reorderableUniverse.filter { it.id !in orderedIds }
 
-            val byId = universe.associateBy { it.id }
-            val ordered = draftTabOrder.mapNotNull { byId[it] }
-            val orderedIds = ordered.map { it.id }.toSet()
-            val appended = universe.filter { it.id !in orderedIds }
+                ordered + appended
+            }
 
-            return ordered + appended
+            val allEntry: LibraryTabEntry = LibraryTabEntry.All(totalCount = totalCount)
+
+            return listOf(allEntry) + reorderableOrdered
         }
 
     private companion object {

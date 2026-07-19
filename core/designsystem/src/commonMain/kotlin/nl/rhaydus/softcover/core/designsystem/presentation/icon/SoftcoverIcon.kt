@@ -4,6 +4,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_account
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_add
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_apk_install
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_arrow_back
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_arrow_drop_down
@@ -32,6 +33,7 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_menu_book
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_more_vert
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_palette
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_pause
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_pin
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_play
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_reading
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_search
@@ -57,6 +59,7 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_visibility_
  */
 enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Account(Res.drawable.ic_account),
+    Add(Res.drawable.ic_add),
     ApkInstall(Res.drawable.ic_apk_install),
     ArrowBack(Res.drawable.ic_arrow_back),
     ArrowDropDown(Res.drawable.ic_arrow_drop_down),
@@ -85,6 +88,7 @@ enum class SoftcoverIcon(internal val resource: DrawableResource) {
     MoreVert(Res.drawable.ic_more_vert),
     Palette(Res.drawable.ic_palette),
     Pause(Res.drawable.ic_pause),
+    Pin(Res.drawable.ic_pin),
     Play(Res.drawable.ic_play),
     Reading(Res.drawable.ic_reading),
     Search(Res.drawable.ic_search),

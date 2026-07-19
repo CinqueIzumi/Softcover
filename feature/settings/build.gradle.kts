@@ -11,6 +11,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":core:domain"))
+            implementation(project(":core:book"))
             implementation(project(":core:lists"))
             api(project(":core:preferences"))
             implementation(project(":core:designsystem"))

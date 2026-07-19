@@ -1,20 +1,26 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,12 +39,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.haptics.LocalHaptics
@@ -47,6 +61,8 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -372,9 +388,12 @@ private fun SettingsSelectableRow(
 // region Library visibility content
 /**
  * The Library-tabs (visibility + order) body, shared by the mobile [LibraryVisibilitySettingsScreen]
- * page and the desktop Settings master–detail pane. The drag-to-reorder is `draggable`-based, so it
- * works with a mouse on desktop as well as touch. The caller supplies the scroll / width [modifier]
- * and renders [LibraryVisibilitySaveBar] separately (docked outside the scroll region).
+ * page and the desktop Settings master–detail pane. The page opens with a single editorial header,
+ * then one flat, borderless reorderable row list — no boxed card, no per-row switch — followed by the
+ * "New list" foot action. The drag-to-reorder is `draggable`-based, so it works with a mouse on desktop
+ * as well as touch, and the fixed `All` entry (`isReorderable = false`) can neither move nor be moved
+ * past. The caller supplies the scroll / width [modifier] and renders [LibraryVisibilitySaveBar]
+ * separately (docked outside the scroll region).
  */
 @Composable
 internal fun LibraryVisibilityContent(
@@ -388,36 +407,92 @@ internal fun LibraryVisibilityContent(
 
         EditorialSectionHeader(
             eyebrow = "Library tabs",
-            headline = "Shelves on your library",
+            headline = "Arrange your shelves.",
+            description = "Choose which shelves ride along the top of your library — and the order they sit in.",
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-        Text(
-            text = "Long-press a row to drag it into a new order. Toggle a row to hide or show that shelf.",
-            style = MaterialTheme.editorialTypography.body,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        LibraryTabsGroupHeader()
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         ReorderableTabsGroup(
             state = state,
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        RhaydusButton(
-            label = "Create custom list",
-            style = ButtonStyle.OUTLINED,
-            size = ButtonSize.S,
-            onClick = onCreateListClick,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        NewListFootAction(onClick = onCreateListClick)
 
         Spacer(modifier = Modifier.height(24.dp))
     }
+}
+
+/**
+ * The group-level opener above the row list: a small primary eyebrow and an italic Fraunces subhead —
+ * deliberately bar-less (§2.3's no-bar register), since [EditorialSectionHeader] already opened the
+ * screen once above and a second accent bar here would be group-level ceremony the redesign retires.
+ */
+@Composable
+private fun LibraryTabsGroupHeader() {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Your tabs".uppercase(),
+            style = MaterialTheme.editorialTypography.eyebrowSmall.copy(letterSpacing = 2.2.sp),
+            color = MaterialTheme.colorScheme.primary,
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        LibraryTabsGroupSubhead()
+    }
+}
+
+/**
+ * The group subhead sentence, with the "a list" legend's 6dp primary dot embedded inline via
+ * [InlineTextContent] so it sits mid-sentence rather than as a separate leading glyph.
+ */
+@Composable
+private fun LibraryTabsGroupSubhead() {
+    val dotColor = MaterialTheme.colorScheme.primary
+    val dotSizeSp = with(LocalDensity.current) { 6.dp.toSp() }
+
+    val annotatedText = buildAnnotatedString {
+        append("Drag to reorder — shelves and lists sit in one line. A ")
+        appendInlineContent(
+            id = LIST_DOT_INLINE_CONTENT_ID,
+            alternateText = "•",
+        )
+        append(" marks a list.")
+    }
+
+    Text(
+        text = annotatedText,
+        style = MaterialTheme.editorialTypography.body.copy(
+            fontSize = 15.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Medium,
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        inlineContent = mapOf(
+            LIST_DOT_INLINE_CONTENT_ID to InlineTextContent(
+                placeholder = Placeholder(
+                    width = dotSizeSp,
+                    height = dotSizeSp,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+                ),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                        .background(dotColor),
+                )
+            },
+        ),
+    )
 }
 
 @Composable
@@ -463,17 +538,14 @@ private fun ReorderableTabsGroup(
             dragOffsetY = dragOffsetY,
             order = workingOrder,
             heightsPx = itemHeightsPx,
+            minIndex = REORDERABLE_MIN_INDEX,
         )
     } else {
         -1
     }
 
-    SettingsGroup {
+    Column(modifier = Modifier.fillMaxWidth()) {
         workingOrder.forEachIndexed { index, entry ->
-            if (index > 0) {
-                SettingsRowDivider()
-            }
-
             val isDragging = entry.id == draggingId
 
             val slotShiftTarget = when {
@@ -513,17 +585,20 @@ private fun ReorderableTabsGroup(
                     }
                     .onSizeChanged { size -> itemHeightsPx[entry.id] = size.height },
             ) {
+                val rowEnabled = entry.isEnabled(state = state)
+                val hidden = entry.canHide && rowEnabled.not()
+
                 ReorderableRow(
                     entry = entry,
-                    checked = entry.isEnabled(state = state),
+                    hidden = hidden,
                     isDragging = isDragging,
-                    onCheckedChange = { enabled ->
+                    onToggle = {
                         entry.dispatchToggle(
-                            enabled = enabled,
+                            enabled = rowEnabled.not(),
                             runAction = runAction,
                         )
                     },
-                    modifier = run {
+                    modifier = if (entry.isReorderable) {
                         val draggableState = rememberDraggableState { delta ->
                             dragOffsetY += delta
                         }
@@ -546,6 +621,7 @@ private fun ReorderableTabsGroup(
                                         dragOffsetY = dragOffsetY,
                                         order = workingOrder,
                                         heightsPx = itemHeightsPx,
+                                        minIndex = REORDERABLE_MIN_INDEX,
                                     )
 
                                     if (targetIdx != currentIdx) {
@@ -571,6 +647,8 @@ private fun ReorderableTabsGroup(
                                 haptics.drop()
                             },
                         )
+                    } else {
+                        Modifier
                     },
                 )
             }
@@ -578,72 +656,256 @@ private fun ReorderableTabsGroup(
     }
 }
 
+/**
+ * One flat, borderless row: a leading grip/pin column, the name (a leading 6dp primary dot for a
+ * list), an italic tabular count line, and a trailing eye toggle when [LibraryTabEntry.canHide]. There
+ * is no per-row click target — only the grip (drag) and the eye (visibility) are interactive — so the
+ * row's own "press wash" reflects [isDragging] rather than a tap, matching the design system's
+ * settings-row press-wash convention (an `animateColorAsState` gated by [playDecorativeMotion]).
+ */
 @Composable
 private fun ReorderableRow(
     entry: LibraryTabEntry,
-    checked: Boolean,
+    hidden: Boolean,
     isDragging: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+    onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isAlwaysOn = entry is LibraryTabEntry.Status && entry.isAlwaysOn
+    val playMotion = playDecorativeMotion()
+
+    val rowBackground by animateColorAsState(
+        targetValue = if (isDragging && playMotion) {
+            MaterialTheme.colorScheme.surfaceContainer
+        } else {
+            Color.Transparent
+        },
+        label = "libraryTabRowWash",
+    )
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(rowBackground)
+            .alpha(if (hidden) HIDDEN_ROW_ALPHA else 1f)
             .padding(
-                horizontal = 12.dp,
-                vertical = 12.dp,
+                start = 14.dp,
+                top = 13.dp,
+                end = 18.dp,
+                bottom = 13.dp,
             ),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Box(
-            modifier = modifier
-                .size(40.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            val dragHandleIcon = drawableIconResource(
+        GripOrPinGlyph(
+            entry = entry,
+            isDragging = isDragging,
+            modifier = modifier,
+        )
+
+        Column(modifier = Modifier.weight(1f)) {
+            RowLabel(
+                entry = entry,
+                hidden = hidden,
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            RowCountLine(
+                entry = entry,
+                hidden = hidden,
+            )
+        }
+
+        if (entry.canHide) {
+            EyeToggle(
+                hidden = hidden,
+                label = entry.label,
+                onClick = onToggle,
+            )
+        }
+    }
+}
+
+/**
+ * The leading 26dp grip column: a drag-handle glyph (outline, primary while dragging) when
+ * [LibraryTabEntry.isReorderable], else a demoted pin glyph standing in for "fixed first" — carries no
+ * drag [modifier] in that case, since the "All" entry can neither move nor be moved past.
+ */
+@Composable
+private fun GripOrPinGlyph(
+    entry: LibraryTabEntry,
+    isDragging: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.width(26.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (entry.isReorderable) {
+            val gripIcon = drawableIconResource(
                 icon = SoftcoverIcon.DragHandle,
                 contentDescription = "Reorder ${entry.label}",
             )
 
-            Icon(
-                painter = dragHandleIcon.getIconPainter(),
-                contentDescription = dragHandleIcon.contentDescription,
-                tint = if (isDragging) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .weight(weight = 1f)
-                .padding(horizontal = 8.dp),
-        ) {
-            Text(
-                text = entry.label,
-                style = MaterialTheme.editorialTypography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-
-            if (isAlwaysOn) {
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
-                    text = "Always visible",
-                    style = MaterialTheme.editorialTypography.eyebrowSmall,
-                    color = MaterialTheme.colorScheme.primary,
+            DesktopTooltip(text = "Drag to reorder") {
+                Icon(
+                    painter = gripIcon.getIconPainter(),
+                    contentDescription = gripIcon.contentDescription,
+                    tint = if (isDragging) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.outline
+                    },
+                    modifier = Modifier
+                        .pointerHandCursor()
+                        .size(20.dp),
                 )
             }
+        } else {
+            val pinIcon = drawableIconResource(
+                icon = SoftcoverIcon.Pin,
+                contentDescription = "${entry.label} always shown first",
+            )
+
+            Icon(
+                painter = pinIcon.getIconPainter(),
+                contentDescription = pinIcon.contentDescription,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(17.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowLabel(
+    entry: LibraryTabEntry,
+    hidden: Boolean,
+) {
+    val textColor = if (hidden) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (entry.isList) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+            )
+
+            Spacer(modifier = Modifier.width(7.dp))
         }
 
-        Switch(
-            checked = checked,
-            enabled = isAlwaysOn.not(),
-            onCheckedChange = onCheckedChange,
+        Text(
+            text = entry.label,
+            style = MaterialTheme.editorialTypography.titleSmall.copy(fontSize = 15.sp),
+            color = textColor,
+        )
+    }
+}
+
+@Composable
+private fun RowCountLine(
+    entry: LibraryTabEntry,
+    hidden: Boolean,
+) {
+    Text(
+        text = if (hidden) "Hidden from tabs" else "${entry.count} titles",
+        style = MaterialTheme.editorialTypography.bodySmall.copy(
+            fontSize = 12.5.sp,
+            lineHeight = 16.sp,
+            fontFeatureSettings = "tnum",
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+/**
+ * The trailing 38dp circular visibility toggle — the single control that shows/hides a row, replacing
+ * both the old per-row `Switch` and the (already-absent) overflow menu. Mirrors the tag editor sheet's
+ * spoiler-toggle eye affordance: hand-cursor + press-scale + a [DesktopTooltip]-carried label.
+ */
+@Composable
+private fun EyeToggle(
+    hidden: Boolean,
+    label: String,
+    onClick: () -> Unit,
+) {
+    val description = if (hidden) "Show $label on the library tabs" else "Hide $label from the library tabs"
+    val icon = if (hidden) SoftcoverIcon.VisibilityOff else SoftcoverIcon.Visibility
+    val tint = if (hidden) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary
+    val resolvedIcon = drawableIconResource(
+        icon = icon,
+        contentDescription = description,
+    )
+
+    DesktopTooltip(text = description) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(CircleShape)
+                .pointerHandCursor()
+                .pressScaleClickable(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = resolvedIcon.getIconPainter(),
+                contentDescription = resolvedIcon.contentDescription,
+                tint = tint,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+/**
+ * The full-width "New list" foot action: a 34dp primary-container plus tile beside a primary label,
+ * opening the list-creation flow via [onClick].
+ */
+@Composable
+private fun NewListFootAction(onClick: () -> Unit) {
+    val addIcon = drawableIconResource(
+        icon = SoftcoverIcon.Add,
+        contentDescription = "New list",
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .pointerHandCursor()
+            .pressScaleClickable(onClick = onClick)
+            .padding(
+                horizontal = 12.dp,
+                vertical = 14.dp,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = addIcon.getIconPainter(),
+                contentDescription = addIcon.contentDescription,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+
+        Text(
+            text = "New list",
+            style = MaterialTheme.editorialTypography.titleSmall.copy(fontSize = 15.sp),
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }
@@ -705,27 +967,6 @@ internal fun LibraryVisibilitySaveBar(
 }
 // endregion
 // region Shared primitives
-@Composable
-internal fun SettingsGroup(content: @Composable () -> Unit) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = RoundedCornerShape(20.dp),
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            content()
-        }
-    }
-}
-
-@Composable
-internal fun SettingsRowDivider() {
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = 20.dp),
-        color = MaterialTheme.colorScheme.outlineVariant,
-    )
-}
-
 /**
  * The Settings screen's one tinted surface: a `primaryContainer` editorial highlight, led by the
  * accent-bar + eyebrow ceremony (hand-composed rather than [EditorialSectionHeader], since the
@@ -901,8 +1142,17 @@ internal fun VersionFooter(
 }
 // endregion
 // region Drag helpers
+private const val HIDDEN_ROW_ALPHA = 0.52f
+private const val REORDERABLE_MIN_INDEX = 1
+private const val LIST_DOT_INLINE_CONTENT_ID = "library-tabs-list-dot"
+
+/**
+ * A row counts as "on" whenever it can't be hidden at all ("All", and any status with
+ * `canHide = false` such as Currently Reading) or the draft set says so.
+ */
 private fun LibraryTabEntry.isEnabled(state: LibraryVisibilitySettingsUiState): Boolean = when (this) {
-    is LibraryTabEntry.Status -> isAlwaysOn || status.code in state.draftEnabledStatusCodes
+    is LibraryTabEntry.All -> true
+    is LibraryTabEntry.Status -> canHide.not() || status.code in state.draftEnabledStatusCodes
     is LibraryTabEntry.CustomList -> listId in state.draftEnabledListIds
 }
 
@@ -910,15 +1160,17 @@ private fun LibraryTabEntry.dispatchToggle(
     enabled: Boolean,
     runAction: (LibraryVisibilityAction) -> Unit,
 ) {
+    if (canHide.not()) return
+
     when (this) {
-        is LibraryTabEntry.Status -> if (isAlwaysOn.not()) {
-            runAction(
-                OnStatusToggleAction(
-                    code = status.code,
-                    enabled = enabled,
-                ),
-            )
-        }
+        is LibraryTabEntry.All -> Unit
+
+        is LibraryTabEntry.Status -> runAction(
+            OnStatusToggleAction(
+                code = status.code,
+                enabled = enabled,
+            ),
+        )
 
         is LibraryTabEntry.CustomList -> runAction(
             OnListToggleAction(
@@ -929,11 +1181,17 @@ private fun LibraryTabEntry.dispatchToggle(
     }
 }
 
+/**
+ * Walks neighbouring row heights from [currentIdx] toward the drag offset's direction, consuming each
+ * neighbour's height once the offset has crossed its midpoint. [minIndex] keeps the fixed "All" row at
+ * index 0 out of reach — a row dragged upward can settle no higher than [minIndex].
+ */
 private fun targetIndexFor(
     currentIdx: Int,
     dragOffsetY: Float,
     order: List<LibraryTabEntry>,
     heightsPx: Map<String, Int>,
+    minIndex: Int = 0,
 ): Int {
     if (dragOffsetY == 0f) return currentIdx
 
@@ -961,7 +1219,7 @@ private fun targetIndexFor(
     } else {
         var i = currentIdx - 1
 
-        while (i >= 0) {
+        while (i >= minIndex) {
             val prevHeight = heightsPx[order[i].id] ?: 0
 
             if (prevHeight <= 0) break

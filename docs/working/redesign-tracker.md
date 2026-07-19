@@ -25,7 +25,7 @@ redesign in the app yet?".
 | Profile | `Profile 1a - Spec Sheet.dc.html` | ✅ Implemented |
 | Settings | `Settings 1a - Spec Sheet.dc.html` | ✅ Implemented |
 | Appearance | `Appearance 1a - Spec Sheet.dc.html` | ✅ Implemented |
-| Library tabs | `Library Tabs 1a - Spec Sheet.dc.html` | ⬜ Not started |
+| Library tabs | `Library Tabs 1a - Spec Sheet.dc.html` | ✅ Implemented |
 | Hidden suggestions | `Hidden Suggestions 1a - Spec Sheet.dc.html` | ✅ Implemented |
 | List creation | `List Creation 1a - Spec Sheet.dc.html` | ✅ Implemented (Create only — the sheet's Edit and Delete surfaces await Step 5.3's list CRUD in 3.7.0) |
 | Onboarding | `Onboarding 1b - Spec Sheet.dc.html` | ⬜ Not started |
@@ -50,3 +50,10 @@ redesign in the app yet?".
   sort/filter is limited to the two proven Typesense sort keys (Relevance / Popularity). The
   monogram cover from the spec's unreleased card became the app-wide coverless fallback
   (`CoverlessTitleCover`), keyed on missing art rather than release status.
+- **Library tabs 1a** was built with an approved model change from the spec sheet's literal
+  "All-only pin". The spec pins a single fixed "All" row; the app instead surfaces two
+  always-visible rows with distinct capabilities: **"All"** is pinned first (pin glyph, no eye,
+  not reorderable), while **"Currently Reading"** keeps its always-visible status (no eye) but
+  stays reorderable via the drag grip. Every row also carries a real "{n} titles" count line
+  (per-status shelf counts + total sourced from `core:book`'s `BooksRepository`; list counts from
+  `BookList.books.size`), full editorial-fidelity per the spec.
