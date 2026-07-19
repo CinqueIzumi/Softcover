@@ -2871,6 +2871,8 @@ internal fun BookDetailOverlays(
             bookIds = setOf(state.book.id),
             customLists = state.userLists.filter { it.isOwned.not() },
             listsBeingMutated = state.listsBeingMutated,
+            bookTitle = state.book.title,
+            bookCovers = listOfNotNull(state.book.currentEdition),
             onDismissRequest = { runAction(OnDismissChooseListsSheetAction()) },
             onToggleMembership = { listId, membership ->
                 runAction(

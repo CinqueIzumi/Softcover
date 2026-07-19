@@ -337,6 +337,7 @@ internal actual fun LibraryScreenLayout(
             bookIds = state.selectedBookIds,
             customLists = state.customLists.filter { it.isOwned.not() },
             listsBeingMutated = state.listsBeingMutated,
+            bookCovers = state.resolveSelectedBooks().take(3).mapNotNull { it.currentEdition },
             onDismissRequest = {
                 runAction(OnBulkAddToListSheetShownAction(shown = false))
             },
