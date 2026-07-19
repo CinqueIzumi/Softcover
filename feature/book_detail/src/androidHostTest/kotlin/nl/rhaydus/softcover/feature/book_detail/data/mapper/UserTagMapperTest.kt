@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
+import nl.rhaydus.softcover.FindTagsByUserQuery
 import nl.rhaydus.softcover.SaveTagsMutation
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -33,6 +34,35 @@ class UserTagMapperTest {
         spoiler: Boolean = false,
     ): FindTagsByUserAndTaggableQuery.Data.Tagging =
         FindTagsByUserAndTaggableQuery.Data.Tagging(
+            __typename = "taggings",
+            id = 100L,
+            spoiler = spoiler,
+            tag = tag,
+        )
+
+    // ----- FindTagsByUserQuery.Data.Tagging helpers -----
+
+    private fun stubFindTagsByUserTag(
+        tag: String = "Dark",
+        count: Int = 5,
+        tagCategoryValue: String? = "Mood",
+    ): FindTagsByUserQuery.Data.Tagging.Tag =
+        FindTagsByUserQuery.Data.Tagging.Tag(
+            __typename = "tags",
+            id = 1L,
+            tag = tag,
+            count = count,
+            tag_category = FindTagsByUserQuery.Data.Tagging.Tag.Tag_category(
+                __typename = "tag_categories",
+                category = tagCategoryValue,
+            ),
+        )
+
+    private fun stubFindTagsByUserTagging(
+        tag: FindTagsByUserQuery.Data.Tagging.Tag = stubFindTagsByUserTag(),
+        spoiler: Boolean = false,
+    ): FindTagsByUserQuery.Data.Tagging =
+        FindTagsByUserQuery.Data.Tagging(
             __typename = "taggings",
             id = 100L,
             spoiler = spoiler,
@@ -97,6 +127,57 @@ class UserTagMapperTest {
         fun `falls back to OTHER when tag category is null`() {
             // ----- Arrange -----
             val tagging = stubTagging(tag = stubTaggingTag(tagCategoryValue = null))
+
+            // ----- Act -----
+            val result = tagging.toUserTag()
+
+            // ----- Assert -----
+            result.category shouldBe TagCategory.OTHER
+        }
+    }
+
+    @Nested
+    inner class FindTagsByUserTaggingToUserTag {
+        @Test
+        fun `maps all fields correctly`() {
+            // ----- Arrange -----
+            val tagging = stubFindTagsByUserTagging(
+                tag = stubFindTagsByUserTag(
+                    tag = "Cozy",
+                    count = 3,
+                    tagCategoryValue = "Mood",
+                ),
+                spoiler = false,
+            )
+
+            // ----- Act -----
+            val result = tagging.toUserTag()
+
+            // ----- Assert -----
+            result shouldBe UserTag(
+                name = "Cozy",
+                category = TagCategory.MOOD,
+                count = 3,
+                spoiler = false,
+            )
+        }
+
+        @Test
+        fun `maps spoiler true`() {
+            // ----- Arrange -----
+            val tagging = stubFindTagsByUserTagging(spoiler = true)
+
+            // ----- Act -----
+            val result = tagging.toUserTag()
+
+            // ----- Assert -----
+            result.spoiler shouldBe true
+        }
+
+        @Test
+        fun `falls back to OTHER when tag category is null`() {
+            // ----- Arrange -----
+            val tagging = stubFindTagsByUserTagging(tag = stubFindTagsByUserTag(tagCategoryValue = null))
 
             // ----- Act -----
             val result = tagging.toUserTag()

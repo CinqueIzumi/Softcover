@@ -27,7 +27,10 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressU
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.toad.ActionDependencies
 
 internal class BookDetailDependencies(
@@ -57,6 +60,9 @@ internal class BookDetailDependencies(
     val saveUserTagsUseCase: SaveUserTagsUseCase,
     val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
+    val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
+    val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
+    val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

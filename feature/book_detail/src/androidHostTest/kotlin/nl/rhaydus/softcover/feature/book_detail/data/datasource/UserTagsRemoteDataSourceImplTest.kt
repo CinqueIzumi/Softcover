@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
+import nl.rhaydus.softcover.FindTagsByUserQuery
 import nl.rhaydus.softcover.SaveTagsMutation
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -264,6 +265,142 @@ class UserTagsRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe listOf(expectedUserTag)
+        }
+    }
+
+    @Nested
+    inner class FetchUserVocabulary {
+        @Test
+        fun `aggregates multiple taggings of the same category and name into one UserTag with the occurrence count`() = runTest {
+            // ----- Arrange -----
+            val userId = 3
+            val queryData = mockk<FindTagsByUserQuery.Data>()
+            val tagging1 = mockk<FindTagsByUserQuery.Data.Tagging>()
+            val tagging2 = mockk<FindTagsByUserQuery.Data.Tagging>()
+            val tagging3 = mockk<FindTagsByUserQuery.Data.Tagging>()
+
+            coEvery {
+                apolloClient.safeQuery(query = FindTagsByUserQuery(userId = userId))
+            } returns queryData
+
+            every {
+                queryData.taggings
+            } returns listOf(tagging1, tagging2, tagging3)
+
+            every {
+                tagging1.toUserTag()
+            } returns UserTag(
+                name = "Cozy",
+                category = TagCategory.MOOD,
+                count = 9,
+                spoiler = false,
+            )
+
+            every {
+                tagging2.toUserTag()
+            } returns UserTag(
+                name = "Cozy",
+                category = TagCategory.MOOD,
+                count = 9,
+                spoiler = true,
+            )
+
+            every {
+                tagging3.toUserTag()
+            } returns UserTag(
+                name = "Cozy",
+                category = TagCategory.MOOD,
+                count = 9,
+                spoiler = false,
+            )
+
+            // ----- Act -----
+            val result = dataSource.fetchUserVocabulary(userId = userId)
+
+            // ----- Assert -----
+            result shouldBe listOf(
+                UserTag(
+                    name = "Cozy",
+                    category = TagCategory.MOOD,
+                    count = 3,
+                    spoiler = false,
+                ),
+            )
+        }
+
+        @Test
+        fun `keeps different categories with the same name as separate entries`() = runTest {
+            // ----- Arrange -----
+            val userId = 3
+            val queryData = mockk<FindTagsByUserQuery.Data>()
+            val tagging1 = mockk<FindTagsByUserQuery.Data.Tagging>()
+            val tagging2 = mockk<FindTagsByUserQuery.Data.Tagging>()
+
+            coEvery {
+                apolloClient.safeQuery(query = FindTagsByUserQuery(userId = userId))
+            } returns queryData
+
+            every {
+                queryData.taggings
+            } returns listOf(tagging1, tagging2)
+
+            every {
+                tagging1.toUserTag()
+            } returns UserTag(
+                name = "Dark",
+                category = TagCategory.MOOD,
+                count = 5,
+                spoiler = false,
+            )
+
+            every {
+                tagging2.toUserTag()
+            } returns UserTag(
+                name = "Dark",
+                category = TagCategory.GENRE,
+                count = 5,
+                spoiler = false,
+            )
+
+            // ----- Act -----
+            val result = dataSource.fetchUserVocabulary(userId = userId)
+
+            // ----- Assert -----
+            result shouldBe listOf(
+                UserTag(
+                    name = "Dark",
+                    category = TagCategory.MOOD,
+                    count = 1,
+                    spoiler = false,
+                ),
+                UserTag(
+                    name = "Dark",
+                    category = TagCategory.GENRE,
+                    count = 1,
+                    spoiler = false,
+                ),
+            )
+        }
+
+        @Test
+        fun `returns empty list when taggings is empty`() = runTest {
+            // ----- Arrange -----
+            val userId = 3
+            val queryData = mockk<FindTagsByUserQuery.Data>()
+
+            coEvery {
+                apolloClient.safeQuery(query = FindTagsByUserQuery(userId = userId))
+            } returns queryData
+
+            every {
+                queryData.taggings
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = dataSource.fetchUserVocabulary(userId = userId)
+
+            // ----- Assert -----
+            result shouldBe emptyList()
         }
     }
 }

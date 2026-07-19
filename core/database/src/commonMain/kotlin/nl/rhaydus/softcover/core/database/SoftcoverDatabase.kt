@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.dao.ReadingLogDao
 import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
+import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.database.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.core.database.model.BookDeadlineEntity
@@ -39,6 +40,7 @@ import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
+import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 
 @Database(
     entities = [
@@ -64,11 +66,12 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
         TagEntity::class,
         BookTagCrossRef::class,
         ShelfManualOrderEntity::class,
+        UserTagVocabularyEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 47,
+    version = 48,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -87,6 +90,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun readingSessionDao(): ReadingSessionDao
 
     abstract fun readingLogDao(): ReadingLogDao
+
+    abstract fun userTagVocabularyDao(): UserTagVocabularyDao
 
     companion object {
         internal fun build(
@@ -1285,6 +1290,27 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // Phase 1 of the local tag cache (roadmap step 10.16): a per-user tag vocabulary table so
+        // previously-used tag names/categories can be suggested offline without a network round trip.
+        // A local cache of the user's applied-tag vocabulary, used to derive tag-editor
+        // suggestions. The composite primary key leads with userId so user/category-scoped reads
+        // are index-covered.
+        private val MIGRATION_47_48 = object : Migration(47, 48) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS user_tag_vocabulary (
+                            userId INTEGER NOT NULL,
+                            category TEXT NOT NULL,
+                            name TEXT NOT NULL,
+                            usageCount INTEGER NOT NULL DEFAULT 0,
+                            PRIMARY KEY(userId, category, name)
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1333,6 +1359,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_44_45,
             MIGRATION_45_46,
             MIGRATION_46_47,
+            MIGRATION_47_48,
         )
     }
 }

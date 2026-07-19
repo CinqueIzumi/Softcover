@@ -14,3 +14,4 @@
 - [Library Tabs "All" entry (logic-first)](architecture_library_tabs_all_entry.md) — pinned All entry correctly guarded at persistence layer; 5-flow count collector is correct reuse, not redundant; BookList.books is safe to count post-sync; UI gap since resolved (see followup)
 - [Library Tabs UI follow-up (clean)](architecture_library_tabs_all_entry_ui_followup.md) — known UI gaps all fixed; only finding was `) }` glomming in new collector test; `isAlwaysOn` now genuinely dead
 - [Onboarding 1b redesign](architecture_onboarding_1b_redesign.md) — pager pages 1-2 dropped verticalScroll (real overflow risk); ClickableText.inlineContent doc-sync gap (component was never documented, weigh that); new Skip/Back touch-target gap
+- [Local tag cache 10.16](project_local_tag_cache_10_16.md) — UserTag.count is contextually overloaded (global popularity vs personal usage); record() clobbered personal counts with global ones; ktlintCheck caught real hits eyeballing missed

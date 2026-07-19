@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.di
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
@@ -17,21 +18,30 @@ import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyLocalDataSource
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyLocalDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.BookReviewsRepositoryImpl
+import nl.rhaydus.softcover.feature.book_detail.data.repository.UserTagVocabularyRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.UserTagsRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.BookReviewsRepository
+import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagVocabularyRepository
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadlineCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagSuggestionsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagVocabularySyncCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserBooksFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserListsFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
@@ -60,6 +70,8 @@ val bookDetailModule = module {
     factory { UserTagsCollector() } bind BookDetailCollector::class
     factory { LastUsedProgressUnitCollector() } bind BookDetailCollector::class
     factory { ReadingPaceForecastCollector() } bind BookDetailCollector::class
+    factory { TagSuggestionsCollector() } bind BookDetailCollector::class
+    factory { TagVocabularySyncCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -90,6 +102,40 @@ val bookDetailModule = module {
 
     factory {
         SaveUserTagsUseCase(userTagsRepository = get())
+    }
+
+    single { get<SoftcoverDatabase>().userTagVocabularyDao() }
+
+    single<UserTagVocabularyLocalDataSource> {
+        UserTagVocabularyLocalDataSourceImpl(dao = get())
+    }
+
+    single<UserTagVocabularyRepository> {
+        UserTagVocabularyRepositoryImpl(
+            remoteDataSource = get(),
+            localDataSource = get(),
+        )
+    }
+
+    factory {
+        SyncUserTagVocabularyUseCase(
+            userTagVocabularyRepository = get(),
+            getUserIdUseCase = get(),
+        )
+    }
+
+    factory {
+        ObserveUserTagVocabularyUseCase(
+            userTagVocabularyRepository = get(),
+            getUserIdUseCase = get(),
+        )
+    }
+
+    factory {
+        RecordAppliedTagsUseCase(
+            userTagVocabularyRepository = get(),
+            getUserIdUseCase = get(),
+        )
     }
 
     factory { params ->
@@ -124,6 +170,9 @@ val bookDetailModule = module {
             saveUserTagsUseCase = get(),
             getLastUsedProgressUnitAsFlowUseCase = get(),
             setLastUsedProgressUnitUseCase = get(),
+            observeUserTagVocabularyUseCase = get(),
+            syncUserTagVocabularyUseCase = get(),
+            recordAppliedTagsUseCase = get(),
         )
     }
 }

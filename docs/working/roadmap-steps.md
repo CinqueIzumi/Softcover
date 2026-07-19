@@ -364,9 +364,6 @@ Italic finish-date prediction on each Reading row; "Up against the clock" sectio
 ### Step 10.14 — Library export (S, depends on 0.2 + 8.5)
 Export current view as styled shelf card image. *(B.1.13)*
 
-### Step 10.16 — Local tag cache + tag suggestions (S–M)
-Cache the user's applied tags locally (aggregated across all tagged books) and suggest them in the tag editor, working around the API's no-`_ilike` tag-search limit. Builds on the shipped tagging slice. *(B.4.25)*
-
 ---
 
 ## Phase 11 — Stretch / out-of-scope flags

@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
+import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
@@ -142,11 +143,13 @@ internal fun TagEditorBottomSheet(
     edition: BookEdition?,
     defaultEdition: BookEdition?,
     userTags: List<UserTag>,
+    tagSuggestions: List<UserTag>,
     selectedCategory: TagCategory,
     draft: String,
     onCategorySelected: (TagCategory) -> Unit,
     onDraftChange: (String) -> Unit,
     onAddTag: (String, TagCategory) -> Unit,
+    onSuggestionSelected: (UserTag) -> Unit,
     onRemoveTag: (UserTag) -> Unit,
     onToggleSpoiler: (UserTag) -> Unit,
     onDismissRequest: () -> Unit,
@@ -183,9 +186,11 @@ internal fun TagEditorBottomSheet(
             TagEditorAddBlock(
                 selectedCategory = selectedCategory,
                 draft = draft,
+                tagSuggestions = tagSuggestions,
                 onCategorySelected = onCategorySelected,
                 onDraftChange = onDraftChange,
                 onCommit = commitDraft,
+                onSuggestionSelected = onSuggestionSelected,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
@@ -339,9 +344,11 @@ private fun tagEditorDescription(bookTitle: String): AnnotatedString {
 private fun TagEditorAddBlock(
     selectedCategory: TagCategory,
     draft: String,
+    tagSuggestions: List<UserTag>,
     onCategorySelected: (TagCategory) -> Unit,
     onDraftChange: (String) -> Unit,
     onCommit: () -> Unit,
+    onSuggestionSelected: (UserTag) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -366,6 +373,22 @@ private fun TagEditorAddBlock(
             onDraftChange = onDraftChange,
             onCommit = onCommit,
         )
+
+        if (tagSuggestions.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(14.dp))
+
+            ExpandableFlowRow {
+                tagSuggestions.forEach { tag ->
+                    key(tag.category, tag.name) {
+                        PillChip(
+                            label = tag.name,
+                            selected = false,
+                            onClick = { onSuggestionSelected(tag) },
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

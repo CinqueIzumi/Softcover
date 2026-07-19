@@ -8,4 +8,5 @@ internal data class BookDetailLocalVariables(
     val bookMutationJobs: Map<Int, Job> = emptyMap(),
     val editionMutationJobs: Map<Int, Job> = emptyMap(),
     val tagSaveJob: Job? = null,
+    val tagVocabularySynced: Boolean = false,
 ) : LocalVariables

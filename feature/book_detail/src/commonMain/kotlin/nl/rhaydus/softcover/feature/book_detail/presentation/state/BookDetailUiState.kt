@@ -61,6 +61,7 @@ internal data class BookDetailUiState(
     val showTagEditorSheet: Boolean = false,
     val tagEditorCategory: TagCategory = TagCategory.TAG,
     val tagEditorInput: String = "",
+    val tagSuggestions: List<UserTag> = emptyList(),
 ) : UiState {
     /**
      * The edition pinned by an external entry point (a barcode scan), if any. It wins over every

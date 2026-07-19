@@ -34,7 +34,11 @@ internal suspend fun TagScope.commitUserTags(
             bookId = bookId,
             tags = newSet,
         )
-            .onSuccess { saved -> setState { it.copy(userTags = saved) } }
+            .onSuccess { saved ->
+                setState { it.copy(userTags = saved) }
+
+                dependencies.recordAppliedTagsUseCase(saved)
+            }
             .onFailure { error ->
                 AppLog.e("$error")
 

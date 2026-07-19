@@ -2839,6 +2839,7 @@ internal fun BookDetailOverlays(
             edition = state.displayedEdition,
             defaultEdition = state.book.defaultEdition,
             userTags = state.userTags,
+            tagSuggestions = state.tagSuggestions,
             selectedCategory = state.tagEditorCategory,
             draft = state.tagEditorInput,
             onCategorySelected = { runAction(OnTagEditorCategoryChangeAction(category = it)) },
@@ -2848,6 +2849,14 @@ internal fun BookDetailOverlays(
                     OnAddUserTagAction(
                         name = name,
                         category = category,
+                    ),
+                )
+            },
+            onSuggestionSelected = {
+                runAction(
+                    OnAddUserTagAction(
+                        name = it.name,
+                        category = it.category,
                     ),
                 )
             },

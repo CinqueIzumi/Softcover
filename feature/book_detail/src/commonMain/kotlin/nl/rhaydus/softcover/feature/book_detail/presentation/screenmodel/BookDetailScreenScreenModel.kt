@@ -28,7 +28,10 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressU
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
@@ -67,6 +70,9 @@ internal class BookDetailScreenScreenModel(
     private val saveUserTagsUseCase: SaveUserTagsUseCase,
     private val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     private val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
+    private val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
+    private val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
+    private val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailCollector, BookDetailLocalVariables>(
@@ -106,6 +112,9 @@ internal class BookDetailScreenScreenModel(
         saveUserTagsUseCase = saveUserTagsUseCase,
         getLastUsedProgressUnitAsFlowUseCase = getLastUsedProgressUnitAsFlowUseCase,
         setLastUsedProgressUnitUseCase = setLastUsedProgressUnitUseCase,
+        observeUserTagVocabularyUseCase = observeUserTagVocabularyUseCase,
+        syncUserTagVocabularyUseCase = syncUserTagVocabularyUseCase,
+        recordAppliedTagsUseCase = recordAppliedTagsUseCase,
     )
 
     init {
