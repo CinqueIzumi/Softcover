@@ -1,7 +1,8 @@
 ---
 name: project_toad_action_race_untracked_job
 description: TOAD ActionScope.setState/setLocalVariables are synchronous StateFlow.update — dispatch() launches one coroutine per action on screenModelScope, so a same-action re-entrancy guard (read-state → set-flag before any suspension point) is sound with zero extra locking, but a suspend fetch not stored in a cancellable Job can race with a *different* fresh-start action and corrupt shared state.
-type: project
+metadata:
+  type: project
 ---
 
 Confirmed by reading the vendored `nl.rhaydus:toad-jvm` sources jar (ToadScreenModel.kt / ActionScope.kt):

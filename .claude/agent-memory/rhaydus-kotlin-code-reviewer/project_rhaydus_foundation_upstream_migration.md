@@ -1,7 +1,8 @@
 ---
 name: project_rhaydus_foundation_upstream_migration
 description: rhaydus-foundation is a sibling stand-alone repo Softcover depends on; app-local code is being migrated upstream into it in batches
-type: project
+metadata:
+  type: project
 ---
 
 `rhaydus-foundation` is a separate git repo checked out as a sibling of this one (relative path

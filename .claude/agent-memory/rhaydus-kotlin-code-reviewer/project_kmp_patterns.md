@@ -1,5 +1,5 @@
 ---
-name: project-kmp-patterns
+name: project_kmp_patterns
 description: KMP migration patterns observed in core:preferences — expect/actual DI, platform source sets, value class annotation
 metadata:
   type: project

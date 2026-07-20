@@ -1,7 +1,8 @@
 ---
 name: project_bottom_chrome_padding
 description: bottomChromePadding()/rememberBottomBarPadding() contract for scroll-surface trailing padding under BottomBarScaffold/SessionPeekBar; recurring miss pattern is offline/error placeholders
-type: project
+metadata:
+  type: project
 ---
 
 Foundation contract: `BottomBarScaffold` (designsystem-core) provides `LocalBottomBarPadding` (default `0.dp`); a

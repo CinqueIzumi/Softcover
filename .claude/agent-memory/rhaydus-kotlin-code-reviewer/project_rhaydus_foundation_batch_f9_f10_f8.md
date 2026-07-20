@@ -1,7 +1,8 @@
 ---
 name: project_rhaydus_foundation_batch_f9_f10_f8
 description: F9 (SecureStorage) + F10 (NetworkAvailabilityProvider) + F8 (offline-sync) adoption on hotfix/3.0.3 — review notes and verified-clean areas
-type: project
+metadata:
+  type: project
 ---
 
 Reviewed the combined Softcover (`hotfix/3.0.3`) + rhaydus-foundation (`release/0.3.0`) uncommitted diff

@@ -22,3 +22,11 @@ is a lazy excuse." So do NOT limit this to touched files and do NOT treat existi
 accepted precedent. Flag/fix the grouping wherever it deviates. Because no tool surfaces it, read the
 full import block yourself. (The three instances found in the "Hidden suggestions" review —
 `ExploreShelf.kt`, both `SettingsScreenLayout` actuals — were fixed 2026-07-13.)
+
+**Bulk-rewrite corollary (modularization steps):** when a `feature.*` import is mechanically replaced
+by its `core.*` equivalent, the replacement tends to land *in the old import's line position* rather
+than re-sorted — leaving `core.*` sitting below `feature.*` in the project group. Within the
+`nl.rhaydus.*` group the required order is alphabetical, so `core.*` sorts before `feature.*`; the
+ktlint project-import rule does order alphabetically within that group, but a review should still
+verify the whole block was re-sorted after any rewrite rather than trusting the diff's line-for-line
+substitution. This appeared in 26 files during modularization step 3.

@@ -60,3 +60,14 @@ single top-level data/enum class as a `MatchingDeclarationName` hit on assumptio
 forced (`--rerun`) detekt run before reporting it, since the up-to-date cache silently returns stale
 green/red results.** Still worth eyeballing every new `data class`/`enum class` for its own-file
 placement — the rule question is genuinely subtle and worth a real gate run, not a memory citation.
+
+**Accepted-pattern corpus (private helper data class colocated in a component file whose primary
+top-level declaration is a `@Composable fun`, all verified passing `ktlintCheck`):**
+`EditionImage.kt` → `private data class EditionImageResolution`; `MarkAsReadBurst.kt` →
+`private data class ParticleSeed`; `ChooseListsBottomSheet.kt` → `private data class ListMembershipInfo`
+(added in the 2026-07-22 Choose-lists/Change-edition sheet redesign, reviewed clean). The gate does not
+fire on a `private`, single-file-scoped helper data class that exists purely as a helper-function return
+type inside a component file (as opposed to two unrelated public/exported types sharing a file). Do **not**
+flag a new instance of this shape on the strength of the guide's prose alone — the prose reads absolute
+("a single-caller data class still gets its own file"), but the tooling and this precedent corpus say
+otherwise; verify against `ktlintCheck` behavior first.

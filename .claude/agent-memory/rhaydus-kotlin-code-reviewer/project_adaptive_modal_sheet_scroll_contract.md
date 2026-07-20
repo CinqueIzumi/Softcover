@@ -1,7 +1,8 @@
 ---
 name: project_adaptive_modal_sheet_scroll_contract
 description: AdaptiveModalSheet's content slot does NOT scroll itself — the call site's Column must add .verticalScroll() if content can overflow
-type: project
+metadata:
+  type: project
 ---
 
 Confirmed from `docs/rhaydus/0.3.0/design-system-foundations.md` §5.9: `AdaptiveModalSheet`'s

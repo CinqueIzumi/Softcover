@@ -1,7 +1,8 @@
 ---
-name: Project architecture
+name: project_architecture
 description: Softcover Android app structure — Clean Architecture + TOAD state framework on Voyager, Apollo GraphQL, Room, Koin, Jetpack Compose
-type: project
+metadata:
+  type: project
 ---
 
 Softcover is a native Android Hardcover.app client. Kotlin + Jetpack Compose, targeting SDK 26+.

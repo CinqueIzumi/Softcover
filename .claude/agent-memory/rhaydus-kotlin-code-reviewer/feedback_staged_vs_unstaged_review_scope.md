@@ -1,7 +1,8 @@
 ---
 name: feedback_staged_vs_unstaged_review_scope
 description: how to interpret "review the uncommitted working-tree changes, HEAD already had a large staged redesign" review requests in this repo
-type: feedback
+metadata:
+  type: feedback
 ---
 
 When asked to review "uncommitted working-tree changes" with a caveat like "HEAD already had a

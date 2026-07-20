@@ -1,5 +1,5 @@
 ---
-name: test-class-naming
+name: feedback_test_class_naming
 description: Test file names must match the class name they contain. BookEntityMapperTest.kt was found to contain class BookMapperTest — a mismatch that makes test discovery and navigation unreliable.
 metadata:
   type: feedback

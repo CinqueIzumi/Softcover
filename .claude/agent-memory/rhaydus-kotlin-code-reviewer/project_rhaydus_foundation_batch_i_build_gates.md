@@ -1,7 +1,8 @@
 ---
 name: project_rhaydus_foundation_batch_i_build_gates
 description: rhaydus-foundation Batch I (F18/F20/F21/F23) review findings — buildHealth not wired to check; checkModuleGraph config-cache risk
-type: project
+metadata:
+  type: project
 ---
 
 Batch I (release/0.3.0, staged as of 2026-07-03) added four build gates to rhaydus-foundation:

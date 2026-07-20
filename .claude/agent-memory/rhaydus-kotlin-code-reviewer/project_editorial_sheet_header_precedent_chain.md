@@ -28,4 +28,4 @@ Design-system doc entries for these live in `docs/reference/design-system.md` §
 "Choose-lists sheet", "Change edition sheet" — cross-check new entries against this anatomy list rather
 than re-deriving it from scratch.
 
-See also [[project_private_data_class_colocation]].
+See also [[style_one_type_per_file_colocated_support_class]] (private colocated helper data classes like `ListMembershipInfo` in these sheet files pass the one-type-per-file gate).

@@ -1,7 +1,8 @@
 ---
 name: project_skeleton_dimension_math
 description: How to check whether a skeleton placeholder's dp height actually matches its loaded counterpart's text height — a recurring near-miss in Explore's skeleton work
-type: project
+metadata:
+  type: project
 ---
 
 `SkeletonCrossfade` does no shared sizing (see [[project_skeleton_crossfade_contract]]), so a

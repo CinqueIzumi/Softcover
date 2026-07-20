@@ -1,7 +1,8 @@
 ---
-name: Style conventions
+name: style_conventions
 description: Key Kotlin/Compose style rules from docs/reference/code-style.md for Softcover, plus the deterministic style-check to run before signing off on a review
-type: feedback
+metadata:
+  type: feedback
 ---
 
 From docs/reference/code-style.md (read on every review):

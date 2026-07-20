@@ -1,7 +1,8 @@
 ---
 name: feedback_onstart_stateflow_double_emit
 description: Flow.onStart{} guard combined with collecting a StateFlow double-fires on startup — a concrete bug found and empirically confirmed in rhaydus-foundation Batch H (offline-sync)
-type: feedback
+metadata:
+  type: feedback
 ---
 
 **Pattern to flag in review: `someStateFlow.onStart { if (someStateFlow.value) doThing() }.onEach { if (it) doThing() }.collect()`.**

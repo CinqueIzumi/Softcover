@@ -1,5 +1,5 @@
 ---
-name: project-m1a-active-session-controller
+name: project_m1a_active_session_controller
 description: M1a refactor context — ActiveSessionController moved from class in core:designsystem to interface+impl split; impl in orchestration/session/
 metadata:
   type: project

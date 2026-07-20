@@ -1,7 +1,7 @@
 # Idea catalogue
 A long-form catalogue of upgrades for Softcover — split into *look & feel* (visual, motion, haptics, decoration) and *features* (new data, screens, expansions). This is a brainstorming surface, not a plan: items are not ordered or scoped here. The sequenced pickup order lives in [roadmap-steps.md](roadmap-steps.md); the public, user-facing view is [ROADMAP.md](../../ROADMAP.md).
 
-> Style note: every entry below is meant to fit the editorial voice in [design-system.md](../reference/design-system.md). Where an idea pulls toward "Material dashboard" rather than "editorial spread", that's flagged. Anything brand-new that adds a foundation, component, or pattern must update `../reference/design-system.md` in the same change (per the maintenance rule).
+> Style note: every entry below is meant to fit the editorial voice in [design-system.md](../reference/design-system.md). Where an idea pulls toward "Material dashboard" rather than "editorial spread", that's flagged. Anything brand-new that adds a foundation, component, or pattern must update the relevant section under `../reference/design-system/` in the same change (per the maintenance rule).
 
 > **Maintenance rule.** A **shipped idea is deleted from this file** — what's left is what's still wanted. Tags are **never reused or renumbered**, so a gap (or a reference from another doc to a tag that isn't here) means "that one shipped", exactly as with `roadmap-steps.md`. Where an idea shipped only in part, the entry stays and is narrowed to the part that remains.
 

@@ -403,7 +403,7 @@ Phase 0  ──┬──> Phase 1 ──> Phase 2 ──> Phase 3 ──┬─�
 
 ## Maintenance reminders
 
-- Every step that introduces a new component or pattern must update `../reference/design-system.md` in the same change (DS maintenance rule, CLAUDE.md).
+- Every step that introduces a new component or pattern must update the relevant section under `../reference/design-system/` in the same change (DS maintenance rule, CLAUDE.md).
 - Substantial changes (new file, new feature module, layout/state/data flow changes) delegate to the `code-reviewer` agent before reporting work done.
 - Test writing always delegates to the `unit-test-writer` agent.
 - Roadmap docs are uncommitted by convention (per existing project practice); keep them local and update as steps complete.

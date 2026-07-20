@@ -1,7 +1,8 @@
 ---
 name: project_design_system_doc_drift_pattern
 description: docs/reference/design-system.md drifts when a later edit changes a UI detail but the author only re-edits one paragraph, not every mention
-type: project
+metadata:
+  type: project
 ---
 
 Recurring failure mode found in `docs/reference/design-system.md`: a feature is built in stages

@@ -1,7 +1,8 @@
 ---
 name: project_skeleton_crossfade_contract
 description: Foundation SkeletonCrossfade and rememberStaggeredEntryCoordinator implementation contracts, verified against source — use when reviewing any loading-skeleton or staggered-entry work
-type: project
+metadata:
+  type: project
 ---
 
 Verified 2026-07-21 against `../rhaydus-foundation/designsystem-core/src/commonMain/kotlin/nl/rhaydus/designsystem/`.

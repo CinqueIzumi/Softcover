@@ -1,0 +1,82 @@
+# Design System — Layout primitives
+
+## 3. Layout primitives
+
+### 3.1 Page scaffold
+
+A page has, top-to-bottom: optional top app bar, scrolling content with horizontal padding consistent for the whole page, and bottom navigation (when on a tab root). The bottom of scrolling content reserves padding equal to the bottom bar's footprint so the last item is never occluded.
+
+That padding comes from the foundation contract: every nav shell hosts its bottom chrome in `BottomBarScaffold` (foundation `designsystem-core`, `nl.rhaydus.designsystem.layout`), which provides `LocalBottomBarPadding`, and scrolling surfaces apply `rememberBottomBarPadding()` as their trailing content padding. **The read is unconditional** — a screen never branches on the user's `BottomBarStyle`, never re-measures the bar, and never adds the navigation-bar inset back on. All three shells provide it: the compact shell hosts the docked or floating bar (§4), and the wide shell (rail / sidebar) hosts the flush `SessionPeekBar` as bottom-anchored overlay chrome with no breathing gap. A screen that branches on the bar style gets the wide shell wrong, because the style preference only governs the compact bar.
+
+**Every surface the shell hosts reserves that padding — no exceptions, and the exceptions are where this rots.** The rule is not "the tab root's main list"; it is *every* surface that can reach the bottom edge inside the shell. In practice that means the states a screen forgets: the **empty state**, the **error / offline state**, the **search-results list** that replaces the feed, the **desktop sidebars** and their pinned footers, and the bottom-anchored **save bars**. It also means the desktop layouts — the wide shell's `SessionPeekBar` is bottom-anchored overlay chrome, so a `jvmMain` layout owes the padding exactly as a `mobileMain` one does; "desktop has no bottom bar" is the reasoning that put content under the peek bar. Where a surface already carries its own bottom margin, the padding is *added* to it (`bottom = 24.dp + rememberBottomBarPadding()`), never substituted for it. A shell-hosted scroll surface without the padding is a review blocker.
+
+Screens **pushed onto the root navigator** (profile, settings sub-pages, hidden suggestions, focus mode, the scanner, onboarding, and book detail on compact) render *outside* the shell. `rememberBottomBarPadding()` resolves to `0.dp` there, so reading it is harmless but pointless — they clear the system navigation bar instead, via their `Scaffold` insets or `BottomNavigationSpacer()` (the foundation spacer, which is the navigation-bar inset **only** — not the bar footprint).
+
+**`bottomChromePadding()`** (`core/designsystem/…/presentation/layout/`) is for the one surface that renders in *both* positions: book detail, pushed full-screen on compact and hosted in the expanded two-pane detail slot. It returns the **maximum** of the bar footprint and the navigation-bar inset, which is exact in every hosting case — outside the shell the footprint is `0.dp` so the inset wins; inside an overlay shell the measured footprint already bakes the inset in and dominates. Summing the two instead would double-count the inset in the pane. Reach for it only on a dual-hosted surface; a surface that only ever renders inside the shell reads `rememberBottomBarPadding()` directly.
+
+Top bars are either a plain title bar (centered or start-aligned title, optional subtitle, optional back, optional trailing actions) or a search bar (text field with leading search/loading state and trailing clear). Both are sourced from the shared top-bar components — no screen rolls its own.
+
+**Root tabs prefer an in-page editorial title over a chrome title.** Reach for `SoftcoverTopBar` with a plain `title` only when the screen needs back navigation or trailing icon actions — i.e. on sub-screens pushed into the stack (settings sub-pages, profile, book detail). On a root tab, the screen's identity is rendered *inside* the scroll using the `pageTitle` editorial role (optionally paired with a body subtitle), so it shares the editorial scale with the section headers below it. The Material `titleLarge` chrome title reads as system chrome and clashes with the editorial section rhythm that follows. Library and Settings both follow this rule; Explore is title-less by design (its search bar is the chrome).
+
+**Mobile search top bar — `SoftcoverSearchTopBar`.** The mobile search chrome (`core/designsystem`, Explore's only consumer) is a full-width `Surface` (surface colour, status-bar inset padding, 16dp horizontal / 12dp vertical) containing a single `Row`, gap 10dp, of two children:
+
+1. **The search pill (weight 1f)** — a 46dp-tall, 16dp-radius `Surface` on `surfaceContainer` holding a leading 20dp `primary` search glyph, a directly-focusable `BasicTextField` (placeholder Material `bodyLarge`, `onSurfaceVariant`), and a trailing affordance. The pill is a bespoke `BasicTextField` build rather than the foundation's `EditorialSearchField` because it needs platform focus tracking and a state-driven border the shared field doesn't expose — `EditorialSearchField` remains the right call for a *persistent*, non-focus-driven field (desktop Explore, Library). The pill's `active` parameter (true whenever the caller's `searchPhase` is not the plain feed — focused, loading, or showing results/a mood browse) grows a 1.5dp `primary` border and swaps the trailing slot to a clear (×); `isLoading` overrides the trailing slot with an 18dp `CircularWavyProgressIndicator`. The field's focus state is threaded out via `onFocusChange`, which the caller wires to `OnSearchFocusChangedAction` so the screen can swap its feed for a focus/results surface.
+2. **The barcode button** — a 46×46dp, 14dp-radius `Surface` on `surfaceContainerHigh` with a centred 24dp `primary` scan glyph (`SoftcoverIcon.BarcodeScanner`), always present.
+
+The component signature is `SoftcoverSearchTopBar(searchText, onSearchValueChange, onScanClick, isLoading, active, onFocusChange, placeholder)`. `onScanClick` is a required positional parameter because the scan action is always present on the Explore top bar; there is no generic `trailingFieldAction` escape hatch. Do not embed a Material `TextField` or `AppBarWithSearch` / `SearchBarState` machinery for mobile search input, which prevents the soft keyboard from opening.
+
+### 3.2 Section rhythm
+
+A content section is composed of:
+
+1. **Eyebrow** — short all-caps label in primary colour.
+2. **Headline** — italic display headline directly underneath the eyebrow, on-surface colour.
+3. **Body** — the section's content: a horizontal carousel, a vertical list, a grid, or a single block.
+4. Generous vertical gap before the next section.
+
+This is the canonical pattern. Anywhere a screen needs to introduce a region of content, it uses this triplet — the eyebrow gives the editorial label, the headline gives the human-readable title, and the body delivers.
+
+### 3.3 Hero region
+
+A hero region opens a screen with a single dominant element: a stat, a quote, or a featured cover. Hero text uses `statHero`, `display`, or a quote pattern (oversized low-alpha `quoteGlyph` behind italic headline). Hero regions sit on the page surface, not on a container — they are part of the page, not a tile within it.
+
+### 3.4 Carousels and cards
+
+Horizontal carousels are the default for collections of books. Cards inside a carousel are fixed-width and fixed-height. Optional rows inside a card (rating, badge, secondary line) reserve their height even when empty so cards do not jump as data resolves.
+
+Horizontal carousels do not paint an explicit overflow affordance (no edge bar, no chevron, no fade). The rightmost card sitting partially clipped against the screen edge — paired with the standard 24dp content padding so it never butts flush — is itself the "there's more" cue. Do not reintroduce a page-edge hint, scrollbar, or page indicator on book carousels.
+
+Card anatomy (top-to-bottom):
+
+1. Cover image (book proportions, subtle radius and shadow).
+2. Title in `titleMedium` or `titleSmall`, max two lines.
+3. Optional metadata strip in `eyebrowSmall` or `bodySmall`, on-surface-variant.
+4. Optional trailing accent (rating, progress fragment) in primary colour.
+
+Vertical lists use the same anatomy laid horizontally: cover at the leading edge, text block taking the remaining width.
+
+### 3.5 Modal sheets
+
+Modal bottom sheets open in a fully-expanded state on `surface-container-lowest`. The first element inside is always the canonical header pattern — accent bar, eyebrow, headline (and optional editorial description line) — followed by the sheet's body content. Sheets handle their own dismissal; they never require a custom close button.
+
+**This rule has exactly one documented exception (below).** Every other modal sheet — pickers, action sheets, progress sheets, blocking loaders that happen to be implemented as a sheet — opens with the editorial header. A sheet's job is to feel like a small editorial spread, not like a Material dialog. Material `titleLarge` / `bodyMedium` headers signal "system chrome" and read as a regression; reach for `eyebrow` + `display`/`headlineMedium` + `body` instead. If a sheet's content is so transient that an editorial header feels theatrical, that is a signal it should be a `Dialog` (an unobtrusive overlay), not a sheet.
+
+**Exception — the title-page sheet.** The create-list sheet ("List Creation 1a") swaps the canonical eyebrow-plus-headline header for the **centred title-page composition** (§5): eyebrow, quote-glyph-broken hairline rule, then the name itself as a borderless hero — no separate headline at all, because the name the reader is about to type *is* the headline. This is a deliberate departure reserved for a single-field, ten-second surface where naming something should read as an act of authorship rather than filling in a form. It does not license a second bespoke sheet opening elsewhere; a new sheet that wants to deviate from the canonical header updates this doc with its own reasoning, the way this exception does.
+
+**Worked example — blocking loading sheet.** Onboarding fetches the user's library; the wait can be long, so the surface is a non-dismissable `AdaptiveModalSheet(dismissOnTapOutside = false, dismissOnBackPress = false)` rather than a tiny dialog. The sheet still opens with `EditorialSectionHeader(eyebrow = "Setting up", headline = "Pulling your library together.", description = "Depending on its size, this might take a moment.")`, then a wavy progress indicator below. Container is `surfaceContainerLowest`; back-press and scrim-tap dismissal are disabled, but no close button is added. The result reads like a printed cover-page status line, not a system spinner card.
+
+**A modal sheet is width-adaptive (§2.7).** A bottom sheet welded to the bottom edge of a wide desktop window — a short band under a tall empty scrim, sliding up from below — reads as the phone-derived layout the desktop redesign retires. So a sheet is a **bottom sheet at compact and medium widths** and a **centered editorial panel at expanded width**: a `surfaceContainerLowest` card, ~420dp wide, with a hairline `outlineVariant` border and a large (28dp) editorial corner, height-capped to ~90% of the window (its content scrolls within), and no drag handle. Both forms open with the same canonical header and carry the same body — the form is a chrome decision, not a content one. **Reach for the shared `AdaptiveModalSheet` (foundation `designsystem-core`, `nl.rhaydus.designsystem.component`) for every modal sheet — never a raw `ModalBottomSheet`.** It owns the width branch, the `surfaceContainerLowest` fill, scrim/back dismissal (`dismissOnTapOutside` / `dismissOnBackPress` cover the non-dismissable blocking-loader case), and the panel's drag-handle-replacing top inset; the body it wraps is identical to the one a bottom sheet would host, so a call site never branches on form.
+
+Two ambient hooks let a body react to the form without re-deriving the width class:
+
+- **`LocalModalSheetForm`** (`ModalSheetForm.SHEET` / `PANEL`) — the resolved form, for density and layout. A sheet body can step a phone-sized thumb target down to a desktop pointer target through this, or reflow for the form: the library filter's facet chips scroll horizontally on the narrow sheet but wrap — and collapse behind a "show more" (`ExpandableFlowRow`, §4) — on the fixed-width panel, which can't scroll a row sideways with a pointer. Not every body needs to size-step by form, though — the progress sheet's primary ("Save progress") and secondary ("Mark as read") actions stay one moderate 56dp `ButtonSize.M` on **both** the sheet and the panel (collapsed from an earlier 96dp `ButtonSize.L` on the sheet form, which read as oversized against the redline spec's ~52/48dp actions); the branch on `LocalModalSheetForm.current` is kept rather than a bare constant so a future form-specific need still has a seam to hook into. Read the form, not the window width, so a body stays correct if the sheet→panel breakpoint ever moves.
+- **`LocalModalSheetDismiss`** — closes the sheet the way its form should: the bottom sheet animates down first, the panel closes immediately (it has no slide to play). A body calls this from an *in-content* dismiss action (a confirm-and-close button) instead of driving its own sheet state.
+
+### 3.6 Adaptive content width
+
+On a wide window (§2.7) content does **not** stretch edge-to-edge — long-form prose and forms keep a comfortable measure, and list/grid surfaces gain columns rather than wider cells.
+
+- **Reading surfaces** (book-detail body, settings and other forms, profile, any single-column reading column) centre and cap their width at the **reading measure** (~720dp). Apply `Modifier.cappedContentWidth()` (foundation `designsystem-core`, `nl.rhaydus.designsystem.layout`) to the scrolling content column; the page's horizontal gutter still applies inside the cap. Full-bleed media — cover art, hero backdrops, the cover-to-detail morph target — stays outside the cap and spans the surface.
+- **List/grid surfaces** cap at the wider **pane measure** (~1100dp) and add columns as width grows (§5 large-window list/grid rule), so a shelf reads as a denser spread, not as a stretched phone column.
+- **`TwoPaneScaffold`** (foundation `designsystem-core`, `nl.rhaydus.designsystem.layout`) is the pure-layout primitive backing the expanded-width **list–detail two-pane** pattern (§5): a fixed-width leading pane (the list) beside a flexible trailing pane (the detail), separated by a hairline. It is content-agnostic — the app shell fills it; it owns no navigation. A **null `detail`** collapses it to a single pane (the list fills the full width, no divider); because the list is always the first child either way, toggling `detail` between a value and null keeps the list subtree — and any `movableContentOf` it hosts — in a stable slot instead of tearing it down. The shell uses this so non-pane expanded tabs (desktop Library, Settings) share the same stable list slot as the pane tabs.
+
