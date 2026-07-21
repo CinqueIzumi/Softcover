@@ -11,3 +11,4 @@
 - [backgroundScope + explicit TestDispatcher + advanceUntilIdle gotcha](feedback_backgroundscope_advanceuntilidle.md) — use runCurrent() instead when driving a start(scope) collector test via backgroundScope.launch(explicitStandardTestDispatcher)
 - [Stateful mock for keyed SecureStorage](feedback_stateful_secure_storage_mock.md) — back read/write/delete stubs with a class-level var so migration tests see writes on later reads
 - [core/domain jvmTest task has NO-SOURCE](feedback_core_domain_jvmtest_no_source.md) — androidHostTest sources don't run under jvmTest; use testAndroidHostTest instead, verify against test-results XML not just "BUILD SUCCESSFUL"
+- [book_detail progress-action id stub](feedback_book_detail_progress_action_id_stub.md) — mock Book helpers need `id` stubbed once actions read it for job-cancellation tracking; red suite had two coexisting causes, not one
