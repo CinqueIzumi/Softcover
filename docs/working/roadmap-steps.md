@@ -59,9 +59,6 @@ A private notes field deliberately separated from Step 3.2 (personal review): no
 
 Notes appear in the Notes & Highlights inbox (Step 3.4) under a "private — notes" group; the inbox UI suppresses the share affordance for this group so private notes can't be exported accidentally. *(B.4.22)*
 
-### Step 3.12 — Rating/review prompt on mark-as-read (S–M)
-When a book is marked Read from any surface (Reading screen, book detail, bulk-select), prompt for a rating and/or review, reusing the shipped personal-rating (Step 3.1) and personal-review (Step 3.2) controls in an editorial prompt sheet. *(B.4.26)*
-
 ### Step 3.13 — Personal book traits, graded (M, depends on 0.3)
 A private structured survey of *how a book read* — the counterpart to Step 3.10, which captures how it made the reader *feel*. Dimensions, each a graded scale rather than a yes/no tag: **pace** (slow · moderate · fast · variable), **plot- or character-driven** (one slider, plot → a mix → character), **characters** (likeable / believable / well-developed / multi-layered, plus "flaws a main focus?" and "diverse cast?", each answered yes · complicated · no), and **writing style** (simple · moderate · demanding, with optional vivid / poetic / unconventional flags).
 

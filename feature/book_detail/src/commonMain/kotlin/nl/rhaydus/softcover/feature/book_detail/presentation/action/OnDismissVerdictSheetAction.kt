@@ -6,11 +6,11 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class OnDismissReviewSheetAction : BookDetailAction {
+internal class OnDismissVerdictSheetAction : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(showReviewSheet = false) }
+        scope.setState { it.copy(verdictSheetContext = null) }
     }
 }

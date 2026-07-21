@@ -71,6 +71,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
             coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
             coVerify(exactly = 0) { updateBookProgressUseCase(
@@ -101,6 +102,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
 
             coVerify(exactly = 1) { updateBookProgressUseCase(
                 book = book,
@@ -130,6 +132,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
             coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
             coVerify(exactly = 0) { updateBookProgressUseCase(
@@ -163,6 +166,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
 
             coVerify(exactly = 1) { updateBookProgressUseCase(
                 book = book,
@@ -193,6 +197,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
 
             coVerify(exactly = 1) { updateBookProgressUseCase(
                 book = book,
@@ -272,6 +277,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
 
             coVerify(exactly = 1) { updateBookProgressUseCase(
                 book = book,

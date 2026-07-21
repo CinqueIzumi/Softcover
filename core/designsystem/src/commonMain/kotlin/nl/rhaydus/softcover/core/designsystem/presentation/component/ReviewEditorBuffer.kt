@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.book_detail.presentation.component
+package nl.rhaydus.softcover.core.designsystem.presentation.component
 
 /** The review editor's working state: plain [text] plus the flat list of formatting [marks] over it. */
 internal data class ReviewEditorBuffer(

@@ -101,7 +101,6 @@ import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.editorial.component.DropCapText
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
@@ -126,8 +125,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocum
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.VerdictBlock
+import nl.rhaydus.softcover.core.designsystem.presentation.component.VerdictSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -154,10 +156,10 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissCho
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissReviewSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissScanEditionBannerClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissTagEditorAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnExternalLinkClickAction
@@ -166,14 +168,13 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAs
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadlinePickerAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenReviewSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenTagEditorAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRateBookAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveReviewAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
@@ -187,7 +188,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePerc
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToScannedEditionClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
-import nl.rhaydus.softcover.feature.book_detail.presentation.component.ReviewEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLens
@@ -955,140 +955,6 @@ private fun readStatusDateTrailing(
 }
 
 @Composable
-internal fun PersonalRatingRow(
-    book: Book,
-    runAction: (BookDetailAction) -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-    ) {
-        SmallSectionLabel(text = "Your rating")
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        val rating = book.userBook?.rating?.takeIf { it > 0.0 }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            StarRatingInput(
-                rating = rating,
-                onRatingChange = { newRating ->
-                    runAction(
-                        OnRateBookAction(
-                            book = book,
-                            rating = newRating,
-                        ),
-                    )
-                },
-                starIcon = drawableIconResource(
-                    contentDescription = "",
-                    icon = SoftcoverIcon.StarFilled,
-                ),
-                filledColor = RatingGold,
-            )
-
-            if (rating != null) {
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // The stars run 0–5 in half-star steps; the label speaks the 10-point scale, so the
-                // value doubles — every half star lands on an exact integer (4.5 stars = 9/10).
-                Text(
-                    text = "Your ${
-                        formatDecimalNumber(
-                            value = rating * 2,
-                            fractionDigits = 0,
-                        )
-                    }/10",
-                    style = MaterialTheme.editorialTypography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-internal fun PersonalReviewSection(
-    reviewDocument: ReviewDocument?,
-    hasSpoilers: Boolean,
-    runAction: (BookDetailAction) -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SmallSectionLabel(text = "Your review")
-
-            if (reviewDocument != null && reviewDocument.isBlank().not()) {
-                Text(
-                    text = "Edit",
-                    style = MaterialTheme.editorialTypography.eyebrowSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable(onClick = { runAction(OnOpenReviewSheetAction()) }),
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (reviewDocument == null || reviewDocument.isBlank()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                onClick = { runAction(OnOpenReviewSheetAction()) },
-            ) {
-                Text(
-                    text = "Write a few words…",
-                    style = MaterialTheme.editorialTypography.body,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
-                )
-            }
-        } else {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                onClick = { runAction(OnOpenReviewSheetAction()) },
-            ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                ) {
-                    ReviewDocumentText(
-                        document = reviewDocument,
-                        style = MaterialTheme.editorialTypography.body.copy(
-                            fontStyle = FontStyle.Normal,
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = REVIEW_COLLAPSED_LINES,
-                        overflow = TextOverflow.Ellipsis,
-                        onClick = { runAction(OnOpenReviewSheetAction()) },
-                    )
-
-                    if (hasSpoilers) {
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Text(
-                            text = "Marked as containing spoilers",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun ShelveRow(
     label: String,
     iconRes: RhaydusIconResource,
@@ -1841,7 +1707,7 @@ private fun StatusCallout(
 
 /**
  * The "Yours" lens content (design-system.md's lens-toggle pattern): your-copy sections in order —
- * in-progress / DNF / read / want-to-read status, your rating, your tags, your review. Each section
+ * in-progress / DNF / read / want-to-read status, your verdict (rating + review), your tags. Each section
  * keeps its existing visibility gate, so a section with nothing to show simply doesn't compose.
  */
 @Composable
@@ -1867,9 +1733,12 @@ internal fun YoursLensContent(
         if (book.status == BookStatus.Read) {
             Spacer(modifier = Modifier.height(28.dp))
 
-            PersonalRatingRow(
-                book = book,
-                runAction = runAction,
+            VerdictBlock(
+                rating = book.userBook?.rating?.takeIf { it > 0.0 },
+                review = book.userBook?.reviewDocument,
+                hasSpoilers = book.userBook?.reviewHasSpoilers == true,
+                onEditClick = { runAction(OnOpenVerdictSheetAction(context = VerdictSheetContext.EDIT)) },
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         }
 
@@ -1878,16 +1747,6 @@ internal fun YoursLensContent(
 
             UserTagsSection(
                 state = state,
-                runAction = runAction,
-            )
-        }
-
-        if (book.status == BookStatus.Read) {
-            Spacer(modifier = Modifier.height(28.dp))
-
-            PersonalReviewSection(
-                reviewDocument = book.userBook?.reviewDocument,
-                hasSpoilers = book.userBook?.reviewHasSpoilers == true,
                 runAction = runAction,
             )
         }
@@ -2886,23 +2745,31 @@ internal fun BookDetailOverlays(
         )
     }
 
-    val reviewBook = state.book
-    if (state.showReviewSheet && reviewBook != null) {
-        ReviewEditorBottomSheet(
-            initialDocument = state.reviewEditorDocument,
-            initialHasSpoilers = state.reviewEditorHasSpoilers,
-            canDelete = reviewBook.userBook?.reviewDocument != null,
-            onSave = { document, hasSpoilers ->
+    val verdictContext = state.verdictSheetContext
+    val verdictBook = state.book
+    if (verdictContext != null && verdictBook != null) {
+        VerdictSheet(
+            context = verdictContext,
+            bookTitle = verdictBook.title,
+            coverEdition = state.displayedEdition,
+            fallbackCoverUrl = verdictBook.coverUrl,
+            initialRating = verdictBook.userBook?.rating?.takeIf { it > 0.0 },
+            initialReview = verdictBook.userBook?.reviewDocument ?: ReviewDocument.EMPTY,
+            initialHasSpoilers = verdictBook.userBook?.reviewHasSpoilers == true,
+            canDelete = verdictContext == VerdictSheetContext.EDIT &&
+                verdictBook.userBook?.reviewDocument?.isBlank() == false,
+            onSave = { rating, review, hasSpoilers ->
                 runAction(
-                    OnSaveReviewAction(
-                        book = reviewBook,
-                        review = document,
+                    OnSaveVerdictAction(
+                        book = verdictBook,
+                        rating = rating,
+                        review = review,
                         hasSpoilers = hasSpoilers,
                     ),
                 )
             },
-            onDelete = { runAction(OnDeleteReviewAction(book = reviewBook)) },
-            onDismissRequest = { runAction(OnDismissReviewSheetAction()) },
+            onDelete = { runAction(OnDeleteReviewAction(book = verdictBook)) },
+            onDismissRequest = { runAction(OnDismissVerdictSheetAction()) },
         )
     }
 

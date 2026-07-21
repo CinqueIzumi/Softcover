@@ -28,4 +28,6 @@ internal data class ReadingScreenUiState(
     val streakEnabled: Boolean = true,
 
     val featuredBookPace: ReadingPaceForecast? = null,
+
+    val verdictPromptBook: Book? = null,
 ) : UiState

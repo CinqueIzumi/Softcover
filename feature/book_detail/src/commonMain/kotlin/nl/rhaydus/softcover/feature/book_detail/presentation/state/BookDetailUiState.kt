@@ -2,13 +2,13 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
@@ -42,9 +42,7 @@ internal data class BookDetailUiState(
     val loadingReviews: Boolean = false,
     val revealedSpoilerReviewIds: Set<Int> = emptySet(),
 
-    val showReviewSheet: Boolean = false,
-    val reviewEditorDocument: ReviewDocument = ReviewDocument.EMPTY,
-    val reviewEditorHasSpoilers: Boolean = false,
+    val verdictSheetContext: VerdictSheetContext? = null,
 
     val failedMutationBookIds: Set<Int> = emptySet(),
     val failedMutationEditionIds: Set<Int> = emptySet(),

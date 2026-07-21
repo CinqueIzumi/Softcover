@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -13,9 +15,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -25,17 +29,27 @@ class OnUpdateTimeProgressClickActionTest {
     private lateinit var updateBookProgress: RecordBookProgressUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         updateBookProgress = mockk(relaxed = true)
         stateFlow = MutableStateFlow(BookDetailUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
+
+        coEvery {
+            updateBookProgress(
+                any(),
+                any(),
+                any(),
+            )
+        } returns Result.success(null)
     }
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
@@ -59,7 +73,10 @@ class OnUpdateTimeProgressClickActionTest {
         }
     }
 
-    private fun stubBookWithAudioSeconds(audioSeconds: Int?): Book = mockk<Book>().also { book ->
+    private fun stubBookWithAudioSeconds(
+        audioSeconds: Int?,
+        id: Int = 42,
+    ): Book = mockk<Book>().also { book ->
         val edition = mockk<BookEdition>().also { e ->
             every {
                 e.audioSeconds
@@ -68,6 +85,9 @@ class OnUpdateTimeProgressClickActionTest {
         every {
             book.currentEdition
         } returns edition
+        every {
+            book.id
+        } returns id
     }
 
     @Nested
@@ -502,6 +522,70 @@ class OnUpdateTimeProgressClickActionTest {
                     newSeconds = 3600,
                 )
             }
+        }
+
+        @Test
+        fun `sends BookMarkedAsReadEvent when use case returns Applied`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newSeconds = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookMarkedAsReadEvent>()
+        }
+
+        @Test
+        fun `adds book id to failedMutationBookIds when use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(
+                audioSeconds = 3600,
+                id = 42,
+            )
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newSeconds = any(),
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
         }
     }
 }

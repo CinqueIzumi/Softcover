@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.book_detail.presentation.component
+package nl.rhaydus.softcover.core.designsystem.presentation.component
 
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph

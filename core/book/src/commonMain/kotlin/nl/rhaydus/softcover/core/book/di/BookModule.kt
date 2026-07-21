@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
@@ -150,6 +151,13 @@ val bookModule = module {
 
     factory {
         UpdateBookReviewUseCase(booksRepository = get())
+    }
+
+    factory {
+        SaveBookVerdictUseCase(
+            updateBookRatingUseCase = get(),
+            updateBookReviewUseCase = get(),
+        )
     }
 
     factory {

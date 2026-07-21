@@ -16,6 +16,7 @@ import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailOverlayNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPaneCloseHandler
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalCreateListPresenter
@@ -24,6 +25,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAc
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
@@ -88,6 +90,10 @@ class BookDetailScreen(
                 is BookMarkedAsReadEvent -> {
                     haptics.commit()
                     celebrationKey++
+
+                    screenModel.runAction(
+                        action = OnOpenVerdictSheetAction(context = VerdictSheetContext.FINISHED),
+                    )
                 }
 
                 is OpenExternalLinkEvent -> {

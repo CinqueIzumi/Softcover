@@ -103,9 +103,11 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.designsystem.presentation.component.VerdictSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
@@ -121,13 +123,16 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissVerdictPromptAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnSaveVerdictAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
@@ -234,9 +239,11 @@ internal fun ReadingBooksColumn(
 }
 
 /**
- * The modal overlays shared by both layouts: the progress-update bottom sheet (whose completion
- * thresholds fire the same celebration as the split-button "Mark as Read") and the reading-streak
- * sheet. Confetti is routed through [controller] so both entry points share one burst.
+ * The modal overlays shared by both layouts: the progress-update bottom sheet (a progress entry that
+ * finishes the book fires the same celebration as the split-button "Mark as Read", gated on the real
+ * finish outcome — see the verdict-prompt effect below), the verdict sheet raised on a finish, and
+ * the reading-streak sheet. Confetti is routed through [controller] so every entry point shares one
+ * burst.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -262,22 +269,9 @@ internal fun ReadingOverlays(
                 runAction(OnProgressTabClickAction(it))
             },
             onUpdatePercentageClick = { percentage ->
-                if (percentage.toFloatOrNull() == 100f) {
-                    haptics.commit()
-                    controller.celebrate()
-                }
-
                 runAction(OnUpdatePercentageProgressClickAction(percentage))
             },
             onUpdatePageProgressClick = { pages ->
-                val total = updatingBook.currentEdition?.pages
-                    ?: updatingBook.defaultEdition?.pages
-
-                if (total != null && pages.toIntOrNull() == total) {
-                    haptics.commit()
-                    controller.celebrate()
-                }
-
                 runAction(OnUpdatePageProgressClickAction(pages))
             },
             onUpdateTimeProgressClick = { h, m, s ->
@@ -299,6 +293,47 @@ internal fun ReadingOverlays(
 
                 runAction(DismissProgressSheetAction)
             },
+        )
+    }
+
+    val verdictBook = state.verdictPromptBook
+
+    // A finish reached through the progress sheet (any of page/percentage/time) has no synchronous
+    // "finished" moment to burst from, so the celebration rides the same Applied outcome that opens
+    // this prompt — firing only on a genuine transition, never on a no-op re-record. The explicit
+    // "mark as read" affordances already burst at the instant of the gesture, so they flag that they
+    // handled this finish and the effect skips it, keeping any single finish to exactly one burst.
+    LaunchedEffect(verdictBook?.id) {
+        if (verdictBook == null) return@LaunchedEffect
+
+        if (controller.consumeExplicitBurstFired().not()) {
+            haptics.commit()
+            controller.celebrate()
+        }
+    }
+
+    if (verdictBook != null) {
+        VerdictSheet(
+            context = VerdictSheetContext.FINISHED,
+            bookTitle = verdictBook.title,
+            coverEdition = verdictBook.currentEdition,
+            fallbackCoverUrl = verdictBook.coverUrl,
+            initialRating = verdictBook.userBook?.rating?.takeIf { it > 0.0 },
+            initialReview = verdictBook.userBook?.reviewDocument ?: ReviewDocument.EMPTY,
+            initialHasSpoilers = verdictBook.userBook?.reviewHasSpoilers == true,
+            canDelete = false,
+            onSave = { rating, review, hasSpoilers ->
+                runAction(
+                    OnSaveVerdictAction(
+                        book = verdictBook,
+                        rating = rating,
+                        review = review,
+                        hasSpoilers = hasSpoilers,
+                    ),
+                )
+            },
+            onDelete = {},
+            onDismissRequest = { runAction(OnDismissVerdictPromptAction()) },
         )
     }
 

@@ -39,6 +39,7 @@ val readingModule = module {
             getCurrentlyReadingBooksUseCase = get(),
             updateBookProgressUseCase = get(),
             markBookAsReadUseCase = get(),
+            saveBookVerdictUseCase = get(),
             refreshLibraryUseCase = get(),
             recordBookProgressUseCase = get(),
             observeAllBookDeadlinesUseCase = get(),

@@ -358,8 +358,12 @@ internal class BooksRepositoryImpl(
     ): Book {
         val userBook = book.userBook ?: throw Exception("User did not have a user book")
 
+        // Patch the rating onto the CURRENTLY cached book, not the caller-supplied [book]: a verdict
+        // saved right after finishing (Reading screen's finish → verdict prompt) hands us a pre-finish
+        // snapshot still marked Reading, and re-caching that would resurrect the book in the
+        // currently-reading list until the next refresh. Falling back to [book] only when uncached.
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = book.withRating(rating = rating)
+        val optimistic = (snapshot ?: book).withRating(rating = rating)
         booksLocalDataSource.cacheBook(book = optimistic)
 
         if (networkAvailability.isOnline.value) {
@@ -410,8 +414,12 @@ internal class BooksRepositoryImpl(
 
         val reviewedAt: String = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
+        // Patch the review onto the CURRENTLY cached book, not the caller-supplied [book]: a verdict
+        // saved right after finishing (Reading screen's finish → verdict prompt) hands us a pre-finish
+        // snapshot still marked Reading, and re-caching that would resurrect the book in the
+        // currently-reading list until the next refresh. Falling back to [book] only when uncached.
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = book.withReview(
+        val optimistic = (snapshot ?: book).withReview(
             review = review,
             hasSpoilers = hasSpoilers,
         )

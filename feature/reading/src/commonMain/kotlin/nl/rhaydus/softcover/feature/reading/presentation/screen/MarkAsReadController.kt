@@ -48,8 +48,21 @@ internal class MarkAsReadController(
 
     val slideProgress = Animatable(initialValue = 0f)
 
+    // Set when an explicit "mark as read" affordance bursts at the moment of the gesture, so the
+    // progress-sheet finish path (which bursts later, off the Applied outcome) can tell that this
+    // finish was already celebrated and skip its own burst — keeping a single finish to one burst.
+    private var explicitBurstFired = false
+
     fun celebrate() {
         celebrationKey++
+    }
+
+    /** Reads and clears the "an explicit affordance already burst for the pending finish" flag. */
+    fun consumeExplicitBurstFired(): Boolean {
+        val fired = explicitBurstFired
+        explicitBurstFired = false
+
+        return fired
     }
 
     fun requestMarkAsRead(book: Book) {
@@ -57,6 +70,7 @@ internal class MarkAsReadController(
 
         haptics.commit()
         celebrationKey++
+        explicitBurstFired = true
         navPulse.pulse(LibraryNavPulseKey)
 
         if (playMotion) {

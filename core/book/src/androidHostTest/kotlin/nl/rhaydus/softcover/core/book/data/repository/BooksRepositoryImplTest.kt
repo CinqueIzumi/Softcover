@@ -1809,9 +1809,10 @@ class BooksRepositoryImplTest {
         private fun stubUserBookWithRating(
             id: Int,
             rating: Double?,
+            status: BookStatus = BookStatus.Read,
         ): UserBook = UserBook(
             id = id,
-            status = BookStatus.Read,
+            status = status,
             dateAdded = "2026-01-01",
             createdAt = null,
             privacySettingId = 1,
@@ -1874,6 +1875,10 @@ class BooksRepositoryImplTest {
             val capturedBooks = mutableListOf<Book>()
 
             coEvery {
+                booksLocalDataSource.getBookById(id = 10)
+            } returns null
+
+            coEvery {
                 booksRemoteDataSource.updateBookRating(
                     userBook = any(),
                     rating = newRating,
@@ -1923,6 +1928,10 @@ class BooksRepositoryImplTest {
             every {
                 networkAvailability.isOnline
             } returns MutableStateFlow(true)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = bookId)
+            } returns null
 
             coEvery {
                 booksRemoteDataSource.updateBookRating(
@@ -2215,6 +2224,10 @@ class BooksRepositoryImplTest {
                 networkAvailability.isOnline
             } returns MutableStateFlow(false)
 
+            coEvery {
+                booksLocalDataSource.getBookById(id = bookId)
+            } returns null
+
             // ----- Act -----
             repository.updateBookRating(
                 book = book,
@@ -2240,13 +2253,105 @@ class BooksRepositoryImplTest {
                 )
             }
         }
+
+        @Test
+        fun `does not resurrect a finished book — optimistic write carries the cached Read status, not the passed-in Reading status`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 5
+            val bookId = 10
+            val newRating = 4.5
+
+            // The cached snapshot already reflects that the book was finished.
+            val cachedBook = Book(
+                id = bookId,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = stubUserBookWithRating(
+                    id = userBookId,
+                    rating = 3.0,
+                    status = BookStatus.Read,
+                ),
+                userBookRead = null,
+            )
+
+            // The caller passes a pre-finish snapshot still marked Reading (e.g. the Reading
+            // screen's finish -> verdict prompt flow).
+            val passedBook = Book(
+                id = bookId,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = stubUserBookWithRating(
+                    id = userBookId,
+                    rating = 3.0,
+                    status = BookStatus.Reading,
+                ),
+                userBookRead = null,
+            )
+            val remoteBook = stubBook(userBookId = userBookId)
+            val capturedBooks = mutableListOf<Book>()
+
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = bookId)
+            } returns cachedBook
+
+            coEvery {
+                booksRemoteDataSource.updateBookRating(
+                    userBook = any(),
+                    rating = newRating,
+                )
+            } returns remoteBook
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(capturedBooks))
+            } returns Unit
+
+            // ----- Act -----
+            repository.updateBookRating(
+                book = passedBook,
+                rating = newRating,
+            )
+
+            // ----- Assert -----
+            val optimisticWrite = capturedBooks.first()
+            optimisticWrite.userBook?.status shouldBe BookStatus.Read
+            optimisticWrite.userBook?.rating shouldBe newRating
+        }
     }
 
     @Nested
     inner class UpdateBookReview {
-        private fun stubUserBookForReview(id: Int): UserBook = UserBook(
+        private fun stubUserBookForReview(
+            id: Int,
+            status: BookStatus = BookStatus.Read,
+        ): UserBook = UserBook(
             id = id,
-            status = BookStatus.Read,
+            status = status,
             dateAdded = "2026-01-01",
             createdAt = null,
             privacySettingId = 1,
@@ -2293,6 +2398,10 @@ class BooksRepositoryImplTest {
             every {
                 networkAvailability.isOnline
             } returns MutableStateFlow(true)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = bookId)
+            } returns null
 
             coEvery {
                 booksRemoteDataSource.updateBookReview(
@@ -2355,6 +2464,10 @@ class BooksRepositoryImplTest {
                 networkAvailability.isOnline
             } returns MutableStateFlow(false)
 
+            coEvery {
+                booksLocalDataSource.getBookById(id = 10)
+            } returns null
+
             // ----- Act -----
             val result = repository.updateBookReview(
                 book = book,
@@ -2413,7 +2526,24 @@ class BooksRepositoryImplTest {
                 userBook = stubUserBookForReview(id = userBookId),
                 userBookRead = null,
             )
-            val snapshot = stubBook(userBookId = userBookId)
+            val snapshot = Book(
+                id = bookId,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = stubUserBookForReview(id = userBookId),
+                userBookRead = null,
+            )
 
             every {
                 networkAvailability.isOnline
@@ -2490,7 +2620,24 @@ class BooksRepositoryImplTest {
                 userBook = stubUserBookForReview(id = userBookId),
                 userBookRead = null,
             )
-            val snapshot = stubBook(userBookId = userBookId)
+            val snapshot = Book(
+                id = bookId,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = stubUserBookForReview(id = userBookId),
+                userBookRead = null,
+            )
 
             every {
                 networkAvailability.isOnline
@@ -2592,6 +2739,98 @@ class BooksRepositoryImplTest {
             coVerify {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
+        }
+
+        @Test
+        fun `does not resurrect a finished book — optimistic write carries the cached Read status, not the passed-in Reading status`() = runTest {
+            // ----- Arrange -----
+            val userBookId = 5
+            val bookId = 10
+            val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Finished it, loved it")))))
+            val hasSpoilers = false
+
+            // The cached snapshot already reflects that the book was finished.
+            val cachedBook = Book(
+                id = bookId,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = stubUserBookForReview(
+                    id = userBookId,
+                    status = BookStatus.Read,
+                ),
+                userBookRead = null,
+            )
+
+            // The caller passes a pre-finish snapshot still marked Reading (e.g. the Reading
+            // screen's finish -> verdict prompt flow).
+            val passedBook = Book(
+                id = bookId,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = stubUserBookForReview(
+                    id = userBookId,
+                    status = BookStatus.Reading,
+                ),
+                userBookRead = null,
+            )
+            val remoteBook = stubBook(userBookId = userBookId)
+            val capturedBooks = mutableListOf<Book>()
+
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = bookId)
+            } returns cachedBook
+
+            coEvery {
+                booksRemoteDataSource.updateBookReview(
+                    userBook = any(),
+                    review = any(),
+                    hasSpoilers = any(),
+                    reviewedAt = any(),
+                )
+            } returns remoteBook
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(capturedBooks))
+            } returns Unit
+
+            // ----- Act -----
+            repository.updateBookReview(
+                book = passedBook,
+                review = body,
+                hasSpoilers = hasSpoilers,
+            )
+
+            // ----- Assert -----
+            val optimisticWrite = capturedBooks.first()
+            optimisticWrite.userBook?.status shouldBe BookStatus.Read
+            optimisticWrite.userBook?.reviewDocument shouldBe body
+            optimisticWrite.userBook?.reviewHasSpoilers shouldBe hasSpoilers
         }
     }
 

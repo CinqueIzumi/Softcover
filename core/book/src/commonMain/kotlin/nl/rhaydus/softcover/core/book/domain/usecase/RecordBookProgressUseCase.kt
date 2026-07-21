@@ -8,6 +8,10 @@ import nl.rhaydus.softcover.core.domain.model.Book
  * "where am I now" entry point — the reading screen, Focus Mode, and the lock-screen quick update —
  * shares one canonical finished-vs-progress decision. Each of those wrapped use cases marks today's
  * reading activity on success, so the streak strip updates whichever branch runs.
+ *
+ * The success value reports which branch ran: the [ShelfMutationOutcome] from the finish when the
+ * position reached the end (so a caller can fire finish effects — e.g. the verdict prompt — only on
+ * a genuine [ShelfMutationOutcome.Applied] transition), or `null` when it merely advanced progress.
  */
 class RecordBookProgressUseCase(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
@@ -17,7 +21,7 @@ class RecordBookProgressUseCase(
         book: Book,
         newPage: Int? = null,
         newSeconds: Int? = null,
-    ): Result<Unit> {
+    ): Result<ShelfMutationOutcome?> {
         val edition = book.currentEdition
 
         val finished = when {
@@ -28,13 +32,13 @@ class RecordBookProgressUseCase(
         }
 
         return if (finished) {
-            markBookAsReadUseCase(book = book).map { }
+            markBookAsReadUseCase(book = book)
         } else {
             updateBookProgressUseCase(
                 book = book,
                 newPage = newPage,
                 newSeconds = newSeconds,
-            )
+            ).map { null }
         }
     }
 }

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.book_detail.presentation.component
+package nl.rhaydus.softcover.core.designsystem.presentation.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

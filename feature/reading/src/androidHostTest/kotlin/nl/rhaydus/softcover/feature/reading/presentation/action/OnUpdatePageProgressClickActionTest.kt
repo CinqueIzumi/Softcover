@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -31,6 +32,13 @@ class OnUpdatePageProgressClickActionTest {
     @BeforeEach
     fun setUp() {
         updateBookProgress = mockk(relaxed = true)
+        coEvery {
+            updateBookProgress(
+                book = any(),
+                newPage = any(),
+                newSeconds = any(),
+            )
+        } returns Result.success(null)
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
         scope = ActionScope(
@@ -289,7 +297,7 @@ class OnUpdatePageProgressClickActionTest {
                     newPage = any(),
                     newSeconds = any(),
                 )
-            } returns Result.success(Unit)
+            } returns Result.success(null)
 
             val action = OnUpdatePageProgressClickAction(newPage = "50")
 
@@ -301,6 +309,33 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(7) shouldBe false
+        }
+
+        @Test
+        fun `sets verdictPromptBook to bookToUpdate when updateBookProgress outcome is Applied`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 7)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newPage = any(),
+                    newSeconds = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnUpdatePageProgressClickAction(newPage = "50")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.verdictPromptBook shouldBe book
         }
 
         @Test
@@ -316,7 +351,7 @@ class OnUpdatePageProgressClickActionTest {
                     newPage = any(),
                     newSeconds = any(),
                 )
-            } returns Result.success(Unit)
+            } returns Result.success(null)
 
             val action = OnUpdatePageProgressClickAction(newPage = "50")
 
@@ -357,7 +392,7 @@ class OnUpdatePageProgressClickActionTest {
                     newPage = any(),
                     newSeconds = any(),
                 )
-            } returns Result.success(Unit)
+            } returns Result.success(null)
 
             val action = OnUpdatePageProgressClickAction(newPage = "50")
 

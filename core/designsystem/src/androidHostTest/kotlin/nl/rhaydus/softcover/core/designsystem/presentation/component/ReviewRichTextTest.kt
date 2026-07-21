@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.book_detail.presentation.component
+package nl.rhaydus.softcover.core.designsystem.presentation.component
 
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
@@ -9,10 +9,6 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.canonical
 
 class ReviewRichTextTest {
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
     private fun mark(
         start: Int,
         end: Int,
@@ -32,6 +28,7 @@ class ReviewRichTextTest {
         end,
         ReviewMarkType.BOLD,
     )
+
     private fun italic(
         start: Int,
         end: Int,
@@ -40,6 +37,7 @@ class ReviewRichTextTest {
         end,
         ReviewMarkType.ITALIC,
     )
+
     private fun spoiler(
         start: Int,
         end: Int,
@@ -48,10 +46,6 @@ class ReviewRichTextTest {
         end,
         ReviewMarkType.SPOILER,
     )
-
-    // -------------------------------------------------------------------------
-    // normalizeMarks
-    // -------------------------------------------------------------------------
 
     @Nested
     inner class NormalizeMarks {
@@ -244,10 +238,6 @@ class ReviewRichTextTest {
             result shouldBe emptyList()
         }
     }
-
-    // -------------------------------------------------------------------------
-    // applyEditToMarks
-    // -------------------------------------------------------------------------
 
     @Nested
     inner class ApplyEditToMarks {
@@ -456,10 +446,6 @@ class ReviewRichTextTest {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // isRangeMarked
-    // -------------------------------------------------------------------------
-
     @Nested
     inner class IsRangeMarked {
         @Test
@@ -558,10 +544,6 @@ class ReviewRichTextTest {
             ) shouldBe false
         }
     }
-
-    // -------------------------------------------------------------------------
-    // toggleMark
-    // -------------------------------------------------------------------------
 
     @Nested
     inner class ToggleMark {
@@ -704,10 +686,6 @@ class ReviewRichTextTest {
             ),)
         }
     }
-
-    // -------------------------------------------------------------------------
-    // documentToEditorBuffer / editorBufferToDocument round-trips
-    // -------------------------------------------------------------------------
 
     @Nested
     inner class RoundTrip {

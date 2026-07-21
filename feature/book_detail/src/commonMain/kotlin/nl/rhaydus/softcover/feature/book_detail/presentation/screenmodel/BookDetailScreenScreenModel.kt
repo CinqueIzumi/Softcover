@@ -10,8 +10,8 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
@@ -53,7 +53,7 @@ internal class BookDetailScreenScreenModel(
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
-    private val updateBookRatingUseCase: UpdateBookRatingUseCase,
+    private val saveBookVerdictUseCase: SaveBookVerdictUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
@@ -95,7 +95,7 @@ internal class BookDetailScreenScreenModel(
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
-        updateBookRatingUseCase = updateBookRatingUseCase,
+        saveBookVerdictUseCase = saveBookVerdictUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         setEditionAsOwnedUseCase = setEditionAsOwnedUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,

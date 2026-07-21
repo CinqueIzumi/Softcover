@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
@@ -30,6 +31,7 @@ internal class ReadingScreenScreenModel(
     private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    private val saveBookVerdictUseCase: SaveBookVerdictUseCase,
     private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val recordBookProgressUseCase: RecordBookProgressUseCase,
     private val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
@@ -57,6 +59,7 @@ internal class ReadingScreenScreenModel(
         getCurrentlyReadingBooksUseCase = getCurrentlyReadingBooksUseCase,
         updateBookProgressUseCase = updateBookProgressUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
+        saveBookVerdictUseCase = saveBookVerdictUseCase,
         refreshLibraryUseCase = refreshLibraryUseCase,
         recordBookProgressUseCase = recordBookProgressUseCase,
         observeAllBookDeadlinesUseCase = observeAllBookDeadlinesUseCase,

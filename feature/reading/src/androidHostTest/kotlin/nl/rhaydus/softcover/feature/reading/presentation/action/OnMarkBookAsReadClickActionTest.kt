@@ -216,5 +216,71 @@ class OnMarkBookAsReadClickActionTest {
                 scope = scope,
             )
         }
+
+        @Test
+        fun `sets verdictPromptBook to the book when use case reports an applied change`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 42)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnMarkBookAsReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.verdictPromptBook shouldBe book
+        }
+
+        @Test
+        fun `leaves verdictPromptBook null when use case reports no change`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 42)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.NoChange)
+
+            val action = OnMarkBookAsReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.verdictPromptBook shouldBe null
+        }
+
+        @Test
+        fun `leaves verdictPromptBook null when use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 42)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnMarkBookAsReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.verdictPromptBook shouldBe null
+        }
     }
 }
