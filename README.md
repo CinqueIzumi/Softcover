@@ -53,7 +53,8 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 - Track your **reading streak** — consecutive days with logged reading — shown as a strip on the Reading screen (computed in your local timezone).
 - Track progress by page number or percentage for book editions.
 - Track listening progress in `HH:MM:SS` or percentage for audiobook editions.
-- Mark books as read in one tap.
+- Mark books as read in one tap, or **backdate** a progress update or a finish to a chosen past date and time.
+- On finishing a book, a **Verdict** sheet prompts for a rating and review while it's fresh.
 - Start a distraction-free **focus mode** reading session that times your reading, with pause/resume/stop controls and inline page-progress editing.
 - Resume an ongoing session from anywhere via a persistent session bar, backed by a foreground service.
 
@@ -69,15 +70,19 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 ### Book Details
 - View title, author, description, ratings, release date, and page count or audiobook duration.
 - Change reading status — Want to Read, Currently Reading, Read, Did Not Finish.
+- **Start reading in one step** — go straight to Currently Reading from the book without picking a status first.
 - Update reading or listening progress.
-- Set a reading deadline with a required pages-per-day or minutes-per-day pace.
+- Set a reading deadline with a required pages-per-day or minutes-per-day pace, and see a **reading-pace forecast** of when you'll finish.
+- Tag your books with a **tag editor** — category-clustered suggestions from your own tag vocabulary, with a spoiler toggle for revealing tags.
+- Share a reading update as a generated card.
 - Switch between book and audiobook editions.
 
 ### Lists
-- Create custom lists to organize your books, with duplicate-name detection.
+- Create custom lists to organize your books, choosing whether each list is public or private, with duplicate-name detection.
 
 ### Profile
-- View your profile and reading statistics.
+- View your profile and a **reading-life recap** — reading statistics including a genre breakdown and author demographics.
+- Share your reading stats as a genre-led share card.
 - Log out.
 
 ### Settings
