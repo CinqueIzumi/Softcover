@@ -2,7 +2,7 @@
 
 What we're building next for [Softcover](https://hardcover.app/), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: 3.0.3.** Softcover is now on iPhone, iPad and desktop as well as Android.
+**Current release: 3.1.0,** a top-to-bottom redesign: nearly every screen (Reading, your Library, book pages, Explore, your Profile, Settings and more) rebuilt with a cleaner, more editorial look and feel. Softcover runs on Android, iPhone, iPad and desktop.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
@@ -12,17 +12,6 @@ A few honest caveats:
 > Reading this inside the app? It's the same file, fetched live, so it's always current.
 
 ---
-
-## 3.1.0: A fresh new look
-
-A top-to-bottom redesign: nearly every screen (Reading, your Library, book pages, Explore, your Profile, Settings and more) has been rebuilt with a cleaner, more editorial look and feel.
-
-- Long titles on coverless books resize to stay readable.
-- When you tag a book, get suggestions based on tags you've used before.
-- When you mark a book as read, it'll ask for an optional rating and review.
-- Add a book straight to **Currently Reading** in one tap, instead of shelving it first.
-- Log a reading update against an earlier time (say you read to a page last night, not just now).
-- New reading stats on your profile: a recap of your reading life, from genres and ratings to the mix of authors you read.
 
 ## 3.2.0: Widgets (Android)
 

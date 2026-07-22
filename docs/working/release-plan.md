@@ -1,5 +1,5 @@
 # Release Plan
-A release-by-release slicing of [roadmap-steps.md](roadmap-steps.md). Current shipped version is **3.0.3**.
+A release-by-release slicing of [roadmap-steps.md](roadmap-steps.md). Current shipped version is **3.1.0**.
 
 Each release below mixes a foundational/plumbing step with user-visible features so every drop feels substantial. Step references map directly to `roadmap-steps.md` — when a step ships, delete it there (per its maintenance rule). This file is the *order* of the steps, not a replacement for them.
 
@@ -12,28 +12,13 @@ Scope key from steps file: **S** ≈ 1–2 day, **M** ≈ 3–6 day, **L** ≈ 7
 **Progress markers.** Within a release that hasn't shipped yet, a finished step is prefixed **✅** and stays in place until the whole release ships — at which point the entire section is deleted per the maintenance rule above. Anything unmarked is still outstanding, so the next release section doubles as the "what's left" list. The ✅ is a convenience view, not the source of truth: a step counts as done when it has been **deleted from `roadmap-steps.md`**, and the two should always agree.
 
 **Versioning convention:**
-- **3.x.0** — additive feature releases. (3.0.0 — the KMP-era iOS + desktop launch — shipped, along with hotfixes through 3.0.3.)
+- **3.x.0** — additive feature releases. (3.0.0 — the KMP-era iOS + desktop launch — shipped, along with hotfixes through 3.0.3; 3.1.0 — the app-wide editorial redesign + quick wins — shipped.)
 - **3.x.y** — patch releases (`y > 0`) are reserved for hotfixes shipped *between* planned feature drops; planned releases always bump the minor.
 - Majors are a deliberate call, **not auto-reserved**. The Friend Feed adds a 5th nav tab (a structural change) — flagged as a **`4.0.0` candidate**, your call when it lands.
 
 Dependencies are noted only where they cross a release boundary; same-release deps are obvious from order within the section.
 
 > **Ordering note:** this plan was re-sequenced around an explicit priority order (fixes → high-prio features → medium-prio → backlog), not the original phase order. Some backlog items therefore land later than their old slots. The detail-enrichment cluster was promoted ahead of the book-detail-IA step (4.12 / "K") so the restructure accounts for everything on the screen.
-
----
-
-## 3.1.0 — Editorial redesign + quick wins
-
-The headliner is an app-wide **editorial redesign** — almost every surface rebuilt around the editorial design language (Fraunces / Inter type, hairline lists, eyebrow + headline section openers, masthead controls, hero stats), landed across separate already-pushed commits. Alongside it, a batch of small, high-value features on already-shipped foundations.
-
-- ✅ **App-wide editorial redesign** (the release headliner) — almost the entire app rebuilt around the editorial design language, across separate already-pushed commits. Redesigned surfaces: the **Reading** home feed; the **Library** screen (masthead shelf-switcher + draft-commit sheets) and **Library Tabs**; **Book Detail** (the *The Book* / *Yours* lens split + reading-pace forecast) with its **Choose-lists**, **Change-edition** and **tag-editor** sheets; the **Explore** personalised feed; the **Profile** screen (reading-life recap + genre-led share card); the **Settings** menu and **Appearance** screen; **Onboarding**; and **Hidden Suggestions**.
-- ✅ **Step 10.15** — Auto-resize coverless title text (S) — **done** (`04116c58`, which also covers never leaving a cover slot blank). Already deleted from `roadmap-steps.md`.
-- ✅ **Improvement** — Batch edition-by-ISBN with an `_or` filter (S) — **done**. `GetEditionByIsbn`'s two aliased selections collapsed into one `GetEditionsByIsbns($isbns: [String!]!)` query (`_or` over `isbn_13`/`isbn_10` `_in`); the repository/data-source surface is now batch-only (`fetchEditionMatchesForIsbns(isbns): Map<String, IsbnEditionMatch>`), so Step 8.6's ISBN-list import resolves a whole list in one round trip.
-- ✅ **Step 10.16** — Local tag cache + tag suggestions (S–M) — **done**. A server-synced vocabulary of the user's own applied tags is cached in Room (`user_tag_vocabulary`) and surfaced as most-used-first / substring-narrowed suggestion chips in the tag editor; client-side filtering works around the API's no-`_ilike` tag search. Already deleted from `roadmap-steps.md`.
-- ✅ **Step 3.12** — Rating/review prompt on mark-as-read (S–M) — **done**. A combined **Verdict sheet** (rating + review in one editorial prompt — the shared `core:designsystem` `VerdictSheet`, with a book-page `VerdictBlock` replacing the old separate rating row + review card) rises on a genuine finish from **book detail** and the **Reading screen**, via both the explicit "Mark as Read" affordance and reaching 100% progress. Bulk mark-as-read was intentionally excluded (a per-book prompt doesn't fit a bulk action). Already deleted from `roadmap-steps.md`.
-- ✅ **Step 2.14** — Directly add a book to Currently Reading (S–M) — *pulled forward from 3.3.0 on user request.* **done** — book-detail Shelve control only (search / add-flows intentionally out of scope). The "Reading" row now works on a not-yet-shelved book: `markBookAsReading` gained an `insert_user_book` create path (`status_id = 2` + `user_date = today`, no `started_at`) alongside its existing `update_user_book` path, and the row's `status == None` disable gate was removed. Already deleted from `roadmap-steps.md`.
-- ✅ **Author demographics on Profile** (user request, outside the original step list) — a new **"Who you read"** section on the Profile screen showing the gender / BIPOC / LGBTQ+ makeup of the authors across your finished books. Computed from the remote finished-books stats aggregate (`GetReadUserBooksForStats`) and cached in the profile DataStore, **not** Room (the local book cache only holds currently-displayed Library books, so it can't back a complete stats view). Gender renders as a Women/Men/Other/Unknown proportion bar; BIPOC and LGBTQ+ as three-way Yes/No/Unknown bars, with Unknown shown as its own muted segment so the sparsely-tagged data isn't misrepresented. `gender_id` mapping/rendering per [architecture.md → Unresolvable API enums](../reference/architecture.md#unresolvable-api-enums).
-- ✅ **Step 2.15** — Log a progress update at a chosen date & time (S) — *user request.* **Done.** A date/time picker on the progress-entry flow so a bump can be backdated ("read to here at 9 pm yesterday"), and the picked time also dates the **finish** (reaching 100%, or the sheet's "Mark as Read") on both Reading and Book Detail. Threaded through both write paths' existing (previously unused) `action_at` slots: progress via `update_user_book_read`/`DatesReadInput` (`action_at` + `action = "progress_updated"`), finish via `insert_user_book`/`UserBookCreateInput` (`user_date` = picked local date + `action_at`), plus both offline-replay twins and the pending-write queue (Room `MIGRATION_48_49`). No new mutation, no fragment change; behavior byte-identical when no time is picked. Already deleted from `roadmap-steps.md`. The edit/delete-past-entries half is split out to **Step 3.15** in 3.6.0.
 
 ---
 
@@ -85,7 +70,7 @@ This is the release a tracking-minded user is really waiting for: it's the whole
 
 - **Step 3.4** — Notes & Highlights inbox screen (M) — *deps: 3.3 (3.5.0)*.
 - **Step 3.6** — Reading Sessions log screen (S).
-- **Step 3.15** — Edit & delete past reading-progress entries (S–M) — *soft dep: 2.15 (3.1.0) for the re-date picker*. Correct or remove a logged progress entry after the fact (fix a page, re-date, delete a mis-logged bump). Genuinely new — no delete/amend path exists today; route (`reading_journals` CRUD vs. amending `user_book_read`) settled in the step. Sits with the log/inbox surfaces in this release. *(User request.)*
+- **Step 3.15** — Edit & delete past reading-progress entries (S–M) — *soft dep: 2.15 (shipped in 3.1.0) for the re-date picker*. Correct or remove a logged progress entry after the fact (fix a page, re-date, delete a mis-logged bump). Genuinely new — no delete/amend path exists today; route (`reading_journals` CRUD vs. amending `user_book_read`) settled in the step. Sits with the log/inbox surfaces in this release. *(User request.)*
 - **Step 8.13** — Personal-data export & import, JSON (S–M) — *deps: the Phase 3 corpus (3.5.0)*. **Pulled forward out of 9.8 deliberately**: the private corpus lands in 3.5.0 and lives nowhere but the device, so it cannot wait until 3.15.0 for a way out. Ships one release after the data exists. 9.8's full archive still follows and supersedes it.
 - **Step 4.8** — Share sheet: link + deep-link modes (S).
 - **Step 4.12** — Book-detail tabs / sectioning (M) — lands **after** all detail-enrichment (3.3–3.5.0 + 4.x). Design spike first.
@@ -174,7 +159,7 @@ This is the release a tracking-minded user is really waiting for: it's the whole
 
 - **Step 9.1** — Notification triggers (M) — *deps: 8.4 (3.13.0)*.
 - **Step 9.2** — Activity feed / Notifications inbox screen (M) — *deps: 9.1 (same release)*.
-- **Step 8.6** — Data import from Goodreads / Storygraph / ISBN list (M) — benefits from the 3.1.0 `_or` batch-ISBN improvement.
+- **Step 8.6** — Data import from Goodreads / Storygraph / ISBN list (M) — benefits from the `_or` batch-ISBN improvement shipped in 3.1.0.
 - **Step 8.10** — Onboarding goal + theme + import + notifications + better error UI (M) — *deps: 7.3 (3.10.0), 8.1 (3.13.0), 8.6 (same release)*.
 - **Step 8.11** — Curated starter list step (M) — *deps: 6.5 (3.9.0)*.
 
@@ -233,7 +218,6 @@ Heavy on small polish; reorder freely within. Step 0.2 (share/render foundation)
 ## Cross-release dependency map at a glance
 
 ```
-3.1.0 (2.15) ──> 3.6.0 (3.15)
 3.2.0 (3.7) ──> 3.12.0 (7.12)
 3.5.0 (3.9) ──> 3.11.0 (7.13, 7.16)
 3.5.0 (3.13) ──> 3.11.0 (7.15) ──┐

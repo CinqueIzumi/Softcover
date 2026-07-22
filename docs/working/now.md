@@ -24,7 +24,7 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
-- _(nothing in focus — Step 2.15 (backdated progress + finish) shipped to `release/3.1.0` and is marked ✅ in [release-plan.md](release-plan.md); pick the next release's first step from there. The edit/delete-past-entries follow-on is Step 3.15 / B.2.13 in 3.6.0.)_
+- _(nothing in focus — **3.1.0 shipped** and its section is deleted from [release-plan.md](release-plan.md); the next release up is 3.2.0 (widget infra + Step 3.7, the reading log). The edit/delete-past-entries follow-on to Step 2.15 is Step 3.15 / B.2.13 in 3.6.0.)_
 
 > Foundation adoption onto local 0.3.0 is **done** (21 F-items landed). The only residue is the build-logic batch (F18/F20/F21), hard-blocked until the foundation publishes `build-logic` as Gradle plugins — tracked in [foundation-upstream-candidates.md](foundation-upstream-candidates.md), not here.
 
@@ -34,7 +34,7 @@ _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
 _New asks that aren't in the plan yet. Each needs a catalogue entry (`idea-catalogue.md`) and a step (`roadmap-steps.md`) before it can be scheduled — this section is the holding pen, not their home. Delete a line once it's been promoted._
 
-- _(nothing waiting — the reading-journal ask was triaged: the "log progress at a chosen date & time" half is now `B.2.12` / Step 2.15 (in Focus, 3.1.0), and the edit/delete-entries half is `B.2.13` / Step 3.15 (3.6.0).)_
+- _(nothing waiting — the reading-journal ask was triaged: the "log progress at a chosen date & time" half is now `B.2.12` / Step 2.15 (shipped in 3.1.0), and the edit/delete-entries half is `B.2.13` / Step 3.15 (3.6.0).)_
 
 ---
 
