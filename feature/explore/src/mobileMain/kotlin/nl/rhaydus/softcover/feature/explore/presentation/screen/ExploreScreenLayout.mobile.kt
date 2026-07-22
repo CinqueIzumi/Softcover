@@ -209,13 +209,15 @@ private fun EditorialContent(
         },
     ) {
         Column(
+            // The opening 8dp is padding, not a leading Spacer: a Spacer is a child like any other,
+            // so `spacedBy(36.dp)` used to add its full gap *between* it and the featured card,
+            // costing 44dp under the search chrome instead of the 8 it looked like it asked for.
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(editorialScrollState),
+                .verticalScroll(editorialScrollState)
+                .padding(top = 8.dp),
             verticalArrangement = Arrangement.spacedBy(36.dp),
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
             FeaturedSection(
                 book = state.featuredUpcomingRelease,
                 isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
@@ -273,6 +275,9 @@ private fun FeaturedSection(
     // below never resizes the feed around it.
     if (isLoading.not() && book == null) return
 
+    // No EditorialSectionHeader above this one, unlike every rail below it: the card names itself
+    // with an inline eyebrow on its own top row (see FeaturedCard), which keeps the feed's opening
+    // screen for the book rather than for a header introducing it.
     SkeletonCrossfade(
         isLoading = isLoading,
         modifier = Modifier.padding(horizontal = 16.dp),

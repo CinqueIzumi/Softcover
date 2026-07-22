@@ -96,6 +96,7 @@ Two exist in the helper but have **no production call site** — the gap is the 
 - **B.3.8 Search filters & sorts.** When a search is active, surface a chip row: year range, format (print/audio/ebook), rating threshold, language, page-count range. Sort: relevance, rating, year, popularity.
 - **B.3.10 Cover-art grid view.** A toggle on search results: text-rows (default) vs. cover-only grid for visual browsing. Reuses the cover-only mode the Library already implements.
 - **B.3.11 Continue-series intelligence.** Today Explore shows a "Up next in your series" row. Add: "You haven't touched *Foundation* in 6 months — pick up where you left off?" — gentler re-engagement nudges as separate cards in the same row.
+- **B.3.12 Name the Explore hero.** The card opening the Explore feed is the upcoming release (out within the next 30 days) that the most readers already have on a shelf — but it shipped with no opener at all, so it read as an arbitrary book carrying an "Arriving <date>" chip. Name it in place: a DS §2.3 inline 20×1 hairline eyebrow ("MOST ANTICIPATED · NEXT 30 DAYS", the window interpolated from the shared `FEATURED_RELEASE_WINDOW_DAYS` domain constant so copy and query can't drift) as the card's own first row, and "N readers waiting" beside the date badge for the ranking basis. Deliberately *not* a full `EditorialSectionHeader` like the rails below it — accent bar, headline and a description sentence cost most of the opening screen for a single weekly-rotating card. *(User request.)*
 
 ### B.4 Book detail
 
