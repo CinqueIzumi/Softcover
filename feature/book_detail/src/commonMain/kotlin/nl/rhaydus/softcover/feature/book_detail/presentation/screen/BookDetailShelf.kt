@@ -780,8 +780,10 @@ internal fun LensContent(
  * three VERTICAL rows — Want to read / Reading / Read — replacing the earlier horizontal chip strip.
  * The active row fills `primary`/`onPrimary` and shows a live trailing status; the section opener is
  * the inline 20×1 bar + `eyebrowSmall` contract (never the full section bar). All prior behavior is
- * preserved: optimistic writes, [Modifier.shakeOnError] + "Couldn't save — tap to retry", the
- * [MarkAsReadBurst] + commit haptic celebration on Read, and Reading disabled while `status == None`.
+ * preserved: optimistic writes, [Modifier.shakeOnError] + "Couldn't save — tap to retry", and the
+ * [MarkAsReadBurst] + commit haptic celebration on Read. Every row — Reading included — is enabled
+ * even for a not-yet-shelved book: tapping Reading creates the user book directly on Currently
+ * Reading in one step (no add-to-Want-to-Read-first).
  */
 @Composable
 internal fun ShelveControlCard(
@@ -896,7 +898,6 @@ internal fun ShelveControlCard(
                                         haptics.select()
                                         runAction(OnMarkBookAsReadingClickAction(book = book))
                                     },
-                                    enabled = status != BookStatus.None,
                                     trailingStatus = readingTrailingStatus(book = book),
                                 )
 
@@ -1426,10 +1427,12 @@ internal fun InProgressSection(
         Spacer(modifier = Modifier.height(10.dp))
 
         LinearWavyProgressIndicator(
-            progress = { (progress / 100f).coerceIn(
-                0f,
-                1f,
-            ) },
+            progress = {
+                (progress / 100f).coerceIn(
+                    0f,
+                    1f,
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(14.dp),

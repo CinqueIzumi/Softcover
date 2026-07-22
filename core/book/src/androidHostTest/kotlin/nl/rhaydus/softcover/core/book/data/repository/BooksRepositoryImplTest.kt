@@ -1614,7 +1614,10 @@ class BooksRepositoryImplTest {
             val slot = slot<Book>()
 
             coEvery {
-                booksRemoteDataSource.markBookAsReading(book)
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
             } returns expectedBook
 
             coEvery {
@@ -1642,7 +1645,10 @@ class BooksRepositoryImplTest {
             val expectedBook = stubBook(userBookId = 1)
 
             coEvery {
-                booksRemoteDataSource.markBookAsReading(book)
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
             } returns expectedBook
 
             coEvery {
@@ -1655,7 +1661,10 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerifyOrder {
                 booksLocalDataSource.cacheBook(book = any())
-                booksRemoteDataSource.markBookAsReading(book)
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
             }
         }
 
@@ -1667,7 +1676,10 @@ class BooksRepositoryImplTest {
             val slot = slot<Book>()
 
             coEvery {
-                booksRemoteDataSource.markBookAsReading(book)
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
             } returns expectedBook
 
             coEvery {
@@ -1701,7 +1713,10 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsReading(book)
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
             } throws RuntimeException("network failure")
 
             // ----- Act -----
@@ -1734,7 +1749,10 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsReading(book)
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
             } throws remoteError
 
             // ----- Act & Assert -----
@@ -1758,7 +1776,10 @@ class BooksRepositoryImplTest {
             } returns null
 
             coEvery {
-                booksRemoteDataSource.markBookAsReading(book)
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
             } throws RuntimeException("network failure")
 
             // ----- Act -----
@@ -1786,7 +1807,10 @@ class BooksRepositoryImplTest {
             } returns snapshot
 
             coEvery {
-                booksRemoteDataSource.markBookAsReading(book)
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
             } throws CancellationException("cancelled")
 
             // ----- Act & Assert -----
@@ -1800,6 +1824,39 @@ class BooksRepositoryImplTest {
 
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = snapshot)
+            }
+        }
+
+        @Test
+        fun `forwards non-null editionId to remote data source`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBookId = 1)
+            val editionId = 99
+            val expectedBook = stubBook(userBookId = 1)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = editionId,
+                )
+            } returns expectedBook
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = any())
+            } returns Unit
+
+            // ----- Act -----
+            repository.markBookAsReading(
+                book = book,
+                editionId = editionId,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = editionId,
+                )
             }
         }
     }

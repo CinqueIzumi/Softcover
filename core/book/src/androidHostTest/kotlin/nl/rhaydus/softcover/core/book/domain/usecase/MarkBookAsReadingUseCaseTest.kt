@@ -37,7 +37,10 @@ class MarkBookAsReadingUseCaseTest {
             } returns BookStatus.WantToRead
 
             coEvery {
-                booksRepository.markBookAsReading(book = inputBook)
+                booksRepository.markBookAsReading(
+                    book = inputBook,
+                    editionId = null,
+                )
             } returns updatedBook
 
             coJustRun {
@@ -50,8 +53,83 @@ class MarkBookAsReadingUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
-            coVerify(exactly = 1) { booksRepository.markBookAsReading(book = inputBook) }
+            coVerify(exactly = 1) {
+                booksRepository.markBookAsReading(
+                    book = inputBook,
+                    editionId = null,
+                )
+            }
             coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
+        }
+
+        @Test
+        fun `forwards a non-null editionId to the repository`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+            val editionId = 99
+            val updatedBook = mockk<Book>()
+
+            every {
+                inputBook.status
+            } returns BookStatus.WantToRead
+
+            coEvery {
+                booksRepository.markBookAsReading(
+                    book = inputBook,
+                    editionId = editionId,
+                )
+            } returns updatedBook
+
+            coJustRun {
+                booksRepository.cacheBook(book = updatedBook)
+            }
+
+            // ----- Act -----
+            useCase(
+                book = inputBook,
+                editionId = editionId,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRepository.markBookAsReading(
+                    book = inputBook,
+                    editionId = editionId,
+                )
+            }
+        }
+
+        @Test
+        fun `forwards null editionId to the repository when omitted`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+            val updatedBook = mockk<Book>()
+
+            every {
+                inputBook.status
+            } returns BookStatus.WantToRead
+
+            coEvery {
+                booksRepository.markBookAsReading(
+                    book = inputBook,
+                    editionId = null,
+                )
+            } returns updatedBook
+
+            coJustRun {
+                booksRepository.cacheBook(book = updatedBook)
+            }
+
+            // ----- Act -----
+            useCase(book = inputBook)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRepository.markBookAsReading(
+                    book = inputBook,
+                    editionId = null,
+                )
+            }
         }
 
         @Test
@@ -65,7 +143,10 @@ class MarkBookAsReadingUseCaseTest {
             } returns BookStatus.WantToRead
 
             coEvery {
-                booksRepository.markBookAsReading(book = inputBook)
+                booksRepository.markBookAsReading(
+                    book = inputBook,
+                    editionId = null,
+                )
             } throws expectedError
 
             // ----- Act -----
@@ -89,7 +170,10 @@ class MarkBookAsReadingUseCaseTest {
             } returns BookStatus.WantToRead
 
             coEvery {
-                booksRepository.markBookAsReading(book = inputBook)
+                booksRepository.markBookAsReading(
+                    book = inputBook,
+                    editionId = null,
+                )
             } returns updatedBook
 
             coEvery {
@@ -118,7 +202,12 @@ class MarkBookAsReadingUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
-            coVerify(exactly = 0) { booksRepository.markBookAsReading(any()) }
+            coVerify(exactly = 0) {
+                booksRepository.markBookAsReading(
+                    book = any(),
+                    editionId = any(),
+                )
+            }
             coVerify(exactly = 0) { booksRepository.cacheBook(any()) }
         }
     }

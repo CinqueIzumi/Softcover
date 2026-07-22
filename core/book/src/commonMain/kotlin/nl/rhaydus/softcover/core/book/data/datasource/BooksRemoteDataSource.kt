@@ -27,6 +27,8 @@ import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.MarkBookAsReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.MarkBookAsReadingMutation
 import nl.rhaydus.softcover.MarkBookAsReadingMutation.Data.Update_user_book.User_book.Companion.userBookFragment
+import nl.rhaydus.softcover.MarkBookAsReadingViaInsertMutation
+import nl.rhaydus.softcover.MarkBookAsReadingViaInsertMutation.Data.Insert_user_book.User_book.Companion.userBookFragment as markBookAsReadingInsertUserBookFragment
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.RemoveUserBookMutation
@@ -76,7 +78,10 @@ interface BooksRemoteDataSource {
         editionId: Int? = null,
     ): Book
 
-    suspend fun markBookAsReading(book: Book): Book
+    suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun updateBookRating(
         userBook: UserBook,
@@ -340,9 +345,15 @@ internal class BooksRemoteDataSourceImpl(
             ?.toBook() ?: throw Exception("Book could not be mapped")
     }
 
-    override suspend fun markBookAsReading(book: Book): Book {
+    override suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int?,
+    ): Book {
+        // No user_book yet → create one directly on Currently Reading via `insert_user_book`
+        // (mirroring the want-to-read / read create paths), so a not-yet-shelved book can start
+        // reading in one step. Only the update path needs an existing user_book id.
         val userBook = book.userBook
-            ?: throw Exception("User did not have a user book")
+            ?: return createUserBookAsReading(book = book, editionId = editionId)
 
         val currentDate = Clock.System
             .todayIn(TimeZone.currentSystemDefault())
@@ -371,6 +382,32 @@ internal class BooksRemoteDataSourceImpl(
             .update_user_book
             ?.user_book
             ?.userBookFragment()
+            ?.toBook() ?: throw Exception("Book could not be mapped")
+    }
+
+    private suspend fun createUserBookAsReading(
+        book: Book,
+        editionId: Int?,
+    ): Book {
+        val currentDate = Clock.System
+            .todayIn(TimeZone.currentSystemDefault())
+            .toString()
+
+        val dataObject = UserBookCreateInput(
+            book_id = book.id,
+            edition_id = Optional.presentIfNotNull(editionId),
+            status_id = Optional.present(UserBookStatus.CURRENTLY_READING.code),
+            user_date = Optional.present(currentDate),
+            privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
+        )
+
+        return apolloClient
+            .safeMutation(
+                mutation = MarkBookAsReadingViaInsertMutation(userBookCreateInput = dataObject),
+            )
+            .insert_user_book
+            ?.user_book
+            ?.markBookAsReadingInsertUserBookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
     }
 

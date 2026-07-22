@@ -117,7 +117,10 @@ interface BooksRepository {
         editionId: Int? = null,
     ): Book
 
-    suspend fun markBookAsReading(book: Book): Book
+    suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun updateBookRating(
         book: Book,

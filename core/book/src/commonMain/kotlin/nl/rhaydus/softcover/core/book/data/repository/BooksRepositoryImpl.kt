@@ -337,13 +337,16 @@ internal class BooksRepositoryImpl(
         }
     }
 
-    override suspend fun markBookAsReading(book: Book): Book {
+    override suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int?,
+    ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsReading()
         booksLocalDataSource.cacheBook(book = optimistic)
 
         return runCatching {
-            booksRemoteDataSource.markBookAsReading(book)
+            booksRemoteDataSource.markBookAsReading(book = book, editionId = editionId)
         }.getOrElse { error ->
             if (error is CancellationException) throw error
 

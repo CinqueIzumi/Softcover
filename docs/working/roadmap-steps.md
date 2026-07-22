@@ -19,9 +19,6 @@ The two most-used surfaces gain shelf management depth and reading-flow nudges. 
 ### Step 2.9 — "Since last read" delta on Reading rows (S)
 Eyebrow on compact rows briefly shows the page/time delta since previous open, fading to the regular eyebrow. *(B.2.8)*
 
-### Step 2.14 — Directly add a book to Currently Reading (S–M)
-One-step "start reading" action from book detail's shelf bar, search, and the add flows that puts a book straight onto Currently Reading instead of add-to-shelf-then-change-status. May chain create → set-status (→ start date) mutations on top of the shipped create-userBook path. Pairs with session start (Step 3.5). *(B.2.11)*
-
 ---
 
 ## Phase 3 — Personal data: rating, review, highlight, log, session
