@@ -12,24 +12,24 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import nl.rhaydus.toad.ActionScope
 
-class ReadingStreakCollectorTest {
-    private lateinit var getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase
+class ShelfSwipeCollectorTest {
+    private lateinit var getShelfSwipeEnabledAsFlowUseCase: GetShelfSwipeEnabledAsFlowUseCase
     private lateinit var dependencies: SettingsScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<SettingsScreenUiState>
     private lateinit var scope: ActionScope<SettingsScreenUiState, SettingsScreenEvent, SettingsLocalVariables>
-    private lateinit var readingStreakEnabledFlow: MutableSharedFlow<Boolean>
+    private lateinit var shelfSwipeEnabledFlow: MutableSharedFlow<Boolean>
 
     @BeforeEach
     fun setUp() {
-        readingStreakEnabledFlow = MutableSharedFlow()
-        getReadingStreakEnabledAsFlowUseCase = mockk()
+        shelfSwipeEnabledFlow = MutableSharedFlow()
+        getShelfSwipeEnabledAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(SettingsScreenUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -38,22 +38,22 @@ class ReadingStreakCollectorTest {
         )
 
         every {
-            getReadingStreakEnabledAsFlowUseCase()
-        } returns readingStreakEnabledFlow
+            getShelfSwipeEnabledAsFlowUseCase()
+        } returns shelfSwipeEnabledFlow
 
         dependencies = mockk<SettingsScreenDependencies>(relaxed = true).also { mock ->
             every {
-                mock.getReadingStreakEnabledAsFlowUseCase
-            } returns getReadingStreakEnabledAsFlowUseCase
+                mock.getShelfSwipeEnabledAsFlowUseCase
+            } returns getShelfSwipeEnabledAsFlowUseCase
         }
     }
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets readingStreakEnabledChecked to true when flow emits true`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sets shelfSwipeEnabledChecked to true when flow emits true`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = ReadingStreakCollector()
+            val collector = ShelfSwipeCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -62,17 +62,17 @@ class ReadingStreakCollectorTest {
             }
 
             // ----- Act -----
-            readingStreakEnabledFlow.emit(true)
+            shelfSwipeEnabledFlow.emit(true)
 
             // ----- Assert -----
-            stateFlow.value.readingStreakEnabledChecked shouldBe true
+            stateFlow.value.shelfSwipeEnabledChecked shouldBe true
             job.cancel()
         }
 
         @Test
-        fun `sets readingStreakEnabledChecked to false when flow emits false`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sets shelfSwipeEnabledChecked to false when flow emits false`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = ReadingStreakCollector()
+            val collector = ShelfSwipeCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -81,17 +81,17 @@ class ReadingStreakCollectorTest {
             }
 
             // ----- Act -----
-            readingStreakEnabledFlow.emit(false)
+            shelfSwipeEnabledFlow.emit(false)
 
             // ----- Assert -----
-            stateFlow.value.readingStreakEnabledChecked shouldBe false
+            stateFlow.value.shelfSwipeEnabledChecked shouldBe false
             job.cancel()
         }
 
         @Test
-        fun `updates readingStreakEnabledChecked to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
+        fun `updates shelfSwipeEnabledChecked to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = ReadingStreakCollector()
+            val collector = ShelfSwipeCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -100,18 +100,18 @@ class ReadingStreakCollectorTest {
             }
 
             // ----- Act -----
-            readingStreakEnabledFlow.emit(false)
-            readingStreakEnabledFlow.emit(true)
+            shelfSwipeEnabledFlow.emit(false)
+            shelfSwipeEnabledFlow.emit(true)
 
             // ----- Assert -----
-            stateFlow.value.readingStreakEnabledChecked shouldBe true
+            stateFlow.value.shelfSwipeEnabledChecked shouldBe true
             job.cancel()
         }
 
         @Test
-        fun `does not change readingStreakEnabledChecked before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
+        fun `does not change shelfSwipeEnabledChecked before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = ReadingStreakCollector()
+            val collector = ShelfSwipeCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -120,18 +120,18 @@ class ReadingStreakCollectorTest {
             }
 
             // ----- Act & Assert -----
-            stateFlow.value.readingStreakEnabledChecked shouldBe true
+            stateFlow.value.shelfSwipeEnabledChecked shouldBe false
             job.cancel()
         }
 
         @Test
-        fun `preserves other state fields when updating readingStreakEnabledChecked`() = runTest(UnconfinedTestDispatcher()) {
+        fun `preserves other state fields when updating shelfSwipeEnabledChecked`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = SettingsScreenUiState(
-                readingStreakEnabledChecked = true,
+                shelfSwipeEnabledChecked = true,
                 dropDownExpanded = true,
             )
-            val collector = ReadingStreakCollector()
+            val collector = ShelfSwipeCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -140,29 +140,29 @@ class ReadingStreakCollectorTest {
             }
 
             // ----- Act -----
-            readingStreakEnabledFlow.emit(false)
+            shelfSwipeEnabledFlow.emit(false)
 
             // ----- Assert -----
             stateFlow.value.dropDownExpanded shouldBe true
-            stateFlow.value.readingStreakEnabledChecked shouldBe false
+            stateFlow.value.shelfSwipeEnabledChecked shouldBe false
             job.cancel()
         }
 
         @Test
-        fun `retains last emitted readingStreakEnabledChecked after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
+        fun `retains last emitted shelfSwipeEnabledChecked after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = ReadingStreakCollector()
+            val collector = ShelfSwipeCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
-            readingStreakEnabledFlow.emit(false)
+            shelfSwipeEnabledFlow.emit(false)
             job.cancel()
 
             // ----- Act & Assert -----
-            stateFlow.value.readingStreakEnabledChecked shouldBe false
+            stateFlow.value.shelfSwipeEnabledChecked shouldBe false
         }
     }
 }

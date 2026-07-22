@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCode
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
@@ -47,6 +48,7 @@ internal class LibraryScreenScreenModel(
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     private val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
     private val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
+    private val getShelfSwipeEnabledAsFlowUseCase: GetShelfSwipeEnabledAsFlowUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
@@ -77,6 +79,7 @@ internal class LibraryScreenScreenModel(
         getEnabledStatusCodesAsFlowUseCase = getEnabledStatusCodesAsFlowUseCase,
         getEnabledListIdsAsFlowUseCase = getEnabledListIdsAsFlowUseCase,
         getLibraryTabOrderAsFlowUseCase = getLibraryTabOrderAsFlowUseCase,
+        getShelfSwipeEnabledAsFlowUseCase = getShelfSwipeEnabledAsFlowUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,

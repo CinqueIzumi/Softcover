@@ -83,6 +83,10 @@ interface SettingsRepository {
 
     suspend fun setReadingStreakEnabled(enabled: Boolean)
 
+    val shelfSwipeEnabled: Flow<Boolean>
+
+    suspend fun setShelfSwipeEnabled(enabled: Boolean)
+
     val uiScale: Flow<UiScale>
 
     suspend fun setUiScale(scale: UiScale)

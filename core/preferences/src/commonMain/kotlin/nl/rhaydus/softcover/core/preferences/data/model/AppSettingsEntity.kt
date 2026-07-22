@@ -25,6 +25,7 @@ internal data class AppSettingsEntity(
     val libraryTabOrder: List<String> = emptyList(),
     val desktopWindowState: DesktopWindowStateEntity = DesktopWindowStateEntity(),
     val readingStreakEnabled: Boolean = true,
+    val shelfSwipeEnabled: Boolean = false,
     val lastUsedProgressUnit: ProgressUnit = ProgressUnit.PAGE,
     val uiScale: UiScale = UiScale.DEFAULT,
     // Null means "use the auto-derived most-read genre" - see GetBecauseYouReadBooksUseCase.

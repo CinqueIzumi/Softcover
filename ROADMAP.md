@@ -13,6 +13,12 @@ A few honest caveats:
 
 ---
 
+## 3.1.1: Redesign follow-ups
+
+Polish shaken out of the 3.1.0 redesign.
+
+- **Swipe between shelves again.** Turn on "Swipe between shelves" under Settings, Appearance and you can flick left or right in your Library to move to the next shelf, with the shelves either side named in a quiet line just above your books (tap either name to jump one across). Off by default, so nothing changes unless you ask for it. Phone and tablet only: on desktop the shelf sidebar already does this job.
+
 ## 3.2.0: Widgets (Android)
 
 Home-screen widgets: **Currently Reading**, a **random pick from Want-to-Read**, **Trending this week**, and a **reading-activity calendar**. Plus per-book read-through history (re-reads) on book detail.

@@ -22,6 +22,16 @@ Dependencies are noted only where they cross a release boundary; same-release de
 
 ---
 
+## 3.1.1 — Redesign follow-ups
+
+The 3.1.1 pickup list from [now.md](now.md): polish and restorations shaken out of the 3.1.0 redesign. Triaged into the catalogue as they land, so the public roadmap stays a projection of this file.
+
+- **B.1.14** — Swipe between shelves in the Library (S) — the `HorizontalPager` the masthead redesign retired, back with a neighbour-name rail, behind an opt-in Appearance → Display toggle (default off). Mobile only.
+
+*Release note:* "Turn on 'Swipe between shelves' under Appearance and you can swipe left or right in your Library to move between shelves again, with the shelves either side named just above your books. Off by default, so nothing changes unless you ask for it."
+
+---
+
 ## 3.2.0 — Widgets
 
 - **Step 9.3 (first wave)** — Widget infra + currently-reading, random-from-Want-to-Read, trending-this-week, reading-activity-calendar widgets (L) — Android-first (Glance). Second-wave widgets (streak / quote / year-in-books) land in 3.15.0.

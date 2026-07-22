@@ -28,7 +28,9 @@ _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
 _The agreed scope for the 3.1.1 drop, captured as a working checklist. None of these are triaged into [idea-catalogue.md](idea-catalogue.md) / [roadmap-steps.md](roadmap-steps.md) yet — do that (or fold them into the 3.1.1 entry in [release-plan.md](release-plan.md)) before they ship, so the public [ROADMAP.md](../../ROADMAP.md) stays a projection of the plan rather than of this file._
 
-- [ ] **Horizontal shelf swiping in the Library.** Bring back horizontal swiping across the library shelves. Optionally behind a toggle so the previous (vertical, all-shelves-visible) presentation can still be chosen — only if that's maintainable, since it implies two parallel screen presentations that must stay in sync.
+_Unlike a fast-track fix, an item here is **ticked rather than deleted** when it lands, and carries its catalogue tag once triaged: the list is this drop's scope, so it has to keep showing what is done against what is left. The whole block is deleted in one go when 3.1.1 ships._
+
+- [x] **Horizontal shelf swiping in the Library** (`B.1.14`). Shipped as a `HorizontalPager` behind an opt-in "Swipe between shelves" toggle (Appearance → Display, default **off**), plus a shelf neighbour rail naming the shelves either side. The two-parallel-presentations worry did not materialise: the pager stays the content container with the toggle only flipping `userScrollEnabled`, so there is one mobile presentation either way.
 - [ ] **Clarify the top book on Explore.** Make it obvious what the hero item at the top of Explore actually is (a most-anticipated upcoming release), rather than leaving it unlabelled.
 - [ ] **Search back-button handling.** On the active search screen, the first back press clears the entered query; only a subsequent back press performs the normal back navigation.
 - [ ] **Tag picker "see more".** When choosing tags for a book, tapping "see more" should immediately reveal all of the user's previously chosen tags.

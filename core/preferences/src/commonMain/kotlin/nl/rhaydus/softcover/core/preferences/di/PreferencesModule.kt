@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayout
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
@@ -32,6 +33,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressU
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 
 val preferencesModule = module {
@@ -97,6 +99,10 @@ val preferencesModule = module {
     factory { GetReadingStreakEnabledAsFlowUseCase(settingsRepository = get()) }
 
     factory { SetReadingStreakEnabledUseCase(settingsRepository = get()) }
+
+    factory { GetShelfSwipeEnabledAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetShelfSwipeEnabledUseCase(settingsRepository = get()) }
 
     factory { GetUiScaleAsFlowUseCase(settingsRepository = get()) }
 

@@ -76,6 +76,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.OnFloatingBarTo
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnListToggleAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReadingStreakToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReorderLibraryTabsAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnShelfSwipeToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnStatusToggleAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnUiScaleSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -87,19 +88,22 @@ import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicCo
 /**
  * The Appearance settings body, shared by the mobile [AppearanceSettingsScreen] page and the desktop
  * Settings master–detail pane. Rows sit flat on the page background, hairline-divided — never boxed
- * cards. The Display section collapses the dynamic-colour, floating-bar, and reading-streak switches
- * into one flat toggle-row stack: dynamic colour is gated on [supportsDynamicColor] (always `false` on
- * desktop), [showBottomBarToggle] hides the floating-bottom-bar row on desktop (there is no bottom bar
- * there — it is a compact-only preference), and reading streak always shows. [showUiScaleControl] is
- * desktop-only (hidden on mobile, where the OS handles DPI) and surfaces the "Display scale" picker
- * first, since on desktop it is the most relevant appearance control. The caller supplies the scroll /
- * width [modifier].
+ * cards. The Display section collapses the dynamic-colour, floating-bar, shelf-swipe, and
+ * reading-streak switches into one flat toggle-row stack: dynamic colour is gated on
+ * [supportsDynamicColor] (always `false` on desktop), [showBottomBarToggle] hides the
+ * floating-bottom-bar row on desktop (there is no bottom bar there — it is a compact-only
+ * preference), [showShelfSwipeToggle] hides the swipe-between-shelves row on desktop (whose Library
+ * switches shelves from a permanent sidebar, not a pager), and reading streak always shows.
+ * [showUiScaleControl] is desktop-only (hidden on mobile, where the OS handles DPI) and surfaces the
+ * "Display scale" picker first, since on desktop it is the most relevant appearance control. The
+ * caller supplies the scroll / width [modifier].
  */
 @Composable
 internal fun AppearanceSettingsContent(
     state: SettingsScreenUiState,
     runAction: (SettingsAction) -> Unit,
     showBottomBarToggle: Boolean,
+    showShelfSwipeToggle: Boolean,
     showUiScaleControl: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -124,6 +128,7 @@ internal fun AppearanceSettingsContent(
         DisplaySection(
             state = state,
             showBottomBarToggle = showBottomBarToggle,
+            showShelfSwipeToggle = showShelfSwipeToggle,
             runAction = runAction,
         )
 
@@ -186,6 +191,7 @@ private fun UiScaleSection(
 private fun DisplaySection(
     state: SettingsScreenUiState,
     showBottomBarToggle: Boolean,
+    showShelfSwipeToggle: Boolean,
     runAction: (SettingsAction) -> Unit,
 ) {
     val rows = buildList {
@@ -207,6 +213,17 @@ private fun DisplaySection(
                     gloss = "Lift the nav off the edge, with rounded corners.",
                     checked = state.useFloatingBarChecked,
                     onCheckedChange = { runAction(OnFloatingBarToggledAction(newValue = it)) },
+                ),
+            )
+        }
+
+        if (showShelfSwipeToggle) {
+            add(
+                ToggleRowSpec(
+                    label = "Swipe between shelves",
+                    gloss = "Flick left or right in your Library to move to the next shelf.",
+                    checked = state.shelfSwipeEnabledChecked,
+                    onCheckedChange = { runAction(OnShelfSwipeToggledAction(newValue = it)) },
                 ),
             )
         }

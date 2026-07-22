@@ -82,6 +82,10 @@ interface SettingsLocalDataSource {
 
     suspend fun setReadingStreakEnabled(enabled: Boolean)
 
+    val shelfSwipeEnabled: Flow<Boolean>
+
+    suspend fun setShelfSwipeEnabled(enabled: Boolean)
+
     val uiScale: Flow<UiScale>
 
     suspend fun setUiScale(scale: UiScale)
@@ -274,6 +278,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setReadingStreakEnabled(enabled: Boolean) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(readingStreakEnabled = enabled)
+        }
+    }
+
+    override val shelfSwipeEnabled: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.shelfSwipeEnabled }
+        .distinctUntilChanged()
+
+    override suspend fun setShelfSwipeEnabled(enabled: Boolean) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(shelfSwipeEnabled = enabled)
         }
     }
 

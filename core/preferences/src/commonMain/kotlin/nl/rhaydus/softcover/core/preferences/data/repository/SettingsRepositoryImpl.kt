@@ -132,6 +132,12 @@ internal class SettingsRepositoryImpl(
         settingsLocalDataSource.setReadingStreakEnabled(enabled = enabled)
     }
 
+    override val shelfSwipeEnabled: Flow<Boolean> = settingsLocalDataSource.shelfSwipeEnabled
+
+    override suspend fun setShelfSwipeEnabled(enabled: Boolean) {
+        settingsLocalDataSource.setShelfSwipeEnabled(enabled = enabled)
+    }
+
     override val uiScale: Flow<UiScale> = settingsLocalDataSource.uiScale
 
     override suspend fun setUiScale(scale: UiScale) {
