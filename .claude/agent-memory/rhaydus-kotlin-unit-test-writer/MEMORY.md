@@ -5,3 +5,4 @@
 - [StateFlow transient-reset testing](feedback_stateflow_transient_reset_testing.md) — testing a reset-then-recompute double `.update{}` needs 3 DISTINCT values (baseline/reset/final) or StateFlow conflation hides the transient emission
 - [Apollo taggable_counts query mocking](feedback_apollo_taggable_counts_mocking.md) — mockkObject(X.Data.Taggable_count.Book.Companion) pattern for GetBooksByMoodTagQuery/GetBooksByGenreTagQuery; hasMore uses RAW row count not deduped count
 - [DAO-backed LocalDataSource Flow tests](feedback_flow_dao_local_datasource_pattern.md) — plain `flowOf` + turbine `.test{}` is enough for a DAO passthrough Flow; no TestDispatcher needed unless a real dispatcher is involved
+- [Third-party import order convention](feedback_import_order_convention.md) — ASCIIbetical full-path sort: io.* → kotlin.* → kotlinx.* → nl.rhaydus.* → org.junit.*; fix on touch per on-touch style policy

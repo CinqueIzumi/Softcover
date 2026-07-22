@@ -6,6 +6,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
@@ -27,7 +31,10 @@ class ObserveReadingLifeUseCaseTest {
         useCase = ObserveReadingLifeUseCase(observeUserProfileDataUseCase = observeUserProfileDataUseCase)
     }
 
-    private fun profileData(ratings: RatingsDistribution): UserProfileData = UserProfileData(
+    private fun profileData(
+        ratings: RatingsDistribution,
+        authorDemographics: AuthorDemographics = AuthorDemographics(),
+    ): UserProfileData = UserProfileData(
         profileImageUrl = "https://example.com/avatar.png",
         name = "Jane Doe",
         username = "cinque",
@@ -65,6 +72,7 @@ class ObserveReadingLifeUseCaseTest {
             ),
         ),
         trackedYears = 4,
+        authorDemographics = authorDemographics,
     )
 
     @Nested
@@ -116,6 +124,42 @@ class ObserveReadingLifeUseCaseTest {
 
             // ----- Assert -----
             result?.ratings?.band shouldBe RatingBand.EXACTING
+        }
+
+        @Test
+        fun `authorDemographics carries straight through to ReadingLife`() = runTest {
+            // ----- Arrange -----
+            val demographics = AuthorDemographics(
+                genderSlices = listOf(GenderSlice(
+                    gender = Gender.Other,
+                    count = 2,
+                    fraction = 1.0,
+                ),),
+                knownGenderCount = 2,
+                lgbtqBreakdown = DemographicBreakdown(
+                    yesCount = 1,
+                    noCount = 1,
+                    unknownCount = 0,
+                ),
+            )
+            val ratings = RatingsDistribution(
+                average = 4.0,
+                totalRatings = 20,
+                halfStarBuckets = List(9) { 0 },
+            )
+
+            every {
+                observeUserProfileDataUseCase()
+            } returns flowOf(profileData(
+                ratings = ratings,
+                authorDemographics = demographics,
+            ),)
+
+            // ----- Act -----
+            val result = useCase().first()
+
+            // ----- Assert -----
+            result?.authorDemographics shouldBe demographics
         }
 
         @Test

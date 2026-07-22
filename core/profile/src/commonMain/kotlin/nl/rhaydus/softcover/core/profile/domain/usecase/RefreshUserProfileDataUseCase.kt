@@ -116,6 +116,7 @@ class RefreshUserProfileDataUseCase(
         ratings = ratings,
         recentlyLoved = recentlyLoved,
         trackedYears = trackedYears,
+        authorDemographics = authorDemographics,
     )
 
     // Grace day: a user who hasn't logged yet today should not see their streak break, so the

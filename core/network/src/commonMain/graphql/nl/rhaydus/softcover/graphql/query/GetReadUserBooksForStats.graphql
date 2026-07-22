@@ -1,6 +1,7 @@
 # A lean, paginated fetch of every finished book for client-side stat aggregation (year/month
-# columns, ratings histogram, genre breakdown, total pages). No covers/authors here - those are
-# only needed for the small recently-loved list in GetUserProfileData. 1 root field (me).
+# columns, ratings histogram, genre breakdown, total pages, author demographics). No covers/author
+# names here - those are only needed for the small recently-loved list in GetUserProfileData. 1 root
+# field (me).
 query GetReadUserBooksForStats($limit: Int!, $offset: Int!) {
     me {
         user_books(
@@ -36,6 +37,16 @@ query GetReadUserBooksForStats($limit: Int!, $offset: Int!) {
                         tag_category {
                             category
                         }
+                    }
+                }
+                # Only the fields the author-demographics aggregation needs - id for cross-book
+                # dedupe, no name, to keep this per-book, paginated payload lean.
+                contributions {
+                    author {
+                        id
+                        is_bipoc
+                        is_lgbtq
+                        gender_id
                     }
                 }
             }

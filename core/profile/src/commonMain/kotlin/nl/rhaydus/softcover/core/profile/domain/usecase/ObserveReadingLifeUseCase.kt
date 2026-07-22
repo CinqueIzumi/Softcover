@@ -25,6 +25,7 @@ class ObserveReadingLifeUseCase(
         ratings = ratings.classified(),
         recentlyLoved = recentlyLoved,
         trackedYears = trackedYears,
+        authorDemographics = authorDemographics,
     )
 
     // band is never trusted from the cache (it is not persisted there in the first place); it is

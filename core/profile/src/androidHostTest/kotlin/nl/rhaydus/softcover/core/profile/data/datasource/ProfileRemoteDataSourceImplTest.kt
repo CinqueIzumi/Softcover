@@ -21,7 +21,10 @@ import kotlinx.datetime.asTimeZone
 import nl.rhaydus.softcover.GetReadUserBooksForStatsQuery
 import nl.rhaydus.softcover.GetReadingActivityDaysQuery
 import nl.rhaydus.softcover.GetUserProfileDataQuery
+import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
@@ -157,6 +160,29 @@ class ProfileRemoteDataSourceImplTest {
     }
     // endregion
     // region stats-book builders
+    private fun contribution(
+        id: Int = 1,
+        isBipoc: Boolean? = null,
+        isLgbtq: Boolean? = null,
+        genderId: Int? = null,
+    ): GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Contribution =
+        GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Contribution(
+            __typename = "contributions",
+            author = GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Contribution.Author(
+                __typename = "authors",
+                id = id,
+                is_bipoc = isBipoc,
+                is_lgbtq = isLgbtq,
+                gender_id = genderId,
+            ),
+        )
+
+    private fun nullAuthorContribution(): GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Contribution =
+        GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Contribution(
+            __typename = "contributions",
+            author = null,
+        )
+
     private fun statsUserBook(
         rating: Double? = null,
         lastReadDate: String? = null,
@@ -164,6 +190,7 @@ class ProfileRemoteDataSourceImplTest {
         editionPages: Int? = null,
         bookPages: Int? = null,
         genreTags: List<String?> = emptyList(),
+        contributions: List<GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Contribution> = emptyList(),
     ): GetReadUserBooksForStatsQuery.Data.Me.User_book {
         val journal = finishedJournalUpdatedAt?.let {
             listOf(
@@ -209,6 +236,7 @@ class ProfileRemoteDataSourceImplTest {
                 __typename = "books",
                 pages = bookPages,
                 taggable_counts = taggableCounts,
+                contributions = contributions,
                 id = 1,
             ),
             id = 1,
@@ -799,6 +827,219 @@ class ProfileRemoteDataSourceImplTest {
                     author = "",
                     ratingStars = 0.0,
                     monthLabel = "",
+                ),
+            )
+        }
+    }
+
+    @Nested
+    inner class AuthorDemographicsMapping {
+        @Test
+        fun `gender_id 1, 2 and 3 map to Male, Female and Other, while null and an unrecognized id both map to Unknown`() =
+            runTest {
+                // ----- Arrange -----
+                mockProfileQuery(me())
+                coEvery {
+                    apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+                } returns statsPage(
+                    statsUserBook(
+                        bookPages = 100,
+                        contributions = listOf(
+                            contribution(
+                                id = 1,
+                                genderId = 1,
+                            ),
+                            contribution(
+                                id = 2,
+                                genderId = 2,
+                            ),
+                            contribution(
+                                id = 3,
+                                genderId = 3,
+                            ),
+                            contribution(
+                                id = 4,
+                                genderId = null,
+                            ),
+                            contribution(
+                                id = 5,
+                                genderId = 99,
+                            ),
+                        ),
+                    ),
+                )
+
+                // ----- Act -----
+                val result = dataSource.getUserProfileSnapshot()
+
+                // ----- Assert -----
+                result.authorDemographics.knownGenderCount shouldBe 3
+                result.authorDemographics.unknownGenderCount shouldBe 2
+                result.authorDemographics.genderSlices.last() shouldBe GenderSlice(
+                    gender = Gender.Unknown,
+                    count = 2,
+                    fraction = 2.0 / 5.0,
+                )
+                result.authorDemographics.genderSlices.dropLast(1).map { it.gender to it.count }.toSet() shouldBe setOf(
+                    Gender.Male to 1,
+                    Gender.Female to 1,
+                    Gender.Other to 1,
+                )
+                result.authorDemographics.genderSlices.dropLast(1).forEach {
+                    it.fraction shouldBe (1.0 / 5.0 plusOrMinus 0.0001)
+                }
+            }
+
+        @Test
+        fun `a contribution with a null author is skipped rather than crashing or counting as an author`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(me())
+            coEvery {
+                apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+            } returns statsPage(
+                statsUserBook(
+                    bookPages = 100,
+                    contributions = listOf(
+                        contribution(
+                            id = 1,
+                            genderId = 1,
+                        ),
+                        nullAuthorContribution(),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.authorDemographics.knownGenderCount shouldBe 1
+            result.authorDemographics.unknownGenderCount shouldBe 0
+        }
+
+        @Test
+        fun `is_bipoc and is_lgbtq are mapped through to the respective demographic breakdowns`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(me())
+            coEvery {
+                apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+            } returns statsPage(
+                statsUserBook(
+                    bookPages = 100,
+                    contributions = listOf(
+                        contribution(
+                            id = 1,
+                            isBipoc = true,
+                            isLgbtq = false,
+                            genderId = 1,
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.authorDemographics.bipocBreakdown shouldBe DemographicBreakdown(
+                yesCount = 1,
+                noCount = 0,
+                unknownCount = 0,
+            )
+            result.authorDemographics.lgbtqBreakdown shouldBe DemographicBreakdown(
+                yesCount = 0,
+                noCount = 1,
+                unknownCount = 0,
+            )
+        }
+
+        @Test
+        fun `is_bipoc and is_lgbtq true, false and null across distinct authors land in the matching yes-no-unknown buckets`() =
+            runTest {
+                // ----- Arrange -----
+                mockProfileQuery(me())
+                coEvery {
+                    apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+                } returns statsPage(
+                    statsUserBook(
+                        bookPages = 100,
+                        contributions = listOf(
+                            contribution(
+                                id = 1,
+                                isBipoc = true,
+                                isLgbtq = null,
+                                genderId = 1,
+                            ),
+                            contribution(
+                                id = 2,
+                                isBipoc = false,
+                                isLgbtq = true,
+                                genderId = 2,
+                            ),
+                            contribution(
+                                id = 3,
+                                isBipoc = null,
+                                isLgbtq = false,
+                                genderId = null,
+                            ),
+                        ),
+                    ),
+                )
+
+                // ----- Act -----
+                val result = dataSource.getUserProfileSnapshot()
+
+                // ----- Assert -----
+                result.authorDemographics.bipocBreakdown shouldBe DemographicBreakdown(
+                    yesCount = 1,
+                    noCount = 1,
+                    unknownCount = 1,
+                )
+                result.authorDemographics.lgbtqBreakdown shouldBe DemographicBreakdown(
+                    yesCount = 1,
+                    noCount = 1,
+                    unknownCount = 1,
+                )
+            }
+
+        @Test
+        fun `an author appearing on multiple pages is still counted once in the aggregated demographics`() = runTest {
+            // ----- Arrange -----
+            val recurringAuthor = contribution(
+                id = 7,
+                isBipoc = true,
+                genderId = 2,
+            )
+            val fullPage = statsPage(
+                *List(STATS_PAGE_SIZE) {
+                    statsUserBook(
+                        bookPages = 1,
+                        contributions = listOf(recurringAuthor),
+                    )
+                }.toTypedArray(),
+            )
+            val partialPage = statsPage(
+                statsUserBook(
+                    bookPages = 1,
+                    contributions = listOf(recurringAuthor),
+                ),
+            )
+
+            mockProfileQuery(me())
+            coEvery {
+                apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+            } returnsMany listOf(fullPage, partialPage)
+
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.authorDemographics.knownGenderCount shouldBe 1
+            result.authorDemographics.genderSlices shouldBe listOf(
+                GenderSlice(
+                    gender = Gender.Female,
+                    count = 1,
+                    fraction = 1.0,
                 ),
             )
         }

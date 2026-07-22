@@ -14,7 +14,9 @@ import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.softcover.GetReadUserBooksForStatsQuery
 import nl.rhaydus.softcover.GetReadingActivityDaysQuery
 import nl.rhaydus.softcover.GetUserProfileDataQuery
+import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.core.profile.data.mapper.toAuthorDemographics
 import nl.rhaydus.softcover.core.profile.data.mapper.toBooksByYear
 import nl.rhaydus.softcover.core.profile.data.mapper.toGenreSlices
 import nl.rhaydus.softcover.core.profile.data.mapper.toPagesByMonth
@@ -24,6 +26,7 @@ import nl.rhaydus.softcover.core.profile.data.mapper.toRatingAverage
 import nl.rhaydus.softcover.core.profile.data.mapper.toRatingHalfStarBuckets
 import nl.rhaydus.softcover.core.profile.data.mapper.toTotalPages
 import nl.rhaydus.softcover.core.profile.data.mapper.toTrackedYears
+import nl.rhaydus.softcover.core.profile.data.model.StatsAuthor
 import nl.rhaydus.softcover.core.profile.data.model.StatsBook
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -70,6 +73,7 @@ internal class ProfileRemoteDataSourceImpl(
             pagesByMonth = statsBooks.toPagesByMonth(currentYear = currentYear),
             genres = statsBooks.toGenreSlices(),
             trackedYears = statsBooks.toTrackedYears(),
+            authorDemographics = statsBooks.toAuthorDemographics(),
             // Scoped to the same read-books dataset as the histogram (not me.rated_books, which is
             // all-status) so the bars sum to totalRatings and RatingBand's bimodal math isn't
             // deflated. The hero "Avg. rating" tile above stays on the server's all-status average.
@@ -129,8 +133,17 @@ internal class ProfileRemoteDataSourceImpl(
             genreNames = book.taggable_counts
                 .mapNotNull { it.tag?.tag }
                 .distinct(),
+            authors = book.contributions.mapNotNull { it.author?.toStatsAuthor() },
         )
     }
+
+    private fun GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Contribution.Author.toStatsAuthor(): StatsAuthor =
+        StatsAuthor(
+            id = id,
+            isBipoc = is_bipoc,
+            isLgbtq = is_lgbtq,
+            gender = Gender.fromId(gender_id),
+        )
     // endregion
     // region me{} response mapping
     private fun GetUserProfileDataQuery.Data.Me.recentlyLoved(): List<LovedBook> = recently_loved.map { loved ->

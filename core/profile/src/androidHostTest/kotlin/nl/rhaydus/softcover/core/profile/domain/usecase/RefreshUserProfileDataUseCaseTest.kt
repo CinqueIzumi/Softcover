@@ -4,23 +4,27 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import kotlinx.datetime.TimeZone
+import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class RefreshUserProfileDataUseCaseTest {
     private val fixedClock: Clock = object : Clock {
@@ -62,16 +66,18 @@ class RefreshUserProfileDataUseCaseTest {
         )
     }
 
-    private fun snapshot(): UserProfileSnapshot = UserProfileSnapshot(
-        profileImageUrl = "https://example.com/avatar.png",
-        name = "Jane Doe",
-        username = "cinque",
-        bio = "Avid reader",
-        booksRead = 42,
-        totalPagesRead = 12000,
-        averageRating = 4.2,
-        trackedYears = 7,
-    )
+    private fun snapshot(authorDemographics: AuthorDemographics = AuthorDemographics()): UserProfileSnapshot =
+        UserProfileSnapshot(
+            profileImageUrl = "https://example.com/avatar.png",
+            name = "Jane Doe",
+            username = "cinque",
+            bio = "Avid reader",
+            booksRead = 42,
+            totalPagesRead = 12000,
+            averageRating = 4.2,
+            trackedYears = 7,
+            authorDemographics = authorDemographics,
+        )
 
     // Drives readingStreak via streamReadingDaysDescending (must be strictly descending) and
     // recentReadingDays via getActiveReadingDaysSince — the two are independent inputs.
@@ -210,6 +216,54 @@ class RefreshUserProfileDataUseCaseTest {
             // ----- Assert -----
             cached.username shouldBe "cinque"
             cached.trackedYears shouldBe 7
+        }
+
+        @Test
+        fun `authorDemographics from the snapshot propagates unchanged into the cached UserProfileData`() = runTest {
+            // ----- Arrange -----
+            val demographics = AuthorDemographics(
+                genderSlices = listOf(GenderSlice(
+                    gender = Gender.Female,
+                    count = 1,
+                    fraction = 1.0,
+                ),),
+                knownGenderCount = 1,
+                bipocBreakdown = DemographicBreakdown(
+                    yesCount = 1,
+                    noCount = 0,
+                    unknownCount = 0,
+                ),
+            )
+
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(42)
+            coEvery {
+                profileRepository.fetchUserProfileSnapshot()
+            } returns snapshot(authorDemographics = demographics)
+            coEvery {
+                profileRepository.streamReadingDaysDescending(userId = 42)
+            } returns flowOf()
+            coEvery {
+                profileRepository.getActiveReadingDaysSince(
+                    userId = 42,
+                    since = windowStart,
+                )
+            } returns emptySet()
+
+            val capturedData = mutableListOf<UserProfileData>()
+
+            coEvery {
+                profileRepository.cacheUserProfileData(data = any())
+            } answers {
+                capturedData.add(firstArg())
+            }
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            capturedData.first().authorDemographics shouldBe demographics
         }
     }
 

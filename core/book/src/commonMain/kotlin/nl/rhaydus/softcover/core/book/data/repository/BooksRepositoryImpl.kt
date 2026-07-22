@@ -346,7 +346,10 @@ internal class BooksRepositoryImpl(
         booksLocalDataSource.cacheBook(book = optimistic)
 
         return runCatching {
-            booksRemoteDataSource.markBookAsReading(book = book, editionId = editionId)
+            booksRemoteDataSource.markBookAsReading(
+                book = book,
+                editionId = editionId,
+            )
         }.getOrElse { error ->
             if (error is CancellationException) throw error
 

@@ -3,7 +3,11 @@ package nl.rhaydus.softcover.core.profile.data.mapper
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.profile.data.model.StatsAuthor
 import nl.rhaydus.softcover.core.profile.data.model.StatsBook
+import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
 import org.junit.jupiter.api.Nested
@@ -17,11 +21,25 @@ class StatsBookMapperTest {
         finishDate: LocalDate? = null,
         pages: Int = 0,
         genreNames: List<String> = emptyList(),
+        authors: List<StatsAuthor> = emptyList(),
     ): StatsBook = StatsBook(
         rating = rating,
         finishDate = finishDate,
         pages = pages,
         genreNames = genreNames,
+        authors = authors,
+    )
+
+    private fun statsAuthor(
+        id: Int,
+        isBipoc: Boolean? = null,
+        isLgbtq: Boolean? = null,
+        gender: Gender = Gender.Unknown,
+    ): StatsAuthor = StatsAuthor(
+        id = id,
+        isBipoc = isBipoc,
+        isLgbtq = isLgbtq,
+        gender = gender,
     )
 
     @Nested
@@ -598,6 +616,385 @@ class StatsBookMapperTest {
 
             // ----- Act & Assert -----
             books.toTrackedYears() shouldBe 1
+        }
+    }
+
+    @Nested
+    inner class ToAuthorDemographics {
+        @Test
+        fun `empty book list returns empty gender slices, zero counts and empty breakdowns`() {
+            // ----- Act -----
+            val result = emptyList<StatsBook>().toAuthorDemographics()
+
+            // ----- Assert -----
+            result.genderSlices shouldBe emptyList()
+            result.knownGenderCount shouldBe 0
+            result.unknownGenderCount shouldBe 0
+            result.bipocBreakdown shouldBe DemographicBreakdown()
+            result.lgbtqBreakdown shouldBe DemographicBreakdown()
+        }
+
+        @Test
+        fun `books with no authors produce empty gender slices, zero counts and empty breakdowns`() {
+            // ----- Arrange -----
+            val books = listOf(book(authors = emptyList()), book(authors = emptyList()))
+
+            // ----- Act -----
+            val result = books.toAuthorDemographics()
+
+            // ----- Assert -----
+            result.genderSlices shouldBe emptyList()
+            result.knownGenderCount shouldBe 0
+            result.unknownGenderCount shouldBe 0
+            result.bipocBreakdown shouldBe DemographicBreakdown()
+            result.lgbtqBreakdown shouldBe DemographicBreakdown()
+        }
+
+        @Test
+        fun `an author appearing across 3 books is counted only once in the gender and demographic breakdowns`() {
+            // ----- Arrange -----
+            val recurringAuthor = statsAuthor(
+                id = 1,
+                isBipoc = true,
+                isLgbtq = false,
+                gender = Gender.Male,
+            )
+            val books = listOf(
+                book(authors = listOf(recurringAuthor)),
+                book(authors = listOf(recurringAuthor)),
+                book(authors = listOf(recurringAuthor)),
+            )
+
+            // ----- Act -----
+            val result = books.toAuthorDemographics()
+
+            // ----- Assert -----
+            result.knownGenderCount shouldBe 1
+            result.unknownGenderCount shouldBe 0
+            result.genderSlices shouldBe listOf(
+                GenderSlice(
+                    gender = Gender.Male,
+                    count = 1,
+                    fraction = 1.0,
+                ),
+            )
+            result.bipocBreakdown shouldBe DemographicBreakdown(
+                yesCount = 1,
+                noCount = 0,
+                unknownCount = 0,
+            )
+            result.bipocBreakdown.total shouldBe 1
+            result.lgbtqBreakdown shouldBe DemographicBreakdown(
+                yesCount = 0,
+                noCount = 1,
+                unknownCount = 0,
+            )
+            result.lgbtqBreakdown.total shouldBe 1
+        }
+
+        @Test
+        fun `an author id repeated with different attributes across books still resolves to a single entry`() {
+            // ----- Arrange -----
+            // distinctBy keeps only the first occurrence encountered for a given id - the second
+            // book's conflicting attributes for the same id must not contribute a second entry.
+            val books = listOf(
+                book(authors = listOf(statsAuthor(
+                    id = 1,
+                    gender = Gender.Male,
+                ),),),
+                book(authors = listOf(statsAuthor(
+                    id = 1,
+                    gender = Gender.Female,
+                ),),),
+            )
+
+            // ----- Act -----
+            val result = books.toAuthorDemographics()
+
+            // ----- Assert -----
+            result.knownGenderCount shouldBe 1
+            result.genderSlices shouldBe listOf(
+                GenderSlice(
+                    gender = Gender.Male,
+                    count = 1,
+                    fraction = 1.0,
+                ),
+            )
+        }
+
+        @Test
+        fun `Gender_Unknown is included in genderSlices as the last element, with fraction over ALL distinct authors`() {
+            // ----- Arrange -----
+            val books = listOf(
+                book(authors = listOf(
+                    statsAuthor(
+                        id = 1,
+                        gender = Gender.Male,
+                    ),
+                    statsAuthor(
+                        id = 2,
+                        gender = Gender.Unknown,
+                    ),
+                    statsAuthor(
+                        id = 3,
+                        gender = Gender.Unknown,
+                    ),
+                ),),
+            )
+
+            // ----- Act -----
+            val result = books.toAuthorDemographics()
+
+            // ----- Assert -----
+            result.knownGenderCount shouldBe 1
+            result.unknownGenderCount shouldBe 2
+            result.genderSlices shouldBe listOf(
+                GenderSlice(
+                    gender = Gender.Male,
+                    count = 1,
+                    fraction = 1.0 / 3.0,
+                ),
+                GenderSlice(
+                    gender = Gender.Unknown,
+                    count = 2,
+                    fraction = 2.0 / 3.0,
+                ),
+            )
+            result.genderSlices.last().gender shouldBe Gender.Unknown
+        }
+
+        @Test
+        fun `Gender_Other is counted as its own slice and never merged with Unknown`() {
+            // ----- Arrange -----
+            val books = listOf(
+                book(authors = listOf(
+                    statsAuthor(
+                        id = 1,
+                        gender = Gender.Other,
+                    ),
+                    statsAuthor(
+                        id = 2,
+                        gender = Gender.Unknown,
+                    ),
+                ),),
+            )
+
+            // ----- Act -----
+            val result = books.toAuthorDemographics()
+
+            // ----- Assert -----
+            result.knownGenderCount shouldBe 1
+            result.unknownGenderCount shouldBe 1
+            result.genderSlices shouldBe listOf(
+                GenderSlice(
+                    gender = Gender.Other,
+                    count = 1,
+                    fraction = 0.5,
+                ),
+                GenderSlice(
+                    gender = Gender.Unknown,
+                    count = 1,
+                    fraction = 0.5,
+                ),
+            )
+        }
+
+        @Test
+        fun `gender slices are sorted count-descending with Unknown pinned last, and fractions sum to 1_0 over ALL authors`() {
+            // ----- Arrange -----
+            // Male x3, Female x1, Other x1, Unknown x2 - 7 distinct authors, 5 with a known gender, 2 unknown.
+            val books = listOf(
+                book(authors = listOf(
+                    statsAuthor(
+                        id = 1,
+                        gender = Gender.Male,
+                    ),
+                    statsAuthor(
+                        id = 2,
+                        gender = Gender.Male,
+                    ),
+                    statsAuthor(
+                        id = 3,
+                        gender = Gender.Male,
+                    ),
+                    statsAuthor(
+                        id = 4,
+                        gender = Gender.Female,
+                    ),
+                    statsAuthor(
+                        id = 5,
+                        gender = Gender.Other,
+                    ),
+                    statsAuthor(
+                        id = 6,
+                        gender = Gender.Unknown,
+                    ),
+                    statsAuthor(
+                        id = 7,
+                        gender = Gender.Unknown,
+                    ),
+                ),),
+            )
+
+            // ----- Act -----
+            val result = books.toAuthorDemographics()
+
+            // ----- Assert -----
+            result.knownGenderCount shouldBe 5
+            result.unknownGenderCount shouldBe 2
+            result.genderSlices.first() shouldBe GenderSlice(
+                gender = Gender.Male,
+                count = 3,
+                fraction = 3.0 / 7.0,
+            )
+            result.genderSlices.last() shouldBe GenderSlice(
+                gender = Gender.Unknown,
+                count = 2,
+                fraction = 2.0 / 7.0,
+            )
+            result.genderSlices.drop(1).dropLast(1).map { it.gender to it.count }.toSet() shouldBe setOf(
+                Gender.Female to 1,
+                Gender.Other to 1,
+            )
+            result.genderSlices.sumOf { it.fraction } shouldBe (1.0 plusOrMinus 0.0001)
+        }
+
+        @Test
+        fun `Unknown is pinned last even when it is the largest bucket, not sorted to the front by count`() {
+            // ----- Arrange -----
+            // Male x1, Unknown x5 - 6 distinct authors, 1 with a known gender, 5 unknown.
+            val books = listOf(
+                book(authors = listOf(
+                    statsAuthor(
+                        id = 1,
+                        gender = Gender.Male,
+                    ),
+                    statsAuthor(
+                        id = 2,
+                        gender = Gender.Unknown,
+                    ),
+                    statsAuthor(
+                        id = 3,
+                        gender = Gender.Unknown,
+                    ),
+                    statsAuthor(
+                        id = 4,
+                        gender = Gender.Unknown,
+                    ),
+                    statsAuthor(
+                        id = 5,
+                        gender = Gender.Unknown,
+                    ),
+                    statsAuthor(
+                        id = 6,
+                        gender = Gender.Unknown,
+                    ),
+                ),),
+            )
+
+            // ----- Act -----
+            val result = books.toAuthorDemographics()
+
+            // ----- Assert -----
+            result.knownGenderCount shouldBe 1
+            result.unknownGenderCount shouldBe 5
+            result.genderSlices shouldBe listOf(
+                GenderSlice(
+                    gender = Gender.Male,
+                    count = 1,
+                    fraction = 1.0 / 6.0,
+                ),
+                GenderSlice(
+                    gender = Gender.Unknown,
+                    count = 5,
+                    fraction = 5.0 / 6.0,
+                ),
+            )
+            result.genderSlices.last().gender shouldBe Gender.Unknown
+        }
+
+        @Test
+        fun `bipocBreakdown and lgbtqBreakdown are computed independently over distinct authors, each landing in a different one of the yes-no-unknown buckets`() {
+            // ----- Arrange -----
+            // Author 1: bipoc=true (yes), lgbtq=null (unknown)
+            // Author 2: bipoc=false (no), lgbtq=true (yes)
+            // Author 3: bipoc=null (unknown), lgbtq=false (no)
+            // Every bucket of both breakdowns is exercised, and each breakdown's total equals the
+            // full 3-author population, not just the subset with the attribute known.
+            val books = listOf(
+                book(authors = listOf(
+                    statsAuthor(
+                        id = 1,
+                        isBipoc = true,
+                        isLgbtq = null,
+                    ),
+                    statsAuthor(
+                        id = 2,
+                        isBipoc = false,
+                        isLgbtq = true,
+                    ),
+                    statsAuthor(
+                        id = 3,
+                        isBipoc = null,
+                        isLgbtq = false,
+                    ),
+                ),),
+            )
+
+            // ----- Act -----
+            val result = books.toAuthorDemographics()
+
+            // ----- Assert -----
+            result.bipocBreakdown shouldBe DemographicBreakdown(
+                yesCount = 1,
+                noCount = 1,
+                unknownCount = 1,
+            )
+            result.bipocBreakdown.total shouldBe 3
+            result.lgbtqBreakdown shouldBe DemographicBreakdown(
+                yesCount = 1,
+                noCount = 1,
+                unknownCount = 1,
+            )
+            result.lgbtqBreakdown.total shouldBe 3
+        }
+
+        @Test
+        fun `bipocBreakdown is all-unknown when every distinct author has a null isBipoc, not absent`() {
+            // ----- Arrange -----
+            val books = listOf(
+                book(authors = listOf(
+                    statsAuthor(
+                        id = 1,
+                        isBipoc = null,
+                    ),
+                    statsAuthor(
+                        id = 2,
+                        isBipoc = null,
+                    ),
+                ),),
+            )
+
+            // ----- Act -----
+            val result = books.toAuthorDemographics()
+
+            // ----- Assert -----
+            result.bipocBreakdown shouldBe DemographicBreakdown(
+                yesCount = 0,
+                noCount = 0,
+                unknownCount = 2,
+            )
+            result.bipocBreakdown.total shouldBe 2
+        }
+
+        @Test
+        fun `lgbtqBreakdown and bipocBreakdown are both the empty default when there are no distinct authors at all`() {
+            // ----- Act -----
+            val result = emptyList<StatsBook>().toAuthorDemographics()
+
+            // ----- Assert -----
+            result.lgbtqBreakdown shouldBe DemographicBreakdown()
+            result.bipocBreakdown shouldBe DemographicBreakdown()
         }
     }
 }

@@ -353,7 +353,10 @@ internal class BooksRemoteDataSourceImpl(
         // (mirroring the want-to-read / read create paths), so a not-yet-shelved book can start
         // reading in one step. Only the update path needs an existing user_book id.
         val userBook = book.userBook
-            ?: return createUserBookAsReading(book = book, editionId = editionId)
+            ?: return createUserBookAsReading(
+                book = book,
+                editionId = editionId,
+            )
 
         val currentDate = Clock.System
             .todayIn(TimeZone.currentSystemDefault())

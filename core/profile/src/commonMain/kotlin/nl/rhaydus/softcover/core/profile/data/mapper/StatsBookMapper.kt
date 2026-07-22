@@ -1,7 +1,12 @@
 package nl.rhaydus.softcover.core.profile.data.mapper
 
 import kotlin.math.roundToInt
+import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.profile.data.model.StatsAuthor
 import nl.rhaydus.softcover.core.profile.data.model.StatsBook
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
@@ -149,3 +154,70 @@ internal fun List<StatsBook>.toGenreSlices(): List<GenreSlice> {
 // chart window, so a one-off read from e.g. 2015 still counts. Books with no resolvable finish date
 // don't contribute.
 internal fun List<StatsBook>.toTrackedYears(): Int = mapNotNull { it.finishDate?.year }.toSet().size
+
+// Authors are deduped by id across the whole dataset before any of these stats are computed, so an
+// author who wrote many of the user's finished books is counted once - unlike toGenreSlices, which
+// counts per-book assignments, an author identity is a single, non-repeating fact about the person.
+//
+// Per docs/reference/architecture.md -> Unresolvable API enums: a null gender_id (Gender.Unknown) is
+// a distinct bucket that is never folded into a real gender or merged with Other - it surfaces as its
+// own labelled segment (pinned last). Known limitation: this gender/BIPOC/LGBTQ+ bucket may include non-person
+// contributors (e.g. an anthology or "various" placeholder) that Hardcover models as a taggable
+// author but that isn't a real person; there is currently no field to detect and filter those out, so
+// v1 computes over all distinct tagged authors as-is.
+internal fun List<StatsBook>.toAuthorDemographics(): AuthorDemographics {
+    val authors = flatMap { it.authors }.distinctBy { it.id }
+
+    val totalAuthors = authors.size
+    val genderCounts = authors
+        .groupingBy { it.gender }
+        .eachCount()
+    val unknownGenderCount = genderCounts[Gender.Unknown] ?: 0
+    val knownGenderCount = totalAuthors - unknownGenderCount
+
+    // Known genders ranked by count, then the Unknown bucket pinned last as its own segment. Every
+    // fraction is a share of ALL distinct authors (not just the tagged subset), so the slices sum to 1.
+    val knownGenderSlices = genderCounts.entries
+        .filter { it.key != Gender.Unknown }
+        .sortedByDescending { it.value }
+        .map { (gender, count) ->
+            GenderSlice(
+                gender = gender,
+                count = count,
+                fraction = count.toDouble() / totalAuthors,
+            )
+        }
+    val genderSlices = if (unknownGenderCount > 0) {
+        knownGenderSlices +
+            GenderSlice(
+                gender = Gender.Unknown,
+                count = unknownGenderCount,
+                fraction = unknownGenderCount.toDouble() / totalAuthors,
+            )
+    } else {
+        knownGenderSlices
+    }
+
+    return AuthorDemographics(
+        genderSlices = genderSlices,
+        knownGenderCount = knownGenderCount,
+        unknownGenderCount = unknownGenderCount,
+        bipocBreakdown = authors.toDemographicBreakdown { it.isBipoc },
+        lgbtqBreakdown = authors.toDemographicBreakdown { it.isLgbtq },
+    )
+}
+
+// Every distinct author contributes to exactly one bucket - yes, no, or unknown - so total() over
+// the result always equals the full distinct-author count, not just the tagged subset. An
+// all-unknown population is a valid, meaningful DemographicBreakdown(0, 0, N) rather than absent.
+private fun List<StatsAuthor>.toDemographicBreakdown(
+    attribute: (StatsAuthor) -> Boolean?,
+): DemographicBreakdown {
+    val values = map(attribute)
+
+    return DemographicBreakdown(
+        yesCount = values.count { it == true },
+        noCount = values.count { it == false },
+        unknownCount = values.count { it == null },
+    )
+}

@@ -8,4 +8,5 @@ data class ReadingLife(
     val ratings: RatingsDistribution,
     val recentlyLoved: List<LovedBook>,
     val trackedYears: Int = 0,
+    val authorDemographics: AuthorDemographics = AuthorDemographics(),
 )

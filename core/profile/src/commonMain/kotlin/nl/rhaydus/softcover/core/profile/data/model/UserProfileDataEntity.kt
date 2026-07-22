@@ -22,6 +22,7 @@ internal data class UserProfileDataEntity(
     val ratings: RatingsDistributionEntity = RatingsDistributionEntity(),
     val recentlyLoved: List<LovedBookEntity> = emptyList(),
     val trackedYears: Int = 0,
+    val authorDemographics: AuthorDemographicsEntity = AuthorDemographicsEntity(),
 )
 
 internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
@@ -43,6 +44,7 @@ internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
     ratings = ratings.toModel(),
     recentlyLoved = recentlyLoved.map { it.toModel() },
     trackedYears = trackedYears,
+    authorDemographics = authorDemographics.toModel(),
 )
 
 internal fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileDataEntity(
@@ -64,4 +66,5 @@ internal fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileData
     ratings = ratings.toEntity(),
     recentlyLoved = recentlyLoved.map { it.toEntity() },
     trackedYears = trackedYears,
+    authorDemographics = authorDemographics.toEntity(),
 )

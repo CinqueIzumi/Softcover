@@ -15,4 +15,5 @@ data class UserProfileSnapshot(
     val ratings: RatingsDistribution = RatingsDistribution(),
     val recentlyLoved: List<LovedBook> = emptyList(),
     val trackedYears: Int = 0,
+    val authorDemographics: AuthorDemographics = AuthorDemographics(),
 )

@@ -37,6 +37,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
@@ -133,6 +134,14 @@ internal actual fun ProfileScreenLayout(
 
             GenreStackSection(
                 genres = state.readingLife?.genres.orEmpty(),
+                isLoading = readingLifeLoading,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            AuthorRepresentationSection(
+                authorDemographics = state.readingLife?.authorDemographics ?: AuthorDemographics(),
                 isLoading = readingLifeLoading,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )

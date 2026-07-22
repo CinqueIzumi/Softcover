@@ -3,6 +3,10 @@ package nl.rhaydus.softcover.core.profile.data.model
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
+import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
@@ -229,6 +233,103 @@ class UserProfileDataEntityTest {
     }
 
     @Nested
+    inner class AuthorDemographicsRoundTrip {
+        // A gender breakdown that includes both Other and an Unknown slice, plus a mixed
+        // bipocBreakdown and an all-unknown lgbtqBreakdown, so the round trip exercises every
+        // branch of the entity mapping (see GenderSliceEntity - gender is persisted as its raw
+        // genderId).
+        private fun authorDemographics(): AuthorDemographics = AuthorDemographics(
+            genderSlices = listOf(
+                GenderSlice(
+                    gender = Gender.Male,
+                    count = 3,
+                    fraction = 3.0 / 7.0,
+                ),
+                GenderSlice(
+                    gender = Gender.Other,
+                    count = 2,
+                    fraction = 2.0 / 7.0,
+                ),
+                GenderSlice(
+                    gender = Gender.Unknown,
+                    count = 2,
+                    fraction = 2.0 / 7.0,
+                ),
+            ),
+            knownGenderCount = 5,
+            unknownGenderCount = 2,
+            bipocBreakdown = DemographicBreakdown(
+                yesCount = 2,
+                noCount = 3,
+                unknownCount = 0,
+            ),
+            lgbtqBreakdown = DemographicBreakdown(
+                yesCount = 0,
+                noCount = 0,
+                unknownCount = 5,
+            ),
+        )
+
+        @Test
+        fun `toEntity then toModel preserves gender slices - including Other and Unknown - counts and breakdowns`() {
+            // ----- Arrange -----
+            val model = minimalModel().copy(authorDemographics = authorDemographics())
+
+            // ----- Act -----
+            val result = model.toEntity().toModel()
+
+            // ----- Assert -----
+            result.authorDemographics shouldBe authorDemographics()
+        }
+
+        @Test
+        fun `genderId persistence rebuilds Gender_Other from id 3 and Gender_Unknown from a null id`() {
+            // ----- Arrange -----
+            val model = minimalModel().copy(authorDemographics = authorDemographics())
+
+            // ----- Act -----
+            val result = model.toEntity().toModel()
+
+            // ----- Assert -----
+            result.authorDemographics.genderSlices.map { it.gender } shouldBe listOf(
+                Gender.Male,
+                Gender.Other,
+                Gender.Unknown,
+            )
+        }
+
+        @Test
+        fun `an all-unknown bipocBreakdown and lgbtqBreakdown both round-trip as DemographicBreakdown(0, 0, N)`() {
+            // ----- Arrange -----
+            val model = minimalModel().copy(
+                authorDemographics = AuthorDemographics(
+                    bipocBreakdown = DemographicBreakdown(unknownCount = 4),
+                    lgbtqBreakdown = DemographicBreakdown(unknownCount = 4),
+                ),
+            )
+
+            // ----- Act -----
+            val result = model.toEntity().toModel()
+
+            // ----- Assert -----
+            result.authorDemographics.bipocBreakdown shouldBe DemographicBreakdown(unknownCount = 4)
+            result.authorDemographics.lgbtqBreakdown shouldBe DemographicBreakdown(unknownCount = 4)
+        }
+
+        @Test
+        fun `authorDemographics defaults to an empty AuthorDemographics when never set`() {
+            // ----- Arrange -----
+            val model = minimalModel()
+
+            // ----- Act -----
+            val result = model.toEntity().toModel()
+
+            // ----- Assert -----
+            result.authorDemographics shouldBe AuthorDemographics()
+        }
+    }
+
+    @Nested
     inner class BackwardCompat {
         @Test
         fun `legacy JSON without recentReadingDays field decodes with empty list`() {
@@ -308,6 +409,76 @@ class UserProfileDataEntityTest {
 
             // ----- Assert -----
             model.trackedYears shouldBe 0
+        }
+
+        @Test
+        fun `legacy JSON without an authorDemographics key decodes to the empty AuthorDemographics default`() {
+            // ----- Arrange -----
+            val legacyJson = """
+                {
+                  "profileImageUrl": "https://example.com/avatar.png",
+                  "name": "Jane Doe",
+                  "bio": "Avid reader",
+                  "booksRead": 42,
+                  "totalPagesRead": 12000,
+                  "averageRating": 4.2,
+                  "readingStreak": 5
+                }
+            """.trimIndent()
+            val lenientJson = Json { ignoreUnknownKeys = true }
+
+            // ----- Act -----
+            val entity = lenientJson.decodeFromString(
+                UserProfileDataEntity.serializer(),
+                legacyJson,
+            )
+            val model = entity.toModel()
+
+            // ----- Assert -----
+            model.authorDemographics shouldBe AuthorDemographics()
+        }
+
+        @Test
+        fun `legacy JSON carrying the old bipocShare-lgbtqShare keys ignores them and decodes to empty breakdowns`() {
+            // ----- Arrange -----
+            // Pre-migration cache blobs nested a fractional "bipocShare"/"lgbtqShare" object under
+            // authorDemographics instead of the current "bipocBreakdown"/"lgbtqBreakdown". Those old
+            // keys must be ignored rather than crash decoding, and since the new breakdown keys are
+            // themselves absent, they fall back to the empty DemographicBreakdown default.
+            val legacyJson = """
+                {
+                  "profileImageUrl": "https://example.com/avatar.png",
+                  "name": "Jane Doe",
+                  "bio": "Avid reader",
+                  "booksRead": 42,
+                  "totalPagesRead": 12000,
+                  "averageRating": 4.2,
+                  "readingStreak": 5,
+                  "authorDemographics": {
+                    "genderSlices": [],
+                    "knownGenderCount": 0,
+                    "unknownGenderCount": 0,
+                    "bipocShare": {
+                      "trueCount": 2,
+                      "knownCount": 5,
+                      "fraction": 0.4
+                    },
+                    "lgbtqShare": null
+                  }
+                }
+            """.trimIndent()
+            val lenientJson = Json { ignoreUnknownKeys = true }
+
+            // ----- Act -----
+            val entity = lenientJson.decodeFromString(
+                UserProfileDataEntity.serializer(),
+                legacyJson,
+            )
+            val model = entity.toModel()
+
+            // ----- Assert -----
+            model.authorDemographics.bipocBreakdown shouldBe DemographicBreakdown()
+            model.authorDemographics.lgbtqBreakdown shouldBe DemographicBreakdown()
         }
 
         @Test
