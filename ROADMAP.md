@@ -66,6 +66,7 @@ An editable profile, a set of reading stats (genre & rating distributions, readi
 A long editorial **Stats Atlas**, and the payoff for everything you recorded in 3.5.0:
 
 - Streak and time-of-day heatmaps, and an optional public activity log.
+- **Pick your own window**: read every stat for the last 30 days, the last 6 months, the last 12 months, a single year (2025, 2026 and so on) or all time.
 - **Diversity & representation**: your reading by author gender, background and country, drawn from your own private tags.
 - **How you read**: whether your year leaned plot- or character-driven, your pace and writing-style mix, and the moods you reach for most.
 - **Publication & provenance**: author nationality, language and how much you read in translation, publication years, audience, and where your books came from.

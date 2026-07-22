@@ -24,7 +24,20 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
-- _(nothing in focus — **3.1.0 shipped** and its section is deleted from [release-plan.md](release-plan.md); the next release up is 3.2.0 (widget infra + Step 3.7, the reading log). The edit/delete-past-entries follow-on to Step 2.15 is Step 3.15 / B.2.13 in 3.6.0.)_
+### 3.1.1 — pickup list
+
+_The agreed scope for the 3.1.1 drop, captured as a working checklist. None of these are triaged into [idea-catalogue.md](idea-catalogue.md) / [roadmap-steps.md](roadmap-steps.md) yet — do that (or fold them into the 3.1.1 entry in [release-plan.md](release-plan.md)) before they ship, so the public [ROADMAP.md](../../ROADMAP.md) stays a projection of the plan rather than of this file._
+
+- [ ] **Horizontal shelf swiping in the Library.** Bring back horizontal swiping across the library shelves. Optionally behind a toggle so the previous (vertical, all-shelves-visible) presentation can still be chosen — only if that's maintainable, since it implies two parallel screen presentations that must stay in sync.
+- [ ] **Clarify the top book on Explore.** Make it obvious what the hero item at the top of Explore actually is (a most-anticipated upcoming release), rather than leaving it unlabelled.
+- [ ] **Search back-button handling.** On the active search screen, the first back press clears the entered query; only a subsequent back press performs the normal back navigation.
+- [ ] **Tag picker "see more".** When choosing tags for a book, tapping "see more" should immediately reveal all of the user's previously chosen tags.
+- [ ] **Exclude "unknown" from author stats.** Add a switch that drops books with missing/unknown author data from the author breakdown, so the percentages can be read without the unknown bucket skewing them.
+- [ ] **Full deadline tracking back on the Library screen.** Restore the complete deadline treatment: "finish by X", how many pages you're behind, the pages/day needed to catch up, and the rest of that readout.
+
+**Maybes** (in scope only if they turn out to be cheap):
+
+- [ ] **Exclude books with no genre data from the genre stats.** Wanted, but currently the genre breakdown is computed from the aggregate query and it's unclear whether aggregates can express "has no genres at all". Investigate first: if it isn't expressible there, the fallback is a normal (non-aggregate) query, which is judged far too heavy — in that case, drop it.
 
 > Foundation adoption onto local 0.3.0 is **done** (21 F-items landed). The only residue is the build-logic batch (F18/F20/F21), hard-blocked until the foundation publishes `build-logic` as Gradle plugins — tracked in [foundation-upstream-candidates.md](foundation-upstream-candidates.md), not here.
 

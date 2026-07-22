@@ -125,10 +125,11 @@ This is the release a tracking-minded user is really waiting for: it's the whole
 - **Step 7.7** — Streak heatmap on Profile (M) — *deps: 3.5 (shipped); subsumed by 7.12 next release*. User asked for a **readable yearly** scope (Hardcover's own site heatmap is being removed as unreadable) — ship the 12-month view alongside the 12-week one, not 12-week only.
 - **Step 7.8** — Time-of-day reading heatmap (M) — *deps: 3.5 (shipped)*.
 - **Step 7.9** — Reading Stats Atlas screen (M).
+- **Step 7.17** — Stats Atlas scope selector (M) — *deps: 7.9 (same release); blocks 7.13 / 7.15 / 7.16 below, so it lands right after 7.9*. Rolling windows (last 30 days / 6 months / 12 months) plus static periods (each year on record, all time), shared with 7.14's wrap-up scope sheet. *(User request.)*
 - **Step 7.10** — Public activity log (M).
-- **Step 7.13** — Diversity & representation stats (M) — *deps: 3.9 (3.5.0), 7.9 (same release)*.
-- **Step 7.15** — "How you read" stats (M) — *deps: 3.13 (3.5.0), 7.9 (same release)*. Plot-vs-character balance, pace mix, writing-style mix, mood profile. *(User request.)*
-- **Step 7.16** — Publication & provenance stats (S–M) — *deps: 7.9 (same release), 3.9 + 3.14 (3.5.0), 6.14 (3.8.0) for the audience mix*. Nationality, language & share-translated, year published, audience, where you got it.
+- **Step 7.13** — Diversity & representation stats (M) — *deps: 3.9 (3.5.0), 7.9 + 7.17 (same release)*.
+- **Step 7.15** — "How you read" stats (M) — *deps: 3.13 (3.5.0), 7.9 + 7.17 (same release)*. Plot-vs-character balance, pace mix, writing-style mix, mood profile. *(User request.)*
+- **Step 7.16** — Publication & provenance stats (S–M) — *deps: 7.9 + 7.17 (same release), 3.9 + 3.14 (3.5.0), 6.14 (3.8.0) for the audience mix*. Nationality, language & share-translated, year published, audience, where you got it.
 - ~~**OPEN — "L" (expanded statistics + image export)**~~ — **closed.** The metrics are now specified (7.13 + 7.15 + 7.16) and the image export is 7.14's share surface in 3.12.0. The "own database" question is settled too: the private corpus lives in our own Room tables and is made portable by Step 8.13 — it is **not** smuggled into Hardcover's private-notes field.
 
 ---
